@@ -1,0 +1,26 @@
+
+<script src="../dist/xcomponent.js"></script>
+<script src="./paypal-login/component.js"></script>
+
+<div id="container"></div>
+
+<script>
+
+    paypalLogin.init({
+
+        dimensions: {
+            width: 500,
+            height: 500
+        },
+
+        props: {
+            email: 'foo@bar.com',
+
+            onSuccess: function(email) {
+                console.log('User logged in with email', email, '!');
+            }
+        }
+
+    }).renderIntoId('container');
+
+</script>

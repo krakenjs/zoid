@@ -1,0 +1,30 @@
+
+<script src="../../dist/xcomponent.js"></script>
+<script src="./component.js"></script>
+
+<input type="text" id="email" placeholder="email">
+<input type="password" id="password" placeholder="password">
+<button id="submit">Submit</button>
+
+<script>
+    paypalLogin.attach({
+
+        enter() {
+            if (this.props.email) {
+                document.getElementById('email').value = this.props.email;
+            }
+
+            document.getElementById('submit').onclick = function() {
+
+                var email = document.getElementById('email').value;
+                var password = document.getElementById('password').value;
+
+                if (email && password) {
+                    this.props.onSuccess(email);
+                }
+
+            }.bind(this);
+        }
+    });
+</script>
+

@@ -1,0 +1,16 @@
+
+<paypal-login email="$login.email" on-success="$login.onSuccess"></paypal-login>
+
+<script>
+    window.login = {
+
+        email: 'foo@bar.com',
+
+        onSuccess: function(email) {
+            console.log('User logged in with email', email, '!');
+        }
+    };
+</script>
+
+<script src="../dist/xcomponent.js"></script>
+<script src="./paypal-login/component.js"></script>
