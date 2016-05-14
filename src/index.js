@@ -5,6 +5,6 @@ let components = {};
 
 export function create(options) {
    let component = new Component(options);
-   components[component.options.tag] = component;
+   components[component.tag] = component;
    return component;
 }

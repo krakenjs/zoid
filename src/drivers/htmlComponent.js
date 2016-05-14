@@ -4,9 +4,9 @@ import { dasherizeToCamel } from '../util';
 export var htmlComponent = {
 
     register(component) {
-        document.registerElement(component.options.tag);
+        document.registerElement(component.tag);
 
-        let elements = Array.prototype.slice.call(document.getElementsByTagName(component.options.tag));
+        let elements = Array.prototype.slice.call(document.getElementsByTagName(component.tag));
 
         for (let element of elements) {
 

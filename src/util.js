@@ -14,3 +14,7 @@ export function dasherizeToCamel(string) {
         return g[1].toUpperCase();
     });
 }
+
+export function noop() {
+    // pass
+}

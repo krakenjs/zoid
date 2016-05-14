@@ -1,20 +1,23 @@
 
 import postRobot from 'post-robot/dist/post-robot';
+import { noop } from './util';
 
 export class ChildComponent {
 
-    constructor(component, options) {
+    constructor(component, options = {}) {
+        this.validate(options);
+
         this.component = component;
-        this.options = options || {};
-        this.validate();
+        this.enter = options.enter || noop;
+        this.exit = options.exit || noop;
         
         postRobot.sendToParent('xcomponent_init').then(data => {
             
             this.id = data.id;
             this.props = data.props;
 
-            for (let key of Object.keys(this.component.options.props)) {
-                let prop = this.component.options.props[key];
+            for (let key of Object.keys(this.component.props)) {
+                let prop = this.component.props[key];
                 
                 if (prop.type === 'function') {
                     this.props[key] = function() {
@@ -26,7 +29,7 @@ export class ChildComponent {
                             throw new Error(`Can not serialize arguments passed to props.${key}`);
                         }
                         
-                        postRobot.sendToParent('xcomponent_prop_function', {
+                        return postRobot.sendToParent('xcomponent_prop_function', {
                             key: key,
                             args: args
                         });
@@ -34,11 +37,11 @@ export class ChildComponent {
                 }
             }
 
-            this.options.enter.call(this);
+            this.enter.call(this);
         });
     }
 
-    validate() {
+    validate(options) {
         // pass
     }
 }

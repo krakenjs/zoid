@@ -6,26 +6,16 @@ export class ParentComponent {
 
     constructor(component, options) {
         this.component = component;
-        this.options = options || {};
-        this.validate();
+        this.validate(options);
+        this.props = options.props;
     }
 
-    validate() {
-        // pass
-    }
+    validate(options) {
 
-    normalizeProps(props) {
+        let props = options.props;
 
-        props = props || {};
-        let result = {};
-
-        for (let key of Object.keys(this.component.options.props)) {
-
-            let prop = this.component.options.props[key]
-
-            if (!prop) {
-                throw new Error(`Invalid prop: ${key}`);
-            }
+        for (let key of Object.keys(this.component.props)) {
+            let prop = this.component.props[key]
 
             if (prop.required !== false && !props.hasOwnProperty(key)) {
                 throw new Error(`Prop is required: ${key}`);
@@ -33,11 +23,7 @@ export class ParentComponent {
 
             let value = props[key];
 
-            if (prop.type === 'boolean') {
-
-                result[key] = Boolean(value);
-
-            } else if (prop.type === 'function') {
+            if (prop.type === 'function') {
 
                 if (!(value instanceof Function)) {
                     throw new Error(`Prop is not of type string: ${key}`);
@@ -53,15 +39,38 @@ export class ParentComponent {
                     throw new Error(`Prop is not of type string: ${key}`);
                 }
 
-                result[key] = value;
-
             } else if (prop.type === 'object') {
 
                 try {
-                    result[key] = JSON.stringify(value);
+                    JSON.stringify(value);
                 } catch (err) {
                     throw new Error(`Unable to serialize prop: ${key}`);
                 }
+            }
+        }
+    }
+
+    normalizeProps(props) {
+
+        props = props || {};
+        let result = {};
+
+        for (let key of Object.keys(this.component.props)) {
+
+            let prop = this.component.props[key]
+            let value = props[key];
+
+            if (prop.type === 'boolean') {
+                result[key] = Boolean(value);
+
+            } else if (prop.type === 'function') {
+                continue;
+
+            } else if (prop.type === 'string') {
+                result[key] = value || '';
+
+            } else if (prop.type === 'object') {
+                result[key] = JSON.stringify(value);
             }
         }
 
@@ -95,15 +104,15 @@ export class ParentComponent {
 
     renderInto(element) {
 
-        let props = this.options.props;
+        let props = this.props;
         let normalizedProps = this.normalizeProps(props);
         let queryString = this.propsToQuery(normalizedProps);
 
-        //let dimensions = this.options.dimensions || this.component.options.dimensions || {};
+        //let dimensions = this.dimensions || this.component.dimensions || {};
 
         this.iframe = document.createElement('iframe');
 
-        this.iframe.src = `${this.component.options.url}?${queryString}`;
+        this.iframe.src = `${this.component.url}?${queryString}`;
         this.iframe.height = 500;
         this.iframe.width = 500;
 
@@ -112,11 +121,7 @@ export class ParentComponent {
             name: 'xcomponent_init',
             window: this.iframe.contentWindow,
 
-            handler(err, data) {
-                if (err) {
-                    return;
-                }
-
+            handler(data) {
                 this.id = data.id;
 
                 return {
@@ -130,14 +135,8 @@ export class ParentComponent {
             name: 'xcomponent_prop_function',
             window: this.iframe.contentWindow,
 
-            handler(err, data) {
-                if (err) {
-                    return;
-                }
-
-                setTimeout(() => {
-                    props[data.key].apply(null, data.args);
-                });
+            handler(data) {
+                return props[data.key].apply(null, data.args);
             }
         });
 
