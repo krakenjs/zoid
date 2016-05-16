@@ -138,7 +138,7 @@ Let's do that in our example above.
 </script>
 ```
 
-As the owner of the component, that's all we needed to do! We just had to define an interface, and integrate our component definition with the page we want to render.
+As the owner of the component, that's all we needed to do! Now anyone can use the component we defined.
 
 
 #### As the component user
