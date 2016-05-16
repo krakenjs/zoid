@@ -3,7 +3,7 @@ xcomponent
 
 Writing cross domain components is really hard.
 
-Consider this: I own x.com, you own y.com, and I have some functionality I want to put in your page. For example PayPal Checkout,
+Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put in your page. For example PayPal Checkout,
 or Facebook comments. I could just give you a javascript component to drop in your page. Javascript components are pretty much a
 solved problem at this point! React, Ember, Angular and other frameworks all provide great ways to build reusable and shareable components.
 But I quickly run into some problems:
