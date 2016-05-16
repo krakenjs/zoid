@@ -15,8 +15,8 @@ But I quickly run into some problems:
 So I build an iframe based component. Iframes are great ways to sandbox off little bits of cross-domain functionality,
 where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But immediately, I run into more problems:
 
-- How do I have people pass down data? Should they build an iframe and and drop strings down through my url?
-- How do I pass data and events back up? Do I send fire-and-forget post messages and have you listen for them all manually?
+- How do I have people pass down data? Should they programatically create an iframe and and drop string parameters down through my url?
+- How do I pass data and events back up? Do I send fire-and-forget post messages and have you listen for them all?
 - How do I deal with the lifecycle of the component?
 
 xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components that work seamlessly with both iframes and popups, with tight interfaces that you define.
