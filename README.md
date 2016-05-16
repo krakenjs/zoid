@@ -63,9 +63,9 @@ var MyLoginComponent = xcomponent.create({
 });
 ```
 
-This spec is the part that's going to be shared between my frame (or popup) and the parent page. It describes how to render the component on the page, and what kind of data needs to be passed down for it to render.
+This spec is the part that's going to be shared between my frame (or popup) and the parent page. It describes how to render the component on the page, what kind of data needs to be passed down, and what kind of callbacks I should expect.
 
-Now I'm ready to set up my component page. In this case it's a simple login page written using jQuery, but you can do this in whatever technology you want:
+Now I'm ready to set up my component page. Let's start with a simple log-in form.  It's written using jQuery, but you can use whatever technology you want - `xcomponent` is framework agnostic:
 
 ```html
 <input id="email" type="text" />
@@ -73,10 +73,16 @@ Now I'm ready to set up my component page. In this case it's a simple login page
 <button id="login">Log In</button>
 
 <script>
+    // Wait for the user to log in
+
     $('#login').on('click', function() {
+
+        // Capture their credentials
 
         var email = $('#email').val();
         var password = $('#password').val();
+
+        // Log them in on the server side
 
         $.post('/api/login', { email: email, password: password }, function() {
 
@@ -86,7 +92,9 @@ Now I'm ready to set up my component page. In this case it's a simple login page
 </script>
 ```
 
-Now let's think about how this component is going to be integrated with the parent page. We've already defined the contract, so this is easy:
+This is great, but at this point it's totally isolated from the parent. If I was to drop this in an iframe, it would function perfectly, but the parent would have no way to interact with it.
+
+Now let's think about how this component is going to be integrated with the parent page. We've already defined the component contract, so we just need to plug it in:
 
 - We need to pre-populate the `#email` element with a `prefilledEmail` param, if we're passed one.
 - We need to call an `onLogin` success callback when we do a successful login, so the parent knows the user has logged in.
