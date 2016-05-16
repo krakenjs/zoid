@@ -3,25 +3,32 @@ xcomponent
 
 Writing cross domain components is really hard.
 
-Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put in your page. For example PayPal Checkout,
-or Facebook comments. I could just give you a javascript component to drop in your page. Javascript components are pretty much a
+Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put within your page.
+I could just give you a javascript component to drop in your page. Javascript components are pretty much a
 solved problem at this point! React, Ember, Angular and other frameworks all provide great ways to build reusable and shareable components.
-But I quickly run into some problems:
+But:
 
 - What if I write a component in React and you're using Ember?
-- What if I have secure data that I don't want you to have access to?
-- What if I want to let people log in to my page without sharing their credentials with you?
+- What if I have secure data like login credentials that I don't want you to have access to?
+- What if I need to make calls to apis that I don't want to expose to third party domains?
 
-So I build an iframe based component. Iframes are great ways to sandbox off little bits of cross-domain functionality,
-where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But immediately, I run into more problems:
+So the obvious choice is an iframe, or a popup. Iframes are great ways to sandbox off little bits of cross-domain functionality,
+where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But iframes aren't all that easy to use:
 
-- How do I have people pass down data? Should they programatically create an iframe and and drop string parameters down through my url?
-- How do I pass data and events back up? Do I send fire-and-forget post messages and have you listen for them all?
-- How do I deal with the lifecycle of the component?
+- How should people pass down data? Should they programatically create an iframe and and pass params down in the url?
+- How should people get events back up? Should I send fire-and-forget post messages, and have them add listeners?
+- How do I deal with error cases when my component fails, or when messaging fails?
+- How do I create a nice, simple interface for my component that people can easily reason about?
 
-xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components that work seamlessly with both iframes and popups, with tight interfaces that you define.
+xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components that work seamlessly with both iframes and popups.
+The primary focus of this is to allow you to define your interface, and then do the heavy lifting in the background, and do all of the things you shouldn't need to think about:
 
-### Simple example
+- Passing data down
+- Getting messages back up
+- Creating the iframe or popup and generating the correct url
+- Bubbling errors back up to the parent
+
+### Example
 
 #### As the component creator
 
@@ -58,7 +65,7 @@ var MyLoginComponent = xcomponent.create({
 
 This spec is the part that's going to be shared between my frame (or popup) and the parent page. It describes how to render the component on the page, and what kind of data needs to be passed down for it to render.
 
-Now I'm render to set up my component page to do whatever we need to do. In this case it's a simple login page written using jQuery, but you can do this in whatever technology you want:
+Now I'm ready to set up my component page. In this case it's a simple login page written using jQuery, but you can do this in whatever technology you want:
 
 ```html
 <input id="email" type="text" />
