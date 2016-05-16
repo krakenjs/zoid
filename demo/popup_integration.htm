@@ -2,14 +2,13 @@
 <script src="../dist/xcomponent.js"></script>
 <script src="./paypal-login/component.js"></script>
 
-<div id="container"></div>
-
+<button onclick="openPopup()">Open Component</button>
 <button onclick="login.close()">close</button>
 <button onclick="login.focus()">focus</button>
 
 <script>
 
-    var login = paypalLogin.init({
+    window.login = paypalLogin.init({
 
         dimensions: {
             width: 500,
@@ -22,26 +21,14 @@
             onSuccess: function(email) {
                 console.log('User logged in with email', email, '!');
             }
-        },
-
-        onError: function() {
-            console.log('entered component');
-        },
-
-        timeout: 5000,
-
-        onClose() {
-            console.log('parent detecting close');
-        },
-
-        onError(err) {
-            console.error('parent detecting error', err.stack || err.toString());
-        },
-
-        timeout: 5000
+        }
 
     });
 
-    login.renderIframe('container');
+    function openPopup() {
+        window.login.renderPopup();
+    }
+
+    openPopup();
 
 </script>

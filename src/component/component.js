@@ -2,7 +2,7 @@
 import { ChildComponent } from './child';
 import { ParentComponent } from './parent';
 
-import * as drivers from './drivers';
+import * as drivers from '../drivers';
 
 const PROP_TYPES = [
     'string',
@@ -19,6 +19,8 @@ export class Component {
         this.tag = options.tag;
         this.url = options.url;
         this.props = options.props;
+
+        this.singleton = options.singleton;
 
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];

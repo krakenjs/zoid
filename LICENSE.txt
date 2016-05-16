@@ -1,5 +1,5 @@
 /*───────────────────────────────────────────────────────────────────────────*\
-│  Copyright (C) 2014 PayPal                                                  │
+│  Copyright (C) 2016 PayPal                                                  │
 │                                                                             │
 │                                                                             │
 │   Licensed under the Apache License, Version 2.0 (the "License"); you may   │
@@ -12,3 +12,54 @@
 │   See the License for the specific language governing permissions and       │
 │   limitations under the License.                                            │
 \*───────────────────────────────────────────────────────────────────────────*/
+
+
+
+#!/bin/bash
+
+dates='2016-05-14 2016-05-15';
+biz_pools='hermesnodeweb paymentapiplatformserv xoonboardingnodeweb';
+flow_pools='hermesnodeweb xoonboardingnodeweb xorouternodeweb nvppaymentserv merchantpaymentweb'
+
+for date in $dates; do
+
+    for pool in $biz_pools; do
+
+        echo "Checking $date $pool BIZ"
+
+        query="
+            select day, pool, count(1) as total
+            from cal_biz_logs
+            where pool = '$pool'
+            and day = '$date'
+            group by day, pool;
+        ";
+
+        echo;
+        echo $query;
+        echo;
+
+        ./syncquery.sh "$query";
+
+    done;
+
+    for pool in $flow_pools; do
+
+        echo "Checking $date $pool FLOW"
+
+        query="
+            select day, pool, count(1) as total
+            from cal_flow_logs
+            where pool = '$pool'
+            and day = '$date'
+            group by day, pool;
+        ";
+
+        echo;
+        echo $query;
+        echo;
+
+        ./syncquery.sh "$query";
+
+    done;
+done;

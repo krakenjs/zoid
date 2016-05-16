@@ -6,10 +6,16 @@
 <input type="password" id="password" placeholder="password">
 <button id="submit">Submit</button>
 
-<script>
-    paypalLogin.attach({
+<br /><br />
 
-        enter() {
+<button onclick="login.close()">Close</button>
+<button onclick="login.focus()">Focus</button>
+<button onclick="login.redirectParent('https://www.google.com')">Redirect Parent</button>
+
+<script>
+    window.login = paypalLogin.attach({
+
+        onEnter() {
             if (this.props.email) {
                 document.getElementById('email').value = this.props.email;
             }
@@ -24,6 +30,14 @@
                 }
 
             }.bind(this);
+        },
+
+        onClose() {
+            console.log('child detecting close');
+        },
+
+        onError(err) {
+            console.error('child detecting error', err.stack || err.toString());
         }
     });
 </script>
