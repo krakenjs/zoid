@@ -172,8 +172,6 @@ My life is even easier. I just need to drop in your component onto my page:
 </script>
 ```
 
-And we're done!
-
 This is even easier if you're using a supported framework like React, Ember or Angular:
 
 React:
@@ -187,3 +185,9 @@ Angular:
 ```javascript
 <my-login-component prefilled-email="foo@bar.com" on-login="onLogin" />
 ```
+
+---
+
+And we're done! Notice how I never had to write any code to create an iframe, or send post messages? That's all taken care of for you.
+When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
+turning that callback into a post-message and relaying it to the parent for you.
