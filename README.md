@@ -195,7 +195,7 @@ And we're done! Notice how I never had to write any code to create an iframe, or
 When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
 turning that callback into a post-message and relaying it to the parent for you.
 
----
+
 
 ### Updating props and passing them down to the child
 
@@ -227,7 +227,7 @@ var Main = window.React.createClass({
 ReactDOM.render(<Main />, document.getElementById('example'));
 ```
 
-This code updates `this.state.email` every time the user types into the checkbox.
+This code updates `this.state.email` every time the user types into the input field.
 
 Our component can listen for any property updates like so:
 
@@ -247,4 +247,50 @@ Our component can listen for any property updates like so:
         }
     });
 <script>
+```
+
+If I wanted to update the props from my parent manually, using javascript, I can do this too:
+
+```javascript
+var login = MyLoginComponent.init({
+
+    props: {
+        email: 'foo@bar.com'
+    }
+});
+
+// At some point in the future
+
+login.updateProps({
+    email: 'baz@bar.com'
+});
+```
+
+
+### Setting a timeout for rendering my component
+
+If you set a timeout, xcomponent will automatically call your `onError` method if the component does not initalize itself in that time
+
+```javascript
+var login = MyLoginComponent.init({
+
+    onError: function(err) {
+        // Gracefully handle the error from rendering the component
+    },
+
+    timeout: 5000
+});
+```
+
+
+### Making your component a singleton
+
+A lot of the time, it won't make sense to allow people to use your component multiple times in the same page.
+To prevent them from doing that, you can set `singleton: true` when rendering:
+
+```javascript
+var login = MyLoginComponent.init({
+
+    singleton: true
+});
 ```

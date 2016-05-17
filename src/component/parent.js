@@ -1,6 +1,6 @@
 
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, isClick } from '../util';
+import { urlEncode, popup, noop, isClick, extend } from '../util';
 import { CONSTANTS } from '../constants';
 
 let activeComponents = [];
@@ -66,8 +66,14 @@ export class ParentComponent {
     }
 
     updateProps(props) {
+
         let oldNormalizedProps = JSON.stringify(this.normalizedProps);
-        this.setProps(props);
+
+        let newProps = {};
+        extend(newProps, this.props);
+        extend(newProps, props);
+
+        this.setProps(newProps);
 
         if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
             postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
@@ -207,6 +213,8 @@ export class ParentComponent {
 
         this.window = this.iframe.contentWindow;
         this.listen();
+
+        return this;
     }
 
     renderPopup() {
@@ -222,6 +230,8 @@ export class ParentComponent {
 
         this.window = this.popup;
         this.listen();
+
+        return this;
     }
 
     listen(win) {
@@ -285,17 +295,20 @@ export class ParentComponent {
             console.warn('Error sending close message to child', err.stack || err.toString());
             this.cleanup();
         });
+        return this;
     }
 
     focus() {
         if (this.popup) {
             this.popup.focus();
         }
+        return this;
     }
 
     destroy(err) {
         this.cleanup();
         this.onError.call(this, err);
+        return this;
     }
 
     cleanup() {
