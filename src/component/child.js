@@ -15,6 +15,8 @@ export class ChildComponent {
         this.onClose = once(options.onClose || noop);
         this.onError = once(options.onError || noop);
 
+        this.onProps = options.onProps || noop;
+
         this.listen();
 
         this.props = {};
@@ -22,6 +24,7 @@ export class ChildComponent {
         this.initPromise = postRobot.sendToParent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
             extend(this.props, data.props);
             this.onEnter.call(this);
+            this.onProps.call(this);
         });
 
         this.setupCallbacks();
@@ -55,6 +58,11 @@ export class ChildComponent {
     }
 
     listen() {
+        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: window.opener || window.parent }, data => {
+            extend(this.props, data.props);
+            this.onProps.call(this);
+        });
+
         postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: window.opener || window.parent }, data => {
             this.onClose.call(this);
         });

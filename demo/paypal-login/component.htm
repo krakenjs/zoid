@@ -13,13 +13,9 @@
 <button onclick="login.redirectParent('https://www.google.com')">Redirect Parent</button>
 
 <script>
-    window.login = paypalLogin.attach({
+    window.login = PaypalLogin.attach({
 
         onEnter() {
-            if (this.props.email) {
-                document.getElementById('email').value = this.props.email;
-            }
-
             document.getElementById('submit').onclick = function() {
 
                 var email = document.getElementById('email').value;
@@ -30,6 +26,12 @@
                 }
 
             }.bind(this);
+        },
+
+        onProps() {
+            if (this.props.email) {
+                document.getElementById('email').value = this.props.email;
+            }
         },
 
         onClose() {

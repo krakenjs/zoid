@@ -8,14 +8,46 @@ export var react = {
     },
 
     register(component) {
-        component.ReactComponent = window.React.createClass({
-            render: function render() {
-                return window.React.createElement('div');
+
+
+        component.react = window.React.createClass({
+
+            render() {
+                return null;
             },
 
-            componentDidMount: function() {
-                component.initFromProps(extend({}, this.props)).renderIframe(window.ReactDOM.findDOMNode(this));
+            componentDidMount() {
+                let parent = component.initFromProps(extend({}, this.props));
+
+                this.setState({ parent: parent });
+
+                parent.renderIframe(window.ReactDOM.findDOMNode(this));
+            },
+
+            componentWillUpdate() {
+
+                if (this.state && this.state.parent) {
+                    this.state.parent.updateProps(extend({}, this.props));
+                }
             }
-       });
+        });
+
+        /*
+
+        component.createReactClass = function(options) {
+
+            let props;
+
+            let child = component.attach({
+
+                onProps() {
+                    props = this.props;
+                }
+            });
+
+            window.React.createClass
+        }
+
+        */
     }
 }

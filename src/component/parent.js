@@ -37,6 +37,17 @@ export class ParentComponent {
         this.url = `${this.component.url}?${this.queryString}`;
     }
 
+    updateProps(props) {
+        let oldNormalizedProps = JSON.stringify(this.normalizedProps);
+        this.setProps(props);
+
+        if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
+            postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
+                props: this.normalizedProps
+            });
+        }
+    }
+
     validate(options) {
         if (options.timeout && !(typeof options.timeout === 'number')) {
             throw new Error(`Expected options.timeout to be a number: ${options.timeout}`);

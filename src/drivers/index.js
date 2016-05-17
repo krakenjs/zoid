@@ -1,3 +1,3 @@
 
-export * from './htmlComponent';
+export * from './html';
 export * from './react';

@@ -7,20 +7,24 @@
 <div id="example"></div>
 
 <script type="text/babel">
-    function Main(props) {
 
-        function onEnter() {
-            console.log('Entered component');
+    var Main = window.React.createClass({
+
+        render: function() {
+
+            function onEnter() {
+                console.log('Entered component');
+            }
+
+            function onSuccess(email) {
+                 console.log('User logged in with email', email, '!');
+            }
+
+            return (
+                <PaypalLogin.react email='foo@bar.com' onSuccess={onSuccess} onEnter={onEnter} />
+            );
         }
-
-        function onSuccess(email) {
-             console.log('User logged in with email', email, '!');
-        }
-
-        return (
-            <paypalLogin.ReactComponent email='foobaz@bar.com' onSuccess={onSuccess} onEnter={onEnter} />
-        );
-    }
+    });
 
     ReactDOM.render(<Main />, document.getElementById('example'));
 </script>

@@ -1,5 +1,5 @@
 
-window.paypalLogin = xcomponent.create({
+window.PaypalLogin = xcomponent.create({
 
     tag: 'paypal-login',
 
