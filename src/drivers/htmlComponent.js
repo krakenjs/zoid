@@ -3,6 +3,10 @@ import { dasherizeToCamel } from '../util';
 
 export var htmlComponent = {
 
+    isActive() {
+        return true;
+    },
+
     register(component) {
         document.registerElement(component.tag);
 

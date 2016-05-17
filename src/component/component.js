@@ -25,7 +25,9 @@ export class Component {
 
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
-            driver.register(this);
+            if (driver.isActive()) {
+                driver.register(this);
+            }
         }
     }
 
