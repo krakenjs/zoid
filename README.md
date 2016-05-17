@@ -37,6 +37,9 @@ Let's say I'm creating a component. First I'd create a spec for the component's 
 ```javascript
 var MyLoginComponent = xcomponent.create({
 
+    // The html tag used to render my component
+    tag: 'my-login-component',
+
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
     url: 'http://www.my-site.com/my-login-component',
 
@@ -177,7 +180,7 @@ This is even easier if you're using a supported framework like React, Ember or A
 React:
 
 ```javascript
-<MyLoginComponent prefilledEmail='foo@bar.com' onLogin={this.onLogin} />
+<MyLoginComponent.react prefilledEmail='foo@bar.com' onLogin={this.onLogin} />
 ```
 
 Angular:
@@ -191,3 +194,57 @@ Angular:
 And we're done! Notice how I never had to write any code to create an iframe, or send post messages? That's all taken care of for you.
 When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
 turning that callback into a post-message and relaying it to the parent for you.
+
+---
+
+### Updating props and passing them down to the child
+
+xcomponent will automatically pass down new properties to the child, depending on the framework you're integrating with.
+
+For example, I might have the following react code:
+
+```javascript
+var Main = window.React.createClass({
+
+    componentWillMount: function() {
+        this.setState({ email: 'foo@bar.com' });
+    },
+
+    emailChange: function(event) {
+        this.setState({ email: event.target.value });
+    },
+
+    render: function() {
+        return (
+            <div>
+                <MyLoginComponent.react prefilledEmail={this.state.email} />
+                <input onChange={this.emailChange} placeholder="email" value={this.state.email} />
+            </div>
+        );
+    }
+});
+
+ReactDOM.render(<Main />, document.getElementById('example'));
+```
+
+This code updates `this.state.email` every time the user types into the checkbox.
+
+Our component can listen for any property updates like so:
+
+```html
+
+<div>
+    Welcome <span id="email"></span>!
+</div>
+
+<script>
+    MyLoginComponent.attach({
+
+        onProps: function() {
+            if (this.props.email) {
+                document.getElementById('email').value = this.props.email;
+            }
+        }
+    });
+<script>
+```

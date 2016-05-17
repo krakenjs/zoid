@@ -15,7 +15,7 @@
 <script>
     window.login = PaypalLogin.attach({
 
-        onEnter() {
+        onEnter: function() {
             document.getElementById('submit').onclick = function() {
 
                 var email = document.getElementById('email').value;
@@ -28,17 +28,17 @@
             }.bind(this);
         },
 
-        onProps() {
+        onProps: function() {
             if (this.props.email) {
                 document.getElementById('email').value = this.props.email;
             }
         },
 
-        onClose() {
+        onClose: function() {
             console.log('child detecting close');
         },
 
-        onError(err) {
+        onError: function(err) {
             console.error('child detecting error', err.stack || err.toString());
         }
     });
