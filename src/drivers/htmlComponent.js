@@ -23,7 +23,7 @@ export var htmlComponent = {
                 }
             }
 
-            component.init({ props }).renderIframe(element);
+            component.initFromProps(props).renderIframe(element);
         }
     }
 }

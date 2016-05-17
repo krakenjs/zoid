@@ -1,6 +1,7 @@
 
 import { ChildComponent } from './child';
 import { ParentComponent } from './parent';
+import { pop, noop } from '../util';
 
 import * as drivers from '../drivers';
 
@@ -69,5 +70,20 @@ export class Component {
 
     init(options) {
         return new ParentComponent(this, options);
+    }
+
+    initFromProps(props) {
+
+        return new ParentComponent(this, {
+
+            props,
+
+            onEnter: pop(props, 'onEnter', noop),
+            onExit:  pop(props, 'onExit', noop),
+            onClose: pop(props, 'onClose', noop),
+            onError: pop(props, 'onError', noop),
+
+            timeout: parseInt(pop(props, 'timeout', 0), 10)
+        });
     }
 }

@@ -1,5 +1,5 @@
 
-<paypal-login email="$login.email" on-success="$login.onSuccess"></paypal-login>
+<paypal-login email="$login.email" on-success="$login.onSuccess" on-enter="$login.onEnter"></paypal-login>
 
 <script>
     window.login = {
@@ -8,6 +8,10 @@
 
         onSuccess: function(email) {
             console.log('User logged in with email', email, '!');
+        },
+
+        onEnter: function() {
+            console.log('Entered component');
         }
     };
 </script>

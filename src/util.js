@@ -92,3 +92,9 @@ window.addEventListener('load', function() {
 export function isClick() {
     return clickEventActive;
 }
+
+export function pop(obj, name, def) {
+    let result = obj.hasOwnProperty(name) ? obj[name] : def;
+    delete obj[name];
+    return result
+}

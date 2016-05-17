@@ -3,10 +3,18 @@ import postRobot from 'post-robot/dist/post-robot';
 import { urlEncode, popup, noop, isClick } from '../util';
 import { CONSTANTS } from '../constants';
 
+let activeComponents = [];
+
 export class ParentComponent {
 
     constructor(component, options) {
         this.validate(options);
+
+        if (component.singleton && activeComponents.some(comp => comp.component === component)) {
+            throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
+        }
+
+        activeComponents.push(this);
 
         this.listeners = [];
 
@@ -14,11 +22,9 @@ export class ParentComponent {
         this.setProps(options.props);
 
         this.onEnter = options.onEnter || noop;
-        this.onExit = options.onExit || noop;
+        this.onExit = options.onExit   || noop;
         this.onClose = options.onClose || noop;
         this.onError = options.onError || noop;
-
-        this.dimensions = options.dimensions || {};
 
         this.timeout = options.timeout;
     }
@@ -191,35 +197,31 @@ export class ParentComponent {
 
     childListeners() {
         return {
-           [ CONSTANTS.POST_MESSAGE.INIT ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.INIT ]: function(data) {
+                this.onEnter.call(this);
+                this.entered = true;
 
-               this.onEnter.call(this);
-               this.entered = true;
+                return {
+                  props: this.normalizedProps
+                };
+            },
 
-               return {
-                   props: this.normalizedProps
-               };
-           },
+            [ CONSTANTS.POST_MESSAGE.CLOSE ]: function(data) {
+                this.cleanup();
+            },
 
-           [ CONSTANTS.POST_MESSAGE.CLOSE ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.FOCUS ]: function(data) {
+                this.focus();
+            },
 
-               this.cleanup();
-           },
+            [ CONSTANTS.POST_MESSAGE.REDIRECT ]: function(data) {
+                this.cleanup();
+                window.location = data.url;
+            },
 
-           [ CONSTANTS.POST_MESSAGE.FOCUS ]: function(data) {
-
-               this.focus();
-           },
-
-           [ CONSTANTS.POST_MESSAGE.REDIRECT ]: function(data) {
-               this.cleanup();
-               window.location = data.url;
-           },
-
-           [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ]: function(data) {
-
-               return this.props[data.key].apply(null, data.args);
-           }
+            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ]: function(data) {
+                return this.props[data.key].apply(null, data.args);
+            }
        }
     }
 
