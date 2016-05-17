@@ -1,7 +1,7 @@
 
 import { ChildComponent } from './child';
-import { ParentComponent } from './parent';
-import { pop, noop } from '../util';
+import { ParentComponent, internalProps } from './parent';
+import { pop, noop, extend } from '../util';
 
 import * as drivers from '../drivers';
 
@@ -9,7 +9,8 @@ const PROP_TYPES = [
     'string',
     'object',
     'function',
-    'boolean'
+    'boolean',
+    'number'
 ];
 
 export class Component {
@@ -87,5 +88,15 @@ export class Component {
 
             timeout: parseInt(pop(props, 'timeout', 0), 10)
         });
+    }
+
+    getProps() {
+
+        let props = {};
+
+        extend(props, this.props);
+        extend(props, internalProps);
+
+        return props;
     }
 }

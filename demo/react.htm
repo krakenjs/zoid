@@ -10,6 +10,14 @@
 
     var Main = window.React.createClass({
 
+        componentWillMount: function() {
+            this.setState({ email: 'foo@bar.com' });
+        },
+
+        emailChange: function(event) {
+            this.setState({ email: event.target.value });
+        },
+
         render: function() {
 
             function onEnter() {
@@ -21,12 +29,14 @@
             }
 
             return (
-                <PaypalLogin.react email='foo@bar.com' onSuccess={onSuccess} onEnter={onEnter} />
+                <div>
+                    <PaypalLogin.react email={this.state.email} onSuccess={onSuccess} onEnter={onEnter} />
+
+                    <input onChange={this.emailChange} placeholder="email" value={this.state.email} />
+                </div>
             );
         }
     });
 
     ReactDOM.render(<Main />, document.getElementById('example'));
 </script>
-</body>
-</html>

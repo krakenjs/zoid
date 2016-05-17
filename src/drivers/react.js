@@ -24,30 +24,12 @@ export var react = {
                 parent.renderIframe(window.ReactDOM.findDOMNode(this));
             },
 
-            componentWillUpdate() {
+            componentDidUpdate() {
 
                 if (this.state && this.state.parent) {
                     this.state.parent.updateProps(extend({}, this.props));
                 }
             }
         });
-
-        /*
-
-        component.createReactClass = function(options) {
-
-            let props;
-
-            let child = component.attach({
-
-                onProps() {
-                    props = this.props;
-                }
-            });
-
-            window.React.createClass
-        }
-
-        */
     }
 }

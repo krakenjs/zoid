@@ -1,0 +1,20 @@
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<script src="../dist/xcomponent.js"></script>
+<script src="./paypal-login/component.js"></script>
+
+<script>
+    angular.module('app', []).controller('appController', function($scope) {
+        $scope.email = 'foo@bar.com';
+
+        $scope.onLogin = function onLogin(email) {
+            console.log('User logged in with email', email, '!');
+        }
+    });
+</script>
+
+<body ng-app="app" ng-controller="appController">
+    <paypal-login email="{{email}}" on-success="onLogin"></paypal-login>
+
+    <input ng-model="email" />
+</body>

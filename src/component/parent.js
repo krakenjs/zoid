@@ -5,6 +5,34 @@ import { CONSTANTS } from '../constants';
 
 let activeComponents = [];
 
+export const internalProps = {
+
+    onEnter: {
+        type: 'function',
+        required: false
+    },
+
+    onExit: {
+        type: 'function',
+        required: false
+    },
+
+    onClose: {
+        type: 'function',
+        required: false
+    },
+
+    onError: {
+        type: 'function',
+        required: false
+    },
+
+    timeout: {
+        type: 'number',
+        required: false
+    }
+}
+
 export class ParentComponent {
 
     constructor(component, options) {
@@ -59,7 +87,7 @@ export class ParentComponent {
         for (let key of Object.keys(this.component.props)) {
             let prop = this.component.props[key]
 
-            if (prop.required !== false && !props.hasOwnProperty(key)) {
+            if (prop.required !== false && (!props.hasOwnProperty(key) || props[key] === null || props[key] === undefined || props[key] === '')) {
                 throw new Error(`Prop is required: ${key}`);
             }
 
@@ -88,6 +116,12 @@ export class ParentComponent {
                 } catch (err) {
                     throw new Error(`Unable to serialize prop: ${key}`);
                 }
+
+            } else if (prop.type === 'number') {
+
+                if (isNaN(parseInt(value, 10))) {
+                    throw new Error(`Prop is not a number: ${key}`);
+                }
             }
         }
     }
@@ -113,6 +147,9 @@ export class ParentComponent {
 
             } else if (prop.type === 'object') {
                 result[key] = JSON.stringify(value);
+
+            } else if (prop.type === 'number') {
+                result[key] = parseInt(value || 0, 10);
             }
         }
 
@@ -163,7 +200,7 @@ export class ParentComponent {
         this.iframe = document.createElement('iframe');
 
         this.iframe.src = this.url;
-        this.iframe.height = 500;
+        this.iframe.height = 300;
         this.iframe.width = 500;
 
         element.appendChild(this.iframe);
