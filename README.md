@@ -15,7 +15,7 @@ But:
 So the obvious choice is an iframe, or a popup. Iframes are great ways to sandbox off little bits of cross-domain functionality,
 where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But iframes aren't all that easy to use:
 
-- How should people pass down data? Should they programatically create an iframe and and pass params down in the url?
+- How should people pass down data? Should they programatically create an iframe and pass params down in the url?
 - How should people get events back up? Should I send fire-and-forget post messages, and have them add listeners?
 - How do I deal with error cases when my component fails, or when messaging fails?
 - How do I create a nice, simple interface for my component that people can easily reason about?
@@ -269,11 +269,14 @@ login.updateProps({
 
 ### Setting a timeout for rendering my component
 
-If you set a timeout, xcomponent will automatically call your `onError` method if the component does not initalize itself in that time
+If you set a timeout (in ms), xcomponent will automatically call your `onTimeout` method if the component does not initalize itself in that time. In case no `onTimeout` methhod is defined it will call the `onError` method. 
 
 ```javascript
 var login = MyLoginComponent.init({
 
+    onTimeout: function(err) {
+         // Gracefully handle the timeout during rendering the component 
+    },
     onError: function(err) {
         // Gracefully handle the error from rendering the component
     },
