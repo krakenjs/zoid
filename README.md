@@ -15,7 +15,7 @@ But:
 So the obvious choice is an iframe, or a popup. Iframes are great ways to sandbox off little bits of cross-domain functionality,
 where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But iframes aren't all that easy to use:
 
-- How should people pass down data? Should they programatically create an iframe and and pass params down in the url?
+- How should people pass down data? Should they programatically create an iframe and pass params down in the url?
 - How should people get events back up? Should I send fire-and-forget post messages, and have them add listeners?
 - How do I deal with error cases when my component fails, or when messaging fails?
 - How do I create a nice, simple interface for my component that people can easily reason about?
