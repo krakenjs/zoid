@@ -1,37 +1,9 @@
 
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, isClick, extend } from '../util';
+import { urlEncode, popup, noop, isClick, extend, pop } from '../util';
 import { CONSTANTS } from '../constants';
 
 let activeComponents = [];
-
-export const internalProps = {
-
-    onEnter: {
-        type: 'function',
-        required: false
-    },
-
-    onExit: {
-        type: 'function',
-        required: false
-    },
-
-    onClose: {
-        type: 'function',
-        required: false
-    },
-
-    onError: {
-        type: 'function',
-        required: false
-    },
-
-    timeout: {
-        type: 'number',
-        required: false
-    }
-}
 
 export class ParentComponent {
 
@@ -206,11 +178,12 @@ export class ParentComponent {
         this.iframe = document.createElement('iframe');
 
         this.iframe.src = this.url;
-        this.iframe.height = 300;
-        this.iframe.width = 500;
+        this.iframe.width = this.component.dimensions.width;
+        this.iframe.height = this.component.dimensions.height;
 
         element.appendChild(this.iframe);
 
+        this.context = CONSTANTS.CONTEXT.IFRAME;
         this.window = this.iframe.contentWindow;
         this.listen();
 
@@ -224,10 +197,11 @@ export class ParentComponent {
         }
 
         this.popup = popup(`${this.component.url}?${this.queryString}`, {
-            width: 500,
-            height: 500,
+            width: this.component.dimensions.width,
+            height: this.component.dimensions.height,
         });
 
+        this.context = CONSTANTS.CONTEXT.POPUP;
         this.window = this.popup;
         this.listen();
 
@@ -260,7 +234,8 @@ export class ParentComponent {
                 this.entered = true;
 
                 return {
-                  props: this.normalizedProps
+                    context: this.context,
+                    props: this.normalizedProps
                 };
             },
 
@@ -270,6 +245,15 @@ export class ParentComponent {
 
             [ CONSTANTS.POST_MESSAGE.FOCUS ]: function(data) {
                 this.focus();
+            },
+
+            [ CONSTANTS.POST_MESSAGE.RESIZE ]: function(data) {
+
+                if (this.context === CONSTANTS.CONTEXT.POPUP) {
+                    throw new Error('Can not resize popup from parent');
+                }
+
+                return this.resize(data.width, data.height);
             },
 
             [ CONSTANTS.POST_MESSAGE.REDIRECT ]: function(data) {
@@ -289,13 +273,12 @@ export class ParentComponent {
     }
 
     close() {
-        postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).then(data => {
+        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).then(data => {
             this.cleanup();
         }).catch(err => {
             console.warn('Error sending close message to child', err.stack || err.toString());
             this.cleanup();
         });
-        return this;
     }
 
     focus() {
@@ -303,6 +286,23 @@ export class ParentComponent {
             this.popup.focus();
         }
         return this;
+    }
+
+    resize(height, width) {
+        return Promise.resolve().then(() => {
+
+            if (this.context === CONSTANTS.CONTEXT.POPUP) {
+                return postRobot.send(this.popup, CONSTANTS.POST_MESSAGE.RESIZE, {
+                    height: height,
+                    width: width
+                });
+
+            } else if (this.context === CONSTANTS.CONTEXT.IFRAME) {
+
+                this.iframe.height = height;
+                this.iframe.width = width;
+            }
+        });
     }
 
     destroy(err) {
@@ -324,4 +324,47 @@ export class ParentComponent {
         }
     }
 
+}
+
+export const internalProps = {
+
+    onEnter: {
+        type: 'function',
+        required: false
+    },
+
+    onExit: {
+        type: 'function',
+        required: false
+    },
+
+    onClose: {
+        type: 'function',
+        required: false
+    },
+
+    onError: {
+        type: 'function',
+        required: false
+    },
+
+    timeout: {
+        type: 'number',
+        required: false
+    }
+}
+
+ParentComponent.fromProps = function fromProps(component, props) {
+
+    return new ParentComponent(component, {
+
+        props,
+
+        onEnter: pop(props, 'onEnter'),
+        onExit:  pop(props, 'onExit'),
+        onClose: pop(props, 'onClose'),
+        onError: pop(props, 'onError'),
+
+        timeout: parseInt(pop(props, 'timeout', 0), 10)
+    });
 }

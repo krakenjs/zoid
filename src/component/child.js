@@ -1,4 +1,5 @@
 
+import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
 import { noop, once, extend } from '../util';
 import { CONSTANTS } from '../constants';
@@ -21,8 +22,13 @@ export class ChildComponent {
 
         this.props = {};
 
+        this.parent = window.opener || window.parent;
+
         this.initPromise = postRobot.sendToParent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
+
+            this.context = data.context;
             extend(this.props, data.props);
+
             this.onEnter.call(this);
             this.onProps.call(this);
         });
@@ -58,13 +64,17 @@ export class ChildComponent {
     }
 
     listen() {
-        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: window.opener || window.parent }, data => {
+        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, data => {
             extend(this.props, data.props);
             this.onProps.call(this);
         });
 
-        postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: window.opener || window.parent }, data => {
+        postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, data => {
             this.onClose.call(this);
+        });
+
+        postRobot.on(CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, data => {
+            window.resizeTo(data.width, data.height);
         });
     }
 
@@ -74,6 +84,21 @@ export class ChildComponent {
 
     focus() {
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.FOCUS);
+    }
+
+    resize(height, width) {
+        return Promise.resolve().then(() => {
+
+            if (this.context === CONSTANTS.CONTEXT.POPUP) {
+                window.resizeTo(width, height);
+
+            } else if (this.context === CONSTANTS.CONTEXT.IFRAME) {
+                return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RESIZE, {
+                    height: height,
+                    width: width
+                });
+            }
+        });
     }
 
     redirectParent(url) {

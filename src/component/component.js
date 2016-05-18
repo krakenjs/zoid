@@ -1,7 +1,7 @@
 
 import { ChildComponent } from './child';
 import { ParentComponent, internalProps } from './parent';
-import { pop, noop, extend } from '../util';
+import { extend } from '../util';
 
 import * as drivers from '../drivers';
 
@@ -21,6 +21,7 @@ export class Component {
         this.tag = options.tag;
         this.url = options.url;
         this.props = options.props;
+        this.dimensions = options.dimensions;
 
         this.singleton = options.singleton;
 
@@ -40,6 +41,18 @@ export class Component {
 
         if (!options.url || !(typeof options.url === 'string')) {
             throw new Error(`Expected options.url to be a string`);
+        }
+
+        if (!options.dimensions || !(options.dimensions instanceof Object)) {
+            throw new Error(`Expected options.dimensions to be an object`);
+        }
+
+        if (typeof options.dimensions.width !== 'number') {
+            throw new Error(`Expected options.dimensions.width to be a number`);
+        }
+
+        if (typeof options.dimensions.height !== 'number') {
+            throw new Error(`Expected options.dimensions.height to be a number`);
         }
 
         if (!options.props || !(options.props instanceof Object)) {
@@ -76,18 +89,7 @@ export class Component {
     }
 
     initFromProps(props) {
-
-        return new ParentComponent(this, {
-
-            props,
-
-            onEnter: pop(props, 'onEnter', noop),
-            onExit:  pop(props, 'onExit', noop),
-            onClose: pop(props, 'onClose', noop),
-            onError: pop(props, 'onError', noop),
-
-            timeout: parseInt(pop(props, 'timeout', 0), 10)
-        });
+        return ParentComponent.fromProps(this, props);
     }
 
     getProps() {

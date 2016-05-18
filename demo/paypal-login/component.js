@@ -21,17 +21,7 @@ window.PaypalLogin = xcomponent.create({
     },
 
     dimensions: {
-
-        autoresize: true,
-
-        width: {
-            min: 400,
-            max: 600
-        },
-
-        height: {
-            min: 400,
-            max: 600
-        }
+        width: 400,
+        height: 200
     }
 });
