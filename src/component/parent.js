@@ -159,6 +159,39 @@ export class ParentComponent {
         }).filter(Boolean).join('&');
     }
 
+    getPosition() {
+
+        let pos = {};
+        let dimensions = this.component.dimensions;
+
+        if (typeof dimensions.x === 'number') {
+            pos.x = dimensions.x;
+        } else {
+            let width = window.innerWidth;
+
+            if (width <= dimensions.width) {
+                pos.x = 0;
+            } else {
+                pos.x = Math.floor((width / 2) - (dimensions.width / 2));
+            }
+        }
+
+        if (typeof dimensions.y === 'number') {
+            pos.y = dimensions.y;
+        } else {
+
+            let height = window.innerHeight;
+
+            if (height <= dimensions.height) {
+                pos.y = 0;
+            } else {
+                pos.y = Math.floor((height / 2) - (dimensions.height / 2));
+            }
+        }
+
+        return pos;
+    }
+
     renderIframe(id) {
 
         let element;
@@ -167,12 +200,10 @@ export class ParentComponent {
             element = id;
         } else if (typeof id === 'string') {
             element = document.getElementById(id);
-        } else if (!id) {
-            element = window.document.body;
-        }
 
-        if (!(element instanceof window.Element)) {
-            throw new Error(`Invalid element: ${id}`);
+            if (!element && document.querySelector) {
+                element = document.querySelector(id);
+            }
         }
 
         this.iframe = document.createElement('iframe');
@@ -181,7 +212,13 @@ export class ParentComponent {
         this.iframe.width = this.component.dimensions.width;
         this.iframe.height = this.component.dimensions.height;
 
-        element.appendChild(this.iframe);
+        if (element) {
+            element.appendChild(this.iframe);
+        } else {
+            window.document.body.appendChild(this.iframe);
+            let pos = this.getPosition();
+            this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
+        }
 
         this.context = CONSTANTS.CONTEXT.IFRAME;
         this.window = this.iframe.contentWindow;
@@ -196,9 +233,13 @@ export class ParentComponent {
             throw new Error('Can not open popup outside of click event');
         }
 
-        this.popup = popup(`${this.component.url}?${this.queryString}`, {
+        let pos = this.getPosition();
+
+        this.popup = popup(this.url, {
             width: this.component.dimensions.width,
             height: this.component.dimensions.height,
+            top: pos.y,
+            left: pos.x
         });
 
         this.context = CONSTANTS.CONTEXT.POPUP;
