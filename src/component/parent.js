@@ -25,6 +25,7 @@ export class ParentComponent {
         this.onExit = options.onExit   || noop;
         this.onClose = options.onClose || noop;
         this.onError = options.onError || noop;
+        this.onTimeout = options.onTimeout || options.onError || noop;
 
         this.timeout = options.timeout;
     }
@@ -307,7 +308,7 @@ export class ParentComponent {
 
     destroy(err) {
         this.cleanup();
-        this.onError.call(this, err);
+        this.onTimeout.call(this, err);
         return this;
     }
 

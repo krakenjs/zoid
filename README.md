@@ -269,11 +269,14 @@ login.updateProps({
 
 ### Setting a timeout for rendering my component
 
-If you set a timeout, xcomponent will automatically call your `onError` method if the component does not initalize itself in that time
+If you set a timeout (in ms), xcomponent will automatically call your `onTimeout` method if the component does not initalize itself in that time. In case no `onTimeout` methhod is defined it will call the `onError` method. 
 
 ```javascript
 var login = MyLoginComponent.init({
 
+    onTimeout: function(err) {
+         // Gracefully handle the timeout during rendering the component 
+    },
     onError: function(err) {
         // Gracefully handle the error from rendering the component
     },
