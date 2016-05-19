@@ -13,6 +13,8 @@ const PROP_TYPES = [
     'number'
 ];
 
+export var components = {};
+
 export class Component {
 
     constructor(options = {}) {
@@ -31,6 +33,8 @@ export class Component {
                 driver.register(this);
             }
         }
+
+        components[this.tag] = this;
     }
 
     validate(options) {
@@ -100,5 +104,9 @@ export class Component {
         extend(props, internalProps);
 
         return props;
+    }
+
+    getByTag(tag) {
+        return components[tag];
     }
 }

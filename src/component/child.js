@@ -31,7 +31,8 @@ export class ChildComponent {
 
             this.onEnter.call(this);
             this.onProps.call(this);
-        });
+
+        }).catch(err => this.onError(err));
 
         this.setupCallbacks();
     }

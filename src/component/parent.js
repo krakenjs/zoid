@@ -1,4 +1,5 @@
 
+import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
 import { urlEncode, popup, noop, isClick, extend, pop } from '../util';
 import { CONSTANTS } from '../constants';
@@ -39,20 +40,22 @@ export class ParentComponent {
     }
 
     updateProps(props) {
+        return Promise.resolve().then(function() {
 
-        let oldNormalizedProps = JSON.stringify(this.normalizedProps);
+            let oldNormalizedProps = JSON.stringify(this.normalizedProps);
 
-        let newProps = {};
-        extend(newProps, this.props);
-        extend(newProps, props);
+            let newProps = {};
+            extend(newProps, this.props);
+            extend(newProps, props);
 
-        this.setProps(newProps);
+            this.setProps(newProps);
 
-        if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
-            postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
-                props: this.normalizedProps
-            });
-        }
+            if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
+                return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
+                    props: this.normalizedProps
+                });
+            }
+        });
     }
 
     validate(options) {
