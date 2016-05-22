@@ -1,6 +1,6 @@
 
 import { Promise } from 'es6-promise-min';
-import postRobot from 'post-robot/dist/post-robot';
+import postRobot from 'post-robot';
 import { noop, once, extend } from '../util';
 import { CONSTANTS } from '../constants';
 

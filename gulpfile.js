@@ -47,7 +47,6 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
   plugins: [
     new webpack.optimize.UglifyJsPlugin({
       test: /\.js$/,
-      exclude: /(node_modules|bower_components)/,
       minimize: true
     })
   ]
