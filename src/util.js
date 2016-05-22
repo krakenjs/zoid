@@ -41,7 +41,7 @@ export function popup(url, options, callback) {
     let interval;
 
     function checkWindowClosed() {
-        if (win.closed) {
+        if (!win || win.closed || typeof win.closed === 'undefined') {
             clearInterval(interval);
             callback();
         }

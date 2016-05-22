@@ -1,8 +1,9 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot';
-import { urlEncode, popup, noop, isClick, extend, pop, getElement } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
+import { PopupOpenError } from '../error';
 
 let activeComponents = [];
 
@@ -214,8 +215,14 @@ export class ParentComponent {
                 return this.renderLightbox();
             }
 
-            if (this.component.defaultContext === CONTEXT_TYPES.POPUP && isClick()) {
-                return this.renderPopup();
+            if (this.component.defaultContext === CONTEXT_TYPES.POPUP) {
+                try {
+                    return this.renderPopup();
+                } catch (err) {
+                    if (!(err instanceof PopupOpenError)) {
+                        throw err;
+                    }
+                }
             }
         }
 
@@ -265,10 +272,6 @@ export class ParentComponent {
 
     renderPopup() {
 
-        if (!isClick()) {
-            throw new Error('Can not open popup outside of click event');
-        }
-
         let pos = this.getPosition();
 
         this.popup = popup(this.url, {
@@ -277,6 +280,10 @@ export class ParentComponent {
             top: pos.y,
             left: pos.x
         });
+
+        if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
+             throw new PopupOpenError(`Can not open popup window - blocked`);
+        }
 
         this.context = CONSTANTS.CONTEXT.POPUP;
         this.window = this.popup;
