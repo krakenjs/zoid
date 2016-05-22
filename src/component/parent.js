@@ -253,11 +253,19 @@ export class ParentComponent {
     }
 
     renderIframe(element) {
+
+        this.openIframe(element);
+        this.loadUrl(this.url);
+
+        return this;
+    }
+
+    openIframe(element) {
+
         element = getElement(element);
 
         this.iframe = document.createElement('iframe');
 
-        this.iframe.src = this.url;
         this.iframe.width = this.component.dimensions.width;
         this.iframe.height = this.component.dimensions.height;
 
@@ -272,9 +280,17 @@ export class ParentComponent {
 
     renderPopup() {
 
+        this.openPopup();
+        this.loadUrl(this.url);
+
+        return this;
+    }
+
+    openPopup() {
+
         let pos = this.getPosition();
 
-        this.popup = popup(this.url, {
+        this.popup = popup('about:blank', {
             width: this.component.dimensions.width,
             height: this.component.dimensions.height,
             top: pos.y,
@@ -290,6 +306,15 @@ export class ParentComponent {
         this.listen();
 
         return this;
+    }
+
+    loadUrl(url) {
+
+        if (this.popup) {
+            this.popup.location = url;
+        } else if (this.iframe) {
+            this.iframe.src = url;
+        }
     }
 
     listen(win) {
