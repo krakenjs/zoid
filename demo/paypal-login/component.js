@@ -23,5 +23,13 @@ window.PaypalLogin = xcomponent.create({
     dimensions: {
         width: 400,
         height: 200
-    }
+    },
+
+    contexts: {
+        iframe: true,
+        lightbox: true,
+        popup: true
+    },
+
+    defaultContext: 'iframe'
 });

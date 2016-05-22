@@ -2,16 +2,9 @@
 import { ChildComponent } from './child';
 import { ParentComponent, internalProps } from './parent';
 import { extend } from '../util';
+import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
 import * as drivers from '../drivers';
-
-const PROP_TYPES = [
-    'string',
-    'object',
-    'function',
-    'boolean',
-    'number'
-];
 
 export var components = {};
 
@@ -24,6 +17,13 @@ export class Component {
         this.url = options.url;
         this.props = options.props;
         this.dimensions = options.dimensions;
+
+        this.contexts = options.contexts || {};
+        for (let context of CONTEXT_TYPES_LIST) {
+            this.contexts[context] = (this.contexts[context] === undefined) ? true : Boolean(this.contexts[context]);
+        }
+
+        this.defaultContext = options.defaultContext;
 
         this.singleton = options.singleton;
 
@@ -74,12 +74,41 @@ export class Component {
                 throw new Error(`Expected prop.type`);
             }
 
-            if (PROP_TYPES.indexOf(prop.type) === -1) {
-                throw new Error(`Expected prop.type to be one of ${PROP_TYPES.join(', ')}`);
+            if (PROP_TYPES_LIST.indexOf(prop.type) === -1) {
+                throw new Error(`Expected prop.type to be one of ${PROP_TYPES_LIST.join(', ')}`);
             }
 
             if (prop.required && prop.def) {
                 throw new Error(`Required prop can not have a default value`);
+            }
+        }
+
+        if (options.contexts) {
+            let anyEnabled = false;
+
+            for (let context of Object.keys(options.contexts)) {
+
+                if (CONTEXT_TYPES_LIST.indexOf(context) === -1) {
+                    throw new Error(`Unsupported context type: ${context}`);
+                }
+
+                if (options.contexts[context] || options.contexts[context] === undefined) {
+                    anyEnabled = true;
+                }
+            }
+
+            if (!anyEnabled) {
+                throw new Error(`No context type is enabled`);
+            }
+        }
+
+        if (options.defaultContext) {
+            if (CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) {
+                throw new Error(`Unsupported context type: ${options.defaultContext}`);
+            }
+
+            if (options.contexts && !options.contexts[options.defaultContext]) {
+                throw new Error(`Disallowed default context type: ${options.defaultContext}`);
             }
         }
     }

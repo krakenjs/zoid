@@ -1,4 +1,6 @@
 
+import { values } from './util';
+
 export const CONSTANTS = {
 
     CONTEXT: {
@@ -16,3 +18,21 @@ export const CONSTANTS = {
         RESIZE: 'xcomponent_resize'
     }
 }
+
+export const PROP_TYPES = {
+    STRING: 'string',
+    OBJECT: 'object',
+    FUNCTION: 'function',
+    BOOLEAN: 'boolean',
+    NUMBER: 'number'
+};
+
+export let PROP_TYPES_LIST = values(PROP_TYPES);
+
+export const CONTEXT_TYPES = {
+    IFRAME: 'iframe',
+    LIGHTBOX: 'lightbox',
+    POPUP: 'popup'
+};
+
+export let CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);

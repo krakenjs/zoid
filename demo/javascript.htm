@@ -35,9 +35,7 @@
 
         timeout: 5000
 
-    });
-
-    login.renderIframe();
+    }).render('#container');
 
     document.getElementById('email').addEventListener('keyup', function(event) {
         login.updateProps({

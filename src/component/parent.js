@@ -1,14 +1,16 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot';
-import { urlEncode, popup, noop, isClick, extend, pop } from '../util';
-import { CONSTANTS } from '../constants';
+import { urlEncode, popup, noop, isClick, extend, pop, getElement } from '../util';
+import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 
 let activeComponents = [];
 
 export class ParentComponent {
 
     constructor(component, options) {
+        this.component = component;
+
         this.validate(options);
 
         if (component.singleton && activeComponents.some(comp => comp.component === component)) {
@@ -19,7 +21,6 @@ export class ParentComponent {
 
         this.listeners = [];
 
-        this.component = component;
         this.setProps(options.props);
 
         this.onEnter = options.onEnter || noop;
@@ -59,8 +60,13 @@ export class ParentComponent {
     }
 
     validate(options) {
+
         if (options.timeout && !(typeof options.timeout === 'number')) {
             throw new Error(`Expected options.timeout to be a number: ${options.timeout}`);
+        }
+
+        if (options.container && !this.component.context.iframe) {
+            throw new Error(`Can not render to a container: does not support iframe mode`);
         }
     }
 
@@ -196,19 +202,51 @@ export class ParentComponent {
         return pos;
     }
 
-    renderIframe(id) {
+    render(el) {
 
-        let element;
+        if (el && this.component.contexts[CONTEXT_TYPES.IFRAME]) {
+            return this.renderIframe(el);
+        }
 
-        if (id instanceof window.Element) {
-            element = id;
-        } else if (typeof id === 'string') {
-            element = document.getElementById(id);
+        if (this.component.defaultContext) {
 
-            if (!element && document.querySelector) {
-                element = document.querySelector(id);
+            if (this.component.defaultContext === CONTEXT_TYPES.LIGHTBOX) {
+                return this.renderLightbox();
+            }
+
+            if (this.component.defaultContext === CONTEXT_TYPES.POPUP && isClick()) {
+                return this.renderPopup();
             }
         }
+
+        if (this.component.contexts[CONTEXT_TYPES.LIGHTBOX]) {
+            return this.renderLightbox();
+
+        }
+
+        if (this.component.contexts[CONTEXT_TYPES.POPUP]) {
+            return this.renderPopup();
+        }
+
+        if (this.component.contexts[CONTEXT_TYPES.IFRAME]) {
+            throw new Error(`Can not render to iframe without a container element`);
+        }
+
+        throw new Error(`No context options available for render`);
+    }
+
+    renderLightbox() {
+
+        this.renderIframe(document.body);
+
+        let pos = this.getPosition();
+        this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
+
+        return this;
+    }
+
+    renderIframe(element) {
+        element = getElement(element);
 
         this.iframe = document.createElement('iframe');
 
@@ -216,13 +254,7 @@ export class ParentComponent {
         this.iframe.width = this.component.dimensions.width;
         this.iframe.height = this.component.dimensions.height;
 
-        if (element) {
-            element.appendChild(this.iframe);
-        } else {
-            window.document.body.appendChild(this.iframe);
-            let pos = this.getPosition();
-            this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
-        }
+        element.appendChild(this.iframe);
 
         this.context = CONSTANTS.CONTEXT.IFRAME;
         this.window = this.iframe.contentWindow;

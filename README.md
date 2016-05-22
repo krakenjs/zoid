@@ -171,7 +171,7 @@ My life is even easier. I just need to drop in your component onto my page:
 
     // Render the component to the page
 
-    mycomponent.renderIframe('container');
+    mycomponent.render('#container');
 </script>
 ```
 

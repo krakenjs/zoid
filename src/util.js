@@ -98,3 +98,33 @@ export function pop(obj, name, def) {
     delete obj[name];
     return result
 }
+
+export function values(obj) {
+    let results = [];
+
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            results.push(obj[key]);
+        }
+    }
+
+    return results;
+}
+
+export function getElement(id) {
+    if (id instanceof window.Element) {
+        return id;
+    }
+
+    if (typeof id === 'string') {
+        let element = document.getElementById(id);
+
+        if (element) {
+            return element;
+        }
+
+        if (document.querySelector) {
+            return document.querySelector(id);
+        }
+    }
+}

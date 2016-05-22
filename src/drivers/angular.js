@@ -42,7 +42,7 @@ export var angular = {
                         }
 
                         let parent = component.initFromProps(getProps());
-                        parent.renderIframe($element[0]);
+                        parent.render($element[0]);
 
                         $scope.$watch(function() {
                             parent.updateProps(getProps());
