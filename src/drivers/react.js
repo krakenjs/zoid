@@ -13,7 +13,7 @@ export var react = {
         component.react = window.React.createClass({
 
             render() {
-                return null;
+                return window.React.createElement('div', null);
             },
 
             componentDidMount() {
