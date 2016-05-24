@@ -33,48 +33,23 @@ export class ChildComponent {
             this.onProps.call(this);
 
         }).catch(err => this.onError(err));
-
-        this.setupCallbacks();
     }
 
     validate(options) {
         // pass
     }
 
-    setupCallbacks() {
-        for (let key of Object.keys(this.component.props)) {
-            let prop = this.component.props[key];
-
-            if (prop.type === 'function') {
-                this.props[key] = function() {
-                    let args = Array.prototype.slice.call(arguments);
-
-                    try {
-                        JSON.stringify(args);
-                    } catch (err) {
-                        throw new Error(`Can not serialize arguments passed to props.${key}`);
-                    }
-
-                    return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.PROP_CALLBACK, {
-                        key: key,
-                        args: args
-                    });
-                }
-            }
-        }
-    }
-
     listen() {
-        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, data => {
+        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, (source, data) => {
             extend(this.props, data.props);
             this.onProps.call(this);
         });
 
-        postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, data => {
+        postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, (source, data) => {
             this.onClose.call(this);
         });
 
-        postRobot.on(CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, data => {
+        postRobot.on(CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, (source, data) => {
             window.resizeTo(data.width, data.height);
         });
     }

@@ -115,7 +115,7 @@ var ESLINT_CONFIG = {
 
     // best practices
     "accessor-pairs": 0,
-    "array-callback-return": 2,
+    "array-callback-return": 0,
     "block-scoped-var": 2,
     "complexity": [0, 10], // would love to turn this on someday
     "consistent-return": 0,

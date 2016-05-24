@@ -15,7 +15,8 @@ export const CONSTANTS = {
         CLOSE: 'xcomponent_close',
         FOCUS: 'xcomponent_focus',
         REDIRECT: 'xcomponent_redirect',
-        RESIZE: 'xcomponent_resize'
+        RESIZE: 'xcomponent_resize',
+        RENDER: 'xcomponent_render'
     }
 }
 

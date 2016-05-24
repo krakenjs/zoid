@@ -1,7 +1,7 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -9,7 +9,7 @@ let activeComponents = [];
 
 export class ParentComponent {
 
-    constructor(component, options) {
+    constructor(component, options = {}) {
         this.component = component;
 
         this.validate(options);
@@ -18,15 +18,18 @@ export class ParentComponent {
             throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
         }
 
+        this.id = uniqueID();
+
         activeComponents.push(this);
 
         this.listeners = [];
 
+        options.props = options.props || {};
         this.setProps(options.props);
 
         this.onEnter = options.onEnter || noop;
         this.onExit = options.onExit   || noop;
-        this.onClose = options.onClose || noop;
+        this.onClose = options.onClose || options.onError || noop;
         this.onError = options.onError || noop;
         this.onTimeout = options.onTimeout || options.onError || noop;
 
@@ -42,7 +45,7 @@ export class ParentComponent {
     }
 
     updateProps(props) {
-        return Promise.resolve().then(function() {
+        return Promise.resolve().then(() => {
 
             let oldNormalizedProps = JSON.stringify(this.normalizedProps);
 
@@ -63,11 +66,11 @@ export class ParentComponent {
     validate(options) {
 
         if (options.timeout && !(typeof options.timeout === 'number')) {
-            throw new Error(`Expected options.timeout to be a number: ${options.timeout}`);
+            throw new Error(`[${this.component.tag}] Expected options.timeout to be a number: ${options.timeout}`);
         }
 
         if (options.container && !this.component.context.iframe) {
-            throw new Error(`Can not render to a container: does not support iframe mode`);
+            throw new Error(`[${this.component.tag}] Can not render to a container: does not support iframe mode`);
         }
     }
 
@@ -77,7 +80,7 @@ export class ParentComponent {
             let prop = this.component.props[key]
 
             if (prop.required !== false && (!props.hasOwnProperty(key) || props[key] === null || props[key] === undefined || props[key] === '')) {
-                throw new Error(`Prop is required: ${key}`);
+                throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
             }
 
             let value = props[key];
@@ -85,7 +88,7 @@ export class ParentComponent {
             if (prop.type === 'function') {
 
                 if (!(value instanceof Function)) {
-                    throw new Error(`Prop is not of type string: ${key}`);
+                    throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
                 }
 
             } else if (prop.type === 'string') {
@@ -95,7 +98,7 @@ export class ParentComponent {
                 }
 
                 if (typeof value !== 'string') {
-                    throw new Error(`Prop is not of type string: ${key}`);
+                    throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
                 }
 
             } else if (prop.type === 'object') {
@@ -103,13 +106,13 @@ export class ParentComponent {
                 try {
                     JSON.stringify(value);
                 } catch (err) {
-                    throw new Error(`Unable to serialize prop: ${key}`);
+                    throw new Error(`[${this.component.tag}] Unable to serialize prop: ${key}`);
                 }
 
             } else if (prop.type === 'number') {
 
                 if (isNaN(parseInt(value, 10))) {
-                    throw new Error(`Prop is not a number: ${key}`);
+                    throw new Error(`[${this.component.tag}] Prop is not a number: ${key}`);
                 }
             }
         }
@@ -129,7 +132,7 @@ export class ParentComponent {
                 result[key] = Boolean(value);
 
             } else if (prop.type === 'function') {
-                continue;
+                result[key] = value;
 
             } else if (prop.type === 'string') {
                 result[key] = value || '';
@@ -161,6 +164,8 @@ export class ParentComponent {
                 result = '1';
             } else if (typeof value === 'string') {
                 result = value;
+            } else if (typeof value === 'function') {
+                return;
             } else if (typeof value === 'object') {
                 result = JSON.stringify(value);
             }
@@ -236,15 +241,24 @@ export class ParentComponent {
         }
 
         if (this.component.contexts[CONTEXT_TYPES.IFRAME]) {
-            throw new Error(`Can not render to iframe without a container element`);
+            throw new Error(`[${this.component.tag}] Can not render to iframe without a container element`);
         }
 
-        throw new Error(`No context options available for render`);
+        throw new Error(`[${this.component.tag}] No context options available for render`);
     }
 
     renderLightbox() {
 
-        this.renderIframe(document.body);
+        this.openLightbox();
+        this.listen();
+        this.loadUrl(this.url);
+
+        return this;
+    }
+
+    openLightbox() {
+
+        this.openIframe(document.body);
 
         let pos = this.getPosition();
         this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
@@ -255,6 +269,7 @@ export class ParentComponent {
     renderIframe(element) {
 
         this.openIframe(element);
+        this.listen();
         this.loadUrl(this.url);
 
         return this;
@@ -273,7 +288,6 @@ export class ParentComponent {
 
         this.context = CONSTANTS.CONTEXT.IFRAME;
         this.window = this.iframe.contentWindow;
-        this.listen();
 
         return this;
     }
@@ -281,6 +295,7 @@ export class ParentComponent {
     renderPopup() {
 
         this.openPopup();
+        this.listen();
         this.loadUrl(this.url);
 
         return this;
@@ -291,19 +306,22 @@ export class ParentComponent {
         let pos = this.getPosition();
 
         this.popup = popup('about:blank', {
+            name: this.id,
             width: this.component.dimensions.width,
             height: this.component.dimensions.height,
             top: pos.y,
             left: pos.x
+        }, () => {
+            this.cleanup();
+            this.onClose.call(this, new Error(`Popup window was closed`));
         });
 
         if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-             throw new PopupOpenError(`Can not open popup window - blocked`);
+             throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
         }
 
         this.context = CONSTANTS.CONTEXT.POPUP;
         this.window = this.popup;
-        this.listen();
 
         return this;
     }
@@ -317,12 +335,31 @@ export class ParentComponent {
         }
     }
 
+    hijack(el) {
+        el = getElement(el);
+
+        el.addEventListener('click', event => {
+            el.target = this.id;
+            this.openPopup();
+            this.listen();
+        });
+    }
+
+    renderToParent() {
+        postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+            tag: this.component.tag,
+            props: this.normalizedProps,
+            parent: this.id,
+            context: undefined // TODO
+        });
+    }
+
     listen(win) {
 
         let childListeners = this.childListeners();
 
         for (let listenerName of Object.keys(childListeners)) {
-            this.addListener(postRobot.on(listenerName, { window: this.window }, data => {
+            this.addListener(postRobot.on(listenerName, { window: this.window }, (source, data) => {
                 return childListeners[listenerName].call(this, data);
             }));
         }
@@ -343,6 +380,7 @@ export class ParentComponent {
                 this.entered = true;
 
                 return {
+                    id: this.id,
                     context: this.context,
                     props: this.normalizedProps
                 };
@@ -359,7 +397,7 @@ export class ParentComponent {
             [ CONSTANTS.POST_MESSAGE.RESIZE ]: function(data) {
 
                 if (this.context === CONSTANTS.CONTEXT.POPUP) {
-                    throw new Error('Can not resize popup from parent');
+                    throw new Error(`[${this.component.tag}] Can not resize popup from parent`);
                 }
 
                 return this.resize(data.width, data.height);

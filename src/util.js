@@ -128,3 +128,12 @@ export function getElement(id) {
         }
     }
 }
+
+export function uniqueID() {
+
+    let chars = '0123456789abcdef';
+
+    return 'xxxxxxxxxx'.replace(/./g, () => {
+        return chars.charAt(Math.floor(Math.random() * chars.length));
+    });
+}
