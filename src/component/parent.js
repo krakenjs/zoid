@@ -1,6 +1,6 @@
 
 import { Promise } from 'es6-promise-min';
-import postRobot from 'post-robot';
+import postRobot from 'post-robot/dist/post-robot';
 import { urlEncode, popup, noop, extend, pop, getElement } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
