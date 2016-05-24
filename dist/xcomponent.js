@@ -4007,7 +4007,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        component.react = window.React.createClass({
 	            render: function render() {
-	                return null;
+	                return window.React.createElement('div', null);
 	            },
 	            componentDidMount: function componentDidMount() {
 	                var parent = component.initFromProps((0, _util.extend)({}, this.props));
