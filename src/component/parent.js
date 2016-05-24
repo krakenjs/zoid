@@ -375,7 +375,7 @@ export class ParentComponent {
 
     childListeners() {
         return {
-            [ CONSTANTS.POST_MESSAGE.INIT ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.INIT ]: (data) => {
                 this.onEnter.call(this);
                 this.entered = true;
 
@@ -386,15 +386,15 @@ export class ParentComponent {
                 };
             },
 
-            [ CONSTANTS.POST_MESSAGE.CLOSE ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.CLOSE ]: (data) => {
                 this.cleanup();
             },
 
-            [ CONSTANTS.POST_MESSAGE.FOCUS ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.FOCUS ]: (data) => {
                 this.focus();
             },
 
-            [ CONSTANTS.POST_MESSAGE.RESIZE ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.RESIZE ]: (data) => {
 
                 if (this.context === CONSTANTS.CONTEXT.POPUP) {
                     throw new Error(`[${this.component.tag}] Can not resize popup from parent`);
@@ -403,12 +403,12 @@ export class ParentComponent {
                 return this.resize(data.width, data.height);
             },
 
-            [ CONSTANTS.POST_MESSAGE.REDIRECT ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.REDIRECT ]: (data) => {
                 this.cleanup();
                 window.location = data.url;
             },
 
-            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ]: function(data) {
+            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ]: (data) => {
                 return this.props[data.key].apply(null, data.args);
             }
        }
@@ -440,8 +440,8 @@ export class ParentComponent {
 
             if (this.context === CONSTANTS.CONTEXT.POPUP) {
                 return postRobot.send(this.popup, CONSTANTS.POST_MESSAGE.RESIZE, {
-                    height: height,
-                    width: width
+                    height,
+                    width
                 });
 
             } else if (this.context === CONSTANTS.CONTEXT.IFRAME) {

@@ -1,7 +1,7 @@
 
 import { dasherizeToCamel } from '../util';
 
-export var htmlComponent = {
+export let htmlComponent = {
 
     isActive() {
         return true;

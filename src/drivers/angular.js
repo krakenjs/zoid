@@ -1,7 +1,7 @@
 
 import { dasherizeToCamel, once } from '../util';
 
-export var angular = {
+export let angular = {
 
     isActive() {
         return Boolean(window.angular);
@@ -11,7 +11,7 @@ export var angular = {
 
         let register = once((moduleName) => {
 
-            window.angular.module(moduleName).directive(dasherizeToCamel(component.tag), function() {
+            window.angular.module(moduleName).directive(dasherizeToCamel(component.tag), () => {
 
                 let props = component.getProps();
                 let scope = {};
@@ -29,9 +29,9 @@ export var angular = {
                 }
 
                 return {
-                    scope: scope,
+                    scope,
 
-                    controller: function($scope, $element) {
+                    controller: ($scope, $element) => {
 
                         function getProps() {
                             let instanceProps = {};
@@ -44,7 +44,7 @@ export var angular = {
                         let parent = component.initFromProps(getProps());
                         parent.render($element[0]);
 
-                        $scope.$watch(function() {
+                        $scope.$watch(() => {
                             parent.updateProps(getProps());
                         });
                     }

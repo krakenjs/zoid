@@ -4,13 +4,13 @@ export function urlEncode(str) {
 }
 
 export function camelToDasherize(string) {
-    return string.replace(/([A-Z])/g, function (g) {
+    return string.replace(/([A-Z])/g, (g) => {
         return `-${g.toLowerCase()}`;
     });
 }
 
 export function dasherizeToCamel(string) {
-    return string.replace(/-([a-z])/g, function (g) {
+    return string.replace(/-([a-z])/g, (g) => {
         return g[1].toUpperCase();
     });
 }
@@ -34,7 +34,7 @@ export function popup(url, options, callback) {
 
     callback = once(callback || noop);
 
-    let win = window.open(url, options.name, Object.keys(options).map(function(key) {
+    let win = window.open(url, options.name, Object.keys(options).map((key) => {
         return `${key}=${options[key]}`;
     }).join(', '));
 
@@ -80,7 +80,7 @@ export function extend(obj, source) {
 
 let clickEventActive = false;
 
-window.addEventListener('load', function() {
+window.addEventListener('load', () => {
     window.document.body.addEventListener('click', () => {
         clickEventActive = true;
         setTimeout(() => {

@@ -6,7 +6,7 @@ import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
 import * as drivers from '../drivers';
 
-export var components = {};
+export let components = {};
 
 export class Component {
 

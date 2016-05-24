@@ -1,7 +1,7 @@
 
 import { extend } from '../util';
 
-export var react = {
+export let react = {
 
     isActive() {
         return Boolean(window.React);
@@ -19,7 +19,7 @@ export var react = {
             componentDidMount() {
                 let parent = component.initFromProps(extend({}, this.props));
 
-                this.setState({ parent: parent });
+                this.setState({ parent });
 
                 parent.renderIframe(window.ReactDOM.findDOMNode(this));
             },

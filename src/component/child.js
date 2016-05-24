@@ -70,8 +70,8 @@ export class ChildComponent {
 
             } else if (this.context === CONSTANTS.CONTEXT.IFRAME) {
                 return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RESIZE, {
-                    height: height,
-                    width: width
+                    height,
+                    width
                 });
             }
         });
@@ -90,11 +90,11 @@ export class ChildComponent {
         }
 
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.REDIRECT, {
-            url: url
-        }).then(function() {
+            url
+        }).then(() => {
             console.warn('Parent did not redirect');
             redirect();
-        }, function(err) {
+        }, (err) => {
             console.warn('Parent did not redirect due to error', err.stack || err.toString());
             redirect();
         });
