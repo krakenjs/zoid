@@ -439,8 +439,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        })['catch'](function (err) {
 	            return _this.onError(err);
 	        });
-
-	        this.setupCallbacks();
 	    }
 
 	    _createClass(ChildComponent, [{
@@ -449,71 +447,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // pass
 	        }
 	    }, {
-	        key: 'setupCallbacks',
-	        value: function setupCallbacks() {
-	            var _this2 = this;
-
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                var _loop = function _loop() {
-	                    var key = _step.value;
-
-	                    var prop = _this2.component.props[key];
-
-	                    if (prop.type === 'function') {
-	                        _this2.props[key] = function () {
-	                            var args = Array.prototype.slice.call(arguments);
-
-	                            try {
-	                                JSON.stringify(args);
-	                            } catch (err) {
-	                                throw new Error('Can not serialize arguments passed to props.' + key);
-	                            }
-
-	                            return _postRobot2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.PROP_CALLBACK, {
-	                                key: key,
-	                                args: args
-	                            });
-	                        };
-	                    }
-	                };
-
-	                for (var _iterator = Object.keys(this.component.props)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    _loop();
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator['return']) {
-	                        _iterator['return']();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-	        }
-	    }, {
 	        key: 'listen',
 	        value: function listen() {
-	            var _this3 = this;
+	            var _this2 = this;
 
-	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, function (data) {
-	                (0, _util.extend)(_this3.props, data.props);
-	                _this3.onProps.call(_this3);
+	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, function (source, data) {
+	                (0, _util.extend)(_this2.props, data.props);
+	                _this2.onProps.call(_this2);
 	            });
 
-	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, function (data) {
-	                _this3.onClose.call(_this3);
+	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, function (source, data) {
+	                _this2.onClose.call(_this2);
 	            });
 
-	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, function (data) {
+	            _postRobot2['default'].on(_constants.CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, function (source, data) {
 	                window.resizeTo(data.width, data.height);
 	            });
 	        }
@@ -530,13 +477,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(height, width) {
-	            var _this4 = this;
+	            var _this3 = this;
 
 	            return _es6PromiseMin.Promise.resolve().then(function () {
 
-	                if (_this4.context === _constants.CONSTANTS.CONTEXT.POPUP) {
+	                if (_this3.context === _constants.CONSTANTS.CONTEXT.POPUP) {
 	                    window.resizeTo(width, height);
-	                } else if (_this4.context === _constants.CONSTANTS.CONTEXT.IFRAME) {
+	                } else if (_this3.context === _constants.CONSTANTS.CONTEXT.IFRAME) {
 	                    return _postRobot2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.RESIZE, {
 	                        height: height,
 	                        width: width
@@ -3001,6 +2948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.pop = pop;
 	exports.values = values;
 	exports.getElement = getElement;
+	exports.uniqueID = uniqueID;
 	function urlEncode(str) {
 	    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
 	}
@@ -3132,6 +3080,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	function uniqueID() {
+
+	    var chars = '0123456789abcdef';
+
+	    return 'xxxxxxxxxx'.replace(/./g, function () {
+	        return chars.charAt(Math.floor(Math.random() * chars.length));
+	    });
+	}
+
 /***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
@@ -3159,7 +3116,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        CLOSE: 'xcomponent_close',
 	        FOCUS: 'xcomponent_focus',
 	        REDIRECT: 'xcomponent_redirect',
-	        RESIZE: 'xcomponent_resize'
+	        RESIZE: 'xcomponent_resize',
+	        RENDER: 'xcomponent_render'
 	    }
 	};
 
@@ -3217,7 +3175,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var activeComponents = [];
 
 	var ParentComponent = exports.ParentComponent = function () {
-	    function ParentComponent(component, options) {
+	    function ParentComponent(component) {
+	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
 	        _classCallCheck(this, ParentComponent);
 
 	        this.component = component;
@@ -3230,15 +3190,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error(component.tag + ' is a singleton, and an only be instantiated once');
 	        }
 
+	        this.id = (0, _util.uniqueID)();
+
 	        activeComponents.push(this);
 
 	        this.listeners = [];
 
+	        options.props = options.props || {};
 	        this.setProps(options.props);
 
 	        this.onEnter = options.onEnter || _util.noop;
 	        this.onExit = options.onExit || _util.noop;
-	        this.onClose = options.onClose || _util.noop;
+	        this.onClose = options.onClose || options.onError || _util.noop;
 	        this.onError = options.onError || _util.noop;
 	        this.onTimeout = options.onTimeout || options.onError || _util.noop;
 
@@ -3257,19 +3220,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps(props) {
+	            var _this = this;
+
 	            return _es6PromiseMin.Promise.resolve().then(function () {
 
-	                var oldNormalizedProps = JSON.stringify(this.normalizedProps);
+	                var oldNormalizedProps = JSON.stringify(_this.normalizedProps);
 
 	                var newProps = {};
-	                (0, _util.extend)(newProps, this.props);
+	                (0, _util.extend)(newProps, _this.props);
 	                (0, _util.extend)(newProps, props);
 
-	                this.setProps(newProps);
+	                _this.setProps(newProps);
 
-	                if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
-	                    return _postRobot2['default'].send(this.window, _constants.CONSTANTS.POST_MESSAGE.PROPS, {
-	                        props: this.normalizedProps
+	                if (_this.window && oldNormalizedProps !== JSON.stringify(_this.normalizedProps)) {
+	                    return _postRobot2['default'].send(_this.window, _constants.CONSTANTS.POST_MESSAGE.PROPS, {
+	                        props: _this.normalizedProps
 	                    });
 	                }
 	            });
@@ -3279,11 +3244,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function validate(options) {
 
 	            if (options.timeout && !(typeof options.timeout === 'number')) {
-	                throw new Error('Expected options.timeout to be a number: ' + options.timeout);
+	                throw new Error('[' + this.component.tag + '] Expected options.timeout to be a number: ' + options.timeout);
 	            }
 
 	            if (options.container && !this.component.context.iframe) {
-	                throw new Error('Can not render to a container: does not support iframe mode');
+	                throw new Error('[' + this.component.tag + '] Can not render to a container: does not support iframe mode');
 	            }
 	        }
 	    }, {
@@ -3301,7 +3266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var prop = this.component.props[key];
 
 	                    if (prop.required !== false && (!props.hasOwnProperty(key) || props[key] === null || props[key] === undefined || props[key] === '')) {
-	                        throw new Error('Prop is required: ' + key);
+	                        throw new Error('[' + this.component.tag + '] Prop is required: ' + key);
 	                    }
 
 	                    var value = props[key];
@@ -3309,7 +3274,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (prop.type === 'function') {
 
 	                        if (!(value instanceof Function)) {
-	                            throw new Error('Prop is not of type string: ' + key);
+	                            throw new Error('[' + this.component.tag + '] Prop is not of type string: ' + key);
 	                        }
 	                    } else if (prop.type === 'string') {
 
@@ -3318,19 +3283,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }
 
 	                        if (typeof value !== 'string') {
-	                            throw new Error('Prop is not of type string: ' + key);
+	                            throw new Error('[' + this.component.tag + '] Prop is not of type string: ' + key);
 	                        }
 	                    } else if (prop.type === 'object') {
 
 	                        try {
 	                            JSON.stringify(value);
 	                        } catch (err) {
-	                            throw new Error('Unable to serialize prop: ' + key);
+	                            throw new Error('[' + this.component.tag + '] Unable to serialize prop: ' + key);
 	                        }
 	                    } else if (prop.type === 'number') {
 
 	                        if (isNaN(parseInt(value, 10))) {
-	                            throw new Error('Prop is not a number: ' + key);
+	                            throw new Error('[' + this.component.tag + '] Prop is not a number: ' + key);
 	                        }
 	                    }
 	                }
@@ -3371,7 +3336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (prop.type === 'boolean') {
 	                        result[key] = Boolean(value);
 	                    } else if (prop.type === 'function') {
-	                        continue;
+	                        result[key] = value;
 	                    } else if (prop.type === 'string') {
 	                        result[key] = value || '';
 	                    } else if (prop.type === 'object') {
@@ -3415,6 +3380,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    result = '1';
 	                } else if (typeof value === 'string') {
 	                    result = value;
+	                } else if (typeof value === 'function') {
+	                    return;
 	                } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
 	                    result = JSON.stringify(value);
 	                }
@@ -3490,16 +3457,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (this.component.contexts[_constants.CONTEXT_TYPES.IFRAME]) {
-	                throw new Error('Can not render to iframe without a container element');
+	                throw new Error('[' + this.component.tag + '] Can not render to iframe without a container element');
 	            }
 
-	            throw new Error('No context options available for render');
+	            throw new Error('[' + this.component.tag + '] No context options available for render');
 	        }
 	    }, {
 	        key: 'renderLightbox',
 	        value: function renderLightbox() {
 
-	            this.renderIframe(document.body);
+	            this.openLightbox();
+	            this.listen();
+	            this.loadUrl(this.url);
+
+	            return this;
+	        }
+	    }, {
+	        key: 'openLightbox',
+	        value: function openLightbox() {
+
+	            this.openIframe(document.body);
 
 	            var pos = this.getPosition();
 	            this.iframe.setAttribute('style', 'position: absolute; top: ' + pos.y + '; left ' + pos.x + ';');
@@ -3511,6 +3488,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function renderIframe(element) {
 
 	            this.openIframe(element);
+	            this.listen();
 	            this.loadUrl(this.url);
 
 	            return this;
@@ -3530,7 +3508,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.context = _constants.CONSTANTS.CONTEXT.IFRAME;
 	            this.window = this.iframe.contentWindow;
-	            this.listen();
 
 	            return this;
 	        }
@@ -3539,6 +3516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function renderPopup() {
 
 	            this.openPopup();
+	            this.listen();
 	            this.loadUrl(this.url);
 
 	            return this;
@@ -3546,23 +3524,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'openPopup',
 	        value: function openPopup() {
+	            var _this2 = this;
 
 	            var pos = this.getPosition();
 
 	            this.popup = (0, _util.popup)('about:blank', {
+	                name: this.id,
 	                width: this.component.dimensions.width,
 	                height: this.component.dimensions.height,
 	                top: pos.y,
 	                left: pos.x
+	            }, function () {
+	                _this2.cleanup();
+	                _this2.onClose.call(_this2, new Error('Popup window was closed'));
 	            });
 
 	            if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-	                throw new _error.PopupOpenError('Can not open popup window - blocked');
+	                throw new _error.PopupOpenError('[' + this.component.tag + '] Can not open popup window - blocked');
 	            }
 
 	            this.context = _constants.CONSTANTS.CONTEXT.POPUP;
 	            this.window = this.popup;
-	            this.listen();
 
 	            return this;
 	        }
@@ -3577,9 +3559,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	    }, {
+	        key: 'hijack',
+	        value: function hijack(el) {
+	            var _this3 = this;
+
+	            el = (0, _util.getElement)(el);
+
+	            el.addEventListener('click', function (event) {
+	                el.target = _this3.id;
+	                _this3.openPopup();
+	                _this3.listen();
+	            });
+	        }
+	    }, {
+	        key: 'renderToParent',
+	        value: function renderToParent() {
+	            _postRobot2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.RENDER, {
+	                tag: this.component.tag,
+	                props: this.normalizedProps,
+	                parent: this.id,
+	                context: undefined // TODO
+	            });
+	        }
+	    }, {
 	        key: 'listen',
 	        value: function listen(win) {
-	            var _this = this;
+	            var _this4 = this;
 
 	            var childListeners = this.childListeners();
 
@@ -3591,8 +3596,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _loop = function _loop() {
 	                    var listenerName = _step3.value;
 
-	                    _this.addListener(_postRobot2['default'].on(listenerName, { window: _this.window }, function (data) {
-	                        return childListeners[listenerName].call(_this, data);
+	                    _this4.addListener(_postRobot2['default'].on(listenerName, { window: _this4.window }, function (source, data) {
+	                        return childListeners[listenerName].call(_this4, data);
 	                    }));
 	                };
 
@@ -3616,8 +3621,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (this.timeout) {
 	                setTimeout(function () {
-	                    if (!_this.entered) {
-	                        _this.destroy(new Error('Loading component ' + _this.component.tag + ' at ' + _this.url + ' timed out after ' + _this.timeout + ' milliseconds'));
+	                    if (!_this4.entered) {
+	                        _this4.destroy(new Error('Loading component ' + _this4.component.tag + ' at ' + _this4.url + ' timed out after ' + _this4.timeout + ' milliseconds'));
 	                    }
 	                }, this.timeout);
 	            }
@@ -3632,6 +3637,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.entered = true;
 
 	                return {
+	                    id: this.id,
 	                    context: this.context,
 	                    props: this.normalizedProps
 	                };
@@ -3642,7 +3648,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }), _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.RESIZE, function (data) {
 
 	                if (this.context === _constants.CONSTANTS.CONTEXT.POPUP) {
-	                    throw new Error('Can not resize popup from parent');
+	                    throw new Error('[' + this.component.tag + '] Can not resize popup from parent');
 	                }
 
 	                return this.resize(data.width, data.height);
@@ -3662,13 +3668,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this2 = this;
+	            var _this5 = this;
 
 	            return _postRobot2['default'].send(this.window, _constants.CONSTANTS.POST_MESSAGE.CLOSE).then(function (data) {
-	                _this2.cleanup();
+	                _this5.cleanup();
 	            })['catch'](function (err) {
 	                console.warn('Error sending close message to child', err.stack || err.toString());
-	                _this2.cleanup();
+	                _this5.cleanup();
 	            });
 	        }
 	    }, {
@@ -3682,19 +3688,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(height, width) {
-	            var _this3 = this;
+	            var _this6 = this;
 
 	            return _es6PromiseMin.Promise.resolve().then(function () {
 
-	                if (_this3.context === _constants.CONSTANTS.CONTEXT.POPUP) {
-	                    return _postRobot2['default'].send(_this3.popup, _constants.CONSTANTS.POST_MESSAGE.RESIZE, {
+	                if (_this6.context === _constants.CONSTANTS.CONTEXT.POPUP) {
+	                    return _postRobot2['default'].send(_this6.popup, _constants.CONSTANTS.POST_MESSAGE.RESIZE, {
 	                        height: height,
 	                        width: width
 	                    });
-	                } else if (_this3.context === _constants.CONSTANTS.CONTEXT.IFRAME) {
+	                } else if (_this6.context === _constants.CONSTANTS.CONTEXT.IFRAME) {
 
-	                    _this3.iframe.height = height;
-	                    _this3.iframe.width = width;
+	                    _this6.iframe.height = height;
+	                    _this6.iframe.width = width;
 	                }
 	            });
 	        }
