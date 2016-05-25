@@ -17,6 +17,12 @@ window.PaypalLogin = xcomponent.create({
         onSuccess: {
             type: 'function',
             required: true
+        },
+
+        onChangeEmail: {
+            type: 'function',
+            required: false,
+            noop: true
         }
     },
 

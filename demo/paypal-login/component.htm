@@ -42,5 +42,9 @@
             console.error('child detecting error', err.stack || err.toString());
         }
     });
+
+    document.getElementById('email').addEventListener('keyup', function(event) {
+        login.props.onChangeEmail(event.target.value);
+    });
 </script>
 

@@ -1,6 +1,6 @@
 import {Promise} from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -47,16 +47,15 @@ export class ParentComponent {
 
     setProps(props) {
         this.validateProps(props);
-        this.props = props;
-        this.normalizedProps = this.normalizeProps(this.props);
-        this.queryString = this.propsToQuery(this.normalizedProps);
+        this.props = this.normalizeProps(props);
+        this.queryString = this.propsToQuery(this.props);
         this.url = `${this.component.url}?${this.queryString}`;
     }
 
     updateProps(props) {
         return Promise.resolve().then(() => {
 
-            let oldNormalizedProps = JSON.stringify(this.normalizedProps);
+            let oldProps = JSON.stringify(this.props);
 
             let newProps = {};
             extend(newProps, this.props);
@@ -64,11 +63,9 @@ export class ParentComponent {
 
             this.setProps(newProps);
 
-            console.log(props, this.window, oldNormalizedProps !== JSON.stringify(this.normalizedProps));
-
-            if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
+            if (this.window && oldProps !== JSON.stringify(this.props)) {
                 return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
-                    props: this.normalizedProps
+                    props: this.props
                 });
             }
         });
@@ -88,9 +85,11 @@ export class ParentComponent {
     validateProps(props) {
 
         for (let key of Object.keys(this.component.props)) {
-            let prop = this.component.props[key];
 
-            let hasProp = props.hasOwnProperty(key) && props[key] !== null && props[key] !== undefined && props[key] !== '';
+            let prop = this.component.props[key];
+            let value = props[key];
+
+            let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
 
             if (!hasProp) {
 
@@ -100,8 +99,6 @@ export class ParentComponent {
 
                 continue;
             }
-
-            let value = props[key];
 
             if (prop.type === 'function') {
 
@@ -142,11 +139,27 @@ export class ParentComponent {
             let prop = this.component.props[key];
             let value = props[key];
 
+            let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
+
+            if (!hasProp && prop.def) {
+                value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
+            }
+
             if (prop.type === 'boolean') {
                 result[key] = Boolean(value);
 
             } else if (prop.type === 'function') {
                 result[key] = value;
+
+                if (!value) {
+                    if (prop.noop) {
+                        result[key] = noop;
+                    }
+                }
+
+                if (result[key] && prop.once) {
+                    result[key] = once(result[key]);
+                }
 
             } else if (prop.type === 'string') {
                 result[key] = value || '';
@@ -376,7 +389,7 @@ export class ParentComponent {
             tag: this.component.tag,
             options: {
                 childWindowName,
-                props: this.normalizedProps,
+                props: this.props,
                 parentComponentWindowName: window.name
             }
 
@@ -418,7 +431,7 @@ export class ParentComponent {
 
                 return {
                     context: this.context,
-                    props: this.normalizedProps
+                    props: this.props
                 };
             },
 
@@ -438,10 +451,6 @@ export class ParentComponent {
             [ CONSTANTS.POST_MESSAGE.REDIRECT ](source, data) {
                 this.cleanup();
                 window.location = data.url;
-            },
-
-            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ](source, data) {
-                return this.props[data.key].apply(null, data.args);
             },
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
