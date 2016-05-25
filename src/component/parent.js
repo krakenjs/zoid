@@ -368,9 +368,16 @@ export class ParentComponent {
     }
 
     watchForClose() {
+
         onCloseWindow(this.window, () => {
             this.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
             this.cleanup();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (this.popup) {
+                this.popup.close();
+            }
         });
     }
 

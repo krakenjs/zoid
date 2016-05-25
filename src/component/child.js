@@ -79,11 +79,16 @@ export class ChildComponent {
 
         onCloseWindow(this.parentWindow, () => {
             this.onClose(new Error(`[${this.component.tag}] parent window was closed`));
+            if (this.context === CONSTANTS.CONTEXT.POPUP) {
+                window.close();
+            }
         });
 
-        onCloseWindow(this.parentComponentWindow, () => {
-            this.close(new Error(`[${this.component.tag}] parent component window was closed`));
-        });
+        if (this.parentComponentWindow && this.parentComponentWindow !== this.parentWindow) {
+            onCloseWindow(this.parentComponentWindow, () => {
+                this.close(new Error(`[${this.component.tag}] parent component window was closed`));
+            });
+        }
     }
 
     validate(options) {
