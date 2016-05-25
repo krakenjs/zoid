@@ -90,8 +90,15 @@ export class ParentComponent {
         for (let key of Object.keys(this.component.props)) {
             let prop = this.component.props[key];
 
-            if (prop.required !== false && (!props.hasOwnProperty(key) || props[key] === null || props[key] === undefined || props[key] === '')) {
-                throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
+            let hasProp = props.hasOwnProperty(key) && props[key] !== null && props[key] !== undefined && props[key] !== '';
+
+            if (!hasProp) {
+
+                if (prop.required !== false) {
+                    throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
+                }
+
+                continue;
             }
 
             let value = props[key];
@@ -99,14 +106,10 @@ export class ParentComponent {
             if (prop.type === 'function') {
 
                 if (!(value instanceof Function)) {
-                    throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
+                    throw new Error(`[${this.component.tag}] Prop is not of type function: ${key}`);
                 }
 
             } else if (prop.type === 'string') {
-
-                if (value === null || value === undefined) {
-                    value = '';
-                }
 
                 if (typeof value !== 'string') {
                     throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
