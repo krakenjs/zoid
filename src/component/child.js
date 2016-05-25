@@ -1,7 +1,7 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { noop, once, extend, getParentWindow, b64decode } from '../util';
+import { noop, once, extend, getParentWindow, b64decode, onCloseWindow } from '../util';
 import { CONSTANTS } from '../constants';
 
 export class ChildComponent {
@@ -19,11 +19,9 @@ export class ChildComponent {
         this.onProps = options.onProps || noop;
 
         this.setWindows();
-
+        this.watchForClose();
 
         this.props = {};
-
-
 
         if (!this.parentWindow) {
             throw new Error(`[${this.component.tag}] Can not find parent window`);
@@ -77,6 +75,17 @@ export class ChildComponent {
         }).catch(err => this.onError(err));
     }
 
+    watchForClose() {
+
+        onCloseWindow(this.parentWindow, () => {
+            this.onClose(new Error(`[${this.component.tag}] parent window was closed`));
+        });
+
+        onCloseWindow(this.parentComponentWindow, () => {
+            this.close(new Error(`[${this.component.tag}] parent component window was closed`));
+        });
+    }
+
     validate(options) {
         // pass
     }
@@ -112,8 +121,8 @@ export class ChildComponent {
         }
     }
 
-    close() {
-        this.onClose.call(this);
+    close(err) {
+        this.onClose.call(this, err);
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
     }
 

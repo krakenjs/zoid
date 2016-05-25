@@ -1,6 +1,6 @@
 import {Promise} from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -29,10 +29,10 @@ export class ParentComponent {
         this.setProps(options.props);
 
         this.onEnter = options.onEnter || noop;
-        this.onExit = options.onExit || noop;
-        this.onClose = options.onClose || options.onError || noop;
-        this.onError = options.onError || noop;
-        this.onTimeout = options.onTimeout || options.onError || noop;
+        this.onExit = once(options.onExit || noop);
+        this.onClose = once(options.onClose || options.onError || noop);
+        this.onError = once(options.onError || noop);
+        this.onTimeout = once(options.onTimeout || options.onError || noop);
 
         this.timeout = options.timeout;
     }
@@ -304,18 +304,16 @@ export class ParentComponent {
 
     openIframe(element) {
 
-        element = getElement(element);
-
-        this.iframe = document.createElement('iframe');
-
-        this.iframe.name = this.childWindowName;
-        this.iframe.width = this.component.dimensions.width;
-        this.iframe.height = this.component.dimensions.height;
-
-        element.appendChild(this.iframe);
+        this.iframe = iframe(element, null, {
+            name: this.childWindowName,
+            width: this.component.dimensions.width,
+            height: this.component.dimensions.height
+        });
 
         this.context = CONSTANTS.CONTEXT.IFRAME;
         this.window = this.iframe.contentWindow;
+
+        this.watchForClose();
 
         return this;
     }
@@ -339,9 +337,6 @@ export class ParentComponent {
             height: this.component.dimensions.height,
             top: pos.y,
             left: pos.x
-        }, () => {
-            this.cleanup();
-            this.onClose.call(this, new Error(`Popup window was closed`));
         });
 
         if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
@@ -351,7 +346,16 @@ export class ParentComponent {
         this.context = CONSTANTS.CONTEXT.POPUP;
         this.window = this.popup;
 
+        this.watchForClose();
+
         return this;
+    }
+
+    watchForClose() {
+        onCloseWindow(this.window, () => {
+            this.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
+            this.cleanup();
+        });
     }
 
     loadUrl(url) {
@@ -506,7 +510,7 @@ export class ParentComponent {
 
         if (this.popup) {
             this.popup.close();
-        } else if (this.iframe) {
+        } else if (this.iframe && this.iframe.parentNode) {
             this.iframe.parentNode.removeChild(this.iframe);
         }
 

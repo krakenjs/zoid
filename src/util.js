@@ -30,13 +30,51 @@ export function once(method) {
     };
 }
 
-export function popup(url, options, callback) {
+export function getElement(id) {
+    if (id instanceof window.Element) {
+        return id;
+    }
 
-    callback = once(callback || noop);
+    if (typeof id === 'string') {
+        let element = document.getElementById(id);
+
+        if (element) {
+            return element;
+        }
+
+        if (document.querySelector) {
+            return document.querySelector(id);
+        }
+    }
+}
+
+export function popup(url, options) {
 
     let win = window.open(url, options.name, Object.keys(options).map((key) => {
         return `${key}=${options[key]}`;
     }).join(', '));
+
+    return win;
+}
+
+export function iframe(container, url, options) {
+
+    container = getElement(container);
+
+    let frame = document.createElement('iframe');
+
+    for (let key of Object.keys(options)) {
+        frame[key] = options[key];
+    }
+
+    container.appendChild(frame);
+
+    return frame;
+}
+
+export function onCloseWindow(win, callback) {
+
+    callback = once(callback);
 
     let interval;
 
@@ -54,13 +92,11 @@ export function popup(url, options, callback) {
         let close = win.close;
         win.close = function() {
             close.apply(this, arguments);
-            checkWindowClosed();
+            setTimeout(checkWindowClosed);
         };
     } catch (err) {
         // pass
     }
-
-    return win;
 }
 
 export function extend(obj, source) {
@@ -109,24 +145,6 @@ export function values(obj) {
     }
 
     return results;
-}
-
-export function getElement(id) {
-    if (id instanceof window.Element) {
-        return id;
-    }
-
-    if (typeof id === 'string') {
-        let element = document.getElementById(id);
-
-        if (element) {
-            return element;
-        }
-
-        if (document.querySelector) {
-            return document.querySelector(id);
-        }
-    }
 }
 
 export function uniqueID() {
