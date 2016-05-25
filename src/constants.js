@@ -3,6 +3,8 @@ import { values } from './util';
 
 export const CONSTANTS = {
 
+    XCOMPONENT: 'xcomponent',
+
     CONTEXT: {
         IFRAME: 'xcomponent_context_iframe',
         POPUP: 'xcomponent_context_popup'

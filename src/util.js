@@ -147,3 +147,11 @@ export function getParentWindow() {
         return window.parent;
     }
 }
+
+export function b64encode(str) {
+    return window.btoa(str).replace(/[=]/g, '_');
+}
+
+export function b64decode(str) {
+    return window.atob(str.replace(/[_]/g, '='));
+}

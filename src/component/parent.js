@@ -1,8 +1,8 @@
 import {Promise} from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import {urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow} from '../util';
-import {CONSTANTS, CONTEXT_TYPES} from '../constants';
-import {PopupOpenError} from '../error';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode } from '../util';
+import { CONSTANTS, CONTEXT_TYPES } from '../constants';
+import { PopupOpenError } from '../error';
 
 let activeComponents = [];
 
@@ -19,9 +19,7 @@ export class ParentComponent {
 
         this.parentWindow = getParentWindow();
 
-        this.id = window.name;
-        this.parentId = options.parentId;
-        this.childId = options.childId || uniqueID();
+        this.childWindowName = options.childWindowName || this.getChildWindowName();
 
         activeComponents.push(this);
 
@@ -37,6 +35,14 @@ export class ParentComponent {
         this.onTimeout = options.onTimeout || options.onError || noop;
 
         this.timeout = options.timeout;
+    }
+
+    getChildWindowName(windowName) {
+        return b64encode(JSON.stringify({
+            type: CONSTANTS.XCOMPONENT,
+            parent: windowName,
+            id: uniqueID()
+        }));
     }
 
     setProps(props) {
@@ -286,7 +292,7 @@ export class ParentComponent {
 
         this.iframe = document.createElement('iframe');
 
-        this.iframe.name = this.childId;
+        this.iframe.name = this.childWindowName;
         this.iframe.width = this.component.dimensions.width;
         this.iframe.height = this.component.dimensions.height;
 
@@ -312,7 +318,7 @@ export class ParentComponent {
         let pos = this.getPosition();
 
         this.popup = popup('about:blank', {
-            name: this.childId,
+            name: this.childWindowName,
             width: this.component.dimensions.width,
             height: this.component.dimensions.height,
             top: pos.y,
@@ -345,7 +351,7 @@ export class ParentComponent {
         el = getElement(el);
 
         el.addEventListener('click', event => {
-            el.target = this.childId;
+            el.target = this.childWindowName;
             this.openPopup();
             this.listen();
         });
@@ -357,17 +363,23 @@ export class ParentComponent {
             throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
         }
 
+        if (!window.name) {
+            throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
+        }
+
+        let childWindowName = this.getChildWindowName(window.name);
+
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
             tag: this.component.tag,
             options: {
+                childWindowName,
                 props: this.normalizedProps,
-                parentId: this.id,
-                childId: this.childId
+                parentComponentWindowName: window.name
             }
 
         }).then(data => {
 
-            this.window = this.parentWindow.frames[this.childId];
+            this.window = this.parentWindow.frames[childWindowName];
             this.listen();
         });
     }
@@ -402,8 +414,6 @@ export class ParentComponent {
                 this.entered = true;
 
                 return {
-                    id: this.childId,
-                    parentId: this.parentId || this.id,
                     context: this.context,
                     props: this.normalizedProps
                 };

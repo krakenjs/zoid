@@ -1,7 +1,7 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { noop, once, extend, getParentWindow } from '../util';
+import { noop, once, extend, getParentWindow, b64decode } from '../util';
 import { CONSTANTS } from '../constants';
 
 export class ChildComponent {
@@ -18,9 +18,12 @@ export class ChildComponent {
 
         this.onProps = options.onProps || noop;
 
+        this.setWindows();
+
+
         this.props = {};
 
-        this.parentWindow = this.parentComponentWindow = getParentWindow();
+
 
         if (!this.parentWindow) {
             throw new Error(`[${this.component.tag}] Can not find parent window`);
@@ -29,20 +32,41 @@ export class ChildComponent {
         this.init(this.parentWindow);
     }
 
-    init(win) {
-        this.initPromise = postRobot.send(win, CONSTANTS.POST_MESSAGE.INIT).then(data => {
+    setWindows() {
 
-            if (data.parentId && this.parentWindow && this.parentWindow.frames[data.parentId]) {
-                this.parentComponentWindow = this.parentWindow.frames[data.parentId];
+        if (window.__activeXComponent__) {
+            throw new Error(`[${this.component.tag}] Can not attach multiple components to the same window`);
+        }
 
-                if (win !== this.parentComponentWindow) {
-                    return this.init(this.parentComponentWindow);
-                }
-            }
+        window.__activeXComponent__ = this;
+
+        this.parentWindow = getParentWindow();
+
+        let winProps;
+
+        try {
+            winProps = JSON.parse(b64decode(window.name));
+        } catch (err) {
+            // pass
+        }
+
+        if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
+            throw new Error(`[${this.component.tag}] Window has not been rendered by xcomponent - can not attach here`);
+        }
+
+        if (winProps.parent) {
+            this.parentComponentWindow = this.parentWindow.frames[winProps.parent];
+        } else {
+            this.parentComponentWindow = this.parentWindow;
+        }
+
+        this.id = winProps.id;
+    }
+
+    init() {
+        this.initPromise = postRobot.send(this.parentComponentWindow, CONSTANTS.POST_MESSAGE.INIT).then(data => {
 
             this.listen();
-
-            this.parentComponentWindow = win;
 
             this.context = data.context;
             extend(this.props, data.props);

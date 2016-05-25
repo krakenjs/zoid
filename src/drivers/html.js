@@ -4,7 +4,7 @@ import { dasherizeToCamel } from '../util';
 export let htmlComponent = {
 
     isActive() {
-        return true;
+        return document.registerElement;
     },
 
     register(component) {
