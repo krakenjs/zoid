@@ -2,6 +2,7 @@
 var gulp = require('gulp');
 var webpack = require('webpack');
 var gulpWebpack = require('gulp-webpack');
+var eslint = require('gulp-eslint');
 
 gulp.task('build', ['webpack', 'webpack-min']);
 
@@ -51,15 +52,20 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
   ]
 });
 
-gulp.task('webpack', function() {
+gulp.task('webpack', ['lint'], function() {
   return gulp.src('src/index.js')
       .pipe(gulpWebpack(WEBPACK_CONFIG))
       .pipe(gulp.dest('dist'));
 });
 
-gulp.task('webpack-min', function() {
+gulp.task('webpack-min', ['lint'], function() {
   return gulp.src('src/index.js')
       .pipe(gulpWebpack(WEBPACK_CONFIG_MIN))
       .pipe(gulp.dest('dist'));
 });
 
+gulp.task('lint', function() {
+  return gulp.src('src/**').pipe(eslint())
+  .pipe(eslint.format())
+  .pipe(eslint.failAfterError());
+});
