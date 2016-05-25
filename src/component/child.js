@@ -147,24 +147,14 @@ export class ChildComponent {
 
     redirectParent(url) {
 
-        function redirect() {
-            setTimeout(() => {
-                if (window.opener) {
-                    window.opener.location = url;
-                } else if (window.parent) {
-                    window.parent.location = url;
-                }
-            });
-        }
-
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.REDIRECT, {
             url
-        }).then(function() {
+        }).then(() => {
             console.warn(`[${this.component.tag}] Parent did not redirect`);
-            redirect();
-        }, function(err) {
+            this.parentWindow.location = url;
+        }, err => {
             console.warn(`[${this.component.tag}] Parent did not redirect due to error: ${err.stack || err.toString()}`);
-            redirect();
+            this.parentWindow.location = url;
         });
     }
 }
