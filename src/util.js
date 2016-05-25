@@ -96,7 +96,7 @@ export function isClick() {
 export function pop(obj, name, def) {
     let result = obj.hasOwnProperty(name) ? obj[name] : def;
     delete obj[name];
-    return result
+    return result;
 }
 
 export function values(obj) {

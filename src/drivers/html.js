@@ -30,4 +30,4 @@ export let htmlComponent = {
             component.initFromProps(props).render(element);
         }
     }
-}
+};

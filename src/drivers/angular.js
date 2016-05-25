@@ -48,9 +48,9 @@ export let angular = {
                             parent.updateProps(getProps());
                         });
                     }
-                }
+                };
             });
-        })
+        });
 
 
         let bootstrap = window.angular.bootstrap;
@@ -58,7 +58,7 @@ export let angular = {
         window.angular.bootstrap = function(el, modules) {
             register(modules[0]);
             return bootstrap.apply(this, arguments);
-        }
+        };
 
         let module = window.angular.module;
 
@@ -66,6 +66,6 @@ export let angular = {
             let result = module.apply(this, arguments);
             register(moduleName);
             return result;
-        }
+        };
     }
-}
+};

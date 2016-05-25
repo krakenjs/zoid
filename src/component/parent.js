@@ -1,9 +1,8 @@
-
-import { Promise } from 'es6-promise-min';
+import {Promise} from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow } from '../util';
-import { CONSTANTS, CONTEXT_TYPES } from '../constants';
-import { PopupOpenError } from '../error';
+import {urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow} from '../util';
+import {CONSTANTS, CONTEXT_TYPES} from '../constants';
+import {PopupOpenError} from '../error';
 
 let activeComponents = [];
 
@@ -32,7 +31,7 @@ export class ParentComponent {
         this.setProps(options.props);
 
         this.onEnter = options.onEnter || noop;
-        this.onExit = options.onExit   || noop;
+        this.onExit = options.onExit || noop;
         this.onClose = options.onClose || options.onError || noop;
         this.onError = options.onError || noop;
         this.onTimeout = options.onTimeout || options.onError || noop;
@@ -59,7 +58,7 @@ export class ParentComponent {
 
             this.setProps(newProps);
 
-            console.log(props, this.window, oldNormalizedProps !== JSON.stringify(this.normalizedProps))
+            console.log(props, this.window, oldNormalizedProps !== JSON.stringify(this.normalizedProps));
 
             if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
                 return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
@@ -83,7 +82,7 @@ export class ParentComponent {
     validateProps(props) {
 
         for (let key of Object.keys(this.component.props)) {
-            let prop = this.component.props[key]
+            let prop = this.component.props[key];
 
             if (prop.required !== false && (!props.hasOwnProperty(key) || props[key] === null || props[key] === undefined || props[key] === '')) {
                 throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
@@ -131,7 +130,7 @@ export class ParentComponent {
 
         for (let key of Object.keys(this.component.props)) {
 
-            let prop = this.component.props[key]
+            let prop = this.component.props[key];
             let value = props[key];
 
             if (prop.type === 'boolean') {
@@ -266,8 +265,8 @@ export class ParentComponent {
 
         this.openIframe(document.body);
 
-        //let pos = this.getPosition();
-        //this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
+        // let pos = this.getPosition();
+        // this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
 
         return this;
     }
@@ -324,7 +323,7 @@ export class ParentComponent {
         });
 
         if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-             throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
+            throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
         }
 
         this.context = CONSTANTS.CONTEXT.POPUP;
@@ -382,7 +381,7 @@ export class ParentComponent {
         let childListeners = this.childListeners();
 
         for (let listenerName of Object.keys(childListeners)) {
-            this.addListener(postRobot.on(listenerName, { window: this.window }, (source, data) => {
+            this.addListener(postRobot.on(listenerName, {window: this.window}, (source, data) => {
                 return childListeners[listenerName].call(this, source, data);
             }));
         }
@@ -436,7 +435,7 @@ export class ParentComponent {
                 let component = this.component.getByTag(data.tag);
                 component.init(data.options).render();
             }
-        }
+        };
     }
 
     addListener(listener) {
@@ -522,7 +521,7 @@ export const internalProps = {
         type: 'number',
         required: false
     }
-}
+};
 
 ParentComponent.fromProps = function fromProps(component, props) {
 
@@ -531,10 +530,10 @@ ParentComponent.fromProps = function fromProps(component, props) {
         props,
 
         onEnter: pop(props, 'onEnter'),
-        onExit:  pop(props, 'onExit'),
+        onExit: pop(props, 'onExit'),
         onClose: pop(props, 'onClose'),
         onError: pop(props, 'onError'),
 
         timeout: parseInt(pop(props, 'timeout', 0), 10)
     });
-}
+};

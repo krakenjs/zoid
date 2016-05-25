@@ -17,7 +17,7 @@ export const CONSTANTS = {
         RESIZE: 'xcomponent_resize',
         RENDER: 'xcomponent_render'
     }
-}
+};
 
 export const PROP_TYPES = {
     STRING: 'string',

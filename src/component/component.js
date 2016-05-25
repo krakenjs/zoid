@@ -40,7 +40,7 @@ export class Component {
     validate(options) {
 
         if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) {
-            throw new Error(`Invalid options.tag: ${options.tag}`)
+            throw new Error(`Invalid options.tag: ${options.tag}`);
         }
 
         if (!options.url || !(typeof options.url === 'string')) {
