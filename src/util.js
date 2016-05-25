@@ -173,3 +173,14 @@ export function b64encode(str) {
 export function b64decode(str) {
     return window.atob(str.replace(/[_]/g, '='));
 }
+
+export function getParentNode(el, tag) {
+    tag = tag.toLowerCase();
+
+    while (el.parentNode) {
+        el = el.parentNode;
+        if (el.tagName.toLowerCase() === tag) {
+            return el;
+        }
+    }
+}

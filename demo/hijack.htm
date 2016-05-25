@@ -9,7 +9,16 @@
 
 <br /><input id="email" value="foo@bar.com" />
 
-<a id="loginbutton" href="http://localhost:63342/nfra/xcomponent/demo/paypal-login/component.htm?email=foo@bar.com">log in!</a>
+<a id="loginlink" href="http://localhost:63342/nfra/xcomponent/demo/paypal-login/component.htm?email=foo@bar.com">log in!</a>
+
+<form action="http://localhost:63342/nfra/xcomponent/demo/paypal-login/component.htm?email=foo@bar.com" method="POST">
+    <button id="loginbuttonpopup" target="_blank">log in popup</button>
+</form>
+
+<form action="http://localhost:63342/nfra/xcomponent/demo/paypal-login/component.htm?email=foo@bar.com" method="POST">
+    <button id="loginbuttonlightbox" target="_blank">log in lightbox</button>
+</form>
+
 
 <script>
 
@@ -37,6 +46,6 @@
 
         timeout: 5000
 
-    }).hijack('#loginbutton');
+    }).hijack('#loginlink').hijackToPopup('#loginbuttonpopup').hijackToLightbox('#loginbuttonlightbox');
 
 </script>

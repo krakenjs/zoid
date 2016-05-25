@@ -1,6 +1,6 @@
 import {Promise} from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow, getParentNode } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -295,6 +295,10 @@ export class ParentComponent {
 
     renderIframe(element) {
 
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
+
         this.openIframe(element);
         this.listen();
         this.loadUrl(this.url);
@@ -303,6 +307,10 @@ export class ParentComponent {
     }
 
     openIframe(element) {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
 
         this.iframe = iframe(element, null, {
             name: this.childWindowName,
@@ -320,6 +328,10 @@ export class ParentComponent {
 
     renderPopup() {
 
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
+
         this.openPopup();
         this.listen();
         this.loadUrl(this.url);
@@ -328,6 +340,10 @@ export class ParentComponent {
     }
 
     openPopup() {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
 
         let pos = this.getPosition();
 
@@ -367,17 +383,56 @@ export class ParentComponent {
         }
     }
 
-    hijack(el) {
+    hijackToPopup(el) {
+        return this.hijack(el, CONTEXT_TYPES.POPUP);
+    }
+
+    hijackToLightbox(el) {
+        return this.hijack(el, CONTEXT_TYPES.LIGHTBOX);
+    }
+
+    hijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
         el = getElement(el);
 
+        let isButton = el.tagName.toLowerCase() === 'button' || (el.tagName.toLowerCase() === 'input' && el.type === 'submit');
+        let form;
+
+        if (isButton) {
+            form = getParentNode(el, 'form');
+        }
+
         el.addEventListener('click', event => {
-            el.target = this.childWindowName;
-            this.openPopup();
+
+            if (this.window) {
+                event.preventDefault();
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            if (context === CONTEXT_TYPES.LIGHTBOX) {
+                this.openLightbox();
+            } else if (context === CONTEXT_TYPES.POPUP) {
+                this.openPopup();
+            } else {
+                throw new Error(`[${this.component.tag}] Invalid context for hijack: ${context}`);
+            }
+
+            if (isButton && form) {
+                form.target = this.childWindowName;
+            } else {
+                el.target = this.childWindowName;
+            }
+
             this.listen();
         });
+
+        return this;
     }
 
     renderToParent() {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
 
         if (!this.parentWindow) {
             throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
@@ -514,9 +569,15 @@ export class ParentComponent {
             this.iframe.parentNode.removeChild(this.iframe);
         }
 
+        delete this.window;
+        delete this.popup;
+        delete this.iframe;
+
         for (let listener of this.listeners) {
             listener.cancel();
         }
+
+        this.listeners = [];
     }
 
 }
