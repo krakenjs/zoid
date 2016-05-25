@@ -67,6 +67,10 @@ export function iframe(container, url, options) {
         frame[key] = options[key];
     }
 
+    frame.style.backgroundColor = 'transparent';
+    frame.frameBorder = '0';
+    frame.allowTransparency = 'true';
+
     container.appendChild(frame);
 
     return frame;
