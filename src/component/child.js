@@ -1,7 +1,7 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { noop, once, extend } from '../util';
+import { noop, once, extend, getParentWindow } from '../util';
 import { CONSTANTS } from '../constants';
 
 export class ChildComponent {
@@ -18,13 +18,31 @@ export class ChildComponent {
 
         this.onProps = options.onProps || noop;
 
-        this.listen();
-
         this.props = {};
 
-        this.parent = window.opener || window.parent;
+        this.parentWindow = this.parentComponentWindow = getParentWindow();
 
-        this.initPromise = postRobot.sendToParent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
+        if (!this.parentWindow) {
+            throw new Error(`[${this.component.tag}] Can not find parent window`);
+        }
+
+        this.init(this.parentWindow);
+    }
+
+    init(win) {
+        this.initPromise = postRobot.send(win, CONSTANTS.POST_MESSAGE.INIT).then(data => {
+
+            if (data.parentId && this.parentWindow && this.parentWindow.frames[data.parentId]) {
+                this.parentComponentWindow = this.parentWindow.frames[data.parentId];
+
+                if (win !== this.parentComponentWindow) {
+                    return this.init(this.parentComponentWindow);
+                }
+            }
+
+            this.listen();
+
+            this.parentComponentWindow = win;
 
             this.context = data.context;
             extend(this.props, data.props);
@@ -39,27 +57,44 @@ export class ChildComponent {
         // pass
     }
 
+    parentListeners() {
+        return {
+            [ CONSTANTS.POST_MESSAGE.PROPS ](source, data) {
+                extend(this.props, data.props);
+                this.onProps.call(this);
+            },
+
+            [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
+                return this.close();
+            },
+
+            [ CONSTANTS.POST_MESSAGE.RESIZE ](source, data) {
+                window.resizeTo(data.width, data.height);
+            }
+        };
+    }
+
     listen() {
-        postRobot.on(CONSTANTS.POST_MESSAGE.PROPS, { window: this.parent }, (source, data) => {
-            extend(this.props, data.props);
-            this.onProps.call(this);
-        });
+        if (!this.parentComponentWindow) {
+            throw new Error(`[${this.component.tag}] parent component window not set`);
+        }
 
-        postRobot.on(CONSTANTS.POST_MESSAGE.CLOSE, { window: this.parent }, (source, data) => {
-            this.onClose.call(this);
-        });
+        let parentListeners = this.parentListeners();
 
-        postRobot.on(CONSTANTS.POST_MESSAGE.RESIZE, { window: this.parent }, (source, data) => {
-            window.resizeTo(data.width, data.height);
-        });
+        for (let listenerName of Object.keys(parentListeners)) {
+            postRobot.on(listenerName, { window: this.parentComponentWindow }, (source, data) => {
+                return parentListeners[listenerName].call(this, source, data);
+            });
+        }
     }
 
     close() {
+        this.onClose.call(this);
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
     }
 
     focus() {
-        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.FOCUS);
+        window.focus();
     }
 
     resize(height, width) {
@@ -91,11 +126,11 @@ export class ChildComponent {
 
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.REDIRECT, {
             url
-        }).then(() => {
-            console.warn('Parent did not redirect');
+        }).then(function() {
+            console.warn(`[${this.component.tag}] Parent did not redirect`);
             redirect();
-        }, (err) => {
-            console.warn('Parent did not redirect due to error', err.stack || err.toString());
+        }, function(err) {
+            console.warn(`[${this.component.tag}] Parent did not redirect due to error: ${err.stack || err.toString()}`);
             redirect();
         });
     }

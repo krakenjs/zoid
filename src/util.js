@@ -137,3 +137,13 @@ export function uniqueID() {
         return chars.charAt(Math.floor(Math.random() * chars.length));
     });
 }
+
+export function getParentWindow() {
+    if (window.opener) {
+        return window.opener;
+    }
+
+    if (window.parent && window.parent !== window) {
+        return window.parent;
+    }
+}

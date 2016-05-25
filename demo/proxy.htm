@@ -1,0 +1,18 @@
+
+<script src="../dist/xcomponent.js"></script>
+<script src="./paypal-button/component.js"></script>
+<script src="./paypal-checkout/component.js"></script>
+
+<div id="container"></div>
+
+<script>
+    PayPalButton.init({
+
+        props: {
+            onSuccess() {
+                console.log('payment was completed!!1');
+            }
+        }
+
+    }).render('#container')
+</script>

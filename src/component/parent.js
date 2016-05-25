@@ -1,7 +1,7 @@
 
 import { Promise } from 'es6-promise-min';
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -18,7 +18,11 @@ export class ParentComponent {
             throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
         }
 
-        this.id = uniqueID();
+        this.parentWindow = getParentWindow();
+
+        this.id = window.name;
+        this.parentId = options.parentId;
+        this.childId = options.childId || uniqueID();
 
         activeComponents.push(this);
 
@@ -54,6 +58,8 @@ export class ParentComponent {
             extend(newProps, props);
 
             this.setProps(newProps);
+
+            console.log(props, this.window, oldNormalizedProps !== JSON.stringify(this.normalizedProps))
 
             if (this.window && oldNormalizedProps !== JSON.stringify(this.normalizedProps)) {
                 return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
@@ -260,8 +266,8 @@ export class ParentComponent {
 
         this.openIframe(document.body);
 
-        let pos = this.getPosition();
-        this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
+        //let pos = this.getPosition();
+        //this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
 
         return this;
     }
@@ -281,6 +287,7 @@ export class ParentComponent {
 
         this.iframe = document.createElement('iframe');
 
+        this.iframe.name = this.childId;
         this.iframe.width = this.component.dimensions.width;
         this.iframe.height = this.component.dimensions.height;
 
@@ -306,7 +313,7 @@ export class ParentComponent {
         let pos = this.getPosition();
 
         this.popup = popup('about:blank', {
-            name: this.id,
+            name: this.childId,
             width: this.component.dimensions.width,
             height: this.component.dimensions.height,
             top: pos.y,
@@ -339,35 +346,51 @@ export class ParentComponent {
         el = getElement(el);
 
         el.addEventListener('click', event => {
-            el.target = this.id;
+            el.target = this.childId;
             this.openPopup();
             this.listen();
         });
     }
 
     renderToParent() {
-        postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+
+        if (!this.parentWindow) {
+            throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
+        }
+
+        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
             tag: this.component.tag,
-            props: this.normalizedProps,
-            parent: this.id,
-            context: undefined // TODO
+            options: {
+                props: this.normalizedProps,
+                parentId: this.id,
+                childId: this.childId
+            }
+
+        }).then(data => {
+
+            this.window = this.parentWindow.frames[this.childId];
+            this.listen();
         });
     }
 
     listen(win) {
 
+        if (!this.window) {
+            throw new Error(`[${this.component.tag}] parent component window not set`);
+        }
+
         let childListeners = this.childListeners();
 
         for (let listenerName of Object.keys(childListeners)) {
             this.addListener(postRobot.on(listenerName, { window: this.window }, (source, data) => {
-                return childListeners[listenerName].call(this, data);
+                return childListeners[listenerName].call(this, source, data);
             }));
         }
 
         if (this.timeout) {
             setTimeout(() => {
                 if (!this.entered) {
-                    this.destroy(new Error(`Loading component ${this.component.tag} at ${this.url} timed out after ${this.timeout} milliseconds`));
+                    this.destroy(new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.timeout} milliseconds`));
                 }
             }, this.timeout);
         }
@@ -375,26 +398,23 @@ export class ParentComponent {
 
     childListeners() {
         return {
-            [ CONSTANTS.POST_MESSAGE.INIT ]: (data) => {
+            [ CONSTANTS.POST_MESSAGE.INIT ](source, data) {
                 this.onEnter.call(this);
                 this.entered = true;
 
                 return {
-                    id: this.id,
+                    id: this.childId,
+                    parentId: this.parentId || this.id,
                     context: this.context,
                     props: this.normalizedProps
                 };
             },
 
-            [ CONSTANTS.POST_MESSAGE.CLOSE ]: (data) => {
+            [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
                 this.cleanup();
             },
 
-            [ CONSTANTS.POST_MESSAGE.FOCUS ]: (data) => {
-                this.focus();
-            },
-
-            [ CONSTANTS.POST_MESSAGE.RESIZE ]: (data) => {
+            [ CONSTANTS.POST_MESSAGE.RESIZE ](source, data) {
 
                 if (this.context === CONSTANTS.CONTEXT.POPUP) {
                     throw new Error(`[${this.component.tag}] Can not resize popup from parent`);
@@ -403,15 +423,20 @@ export class ParentComponent {
                 return this.resize(data.width, data.height);
             },
 
-            [ CONSTANTS.POST_MESSAGE.REDIRECT ]: (data) => {
+            [ CONSTANTS.POST_MESSAGE.REDIRECT ](source, data) {
                 this.cleanup();
                 window.location = data.url;
             },
 
-            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ]: (data) => {
+            [ CONSTANTS.POST_MESSAGE.PROP_CALLBACK ](source, data) {
                 return this.props[data.key].apply(null, data.args);
+            },
+
+            [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
+                let component = this.component.getByTag(data.tag);
+                component.init(data.options).render();
             }
-       }
+        }
     }
 
     addListener(listener) {
@@ -420,9 +445,7 @@ export class ParentComponent {
     }
 
     close() {
-        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).then(data => {
-            this.cleanup();
-        }).catch(err => {
+        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).catch(err => {
             console.warn('Error sending close message to child', err.stack || err.toString());
             this.cleanup();
         });

@@ -1,0 +1,10 @@
+
+<script src="../../dist/xcomponent.js"></script>
+<script src="./component.js"></script>
+
+<script>
+    window.checkout = PayPalCheckout.attach();
+</script>
+
+<button onclick="checkout.props.onAuthorize()">Pay!</button>
+

@@ -13,7 +13,6 @@ export const CONSTANTS = {
         PROPS: 'xcomponent_props',
         PROP_CALLBACK: 'xcomponent_prop_callback',
         CLOSE: 'xcomponent_close',
-        FOCUS: 'xcomponent_focus',
         REDIRECT: 'xcomponent_redirect',
         RESIZE: 'xcomponent_resize',
         RENDER: 'xcomponent_render'
