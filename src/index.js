@@ -1,4 +1,4 @@
-import {Component} from './component';
+import { Component } from './component';
 
 let components = {};
 
@@ -7,3 +7,5 @@ export function create(options) {
     components[component.tag] = component;
     return component;
 }
+
+export default module.exports;

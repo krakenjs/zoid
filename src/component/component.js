@@ -15,7 +15,7 @@ export class Component {
 
         this.tag = options.tag;
         this.url = options.url;
-        this.props = options.props;
+        this.props = options.props || {};
         this.dimensions = options.dimensions;
 
         this.contexts = options.contexts || {};
@@ -59,29 +59,32 @@ export class Component {
             throw new Error(`Expected options.dimensions.height to be a number`);
         }
 
-        if (!options.props || !(options.props instanceof Object)) {
+        if (options.props && !(options.props instanceof Object)) {
             throw new Error(`Expected options.props to be an object`);
         }
 
-        for (let key of Object.keys(options.props)) {
-            let prop = options.props[key];
+        if (options.props) {
+            for (let key of Object.keys(options.props)) {
+                let prop = options.props[key];
 
-            if (!prop || !(prop instanceof Object)) {
-                throw new Error(`Expected options.props.${key} to be an object`);
-            }
+                if (!prop || !(prop instanceof Object)) {
+                    throw new Error(`Expected options.props.${key} to be an object`);
+                }
 
-            if (!prop.type) {
-                throw new Error(`Expected prop.type`);
-            }
+                if (!prop.type) {
+                    throw new Error(`Expected prop.type`);
+                }
 
-            if (PROP_TYPES_LIST.indexOf(prop.type) === -1) {
-                throw new Error(`Expected prop.type to be one of ${PROP_TYPES_LIST.join(', ')}`);
-            }
+                if (PROP_TYPES_LIST.indexOf(prop.type) === -1) {
+                    throw new Error(`Expected prop.type to be one of ${PROP_TYPES_LIST.join(', ')}`);
+                }
 
-            if (prop.required && prop.def) {
-                throw new Error(`Required prop can not have a default value`);
+                if (prop.required && prop.def) {
+                    throw new Error(`Required prop can not have a default value`);
+                }
             }
         }
+
 
         if (options.contexts) {
             let anyEnabled = false;
