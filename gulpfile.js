@@ -3,6 +3,8 @@ var gulp = require('gulp');
 var webpack = require('webpack');
 var gulpWebpack = require('gulp-webpack');
 var eslint = require('gulp-eslint');
+var Server = require('karma').Server;
+var argv = require('yargs').argv;
 
 gulp.task('build', ['webpack', 'webpack-min']);
 
@@ -68,4 +70,29 @@ gulp.task('lint', function() {
   return gulp.src('src/**').pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
+});
+
+gulp.task('karma', function (done) {
+
+  var server = new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: !Boolean(argv['keep-browser-open']),
+    client: {
+      captureConsole: Boolean(argv['capture-console'])
+    }
+  });
+
+  server.on('browser_error', function (browser, err) {
+    console.log('Karma Run Failed: ' + err.message);
+    throw err;
+  });
+
+  server.on('run_complete', function (browsers, results) {
+    if (results.failed) {
+      return done(new Error('Karma: Tests Failed'));
+    }
+    done();
+  });
+
+  server.start();
 });
