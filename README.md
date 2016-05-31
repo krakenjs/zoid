@@ -1,6 +1,10 @@
 xcomponent
 ----------
 
+A cross-domain component toolkit. Useful if you want to build a cross-domain component, which lives in an iframe or popup.
+
+-----
+
 Writing cross domain components is really hard.
 
 Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put within your page.
@@ -135,7 +139,7 @@ Let's do that in our example above.
 
             // Since we had a successful login, let's call our parent with the callback they provided
 
-            this.props.onLogin(email);
+            loginComponent.props.onLogin(email);
         });
     });
 </script>
@@ -248,6 +252,8 @@ Our component can listen for any property updates like so:
     });
 <script>
 ```
+
+Note that `onProps` will be called every time the parent props update, including on first render.
 
 If I wanted to update the props from my parent manually, using javascript, I can do this too:
 
