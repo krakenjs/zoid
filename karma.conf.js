@@ -105,6 +105,10 @@ module.exports = function(config) {
 
         coverageReporter: {
 
+            instrumenterOptions: {
+                istanbul: { noCompact: true }
+            },
+
             reporters: [
                 {
                     type: 'text'

@@ -47,7 +47,7 @@ export class Component {
             throw new Error(`Expected options.url to be a string`);
         }
 
-        if (!options.dimensions || !(options.dimensions instanceof Object)) {
+        if (!options.dimensions || !(typeof options.dimensions === 'object')) {
             throw new Error(`Expected options.dimensions to be an object`);
         }
 
@@ -59,7 +59,7 @@ export class Component {
             throw new Error(`Expected options.dimensions.height to be a number`);
         }
 
-        if (options.props && !(options.props instanceof Object)) {
+        if (options.props && !(typeof options.props === 'object')) {
             throw new Error(`Expected options.props to be an object`);
         }
 
@@ -67,7 +67,7 @@ export class Component {
             for (let key of Object.keys(options.props)) {
                 let prop = options.props[key];
 
-                if (!prop || !(prop instanceof Object)) {
+                if (!prop || !(typeof prop === 'object')) {
                     throw new Error(`Expected options.props.${key} to be an object`);
                 }
 
