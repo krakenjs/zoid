@@ -6,7 +6,7 @@ var eslint = require('gulp-eslint');
 var Server = require('karma').Server;
 var argv = require('yargs').argv;
 
-gulp.task('build', ['webpack', 'webpack-min']);
+gulp.task('build', ['karma', 'webpack', 'webpack-min']);
 
 var FILE_NAME = 'xcomponent';
 var MODULE_NAME = 'xcomponent';
