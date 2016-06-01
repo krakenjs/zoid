@@ -67,12 +67,12 @@ gulp.task('webpack-min', ['lint'], function() {
 });
 
 gulp.task('lint', function() {
-  return gulp.src('src/**').pipe(eslint())
+  return gulp.src('src/**/*.js').pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
 });
 
-gulp.task('karma', function (done) {
+gulp.task('karma', ['lint'], function (done) {
 
   var server = new Server({
     configFile: __dirname + '/karma.conf.js',
