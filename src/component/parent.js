@@ -371,7 +371,7 @@ export class ParentComponent {
 
         onCloseWindow(this.window, () => {
             this.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
-            this.cleanup();
+            this.destroy();
         });
 
         window.addEventListener('beforeunload', () => {
@@ -483,7 +483,8 @@ export class ParentComponent {
         if (this.timeout) {
             setTimeout(() => {
                 if (!this.entered) {
-                    this.destroy(new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.timeout} milliseconds`));
+                    this.onTimeout.call(this, new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.timeout} milliseconds`));
+                    this.destroy();
                 }
             }, this.timeout);
         }
@@ -502,7 +503,7 @@ export class ParentComponent {
             },
 
             [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
-                this.cleanup();
+                this.destroy();
             },
 
             [ CONSTANTS.POST_MESSAGE.RESIZE ](source, data) {
@@ -512,11 +513,6 @@ export class ParentComponent {
                 }
 
                 return this.resize(data.width, data.height);
-            },
-
-            [ CONSTANTS.POST_MESSAGE.REDIRECT ](source, data) {
-                this.cleanup();
-                window.location = data.url;
             },
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
@@ -534,7 +530,7 @@ export class ParentComponent {
     close() {
         return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).catch(err => {
             console.warn('Error sending close message to child', err.stack || err.toString());
-            this.cleanup();
+            this.destroy();
         });
     }
 
@@ -562,13 +558,7 @@ export class ParentComponent {
         });
     }
 
-    destroy(err) {
-        this.cleanup();
-        this.onTimeout.call(this, err);
-        return this;
-    }
-
-    cleanup() {
+    destroy() {
 
         if (this.popup) {
             this.popup.close();

@@ -151,15 +151,11 @@ export class ChildComponent {
     }
 
     redirectParent(url) {
+        this.onClose.call(this);
+        this.parentWindow.location = url;
+    }
 
-        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.REDIRECT, {
-            url
-        }).then(() => {
-            console.warn(`[${this.component.tag}] Parent did not redirect`);
-            this.parentWindow.location = url;
-        }, err => {
-            console.warn(`[${this.component.tag}] Parent did not redirect due to error: ${err.stack || err.toString()}`);
-            this.parentWindow.location = url;
-        });
+    breakOut() {
+        this.redirectParent(window.location.href);
     }
 }
