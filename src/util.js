@@ -1,5 +1,5 @@
 
-import postRobot from 'post-robot/dist/post-robot';
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 export function urlEncode(str) {
     return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
@@ -215,7 +215,7 @@ export function denodeify(method) {
             return Promise.resolve(method.apply(self, args));
         }
 
-        return new postRobot.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             args.push(function denodeifyCallback(err, result) {
                 return err ? reject(err) : resolve(result);
             });

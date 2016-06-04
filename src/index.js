@@ -1,4 +1,4 @@
-import postRobot from 'post-robot/dist/post-robot';
+import postRobot from 'post-robot/src';
 import { Component } from './component';
 
 export function create(options) {

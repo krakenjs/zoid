@@ -16,7 +16,7 @@ var WEBPACK_CONFIG = {
     loaders: [
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
+        exclude: /(dist)/,
         loader: 'babel',
         query: {
           presets: ['es2015'],
@@ -38,7 +38,8 @@ var WEBPACK_CONFIG = {
     filename: `${FILE_NAME}.js`,
     libraryTarget: 'umd',
     umdNamedDefine: true,
-    library: MODULE_NAME
+    library: MODULE_NAME,
+    pathinfo: true
   },
   bail: true
 };

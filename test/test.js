@@ -1,6 +1,6 @@
 
 import xcomponent from 'src/index';
-import postRobot from 'post-robot/dist/post-robot';
+import postRobot from 'post-robot/src';
 
 import { testComponent } from './component';
 

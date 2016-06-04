@@ -66,6 +66,7 @@
     "babel-eslint": "^6.0.4",
     "es6-promise": "^3.1.2",
     "es6-promise-min": "^2.0.1",
-    "post-robot": "^2.0.0"
+    "post-robot": "^2.0.6",
+    "sync-browser-mocks": "^1.0.4"
   }
 }

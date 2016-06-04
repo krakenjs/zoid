@@ -1,5 +1,6 @@
 
-import postRobot from 'post-robot/dist/post-robot';
+import postRobot from 'post-robot/src';
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { noop, once, extend, getParentWindow, b64decode, onCloseWindow } from '../util';
 import { CONSTANTS } from '../constants';
 import { IntegrationError } from '../error';
@@ -35,7 +36,7 @@ export class ChildComponent {
 
     init() {
         if (this.standalone && !this.parentComponentWindow) {
-            return postRobot.Promise.resolve();
+            return Promise.resolve();
         }
 
         return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
@@ -189,7 +190,7 @@ export class ChildComponent {
     }
 
     resize(height, width) {
-        return postRobot.Promise.resolve().then(() => {
+        return Promise.resolve().then(() => {
 
             if (this.context === CONSTANTS.CONTEXT.POPUP) {
                 window.resizeTo(width, height);

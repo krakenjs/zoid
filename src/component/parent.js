@@ -1,5 +1,6 @@
 
-import postRobot from 'post-robot/dist/post-robot';
+import postRobot from 'post-robot/src';
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow, getParentNode, denodeify } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
@@ -56,7 +57,7 @@ export class ParentComponent {
     }
 
     updateProps(props) {
-        return postRobot.Promise.resolve().then(() => {
+        return Promise.resolve().then(() => {
 
             let oldProps = JSON.stringify(this.props);
 
@@ -558,7 +559,7 @@ export class ParentComponent {
     }
 
     resize(height, width) {
-        return postRobot.Promise.resolve().then(() => {
+        return Promise.resolve().then(() => {
 
             if (this.context === CONSTANTS.CONTEXT.POPUP) {
                 return postRobot.send(this.popup, CONSTANTS.POST_MESSAGE.RESIZE, {
