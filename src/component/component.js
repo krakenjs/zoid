@@ -4,6 +4,9 @@ import { ParentComponent, internalProps } from './parent';
 import { extend } from '../util';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
+// import defaultOverlayTemplate from '../templates/overlay.htm';
+// import defaultOverlayCSS from '../templates/overlay.css';
+
 import * as drivers from '../drivers';
 
 export let components = {};
@@ -33,6 +36,9 @@ export class Component {
                 driver.register(this);
             }
         }
+
+        // this.overlayTemplate = scanForJavascript(options.overlayTemplate) || defaultOverlayTemplate;
+        // this.overlayCSS = scanForJavascript(options.overlayCSS) || defaultOverlayCSS;
 
         components[this.tag] = this;
     }
@@ -116,8 +122,18 @@ export class Component {
         }
     }
 
-    attach(options) {
+    parent(options) {
+        return new ParentComponent(this, options);
+    }
+
+    child(options) {
         return new ChildComponent(this, options);
+    }
+
+    attach(options) {
+        var component = this.child(options);
+        component.init();
+        return component;
     }
 
     init(options) {

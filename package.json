@@ -58,6 +58,7 @@
     "phantomjs-prebuilt": "^2.1.7",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
+    "text-loader": "0.0.1",
     "webpack": "^1.13.1",
     "yargs": "^4.7.1"
   },

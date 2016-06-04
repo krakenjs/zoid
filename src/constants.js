@@ -17,7 +17,8 @@ export const CONSTANTS = {
         CLOSE: 'xcomponent_close',
         REDIRECT: 'xcomponent_redirect',
         RESIZE: 'xcomponent_resize',
-        RENDER: 'xcomponent_render'
+        RENDER: 'xcomponent_render',
+        ERROR: 'xcomponent_error'
     }
 };
 

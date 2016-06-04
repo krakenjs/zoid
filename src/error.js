@@ -15,3 +15,5 @@ class ExtendableError extends Error {
 
 
 export class PopupOpenError extends ExtendableError {}
+
+export class IntegrationError extends ExtendableError {}

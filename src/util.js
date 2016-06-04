@@ -1,4 +1,6 @@
 
+import postRobot from 'post-robot/dist/post-robot';
+
 export function urlEncode(str) {
     return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
 }
@@ -187,4 +189,37 @@ export function getParentNode(el, tag) {
             return el;
         }
     }
+}
+
+export function scanForJavascript(str) {
+
+    if (!str) {
+        return str;
+    }
+
+    if (str.match(/<script|on\w+=|javascript:|expression\s*\(/)) {
+        throw new Error(`HTML contains potential javascript: ${str}`);
+    }
+
+    return str;
+}
+
+export function denodeify(method) {
+
+    return function() {
+
+        let self = this;
+        let args = Array.prototype.slice.call(arguments);
+
+        if (args.length >= method.length) {
+            return Promise.resolve(method.apply(self, args));
+        }
+
+        return new postRobot.Promise((resolve, reject) => {
+            args.push(function denodeifyCallback(err, result) {
+                return err ? reject(err) : resolve(result);
+            });
+            return method.apply(self, args);
+        });
+    };
 }

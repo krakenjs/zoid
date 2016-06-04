@@ -27,6 +27,10 @@ var WEBPACK_CONFIG = {
             'transform-es3-member-expression-literals'
           ]
         }
+      },
+      {
+        test: /\.(html?|css)$/,
+        loader: 'text-loader'
       }
     ]
   },

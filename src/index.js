@@ -1,11 +1,11 @@
+import postRobot from 'post-robot/dist/post-robot';
 import { Component } from './component';
 
-let components = {};
-
 export function create(options) {
-    let component = new Component(options);
-    components[component.tag] = component;
-    return component;
+    return new Component(options);
 }
 
+export * from './error';
+
+module.exports.postRobot = postRobot;
 export default module.exports;

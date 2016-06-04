@@ -1,6 +1,6 @@
-import {Promise} from 'es6-promise-min';
+
 import postRobot from 'post-robot/dist/post-robot';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow, getParentNode } from '../util';
+import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow, getParentNode, denodeify } from '../util';
 import { CONSTANTS, CONTEXT_TYPES } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -49,11 +49,14 @@ export class ParentComponent {
         this.validateProps(props);
         this.props = this.normalizeProps(props);
         this.queryString = this.propsToQuery(this.props);
-        this.url = `${this.component.url}?${this.queryString}`;
+        this.url = this.component.url;
+        if (this.queryString) {
+            this.url = `${ this.url }${ this.component.url.indexOf('?') === -1 ? '?' : '&' }${ this.queryString }`;
+        }
     }
 
     updateProps(props) {
-        return Promise.resolve().then(() => {
+        return postRobot.Promise.resolve().then(() => {
 
             let oldProps = JSON.stringify(this.props);
 
@@ -149,17 +152,25 @@ export class ParentComponent {
                 result[key] = Boolean(value);
 
             } else if (prop.type === 'function') {
-                result[key] = value;
 
                 if (!value) {
+
                     if (prop.noop) {
-                        result[key] = noop;
+                        value = noop;
+                    }
+
+                } else {
+
+                    if (prop.denodeify) {
+                        value = denodeify(value);
+                    }
+
+                    if (prop.once) {
+                        value = once(value);
                     }
                 }
 
-                if (result[key] && prop.once) {
-                    result[key] = once(result[key]);
-                }
+                result[key] = value;
 
             } else if (prop.type === 'string') {
                 result[key] = value || '';
@@ -518,6 +529,11 @@ export class ParentComponent {
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
                 let component = this.component.getByTag(data.tag);
                 component.init(data.options).render();
+            },
+
+            [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
+                this.destroy();
+                this.onError(new Error(data.error));
             }
         };
     }
@@ -542,7 +558,7 @@ export class ParentComponent {
     }
 
     resize(height, width) {
-        return Promise.resolve().then(() => {
+        return postRobot.Promise.resolve().then(() => {
 
             if (this.context === CONSTANTS.CONTEXT.POPUP) {
                 return postRobot.send(this.popup, CONSTANTS.POST_MESSAGE.RESIZE, {
