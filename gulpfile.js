@@ -30,7 +30,7 @@ var WEBPACK_CONFIG = {
       },
       {
         test: /\.(html?|css)$/,
-        loader: 'text-loader'
+        loader: 'raw-loader'
       }
     ]
   },

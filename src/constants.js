@@ -39,3 +39,5 @@ export const CONTEXT_TYPES = {
 };
 
 export let CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
+
+export let MAX_Z_INDEX = 2147483647;

@@ -1,11 +1,11 @@
 
 import { ChildComponent } from './child';
 import { ParentComponent, internalProps } from './parent';
-import { extend } from '../util';
+import { extend, scanForJavascript } from '../util';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
-// import defaultOverlayTemplate from '../templates/overlay.htm';
-// import defaultOverlayCSS from '../templates/overlay.css';
+import defaultOverlayTemplate from '../templates/overlay.htm';
+import defaultOverlayStyle from '../templates/overlay.css';
 
 import * as drivers from '../drivers';
 
@@ -37,8 +37,8 @@ export class Component {
             }
         }
 
-        // this.overlayTemplate = scanForJavascript(options.overlayTemplate) || defaultOverlayTemplate;
-        // this.overlayCSS = scanForJavascript(options.overlayCSS) || defaultOverlayCSS;
+        this.overlayTemplate = scanForJavascript(options.overlayTemplate) || defaultOverlayTemplate;
+        this.overlayStyle = scanForJavascript(options.overlayStyle) || defaultOverlayStyle;
 
         components[this.tag] = this;
     }

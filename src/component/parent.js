@@ -1,18 +1,185 @@
 
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { urlEncode, popup, noop, extend, pop, getElement, uniqueID, getParentWindow, b64encode, once, iframe, onCloseWindow, getParentNode, denodeify } from '../util';
-import { CONSTANTS, CONTEXT_TYPES } from '../constants';
+import { BaseComponent } from './base';
+import { urlEncode, popup, noop, extend, pop, getElement, getParentWindow, once, iframe, onCloseWindow, getParentNode, denodeify } from '../util';
+import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
 import { PopupOpenError } from '../error';
 
 let activeComponents = [];
 
-export class ParentComponent {
+let RENDER_DRIVERS = {
+
+    [ CONTEXT_TYPES.IFRAME ]: {
+
+        render(element) {
+
+            if (!this.component.contexts[CONTEXT_TYPES.IFRAME]) {
+                throw new Error(`Invalid context: ${CONTEXT_TYPES.IFRAME}`);
+            }
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            this.openIframe(element);
+            this.listen(this.window);
+            this.loadUrl(this.url);
+            this.runTimeout();
+
+            return this;
+        },
+
+        open(element) {
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            this.iframe = iframe(element, null, {
+                name: this.childWindowName,
+                width: this.component.dimensions.width,
+                height: this.component.dimensions.height
+            });
+
+            this.context = CONSTANTS.CONTEXT.IFRAME;
+            this.window = this.iframe.contentWindow;
+
+            this.watchForClose();
+
+            return this;
+        },
+
+        renderToParent(el) {
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            return this.renderToParent(el, CONTEXT_TYPES.IFRAME);
+        }
+    },
+
+    [ CONTEXT_TYPES.POPUP ]: {
+
+        render() {
+
+            if (!this.component.contexts[CONTEXT_TYPES.POPUP]) {
+                throw new Error(`Invalid context: ${CONTEXT_TYPES.POPUP}`);
+            }
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            this.openPopup();
+            this.listen(this.window);
+            this.loadUrl(this.url);
+            this.runTimeout();
+
+            this.createOverlay();
+
+            return this;
+        },
+
+        open() {
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            let pos = this.getPosition();
+
+            this.popup = popup('about:blank', {
+                name: this.childWindowName,
+                width: this.component.dimensions.width,
+                height: this.component.dimensions.height,
+                top: pos.y,
+                left: pos.x
+            });
+
+            if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
+                throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
+            }
+
+            this.context = CONSTANTS.CONTEXT.POPUP;
+            this.window = this.popup;
+
+            this.watchForClose();
+
+            return this;
+        },
+
+        renderToParent() {
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            this.childWindowName = this.getChildWindowName({ proxy: true });
+
+            this.openPopup();
+
+            return this.renderToParent(null, CONTEXT_TYPES.POPUP);
+        }
+    },
+
+    [ CONTEXT_TYPES.LIGHTBOX ]: {
+
+        render() {
+
+            if (!this.component.contexts[CONTEXT_TYPES.LIGHTBOX]) {
+                throw new Error(`Invalid context: ${CONTEXT_TYPES.LIGHTBOX}`);
+            }
+
+            this.openLightbox();
+            this.listen(this.window);
+            this.loadUrl(this.url);
+            this.runTimeout();
+
+            this.createOverlay();
+
+            return this;
+        },
+
+        open() {
+
+            this.openIframe(document.body);
+
+            let pos = this.getPosition();
+
+            this.iframe.style.zIndex = MAX_Z_INDEX;
+            this.iframe.style.position = 'absolute';
+            this.iframe.style.left = pos.x;
+            this.iframe.style.top = pos.y;
+            this.iframe.style.borderRadius = '10px';
+
+            return this;
+        },
+
+        renderToParent() {
+
+            if (this.window) {
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
+            }
+
+            return this.renderToParent(null, CONTEXT_TYPES.LIGHTBOX);
+        }
+    }
+};
+
+
+export class ParentComponent extends BaseComponent {
 
     constructor(component, options = {}) {
+        super(component, options);
+
         this.component = component;
 
         this.validate(options);
+
+        this.screenWidth = options.screenWidth || window.outerWidth;
+        this.screenHeight = options.screenHeight || window.outerHeight;
 
         if (component.singleton && activeComponents.some(comp => comp.component === component)) {
             throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
@@ -24,26 +191,16 @@ export class ParentComponent {
 
         activeComponents.push(this);
 
-        this.listeners = [];
-
         options.props = options.props || {};
         this.setProps(options.props);
 
-        this.onEnter = options.onEnter || noop;
-        this.onExit = once(options.onExit || noop);
-        this.onClose = once(options.onClose || options.onError || noop);
-        this.onError = once(options.onError || noop);
+        this.onEnter   = options.onEnter || noop;
+        this.onExit    = once(options.onExit    || noop);
+        this.onClose   = once(options.onClose   || options.onError || noop);
+        this.onError   = once(options.onError   || noop);
         this.onTimeout = once(options.onTimeout || options.onError || noop);
 
         this.timeout = options.timeout;
-    }
-
-    getChildWindowName(windowName) {
-        return b64encode(JSON.stringify({
-            type: CONSTANTS.XCOMPONENT,
-            parent: windowName,
-            id: uniqueID()
-        }));
     }
 
     setProps(props) {
@@ -222,7 +379,7 @@ export class ParentComponent {
         if (typeof dimensions.x === 'number') {
             pos.x = dimensions.x;
         } else {
-            let width = window.innerWidth;
+            let width = this.screenWidth;
 
             if (width <= dimensions.width) {
                 pos.x = 0;
@@ -235,7 +392,7 @@ export class ParentComponent {
             pos.y = dimensions.y;
         } else {
 
-            let height = window.innerHeight;
+            let height = this.screenHeight;
 
             if (height <= dimensions.height) {
                 pos.y = 0;
@@ -247,137 +404,149 @@ export class ParentComponent {
         return pos;
     }
 
-    render(el) {
+    getRenderContext(el) {
 
         if (el && this.component.contexts[CONTEXT_TYPES.IFRAME]) {
-            return this.renderIframe(el);
+            return CONTEXT_TYPES.IFRAME;
         }
 
         if (this.component.defaultContext) {
 
             if (this.component.defaultContext === CONTEXT_TYPES.LIGHTBOX) {
-                return this.renderLightbox();
+                return CONTEXT_TYPES.LIGHTBOX;
             }
 
             if (this.component.defaultContext === CONTEXT_TYPES.POPUP) {
-                try {
-                    return this.renderPopup();
-                } catch (err) {
-                    if (!(err instanceof PopupOpenError)) {
-                        throw err;
-                    }
-                }
+                return CONTEXT_TYPES.POPUP;
             }
         }
 
         if (this.component.contexts[CONTEXT_TYPES.LIGHTBOX]) {
-            return this.renderLightbox();
+            return CONTEXT_TYPES.LIGHTBOX;
 
         }
 
         if (this.component.contexts[CONTEXT_TYPES.POPUP]) {
-            return this.renderPopup();
+            return CONTEXT_TYPES.POPUP;
         }
+    }
 
-        if (this.component.contexts[CONTEXT_TYPES.IFRAME]) {
-            throw new Error(`[${this.component.tag}] Can not render to iframe without a container element`);
+
+
+
+
+    render(element, renderContext) {
+
+        renderContext = renderContext || this.getRenderContext(element);
+
+        for (let context of [ renderContext, CONTEXT_TYPES.POPUP, CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX ]) {
+
+            if (!context) {
+                continue;
+            }
+
+            try {
+                return RENDER_DRIVERS[context].render.call(this, element);
+            } catch (err) {
+
+                if (err instanceof PopupOpenError) {
+                    continue;
+                }
+
+                throw err;
+            }
         }
 
         throw new Error(`[${this.component.tag}] No context options available for render`);
     }
 
-    renderLightbox() {
+    renderToParent(element, renderContext) {
 
-        this.openLightbox();
-        this.listen();
-        this.loadUrl(this.url);
+        renderContext = renderContext || this.getRenderContext(element);
 
-        return this;
-    }
+        if (!this.component.contexts[renderContext]) {
+            throw new Error(`Invalid context: ${renderContext}`);
+        }
 
-    openLightbox() {
+        if (!this.parentWindow) {
+            throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
+        }
 
-        this.openIframe(document.body);
+        if (!window.name) {
+            throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
+        }
 
-        // let pos = this.getPosition();
-        // this.iframe.setAttribute('style', `position: absolute; top: ${pos.y}; left ${pos.x};`);
+        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+            tag: this.component.tag,
+            context: renderContext,
+            element: element,
+            options: {
+                props:                     this.props,
+                childWindowName:           this.childWindowName,
+                parentComponentWindowName: window.name,
+                screenWidth:               this.screenWidth,
+                screenHeight:              this.screenHeight
+            }
 
-        return this;
+        }).then(data => {
+
+            if (!this.window) {
+                this.window = this.parentWindow.frames[this.childWindowName];
+            }
+
+            this.listen(this.window);
+        });
     }
 
     renderIframe(element) {
-
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
-
-        this.openIframe(element);
-        this.listen();
-        this.loadUrl(this.url);
-
-        return this;
+        return this.render(element, CONTEXT_TYPES.IFRAME);
     }
 
     openIframe(element) {
+        return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
+    }
 
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
+    renderIframeToParent(element) {
+        return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].renderToParent.call(this, element);
+    }
 
-        this.iframe = iframe(element, null, {
-            name: this.childWindowName,
-            width: this.component.dimensions.width,
-            height: this.component.dimensions.height
-        });
+    renderLightbox() {
+        return this.render(null, CONTEXT_TYPES.LIGHTBOX);
+    }
 
-        this.context = CONSTANTS.CONTEXT.IFRAME;
-        this.window = this.iframe.contentWindow;
+    openLightbox() {
+        return RENDER_DRIVERS[CONTEXT_TYPES.LIGHTBOX].open.call(this);
+    }
 
-        this.watchForClose();
-
-        return this;
+    renderLightboxToParent() {
+        return RENDER_DRIVERS[CONTEXT_TYPES.LIGHTBOX].renderToParent.call(this);
     }
 
     renderPopup() {
-
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
-
-        this.openPopup();
-        this.listen();
-        this.loadUrl(this.url);
-
-        return this;
+        return this.render(null, CONTEXT_TYPES.POPUP);
     }
 
     openPopup() {
-
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
-
-        let pos = this.getPosition();
-
-        this.popup = popup('about:blank', {
-            name: this.childWindowName,
-            width: this.component.dimensions.width,
-            height: this.component.dimensions.height,
-            top: pos.y,
-            left: pos.x
-        });
-
-        if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-            throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
-        }
-
-        this.context = CONSTANTS.CONTEXT.POPUP;
-        this.window = this.popup;
-
-        this.watchForClose();
-
-        return this;
+        return RENDER_DRIVERS[CONTEXT_TYPES.POPUP].open.call(this);
     }
+
+    renderPopupToParent() {
+        return RENDER_DRIVERS[CONTEXT_TYPES.POPUP].renderToParent.call(this);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     watchForClose() {
 
@@ -427,13 +596,7 @@ export class ParentComponent {
                 throw new Error(`[${this.component.tag}] Component is already rendered`);
             }
 
-            if (context === CONTEXT_TYPES.LIGHTBOX) {
-                this.openLightbox();
-            } else if (context === CONTEXT_TYPES.POPUP) {
-                this.openPopup();
-            } else {
-                throw new Error(`[${this.component.tag}] Invalid context for hijack: ${context}`);
-            }
+            RENDER_DRIVERS[context].open.call(this);
 
             if (isButton && form) {
                 form.target = this.childWindowName;
@@ -441,56 +604,13 @@ export class ParentComponent {
                 el.target = this.childWindowName;
             }
 
-            this.listen();
+            this.listen(this.window);
         });
 
         return this;
     }
 
-    renderToParent() {
-
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
-
-        if (!this.parentWindow) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
-        }
-
-        if (!window.name) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
-        }
-
-        let childWindowName = this.getChildWindowName(window.name);
-
-        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
-            tag: this.component.tag,
-            options: {
-                childWindowName,
-                props: this.props,
-                parentComponentWindowName: window.name
-            }
-
-        }).then(data => {
-
-            this.window = this.parentWindow.frames[childWindowName];
-            this.listen();
-        });
-    }
-
-    listen(win) {
-
-        if (!this.window) {
-            throw new Error(`[${this.component.tag}] parent component window not set`);
-        }
-
-        let childListeners = this.childListeners();
-
-        for (let listenerName of Object.keys(childListeners)) {
-            this.addListener(postRobot.on(listenerName, {window: this.window}, (source, data) => {
-                return childListeners[listenerName].call(this, source, data);
-            }));
-        }
+    runTimeout() {
 
         if (this.timeout) {
             setTimeout(() => {
@@ -502,7 +622,7 @@ export class ParentComponent {
         }
     }
 
-    childListeners() {
+    listeners() {
         return {
             [ CONSTANTS.POST_MESSAGE.INIT ](source, data) {
                 this.onEnter.call(this);
@@ -529,7 +649,7 @@ export class ParentComponent {
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
                 let component = this.component.getByTag(data.tag);
-                component.init(data.options).render();
+                component.init(data.options).render(data.element, data.context);
             },
 
             [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
@@ -537,11 +657,6 @@ export class ParentComponent {
                 this.onError(new Error(data.error));
             }
         };
-    }
-
-    addListener(listener) {
-        this.listeners.push(listener);
-        return listener;
     }
 
     close() {
@@ -575,6 +690,39 @@ export class ParentComponent {
         });
     }
 
+    createOverlay() {
+
+        this.overlay = document.createElement('div');
+        this.overlay.style.zIndex = MAX_Z_INDEX - 1;
+        this.overlay.innerHTML = this.component.overlayTemplate;
+        this.overlay.className = `xcomponent-overlay xcomponent-${this.context}`;
+
+        this.overlayStyle = document.createElement('style');
+        this.overlayStyle.setAttribute('type', 'text/css');
+        if (this.overlayStyle.styleSheet) {
+            this.overlayStyle.styleSheet.cssText = this.component.overlayStyle;
+        } else {
+            this.overlayStyle.appendChild(document.createTextNode(this.component.overlayStyle));
+        }
+
+        document.body.appendChild(this.overlay);
+        document.head.appendChild(this.overlayStyle);
+
+        this.overlay.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            this.focus();
+        });
+
+        Array.prototype.slice.call(this.overlay.getElementsByClassName('xcomponent-close')).forEach(el => {
+            el.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.close();
+            });
+        });
+    }
+
     destroy() {
 
         if (this.popup) {
@@ -587,11 +735,17 @@ export class ParentComponent {
         delete this.popup;
         delete this.iframe;
 
-        for (let listener of this.listeners) {
-            listener.cancel();
+        this.cleanupListeners();
+
+        if (this.overlay) {
+            document.body.removeChild(this.overlay);
+            delete this.overlay;
         }
 
-        this.listeners = [];
+        if (this.overlayStyle) {
+            document.head.removeChild(this.overlayStyle);
+            delete this.overlayStyle;
+        }
     }
 
 }

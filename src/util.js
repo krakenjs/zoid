@@ -54,7 +54,7 @@ export function popup(url, options) {
 
     let win = window.open(url, options.name, Object.keys(options).map((key) => {
         return `${key}=${options[key]}`;
-    }).join(', '));
+    }).join(', '), true);
 
     return win;
 }
@@ -197,7 +197,7 @@ export function scanForJavascript(str) {
         return str;
     }
 
-    if (str.match(/<script|on\w+=|javascript:|expression\s*\(/)) {
+    if (str.match(/<script|on\w+\s*=|javascript:|expression\s*\(|eval\(|new\s*Function/)) {
         throw new Error(`HTML contains potential javascript: ${str}`);
     }
 

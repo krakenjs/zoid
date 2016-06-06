@@ -1,13 +1,15 @@
 
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { noop, once, extend, getParentWindow, b64decode, onCloseWindow } from '../util';
+import { BaseComponent } from './base';
+import { noop, once, extend, getParentWindow, onCloseWindow } from '../util';
 import { CONSTANTS } from '../constants';
-import { IntegrationError } from '../error';
 
-export class ChildComponent {
+export class ChildComponent extends BaseComponent {
 
     constructor(component, options = {}) {
+        super(component, options);
+
         this.validate(options);
 
         this.component = component;
@@ -41,7 +43,7 @@ export class ChildComponent {
 
         return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
 
-            this.listen();
+            this.listen(this.parentComponentWindow);
 
             this.context = data.context;
             extend(this.props, data.props);
@@ -52,50 +54,8 @@ export class ChildComponent {
         }).catch(err => this.onError(err));
     }
 
-    tryCatch(method) {
-
-        let self = this;
-        let errored = false;
-
-        return function wrapper() {
-
-            if (errored) {
-                return;
-            }
-
-            try {
-                return method.apply(this, arguments);
-            } catch (err) {
-                errored = true;
-
-                if (err instanceof IntegrationError) {
-                    return self.error(err);
-                }
-
-                console.error(err.stack || err.toString());
-                return self.error(new Error(`[${this.component.tag}] Child callback method threw an error`));
-            }
-        };
-    }
-
     sendToParentComponent(name, data) {
         return postRobot.send(this.parentComponentWindow, CONSTANTS.POST_MESSAGE.INIT);
-    }
-
-    getWindowProps() {
-        let winProps;
-
-        try {
-            winProps = JSON.parse(b64decode(window.name));
-        } catch (err) {
-            return;
-        }
-
-        if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
-            return;
-        }
-
-        return winProps;
     }
 
     setWindows() {
@@ -118,7 +78,7 @@ export class ChildComponent {
             throw new Error(`[${this.component.tag}] Window has not been rendered by xcomponent - can not attach here`);
         }
 
-        if (winProps.parent) {
+        if (winProps.proxy && winProps.parent) {
             this.parentComponentWindow = this.parentWindow.frames[winProps.parent];
         } else {
             this.parentComponentWindow = this.parentWindow;
@@ -149,7 +109,7 @@ export class ChildComponent {
         // pass
     }
 
-    parentListeners() {
+    listeners() {
         return {
             [ CONSTANTS.POST_MESSAGE.PROPS ](source, data) {
                 extend(this.props, data.props);
@@ -164,20 +124,6 @@ export class ChildComponent {
                 window.resizeTo(data.width, data.height);
             }
         };
-    }
-
-    listen() {
-        if (!this.parentComponentWindow) {
-            throw new Error(`[${this.component.tag}] parent component window not set`);
-        }
-
-        let parentListeners = this.parentListeners();
-
-        for (let listenerName of Object.keys(parentListeners)) {
-            postRobot.on(listenerName, { window: this.parentComponentWindow }, (source, data) => {
-                return parentListeners[listenerName].call(this, source, data);
-            });
-        }
     }
 
     close(err) {
