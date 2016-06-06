@@ -14,14 +14,6 @@ let RENDER_DRIVERS = {
 
         render(element) {
 
-            if (!this.component.contexts[CONTEXT_TYPES.IFRAME]) {
-                throw new Error(`Invalid context: ${CONTEXT_TYPES.IFRAME}`);
-            }
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
-
             this.openIframe(element);
             this.listen(this.window);
             this.loadUrl(this.url);
@@ -31,10 +23,6 @@ let RENDER_DRIVERS = {
         },
 
         open(element) {
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
 
             this.iframe = iframe(element, null, {
                 name: this.childWindowName,
@@ -50,27 +38,14 @@ let RENDER_DRIVERS = {
             return this;
         },
 
-        renderToParent(el) {
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
-
-            return this.renderToParent(el, CONTEXT_TYPES.IFRAME);
+        renderToParent(element) {
+            // pass
         }
     },
 
     [ CONTEXT_TYPES.POPUP ]: {
 
         render() {
-
-            if (!this.component.contexts[CONTEXT_TYPES.POPUP]) {
-                throw new Error(`Invalid context: ${CONTEXT_TYPES.POPUP}`);
-            }
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
 
             this.openPopup();
             this.listen(this.window);
@@ -83,10 +58,6 @@ let RENDER_DRIVERS = {
         },
 
         open() {
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
 
             let pos = this.getPosition();
 
@@ -111,26 +82,14 @@ let RENDER_DRIVERS = {
         },
 
         renderToParent() {
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
-
             this.childWindowName = this.getChildWindowName({ proxy: true });
-
             this.openPopup();
-
-            return this.renderToParent(null, CONTEXT_TYPES.POPUP);
         }
     },
 
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
         render() {
-
-            if (!this.component.contexts[CONTEXT_TYPES.LIGHTBOX]) {
-                throw new Error(`Invalid context: ${CONTEXT_TYPES.LIGHTBOX}`);
-            }
 
             this.openLightbox();
             this.listen(this.window);
@@ -158,12 +117,7 @@ let RENDER_DRIVERS = {
         },
 
         renderToParent() {
-
-            if (this.window) {
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
-
-            return this.renderToParent(null, CONTEXT_TYPES.LIGHTBOX);
+            // pass
         }
     }
 };
@@ -437,11 +391,19 @@ export class ParentComponent extends BaseComponent {
 
     render(element, renderContext) {
 
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
+
+        if (renderContext && !this.component.contexts[renderContext]) {
+            throw new Error(`Invalid context: ${renderContext}`);
+        }
+
         renderContext = renderContext || this.getRenderContext(element);
 
         for (let context of [ renderContext, CONTEXT_TYPES.POPUP, CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX ]) {
 
-            if (!context) {
+            if (!context || !this.component.contexts[context]) {
                 continue;
             }
 
@@ -460,13 +422,26 @@ export class ParentComponent extends BaseComponent {
         throw new Error(`[${this.component.tag}] No context options available for render`);
     }
 
-    renderToParent(element, renderContext) {
+    open(element, context) {
 
-        renderContext = renderContext || this.getRenderContext(element);
-
-        if (!this.component.contexts[renderContext]) {
-            throw new Error(`Invalid context: ${renderContext}`);
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
         }
+
+        return RENDER_DRIVERS[context].open.call(this, element);
+    }
+
+    renderToParent(element, context) {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
+
+        if (context && !this.component.contexts[context]) {
+            throw new Error(`Invalid context: ${context}`);
+        }
+
+        context = context || this.getRenderContext(element);
 
         if (!this.parentWindow) {
             throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
@@ -476,9 +451,11 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
         }
 
+        RENDER_DRIVERS[context].renderToParent.call(this, element);
+
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
             tag: this.component.tag,
-            context: renderContext,
+            context: context,
             element: element,
             options: {
                 props:                     this.props,
@@ -503,11 +480,11 @@ export class ParentComponent extends BaseComponent {
     }
 
     openIframe(element) {
-        return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
+        return this.open(element, CONTEXT_TYPES.IFRAME);
     }
 
     renderIframeToParent(element) {
-        return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].renderToParent.call(this, element);
+        return this.renderToParent(element, CONTEXT_TYPES.IFRAME);
     }
 
     renderLightbox() {
@@ -515,11 +492,11 @@ export class ParentComponent extends BaseComponent {
     }
 
     openLightbox() {
-        return RENDER_DRIVERS[CONTEXT_TYPES.LIGHTBOX].open.call(this);
+        return this.open(null, CONTEXT_TYPES.LIGHTBOX);
     }
 
     renderLightboxToParent() {
-        return RENDER_DRIVERS[CONTEXT_TYPES.LIGHTBOX].renderToParent.call(this);
+        return this.renderToParent(null, CONTEXT_TYPES.LIGHTBOX);
     }
 
     renderPopup() {
@@ -527,11 +504,11 @@ export class ParentComponent extends BaseComponent {
     }
 
     openPopup() {
-        return RENDER_DRIVERS[CONTEXT_TYPES.POPUP].open.call(this);
+        return this.open(null, CONTEXT_TYPES.POPUP);
     }
 
     renderPopupToParent() {
-        return RENDER_DRIVERS[CONTEXT_TYPES.POPUP].renderToParent.call(this);
+        return this.renderToParent(null, CONTEXT_TYPES.POPUP);
     }
 
 
