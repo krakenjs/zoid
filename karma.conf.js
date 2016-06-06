@@ -67,6 +67,10 @@ module.exports = function(config) {
                                 ['transform-es2015-for-of', {loose: true}]
                             ]
                         }
+                    },
+                    {
+                        test: /\.(html?|css)$/,
+                        loader: 'raw-loader'
                     }
                 ],
 
