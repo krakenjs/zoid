@@ -1,7 +1,7 @@
 
 import { ChildComponent } from './child';
 import { ParentComponent, internalProps } from './parent';
-import { extend, scanForJavascript } from '../util';
+import { extend, scanForJavascript } from '../lib';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
 import defaultOverlayTemplate from '../templates/overlay.htm';
@@ -64,8 +64,20 @@ export class Component {
         return new ParentComponent(this, options);
     }
 
-    initFromProps(props) {
-        return ParentComponent.fromProps(this, props);
+    initFromProps(options = {}) {
+
+        let props = {};
+
+        for (let key of Object.keys(this.props)) {
+            if (options.hasOwnProperty(key)) {
+                props[key] = options[key];
+                delete options[key];
+            }
+        }
+
+        options.props = props;
+
+        return new ParentComponent(this, options);
     }
 
     getProps() {

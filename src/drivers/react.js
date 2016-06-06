@@ -1,5 +1,5 @@
 
-import { extend } from '../util';
+import { extend } from '../lib';
 
 export let react = {
 

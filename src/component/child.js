@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
-import { noop, once, extend, getParentWindow, onCloseWindow } from '../util';
+import { noop, once, extend, getParentWindow, onCloseWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
 export class ChildComponent extends BaseComponent {

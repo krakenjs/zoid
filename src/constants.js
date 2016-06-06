@@ -1,5 +1,5 @@
 
-import { values } from './util';
+import { values } from './lib';
 
 export const CONSTANTS = {
 

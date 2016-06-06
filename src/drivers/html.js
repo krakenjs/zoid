@@ -1,5 +1,5 @@
 
-import { dasherizeToCamel } from '../util';
+import { dasherizeToCamel } from '../lib';
 
 export let htmlComponent = {
 

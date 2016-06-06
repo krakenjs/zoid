@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
-import { urlEncode, popup, noop, extend, pop, getElement, getParentWindow, once, iframe, onCloseWindow, getParentNode, denodeify } from '../util';
+import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, getParentNode, denodeify, memoize, createElement } from '../lib';
 import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -30,8 +30,15 @@ let RENDER_DRIVERS = {
                 height: this.component.dimensions.height
             });
 
-            this.context = CONSTANTS.CONTEXT.IFRAME;
-            this.window = this.iframe.contentWindow;
+            this.registerForCleanup(() => {
+                if (this.iframe) {
+                    this.iframe.parentNode.removeChild(this.iframe);
+                    delete this.iframe;
+                }
+            });
+
+            this.setForCleanup('context', CONSTANTS.CONTEXT.IFRAME);
+            this.setForCleanup('window', this.iframe.contentWindow);
 
             this.watchForClose();
 
@@ -69,12 +76,19 @@ let RENDER_DRIVERS = {
                 left: pos.x
             });
 
+            this.registerForCleanup(() => {
+                if (this.popup) {
+                    this.popup.close();
+                    delete this.popup;
+                }
+            });
+
             if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
                 throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
             }
 
-            this.context = CONSTANTS.CONTEXT.POPUP;
-            this.window = this.popup;
+            this.setForCleanup('context', CONSTANTS.CONTEXT.POPUP);
+            this.setForCleanup('window', this.popup);
 
             this.watchForClose();
 
@@ -263,6 +277,10 @@ export class ParentComponent extends BaseComponent {
 
                     if (prop.once) {
                         value = once(value);
+                    }
+
+                    if (prop.memoize) {
+                        value = memoize(value);
                     }
                 }
 
@@ -455,7 +473,7 @@ export class ParentComponent extends BaseComponent {
         }).then(data => {
 
             if (!this.window) {
-                this.window = this.parentWindow.frames[this.childWindowName];
+                this.setForCleanup('window', this.parentWindow.frames[this.childWindowName]);
             }
 
             this.listen(this.window);
@@ -497,17 +515,6 @@ export class ParentComponent extends BaseComponent {
     renderPopupToParent() {
         return this.renderToParent(null, CONTEXT_TYPES.POPUP);
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -656,26 +663,40 @@ export class ParentComponent extends BaseComponent {
 
     createOverlay() {
 
-        this.overlay = document.createElement('div');
-        this.overlay.style.zIndex = MAX_Z_INDEX - 1;
-        this.overlay.innerHTML = this.component.overlayTemplate;
-        this.overlay.className = `xcomponent-overlay xcomponent-${this.context}`;
+        this.overlay = createElement('div', {
 
-        this.overlayStyle = document.createElement('style');
-        this.overlayStyle.setAttribute('type', 'text/css');
-        if (this.overlayStyle.styleSheet) {
-            this.overlayStyle.styleSheet.cssText = this.component.overlayStyle;
-        } else {
-            this.overlayStyle.appendChild(document.createTextNode(this.component.overlayStyle));
-        }
+            html: this.component.overlayTemplate,
 
-        document.body.appendChild(this.overlay);
-        document.head.appendChild(this.overlayStyle);
+            class: [
+                `xcomponent-overlay`,
+                `xcomponent-${this.context}`
+            ],
 
-        this.overlay.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            this.focus();
+            style: { zIndex: MAX_Z_INDEX - 1 },
+
+            events: {
+                click: event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.focus();
+                }
+            }
+
+        }, document.body);
+
+        this.overlayStyle = createElement('style', {
+
+            styleSheet: this.component.overlayStyle,
+
+            attributes: {
+                type: 'text/css'
+            }
+
+        }, document.body);
+
+        this.registerForCleanup(() => {
+            document.body.removeChild(this.overlay);
+            document.body.removeChild(this.overlayStyle);
         });
 
         Array.prototype.slice.call(this.overlay.getElementsByClassName('xcomponent-close')).forEach(el => {
@@ -688,28 +709,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     destroy() {
-
-        if (this.popup) {
-            this.popup.close();
-        } else if (this.iframe && this.iframe.parentNode) {
-            this.iframe.parentNode.removeChild(this.iframe);
-        }
-
-        delete this.window;
-        delete this.popup;
-        delete this.iframe;
-
-        this.cleanupListeners();
-
-        if (this.overlay) {
-            document.body.removeChild(this.overlay);
-            delete this.overlay;
-        }
-
-        if (this.overlayStyle) {
-            document.head.removeChild(this.overlayStyle);
-            delete this.overlayStyle;
-        }
+        this.cleanup();
     }
 
 }
@@ -736,6 +736,11 @@ export const internalProps = {
         required: false
     },
 
+    url: {
+        type: 'string',
+        required: false
+    },
+
     env: {
         type: 'string',
         required: false
@@ -745,20 +750,4 @@ export const internalProps = {
         type: 'number',
         required: false
     }
-};
-
-ParentComponent.fromProps = function fromProps(component, props) {
-
-    return new ParentComponent(component, {
-
-        props,
-
-        onEnter: pop(props, 'onEnter'),
-        onExit:  pop(props, 'onExit'),
-        onClose: pop(props, 'onClose'),
-        onError: pop(props, 'onError'),
-
-        env:     pop(props, 'env'),
-        timeout: parseInt(pop(props, 'timeout', 0), 10)
-    });
 };

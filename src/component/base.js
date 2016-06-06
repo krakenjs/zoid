@@ -1,10 +1,32 @@
 import postRobot from 'post-robot/src';
 
-import { b64encode, b64decode, extend, uniqueID } from '../util';
+import { b64encode, b64decode, extend, uniqueID } from '../lib';
 import { CONSTANTS } from '../constants';
 import { IntegrationError } from '../error';
 
 export class BaseComponent {
+
+    registerForCleanup(task) {
+        this.cleanupTasks = this.cleanupTasks || [];
+        this.cleanupTasks.push(task);
+        return this;
+    }
+
+    cleanup() {
+        if (this.cleanupTasks) {
+            for (let task of this.cleanupTasks) {
+                task();
+            }
+            this.cleanupTasks = [];
+        }
+    }
+
+    setForCleanup(key, value) {
+        this[key] = value;
+        this.registerForCleanup(() => {
+            delete this[key];
+        });
+    }
 
     getChildWindowName(props = {}) {
         return b64encode(JSON.stringify(extend({
@@ -70,17 +92,10 @@ export class BaseComponent {
                 return listeners[listenerName].call(this, source, data);
             });
 
-            this.postListeners = this.postListeners || [];
-            this.postListeners.push(listener);
+            this.registerForCleanup(() => {
+                listener.cancel();
+            });
         }
-    }
-
-    cleanupListeners() {
-        for (let listener of this.postListeners) {
-            listener.cancel();
-        }
-
-        this.postListeners = [];
     }
 
     validateProps(props) {

@@ -1,5 +1,5 @@
 
-import { dasherizeToCamel, once } from '../util';
+import { dasherizeToCamel, once } from '../lib';
 
 export let angular = {
 
