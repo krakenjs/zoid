@@ -82,4 +82,51 @@ export class BaseComponent {
 
         this.postListeners = [];
     }
+
+    validateProps(props) {
+
+        for (let key of Object.keys(this.component.props)) {
+
+            let prop = this.component.props[key];
+            let value = props[key];
+
+            let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
+
+            if (!hasProp) {
+
+                if (prop.required !== false) {
+                    throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
+                }
+
+                continue;
+            }
+
+            if (prop.type === 'function') {
+
+                if (!(value instanceof Function)) {
+                    throw new Error(`[${this.component.tag}] Prop is not of type function: ${key}`);
+                }
+
+            } else if (prop.type === 'string') {
+
+                if (typeof value !== 'string') {
+                    throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
+                }
+
+            } else if (prop.type === 'object') {
+
+                try {
+                    JSON.stringify(value);
+                } catch (err) {
+                    throw new Error(`[${this.component.tag}] Unable to serialize prop: ${key}`);
+                }
+
+            } else if (prop.type === 'number') {
+
+                if (isNaN(parseInt(value, 10))) {
+                    throw new Error(`[${this.component.tag}] Prop is not a number: ${key}`);
+                }
+            }
+        }
+    }
 }

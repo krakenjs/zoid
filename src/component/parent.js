@@ -127,26 +127,23 @@ export class ParentComponent extends BaseComponent {
 
     constructor(component, options = {}) {
         super(component, options);
-
         this.component = component;
+        this.options = options;
 
-        this.validate(options);
 
-        this.screenWidth = options.screenWidth || window.outerWidth;
-        this.screenHeight = options.screenHeight || window.outerHeight;
+        // Ensure the component is not loaded twice on the same page, if it is a singleton
 
         if (component.singleton && activeComponents.some(comp => comp.component === component)) {
             throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
         }
 
-        this.parentWindow = getParentWindow();
-
-        this.childWindowName = options.childWindowName || this.getChildWindowName();
-
         activeComponents.push(this);
 
-        options.props = options.props || {};
-        this.setProps(options.props);
+        this.validate(options);
+
+        this.parentWindow = getParentWindow();
+
+        // User options
 
         this.onEnter   = options.onEnter || noop;
         this.onExit    = once(options.onExit    || noop);
@@ -154,17 +151,45 @@ export class ParentComponent extends BaseComponent {
         this.onError   = once(options.onError   || noop);
         this.onTimeout = once(options.onTimeout || options.onError || noop);
 
-        this.timeout = options.timeout;
+        this.customUrl = options.url;
+        this.env       = options.env;
+        this.timeout   = options.timeout;
+
+        this.setProps(options.props || {});
+
+
+        // Options passed during renderToParent
+
+        this.childWindowName = options.childWindowName || this.getChildWindowName();
+
+        this.screenWidth = options.screenWidth || window.outerWidth;
+        this.screenHeight = options.screenHeight || window.outerHeight;
     }
 
     setProps(props) {
-        this.validateProps(props);
         this.props = this.normalizeProps(props);
-        this.queryString = this.propsToQuery(this.props);
-        this.url = this.component.url;
-        if (this.queryString) {
-            this.url = `${ this.url }${ this.component.url.indexOf('?') === -1 ? '?' : '&' }${ this.queryString }`;
+        this.url   = this.getUrl();
+    }
+
+    getUrl() {
+
+        let url;
+
+        if (this.customUrl) {
+            url = this.customUrl;
+        } else if (this.env) {
+            url = this.component.envUrls[this.env];
+        } else {
+            url = this.component.url;
         }
+
+        let queryString = this.propsToQuery(this.props);
+
+        if (queryString) {
+            url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;
+        }
+
+        return url;
     }
 
     updateProps(props) {
@@ -195,56 +220,15 @@ export class ParentComponent extends BaseComponent {
         if (options.container && !this.component.context.iframe) {
             throw new Error(`[${this.component.tag}] Can not render to a container: does not support iframe mode`);
         }
-    }
 
-    validateProps(props) {
-
-        for (let key of Object.keys(this.component.props)) {
-
-            let prop = this.component.props[key];
-            let value = props[key];
-
-            let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-            if (!hasProp) {
-
-                if (prop.required !== false) {
-                    throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
-                }
-
-                continue;
-            }
-
-            if (prop.type === 'function') {
-
-                if (!(value instanceof Function)) {
-                    throw new Error(`[${this.component.tag}] Prop is not of type function: ${key}`);
-                }
-
-            } else if (prop.type === 'string') {
-
-                if (typeof value !== 'string') {
-                    throw new Error(`[${this.component.tag}] Prop is not of type string: ${key}`);
-                }
-
-            } else if (prop.type === 'object') {
-
-                try {
-                    JSON.stringify(value);
-                } catch (err) {
-                    throw new Error(`[${this.component.tag}] Unable to serialize prop: ${key}`);
-                }
-
-            } else if (prop.type === 'number') {
-
-                if (isNaN(parseInt(value, 10))) {
-                    throw new Error(`[${this.component.tag}] Prop is not a number: ${key}`);
-                }
-            }
+        if (options.env && (!this.component.envUrls[options.env])) {
+            throw new Error(`[${this.component.tag}] Invalid env: ${options.env}`);
         }
     }
 
     normalizeProps(props) {
+
+        this.validateProps(props);
 
         props = props || {};
         let result = {};
@@ -454,15 +438,18 @@ export class ParentComponent extends BaseComponent {
         RENDER_DRIVERS[context].renderToParent.call(this, element);
 
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+
             tag: this.component.tag,
             context: context,
             element: element,
+
             options: {
-                props:                     this.props,
-                childWindowName:           this.childWindowName,
-                parentComponentWindowName: window.name,
-                screenWidth:               this.screenWidth,
-                screenHeight:              this.screenHeight
+
+                ...this.options,
+
+                childWindowName: this.childWindowName,
+                screenWidth:     this.screenWidth,
+                screenHeight:    this.screenHeight
             }
 
         }).then(data => {
@@ -749,6 +736,11 @@ export const internalProps = {
         required: false
     },
 
+    env: {
+        type: 'string',
+        required: false
+    },
+
     timeout: {
         type: 'number',
         required: false
@@ -762,10 +754,11 @@ ParentComponent.fromProps = function fromProps(component, props) {
         props,
 
         onEnter: pop(props, 'onEnter'),
-        onExit: pop(props, 'onExit'),
+        onExit:  pop(props, 'onExit'),
         onClose: pop(props, 'onClose'),
         onError: pop(props, 'onError'),
 
+        env:     pop(props, 'env'),
         timeout: parseInt(pop(props, 'timeout', 0), 10)
     });
 };
