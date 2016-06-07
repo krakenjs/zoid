@@ -12,15 +12,7 @@ let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.IFRAME ]: {
 
-        render(element) {
-
-            this.openIframe(element);
-            this.listen(this.window);
-            this.loadUrl(this.url);
-            this.runTimeout();
-
-            return this;
-        },
+        overlay: false,
 
         open(element) {
 
@@ -52,17 +44,7 @@ let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.POPUP ]: {
 
-        render() {
-
-            this.openPopup();
-            this.listen(this.window);
-            this.loadUrl(this.url);
-            this.runTimeout();
-
-            this.createOverlay();
-
-            return this;
-        },
+        overlay: true,
 
         open() {
 
@@ -103,17 +85,7 @@ let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
-        render() {
-
-            this.openLightbox();
-            this.listen(this.window);
-            this.loadUrl(this.url);
-            this.runTimeout();
-
-            this.createOverlay();
-
-            return this;
-        },
+        overlay: true,
 
         open() {
 
@@ -409,8 +381,10 @@ export class ParentComponent extends BaseComponent {
                 continue;
             }
 
+            let driver = RENDER_DRIVERS[context];
+
             try {
-                return RENDER_DRIVERS[context].render.call(this, element);
+                driver.open.call(this, element);
             } catch (err) {
 
                 if (err instanceof PopupOpenError) {
@@ -419,6 +393,16 @@ export class ParentComponent extends BaseComponent {
 
                 throw err;
             }
+
+            this.listen(this.window);
+            this.loadUrl(this.url);
+            this.runTimeout();
+
+            if (driver.overlay) {
+                this.createOverlay();
+            }
+
+            return;
         }
 
         throw new Error(`[${this.component.tag}] No context options available for render`);
@@ -433,7 +417,7 @@ export class ParentComponent extends BaseComponent {
         return RENDER_DRIVERS[context].open.call(this, element);
     }
 
-    renderToParent(element, context) {
+    renderToParent(element, context, options = {}) {
 
         if (this.window) {
             throw new Error(`[${this.component.tag}] Component is already rendered`);
@@ -456,6 +440,8 @@ export class ParentComponent extends BaseComponent {
         RENDER_DRIVERS[context].renderToParent.call(this, element);
 
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+
+            ...options,
 
             tag: this.component.tag,
             context: context,
@@ -542,43 +528,63 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
-    hijackToPopup(el) {
-        return this.hijack(el, CONTEXT_TYPES.POPUP);
+    hijackToPopup(element) {
+        return this.hijack(element, CONTEXT_TYPES.POPUP);
     }
 
-    hijackToLightbox(el) {
-        return this.hijack(el, CONTEXT_TYPES.LIGHTBOX);
+    hijackToLightbox(element) {
+        return this.hijack(element, CONTEXT_TYPES.LIGHTBOX);
     }
 
-    hijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
-        el = getElement(el);
+    hijack(element, context = CONTEXT_TYPES.LIGHTBOX) {
+        let el = getElement(element);
+
+        if (!el) {
+            throw new Error(`[${this.component.tag}] Can not find element: ${element}`);
+        }
 
         let isButton = el.tagName.toLowerCase() === 'button' || (el.tagName.toLowerCase() === 'input' && el.type === 'submit');
-        let form;
 
         if (isButton) {
-            form = getParentNode(el, 'form');
+            el = getParentNode(el, 'form');
         }
 
         el.addEventListener('click', event => {
 
             if (this.window) {
                 event.preventDefault();
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
             }
 
-            RENDER_DRIVERS[context].open.call(this);
-
-            if (isButton && form) {
-                form.target = this.childWindowName;
-            } else {
-                el.target = this.childWindowName;
-            }
-
-            this.listen(this.window);
+            this.renderHijack(el, context);
         });
 
         return this;
+    }
+
+    renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Component is already rendered`);
+        }
+
+        let driver = RENDER_DRIVERS[context];
+
+        driver.open.call(this);
+
+        el.target = this.childWindowName;
+
+        this.listen(this.window);
+        this.runTimeout();
+
+        if (driver.overlay) {
+            this.createOverlay();
+        }
+    }
+
+    submitParentForm() {
+        return this.renderToParent(null, CONTEXT_TYPES.POPUP, {
+            submitParentForm: true
+        });
     }
 
     runTimeout() {
@@ -620,7 +626,16 @@ export class ParentComponent extends BaseComponent {
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
                 let component = this.component.getByTag(data.tag);
-                component.init(data.options).render(data.element, data.context);
+                let instance =  component.init(data.options);
+
+                if (data.submitParentForm) {
+                    let form = getParentNode(this.iframe, 'form');
+                    instance.renderHijack(form, data.context);
+                    form.submit();
+
+                } else {
+                    instance.render(data.element, data.context);
+                }
             },
 
             [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {

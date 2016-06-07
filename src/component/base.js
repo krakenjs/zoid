@@ -109,7 +109,7 @@ export class BaseComponent {
 
             if (!hasProp) {
 
-                if (prop.required !== false) {
+                if (prop.required !== false && !prop.hasOwnProperty('def')) {
                     throw new Error(`[${this.component.tag}] Prop is required: ${key}`);
                 }
 
