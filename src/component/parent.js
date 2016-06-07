@@ -79,7 +79,7 @@ let RENDER_DRIVERS = {
 
         renderToParent() {
             this.childWindowName = this.getChildWindowName({ proxy: true });
-            this.openPopup();
+            this.open(null, CONTEXT_TYPES.POPUP);
         }
     },
 
@@ -89,7 +89,7 @@ let RENDER_DRIVERS = {
 
         open() {
 
-            this.openIframe(document.body);
+            this.open(document.body, CONTEXT_TYPES.IFRAME);
 
             let pos = this.getPosition();
 
@@ -135,6 +135,8 @@ export class ParentComponent extends BaseComponent {
 
         this.screenWidth = options.screenWidth || window.outerWidth;
         this.screenHeight = options.screenHeight || window.outerHeight;
+
+        this.createStyle();
     }
 
     setProps(props) {
@@ -374,10 +376,8 @@ export class ParentComponent extends BaseComponent {
                 continue;
             }
 
-            let driver = RENDER_DRIVERS[context];
-
             try {
-                driver.open.call(this, element);
+                this.open(element, context);
             } catch (err) {
 
                 if (err instanceof PopupOpenError) {
@@ -391,7 +391,7 @@ export class ParentComponent extends BaseComponent {
             this.loadUrl(this.url);
             this.runTimeout();
 
-            if (driver.overlay) {
+            if (RENDER_DRIVERS[context].overlay) {
                 this.createOverlay();
             }
 
@@ -407,7 +407,9 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`[${this.component.tag}] Component is already rendered`);
         }
 
-        return RENDER_DRIVERS[context].open.call(this, element);
+        RENDER_DRIVERS[context].open.call(this, element);
+
+        this.createInitialComponent();
     }
 
     renderToParent(element, context, options = {}) {
@@ -462,10 +464,6 @@ export class ParentComponent extends BaseComponent {
         return this.render(element, CONTEXT_TYPES.IFRAME);
     }
 
-    openIframe(element) {
-        return this.open(element, CONTEXT_TYPES.IFRAME);
-    }
-
     renderIframeToParent(element) {
         return this.renderToParent(element, CONTEXT_TYPES.IFRAME);
     }
@@ -474,20 +472,12 @@ export class ParentComponent extends BaseComponent {
         return this.render(null, CONTEXT_TYPES.LIGHTBOX);
     }
 
-    openLightbox() {
-        return this.open(null, CONTEXT_TYPES.LIGHTBOX);
-    }
-
     renderLightboxToParent() {
         return this.renderToParent(null, CONTEXT_TYPES.LIGHTBOX);
     }
 
     renderPopup() {
         return this.render(null, CONTEXT_TYPES.POPUP);
-    }
-
-    openPopup() {
-        return this.open(null, CONTEXT_TYPES.POPUP);
     }
 
     renderPopupToParent() {
@@ -559,16 +549,14 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`[${this.component.tag}] Component is already rendered`);
         }
 
-        let driver = RENDER_DRIVERS[context];
-
-        driver.open.call(this);
+        this.open(null, context);
 
         el.target = this.childWindowName;
 
         this.listen(this.window);
         this.runTimeout();
 
-        if (driver.overlay) {
+        if (RENDER_DRIVERS[context].overlay) {
             this.createOverlay();
         }
     }
@@ -666,6 +654,41 @@ export class ParentComponent extends BaseComponent {
                 this.iframe.width = width;
             }
         });
+    }
+
+    createStyle() {
+        this.overlayStyle = createElement('style', {
+
+            styleSheet: this.component.parentStyle,
+
+            attributes: {
+                type: 'text/css'
+            }
+
+        }, document.body);
+    }
+
+    createInitialComponent() {
+
+        createElement('body', {
+
+            html: this.component.componentTemplate,
+
+            class: [
+                `xcomponent-component`
+            ]
+
+        }, this.window.document.body);
+
+        createElement('style', {
+
+            styleSheet: this.component.componentStyle,
+
+            attributes: {
+                type: 'text/css'
+            }
+
+        }, this.window.document.body);
     }
 
     createOverlay() {

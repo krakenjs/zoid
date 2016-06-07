@@ -5,8 +5,11 @@ import { internalProps } from './base';
 import { extend, scanForJavascript } from '../lib';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
-import defaultOverlayTemplate from '../templates/overlay.htm';
-import defaultOverlayStyle from '../templates/overlay.css';
+import parentStyle from '../templates/parent.css';
+import overlayTemplate from '../templates/overlay.htm';
+import overlayStyle from '../templates/overlay.css';
+import componentTemplate from '../templates/component.htm';
+import componentStyle from '../templates/component.css';
 
 import * as drivers from '../drivers';
 
@@ -34,17 +37,20 @@ export class Component {
 
         this.singleton = options.singleton;
 
+        this.parentStyle       = scanForJavascript(options.parentStyle)       || parentStyle;
+        this.overlayTemplate   = scanForJavascript(options.overlayTemplate)   || overlayTemplate;
+        this.overlayStyle      = scanForJavascript(options.overlayStyle)      || overlayStyle;
+        this.componentTemplate = scanForJavascript(options.componentTemplate) || componentTemplate;
+        this.componentStyle    = scanForJavascript(options.componentStyle)    || componentStyle;
+
+        components[this.tag] = this;
+
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
             if (driver.isActive()) {
                 driver.register(this);
             }
         }
-
-        this.overlayTemplate = scanForJavascript(options.overlayTemplate) || defaultOverlayTemplate;
-        this.overlayStyle = scanForJavascript(options.overlayStyle) || defaultOverlayStyle;
-
-        components[this.tag] = this;
     }
 
     parent(options) {
