@@ -1,6 +1,7 @@
 
 import { ChildComponent } from './child';
-import { ParentComponent, internalProps } from './parent';
+import { ParentComponent } from './parent';
+import { internalProps } from './base';
 import { extend, scanForJavascript } from '../lib';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
@@ -17,7 +18,7 @@ export class Component {
         this.validate(options);
 
         this.tag        = options.tag;
-        this.props      = options.props || {};
+        this.props      = extend(options.props || {}, internalProps);
         this.dimensions = options.dimensions;
 
         this.defaultEnv = options.defaultEnv;
@@ -60,34 +61,8 @@ export class Component {
         return component;
     }
 
-    init(options) {
-        return new ParentComponent(this, options);
-    }
-
-    initFromProps(options = {}) {
-
-        let props = {};
-
-        for (let key of Object.keys(this.props)) {
-            if (options.hasOwnProperty(key)) {
-                props[key] = options[key];
-                delete options[key];
-            }
-        }
-
-        options.props = props;
-
-        return new ParentComponent(this, options);
-    }
-
-    getProps() {
-
-        let props = {};
-
-        extend(props, this.props);
-        extend(props, internalProps);
-
-        return props;
+    init(props) {
+        return new ParentComponent(this, { props });
     }
 
     getByTag(tag) {
@@ -119,6 +94,10 @@ export class Component {
         if (options.props) {
             for (let key of Object.keys(options.props)) {
                 let prop = options.props[key];
+
+                if (internalProps.hasOwnProperty(key)) {
+                    throw new Error(`[${options.tag}] Reserved prop name: ${key}`);
+                }
 
                 if (!prop || !(typeof prop === 'object')) {
                     throw new Error(`[${options.tag}] Expected options.props.${key} to be an object`);

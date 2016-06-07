@@ -15,11 +15,9 @@ describe('xcomponent tests', function() {
     it('should enter a component and call a prop', function(done) {
         var component = testComponent.init({
 
-            props: {
-                foo: function(bar) {
-                    assert.equal(bar, 'bar');
-                    done();
-                }
+            foo: function(bar) {
+                assert.equal(bar, 'bar');
+                done();
             }
 
         }).renderLightbox();

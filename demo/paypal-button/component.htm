@@ -10,10 +10,8 @@
 
     function clickButton() {
         window.checkout = PayPalCheckout.init({
-            props: {
-                onAuthorize: function() {
-                    button.props.onSuccess();
-                }
+            onAuthorize: function() {
+                button.props.onSuccess();
             }
         });
 

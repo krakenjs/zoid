@@ -8,10 +8,8 @@
 <script>
     PayPalButton.init({
 
-        props: {
-            onSuccess() {
-                console.log('payment was completed!');
-            }
+        onSuccess() {
+            console.log('payment was completed!');
         }
 
     }).render('#container')

@@ -4,6 +4,60 @@ import { b64encode, b64decode, extend, uniqueID } from '../lib';
 import { CONSTANTS } from '../constants';
 import { IntegrationError } from '../error';
 
+export const internalProps = {
+
+    onEnter: {
+        type: 'function',
+        required: false,
+        noop: true
+    },
+
+    onExit: {
+        type: 'function',
+        required: false,
+        noop: true,
+        once: true
+    },
+
+    onClose: {
+        type: 'function',
+        required: false,
+        noop: true,
+        once: true,
+        defaultProp: 'onError'
+    },
+
+    onTimeout: {
+        type: 'function',
+        required: false,
+        noop: true,
+        once: true,
+        defaultProp: 'onError'
+    },
+
+    onError: {
+        type: 'function',
+        required: false,
+        noop: true,
+        once: true
+    },
+
+    url: {
+        type: 'string',
+        required: false
+    },
+
+    env: {
+        type: 'string',
+        required: false
+    },
+
+    timeout: {
+        type: 'number',
+        required: false
+    }
+};
+
 export class BaseComponent {
 
     registerForCleanup(task) {
@@ -99,6 +153,12 @@ export class BaseComponent {
     }
 
     validateProps(props) {
+
+        for (let key of Object.keys(props)) {
+            if (!this.component.props.hasOwnProperty(key)) {
+                throw new Error(`[${this.component.tag}] Invalid prop: ${key}`);
+            }
+        }
 
         for (let key of Object.keys(this.component.props)) {
 

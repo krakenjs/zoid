@@ -13,11 +13,10 @@ export let angular = {
 
             window.angular.module(moduleName).directive(dasherizeToCamel(component.tag), () => {
 
-                let props = component.getProps();
                 let scope = {};
 
-                for (let key of Object.keys(props)) {
-                    let prop = props[key];
+                for (let key of Object.keys(component.props)) {
+                    let prop = component.props[key];
 
                     if (prop.type === 'function' || prop.type === 'object') {
                         scope[key] = '=';
@@ -41,7 +40,7 @@ export let angular = {
                             return instanceProps;
                         }
 
-                        let parent = component.initFromProps(getProps());
+                        let parent = component.init(getProps());
                         parent.render($element[0]);
 
                         $scope.$watch(() => {

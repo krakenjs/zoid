@@ -164,12 +164,10 @@ My life is even easier. I just need to drop in your component onto my page:
 
     var mycomponent = MyLoginComponent.init({
 
-        props: {
-            prefilledEmail: 'foo@bar.com',
+        prefilledEmail: 'foo@bar.com',
 
-            onLogin: function(email) {
-                console.log('User logged in with email:', email);
-            }
+        onLogin: function(email) {
+            console.log('User logged in with email:', email);
         }
     });
 
@@ -259,10 +257,7 @@ If I wanted to update the props from my parent manually, using javascript, I can
 
 ```javascript
 var login = MyLoginComponent.init({
-
-    props: {
-        email: 'foo@bar.com'
-    }
+    email: 'foo@bar.com'
 });
 
 // At some point in the future

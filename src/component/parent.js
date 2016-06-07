@@ -114,7 +114,6 @@ export class ParentComponent extends BaseComponent {
     constructor(component, options = {}) {
         super(component, options);
         this.component = component;
-        this.options = options;
 
 
         // Ensure the component is not loaded twice on the same page, if it is a singleton
@@ -126,23 +125,9 @@ export class ParentComponent extends BaseComponent {
         activeComponents.push(this);
 
         this.validate(options);
-
         this.parentWindow = getParentWindow();
 
-        // User options
-
-        this.onEnter   = options.onEnter || noop;
-        this.onExit    = once(options.onExit    || noop);
-        this.onClose   = once(options.onClose   || options.onError || noop);
-        this.onError   = once(options.onError   || noop);
-        this.onTimeout = once(options.onTimeout || options.onError || noop);
-
-        this.customUrl = options.url;
-        this.env       = options.env;
-        this.timeout   = options.timeout;
-
         this.setProps(options.props || {});
-
 
         // Options passed during renderToParent
 
@@ -161,10 +146,10 @@ export class ParentComponent extends BaseComponent {
 
         let url;
 
-        if (this.customUrl) {
-            url = this.customUrl;
-        } else if (this.env) {
-            url = this.component.envUrls[this.env];
+        if (this.props.url) {
+            url = this.props.url;
+        } else if (this.props.env) {
+            url = this.component.envUrls[this.props.env];
         } else {
             url = this.component.url;
         }
@@ -199,8 +184,12 @@ export class ParentComponent extends BaseComponent {
 
     validate(options) {
 
-        if (options.timeout && !(typeof options.timeout === 'number')) {
-            throw new Error(`[${this.component.tag}] Expected options.timeout to be a number: ${options.timeout}`);
+        if (options.timeout) {
+            let timeout = parseInt(options.timeout, 10);
+
+            if (typeof timeout !== 'number' || isNaN(timeout)) {
+                throw new Error(`[${this.component.tag}] Expected options.timeout to be a number: ${options.timeout}`);
+            }
         }
 
         if (options.container && !this.component.context.iframe) {
@@ -228,6 +217,8 @@ export class ParentComponent extends BaseComponent {
 
             if (!hasProp && prop.def) {
                 value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
+            } else if (!hasProp && prop.defaultProp) {
+                value = props[prop.defaultProp];
             }
 
             if (prop.type === 'boolean') {
@@ -237,7 +228,7 @@ export class ParentComponent extends BaseComponent {
 
                 if (!value) {
 
-                    if (prop.noop) {
+                    if (!value && prop.noop) {
                         value = noop;
                     }
 
@@ -287,11 +278,13 @@ export class ParentComponent extends BaseComponent {
             if (typeof value === 'boolean') {
                 result = '1';
             } else if (typeof value === 'string') {
-                result = value;
+                result = value.toString();
             } else if (typeof value === 'function') {
                 return;
             } else if (typeof value === 'object') {
                 result = JSON.stringify(value);
+            } else if (typeof value === 'number') {
+                result = value.toString();
             }
 
             return `${urlEncode(key)}=${urlEncode(result)}`;
@@ -448,8 +441,7 @@ export class ParentComponent extends BaseComponent {
             element: element,
 
             options: {
-
-                ...this.options,
+                props: this.props,
 
                 childWindowName: this.childWindowName,
                 screenWidth:     this.screenWidth,
@@ -508,7 +500,7 @@ export class ParentComponent extends BaseComponent {
     watchForClose() {
 
         onCloseWindow(this.window, () => {
-            this.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
+            this.props.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
             this.destroy();
         });
 
@@ -589,20 +581,20 @@ export class ParentComponent extends BaseComponent {
 
     runTimeout() {
 
-        if (this.timeout) {
+        if (this.props.timeout) {
             setTimeout(() => {
                 if (!this.entered) {
-                    this.onTimeout.call(this, new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.timeout} milliseconds`));
+                    this.props.onTimeout.call(this, new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.props.timeout} milliseconds`));
                     this.destroy();
                 }
-            }, this.timeout);
+            }, this.props.timeout);
         }
     }
 
     listeners() {
         return {
             [ CONSTANTS.POST_MESSAGE.INIT ](source, data) {
-                this.onEnter.call(this);
+                this.props.onEnter.call(this);
                 this.entered = true;
 
                 return {
@@ -626,7 +618,7 @@ export class ParentComponent extends BaseComponent {
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
                 let component = this.component.getByTag(data.tag);
-                let instance =  component.init(data.options);
+                let instance =  component.parent(data.options);
 
                 if (data.submitParentForm) {
                     let form = getParentNode(this.iframe, 'form');
@@ -640,7 +632,7 @@ export class ParentComponent extends BaseComponent {
 
             [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
                 this.destroy();
-                this.onError(new Error(data.error));
+                this.props.onError(new Error(data.error));
             }
         };
     }
@@ -728,41 +720,3 @@ export class ParentComponent extends BaseComponent {
     }
 
 }
-
-export const internalProps = {
-
-    onEnter: {
-        type: 'function',
-        required: false
-    },
-
-    onExit: {
-        type: 'function',
-        required: false
-    },
-
-    onClose: {
-        type: 'function',
-        required: false
-    },
-
-    onError: {
-        type: 'function',
-        required: false
-    },
-
-    url: {
-        type: 'string',
-        required: false
-    },
-
-    env: {
-        type: 'string',
-        required: false
-    },
-
-    timeout: {
-        type: 'number',
-        required: false
-    }
-};

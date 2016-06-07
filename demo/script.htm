@@ -1,0 +1,21 @@
+
+<script src="../dist/xcomponent.js"></script>
+
+<div id="container"></div>
+<br /><input id="email" value="foo@bar.com" />
+
+<style>
+    body {
+        background-color: lightblue;
+    }
+</style>
+
+<script data-component="paypal-login" src="./paypal-login/component.js">
+    {
+        email: 'foo@bar.com',
+        onSuccess: function onSuccess(email) {
+            console.log('User logged in:', email);
+        },
+        timeout: 5000
+    }
+</script>

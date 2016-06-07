@@ -19,12 +19,10 @@
 
     var login = PaypalLogin.init({
 
-        props: {
-            email: 'foo@bar.com',
+        email: 'foo@bar.com',
 
-            onSuccess: function(email) {
-                console.log('User logged in with email', email, '!');
-            }
+        onSuccess: function(email) {
+            console.log('User logged in with email', email, '!');
         },
 
         onError: function() {

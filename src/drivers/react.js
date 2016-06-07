@@ -9,7 +9,6 @@ export let react = {
 
     register(component) {
 
-
         component.react = window.React.createClass({
 
             render() {
@@ -17,7 +16,7 @@ export let react = {
             },
 
             componentDidMount() {
-                let parent = component.initFromProps(extend({}, this.props));
+                let parent = component.init(extend({}, this.props));
 
                 this.setState({ parent });
 
