@@ -1,19 +1,12 @@
 
-class ExtendableError extends Error {
-
-    constructor(message) {
-        super(message);
-        this.name = this.constructor.name;
-        this.message = message;
-        if (typeof Error.captureStackTrace === 'function') {
-            Error.captureStackTrace(this, this.constructor);
-        } else {
-            this.stack = (new Error(message)).stack;
-        }
-    }
+export function PopupOpenError(message) {
+    this.message = message;
 }
 
+PopupOpenError.prototype = Object.create(Error.prototype);
 
-export class PopupOpenError extends ExtendableError {}
+export function IntegrationError(message) {
+    this.message = message;
+}
 
-export class IntegrationError extends ExtendableError {}
+IntegrationError.prototype = Object.create(Error.prototype);

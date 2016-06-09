@@ -92,7 +92,8 @@ let RENDER_DRIVERS = {
             // Sometimes we'll be blocked from opening the popup because we're not in a click event.
 
             if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-                throw new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
+                var err = new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
+                throw err;
             }
 
             this.setForCleanup('context', CONSTANTS.CONTEXT.POPUP);
@@ -529,6 +530,8 @@ export class ParentComponent extends BaseComponent {
         if (RENDER_DRIVERS[context].overlay) {
             this.createOverlayTemplate();
         }
+
+        return this;
     }
 
 
@@ -615,6 +618,8 @@ export class ParentComponent extends BaseComponent {
             // messages on the sibling window, since we have a handle on it.
 
             this.listen(this.window);
+
+            return this;
         });
     }
 
