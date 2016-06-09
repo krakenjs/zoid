@@ -871,7 +871,7 @@ export class ParentComponent extends BaseComponent {
 
                 this.onInit.reject().catch(function() {
                     let err = new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.props.timeout} milliseconds`);
-                    this.props.onTimeout.call(this, err);
+                    this.props.onTimeout(err);
                     this.destroy();
                 });
 
@@ -894,7 +894,7 @@ export class ParentComponent extends BaseComponent {
             // for this message to be sure so we can continue doing anything from the parent
 
             [ CONSTANTS.POST_MESSAGE.INIT ](source, data) {
-                this.props.onEnter.call(this);
+                this.props.onEnter();
                 this.onInit.resolve();
 
                 // Let the child know what its context is, and what its initial props are.
