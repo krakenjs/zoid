@@ -1,6 +1,6 @@
 import postRobot from 'post-robot/src';
 
-import { b64encode, b64decode, extend } from '../lib';
+import { b64encode, b64decode, extend, once } from '../lib';
 import { CONSTANTS } from '../constants';
 import { IntegrationError } from '../error';
 
@@ -182,7 +182,7 @@ export class BaseComponent {
         let self = this;
         let errored = false;
 
-        return function wrapper() {
+        return once(function wrapper() {
 
             if (errored) {
                 return;
@@ -198,9 +198,9 @@ export class BaseComponent {
                 }
 
                 console.error(err.stack || err.toString());
-                return self.error(new Error(`[${this.component.tag}] Child callback method threw an error`));
+                return self.error(new Error(`[${this.component.tag}] Child lifecycle method threw an error`));
             }
-        };
+        });
     }
 
 

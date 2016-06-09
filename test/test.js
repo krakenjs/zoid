@@ -103,4 +103,87 @@ describe('xcomponent error cases', function() {
 
         done();
     });
+
+    it('should enter a component, throw an error, and return a new error to the parent without the original stack', function(done) {
+
+        component = testComponent.init({
+
+            onError(err) {
+                assert.isTrue(err.message.indexOf('xxxxx') === -1, 'Expected error to not contain original error');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndThrowRegularError');
+    });
+
+    it('should enter a component, throw an integration error, and return the error to the parent with the original stack', function(done) {
+
+        component = testComponent.init({
+
+            onError(err) {
+                assert.isTrue(err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndThrowIntegrationError');
+    });
+});
+
+describe('xcomponent misc', function() {
+
+    it('should close an xcomponent popup', function(done) {
+
+        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!');
+
+        component = testComponent.init({
+
+            onEnter() {
+                let win = component.window;
+
+                component.close().then(() => {
+                    assert.isTrue(win.closed, 'Expected component window to be closed');
+                    done();
+                });
+            }
+
+        }).renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should close an xcomponent lightbox', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                let win = component.window;
+
+                component.close().then(() => {
+                    assert.isTrue(win.closed, 'Expected component window to be closed');
+                    done();
+                });
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should focus an xcomponent popup', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                component.window.focus = done;
+                component.focus();
+            }
+
+        }).renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
 });

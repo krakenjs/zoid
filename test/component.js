@@ -18,3 +18,21 @@ export var testComponent = xcomponent.create({
         }
     }
 });
+
+export var testComponent2 = xcomponent.create({
+
+    tag: 'test-component2',
+    url: '/base/test/child.htm',
+
+    dimensions: {
+        width: 500,
+        height: 500
+    },
+
+    props: {
+        foo: {
+            type: 'function',
+            required: false
+        }
+    }
+});

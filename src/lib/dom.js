@@ -94,10 +94,11 @@ export function onCloseWindow(win, callback) {
     }
 
     interval = setInterval(checkWindowClosed, 50);
-    setTimeout(checkWindowClosed);
+    let timeout = setTimeout(checkWindowClosed);
+
+    let close = win.close;
 
     try {
-        let close = win.close;
         win.close = function() {
             close.apply(this, arguments);
             setTimeout(checkWindowClosed);
@@ -105,6 +106,34 @@ export function onCloseWindow(win, callback) {
     } catch (err) {
         // pass
     }
+
+    return {
+        cancel() {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            try {
+                win.close = close;
+            } catch (err) {
+                // pass
+            }
+        }
+    };
+}
+
+
+/*  Add Event Listener
+    ------------------
+
+    Add DOM Event listener with cancel
+*/
+
+export function addEventListener(obj, event, handler) {
+    obj.addEventListener(event, handler);
+    return {
+        cancel() {
+            obj.removeEventListener(event, handler);
+        }
+    };
 }
 
 

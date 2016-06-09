@@ -1,6 +1,8 @@
 
-import { testComponent } from './component';
+import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
+
+import { testComponent } from './component';
 
 let cases = {
 
@@ -12,6 +14,22 @@ let cases = {
         testComponent.attach({
             onEnter: function() {
                 this.props.foo('bar');
+            }
+        });
+    },
+
+    attachTestComponentAndThrowRegularError() {
+        testComponent.attach({
+            onEnter: function() {
+                throw new Error('xxxxx');
+            }
+        });
+    },
+
+    attachTestComponentAndThrowIntegrationError() {
+        testComponent.attach({
+            onEnter: function() {
+                throw new xcomponent.IntegrationError('xxxxx');
             }
         });
     }

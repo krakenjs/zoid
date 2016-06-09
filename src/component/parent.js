@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
-import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID } from '../lib';
+import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID } from '../lib';
 import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -302,74 +302,84 @@ export class ParentComponent extends BaseComponent {
         let result = {};
 
         for (let key of Object.keys(this.component.props)) {
-
-            let prop = this.component.props[key];
-            let value = props[key];
-
-            let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-            // Substitute in provided default. If prop.def is a function, we call it to get the default.
-
-            if (!hasProp && prop.def) {
-                value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
-            }
-
-            // If we have a defaultProp, use the value of that prop for this one
-
-            else if (!hasProp && prop.defaultProp) {
-                value = props[prop.defaultProp];
-            }
-
-            if (prop.type === 'boolean') {
-                result[key] = Boolean(value);
-
-            } else if (prop.type === 'function') {
-
-                if (!value) {
-
-                    // If prop.noop is set, make the function a noop
-
-                    if (!value && prop.noop) {
-                        value = noop;
-                    }
-
-                } else {
-
-                    // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
-
-                    if (prop.denodeify) {
-                        value = denodeify(value);
-                    }
-
-                    // If prop.once is set, ensure the function can only be called once
-
-                    if (prop.once) {
-                        value = once(value);
-                    }
-
-                    // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
-
-                    if (prop.memoize) {
-                        value = memoize(value);
-                    }
-                }
-
-                result[key] = value;
-
-            } else if (prop.type === 'string') {
-                result[key] = value || '';
-
-            } else if (prop.type === 'object') {
-                result[key] = JSON.stringify(value);
-
-            } else if (prop.type === 'number') {
-                result[key] = parseInt(value || 0, 10);
-            }
+            result[key] = this.normalizeProp(props, key);
         }
 
         return result;
     }
 
+
+     /*  Normalize Props
+         ---------------
+
+         Turn prop into normalized value, using defaults, function options, etc.
+     */
+
+    normalizeProp(props, key) {
+
+        let prop = this.component.props[key];
+        let value = props[key];
+
+        let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
+
+        // Substitute in provided default. If prop.def is a function, we call it to get the default.
+
+        if (!hasProp && prop.def) {
+            value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
+        }
+
+        // If we have a defaultProp, use the value of that prop for this one
+
+        else if (!hasProp && prop.defaultProp) {
+            value = this.normalizeProp(props, prop.defaultProp);
+        }
+
+        if (prop.type === 'boolean') {
+            return Boolean(value);
+
+        } else if (prop.type === 'function') {
+
+            if (!value) {
+
+                // If prop.noop is set, make the function a noop
+
+                if (!value && prop.noop) {
+                    value = noop;
+                }
+
+            } else {
+
+                // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
+
+                if (prop.denodeify) {
+                    value = denodeify(value);
+                }
+
+                // If prop.once is set, ensure the function can only be called once
+
+                if (prop.once) {
+                    value = once(value);
+                }
+
+                // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
+
+                if (prop.memoize) {
+                    value = memoize(value);
+                }
+            }
+
+            return value;
+
+        } else if (prop.type === 'string') {
+            return value || '';
+
+        } else if (prop.type === 'object') {
+            return JSON.stringify(value);
+
+        } else if (prop.type === 'number') {
+            return parseInt(value || 0, 10);
+        }
+    }
 
 
     /*  Props to Query
@@ -709,7 +719,7 @@ export class ParentComponent extends BaseComponent {
 
     watchForClose() {
 
-        onCloseWindow(this.window, () => {
+        let closeWindowListener = onCloseWindow(this.window, () => {
             this.props.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
             this.destroy();
         });
@@ -717,10 +727,15 @@ export class ParentComponent extends BaseComponent {
         // Our child has know way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
 
-        window.addEventListener('beforeunload', () => {
+        let unloadListener = addEventListener(window, 'beforeunload', () => {
             if (this.popup) {
                 this.popup.close();
             }
+        });
+
+        this.registerForCleanup(() => {
+            closeWindowListener.cancel();
+            unloadListener.cancel();
         });
     }
 
@@ -962,8 +977,8 @@ export class ParentComponent extends BaseComponent {
             // The child encountered an error
 
             [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
-                this.destroy();
                 this.props.onError(new Error(data.error));
+                this.destroy();
             }
         };
     }

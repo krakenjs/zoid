@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
-import { noop, once, extend, getParentWindow, onCloseWindow } from '../lib';
+import { noop, extend, getParentWindow, onCloseWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
 /*  Child Component
@@ -25,9 +25,9 @@ export class ChildComponent extends BaseComponent {
 
         // Handlers for various component lifecycle events
 
-        this.onEnter = once(this.tryCatch(options.onEnter || noop));
-        this.onClose = once(this.tryCatch(options.onClose || noop));
-        this.onError = once(this.tryCatch(options.onError || function(err) { throw err; }));
+        this.onEnter = this.tryCatch(options.onEnter || noop);
+        this.onClose = this.tryCatch(options.onClose || noop);
+        this.onError = this.tryCatch(options.onError || function(err) { throw err; });
         this.onProps = this.tryCatch(options.onProps || noop);
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
@@ -102,7 +102,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParentComponent(name, data) {
-        return postRobot.send(this.parentComponentWindow, CONSTANTS.POST_MESSAGE.INIT);
+        return postRobot.send(this.parentComponentWindow, name, data);
     }
 
 
@@ -317,7 +317,7 @@ export class ChildComponent extends BaseComponent {
 
     error(err) {
         return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.ERROR, {
-            error: err.stack || err.toString()
+            error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
         });
     }
 }
