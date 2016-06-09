@@ -1,6 +1,13 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
+
+/*  DeNodeify
+    ---------
+
+    Turns a method from a function which accepts a callback, into a function which returns a promise.
+*/
+
 export function denodeify(method) {
 
     return function() {

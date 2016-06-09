@@ -2,6 +2,16 @@
 import { once } from './fn';
 import { extend } from './util';
 
+
+/*  Get Element
+    -----------
+
+    Gets an element based on
+
+    - Element id
+    - CSS Query selector
+*/
+
 export function getElement(id) {
     if (id instanceof window.Element) {
         return id;
@@ -20,6 +30,13 @@ export function getElement(id) {
     }
 }
 
+
+/*  Popup
+    -----
+
+    Open a popup window with the specified option map
+*/
+
 export function popup(url, options) {
 
     let win = window.open(url, options.name, Object.keys(options).map((key) => {
@@ -28,6 +45,14 @@ export function popup(url, options) {
 
     return win;
 }
+
+
+
+/*  Iframe
+    ------
+
+    Open an iframe with the specified container, url, and option property map
+*/
 
 export function iframe(container, url, options) {
 
@@ -47,6 +72,13 @@ export function iframe(container, url, options) {
 
     return frame;
 }
+
+
+/*  On Close Window
+    ---------------
+
+    Wait for the specified window to close or cease to exist, then call the callback
+*/
 
 export function onCloseWindow(win, callback) {
 
@@ -76,20 +108,11 @@ export function onCloseWindow(win, callback) {
 }
 
 
-let clickEventActive = false;
+/*  Get Parent Window
+    -----------------
 
-window.addEventListener('load', () => {
-    window.document.body.addEventListener('click', () => {
-        clickEventActive = true;
-        setTimeout(() => {
-            clickEventActive = false;
-        });
-    }, true);
-});
-
-export function isClick() {
-    return clickEventActive;
-}
+    Get the parent window depending on whether we are in an iframe or a popup
+*/
 
 export function getParentWindow() {
     if (window.opener) {
@@ -101,6 +124,13 @@ export function getParentWindow() {
     }
 }
 
+
+/*  Get Parent Node
+    ---------------
+
+    Get the parent element with the specified tag name
+*/
+
 export function getParentNode(el, tag) {
     tag = tag.toLowerCase();
 
@@ -111,6 +141,13 @@ export function getParentNode(el, tag) {
         }
     }
 }
+
+
+/*  Scan For Javascript
+    -------------------
+
+    Check if the string contains anything which could conceivably be run as javascript if the string is set to innerHTML
+*/
 
 export function scanForJavascript(str) {
 
@@ -124,6 +161,13 @@ export function scanForJavascript(str) {
 
     return str;
 }
+
+
+/*  Create Element
+    --------------
+
+    Create an element with style, html, classes, attributes etc. and append it to the specified container
+*/
 
 export function createElement(tag = 'div', options = {}, container = null) {
     let element = document.createElement(tag);
@@ -165,4 +209,24 @@ export function createElement(tag = 'div', options = {}, container = null) {
     }
 
     return element;
+}
+
+
+/*  Create Stylesheet
+    -----------------
+
+    Create a stylesheet with the specified css, and append it to a a container
+*/
+
+export function createStyleSheet(styleSheet, container) {
+
+    return createElement('style', {
+
+        styleSheet: styleSheet,
+
+        attributes: {
+            type: 'text/css'
+        }
+
+    }, container);
 }
