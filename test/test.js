@@ -189,3 +189,129 @@ describe('xcomponent misc', function() {
         postRobot.once('init', () => 'attachTestComponent');
     });
 });
+
+
+describe('xcomponent templates and styles', function() {
+
+    it('should focus an xcomponent popup on click of the overlay', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                component.window.focus = done;
+                document.querySelector('.xcomponent-overlay').click();
+            }
+
+        }).renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should close an xcomponent popup on click of the overlay close button', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                let close = component.window.close;
+
+                component.window.close = function() {
+                    close.apply(this, arguments);
+                    done();
+                };
+
+                document.querySelector('.xcomponent-close').click();
+            }
+
+        }).renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+
+    it('should close an xcomponent lightbox on click of the overlay close button', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                let close = component.window.close;
+
+                component.window.close = function() {
+                    close.apply(this, arguments);
+                    done();
+                };
+
+                document.querySelector('.xcomponent-close').click();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+});
+
+describe('xcomponent render to parent', function() {
+
+    it('should render a component to the parent as a lightbox', function(done) {
+
+        component = testComponent.init({
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => {
+
+            postRobot.once('init', () => {
+                return 'attachTestComponent2';
+            });
+
+            return 'renderTestComponent2ToParentLightbox';
+        });
+    });
+
+    it('should render a component to the parent as a popup', function(done) {
+
+        component = testComponent.init({
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => {
+
+            postRobot.once('init', () => {
+                return 'attachTestComponent2';
+            });
+
+            return 'renderTestComponent2ToParentPopup';
+        });
+    });
+
+    it('should render a component to the parent as an iframe', function(done) {
+
+        component = testComponent.init({
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => {
+
+            postRobot.once('init', () => {
+                return 'attachTestComponent2';
+            });
+
+            return 'renderTestComponent2ToParentIframe';
+        });
+    });
+
+    it('should render a component to the parent and call a prop', function(done) {
+
+        component = testComponent.init({
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => {
+
+            postRobot.once('init', () => {
+                return 'attachTestComponent2AndCallFoo';
+            });
+
+            return 'renderTestComponent2ToParentLightboxAndPassFoo';
+        });
+    });
+});
