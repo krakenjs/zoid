@@ -61,6 +61,7 @@ let cases = {
     renderTestComponent2ToParentPopup() {
         let comp = testComponent.attach({
             onEnter() {
+
                 testComponent2.init({
                     onEnter() {
                         return comp.props.foo();
@@ -95,6 +96,44 @@ let cases = {
         });
     }
 };
+
+
+
+
+
+/*
+
+function parseWindowName(name) {
+    let winProps;
+
+    try {
+        winProps = JSON.parse(b64decode(name));
+    } catch (err) {
+        return;
+    }
+
+    if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
+        return;
+    }
+
+    return winProps;
+}
+
+function getParentWindow() {
+
+    let winProps = parseWindowName(window.name);
+    let parent = window.opener || window.parent;
+
+    if (winProps.proxy && winProps.parent) {
+        return parent.frames[winProps.parent];
+
+    } else {
+        return parent;
+    }
+}
+
+*/
+
 
 postRobot.sendToParent('init').then(function(caseName) {
     cases[caseName]();
