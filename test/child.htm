@@ -1,7 +1,5 @@
 <script>
-	window.__coverage__ = window.parent.__coverage__;
+	window.__coverage__ = (window.opener || window.parent).__coverage__;
 </script>
 
 <script src="/base/test/child.js"></script>
-
-Yo

@@ -257,14 +257,7 @@ describe('xcomponent render to parent', function() {
             foo: done
         }).renderIframe(document.body);
 
-        postRobot.once('init', () => {
-
-            postRobot.once('init', () => {
-                return 'attachTestComponent2';
-            });
-
-            return 'renderTestComponent2ToParentLightbox';
-        });
+        postRobot.once('init', () => 'renderTestComponent2ToParentLightbox');
     });
 
     it('should render a component to the parent as a popup', function(done) {
@@ -273,14 +266,7 @@ describe('xcomponent render to parent', function() {
             foo: done
         }).renderIframe(document.body);
 
-        postRobot.once('init', () => {
-
-            postRobot.once('init', () => {
-                return 'attachTestComponent2';
-            });
-
-            return 'renderTestComponent2ToParentPopup';
-        });
+        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
     });
 
     it('should render a component to the parent as an iframe', function(done) {
@@ -289,14 +275,7 @@ describe('xcomponent render to parent', function() {
             foo: done
         }).renderIframe(document.body);
 
-        postRobot.once('init', () => {
-
-            postRobot.once('init', () => {
-                return 'attachTestComponent2';
-            });
-
-            return 'renderTestComponent2ToParentIframe';
-        });
+        postRobot.once('init', () => 'renderTestComponent2ToParentIframe');
     });
 
     it('should render a component to the parent and call a prop', function(done) {
@@ -305,13 +284,6 @@ describe('xcomponent render to parent', function() {
             foo: done
         }).renderIframe(document.body);
 
-        postRobot.once('init', () => {
-
-            postRobot.once('init', () => {
-                return 'attachTestComponent2AndCallFoo';
-            });
-
-            return 'renderTestComponent2ToParentLightboxAndPassFoo';
-        });
+        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndPassFoo');
     });
 });

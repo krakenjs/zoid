@@ -1,6 +1,7 @@
 
 import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
+import { parseWindowName } from 'src/component/util';
 
 import { testComponent, testComponent2 } from './component';
 
@@ -54,6 +55,8 @@ let cases = {
                         return comp.props.foo();
                     }
                 }).renderLightboxToParent();
+
+                postRobot.once('init', () => 'attachTestComponent2');
             }
         });
     },
@@ -67,6 +70,8 @@ let cases = {
                         return comp.props.foo();
                     }
                 }).renderPopupToParent();
+
+                postRobot.once('init', () => 'attachTestComponent2');
             }
         });
     },
@@ -79,6 +84,8 @@ let cases = {
                         return comp.props.foo();
                     }
                 }).renderIframeToParent('body');
+
+                postRobot.once('init', () => 'attachTestComponent2');
             }
         });
     },
@@ -92,6 +99,8 @@ let cases = {
                         this.props.foo();
                     }
                 }).renderLightboxToParent();
+
+                postRobot.once('init', () => 'attachTestComponent2AndCallFoo');
             }
         });
     }
@@ -100,31 +109,12 @@ let cases = {
 
 
 
-
-/*
-
-function parseWindowName(name) {
-    let winProps;
-
-    try {
-        winProps = JSON.parse(b64decode(name));
-    } catch (err) {
-        return;
-    }
-
-    if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
-        return;
-    }
-
-    return winProps;
-}
-
 function getParentWindow() {
 
     let winProps = parseWindowName(window.name);
     let parent = window.opener || window.parent;
 
-    if (winProps.proxy && winProps.parent) {
+    if (winProps && winProps.sibling) {
         return parent.frames[winProps.parent];
 
     } else {
@@ -132,9 +122,6 @@ function getParentWindow() {
     }
 }
 
-*/
-
-
-postRobot.sendToParent('init').then(function(caseName) {
+postRobot.send(getParentWindow(), 'init').then(function(caseName) {
     cases[caseName]();
 });

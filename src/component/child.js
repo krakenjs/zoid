@@ -2,6 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
+import { parseWindowName } from './util';
 import { noop, extend, getParentWindow, onCloseWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
@@ -136,7 +137,7 @@ export class ChildComponent extends BaseComponent {
 
         // Get properties from the window name, passed down from our parent component
 
-        let winProps = this.parseWindowName(window.name);
+        let winProps = parseWindowName(window.name);
 
         if (!winProps) {
             throw new Error(`[${this.component.tag}] Window has not been rendered by xcomponent - can not attach here`);
@@ -147,7 +148,7 @@ export class ChildComponent extends BaseComponent {
         // - Our actual parent
         // - A sibling which rendered us using renderToParent()
 
-        if (winProps.proxy && winProps.parent) {
+        if (winProps.sibling) {
 
             // We were rendered by a sibling, which we can access cross-domain via parent.frames
             this.parentComponentWindow = this.parentWindow.frames[winProps.parent];

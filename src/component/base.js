@@ -1,76 +1,7 @@
 import postRobot from 'post-robot/src';
 
-import { b64encode, b64decode, extend, once } from '../lib';
-import { CONSTANTS } from '../constants';
+import { once } from '../lib';
 import { IntegrationError } from '../error';
-
-/*  Internal Props
-    --------------
-
-    We define and use certain props by default, for configuration and events that are used at the framework level.
-    These follow the same format as regular props, and are classed as reserved words that may not be overriden by users.
-*/
-
-export const internalProps = {
-
-    // A custom url to use to render the component
-
-    url: {
-        type: 'string',
-        required: false
-    },
-
-    // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
-
-    env: {
-        type: 'string',
-        required: false
-    },
-
-    // A millisecond timeout before onTimeout is called
-
-    timeout: {
-        type: 'number',
-        required: false
-    },
-
-    // When we get an INIT message from the child
-
-    onEnter: {
-        type: 'function',
-        required: false,
-        noop: true
-    },
-
-    // When the user closes the component. Defaults to onError if no handler passed.
-
-    onClose: {
-        type: 'function',
-        required: false,
-        noop: true,
-        once: true,
-        defaultProp: 'onError'
-    },
-
-    // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
-
-    onTimeout: {
-        type: 'function',
-        required: false,
-        noop: true,
-        once: true,
-        defaultProp: 'onError'
-    },
-
-    // When the component experiences an error
-
-    onError: {
-        type: 'function',
-        required: false,
-        noop: true,
-        once: true
-    }
-};
 
 
 /*  Base Component
@@ -123,51 +54,6 @@ export class BaseComponent {
         this.registerForCleanup(() => {
             delete this[key];
         });
-    }
-
-
-    /*  Build Child Window Name
-        -----------------------
-
-        Build a name for our child window. This should identify the following things to the child:
-
-        - That the window was created by, and is owned by xcomponent
-        - The name of the child's parent. This is so the child can identify which window created it, even when we do a
-          renderToParent, in which case the true parent may actually be a sibling frame in the window hierarchy
-
-        We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
-    */
-
-    buildChildWindowName(parent, props = {}) {
-        return b64encode(JSON.stringify(extend({
-            type:   CONSTANTS.XCOMPONENT,
-            id: this.id,
-            parent: parent
-        }, props)));
-    }
-
-
-    /*  Parse Window Name
-        -----------------
-
-        The inverse of buildChildWindowName. Base64 decodes and json parses the window name to get the original props
-        passed down, including the parent name. Only accepts window names built by xcomponent
-    */
-
-    parseWindowName(name) {
-        let winProps;
-
-        try {
-            winProps = JSON.parse(b64decode(name));
-        } catch (err) {
-            return;
-        }
-
-        if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
-            return;
-        }
-
-        return winProps;
     }
 
 

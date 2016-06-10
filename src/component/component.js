@@ -1,7 +1,7 @@
 
 import { ChildComponent } from './child';
 import { ParentComponent } from './parent';
-import { internalProps } from './base';
+import { internalProps } from './props';
 import { extend, scanForJavascript } from '../lib';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 

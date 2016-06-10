@@ -2,6 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
+import { buildChildWindowName } from './util';
 import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID } from '../lib';
 import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
 import { PopupOpenError } from '../error';
@@ -118,12 +119,6 @@ let RENDER_DRIVERS = {
             // Because we need a click event, we have to open up the popup from the child the moment it's requested,
             // Then message up and continue the rendering process from the parent as with any other renderToParent.
 
-            // We need to calculate the child window name again so we can inform it that it's a renderToParent proxy case.
-
-            this.childWindowName = this.buildChildWindowName(window.name, { proxy: true });
-
-            // And then we need to open the popup immediately
-
             this.open(null, CONTEXT_TYPES.POPUP);
         }
     },
@@ -176,7 +171,6 @@ export class ParentComponent extends BaseComponent {
 
         this.id = uniqueID();
 
-
         // Ensure the component is not loaded twice on the same page, if it is a singleton
 
         if (component.singleton && activeComponents.some(comp => comp.component === component)) {
@@ -194,7 +188,10 @@ export class ParentComponent extends BaseComponent {
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
 
-        this.childWindowName = options.childWindowName || this.buildChildWindowName(window.name);
+        this.childWindowName = options.childWindowName || buildChildWindowName({
+            parent: window.name,
+            id: this.id
+        });
 
         this.screenWidth = options.screenWidth || window.outerWidth;
         this.screenHeight = options.screenHeight || window.outerHeight;
@@ -595,6 +592,14 @@ export class ParentComponent extends BaseComponent {
         if (!window.name) {
             throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
         }
+
+        // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
+
+        this.childWindowName = buildChildWindowName({
+            id: this.id,
+            parent: window.name,
+            sibling: true
+        });
 
         // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
         // open them from the child, since we depend on there being a click event to avoid the popup blocker.
