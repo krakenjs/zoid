@@ -137,17 +137,17 @@ describe('xcomponent misc', function() {
 
     it('should close an xcomponent popup', function(done) {
 
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!');
-
         component = testComponent.init({
 
             onEnter() {
-                let win = component.window;
+                let close = component.window.close;
 
-                component.close().then(() => {
-                    assert.isTrue(win.closed, 'Expected component window to be closed');
+                component.window.close = function() {
+                    close.apply(this, arguments);
                     done();
-                });
+                };
+
+                component.close();
             }
 
         }).renderPopup();
@@ -160,12 +160,14 @@ describe('xcomponent misc', function() {
         component = testComponent.init({
 
             onEnter() {
-                let win = component.window;
+                let close = component.window.close;
 
-                component.close().then(() => {
-                    assert.isTrue(win.closed, 'Expected component window to be closed');
+                component.window.close = function() {
+                    close.apply(this, arguments);
                     done();
-                });
+                };
+
+                component.close();
             }
 
         }).renderLightbox();

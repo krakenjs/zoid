@@ -73,6 +73,10 @@ export class ChildComponent extends BaseComponent {
             return Promise.resolve();
         }
 
+        // Start listening for post messages
+
+        this.listen(this.parentComponentWindow);
+
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -81,8 +85,6 @@ export class ChildComponent extends BaseComponent {
         // - What props has the parent specified
 
         return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
-
-            this.listen(this.parentComponentWindow);
 
             this.context = data.context;
             extend(this.props, data.props);

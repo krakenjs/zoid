@@ -42,6 +42,11 @@ let RENDER_DRIVERS = {
 
             this.registerForCleanup(() => {
                 if (this.iframe) {
+                    try {
+                        this.iframe.contentWindow.close();
+                    } catch (err) {
+                        // pass
+                    }
                     this.iframe.parentNode.removeChild(this.iframe);
                     delete this.iframe;
                 }
@@ -991,9 +996,25 @@ export class ParentComponent extends BaseComponent {
     */
 
     close() {
-        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).catch(err => {
-            console.warn('Error sending close message to child', err.stack || err.toString());
-            this.destroy();
+
+        // We send a post message to the child to close. This has two effects:
+        // 1. We let the child do any cleanup it needs to do
+        // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
+
+        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE, {}, { timeout: 1 }).catch(err => {
+
+            // This is kind of a chicken-and-egg situation, as at some point we have to close the window, and some
+            // post message is inevitably going to be lost. In this case we're waiting for the child to message its own
+            // parent and get a response, and the response will never come because the window is closed. Hence this
+            // promise will always fail.
+            //
+            // So we can do an additional check here to see if this.window still exists. If it does, something failed and
+            // we need to clean up as best we can manually. If not, we're good.
+
+            if (this.window) {
+                console.warn('Error sending close message to child', err.stack || err.toString());
+                this.destroy();
+            }
         });
     }
 

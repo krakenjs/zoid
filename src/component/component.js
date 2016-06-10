@@ -126,7 +126,7 @@ export class Component {
     */
 
     attach(options) {
-        var component = this.child(options);
+        let component = this.child(options);
         component.init();
         return component;
     }
