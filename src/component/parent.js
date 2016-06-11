@@ -807,13 +807,9 @@ export class ParentComponent extends BaseComponent {
                 throw new Error(`[${this.component.tag}] Component is already rendered`);
             }
 
-            // Point the element to open in our child window
-
-            targetElement.target = this.childWindowName;
-
             // Open the window to render into
 
-            this.renderHijack(context);
+            this.renderHijack(targetElement, context);
         });
 
         return this;
@@ -826,11 +822,15 @@ export class ParentComponent extends BaseComponent {
         Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
     */
 
-    renderHijack(context = CONTEXT_TYPES.LIGHTBOX) {
+    renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
 
         if (this.window) {
             throw new Error(`[${this.component.tag}] Component is already rendered`);
         }
+
+        // Point the element to open in our child window
+
+        el.target = this.childWindowName;
 
         // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
@@ -968,13 +968,15 @@ export class ParentComponent extends BaseComponent {
 
                 if (data.hijackSubmitParentForm) {
 
+                    let form = getParentNode(this.iframe, 'form');
+
                     // Open the window and do everything except load the url
 
-                    instance.renderHijack(data.context);
+                    instance.renderHijack(form, data.context);
 
                     // Submit the form to load the url into the new window
 
-                    getParentNode(this.iframe, 'form').submit();
+                    form.submit();
                 }
 
                 // Otherwise we're just doing a normal render on behalf of the child

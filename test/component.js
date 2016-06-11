@@ -43,6 +43,11 @@ export var testComponent2 = xcomponent.create({
         foo: {
             type: 'function',
             required: false
-        }
+        },
+
+        sendUrl: {
+            type: 'function',
+            required: false
+        },
     }
 });

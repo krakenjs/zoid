@@ -347,7 +347,7 @@ describe('xcomponent hijack', function() {
 
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'base/test/child.htm?foo=xyzhijacktest';
+        form.action = '/base/test/child.htm?foo=xyzhijacktest';
 
         var button = document.createElement('button');
         button.id = 'hijackButton';
@@ -372,7 +372,7 @@ describe('xcomponent hijack', function() {
 
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'base/test/child.htm?foo=xyzhijacktest';
+        form.action = '/base/test/child.htm?foo=xyzhijacktest';
 
         var button = document.createElement('button');
         button.id = 'hijackButton';
@@ -397,7 +397,7 @@ describe('xcomponent hijack', function() {
 
         var link = document.createElement('a');
         link.id = 'hijackLink';
-        link.href = 'base/test/child.htm?foo=xyzhijacktest';
+        link.href = '/base/test/child.htm?foo=xyzhijacktest';
 
         document.body.appendChild(link);
 
@@ -418,7 +418,7 @@ describe('xcomponent hijack', function() {
 
         var link = document.createElement('a');
         link.id = 'hijackLink';
-        link.href = 'base/test/child.htm?foo=xyzhijacktest';
+        link.href = '/base/test/child.htm?foo=xyzhijacktest';
 
         document.body.appendChild(link);
 
@@ -433,5 +433,25 @@ describe('xcomponent hijack', function() {
         postRobot.once('init', () => 'attachTestComponent');
 
         link.click();
+    });
+
+    it('should render a component by submitting a button from a child component', function(done) {
+
+        var form = document.createElement('form');
+        form.id = 'hijackForm'
+        form.method = 'POST';
+        form.action = '/base/test/child.htm?foo=xyzhijacktest';
+
+        document.body.appendChild(form);
+
+        component = testComponent.init({
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                document.body.removeChild(form);
+                done();
+            }
+        }).renderIframe('#hijackForm');
+
+        postRobot.once('init', () => 'attachTestComponentAndSubmitParentButton');
     });
 });

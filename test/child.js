@@ -42,7 +42,13 @@ let cases = {
     },
 
     attachTestComponent2() {
-        testComponent2.attach();
+        testComponent2.attach({
+            onEnter() {
+                if (this.props.sendUrl) {
+                    this.props.sendUrl(window.location.href);
+                }
+            }
+        });
     },
 
     attachTestComponent2AndCallFoo() {
@@ -176,6 +182,26 @@ let cases = {
                 comp2.renderPopupToParent();
 
                 postRobot.once('init', () => 'attachTestComponent2');
+            }
+        });
+    },
+
+    attachTestComponentAndSubmitParentButton() {
+        let comp = testComponent.attach({
+            onEnter() {
+
+                let comp2 = testComponent2.init({
+                    sendUrl: this.props.sendUrl
+                });
+
+                postRobot.once('init', () => 'attachTestComponent2');
+
+                var button = document.createElement('button');
+                button.addEventListener('click', () => {
+                    comp2.hijackSubmitParentForm();
+                });
+
+                button.click();
             }
         });
     }
