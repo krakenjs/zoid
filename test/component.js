@@ -12,6 +12,16 @@ export var testComponent = xcomponent.create({
     },
 
     props: {
+        childEntered: {
+            type: 'function',
+            required: false
+        },
+
+        sendUrl: {
+            type: 'function',
+            required: false
+        },
+
         foo: {
             type: 'function',
             required: false

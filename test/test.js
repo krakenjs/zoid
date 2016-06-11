@@ -135,6 +135,20 @@ describe('xcomponent error cases', function() {
 
 describe('xcomponent misc', function() {
 
+    it('should enter a component with a custom url', function(done) {
+
+        component = testComponent.init({
+            url: 'base/test/child.htm?foo=xyztest',
+
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyztest') !== -1, 'Expected url to be custom url passed during init');
+                done();
+            }
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
     it('should close an xcomponent popup', function(done) {
 
         component = testComponent.init({
@@ -285,5 +299,44 @@ describe('xcomponent render to parent', function() {
         }).renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndPassFoo');
+    });
+
+    it('should close an xcomponent renderToParent popup on click of the overlay close button', function(done) {
+
+        component = testComponent.init({
+            childEntered() {
+                document.querySelector('.xcomponent-close').click();
+            },
+
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndCallFooOnClose');
+    });
+
+    it('should close an xcomponent renderToParent popup on click of the overlay close button', function(done) {
+
+        component = testComponent.init({
+            childEntered() {
+                document.querySelector('.xcomponent-close').click();
+            },
+
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnClose');
+    });
+
+    it('should focus an xcomponent renderToParent popup on click of the overlay', function(done) {
+
+        component = testComponent.init({
+            childEntered() {
+                document.querySelector('.xcomponent-overlay').click();
+            },
+
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnFocus');
     });
 });

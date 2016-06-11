@@ -77,6 +77,9 @@ export class ChildComponent extends BaseComponent {
         // Start listening for post messages
 
         this.listen(this.parentComponentWindow);
+        if (this.parentWindow !== this.parentComponentWindow) {
+            this.listen(this.parentWindow);
+        }
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
