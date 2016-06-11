@@ -340,3 +340,98 @@ describe('xcomponent render to parent', function() {
         postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnFocus');
     });
 });
+
+describe('xcomponent hijack', function() {
+
+    it('should render a component by hijacking a button to a lightbox', function(done) {
+
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'base/test/child.htm?foo=xyzhijacktest';
+
+        var button = document.createElement('button');
+        button.id = 'hijackButton';
+
+        form.appendChild(button);
+        document.body.appendChild(form);
+
+        component = testComponent.init({
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                document.body.removeChild(form);
+                done();
+            }
+        }).hijackButtonToLightbox('#hijackButton');
+
+        postRobot.once('init', () => 'attachTestComponent');
+
+        button.click();
+    });
+
+    it('should render a component by hijacking a button to a popup', function(done) {
+
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'base/test/child.htm?foo=xyzhijacktest';
+
+        var button = document.createElement('button');
+        button.id = 'hijackButton';
+
+        form.appendChild(button);
+        document.body.appendChild(form);
+
+        component = testComponent.init({
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                document.body.removeChild(form);
+                done();
+            }
+        }).hijackButtonToPopup('#hijackButton');
+
+        postRobot.once('init', () => 'attachTestComponent');
+
+        button.click();
+    });
+
+    it('should render a component by hijacking a link to a lightbox', function(done) {
+
+        var link = document.createElement('a');
+        link.id = 'hijackLink';
+        link.href = 'base/test/child.htm?foo=xyzhijacktest';
+
+        document.body.appendChild(link);
+
+        component = testComponent.init({
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                document.body.removeChild(link);
+                done();
+            }
+        }).hijackButtonToLightbox('#hijackLink');
+
+        postRobot.once('init', () => 'attachTestComponent');
+
+        link.click();
+    });
+
+    it('should render a component by hijacking a link to a popup', function(done) {
+
+        var link = document.createElement('a');
+        link.id = 'hijackLink';
+        link.href = 'base/test/child.htm?foo=xyzhijacktest';
+
+        document.body.appendChild(link);
+
+        component = testComponent.init({
+            sendUrl: function(url) {
+                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                document.body.removeChild(link);
+                done();
+            }
+        }).hijackButtonToPopup('#hijackLink');
+
+        postRobot.once('init', () => 'attachTestComponent');
+
+        link.click();
+    });
+});

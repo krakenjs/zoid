@@ -796,9 +796,7 @@ export class ParentComponent extends BaseComponent {
 
         // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
 
-        if (isButton) {
-            el = getParentNode(el, 'form');
-        }
+        let targetElement = isButton ? getParentNode(el, 'form') : el;
 
         // We need to wait for the click event, which is necessary for opening a popup (if we need to)
 
@@ -806,11 +804,14 @@ export class ParentComponent extends BaseComponent {
 
             if (this.window) {
                 event.preventDefault();
+                throw new Error(`[${this.component.tag}] Component is already rendered`);
             }
 
             // Point the element to open in our child window
 
-            el.target = this.childWindowName;
+            targetElement.target = this.childWindowName;
+
+            // Open the window to render into
 
             this.renderHijack(context);
         });
