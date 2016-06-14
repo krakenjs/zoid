@@ -179,10 +179,11 @@ export class Component {
             throw new Error(`Invalid options.tag: ${options.tag}`);
         }
 
-        if (!options.dimensions || !(typeof options.dimensions === 'object')) {
+    /*    if (!options.dimensions || !(typeof options.dimensions === 'object')) {
             throw new Error(`[${options.tag}] Expected options.dimensions to be an object`);
         }
-
+    */
+        
         if (typeof options.dimensions.width !== 'number') {
             throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
         }
