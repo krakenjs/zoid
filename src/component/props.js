@@ -62,7 +62,9 @@ export const internalProps = {
     onError: {
         type: 'function',
         required: false,
-        noop: true,
+        def(err) {
+            console.error(err.message, '\n', err.stack || err.toString());
+        },
         once: true
     }
 };

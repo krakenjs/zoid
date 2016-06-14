@@ -245,10 +245,20 @@ export class ChildComponent extends BaseComponent {
 
             [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
 
-                // Why doesn't the parent just close us? The reason is, our parent component might not actually be our
-                // parent window. So we message our parent window and tell them to close us.
+                // If source is not our immediate parent, we need to message our parent window to tell it to close us.
 
-                return this.close();
+                if (source !== this.parentWindow) {
+                    postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
+
+                    // Note -- we don't want to wait for that post message, otherwise we'll be closed before we can
+                    // respond to the original close message
+
+                    return;
+                }
+
+                // Otherwise call onClose and allow the parent to close us
+
+                this.onClose.call(this);
             }
         };
     }
@@ -262,10 +272,11 @@ export class ChildComponent extends BaseComponent {
 
     close(err) {
 
-        // We could do this ourselves, if were a popup -- but iframes can't close themselves, so in all cases just
+        this.onClose.call(this, err);
+
+        // We could do this ourselves, if we were a popup -- but iframes can't close themselves, so in all cases just
         // message the parent and have them close us instead
 
-        this.onClose.call(this, err);
         return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
     }
 

@@ -716,7 +716,7 @@ describe('xcomponent validation errors', function() {
         throw new Error('Expected error to be thrown');
     }
 
-    it('should throw validation errors when a component is created without the c', function() {
+    it('should throw validation errors when a component is created without the correct options', function() {
 
         expectError(function() {
             xcomponent.create({});

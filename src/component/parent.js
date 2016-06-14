@@ -941,7 +941,7 @@ export class ParentComponent extends BaseComponent {
             // this logic to exist in the parent window
 
             [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
-                this.destroy();
+                this.close();
             },
 
 
@@ -990,8 +990,7 @@ export class ParentComponent extends BaseComponent {
             // The child encountered an error
 
             [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
-                this.props.onError(new Error(data.error));
-                this.destroy();
+                this.error(new Error(data.error));
             }
         };
     }
@@ -1009,20 +1008,17 @@ export class ParentComponent extends BaseComponent {
         // 1. We let the child do any cleanup it needs to do
         // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
 
-        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE, {}, { timeout: 1 }).catch(err => {
+        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE, {}, { timeout: 500 }).catch(err => {
 
-            // This is kind of a chicken-and-egg situation, as at some point we have to close the window, and some
-            // post message is inevitably going to be lost. In this case we're waiting for the child to message its own
-            // parent and get a response, and the response will never come because the window is closed. Hence this
-            // promise will always fail.
-            //
-            // So we can do an additional check here to see if this.window still exists. If it does, something failed and
-            // we need to clean up as best we can manually. If not, we're good.
+            // If we get an error, log it as a warning, but don't error out
 
-            if (this.window) {
-                console.warn('Error sending close message to child', err.stack || err.toString());
-                this.destroy();
-            }
+            console.warn('Error sending close message to child', err.stack || err.toString());
+
+        }).then(() => {
+
+            // Whatever happens, we'll destroy the child window
+
+            this.destroy();
         });
     }
 
@@ -1154,4 +1150,15 @@ export class ParentComponent extends BaseComponent {
         this.cleanup();
     }
 
+
+    /*  Error
+        -----
+
+        Handle an error
+    */
+
+    error(err) {
+        this.props.onError(err);
+        this.destroy();
+    }
 }
