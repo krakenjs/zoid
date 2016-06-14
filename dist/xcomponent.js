@@ -98,62 +98,24 @@ return /******/ (function(modules) { // webpackBootstrap
   \**********************/
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.PopupOpenError = PopupOpenError;
+	exports.IntegrationError = IntegrationError;
+	function PopupOpenError(message) {
+	    this.message = message;
+	}
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	PopupOpenError.prototype = Object.create(Error.prototype);
 
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	function IntegrationError(message) {
+	    this.message = message;
+	}
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var ExtendableError = function (_Error) {
-	    _inherits(ExtendableError, _Error);
-
-	    function ExtendableError(message) {
-	        _classCallCheck(this, ExtendableError);
-
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExtendableError).call(this, message));
-
-	        _this.name = _this.constructor.name;
-	        _this.message = message;
-	        if (typeof Error.captureStackTrace === 'function') {
-	            Error.captureStackTrace(_this, _this.constructor);
-	        } else {
-	            _this.stack = new Error(message).stack;
-	        }
-	        return _this;
-	    }
-
-	    return ExtendableError;
-	}(Error);
-
-	var PopupOpenError = exports.PopupOpenError = function (_ExtendableError) {
-	    _inherits(PopupOpenError, _ExtendableError);
-
-	    function PopupOpenError() {
-	        _classCallCheck(this, PopupOpenError);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(PopupOpenError).apply(this, arguments));
-	    }
-
-	    return PopupOpenError;
-	}(ExtendableError);
-
-	var IntegrationError = exports.IntegrationError = function (_ExtendableError2) {
-	    _inherits(IntegrationError, _ExtendableError2);
-
-	    function IntegrationError() {
-	        _classCallCheck(this, IntegrationError);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(IntegrationError).apply(this, arguments));
-	    }
-
-	    return IntegrationError;
-	}(ExtendableError);
+	IntegrationError.prototype = Object.create(Error.prototype);
 
 /***/ },
 /* 2 */
@@ -382,7 +344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            hash: hash,
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
 	            name: options.name,
-	            data: options.data || {}
+	            data: options.data
 	        }, options.domain || '*')['catch'](reject);
 
 	        setTimeout(function () {
@@ -409,7 +371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = options || {};
 	    options.window = window;
 	    options.name = name;
-	    options.data = data || {};
+	    options.data = data;
 	    options.callback = callback;
 
 	    return request(options);
@@ -968,7 +930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (result !== undefined) {
 	                newobj[key] = result;
-	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') {
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
 	                newobj[key] = util.replaceObject(item, callback);
 	            } else {
 	                newobj[key] = item;
@@ -1153,6 +1115,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can not resolve promise with another promise');
 	    }
 
+	    //console.log('resolve!', result)
+
 	    this.resolved = true;
 	    this.value = result;
 	    this.dispatch();
@@ -1168,6 +1132,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (error && error.then) {
 	        throw new Error('Can not reject promise with another promise');
 	    }
+
+	    //console.log('reject!', error.message)
 
 	    this.rejected = true;
 	    this.value = error;
@@ -1451,13 +1417,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return (0, _send.sendMessage)(proxyWindow, message, '*', true);
 	    }
 
-	    _lib.util.debug('#receive', message.type, message.name, message);
+	    //window.parent.console.log('#receive', message.type, message.name, message);
+	    //window.console.log('#receive', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	    }
 
-	    message.data = (0, _lib.deserializeMethods)(source, message.data || {});
+	    if (message.data) {
+	        message.data = (0, _lib.deserializeMethods)(source, message.data);
+	    }
 
 	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	}
@@ -1554,18 +1523,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.childWindows = undefined;
+	exports.isSameDomain = isSameDomain;
 	exports.propagate = propagate;
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 14);
+	var _util = __webpack_require__(/*! ./util */ 9);
 
 	var _interface = __webpack_require__(/*! ../interface */ 3);
+
+	var domainMatches = [];
+
+	function isSameDomain(win) {
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+
+	        for (var _iterator = domainMatches[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var _match = _step.value;
+
+	            if (_match.win === win) {
+	                return _match.match;
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator['return']) {
+	                _iterator['return']();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
+	    }
+
+	    var windowDomain = window.location.protocol + '//' + window.location.host;
+	    var match = false;
+
+	    try {
+	        if (win.location.protocol && win.location.host) {
+	            var otherDomain = win.location.protocol + '//' + win.location.host;
+	            if (otherDomain === windowDomain) {
+	                match = true;
+	            }
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    domainMatches.push({
+	        win: win,
+	        match: match
+	    });
+
+	    return match;
+	}
 
 	var windows = [];
 
 	function getMap(key, value) {
-	    return _lib.util.find(windows, function (map) {
+	    return _util.util.find(windows, function (map) {
 	        return map[key] === value;
 	    }, {});
 	}
@@ -1584,16 +1607,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return map.type;
 	        }
 
-	        if (_lib.util.safeHasProp(win, 'parent') && win.parent !== win) {
+	        if (_util.util.safeHasProp(win, 'parent') && win.parent !== win) {
 	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
 	        }
 
-	        if (_lib.util.safeHasProp(win, 'opener')) {
+	        if (_util.util.safeHasProp(win, 'opener')) {
 	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
 	        }
 
-	        var isFrame = _lib.util.some(windows, function (childWin) {
-	            return _lib.util.isFrameOwnedBy(childWin.win, win);
+	        var isFrame = _util.util.some(windows, function (childWin) {
+	            return _util.util.isFrameOwnedBy(childWin.win, win);
 	        });
 
 	        if (isFrame) {
@@ -1604,7 +1627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    register: function register(id, win, type) {
 
-	        var existing = _lib.util.find(windows, function (map) {
+	        var existing = _util.util.find(windows, function (map) {
 	            return map.id === id && map.win === win;
 	        });
 
@@ -1612,7 +1635,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        _lib.util.debug('Registering window:', type, id, win);
+	        _util.util.debug('Registering window:', type, id, win);
 
 	        windows.push({
 	            id: id,
@@ -1642,11 +1665,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	window.open = function (url, name, x, y) {
 
 	    if (!name) {
-	        name = _lib.util.uniqueID();
+	        name = _util.util.uniqueID();
 	        arguments[1] = name;
 	    }
 
-	    var win = _lib.util.apply(openWindow, this, arguments);
+	    var win = _util.util.apply(openWindow, this, arguments);
 
 	    childWindows.register(name, win, _conf.CONSTANTS.WINDOW_TYPES.POPUP);
 	    return win;
@@ -1668,32 +1691,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        _lib.util.debug('propagating to', identifier, win);
+	        _util.util.debug('propagating to', identifier, win);
 
 	        registered.push(win);
 
-	        if (_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _lib.util.getType());
+	        if (isSameDomain(win) && _util.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _util.util.getType());
 	        } else {
 
-	            _lib.util.windowReady.then(function () {
+	            _util.util.windowReady.then(function () {
 	                (0, _interface.send)(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
 	                    id: id,
-	                    type: _lib.util.getType()
+	                    type: _util.util.getType()
 	                }).then(function (data) {
 	                    childWindows.register(data.id, win, data.type);
 	                }, function (err) {
-	                    _lib.util.debugError('Error sending identify:', err.stack || err.toString());
+	                    _util.util.debugError('Error sending identify:', err.stack || err.toString());
 	                });
 	            });
 	        }
 	    }
 
-	    _lib.util.eachParent(function (parent) {
+	    _util.util.eachParent(function (parent) {
 
 	        register(parent, 'parent');
 
-	        _lib.util.eachFrame(parent, function (frame) {
+	        _util.util.eachFrame(parent, function (frame) {
 	            register(frame, 'frame');
 	        });
 	    }, true);
@@ -1726,6 +1749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var methods = {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
+
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
 
 	        if (!methods[data.id]) {
@@ -1927,7 +1951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            try {
 	                var frame = win.frames[i];
 
-	                if (frame && frame !== window && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	                    return frame;
 	                }
 	            } catch (err) {
@@ -2048,13 +2072,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    message.windowType = _lib.util.getType();
 	    message.originalWindowType = message.originalWindowType || _lib.util.getType();
 
-	    message.data = (0, _lib.serializeMethods)(win, message.data || {});
+	    message.data = (0, _lib.serializeMethods)(win, message.data);
 
 	    if (!message.target) {
 	        message.target = _lib.childWindows.getWindowId(win);
 	    }
 
-	    _lib.util.debug(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+	    //window.parent.console.log(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+	    //window.console.log(isProxy ? '#proxy' : '#send', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        delete message.target;
@@ -2148,6 +2173,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
+	    if (!(0, _lib.isSameDomain)(win)) {
+	        throw new Error('window is a different domain');
+	    }
+
 	    if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
 	        throw new Error('postRobot not found on window');
 	    }
@@ -2163,6 +2192,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!frame) {
 	        throw new Error('No bridge available in window');
+	    }
+
+	    if (!(0, _lib.isSameDomain)(frame)) {
+	        throw new Error('Bridge is different domain');
 	    }
 
 	    if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
@@ -2236,6 +2269,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var requestListener = _step.value;
 
 
+	            //console.log('???', requestListener.name, name);
+
 	            if (requestListener.name !== name) {
 	                continue;
 	            }
@@ -2277,6 +2312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var requestListener = _step2.value;
 
 	            if (requestListener.options === options) {
+	                //console.log('REMOVING REQUEST LISTENER', requestListener.name);
 	                listener = requestListener;
 	                break;
 	            }
@@ -2403,7 +2439,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-	            data: data || {}
+	            data: data
 	        });
 	    }, function (err) {
 
@@ -2426,7 +2462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
 	        return options.respond(new Error(message.error));
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.data);
+	        return options.respond(null, message.data || message.response);
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
 
@@ -2479,7 +2515,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
 
 	    options.handleError = function (err) {
-	        (0, _drivers.removeRequestListener)(options);
+	        //console.log('BBBBBBBB', err.message, err.stack)
+	        //removeRequestListener(options);
 	        options.errorHandler(err);
 	    };
 
@@ -2650,7 +2687,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _parent = __webpack_require__(/*! ./parent */ 38);
+	var _parent = __webpack_require__(/*! ./parent */ 39);
 
 	Object.keys(_parent).forEach(function (key) {
 	  if (key === "default") return;
@@ -2694,21 +2731,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _child = __webpack_require__(/*! ./child */ 30);
 
-	var _parent = __webpack_require__(/*! ./parent */ 38);
+	var _parent = __webpack_require__(/*! ./parent */ 39);
+
+	var _props = __webpack_require__(/*! ./props */ 40);
 
 	var _lib = __webpack_require__(/*! ../lib */ 32);
 
-	var _constants = __webpack_require__(/*! ../constants */ 37);
+	var _constants = __webpack_require__(/*! ../constants */ 38);
 
-	var _overlay = __webpack_require__(/*! ../templates/overlay.htm */ 39);
+	var _parent2 = __webpack_require__(/*! ../templates/parent.css */ 41);
+
+	var _parent3 = _interopRequireDefault(_parent2);
+
+	var _overlay = __webpack_require__(/*! ../templates/overlay.htm */ 42);
 
 	var _overlay2 = _interopRequireDefault(_overlay);
 
-	var _overlay3 = __webpack_require__(/*! ../templates/overlay.css */ 40);
+	var _overlay3 = __webpack_require__(/*! ../templates/overlay.css */ 43);
 
 	var _overlay4 = _interopRequireDefault(_overlay3);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 41);
+	var _component = __webpack_require__(/*! ../templates/component.htm */ 44);
+
+	var _component2 = _interopRequireDefault(_component);
+
+	var _component3 = __webpack_require__(/*! ../templates/component.css */ 45);
+
+	var _component4 = _interopRequireDefault(_component3);
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 46);
 
 	var drivers = _interopRequireWildcard(_drivers);
 
@@ -2720,6 +2771,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var components = exports.components = {};
 
+	/*  Component
+	    ---------
+
+	    This is the spec for the component. The idea is, when I call xcomponent.create(), it will create a new instance
+	    of Component with the blueprint needed to set up ParentComponents and ChildComponents.
+
+	    This is the one portion of code which is required by -- and shared to -- both the parent and child windows, and
+	    contains all of the configuration needed for them to set themselves up.
+	*/
+
 	var Component = exports.Component = function () {
 	    function Component() {
 	        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -2728,13 +2789,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.validate(options);
 
+	        // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
+	        // e.g. <my-component>
+
 	        this.tag = options.tag;
-	        this.props = options.props || {};
+
+	        // A json based spec describing what kind of props the component accepts. This is used to validate any props before
+	        // they are passed down to the child.
+
+	        this.props = (0, _lib.extend)(options.props || {}, _props.internalProps);
+
+	        // The dimensions of the component, e.g. { width: 500, height: 200 }
+
 	        this.dimensions = options.dimensions;
 
+	        // The default environment we should render to if none is specified in the parent
+
 	        this.defaultEnv = options.defaultEnv;
+
+	        // A mapping of env->url, used to determine which url to load for which env
+
 	        this.envUrls = options.envUrls || {};
+
+	        // A url to use by default to render the component, if not using envs
+
 	        this.url = options.url || options.envUrls[options.defaultEnv];
+
+	        // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
 
 	        this.contexts = options.contexts || {};
 	        var _iteratorNormalCompletion = true;
@@ -2747,6 +2828,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                this.contexts[context] = this.contexts[context] === undefined ? true : Boolean(this.contexts[context]);
 	            }
+
+	            // The default context to render to
 	        } catch (err) {
 	            _didIteratorError = true;
 	            _iteratorError = err;
@@ -2764,7 +2847,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.defaultContext = options.defaultContext;
 
+	        // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
+
 	        this.singleton = options.singleton;
+
+	        // Templates and styles for the parent page and the initial rendering of the component
+
+	        this.parentStyle = (0, _lib.scanForJavascript)(options.parentStyle) || _parent3['default'];
+	        this.overlayTemplate = (0, _lib.scanForJavascript)(options.overlayTemplate) || _overlay2['default'];
+	        this.overlayStyle = (0, _lib.scanForJavascript)(options.overlayStyle) || _overlay4['default'];
+	        this.componentTemplate = (0, _lib.scanForJavascript)(options.componentTemplate) || _component2['default'];
+	        this.componentStyle = (0, _lib.scanForJavascript)(options.componentStyle) || _component4['default'];
+
+	        // A mapping of tag->component so we can reference components by string tag name
+
+	        components[this.tag] = this;
+
+	        // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
+	        // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
+	        // This makes us a little more pluggable and loosely coupled.
 
 	        var _iteratorNormalCompletion2 = true;
 	        var _didIteratorError2 = false;
@@ -2793,23 +2894,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
-
-	        this.overlayTemplate = (0, _lib.scanForJavascript)(options.overlayTemplate) || _overlay2['default'];
-	        this.overlayStyle = (0, _lib.scanForJavascript)(options.overlayStyle) || _overlay4['default'];
-
-	        components[this.tag] = this;
 	    }
+
+	    /*  Parent
+	        ------
+	         Get an instance of the parent for this component (lives on the parent page which contains the component)
+	    */
 
 	    _createClass(Component, [{
 	        key: 'parent',
 	        value: function parent(options) {
 	            return new _parent.ParentComponent(this, options);
 	        }
+
+	        /*  Child
+	            -----
+	             Get an instance of the child for this component (lives on the child component page which lives in the parent)
+	        */
+
 	    }, {
 	        key: 'child',
 	        value: function child(options) {
 	            return new _child.ChildComponent(this, options);
 	        }
+
+	        /*  Attach
+	            ------
+	             Shortcut to instantiate a child in a child component window
+	        */
+
 	    }, {
 	        key: 'attach',
 	        value: function attach(options) {
@@ -2817,67 +2930,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	            component.init();
 	            return component;
 	        }
+
+	        /*  Init
+	            ----
+	             Shortcut to instantiate a component on a parent page, with props
+	        */
+
 	    }, {
 	        key: 'init',
-	        value: function init(options) {
-	            return new _parent.ParentComponent(this, options);
+	        value: function init(props) {
+	            return new _parent.ParentComponent(this, { props: props });
 	        }
-	    }, {
-	        key: 'initFromProps',
-	        value: function initFromProps() {
-	            var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
+	        /*  Get By Tag
+	            ----------
+	             Get a component instance by tag name
+	        */
 
-	            var props = {};
-
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
-
-	            try {
-	                for (var _iterator3 = Object.keys(this.props)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var key = _step3.value;
-
-	                    if (options.hasOwnProperty(key)) {
-	                        props[key] = options[key];
-	                        delete options[key];
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-	                        _iterator3['return']();
-	                    }
-	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
-	                    }
-	                }
-	            }
-
-	            options.props = props;
-
-	            return new _parent.ParentComponent(this, options);
-	        }
-	    }, {
-	        key: 'getProps',
-	        value: function getProps() {
-
-	            var props = {};
-
-	            (0, _lib.extend)(props, this.props);
-	            (0, _lib.extend)(props, _parent.internalProps);
-
-	            return props;
-	        }
 	    }, {
 	        key: 'getByTag',
 	        value: function getByTag(tag) {
 	            return components[tag];
 	        }
+
+	        /*  Validate
+	            --------
+	             Validate any options passed into Component
+	        */
+
 	    }, {
 	        key: 'validate',
 	        value: function validate(options) {
@@ -2903,15 +2983,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (options.props) {
-	                var _iteratorNormalCompletion4 = true;
-	                var _didIteratorError4 = false;
-	                var _iteratorError4 = undefined;
+	                var _iteratorNormalCompletion3 = true;
+	                var _didIteratorError3 = false;
+	                var _iteratorError3 = undefined;
 
 	                try {
-	                    for (var _iterator4 = Object.keys(options.props)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                        var key = _step4.value;
+	                    for (var _iterator3 = Object.keys(options.props)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                        var key = _step3.value;
 
 	                        var prop = options.props[key];
+
+	                        if (_props.internalProps.hasOwnProperty(key)) {
+	                            throw new Error('[' + options.tag + '] Reserved prop name: ' + key);
+	                        }
 
 	                        if (!prop || !((typeof prop === 'undefined' ? 'undefined' : _typeof(prop)) === 'object')) {
 	                            throw new Error('[' + options.tag + '] Expected options.props.' + key + ' to be an object');
@@ -2930,16 +3014,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError4 = true;
-	                    _iteratorError4 = err;
+	                    _didIteratorError3 = true;
+	                    _iteratorError3 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-	                            _iterator4['return']();
+	                        if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+	                            _iterator3['return']();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError4) {
-	                            throw _iteratorError4;
+	                        if (_didIteratorError3) {
+	                            throw _iteratorError3;
 	                        }
 	                    }
 	                }
@@ -2948,13 +3032,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (options.contexts) {
 	                var anyEnabled = false;
 
-	                var _iteratorNormalCompletion5 = true;
-	                var _didIteratorError5 = false;
-	                var _iteratorError5 = undefined;
+	                var _iteratorNormalCompletion4 = true;
+	                var _didIteratorError4 = false;
+	                var _iteratorError4 = undefined;
 
 	                try {
-	                    for (var _iterator5 = Object.keys(options.contexts)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                        var context = _step5.value;
+	                    for (var _iterator4 = Object.keys(options.contexts)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                        var context = _step4.value;
 
 
 	                        if (_constants.CONTEXT_TYPES_LIST.indexOf(context) === -1) {
@@ -2966,16 +3050,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError5 = true;
-	                    _iteratorError5 = err;
+	                    _didIteratorError4 = true;
+	                    _iteratorError4 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
-	                            _iterator5['return']();
+	                        if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+	                            _iterator4['return']();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError5) {
-	                            throw _iteratorError5;
+	                        if (_didIteratorError4) {
+	                            throw _iteratorError4;
 	                        }
 	                    }
 	                }
@@ -2996,29 +3080,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (options.envUrls) {
-	                var _iteratorNormalCompletion6 = true;
-	                var _didIteratorError6 = false;
-	                var _iteratorError6 = undefined;
+	                var _iteratorNormalCompletion5 = true;
+	                var _didIteratorError5 = false;
+	                var _iteratorError5 = undefined;
 
 	                try {
-	                    for (var _iterator6 = Object.keys(options.envUrls)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                        var env = _step6.value;
+	                    for (var _iterator5 = Object.keys(options.envUrls)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                        var env = _step5.value;
 
 	                        if (!options.envUrls[env]) {
 	                            throw new Error('[' + options.tag + '] No url specified for env: ' + env);
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError6 = true;
-	                    _iteratorError6 = err;
+	                    _didIteratorError5 = true;
+	                    _iteratorError5 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion6 && _iterator6['return']) {
-	                            _iterator6['return']();
+	                        if (!_iteratorNormalCompletion5 && _iterator5['return']) {
+	                            _iterator5['return']();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError6) {
-	                            throw _iteratorError6;
+	                        if (_didIteratorError5) {
+	                            throw _iteratorError5;
 	                        }
 	                    }
 	                }
@@ -3035,9 +3119,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!options.url || !(typeof options.url === 'string')) {
 	                if (!options.defaultEnv || typeof options.defaultEnv !== 'string') {
 	                    if (options.envUrls) {
-	                        throw new Error('[' + options.tag + '] Expected options.url to be a string');
-	                    } else {
 	                        throw new Error('[' + options.tag + '] Expected options.defaultEnv to be a string');
+	                    } else {
+	                        throw new Error('[' + options.tag + '] Expected options.url to be a string');
 	                    }
 	                }
 	            }
@@ -3071,9 +3155,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ./base */ 31);
 
+	var _util = __webpack_require__(/*! ./util */ 37);
+
 	var _lib = __webpack_require__(/*! ../lib */ 32);
 
-	var _constants = __webpack_require__(/*! ../constants */ 37);
+	var _constants = __webpack_require__(/*! ../constants */ 38);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -3085,6 +3171,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	/*  Child Component
+	    ---------------
+
+	    This is the portion of code which runs inside the frame or popup window containing the component's implementation.
+
+	    When the component author calls myComponent.attach(), it creates a new instance of ChildComponent, which is then
+	    responsible for managing the state and messaging back up to the parent, and providing props for the component to
+	    utilize.
+	*/
+
 	var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
 	    _inherits(ChildComponent, _BaseComponent);
 
@@ -3095,21 +3191,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ChildComponent).call(this, component, options));
 
+	        _this.component = component;
+
 	        _this.validate(options);
 
-	        _this.component = component;
+	        // Handlers for various component lifecycle events
+
+	        _this.onEnter = _this.tryCatch(options.onEnter || _lib.noop);
+	        _this.onClose = _this.tryCatch(options.onClose || _lib.noop);
+	        _this.onError = _this.tryCatch(options.onError || function (err) {
+	            throw err;
+	        });
+	        _this.onProps = _this.tryCatch(options.onProps || _lib.noop, false);
+
+	        // The child can specify some default props if none are passed from the parent. This often makes integrations
+	        // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
+	        // has provided them or not, and fall-back to some default behavior.
+
+	        _this.props = options.defaultProps || {};
+
+	        // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
+	        // there's an existing full-page implementation which uses redirects. In this case, the user can specify
+	        // standalone: true, and defaultProps, and the child component should continue to function in the same way
+	        // as if it were created by xcomponent, with the exception that no post-messages will ever be sent.
 
 	        _this.standalone = options.standalone;
 
-	        _this.onEnter = (0, _lib.once)(_this.tryCatch(options.onEnter || _lib.noop));
-	        _this.onExit = (0, _lib.once)(_this.tryCatch(options.onExit || _lib.noop));
-	        _this.onClose = (0, _lib.once)(_this.tryCatch(options.onClose || _lib.noop));
-	        _this.onError = (0, _lib.once)(_this.tryCatch(options.onError || function (err) {
-	            throw err;
-	        }));
-	        _this.onProps = _this.tryCatch(options.onProps || _lib.noop);
-
-	        _this.props = options.defaultProps || {};
+	        // In standalone mode, we would expect setWindows to fail since there is no parent window and window.name
+	        // will not be generated by xcomponent. In this case we can fail silently, whereas normally we'd want to
+	        // fail hard here.
 
 	        try {
 	            _this.setWindows();
@@ -3124,18 +3234,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _this;
 	    }
 
+	    /*  Init
+	        ----
+	         Message up to the parent to let them know we've rendered successfully, and get some initial data and props
+	    */
+
 	    _createClass(ChildComponent, [{
 	        key: 'init',
 	        value: function init() {
 	            var _this2 = this;
 
+	            // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
+
 	            if (this.standalone && !this.parentComponentWindow) {
 	                return _promise.SyncPromise.resolve();
 	            }
 
-	            return this.sendToParentComponent(_constants.CONSTANTS.POST_MESSAGE.INIT).then(function (data) {
+	            // Start listening for post messages
 
-	                _this2.listen(_this2.parentComponentWindow);
+	            this.listen(this.parentComponentWindow);
+	            if (this.parentWindow !== this.parentComponentWindow) {
+	                this.listen(this.parentWindow);
+	            }
+
+	            // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
+	            //
+	            // For example:
+	            //
+	            // - What context are we
+	            // - What props has the parent specified
+
+	            return this.sendToParentComponent(_constants.CONSTANTS.POST_MESSAGE.INIT).then(function (data) {
 
 	                _this2.context = data.context;
 	                (0, _lib.extend)(_this2.props, data.props);
@@ -3146,14 +3275,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _this2.onError(err);
 	            });
 	        }
+
+	        /*  Send to Parent
+	            --------------
+	             Send a post message to our parent component window. Note -- this may not be our immediate parent, if we were
+	            rendered using renderToParent.
+	        */
+
 	    }, {
 	        key: 'sendToParentComponent',
 	        value: function sendToParentComponent(name, data) {
-	            return _src2['default'].send(this.parentComponentWindow, _constants.CONSTANTS.POST_MESSAGE.INIT);
+	            return _src2['default'].send(this.parentComponentWindow, name, data);
 	        }
+
+	        /*  Set Windows
+	            -----------
+	             Determine the parent window, and the parent component window. Note -- these may be different, if we were
+	            rendered using renderToParent.
+	        */
+
 	    }, {
 	        key: 'setWindows',
 	        value: function setWindows() {
+
+	            // Ensure we do not try to .attach() multiple times for the same component on the same page
 
 	            if (window.__activeXComponent__) {
 	                throw new Error('[' + this.component.tag + '] Can not attach multiple components to the same window');
@@ -3161,28 +3306,59 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            window.__activeXComponent__ = this;
 
+	            // Get the direct parent window
+
 	            this.parentWindow = (0, _lib.getParentWindow)();
 
 	            if (!this.parentWindow) {
 	                throw new Error('[' + this.component.tag + '] Can not find parent window');
 	            }
 
-	            var winProps = this.getWindowProps();
+	            // Get properties from the window name, passed down from our parent component
+
+	            var winProps = (0, _util.parseWindowName)(window.name);
 
 	            if (!winProps) {
 	                throw new Error('[' + this.component.tag + '] Window has not been rendered by xcomponent - can not attach here');
 	            }
 
-	            if (winProps.proxy && winProps.parent) {
+	            // Use this to infer which window is our true 'parent component'. This can either be:
+	            //
+	            // - Our actual parent
+	            // - A sibling which rendered us using renderToParent()
+
+	            if (winProps.sibling) {
+
+	                // We were rendered by a sibling, which we can access cross-domain via parent.frames
 	                this.parentComponentWindow = this.parentWindow.frames[winProps.parent];
 	            } else {
+
+	                // Our parent window is the same as our parent component window
 	                this.parentComponentWindow = this.parentWindow;
 	            }
 
-	            this.id = winProps.id;
+	            // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
+	            // only a few ways of doing it:
+	            //
+	            // - The window is a direct parent, in which case you can use window.parent or window.opener
+	            // - The window is an iframe owned by you or one of your parents, in which case you can use window.frames
+	            // - The window sent you a post-message, in which case you can use event.source
+	            //
+	            // If we didn't rely on winProps.parent here from the window name, we'd have to relay all of our messages through
+	            // our actual parent. Which is no fun at all, and pretty error prone even with the help of post-robot. So this
+	            // is the lesser of two evils until browsers give us something like getWindowByName(...)
+
+	            // If the parent window closes, we need to close ourselves. There's no point continuing to run our component
+	            // if there's no parent to message to.
 
 	            this.watchForClose();
 	        }
+
+	        /*  Watch For Close
+	            ---------------
+	             Watch both the parent window and the parent component window, if they close, close this window too.
+	        */
+
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
@@ -3190,22 +3366,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _lib.onCloseWindow)(this.parentWindow, function () {
 	                _this3.onClose(new Error('[' + _this3.component.tag + '] parent window was closed'));
+
+	                // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
+	                // close us, if we're an iframe
+
 	                if (_this3.context === _constants.CONSTANTS.CONTEXT.POPUP) {
 	                    window.close();
 	                }
 	            });
 
+	            // Only listen for parent component window if it's actually a different window
+
 	            if (this.parentComponentWindow && this.parentComponentWindow !== this.parentWindow) {
 	                (0, _lib.onCloseWindow)(this.parentComponentWindow, function () {
+
+	                    // We do actually need to close ourselves in this case, even if we're an iframe, because our component
+	                    // window is probably a sibling and we'll remain open by default.
+
 	                    _this3.close(new Error('[' + _this3.component.tag + '] parent component window was closed'));
 	                });
 	            }
 	        }
+
+	        /*  Validate
+	            --------
+	             Validate any options passed in to ChildComponent
+	        */
+
 	    }, {
 	        key: 'validate',
-	        value: function validate(options) {
-	            // pass
-	        }
+	        value: function validate(options) {}
+
+	        // TODO: Implement this
+
+
+	        /*  Listeners
+	            ---------
+	             Post-message listeners that will be automatically set up to listen for messages from the parent component
+	        */
+
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
@@ -3215,55 +3414,85 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (0, _lib.extend)(this.props, data.props);
 	                this.onProps.call(this);
 	            }), _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.CLOSE, function (source, data) {
+
+	                // Why doesn't the parent just close us? The reason is, our parent component might not actually be our
+	                // parent window. So we message our parent window and tell them to close us.
+
 	                return this.close();
-	            }), _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.RESIZE, function (source, data) {
-	                window.resizeTo(data.width, data.height);
 	            }), _ref;
 	        }
+
+	        /*  Close
+	            -----
+	             Close the child window
+	        */
+
 	    }, {
 	        key: 'close',
 	        value: function close(err) {
+
+	            // We could do this ourselves, if were a popup -- but iframes can't close themselves, so in all cases just
+	            // message the parent and have them close us instead
+
 	            this.onClose.call(this, err);
 	            return _src2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.CLOSE);
 	        }
+
+	        /*  Focus
+	            -----
+	             Focus the child window. Must be done on a user action like a click
+	        */
+
 	    }, {
 	        key: 'focus',
 	        value: function focus() {
 	            window.focus();
 	        }
+
+	        /*  Resize
+	            -----
+	             Resize the child window. Must be done on a user action like a click
+	        */
+
 	    }, {
 	        key: 'resize',
-	        value: function resize(height, width) {
-	            var _this4 = this;
-
-	            return _promise.SyncPromise.resolve().then(function () {
-
-	                if (_this4.context === _constants.CONSTANTS.CONTEXT.POPUP) {
-	                    window.resizeTo(width, height);
-	                } else if (_this4.context === _constants.CONSTANTS.CONTEXT.IFRAME) {
-	                    return _src2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.RESIZE, {
-	                        height: height,
-	                        width: width
-	                    });
-	                }
-	            });
+	        value: function resize(width, height) {
+	            window.resizeTo(width, height);
 	        }
+
+	        /*  Redirect To Parent
+	            ------------------
+	             Redirect the parent window
+	         */
+
 	    }, {
 	        key: 'redirectParent',
-	        value: function redirectParent(url) {
-	            this.onClose.call(this);
-	            this.parentWindow.location = url;
-	        }
+	        value: function redirectParent(url) {}
+
+	        // TODO: Implement this. Or don't. Not sure if it's a good idea when it's easy enough to do with props...
+
+
+	        /*  Break Out
+	            ---------
+	             Redirect the parent window to the current url, effectively breaking the component out to the full page
+	        */
+
 	    }, {
 	        key: 'breakOut',
 	        value: function breakOut() {
 	            this.redirectParent(window.location.href);
 	        }
+
+	        /*  Error
+	            -----
+	             Send an error back to the parent
+	        */
+
 	    }, {
 	        key: 'error',
 	        value: function error(err) {
 	            return this.sendToParentComponent(_constants.CONSTANTS.POST_MESSAGE.ERROR, {
-	                error: err.stack || err.toString()
+	                error: err.stack ? err.message + '\n' + err.stack : err.toString()
 	            });
 	        }
 	    }]);
@@ -3293,13 +3522,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../lib */ 32);
 
-	var _constants = __webpack_require__(/*! ../constants */ 37);
-
 	var _error = __webpack_require__(/*! ../error */ 1);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/*  Base Component
+	    --------------
+
+	    Methods that are common between child and parent components, but are not generic or uncoupled enough to live in
+	    a separate library.
+	*/
 
 	var BaseComponent = exports.BaseComponent = function () {
 	    function BaseComponent() {
@@ -3308,11 +3542,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _createClass(BaseComponent, [{
 	        key: 'registerForCleanup',
+
+
+	        /*  Register For Cleanup
+	            --------------------
+	             Register a method that will be called to do some cleanup whenever this.cleanup() is called
+	        */
+
 	        value: function registerForCleanup(task) {
 	            this.cleanupTasks = this.cleanupTasks || [];
 	            this.cleanupTasks.push(task);
 	            return this;
 	        }
+
+	        /*  Cleanup
+	            -------
+	             Call all of the methods registered with this.registerForCleanup
+	        */
+
 	    }, {
 	        key: 'cleanup',
 	        value: function cleanup() {
@@ -3345,6 +3592,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.cleanupTasks = [];
 	            }
 	        }
+
+	        /*  Set For Cleanup
+	            ---------------
+	             Set a key on this which will be auto-deleted when this.cleanup() is called
+	        */
+
 	    }, {
 	        key: 'setForCleanup',
 	        value: function setForCleanup(key, value) {
@@ -3355,25 +3608,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	                delete _this[key];
 	            });
 	        }
-	    }, {
-	        key: 'getChildWindowName',
-	        value: function getChildWindowName() {
-	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-	            return (0, _lib.b64encode)(JSON.stringify((0, _lib.extend)({
-	                type: _constants.CONSTANTS.XCOMPONENT,
-	                parent: window.name,
-	                id: (0, _lib.uniqueID)()
-	            }, props)));
-	        }
+	        /*  Try Catch
+	            ---------
+	             Returns a new method which wraps the original call in a try/catch, otherwise delegates to this.onError
+	        */
+
 	    }, {
 	        key: 'tryCatch',
-	        value: function tryCatch(method) {
+	        value: function tryCatch(method, doOnce) {
 
 	            var self = this;
 	            var errored = false;
 
-	            return function wrapper() {
+	            var wrapper = function wrapper() {
 
 	                if (errored) {
 	                    return;
@@ -3388,28 +3636,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        return self.error(err);
 	                    }
 
-	                    console.error(err.stack || err.toString());
-	                    return self.error(new Error('[' + this.component.tag + '] Child callback method threw an error'));
+	                    return self.error(new Error('[' + this.component.tag + '] Child lifecycle method threw an error'));
 	                }
 	            };
-	        }
-	    }, {
-	        key: 'getWindowProps',
-	        value: function getWindowProps() {
-	            var winProps = void 0;
 
-	            try {
-	                winProps = JSON.parse((0, _lib.b64decode)(window.name));
-	            } catch (err) {
-	                return;
+	            if (doOnce !== false) {
+	                wrapper = (0, _lib.once)(wrapper);
 	            }
 
-	            if (!winProps || winProps.type !== _constants.CONSTANTS.XCOMPONENT) {
-	                return;
-	            }
-
-	            return winProps;
+	            return wrapper;
 	        }
+
+	        /*  Listen
+	            ------
+	             Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
+	            post-messages, so this sets up an easy way to create a collection of listeners in one go.
+	             All post-messaging is done using post-robot.
+	        */
+
 	    }, {
 	        key: 'listen',
 	        value: function listen(win) {
@@ -3417,6 +3661,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (!win) {
 	                throw new Error('[' + this.component.tag + '] window to listen to not set');
+	            }
+
+	            if (!this.listeners) {
+	                return;
 	            }
 
 	            var listeners = this.listeners();
@@ -3457,57 +3705,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
+
+	        /*  Validate Props
+	            --------------
+	             Validate user-defined props. Users can pass props down from the parent into the child component, but first we
+	            double check the values are what we expect, based on the props spec defined in the original component.
+	        */
+
 	    }, {
 	        key: 'validateProps',
 	        value: function validateProps(props) {
+
+	            // First make sure all of the props we were sent are actually valid prop names
+
 	            var _iteratorNormalCompletion3 = true;
 	            var _didIteratorError3 = false;
 	            var _iteratorError3 = undefined;
 
 	            try {
-
-	                for (var _iterator3 = Object.keys(this.component.props)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                for (var _iterator3 = Object.keys(props)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var key = _step3.value;
 
-
-	                    var prop = this.component.props[key];
-	                    var value = props[key];
-
-	                    var hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-	                    if (!hasProp) {
-
-	                        if (prop.required !== false && !prop.hasOwnProperty('def')) {
-	                            throw new Error('[' + this.component.tag + '] Prop is required: ' + key);
-	                        }
-
-	                        continue;
-	                    }
-
-	                    if (prop.type === 'function') {
-
-	                        if (!(value instanceof Function)) {
-	                            throw new Error('[' + this.component.tag + '] Prop is not of type function: ' + key);
-	                        }
-	                    } else if (prop.type === 'string') {
-
-	                        if (typeof value !== 'string') {
-	                            throw new Error('[' + this.component.tag + '] Prop is not of type string: ' + key);
-	                        }
-	                    } else if (prop.type === 'object') {
-
-	                        try {
-	                            JSON.stringify(value);
-	                        } catch (err) {
-	                            throw new Error('[' + this.component.tag + '] Unable to serialize prop: ' + key);
-	                        }
-	                    } else if (prop.type === 'number') {
-
-	                        if (isNaN(parseInt(value, 10))) {
-	                            throw new Error('[' + this.component.tag + '] Prop is not a number: ' + key);
-	                        }
+	                    if (!this.component.props.hasOwnProperty(key)) {
+	                        throw new Error('[' + this.component.tag + '] Invalid prop: ' + key);
 	                    }
 	                }
+
+	                // Then loop over the props we expect, and make sure they're all present and valid
 	            } catch (err) {
 	                _didIteratorError3 = true;
 	                _iteratorError3 = err;
@@ -3519,6 +3743,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	                } finally {
 	                    if (_didIteratorError3) {
 	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
+
+	            try {
+	                for (var _iterator4 = Object.keys(this.component.props)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var _key = _step4.value;
+
+
+	                    var prop = this.component.props[_key];
+	                    var value = props[_key];
+
+	                    var hasProp = props.hasOwnProperty(_key) && value !== null && value !== undefined && value !== '';
+
+	                    if (!hasProp) {
+
+	                        // Props can either be optional, or specify a default value
+
+	                        if (prop.required !== false && !prop.hasOwnProperty('def')) {
+	                            throw new Error('[' + this.component.tag + '] Prop is required: ' + _key);
+	                        }
+
+	                        continue;
+	                    }
+
+	                    if (prop.type === 'function') {
+
+	                        if (!(value instanceof Function)) {
+	                            throw new Error('[' + this.component.tag + '] Prop is not of type function: ' + _key);
+	                        }
+	                    } else if (prop.type === 'string') {
+
+	                        if (typeof value !== 'string') {
+	                            throw new Error('[' + this.component.tag + '] Prop is not of type string: ' + _key);
+	                        }
+	                    } else if (prop.type === 'object') {
+
+	                        // Since we're sending everything by post-message, everything must be json serializable
+
+	                        try {
+	                            JSON.stringify(value);
+	                        } catch (err) {
+	                            throw new Error('[' + this.component.tag + '] Unable to serialize prop: ' + _key);
+	                        }
+	                    } else if (prop.type === 'number') {
+
+	                        if (isNaN(parseInt(value, 10))) {
+	                            throw new Error('[' + this.component.tag + '] Prop is not a number: ' + _key);
+	                        }
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+	                        _iterator4['return']();
+	                    }
+	                } finally {
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -3605,15 +3895,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.popup = popup;
 	exports.iframe = iframe;
 	exports.onCloseWindow = onCloseWindow;
-	exports.isClick = isClick;
+	exports.addEventListener = addEventListener;
 	exports.getParentWindow = getParentWindow;
 	exports.getParentNode = getParentNode;
 	exports.scanForJavascript = scanForJavascript;
 	exports.createElement = createElement;
+	exports.createStyleSheet = createStyleSheet;
 
 	var _fn = __webpack_require__(/*! ./fn */ 34);
 
 	var _util = __webpack_require__(/*! ./util */ 35);
+
+	/*  Get Element
+	    -----------
+
+	    Gets an element based on
+
+	    - Element id
+	    - CSS Query selector
+	*/
 
 	function getElement(id) {
 	    if (id instanceof window.Element) {
@@ -3633,6 +3933,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	/*  Popup
+	    -----
+
+	    Open a popup window with the specified option map
+	*/
+
 	function popup(url, options) {
 
 	    var win = window.open(url, options.name, Object.keys(options).map(function (key) {
@@ -3641,6 +3947,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return win;
 	}
+
+	/*  Iframe
+	    ------
+
+	    Open an iframe with the specified container, url, and option property map
+	*/
 
 	function iframe(container, url, options) {
 
@@ -3682,6 +3994,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return frame;
 	}
 
+	/*  On Close Window
+	    ---------------
+
+	    Wait for the specified window to close or cease to exist, then call the callback
+	*/
+
 	function onCloseWindow(win, callback) {
 
 	    callback = (0, _fn.once)(callback);
@@ -3696,35 +4014,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    interval = setInterval(checkWindowClosed, 50);
-	    setTimeout(checkWindowClosed);
+	    var timeout = setTimeout(checkWindowClosed);
+
+	    var close = win.close;
 
 	    try {
-	        (function () {
-	            var close = win.close;
-	            win.close = function () {
-	                close.apply(this, arguments);
-	                setTimeout(checkWindowClosed);
-	            };
-	        })();
+	        win.close = function () {
+	            close.apply(this, arguments);
+	            setTimeout(checkWindowClosed);
+	        };
 	    } catch (err) {
 	        // pass
 	    }
+
+	    return {
+	        cancel: function cancel() {
+	            clearTimeout(timeout);
+	            clearInterval(interval);
+	            try {
+	                win.close = close;
+	            } catch (err) {
+	                // pass
+	            }
+	        }
+	    };
 	}
 
-	var clickEventActive = false;
+	/*  Add Event Listener
+	    ------------------
 
-	window.addEventListener('load', function () {
-	    window.document.body.addEventListener('click', function () {
-	        clickEventActive = true;
-	        setTimeout(function () {
-	            clickEventActive = false;
-	        });
-	    }, true);
-	});
+	    Add DOM Event listener with cancel
+	*/
 
-	function isClick() {
-	    return clickEventActive;
+	function addEventListener(obj, event, handler) {
+	    obj.addEventListener(event, handler);
+	    return {
+	        cancel: function cancel() {
+	            obj.removeEventListener(event, handler);
+	        }
+	    };
 	}
+
+	/*  Get Parent Window
+	    -----------------
+
+	    Get the parent window depending on whether we are in an iframe or a popup
+	*/
 
 	function getParentWindow() {
 	    if (window.opener) {
@@ -3736,6 +4071,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	/*  Get Parent Node
+	    ---------------
+
+	    Get the parent element with the specified tag name
+	*/
+
 	function getParentNode(el, tag) {
 	    tag = tag.toLowerCase();
 
@@ -3746,6 +4087,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	}
+
+	/*  Scan For Javascript
+	    -------------------
+
+	    Check if the string contains anything which could conceivably be run as javascript if the string is set to innerHTML
+	*/
 
 	function scanForJavascript(str) {
 
@@ -3759,6 +4106,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return str;
 	}
+
+	/*  Create Element
+	    --------------
+
+	    Create an element with style, html, classes, attributes etc. and append it to the specified container
+	*/
 
 	function createElement() {
 	    var tag = arguments.length <= 0 || arguments[0] === undefined ? 'div' : arguments[0];
@@ -3814,38 +4167,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    if (options.events) {
-	        var _iteratorNormalCompletion3 = true;
-	        var _didIteratorError3 = false;
-	        var _iteratorError3 = undefined;
-
-	        try {
-	            for (var _iterator3 = Object.keys(options.events)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                var _key = _step3.value;
-
-	                element.addEventListener(_key, options.events[_key]);
-	            }
-	        } catch (err) {
-	            _didIteratorError3 = true;
-	            _iteratorError3 = err;
-	        } finally {
-	            try {
-	                if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-	                    _iterator3['return']();
-	                }
-	            } finally {
-	                if (_didIteratorError3) {
-	                    throw _iteratorError3;
-	                }
-	            }
-	        }
-	    }
-
 	    if (container) {
 	        container.appendChild(element);
 	    }
 
 	    return element;
+	}
+
+	/*  Create Stylesheet
+	    -----------------
+
+	    Create a stylesheet with the specified css, and append it to a a container
+	*/
+
+	function createStyleSheet(styleSheet, container) {
+
+	    return createElement('style', {
+
+	        styleSheet: styleSheet,
+
+	        attributes: {
+	            type: 'text/css'
+	        }
+
+	    }, container);
 	}
 
 /***/ },
@@ -3863,9 +4208,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.noop = noop;
 	exports.once = once;
 	exports.memoize = memoize;
-	function noop() {
-	    // pass
-	}
+
+	/*  Noop
+	    ----
+
+	    Do nothing, zilch, nada, zip
+	*/
+
+	function noop() {}
+	// pass
+
+
+	/*  Once
+	    ----
+
+	    Create a wrapper function which only allows the inner function to run once, otherwise is a noop
+	*/
 
 	function once(method) {
 	    var called = false;
@@ -3877,6 +4235,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	}
+
+	/*  Memoize
+	    -------
+
+	    Create a wrapper function which caches the result of the first call, then for subsequent calls returns the cached value
+	*/
 
 	function memoize(method) {
 
@@ -3914,9 +4278,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.uniqueID = uniqueID;
 	exports.b64encode = b64encode;
 	exports.b64decode = b64decode;
+	exports.stringifyWithFunctions = stringifyWithFunctions;
+
+	/*  Url Encode
+	    ----------
+
+	    Replace ? and & with encoded values. Allows other values (to create more readable urls than encodeUriComponent)
+	*/
+
 	function urlEncode(str) {
 	    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
 	}
+
+	/*  Camel To Dasherize
+	    ------------------
+
+	    Convert camelCaseText to dasherized-text
+	*/
 
 	function camelToDasherize(string) {
 	    return string.replace(/([A-Z])/g, function (g) {
@@ -3924,11 +4302,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
+	/*  Dasherize to Camel
+	    ------------------
+
+	    Convert dasherized-text to camelCaseText
+	*/
+
 	function dasherizeToCamel(string) {
 	    return string.replace(/-([a-z])/g, function (g) {
 	        return g[1].toUpperCase();
 	    });
 	}
+
+	/*  Extend
+	    ------
+
+	    Extend one object with another
+	*/
 
 	function extend(obj, source) {
 	    if (!source) {
@@ -3944,6 +4334,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	}
 
+	/*  Values
+	    ------
+
+	    Get all of the values from an object as an array
+	*/
+
 	function values(obj) {
 	    var results = [];
 
@@ -3956,6 +4352,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return results;
 	}
 
+	/*  Unique ID
+	    ---------
+
+	    Generate a unique, random hex id
+	*/
+
 	function uniqueID() {
 
 	    var chars = '0123456789abcdef';
@@ -3965,12 +4367,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
+	/*  Base 64 Encode
+	    --------------
+
+	    Base 64 encode a string
+	*/
+
 	function b64encode(str) {
 	    return window.btoa(str).replace(/[=]/g, '_');
 	}
 
+	/*  Base 64 Decode
+	    --------------
+
+	    Base 64 decode a string
+	*/
+
 	function b64decode(str) {
 	    return window.atob(str.replace(/[_]/g, '='));
+	}
+
+	/*  Stringify with Functions
+	    ------------------------
+
+	    JSON Stringify with added support for functions
+	*/
+
+	function stringifyWithFunctions(obj) {
+	    return JSON.stringify(obj, function (key, val) {
+	        if (typeof val === 'function') {
+	            return val.toString();
+	        }
+	        return val;
+	    });
 	}
 
 /***/ },
@@ -3989,6 +4418,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 11);
 
+	/*  DeNodeify
+	    ---------
+
+	    Turns a method from a function which accepts a callback, into a function which returns a promise.
+	*/
+
 	function denodeify(method) {
 
 	    return function () {
@@ -4002,6 +4437,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return new _promise.SyncPromise(function (resolve, reject) {
 	            args.push(function denodeifyCallback(err, result) {
+
+	                if (err && !(err instanceof Error)) {
+	                    throw new Error('Passed non-Error object in callback: [ ' + err + ' ] -- callbacks should either be called with callback(new Error(...)) or callback(null, result).');
+	                }
+
 	                return err ? reject(err) : resolve(result);
 	            });
 	            return method.apply(self, args);
@@ -4011,6 +4451,68 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 37 */
+/*!*******************************!*\
+  !*** ./src/component/util.js ***!
+  \*******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.buildChildWindowName = buildChildWindowName;
+	exports.parseWindowName = parseWindowName;
+
+	var _lib = __webpack_require__(/*! ../lib */ 32);
+
+	var _constants = __webpack_require__(/*! ../constants */ 38);
+
+	/*  Build Child Window Name
+	    -----------------------
+
+	    Build a name for our child window. This should identify the following things to the child:
+
+	    - That the window was created by, and is owned by xcomponent
+	    - The name of the child's parent. This is so the child can identify which window created it, even when we do a
+	      renderToParent, in which case the true parent may actually be a sibling frame in the window hierarchy
+
+	    We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
+	*/
+
+	function buildChildWindowName() {
+	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    return (0, _lib.b64encode)(JSON.stringify((0, _lib.extend)({
+	        type: _constants.CONSTANTS.XCOMPONENT
+	    }, props)));
+	}
+
+	/*  Parse Window Name
+	    -----------------
+
+	    The inverse of buildChildWindowName. Base64 decodes and json parses the window name to get the original props
+	    passed down, including the parent name. Only accepts window names built by xcomponent
+	*/
+
+	function parseWindowName(name) {
+	    var winProps = void 0;
+
+	    try {
+	        winProps = JSON.parse((0, _lib.b64decode)(name));
+	    } catch (err) {
+	        return;
+	    }
+
+	    if (!winProps || winProps.type !== _constants.CONSTANTS.XCOMPONENT) {
+	        return;
+	    }
+
+	    return winProps;
+	}
+
+/***/ },
+/* 38 */
 /*!**************************!*\
   !*** ./src/constants.js ***!
   \**************************/
@@ -4067,7 +4569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var MAX_Z_INDEX = exports.MAX_Z_INDEX = 2147483647;
 
 /***/ },
-/* 38 */
+/* 39 */
 /*!*********************************!*\
   !*** ./src/component/parent.js ***!
   \*********************************/
@@ -4078,7 +4580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.internalProps = exports.ParentComponent = undefined;
+	exports.ParentComponent = undefined;
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -4096,9 +4598,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ./base */ 31);
 
+	var _util = __webpack_require__(/*! ./util */ 37);
+
 	var _lib = __webpack_require__(/*! ../lib */ 32);
 
-	var _constants = __webpack_require__(/*! ../constants */ 37);
+	var _constants = __webpack_require__(/*! ../constants */ 38);
 
 	var _error = __webpack_require__(/*! ../error */ 1);
 
@@ -4113,6 +4617,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	var activeComponents = [];
+
+	/*  Render Drivers
+	    --------------
+
+	    There are various differences in how we treat:
+
+	    - Opening frames and windows
+	    - Rendering up to the parent
+	    - Showing overlays
+
+	    based on the context we're rendering to.
+
+	    These render drivers split this functionality out in a driver pattern, so our component code doesn't bunch up into a
+	    series of if-popup-then-else-if-lightbox code.
+	*/
 
 	var RENDER_DRIVERS = (_RENDER_DRIVERS = {}, _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.IFRAME, {
 
@@ -4129,6 +4648,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.registerForCleanup(function () {
 	            if (_this.iframe) {
+	                try {
+	                    _this.iframe.contentWindow.close();
+	                } catch (err) {
+	                    // pass
+	                }
 	                _this.iframe.parentNode.removeChild(_this.iframe);
 	                delete _this.iframe;
 	            }
@@ -4137,12 +4661,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.setForCleanup('context', _constants.CONSTANTS.CONTEXT.IFRAME);
 	        this.setForCleanup('window', this.iframe.contentWindow);
 
+	        // There's a possibility that our iframe's dom element could be removed by other code, for a variety of
+	        // reasons. As such, we need to periodically check we still have a child window that is open.
+
 	        this.watchForClose();
 
 	        return this;
 	    },
 	    renderToParent: function renderToParent(element) {
-	        // pass
+
+	        // No special behavior needed to renderToParent
 	    }
 	}), _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.POPUP, {
 
@@ -4168,20 +4696,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 
+	        // Sometimes we'll be blocked from opening the popup because we're not in a click event.
+
 	        if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-	            throw new _error.PopupOpenError('[' + this.component.tag + '] Can not open popup window - blocked');
+	            var err = new _error.PopupOpenError('[' + this.component.tag + '] Can not open popup window - blocked');
+	            throw err;
 	        }
 
 	        this.setForCleanup('context', _constants.CONSTANTS.CONTEXT.POPUP);
 	        this.setForCleanup('window', this.popup);
+
+	        // With popups, since they can be closed manually by the user with no feedback to us, we need to watch for
+	        // them being closed.
 
 	        this.watchForClose();
 
 	        return this;
 	    },
 	    renderToParent: function renderToParent() {
-	        this.childWindowName = this.getChildWindowName({ proxy: true });
-	        this.openPopup();
+
+	        // Popups are the only case where we need to do anything special to render to parent.
+	        // Because we need a click event, we have to open up the popup from the child the moment it's requested,
+	        // Then message up and continue the rendering process from the parent as with any other renderToParent.
+
+	        this.open(null, _constants.CONTEXT_TYPES.POPUP);
 	    }
 	}), _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.LIGHTBOX, {
 
@@ -4189,9 +4727,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    open: function open() {
 
-	        this.openIframe(document.body);
+	        this.open(document.body, _constants.CONTEXT_TYPES.IFRAME);
 
 	        var pos = this.getPosition();
+
+	        // TODO: some of this should be done in the parent.css file
 
 	        this.iframe.style.zIndex = _constants.MAX_Z_INDEX;
 	        this.iframe.style.position = 'absolute';
@@ -4202,9 +4742,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this;
 	    },
 	    renderToParent: function renderToParent() {
-	        // pass
+
+	        // No special behavior needed to renderToParent
 	    }
 	}), _RENDER_DRIVERS);
+
+	/*  Parent Component
+	    ----------------
+
+	    This manages the state of the component on the parent window side - i.e. the window the component is being rendered into.
+
+	    It handles opening the necessary windows/iframes, launching the component's url, and listening for messages back from the component.
+	*/
 
 	var ParentComponent = exports.ParentComponent = function (_BaseComponent) {
 	    _inherits(ParentComponent, _BaseComponent);
@@ -4217,7 +4766,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ParentComponent).call(this, component, options));
 
 	        _this3.component = component;
-	        _this3.options = options;
+
+	        _this3.id = (0, _lib.uniqueID)();
 
 	        // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -4230,48 +4780,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	        activeComponents.push(_this3);
 
 	        _this3.validate(options);
-
 	        _this3.parentWindow = (0, _lib.getParentWindow)();
-
-	        // User options
-
-	        _this3.onEnter = options.onEnter || _lib.noop;
-	        _this3.onExit = (0, _lib.once)(options.onExit || _lib.noop);
-	        _this3.onClose = (0, _lib.once)(options.onClose || options.onError || _lib.noop);
-	        _this3.onError = (0, _lib.once)(options.onError || _lib.noop);
-	        _this3.onTimeout = (0, _lib.once)(options.onTimeout || options.onError || _lib.noop);
-
-	        _this3.customUrl = options.url;
-	        _this3.env = options.env;
-	        _this3.timeout = options.timeout;
 
 	        _this3.setProps(options.props || {});
 
-	        // Options passed during renderToParent
+	        // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
+	        // them only when we're trying to render from a sibling to a sibling
 
-	        _this3.childWindowName = options.childWindowName || _this3.getChildWindowName();
+	        _this3.childWindowName = options.childWindowName || (0, _util.buildChildWindowName)({
+	            parent: window.name,
+	            id: _this3.id
+	        });
 
 	        _this3.screenWidth = options.screenWidth || window.outerWidth;
 	        _this3.screenHeight = options.screenHeight || window.outerHeight;
+
+	        // Add parent.css to the parent page
+
+	        _this3.createParentStyle();
+
+	        // Set up promise for init
+
+	        _this3.onInit = new _promise.SyncPromise();
 	        return _this3;
 	    }
+
+	    /*  Set Props
+	        ---------
+	         Normalize props and generate the url we'll use to render the component
+	    */
 
 	    _createClass(ParentComponent, [{
 	        key: 'setProps',
 	        value: function setProps(props) {
 	            this.props = this.normalizeProps(props);
-	            this.url = this.getUrl();
+	            this.url = this.buildUrl();
 	        }
+
+	        /*  Build Url
+	            ---------
+	             We build the props we're passed into the initial url. This means the component server-side can start rendering
+	            itself based on whatever props the merchant provides.
+	        */
+
 	    }, {
-	        key: 'getUrl',
-	        value: function getUrl() {
+	        key: 'buildUrl',
+	        value: function buildUrl() {
 
 	            var url = void 0;
 
-	            if (this.customUrl) {
-	                url = this.customUrl;
-	            } else if (this.env) {
-	                url = this.component.envUrls[this.env];
+	            if (this.props.url) {
+	                url = this.props.url;
+	            } else if (this.props.env) {
+	                url = this.component.envUrls[this.props.env];
 	            } else {
 	                url = this.component.url;
 	            }
@@ -4284,14 +4845,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return url;
 	        }
+
+	        /*  Update Props
+	            ------------
+	             Send new props down to the child
+	        */
+
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps(props) {
 	            var _this4 = this;
 
-	            return _promise.SyncPromise.resolve().then(function () {
+	            // Wait for init to complete successfully
 
-	                var oldProps = JSON.stringify(_this4.props);
+	            return this.onInit.then(function () {
+
+	                var oldProps = (0, _lib.stringifyWithFunctions)(_this4.props);
 
 	                var newProps = {};
 	                (0, _lib.extend)(newProps, _this4.props);
@@ -4299,33 +4868,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _this4.setProps(newProps);
 
-	                if (_this4.window && oldProps !== JSON.stringify(_this4.props)) {
+	                // Only send down the new props if they do not match the old
+
+	                if (_this4.window && oldProps !== (0, _lib.stringifyWithFunctions)(_this4.props)) {
 	                    return _src2['default'].send(_this4.window, _constants.CONSTANTS.POST_MESSAGE.PROPS, {
 	                        props: _this4.props
 	                    });
 	                }
 	            });
 	        }
+
+	        /*  Validate
+	            --------
+	             Validate options passed to
+	        */
+
 	    }, {
 	        key: 'validate',
-	        value: function validate(options) {
+	        value: function validate(options) {}
 
-	            if (options.timeout && !(typeof options.timeout === 'number')) {
-	                throw new Error('[' + this.component.tag + '] Expected options.timeout to be a number: ' + options.timeout);
-	            }
+	        // TODO: Implement this
 
-	            if (options.container && !this.component.context.iframe) {
-	                throw new Error('[' + this.component.tag + '] Can not render to a container: does not support iframe mode');
-	            }
 
-	            if (options.env && !this.component.envUrls[options.env]) {
-	                throw new Error('[' + this.component.tag + '] Invalid env: ' + options.env);
-	            }
-	        }
+	        /*  Normalize Props
+	            ---------------
+	             Turn props into normalized values, using defaults, function options, etc.
+	        */
+
 	    }, {
 	        key: 'normalizeProps',
 	        value: function normalizeProps(props) {
-
 	            this.validateProps(props);
 
 	            props = props || {};
@@ -4339,48 +4911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                for (var _iterator = Object.keys(this.component.props)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var key = _step.value;
 
-
-	                    var prop = this.component.props[key];
-	                    var value = props[key];
-
-	                    var hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-	                    if (!hasProp && prop.def) {
-	                        value = prop.def instanceof Function && prop.type !== 'function' ? prop.def() : prop.def;
-	                    }
-
-	                    if (prop.type === 'boolean') {
-	                        result[key] = Boolean(value);
-	                    } else if (prop.type === 'function') {
-
-	                        if (!value) {
-
-	                            if (prop.noop) {
-	                                value = _lib.noop;
-	                            }
-	                        } else {
-
-	                            if (prop.denodeify) {
-	                                value = (0, _lib.denodeify)(value);
-	                            }
-
-	                            if (prop.once) {
-	                                value = (0, _lib.once)(value);
-	                            }
-
-	                            if (prop.memoize) {
-	                                value = (0, _lib.memoize)(value);
-	                            }
-	                        }
-
-	                        result[key] = value;
-	                    } else if (prop.type === 'string') {
-	                        result[key] = value || '';
-	                    } else if (prop.type === 'object') {
-	                        result[key] = JSON.stringify(value);
-	                    } else if (prop.type === 'number') {
-	                        result[key] = parseInt(value || 0, 10);
-	                    }
+	                    result[key] = this.normalizeProp(props, key);
 	                }
 	            } catch (err) {
 	                _didIteratorError = true;
@@ -4399,6 +4930,84 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return result;
 	        }
+
+	        /*  Normalize Props
+	            ---------------
+	             Turn prop into normalized value, using defaults, function options, etc.
+	        */
+
+	    }, {
+	        key: 'normalizeProp',
+	        value: function normalizeProp(props, key) {
+
+	            var prop = this.component.props[key];
+	            var value = props[key];
+
+	            var hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
+
+	            // Substitute in provided default. If prop.def is a function, we call it to get the default.
+
+	            if (!hasProp && prop.def) {
+	                value = prop.def instanceof Function && prop.type !== 'function' ? prop.def() : prop.def;
+	            }
+
+	            // If we have a defaultProp, use the value of that prop for this one
+
+	            else if (!hasProp && prop.defaultProp) {
+	                    value = this.normalizeProp(props, prop.defaultProp);
+	                }
+
+	            if (prop.type === 'boolean') {
+	                return Boolean(value);
+	            } else if (prop.type === 'function') {
+
+	                if (!value) {
+
+	                    // If prop.noop is set, make the function a noop
+
+	                    if (!value && prop.noop) {
+	                        value = _lib.noop;
+	                    }
+	                } else {
+
+	                    // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
+
+	                    if (prop.denodeify) {
+	                        value = (0, _lib.denodeify)(value);
+	                    }
+
+	                    // If prop.once is set, ensure the function can only be called once
+
+	                    if (prop.once) {
+	                        value = (0, _lib.once)(value);
+	                    }
+
+	                    // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
+
+	                    if (prop.memoize) {
+	                        value = (0, _lib.memoize)(value);
+	                    }
+	                }
+
+	                return value;
+	            } else if (prop.type === 'string') {
+	                return value || '';
+	            } else if (prop.type === 'object') {
+	                return JSON.stringify(value);
+	            } else if (prop.type === 'number') {
+	                return parseInt(value || 0, 10);
+	            }
+	        }
+
+	        /*  Props to Query
+	            --------------
+	             Turn props into an initial query string to open the component with
+	             string -> string
+	            bool   -> 1
+	            object -> json
+	            number -> string
+	        */
+
 	    }, {
 	        key: 'propsToQuery',
 	        value: function propsToQuery(props) {
@@ -4416,16 +5025,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (typeof value === 'boolean') {
 	                    result = '1';
 	                } else if (typeof value === 'string') {
-	                    result = value;
+	                    result = value.toString();
 	                } else if (typeof value === 'function') {
 	                    return;
 	                } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
 	                    result = JSON.stringify(value);
+	                } else if (typeof value === 'number') {
+	                    result = value.toString();
 	                }
 
 	                return (0, _lib.urlEncode)(key) + '=' + (0, _lib.urlEncode)(result);
 	            }).filter(Boolean).join('&');
 	        }
+
+	        /*  Get Position
+	            ------------
+	             Calculate the position for the popup / lightbox
+	             This is either
+	            - Specified by the user
+	            - The center of the screen
+	             I'd love to do this with pure css, but alas... popup windows :(
+	        */
+
 	    }, {
 	        key: 'getPosition',
 	        value: function getPosition() {
@@ -4460,11 +5081,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return pos;
 	        }
+
+	        /*  Get Render Context
+	            ------------------
+	             Determine the ideal context to render to, if unspecified by the user
+	        */
+
 	    }, {
 	        key: 'getRenderContext',
 	        value: function getRenderContext(el) {
 
-	            if (el && this.component.contexts[_constants.CONTEXT_TYPES.IFRAME]) {
+	            if (el) {
+
+	                if (!this.component.contexts[_constants.CONTEXT_TYPES.IFRAME]) {
+	                    throw new Error('[' + this.component.tag + '] Iframe context not allowed');
+	                }
+
 	                return _constants.CONTEXT_TYPES.IFRAME;
 	            }
 
@@ -4486,65 +5118,69 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (this.component.contexts[_constants.CONTEXT_TYPES.POPUP]) {
 	                return _constants.CONTEXT_TYPES.POPUP;
 	            }
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render(element, renderContext) {
-
-	            if (this.window) {
-	                throw new Error('[' + this.component.tag + '] Component is already rendered');
-	            }
-
-	            if (renderContext && !this.component.contexts[renderContext]) {
-	                throw new Error('Invalid context: ' + renderContext);
-	            }
-
-	            renderContext = renderContext || this.getRenderContext(element);
-
-	            var _arr = [renderContext, _constants.CONTEXT_TYPES.POPUP, _constants.CONTEXT_TYPES.IFRAME, _constants.CONTEXT_TYPES.LIGHTBOX];
-	            for (var _i = 0; _i < _arr.length; _i++) {
-	                var context = _arr[_i];
-
-	                if (!context || !this.component.contexts[context]) {
-	                    continue;
-	                }
-
-	                var driver = RENDER_DRIVERS[context];
-
-	                try {
-	                    driver.open.call(this, element);
-	                } catch (err) {
-
-	                    if (err instanceof _error.PopupOpenError) {
-	                        continue;
-	                    }
-
-	                    throw err;
-	                }
-
-	                this.listen(this.window);
-	                this.loadUrl(this.url);
-	                this.runTimeout();
-
-	                if (driver.overlay) {
-	                    this.createOverlay();
-	                }
-
-	                return;
-	            }
 
 	            throw new Error('[' + this.component.tag + '] No context options available for render');
 	        }
+
+	        /*  Render
+	            ------
+	             Kick off the actual rendering of the component:
+	             - open the popup/iframe
+	            - load the url into it
+	            - set up listeners
+	        */
+
+	    }, {
+	        key: 'render',
+	        value: function render(element, context) {
+
+	            if (this.window) {
+	                throw new Error('[' + this.component.tag + '] Can not render: component is already rendered');
+	            }
+
+	            if (context && !this.component.contexts[context]) {
+	                throw new Error('Invalid context: ' + context);
+	            }
+
+	            context = context || this.getRenderContext(element);
+
+	            this.open(element, context);
+	            this.listen(this.window);
+	            this.loadUrl(this.url);
+	            this.runTimeout();
+
+	            if (RENDER_DRIVERS[context].overlay) {
+	                this.createOverlayTemplate();
+	            }
+
+	            return this;
+	        }
+
+	        /*  Open
+	            ----
+	             Open a new window in the desired context
+	        */
+
 	    }, {
 	        key: 'open',
 	        value: function open(element, context) {
 
 	            if (this.window) {
-	                throw new Error('[' + this.component.tag + '] Component is already rendered');
+	                throw new Error('[' + this.component.tag + '] Can not open: component is already rendered');
 	            }
 
-	            return RENDER_DRIVERS[context].open.call(this, element);
+	            RENDER_DRIVERS[context].open.call(this, element);
+
+	            this.createComponentTemplate();
 	        }
+
+	        /*  Render to Parent
+	            ----------------
+	             Instruct the parent window to render our component for us -- so, for example, we can have a button component
+	            which opens a lightbox on the parent page, with a full overlay. Or, we could use this to render an iframe based
+	            modal on top of our existing iframe component, without having to expand out the size of our current iframe.
+	        */
+
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
@@ -4571,7 +5207,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('[' + this.component.tag + '] Can not render to parent - not in a child component window');
 	            }
 
+	            // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
+
+	            this.childWindowName = (0, _util.buildChildWindowName)({
+	                id: this.id,
+	                parent: window.name,
+	                sibling: true
+	            });
+
+	            // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
+	            // open them from the child, since we depend on there being a click event to avoid the popup blocker.
+
 	            RENDER_DRIVERS[context].renderToParent.call(this, element);
+
+	            // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
+	            // across, we can pretty much just send all of our props over too without any problems
 
 	            return _src2['default'].sendToParent(_constants.CONSTANTS.POST_MESSAGE.RENDER, _extends({}, options, {
 
@@ -4579,83 +5229,144 @@ return /******/ (function(modules) { // webpackBootstrap
 	                context: context,
 	                element: element,
 
-	                options: _extends({}, this.options, {
+	                options: {
+	                    props: this.props,
 
 	                    childWindowName: this.childWindowName,
 	                    screenWidth: this.screenWidth,
 	                    screenHeight: this.screenHeight
-	                })
+	                }
 
 	            })).then(function (data) {
+
+	                // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
 	                if (!_this5.window) {
 	                    _this5.setForCleanup('window', _this5.parentWindow.frames[_this5.childWindowName]);
 	                }
 
+	                // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
+	                // messages on the sibling window, since we have a handle on it.
+
 	                _this5.listen(_this5.window);
+
+	                return _this5;
 	            });
 	        }
+
+	        /*  Render Iframe
+	            -------------
+	             Render the component to an iframe
+	        */
+
 	    }, {
 	        key: 'renderIframe',
 	        value: function renderIframe(element) {
+
+	            if (!element) {
+	                throw new Error('[' + this.component.tag + '] Must specify element to render iframe');
+	            }
+
 	            return this.render(element, _constants.CONTEXT_TYPES.IFRAME);
 	        }
-	    }, {
-	        key: 'openIframe',
-	        value: function openIframe(element) {
-	            return this.open(element, _constants.CONTEXT_TYPES.IFRAME);
-	        }
+
+	        /*  Render Iframe to Parent
+	            -----------------------
+	             Render the component to an iframe in the parent window
+	        */
+
 	    }, {
 	        key: 'renderIframeToParent',
 	        value: function renderIframeToParent(element) {
+
+	            if (!element) {
+	                throw new Error('[' + this.component.tag + '] Must specify element to render iframe to parent');
+	            }
+
 	            return this.renderToParent(element, _constants.CONTEXT_TYPES.IFRAME);
 	        }
+
+	        /*  Render Lightbox
+	            ---------------
+	             Render the component to a lightbox
+	        */
+
 	    }, {
 	        key: 'renderLightbox',
 	        value: function renderLightbox() {
 	            return this.render(null, _constants.CONTEXT_TYPES.LIGHTBOX);
 	        }
-	    }, {
-	        key: 'openLightbox',
-	        value: function openLightbox() {
-	            return this.open(null, _constants.CONTEXT_TYPES.LIGHTBOX);
-	        }
+
+	        /*  Render Lightbox to Parent
+	            -------------------------
+	             Render the component to a lightbox in the parent window
+	        */
+
 	    }, {
 	        key: 'renderLightboxToParent',
 	        value: function renderLightboxToParent() {
 	            return this.renderToParent(null, _constants.CONTEXT_TYPES.LIGHTBOX);
 	        }
+
+	        /*  Render Popup
+	            ------------
+	             Render the component to a popup
+	        */
+
 	    }, {
 	        key: 'renderPopup',
 	        value: function renderPopup() {
 	            return this.render(null, _constants.CONTEXT_TYPES.POPUP);
 	        }
-	    }, {
-	        key: 'openPopup',
-	        value: function openPopup() {
-	            return this.open(null, _constants.CONTEXT_TYPES.POPUP);
-	        }
+
+	        /*  Render Popup to Parent
+	            ----------------------
+	             Render the component to a popup in the parent window
+	        */
+
 	    }, {
 	        key: 'renderPopupToParent',
 	        value: function renderPopupToParent() {
 	            return this.renderToParent(null, _constants.CONTEXT_TYPES.POPUP);
 	        }
+
+	        /*  Watch For Close
+	            ---------------
+	             Watch for the child window closing, so we can cleanup.
+	            Also watch for this window changing location, so we can close the component.
+	        */
+
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
 	            var _this6 = this;
 
-	            (0, _lib.onCloseWindow)(this.window, function () {
-	                _this6.onClose(new Error('[' + _this6.component.tag + '] ' + _this6.context + ' was closed'));
+	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
+	                _this6.props.onClose(new Error('[' + _this6.component.tag + '] ' + _this6.context + ' was closed'));
 	                _this6.destroy();
 	            });
 
-	            window.addEventListener('beforeunload', function () {
+	            // Our child has know way of knowing if we navigated off the page. So we have to listen for beforeunload
+	            // and close the child manually if that happens.
+
+	            var unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
 	                if (_this6.popup) {
 	                    _this6.popup.close();
 	                }
 	            });
+
+	            this.registerForCleanup(function () {
+	                closeWindowListener.cancel();
+	                unloadListener.cancel();
+	            });
 	        }
+
+	        /*  Load Url
+	            --------
+	             Load url into the child window. This is separated out because it's quite common for us to have situations
+	            where opening the child window and loading the url happen at different points.
+	        */
+
 	    }, {
 	        key: 'loadUrl',
 	        value: function loadUrl(url) {
@@ -4666,19 +5377,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.iframe.src = url;
 	            }
 	        }
+
+	        /*  Hijack Button
+	            -------------
+	             In this case, we don't actually know the final url for the component. The parent page might have a link or a form
+	            which points directly to our component url, or indirectly via a 302.
+	             So here, we listen for a click on the button or link, and hijack the target window. That way, we can be responsible
+	            for opening the window, listening for messages, etc. while the parent page is responsible only for generating the url
+	            to redirect to.
+	             This is necessary because in these cases, there's no way to accurately ascertain the url we're going to before
+	            we're redirected there -- so we let the parent redirect, but handle everything else involving the lifecycle of
+	            the component.
+	             This is a pretty esoteric case -- so if you need it, cool, otherwise you don't need to spend too much time
+	            worrying about it.
+	        */
+
 	    }, {
-	        key: 'hijackToPopup',
-	        value: function hijackToPopup(element) {
-	            return this.hijack(element, _constants.CONTEXT_TYPES.POPUP);
-	        }
-	    }, {
-	        key: 'hijackToLightbox',
-	        value: function hijackToLightbox(element) {
-	            return this.hijack(element, _constants.CONTEXT_TYPES.LIGHTBOX);
-	        }
-	    }, {
-	        key: 'hijack',
-	        value: function hijack(element) {
+	        key: 'hijackButton',
+	        value: function hijackButton(element) {
 	            var _this7 = this;
 
 	            var context = arguments.length <= 1 || arguments[1] === undefined ? _constants.CONTEXT_TYPES.LIGHTBOX : arguments[1];
@@ -4691,21 +5407,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var isButton = el.tagName.toLowerCase() === 'button' || el.tagName.toLowerCase() === 'input' && el.type === 'submit';
 
-	            if (isButton) {
-	                el = (0, _lib.getParentNode)(el, 'form');
-	            }
+	            // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
+
+	            var targetElement = isButton ? (0, _lib.getParentNode)(el, 'form') : el;
+
+	            // We need to wait for the click event, which is necessary for opening a popup (if we need to)
 
 	            el.addEventListener('click', function (event) {
 
 	                if (_this7.window) {
 	                    event.preventDefault();
+	                    throw new Error('[' + _this7.component.tag + '] Component is already rendered');
 	                }
 
-	                _this7.renderHijack(el, context);
+	                // Open the window to render into
+
+	                _this7.renderHijack(targetElement, context);
 	            });
 
 	            return this;
 	        }
+
+	        /*  Render Hijack
+	            -------------
+	             Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
+	        */
+
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(el) {
@@ -4716,48 +5443,102 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('[' + this.component.tag + '] Component is already rendered');
 	            }
 
-	            var driver = RENDER_DRIVERS[context];
-
-	            driver.open.call(this);
+	            // Point the element to open in our child window
 
 	            el.target = this.childWindowName;
+
+	            // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
+
+	            this.open(null, context);
+
+	            // Do everything else the same way -- listen for events, render the overlay, etc.
 
 	            this.listen(this.window);
 	            this.runTimeout();
 
-	            if (driver.overlay) {
-	                this.createOverlay();
+	            if (RENDER_DRIVERS[context].overlay) {
+	                this.createOverlayTemplate();
 	            }
 	        }
+
+	        /*  Hijack Button to Popup
+	            ----------------------
+	             Hijack a link or button to render a popup
+	        */
+
 	    }, {
-	        key: 'submitParentForm',
-	        value: function submitParentForm() {
+	        key: 'hijackButtonToPopup',
+	        value: function hijackButtonToPopup(element) {
+	            return this.hijackButton(element, _constants.CONTEXT_TYPES.POPUP);
+	        }
+
+	        /*  Hijack Button to Lightbox
+	            -------------------------
+	             Hijack a link or button to render a lightbox
+	        */
+
+	    }, {
+	        key: 'hijackButtonToLightbox',
+	        value: function hijackButtonToLightbox(element) {
+	            return this.hijackButton(element, _constants.CONTEXT_TYPES.LIGHTBOX);
+	        }
+
+	        /*  Hijack Submit Parent Form
+	            -------------------------
+	             This takes the 'hijack' case a little further, and allows hijacking to work even when the button is actually
+	            in a child component. So if the parent window has a form, and inside that form is a component, and inside that
+	            component is a button, this can be used to submit the parent form using the child button and hijack the resulting
+	            url into an xcomponent.
+	             This is, again, an esoteric case within an esoteric case -- so probably only consider using it if you're sure you want to.
+	        */
+
+	    }, {
+	        key: 'hijackSubmitParentForm',
+	        value: function hijackSubmitParentForm() {
 	            return this.renderToParent(null, _constants.CONTEXT_TYPES.POPUP, {
-	                submitParentForm: true
+	                hijackSubmitParentForm: true
 	            });
 	        }
+
+	        /*  Run Timeout
+	            -----------
+	             Set a timeout on the initial render, and call this.props.onTimeout if we don't get an init call in time.
+	        */
+
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
 	            var _this8 = this;
 
-	            if (this.timeout) {
+	            if (this.props.timeout) {
 	                setTimeout(function () {
-	                    if (!_this8.entered) {
-	                        _this8.onTimeout.call(_this8, new Error('[' + _this8.component.tag + '] Loading component ' + _this8.component.tag + ' at ' + _this8.url + ' timed out after ' + _this8.timeout + ' milliseconds'));
-	                        _this8.destroy();
-	                    }
-	                }, this.timeout);
+
+	                    // If this.onInit has been previously resolved, this won't have any effect.
+
+	                    _this8.onInit.reject()['catch'](function () {
+	                        var err = new Error('[' + this.component.tag + '] Loading component ' + this.component.tag + ' at ' + this.url + ' timed out after ' + this.props.timeout + ' milliseconds');
+	                        this.props.onTimeout(err);
+	                        this.destroy();
+	                    });
+	                }, this.props.timeout);
 	            }
 	        }
+
+	        /*  Listeners
+	            ---------
+	             Post-robot listeners to the child component window
+	        */
+
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
 	            var _ref;
 
 	            return _ref = {}, _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.INIT, function (source, data) {
-	                this.onEnter.call(this);
-	                this.entered = true;
+	                this.props.onEnter();
+	                this.onInit.resolve();
+
+	                // Let the child know what its context is, and what its initial props are.
 
 	                return {
 	                    context: this.context,
@@ -4773,31 +5554,72 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return this.resize(data.width, data.height);
 	            }), _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.RENDER, function (source, data) {
-	                var component = this.component.getByTag(data.tag);
-	                var instance = component.init(data.options);
 
-	                if (data.submitParentForm) {
+	                var component = this.component.getByTag(data.tag);
+	                var instance = component.parent(data.options);
+
+	                // In the case where we're submitting the parent form using hijackSubmitParentForm
+
+	                if (data.hijackSubmitParentForm) {
+
 	                    var form = (0, _lib.getParentNode)(this.iframe, 'form');
+
+	                    // Open the window and do everything except load the url
+
 	                    instance.renderHijack(form, data.context);
+
+	                    // Submit the form to load the url into the new window
+
 	                    form.submit();
-	                } else {
-	                    instance.render(data.element, data.context);
 	                }
+
+	                // Otherwise we're just doing a normal render on behalf of the child
+
+	                else {
+	                        instance.render(data.element, data.context);
+	                    }
 	            }), _defineProperty(_ref, _constants.CONSTANTS.POST_MESSAGE.ERROR, function (source, data) {
+	                this.props.onError(new Error(data.error));
 	                this.destroy();
-	                this.onError(new Error(data.error));
 	            }), _ref;
 	        }
+
+	        /*  Close
+	            -----
+	             Close the child component
+	        */
+
 	    }, {
 	        key: 'close',
 	        value: function close() {
 	            var _this9 = this;
 
-	            return _src2['default'].send(this.window, _constants.CONSTANTS.POST_MESSAGE.CLOSE)['catch'](function (err) {
-	                console.warn('Error sending close message to child', err.stack || err.toString());
-	                _this9.destroy();
+	            // We send a post message to the child to close. This has two effects:
+	            // 1. We let the child do any cleanup it needs to do
+	            // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
+
+	            return _src2['default'].send(this.window, _constants.CONSTANTS.POST_MESSAGE.CLOSE, {}, { timeout: 1 })['catch'](function (err) {
+
+	                // This is kind of a chicken-and-egg situation, as at some point we have to close the window, and some
+	                // post message is inevitably going to be lost. In this case we're waiting for the child to message its own
+	                // parent and get a response, and the response will never come because the window is closed. Hence this
+	                // promise will always fail.
+	                //
+	                // So we can do an additional check here to see if this.window still exists. If it does, something failed and
+	                // we need to clean up as best we can manually. If not, we're good.
+
+	                if (_this9.window) {
+	                    console.warn('Error sending close message to child', err.stack || err.toString());
+	                    _this9.destroy();
+	                }
 	            });
 	        }
+
+	        /*  Focus
+	            -----
+	             Focus the child component window
+	        */
+
 	    }, {
 	        key: 'focus',
 	        value: function focus() {
@@ -4806,6 +5628,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return this;
 	        }
+
+	        /*  Resize
+	            ------
+	             Resize the child component window
+	        */
+
 	    }, {
 	        key: 'resize',
 	        value: function resize(height, width) {
@@ -4825,9 +5653,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 	        }
+
+	        /*  Create Parent Style
+	            -------------------
+	             Creates a stylesheet on the parent page, to control how the child component is rendered
+	        */
+
 	    }, {
-	        key: 'createOverlay',
-	        value: function createOverlay() {
+	        key: 'createParentStyle',
+	        value: function createParentStyle() {
+	            this.overlayStyle = (0, _lib.createStyleSheet)(this.component.parentStyle, document.body);
+	        }
+
+	        /*  Create Component Template
+	            -------------------------
+	             Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
+	        */
+
+	    }, {
+	        key: 'createComponentTemplate',
+	        value: function createComponentTemplate() {
+
+	            (0, _lib.createElement)('body', {
+
+	                html: this.component.componentTemplate,
+
+	                'class': ['xcomponent-component']
+
+	            }, this.window.document.body);
+
+	            (0, _lib.createStyleSheet)(this.component.componentStyle, this.window.document.body);
+	        }
+
+	        /*  Create Overlay Template
+	            -----------------------
+	             Create a template and stylesheet for the overlay behind the popup/lightbox
+	        */
+
+	    }, {
+	        key: 'createOverlayTemplate',
+	        value: function createOverlayTemplate() {
 	            var _this11 = this;
 
 	            this.overlay = (0, _lib.createElement)('div', {
@@ -4836,31 +5701,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                'class': ['xcomponent-overlay', 'xcomponent-' + this.context],
 
-	                style: { zIndex: _constants.MAX_Z_INDEX - 1 },
-
-	                events: {
-	                    click: function click(event) {
-	                        event.preventDefault();
-	                        event.stopPropagation();
-	                        _this11.focus();
-	                    }
+	                style: {
+	                    zIndex: _constants.MAX_Z_INDEX - 1
 	                }
 
 	            }, document.body);
 
-	            this.overlayStyle = (0, _lib.createElement)('style', {
+	            this.overlayStyle = (0, _lib.createStyleSheet)(this.component.overlayStyle, document.body);
 
-	                styleSheet: this.component.overlayStyle,
-
-	                attributes: {
-	                    type: 'text/css'
-	                }
-
-	            }, document.body);
-
-	            this.registerForCleanup(function () {
-	                document.body.removeChild(_this11.overlay);
-	                document.body.removeChild(_this11.overlayStyle);
+	            this.overlay.addEventListener('click', function (event) {
+	                event.preventDefault();
+	                event.stopPropagation();
+	                _this11.focus();
 	            });
 
 	            Array.prototype.slice.call(this.overlay.getElementsByClassName('xcomponent-close')).forEach(function (el) {
@@ -4870,7 +5722,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this11.close();
 	                });
 	            });
+
+	            this.registerForCleanup(function () {
+	                document.body.removeChild(_this11.overlay);
+	                document.body.removeChild(_this11.overlayStyle);
+	            });
 	        }
+
+	        /*  Destroy
+	            -------
+	             Close the component and clean up any listeners and state
+	        */
+
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
@@ -4881,46 +5744,98 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ParentComponent;
 	}(_base.BaseComponent);
 
+/***/ },
+/* 40 */
+/*!********************************!*\
+  !*** ./src/component/props.js ***!
+  \********************************/
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	/*  Internal Props
+	    --------------
+
+	    We define and use certain props by default, for configuration and events that are used at the framework level.
+	    These follow the same format as regular props, and are classed as reserved words that may not be overriden by users.
+	*/
+
 	var internalProps = exports.internalProps = {
 
-	    onEnter: {
-	        type: 'function',
-	        required: false
-	    },
-
-	    onExit: {
-	        type: 'function',
-	        required: false
-	    },
-
-	    onClose: {
-	        type: 'function',
-	        required: false
-	    },
-
-	    onError: {
-	        type: 'function',
-	        required: false
-	    },
+	    // A custom url to use to render the component
 
 	    url: {
 	        type: 'string',
 	        required: false
 	    },
 
+	    // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
+
 	    env: {
 	        type: 'string',
 	        required: false
 	    },
 
+	    // A millisecond timeout before onTimeout is called
+
 	    timeout: {
 	        type: 'number',
 	        required: false
+	    },
+
+	    // When we get an INIT message from the child
+
+	    onEnter: {
+	        type: 'function',
+	        required: false,
+	        noop: true
+	    },
+
+	    // When the user closes the component. Defaults to onError if no handler passed.
+
+	    onClose: {
+	        type: 'function',
+	        required: false,
+	        noop: true,
+	        once: true,
+	        defaultProp: 'onError'
+	    },
+
+	    // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
+
+	    onTimeout: {
+	        type: 'function',
+	        required: false,
+	        noop: true,
+	        once: true,
+	        defaultProp: 'onError'
+	    },
+
+	    // When the component experiences an error
+
+	    onError: {
+	        type: 'function',
+	        required: false,
+	        noop: true,
+	        once: true
 	    }
 	};
 
 /***/ },
-/* 39 */
+/* 41 */
+/*!**********************************!*\
+  !*** ./src/templates/parent.css ***!
+  \**********************************/
+/***/ function(module, exports) {
+
+	module.exports = ""
+
+/***/ },
+/* 42 */
 /*!***********************************!*\
   !*** ./src/templates/overlay.htm ***!
   \***********************************/
@@ -4929,7 +5844,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = "<a href=\"#xcomponent-close\" class=\"xcomponent-close\"></a>"
 
 /***/ },
-/* 40 */
+/* 43 */
 /*!***********************************!*\
   !*** ./src/templates/overlay.css ***!
   \***********************************/
@@ -4938,7 +5853,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ".xcomponent-overlay {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n    background-color: rgba(0, 0, 0, 0.8);\n}\n\n.xcomponent-overlay.xcomponent-popup {\n    cursor: pointer;\n}\n\n.xcomponent-close {\n    position: absolute;\n    right: 16px;\n    top: 16px;\n    width: 16px;\n    height: 16px;\n    opacity: 0.6;\n}\n\n.xcomponent-close:hover {\n    opacity: 1;\n}\n\n.xcomponent-close:before, .xcomponent-close:after {\n    position: absolute;\n    left: 8px;\n    content: ' ';\n    height: 16px;\n    width: 2px;\n    background-color: white;\n}\n\n.xcomponent-close:before {\n    transform: rotate(45deg);\n}\n\n.xcomponent-close:after {\n    transform: rotate(-45deg);\n}\n"
 
 /***/ },
-/* 41 */
+/* 44 */
+/*!*************************************!*\
+  !*** ./src/templates/component.htm ***!
+  \*************************************/
+/***/ function(module, exports) {
+
+	module.exports = ""
+
+/***/ },
+/* 45 */
+/*!*************************************!*\
+  !*** ./src/templates/component.css ***!
+  \*************************************/
+/***/ function(module, exports) {
+
+	module.exports = ""
+
+/***/ },
+/* 46 */
 /*!******************************!*\
   !*** ./src/drivers/index.js ***!
   \******************************/
@@ -4950,19 +5883,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _html = __webpack_require__(/*! ./html */ 42);
+	var _script = __webpack_require__(/*! ./script */ 47);
 
-	Object.keys(_html).forEach(function (key) {
+	Object.keys(_script).forEach(function (key) {
 	  if (key === "default") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
-	      return _html[key];
+	      return _script[key];
 	    }
 	  });
 	});
 
-	var _react = __webpack_require__(/*! ./react */ 43);
+	var _react = __webpack_require__(/*! ./react */ 48);
 
 	Object.keys(_react).forEach(function (key) {
 	  if (key === "default") return;
@@ -4974,7 +5907,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _angular = __webpack_require__(/*! ./angular */ 44);
+	var _angular = __webpack_require__(/*! ./angular */ 49);
 
 	Object.keys(_angular).forEach(function (key) {
 	  if (key === "default") return;
@@ -4986,7 +5919,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ember = __webpack_require__(/*! ./ember */ 45);
+	var _ember = __webpack_require__(/*! ./ember */ 50);
 
 	Object.keys(_ember).forEach(function (key) {
 	  if (key === "default") return;
@@ -4999,95 +5932,88 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 42 */
-/*!*****************************!*\
-  !*** ./src/drivers/html.js ***!
-  \*****************************/
-/***/ function(module, exports, __webpack_require__) {
+/* 47 */
+/*!*******************************!*\
+  !*** ./src/drivers/script.js ***!
+  \*******************************/
+/***/ function(module, exports) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.htmlComponent = undefined;
-
-	var _lib = __webpack_require__(/*! ../lib */ 32);
-
 	var htmlComponent = exports.htmlComponent = {
 	    isActive: function isActive() {
-	        return document.registerElement;
+	        return true;
 	    },
 	    register: function register(component) {
-	        document.registerElement(component.tag);
 
-	        var elements = Array.prototype.slice.call(document.getElementsByTagName(component.tag));
+	        function render(element) {
 
-	        var _iteratorNormalCompletion = true;
-	        var _didIteratorError = false;
-	        var _iteratorError = undefined;
-
-	        try {
-	            for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                var element = _step.value;
-
-
-	                var props = {};
-
-	                var _iteratorNormalCompletion2 = true;
-	                var _didIteratorError2 = false;
-	                var _iteratorError2 = undefined;
-
-	                try {
-	                    for (var _iterator2 = Array.prototype.slice.call(element.attributes)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                        var attr = _step2.value;
-	                        var name = attr.name;
-	                        var value = attr.value;
-
-	                        name = (0, _lib.dasherizeToCamel)(name);
-
-	                        if (value.indexOf('$') === 0) {
-	                            props[name] = eval('window.' + value.slice(1)); // eslint-disable-line
-	                        } else {
-	                                props[name] = value;
-	                            }
-	                    }
-	                } catch (err) {
-	                    _didIteratorError2 = true;
-	                    _iteratorError2 = err;
-	                } finally {
-	                    try {
-	                        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-	                            _iterator2['return']();
-	                        }
-	                    } finally {
-	                        if (_didIteratorError2) {
-	                            throw _iteratorError2;
-	                        }
-	                    }
-	                }
-
-	                component.initFromProps(props).render(element);
+	            if (!element || !element.tagName || element.tagName.toLowerCase() !== 'script') {
+	                return;
 	            }
-	        } catch (err) {
-	            _didIteratorError = true;
-	            _iteratorError = err;
-	        } finally {
+
+	            if (!element.attributes.type || element.attributes.type.value !== 'application/x-component') {
+	                return;
+	            }
+
+	            if (!element.attributes['data-component'] || element.attributes['data-component'].value !== component.tag) {
+	                return;
+	            }
+
+	            var props;
+
+	            eval('props = ' + element.innerText); // eslint-disable-line no-eval
+
+	            var container = document.createElement('div');
+	            element.parentNode.replaceChild(container, element);
+
+	            component.init(props).render(container);
+	        }
+
+	        function scan() {
+	            var scriptTags = Array.prototype.slice.call(document.getElementsByTagName('script'));
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
 	            try {
-	                if (!_iteratorNormalCompletion && _iterator['return']) {
-	                    _iterator['return']();
+	                for (var _iterator = scriptTags[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var element = _step.value;
+
+	                    render(element);
 	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
 	            } finally {
-	                if (_didIteratorError) {
-	                    throw _iteratorError;
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator['return']) {
+	                        _iterator['return']();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
 	                }
 	            }
 	        }
+
+	        scan();
+	        document.addEventListener('DOMContentLoaded', scan);
+	        window.addEventListener('load', scan);
+
+	        document.addEventListener('DOMNodeInserted', function (event) {
+	            render(event.target);
+	        });
 	    }
 	};
 
 /***/ },
-/* 43 */
+/* 48 */
 /*!******************************!*\
   !*** ./src/drivers/react.js ***!
   \******************************/
@@ -5113,7 +6039,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return window.React.createElement('div', null);
 	            },
 	            componentDidMount: function componentDidMount() {
-	                var parent = component.initFromProps((0, _lib.extend)({}, this.props));
+	                var parent = component.init((0, _lib.extend)({}, this.props));
 
 	                this.setState({ parent: parent });
 
@@ -5130,7 +6056,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 44 */
+/* 49 */
 /*!********************************!*\
   !*** ./src/drivers/angular.js ***!
   \********************************/
@@ -5155,7 +6081,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            window.angular.module(moduleName).directive((0, _lib.dasherizeToCamel)(component.tag), function () {
 
-	                var props = component.getProps();
 	                var scope = {};
 
 	                var _iteratorNormalCompletion = true;
@@ -5163,10 +6088,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _iteratorError = undefined;
 
 	                try {
-	                    for (var _iterator = Object.keys(props)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    for (var _iterator = Object.keys(component.props)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                        var key = _step.value;
 
-	                        var prop = props[key];
+	                        var prop = component.props[key];
 
 	                        if (prop.type === 'function' || prop.type === 'object') {
 	                            scope[key] = '=';
@@ -5226,7 +6151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            return instanceProps;
 	                        }
 
-	                        var parent = component.initFromProps(getProps());
+	                        var parent = component.init(getProps());
 	                        parent.render($element[0]);
 
 	                        $scope.$watch(function () {
@@ -5255,7 +6180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 45 */
+/* 50 */
 /*!******************************!*\
   !*** ./src/drivers/ember.js ***!
   \******************************/
