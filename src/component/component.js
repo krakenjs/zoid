@@ -257,9 +257,9 @@ export class Component {
         if (!options.url || !(typeof options.url === 'string')) {
             if (!options.defaultEnv || typeof options.defaultEnv !== 'string') {
                 if (options.envUrls) {
-                    throw new Error(`[${options.tag}] Expected options.url to be a string`);
-                } else {
                     throw new Error(`[${options.tag}] Expected options.defaultEnv to be a string`);
+                } else {
+                    throw new Error(`[${options.tag}] Expected options.url to be a string`);
                 }
             }
         }

@@ -227,12 +227,6 @@ export function createElement(tag = 'div', options = {}, container = null) {
         }
     }
 
-    if (options.events) {
-        for (let key of Object.keys(options.events)) {
-            element.addEventListener(key, options.events[key]);
-        }
-    }
-
     if (container) {
         container.appendChild(element);
     }

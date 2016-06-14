@@ -17,6 +17,10 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
+            'https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.js',
+            'https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js',
+
             { pattern: 'test/test.js', included: true, served: true },
             { pattern: 'test/*.js', included: false, served: true },
             { pattern: 'test/*.htm', included: false, served: true },

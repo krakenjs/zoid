@@ -25,6 +25,14 @@ let cases = {
         });
     },
 
+    attachTestComponentAndCallFooOnProps() {
+        testComponent.attach({
+            onProps: function() {
+                this.props.foo('bar');
+            }
+        });
+    },
+
     attachTestComponentAndThrowRegularError() {
         testComponent.attach({
             onEnter: function() {
@@ -202,6 +210,40 @@ let cases = {
                 });
 
                 button.click();
+            }
+        });
+    },
+
+    attachTestComponentAndCallMemoizedFunction() {
+        let comp = testComponent.attach({
+            onEnter() {
+                return this.props.memoizedFunction().then(() => {
+                    return this.props.memoizedFunction().then((result) => {
+                        return this.props.complete(result);
+                    });
+                });
+            }
+        });
+    },
+
+    attachTestComponentAndCallOnceFunction() {
+        let comp = testComponent.attach({
+            onEnter() {
+                return this.props.onceFunction().then(() => {
+                    return this.props.onceFunction().then((result) => {
+                        return this.props.complete(result);
+                    });
+                });
+            }
+        });
+    },
+
+    attachTestComponentAndCallDenodeifyFunction() {
+        let comp = testComponent.attach({
+            onEnter() {
+                return this.props.denodeifyFunction('foo').then(result => {
+                    return this.props.complete(result);
+                });
             }
         });
     }

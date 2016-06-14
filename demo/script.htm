@@ -1,5 +1,6 @@
 
 <script src="../dist/xcomponent.js"></script>
+<script src="./paypal-login/component.js"></script>
 
 <div id="container"></div>
 <br /><input id="email" value="foo@bar.com" />
@@ -10,7 +11,7 @@
     }
 </style>
 
-<script data-component="paypal-login" src="./paypal-login/component.js">
+<script type="application/x-component" data-component="paypal-login">
     {
         email: 'foo@bar.com',
         onSuccess: function onSuccess(email) {

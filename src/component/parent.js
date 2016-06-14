@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
 import { buildChildWindowName } from './util';
-import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID } from '../lib';
+import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID, stringifyWithFunctions } from '../lib';
 import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
 import { PopupOpenError } from '../error';
 
@@ -260,7 +260,7 @@ export class ParentComponent extends BaseComponent {
 
         return this.onInit.then(() => {
 
-            let oldProps = JSON.stringify(this.props);
+            let oldProps = stringifyWithFunctions(this.props);
 
             let newProps = {};
             extend(newProps, this.props);
@@ -270,7 +270,7 @@ export class ParentComponent extends BaseComponent {
 
             // Only send down the new props if they do not match the old
 
-            if (this.window && oldProps !== JSON.stringify(this.props)) {
+            if (this.window && oldProps !== stringifyWithFunctions(this.props)) {
                 return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
                     props: this.props
                 });

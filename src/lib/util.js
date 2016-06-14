@@ -112,3 +112,19 @@ export function b64encode(str) {
 export function b64decode(str) {
     return window.atob(str.replace(/[_]/g, '='));
 }
+
+
+/*  Stringify with Functions
+    ------------------------
+
+    JSON Stringify with added support for functions
+*/
+
+export function stringifyWithFunctions(obj) {
+    return JSON.stringify(obj, (key, val) => {
+        if (typeof val === 'function') {
+            return val.toString();
+        }
+        return val;
+    });
+}

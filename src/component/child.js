@@ -29,7 +29,7 @@ export class ChildComponent extends BaseComponent {
         this.onEnter = this.tryCatch(options.onEnter || noop);
         this.onClose = this.tryCatch(options.onClose || noop);
         this.onError = this.tryCatch(options.onError || function(err) { throw err; });
-        this.onProps = this.tryCatch(options.onProps || noop);
+        this.onProps = this.tryCatch(options.onProps || noop, false);
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent

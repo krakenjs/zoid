@@ -63,12 +63,12 @@ export class BaseComponent {
         Returns a new method which wraps the original call in a try/catch, otherwise delegates to this.onError
     */
 
-    tryCatch(method) {
+    tryCatch(method, doOnce) {
 
         let self = this;
         let errored = false;
 
-        return once(function wrapper() {
+        let wrapper = function wrapper() {
 
             if (errored) {
                 return;
@@ -83,10 +83,15 @@ export class BaseComponent {
                     return self.error(err);
                 }
 
-                console.error(err.stack || err.toString());
                 return self.error(new Error(`[${this.component.tag}] Child lifecycle method threw an error`));
             }
-        });
+        };
+
+        if (doOnce !== false) {
+            wrapper = once(wrapper);
+        }
+
+        return wrapper;
     }
 
 

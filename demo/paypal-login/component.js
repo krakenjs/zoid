@@ -5,7 +5,7 @@ window.PaypalLogin = xcomponent.create({
 
     url: './paypal-login/component.htm',
 
-    singleton: true,
+    singleton: false,
 
     props: {
 
