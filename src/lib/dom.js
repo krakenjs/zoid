@@ -40,8 +40,14 @@ export function getElement(id) {
 export function popup(url, options) {
 
     let win = window.open(url, options.name, Object.keys(options).map((key) => {
+
+        if (!options[key]) {
+            return;
+        }
+
         return `${key}=${options[key]}`;
-    }).join(', '), true);
+
+    }).filter(Boolean).join(', '), true);
 
     return win;
 }
