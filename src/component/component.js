@@ -29,8 +29,18 @@ export let components = {};
 export class Component {
 
     constructor(options = {}) {
-        this.validate(options);
 
+        if (!options.dimensions || !(typeof options.dimensions === 'object')) {
+
+            options.dimensions = {
+                width : 0,
+                height : 0
+            };
+
+        }
+        
+        this.validate(options);
+        
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
