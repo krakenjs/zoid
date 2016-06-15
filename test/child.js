@@ -125,6 +125,26 @@ let cases = {
         });
     },
 
+    renderTestComponent2ToParentLightboxAndClose() {
+        let comp = testComponent.attach({
+            onEnter() {
+                let comp2 = testComponent2.init({
+                    onEnter() {
+                        comp2.close();
+                    },
+
+                    onClose() {
+                        comp.props.foo();
+                    }
+                });
+
+                comp2.renderLightboxToParent();
+
+                postRobot.once('init', () => 'attachTestComponent2');
+            }
+        });
+    },
+
     renderTestComponent2ToParentLightboxAndCallFooOnClose() {
         let comp = testComponent.attach({
             onEnter() {

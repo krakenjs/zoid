@@ -43,8 +43,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         noop: true,
-        once: true,
-        defaultProp: 'onError'
+        once: true
     },
 
     // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -52,9 +51,10 @@ export const internalProps = {
     onTimeout: {
         type: 'function',
         required: false,
-        noop: true,
         once: true,
-        defaultProp: 'onError'
+        def(err) {
+            return this.props.onError(err);
+        }
     },
 
     // When the component experiences an error

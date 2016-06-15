@@ -330,12 +330,6 @@ export class ParentComponent extends BaseComponent {
             value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
         }
 
-        // If we have a defaultProp, use the value of that prop for this one
-
-        else if (!hasProp && prop.defaultProp) {
-            value = this.normalizeProp(props, prop.defaultProp);
-        }
-
         if (prop.type === 'boolean') {
             return Boolean(value);
 
@@ -368,6 +362,8 @@ export class ParentComponent extends BaseComponent {
                 if (prop.memoize) {
                     value = memoize(value);
                 }
+
+                value = value.bind(this);
             }
 
             return value;
@@ -639,6 +635,8 @@ export class ParentComponent extends BaseComponent {
 
             this.listen(this.window);
 
+            this.watchForClose();
+
             return this;
         });
     }
@@ -730,7 +728,7 @@ export class ParentComponent extends BaseComponent {
     watchForClose() {
 
         let closeWindowListener = onCloseWindow(this.window, () => {
-            this.props.onClose(new Error(`[${this.component.tag}] ${this.context} was closed`));
+            this.props.onClose();
             this.destroy();
         });
 
@@ -941,6 +939,7 @@ export class ParentComponent extends BaseComponent {
             // this logic to exist in the parent window
 
             [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
+
                 this.close();
             },
 
@@ -1008,11 +1007,13 @@ export class ParentComponent extends BaseComponent {
         // 1. We let the child do any cleanup it needs to do
         // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
 
-        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE, {}, { timeout: 500 }).catch(err => {
+        this.props.onClose();
+
+        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).catch(err => {
 
             // If we get an error, log it as a warning, but don't error out
 
-            console.warn('Error sending close message to child', err.stack || err.toString());
+            console.warn(`Error sending message to child`, err.stack || err.toString());
 
         }).then(() => {
 
@@ -1085,7 +1086,7 @@ export class ParentComponent extends BaseComponent {
             html: this.component.componentTemplate,
 
             class: [
-                `xcomponent-component`
+                'xcomponent-component'
             ]
 
         }, this.window.document.body);

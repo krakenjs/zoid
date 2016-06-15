@@ -413,6 +413,15 @@ describe('xcomponent render to parent', function() {
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndPassFoo');
     });
 
+    it('should render a component to the parent as a lightbox and close on enter', function(done) {
+
+        component = testComponent.init({
+            foo: done
+        }).renderIframe(document.body);
+
+        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndClose');
+    });
+
     it('should close an xcomponent renderToParent popup on click of the overlay close button', function(done) {
 
         component = testComponent.init({

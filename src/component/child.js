@@ -103,6 +103,17 @@ export class ChildComponent extends BaseComponent {
     /*  Send to Parent
         --------------
 
+        Send a post message to our parent window.
+    */
+
+    sendToParent(name, data) {
+        return postRobot.send(this.parentWindow, name, data);
+    }
+
+
+    /*  Send to Parent Component
+        ------------------------
+
         Send a post message to our parent component window. Note -- this may not be our immediate parent, if we were
         rendered using renderToParent.
     */
@@ -245,20 +256,17 @@ export class ChildComponent extends BaseComponent {
 
             [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
 
-                // If source is not our immediate parent, we need to message our parent window to tell it to close us.
+                // Our parent is telling us we're going to close
 
-                if (source !== this.parentWindow) {
-                    postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
-
-                    // Note -- we don't want to wait for that post message, otherwise we'll be closed before we can
-                    // respond to the original close message
-
-                    return;
+                if (source === this.parentWindow) {
+                    this.onClose.call(this);
                 }
 
-                // Otherwise call onClose and allow the parent to close us
+                // Our component parent is asking us to close
 
-                this.onClose.call(this);
+                else {
+                    this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
+                }
             }
         };
     }
@@ -274,10 +282,9 @@ export class ChildComponent extends BaseComponent {
 
         this.onClose.call(this, err);
 
-        // We could do this ourselves, if we were a popup -- but iframes can't close themselves, so in all cases just
-        // message the parent and have them close us instead
+        // Ask our parent window to close us
 
-        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
+        return this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
     }
 
 

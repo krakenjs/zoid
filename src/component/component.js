@@ -2,7 +2,7 @@
 import { ChildComponent } from './child';
 import { ParentComponent } from './parent';
 import { internalProps } from './props';
-import { extend, scanForJavascript } from '../lib';
+import { scanForJavascript } from '../lib';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../constants';
 
 import parentStyle from '../templates/parent.css';
@@ -39,7 +39,10 @@ export class Component {
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
 
-        this.props = extend(options.props || {}, internalProps);
+        this.props = {
+            ...options.props,
+            ...internalProps
+        };
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 

@@ -149,13 +149,16 @@ export function addEventListener(obj, event, handler) {
     Get the parent window depending on whether we are in an iframe or a popup
 */
 
-export function getParentWindow() {
-    if (window.opener) {
-        return window.opener;
+export function getParentWindow(win) {
+
+    win = win || window;
+
+    if (win.opener) {
+        return win.opener;
     }
 
-    if (window.parent && window.parent !== window) {
-        return window.parent;
+    if (win.parent && win.parent !== win) {
+        return win.parent;
     }
 }
 
