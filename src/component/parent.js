@@ -179,6 +179,10 @@ export class ParentComponent extends BaseComponent {
 
         activeComponents.push(this);
 
+        this.registerForCleanup(() => {
+            activeComponents.splice(activeComponents.indexOf(this), 1);
+        });
+
         this.validate(options);
         this.parentWindow = getParentWindow();
 
@@ -372,7 +376,7 @@ export class ParentComponent extends BaseComponent {
             return value || '';
 
         } else if (prop.type === 'object') {
-            return JSON.stringify(value);
+            return value;
 
         } else if (prop.type === 'number') {
             return parseInt(value || 0, 10);
@@ -944,19 +948,6 @@ export class ParentComponent extends BaseComponent {
                 this.close();
             },
 
-
-            // Iframes can't resize themselves, so they need the parent to take care of it for them.
-
-            [ CONSTANTS.POST_MESSAGE.RESIZE ](source, data) {
-
-                if (this.context === CONSTANTS.CONTEXT.POPUP) {
-                    throw new Error(`[${this.component.tag}] Can not resize popup from parent`);
-                }
-
-                return this.resize(data.width, data.height);
-            },
-
-
             // We got a request to render from the child (renderToParent)
 
             [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
@@ -1036,30 +1027,6 @@ export class ParentComponent extends BaseComponent {
             this.popup.focus();
         }
         return this;
-    }
-
-
-    /*  Resize
-        ------
-
-        Resize the child component window
-    */
-
-    resize(height, width) {
-        return Promise.resolve().then(() => {
-
-            if (this.context === CONSTANTS.CONTEXT.POPUP) {
-                return postRobot.send(this.popup, CONSTANTS.POST_MESSAGE.RESIZE, {
-                    height,
-                    width
-                });
-
-            } else if (this.context === CONSTANTS.CONTEXT.IFRAME) {
-
-                this.iframe.height = height;
-                this.iframe.width = width;
-            }
-        });
     }
 
 

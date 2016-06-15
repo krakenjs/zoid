@@ -3,8 +3,9 @@ import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
-import { testComponent } from './component';
-import { loadScript, once } from 'src/lib';
+import { testComponent, testComponent3 } from './component';
+import { loadScript, once, b64encode } from 'src/lib';
+import { CONTEXT_TYPES } from 'src/constants';
 
 postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS[postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_GLOBAL_METHOD] = false;
 
@@ -104,6 +105,222 @@ describe('basic xcomponent rendering', function() {
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooOnProps');
     });
+
+    it('should try to render by passing in an element', function(done) {
+
+        component = testComponent.init({
+            onEnter: done
+        }).render(document.body);
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should try to render to defaultContext lightbox', function(done) {
+
+        let originalDefaultContext = testComponent.defaultContext;
+        testComponent.defaultContext = 'lightbox';
+
+        component = testComponent.init({
+            onEnter() {
+                testComponent.defaultContext = originalDefaultContext;
+                done();
+            }
+        }).render();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should try to render to defaultContext popup', function(done) {
+
+        let originalDefaultContext = testComponent.defaultContext;
+        testComponent.defaultContext = 'popup';
+
+        component = testComponent.init({
+            onEnter: function() {
+                testComponent.defaultContext = originalDefaultContext;
+                done();
+            }
+        }).render();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should try to render to when popup is the only available option', function(done) {
+
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: true,
+            lightbox: false,
+            iframe: false
+        };
+
+        component = testComponent.init({
+            onEnter() {
+                testComponent.defaultContext = originalDefaultContext;
+                testComponent.contexts = originalContexts;
+                done();
+            }
+        }).render();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should try to render to when lightbox is the only available option', function(done) {
+
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: false,
+            lightbox: true,
+            iframe: false
+        };
+
+        component = testComponent.init({
+            onEnter() {
+                testComponent.defaultContext = originalDefaultContext;
+                testComponent.contexts = originalContexts;
+                done();
+            }
+        }).render();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should enter a component and call back with a string prop', function(done) {
+
+        component = testComponent.init({
+
+            stringProp: 'bar',
+
+            foo: function(result) {
+                assert.equal(result, 'bar');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithStringProp');
+    });
+
+    it('should enter a component and call back with a number prop', function(done) {
+
+        component = testComponent.init({
+
+            numberProp: 123,
+
+            foo: function(result) {
+                assert.equal(result, 123);
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
+    });
+
+    it('should enter a component and call back with a parseInted number prop', function(done) {
+
+        component = testComponent.init({
+
+            numberProp: '123',
+
+            foo: function(result) {
+                assert.equal(result, 123);
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
+    });
+
+    it('should enter a component and call back with a boolean prop', function(done) {
+
+        component = testComponent.init({
+
+            booleanProp: true,
+
+            foo: function(result) {
+                assert.equal(result, true);
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+    });
+
+    it('should enter a component and call back with a truthy boolean prop', function(done) {
+
+        component = testComponent.init({
+
+            booleanProp: 1,
+
+            foo: function(result) {
+                assert.equal(result, true);
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+    });
+
+    it('should enter a component and call back with a falsy boolean prop', function(done) {
+
+        component = testComponent.init({
+
+            booleanProp: 0,
+
+            foo: function(result) {
+                assert.equal(result, false);
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+    });
+
+    it('should enter a component and call back with an object prop', function(done) {
+
+        component = testComponent.init({
+
+            objectProp: { foo: 'bar', x: 12345, fn: function() { done(); }, obj: { bar: 'baz' } },
+
+            foo: function(result) {
+                assert.equal(result.foo, 'bar');
+                assert.equal(result.obj.bar, 'baz');
+                assert.equal(result.x, 12345);
+                assert.isTrue(result.fn instanceof Function);
+                result.fn();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithObjectProp');
+    });
+
+    it('should enter a component and call back with a function prop', function(done) {
+
+        component = testComponent.init({
+
+            functionProp: done,
+
+            foo: function(result) {
+                assert.isTrue(result instanceof Function);
+                result();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooWithFunctionProp');
+    });
 });
 
 describe('xcomponent error cases', function() {
@@ -162,28 +379,129 @@ describe('xcomponent error cases', function() {
         postRobot.once('init', () => 'attachTestComponentAndThrowIntegrationError');
     });
 
-    it.skip('should enter a component and timeout, then call onTimeout', function(done) {
+    it('should enter a component and timeout, then call onTimeout', function(done) {
 
         testComponent.init({
-            timeout: 10,
+            timeout: 1,
             onTimeout() {
                 done();
+            }
+        }).renderLightbox();
+    });
+
+    it('should enter a component and timeout, then call onError in the absense of onTimeout', function(done) {
+
+        testComponent.init({
+            timeout: 1,
+            onError() {
+                done();
+            }
+        }).renderLightbox();
+    });
+
+    it('should enter a component and timeout, then log an error in the absense of onTimeout and onError', function(done) {
+
+        let console = window.console;
+
+        window.console = {
+            error() {
+                window.console = console;
+                done();
+            }
+        };
+
+        testComponent.init({
+            timeout: 1
+        }).renderLightbox();
+    });
+
+    it('should enter a component and error out when the page name is not valid', function(done) {
+
+        window.open('/base/test/child.htm', 'INVALIDNAME');
+
+        postRobot.once('init', () => 'attachTestComponentWithInvalidName');
+        postRobot.once('complete', () => done());
+    });
+
+    it('should enter a component and error out when the page name is not generated by xcomponent', function(done) {
+
+        window.open('/base/test/child.htm', b64encode('{}'));
+
+        postRobot.once('init', () => 'attachTestComponentWithInvalidName');
+        postRobot.once('complete', () => done());
+    });
+
+    it('should try to enter a singleton component twice and error out', function(done) {
+
+        component = testComponent.init({
+            onEnter() {
+                try {
+                    testComponent.init();
+                } catch (err) {
+                    done();
+                }
             }
         }).renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
 
-    it.skip('should enter a component and timeout, then call onError in the absense of onTimeout', function(done) {
+    it('should try to render a component twice and error out', function(done) {
 
-        testComponent.init({
-            timeout: 10,
-            onError() {
-                done();
-            }
-        }).renderLightbox();
+        component = testComponent.init();
 
-        postRobot.once('init', () => 'attachTestComponent');
+        component.render();
+
+        try {
+            component.render();
+        } catch (err) {
+            done();
+        }
+    });
+
+    it('should try to render a component to an unsupported context and error out', function(done) {
+
+        component = testComponent3.init();
+
+        try {
+            component.render(null, CONTEXT_TYPES.POPUP);
+        } catch (err) {
+            done();
+        }
+    });
+
+    it('should try to render a component with a specified element when iframe mode is not supported', function(done) {
+
+        component = testComponent3.init();
+
+        try {
+            component.render(document.body);
+        } catch (err) {
+            done();
+        }
+    });
+
+    it('should try to render to when iframe is the only available option but no element is passed', function(done) {
+
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: false,
+            lightbox: false,
+            iframe: true
+        };
+
+        component = testComponent.init();
+
+        try {
+            component.render();
+        } catch (err) {
+            testComponent.defaultContext = originalDefaultContext;
+            testComponent.contexts = originalContexts;
+            done();
+        }
     });
 });
 
@@ -192,7 +510,7 @@ describe('xcomponent options', function() {
     it('should enter a component with a custom url', function(done) {
 
         component = testComponent.init({
-            url: 'base/test/child.htm?foo=xyztest',
+            url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl: function(url) {
                 assert.isTrue(url.indexOf('xyztest') !== -1, 'Expected url to be custom url passed during init');
@@ -680,7 +998,11 @@ describe('xcomponent drivers', function() {
                 return window.React.createElement(
                     'div',
                     null,
-                    React.createElement(testComponent.react, { onEnter: done })
+                    React.createElement(testComponent.react, {
+                        onEnter() {
+                            this.close().then(done);
+                        }
+                    })
                 );
             }
         });
@@ -701,7 +1023,7 @@ describe('xcomponent drivers', function() {
 
                 function foo(bar) {
                     assert.equal(bar, 'bar');
-                    done();
+                    this.close().then(done);
                 }
 
                 return window.React.createElement(
@@ -730,7 +1052,9 @@ describe('xcomponent drivers', function() {
         let $rootScope = injector.get('$rootScope');
 
         let $scope = $rootScope.$new();
-        $scope.onEnter = done;
+        $scope.onEnter = function() {
+            this.close().then(done);
+        };
 
         let element = $compile(`
             <test-component on-enter="onEnter"></test-component>
@@ -752,7 +1076,7 @@ describe('xcomponent drivers', function() {
 
         let $scope = $rootScope.$new();
         $scope.foo = function() {
-            return done();
+            this.close().then(done);
         };
 
         let element = $compile(`
@@ -769,7 +1093,9 @@ describe('xcomponent drivers', function() {
         let container = document.createElement('div');
         document.body.appendChild(container);
 
-        window.done = done;
+        window.done = function() {
+            this.close().then(done);
+        };
 
         container.innerHTML = `
             <script type="application/x-component" data-component="test-component">
@@ -787,14 +1113,14 @@ describe('xcomponent drivers', function() {
         let container = document.createElement('div');
         document.body.appendChild(container);
 
-        window.done = done;
+        window.done = function() {
+            this.close().then(done);
+        };
 
         container.innerHTML = `
             <script type="application/x-component" data-component="test-component">
                 {
-                    foo: function() {
-                        window.done();
-                    }
+                    foo: window.done
                 }
             </script>
         `;
@@ -1092,6 +1418,20 @@ describe('xcomponent validation errors', function() {
                 envUrls: {
                     foo: 'http://www.zombo.com'
                 }
+            });
+        });
+
+        expectError(function() {
+            xcomponent.create({
+                tag: 'my-component',
+                dimensions: {
+                    height: 50,
+                    width: 200
+                },
+                envUrls: {
+                    foo: 'http://www.zombo.com'
+                },
+                defaultUrl: 1234
             });
         });
 

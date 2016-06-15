@@ -30,7 +30,7 @@ export const PROP_TYPES = {
     NUMBER: 'number'
 };
 
-export let PROP_TYPES_LIST = values(PROP_TYPES);
+export const PROP_TYPES_LIST = values(PROP_TYPES);
 
 export const CONTEXT_TYPES = {
     IFRAME: 'iframe',
@@ -38,6 +38,6 @@ export const CONTEXT_TYPES = {
     POPUP: 'popup'
 };
 
-export let CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
+export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
-export let MAX_Z_INDEX = 2147483647;
+export const MAX_Z_INDEX = 2147483647;

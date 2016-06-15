@@ -265,7 +265,7 @@ export class ChildComponent extends BaseComponent {
                 // Our component parent is asking us to close
 
                 else {
-                    this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
+                    this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE).catch(err => this.onError(err));
                 }
             }
         };
@@ -296,40 +296,6 @@ export class ChildComponent extends BaseComponent {
 
     focus() {
         window.focus();
-    }
-
-
-    /*  Resize
-        -----
-
-        Resize the child window. Must be done on a user action like a click
-    */
-
-    resize(width, height) {
-        window.resizeTo(width, height);
-    }
-
-
-    /*  Redirect To Parent
-        ------------------
-
-        Redirect the parent window
-     */
-
-    redirectParent(url) {
-
-        // TODO: Implement this. Or don't. Not sure if it's a good idea when it's easy enough to do with props...
-    }
-
-
-    /*  Break Out
-        ---------
-
-        Redirect the parent window to the current url, effectively breaking the component out to the full page
-    */
-
-    breakOut() {
-        this.redirectParent(window.location.href);
     }
 
 

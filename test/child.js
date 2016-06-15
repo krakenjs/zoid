@@ -25,6 +25,46 @@ let cases = {
         });
     },
 
+    attachTestComponentAndCallFooWithBooleanProp() {
+        testComponent.attach({
+            onEnter: function() {
+                this.props.foo(this.props.booleanProp);
+            }
+        });
+    },
+
+    attachTestComponentAndCallFooWithFunctionProp() {
+        testComponent.attach({
+            onEnter: function() {
+                this.props.foo(this.props.functionProp);
+            }
+        });
+    },
+
+    attachTestComponentAndCallFooWithStringProp() {
+        testComponent.attach({
+            onEnter: function() {
+                this.props.foo(this.props.stringProp);
+            }
+        });
+    },
+
+    attachTestComponentAndCallFooWithObjectProp() {
+        testComponent.attach({
+            onEnter: function() {
+                this.props.foo(this.props.objectProp);
+            }
+        });
+    },
+
+    attachTestComponentAndCallFooWithNumberProp() {
+        testComponent.attach({
+            onEnter: function() {
+                this.props.foo(this.props.numberProp);
+            }
+        });
+    },
+
     attachTestComponentAndCallFooOnProps() {
         testComponent.attach({
             onProps: function() {
@@ -276,6 +316,15 @@ let cases = {
                 });
             }
         });
+    },
+
+    attachTestComponentWithInvalidName() {
+
+        try {
+            testComponent.attach();
+        } catch (err) {
+            postRobot.sendToParent('complete');
+        }
     }
 };
 
