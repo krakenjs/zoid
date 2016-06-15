@@ -101,3 +101,5 @@ gulp.task('karma', ['lint'], function (done) {
 
   server.start();
 });
+
+gulp.task('test', ['karma']);
