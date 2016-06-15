@@ -898,8 +898,9 @@ export class ParentComponent extends BaseComponent {
 
                 // If this.onInit has been previously resolved, this won't have any effect.
 
-                this.onInit.reject().catch(function() {
-                    let err = new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.props.timeout} milliseconds`);
+                let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.props.timeout} milliseconds`);
+
+                this.onInit.reject(error).catch(err => {
                     this.props.onTimeout(err);
                     this.destroy();
                 });

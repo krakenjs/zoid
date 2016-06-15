@@ -161,6 +161,30 @@ describe('xcomponent error cases', function() {
 
         postRobot.once('init', () => 'attachTestComponentAndThrowIntegrationError');
     });
+
+    it.skip('should enter a component and timeout, then call onTimeout', function(done) {
+
+        testComponent.init({
+            timeout: 10,
+            onTimeout() {
+                done();
+            }
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it.skip('should enter a component and timeout, then call onError in the absense of onTimeout', function(done) {
+
+        testComponent.init({
+            timeout: 10,
+            onError() {
+                done();
+            }
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
 });
 
 describe('xcomponent options', function() {
@@ -596,7 +620,7 @@ describe('xcomponent hijack', function() {
                 document.body.removeChild(link);
                 done();
             }
-        }).hijackButtonToLightbox('#hijackLink');
+        }).hijackButtonToLightbox('hijackLink');
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -1104,6 +1128,18 @@ describe('xcomponent validation errors', function() {
                     width: 200
                 },
                 url: 12345
+            });
+        });
+
+        expectError(function() {
+            xcomponent.create({
+                tag: 'my-component',
+                dimensions: {
+                    height: 50,
+                    width: 200
+                },
+                url: 'http://zombo.com',
+                overlayTemplate: '<script>foo();</script>'
             });
         });
     });
