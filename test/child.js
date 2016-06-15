@@ -266,6 +266,16 @@ let cases = {
                 });
             }
         });
+    },
+
+    attachTestComponentAndCallDenodeifyFunctionWithError() {
+        let comp = testComponent.attach({
+            onEnter() {
+                return this.props.denodeifyFunction('foo').catch(err => {
+                    return this.props.complete('foobar');
+                });
+            }
+        });
     }
 };
 

@@ -256,6 +256,74 @@ describe('xcomponent options', function() {
 
         postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
     });
+
+    it('should enter a component and call a denodeify function returning a promise', function(done) {
+
+        var x = 0;
+
+        component = testComponent.init({
+
+            denodeifyFunction(val) {
+                return Promise.resolve(`${val}bar`);
+            },
+
+            complete(result) {
+                assert.equal(result, 'foobar', 'Expected result to have nodeified');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
+    });
+
+    it('should enter a component and call a denodeify function with an error', function(done) {
+
+        var x = 0;
+
+        component = testComponent.init({
+
+            denodeifyFunction(val, callback) {
+                setTimeout(function() {
+                    return callback(new Error('foo'));
+                });
+            },
+
+            complete(result) {
+                assert.equal(result, 'foobar', 'Expected result to have nodeified');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunctionWithError');
+    });
+
+    it('should enter a component and call a denodeify function incorrectly', function(done) {
+
+        var x = 0;
+
+        component = testComponent.init({
+
+            denodeifyFunction(val, callback) {
+                setTimeout(function() {
+                    try {
+                        return callback('something aint right!');
+                    } catch (err) {
+                        done();
+                    }
+                });
+            },
+
+            complete(result) {
+                assert.equal(result, 'foobar', 'Expected result to have nodeified');
+                done();
+            }
+
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
+    });
 });
 
 
