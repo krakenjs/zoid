@@ -28,6 +28,7 @@
   "devDependencies": {
     "babel-core": "^6.7.7",
     "babel-loader": "^6.2.4",
+    "babel-plugin-__coverage__": "^11.0.0",
     "babel-plugin-add-module-exports": "^0.1.4",
     "babel-plugin-syntax-object-rest-spread": "^6.5.0",
     "babel-plugin-transform-es2015-for-of": "^6.8.0",

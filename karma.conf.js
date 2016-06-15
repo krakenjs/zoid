@@ -71,21 +71,14 @@ module.exports = function(config) {
                                 'syntax-object-rest-spread',
                                 'transform-es3-property-literals',
                                 'transform-es3-member-expression-literals',
-                                ['transform-es2015-for-of', {loose: true}]
+                                ['transform-es2015-for-of', {loose: true}],
+                                [ '__coverage__', { only: `${__dirname}/src` } ]
                             ]
                         }
                     },
                     {
                         test: /\.(html?|css)$/,
                         loader: 'raw-loader'
-                    }
-                ],
-
-                postLoaders: [
-                    {
-                        test: /\.js$/,
-                        exclude: /(node_modules|bower_components|dist|test)/,
-                        loader: 'istanbul-instrumenter'
                     }
                 ]
             },
