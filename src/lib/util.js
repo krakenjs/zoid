@@ -128,3 +128,24 @@ export function stringifyWithFunctions(obj) {
         return val;
     });
 }
+
+
+/*  nextTick
+    --------
+
+    Use postMessage to emulate nextTick
+*/
+
+let tickMessageName = `__nextTick__${uniqueID()}`;
+let queue = [];
+
+window.addEventListener('message', function(event) {
+    if (event.data === tickMessageName) {
+        queue.shift().call();
+    }
+});
+
+export function nextTick(method) {
+    queue.push(method);
+    window.postMessage(tickMessageName, '*');
+}

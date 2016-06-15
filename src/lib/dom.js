@@ -1,6 +1,6 @@
 
 import { once } from './fn';
-import { extend } from './util';
+import { extend, nextTick } from './util';
 
 
 /*  Get Element
@@ -92,22 +92,22 @@ export function onCloseWindow(win, callback) {
 
     let interval;
 
-    function checkWindowClosed() {
+    let checkWindowClosed = () => {
         if (!win || win.closed || typeof win.closed === 'undefined') {
             clearInterval(interval);
             callback();
         }
-    }
+    };
 
     interval = setInterval(checkWindowClosed, 50);
-    let timeout = setTimeout(checkWindowClosed);
+    nextTick(checkWindowClosed);
 
     let close = win.close;
 
     try {
         win.close = function() {
             close.apply(this, arguments);
-            setTimeout(checkWindowClosed);
+            nextTick(checkWindowClosed);
         };
     } catch (err) {
         // pass
@@ -115,7 +115,6 @@ export function onCloseWindow(win, callback) {
 
     return {
         cancel() {
-            clearTimeout(timeout);
             clearInterval(interval);
             try {
                 win.close = close;
