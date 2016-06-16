@@ -149,3 +149,23 @@ export function nextTick(method) {
     queue.push(method);
     window.postMessage(tickMessageName, '*');
 }
+
+
+/*  Safe Get
+    --------
+
+    Get a property without throwing error
+*/
+
+export function safeGet(obj, prop) {
+
+    let result;
+
+    try {
+        result = obj[prop];
+    } catch(err) {
+        // pass
+    }
+
+    return result;
+}

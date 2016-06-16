@@ -107,6 +107,16 @@ let cases = {
         });
     },
 
+    attachTestComponentAndCallFooOnClose() {
+        testComponent.attach({
+            onClose: function() {
+                this.props.foo();
+                window.close = function() {};
+            }
+        });
+    },
+
+
     renderTestComponent2ToParentLightbox() {
         let comp = testComponent.attach({
             onEnter() {

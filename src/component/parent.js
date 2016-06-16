@@ -178,6 +178,8 @@ export class ParentComponent extends BaseComponent {
         super(component, options);
         this.component = component;
 
+        this.validate(options);
+
         this.id = uniqueID();
 
         // Ensure the component is not loaded twice on the same page, if it is a singleton
@@ -192,7 +194,6 @@ export class ParentComponent extends BaseComponent {
             activeComponents.splice(activeComponents.indexOf(this), 1);
         });
 
-        this.validate(options);
         this.parentWindow = getParentWindow();
 
         this.setProps(options.props || {});
@@ -299,8 +300,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     validate(options) {
-
-        // TODO: Implement this
+        this.validateProps(options.props || {});
     }
 
 

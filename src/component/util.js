@@ -1,5 +1,5 @@
 
-import { b64encode, b64decode, extend } from '../lib';
+import { b64encode, b64decode, extend, memoize, getParentWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
 /*  Build Child Window Name
@@ -29,7 +29,7 @@ export function buildChildWindowName(props = {}) {
     passed down, including the parent name. Only accepts window names built by xcomponent
 */
 
-export function parseWindowName(name) {
+export let parseWindowName = memoize(function parseWindowName(name) {
     let winProps;
 
     try {
@@ -43,4 +43,31 @@ export function parseWindowName(name) {
     }
 
     return winProps;
-}
+});
+
+export let getParentComponentWindow = memoize(function getParentComponentWindow() {
+
+    // Get properties from the window name, passed down from our parent component
+
+    let winProps = parseWindowName(window.name);
+
+    if (!winProps) {
+        throw new Error(`Window has not been rendered by xcomponent - can not attach here`);
+    }
+
+    // Use this to infer which window is our true 'parent component'. This can either be:
+    //
+    // - Our actual parent
+    // - A sibling which rendered us using renderToParent()
+
+    if (winProps.sibling) {
+
+        // We were rendered by a sibling, which we can access cross-domain via parent.frames
+        return getParentWindow().frames[winProps.parent];
+
+    } else {
+
+        // Our parent window is the same as our parent component window
+        return getParentWindow();
+    }
+});

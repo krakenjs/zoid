@@ -1,6 +1,6 @@
 
 import { once } from './fn';
-import { extend, nextTick } from './util';
+import { extend, nextTick, safeGet } from './util';
 
 
 /*  Get Element
@@ -90,12 +90,23 @@ export function onCloseWindow(win, callback) {
 
     callback = once(callback);
 
+    let isFunction = (win instanceof Function);
+
     let interval;
 
     let checkWindowClosed = () => {
-        if (!win || win.closed || typeof win.closed === 'undefined') {
+
+        let myWin;
+
+        try {
+            myWin = isFunction ? win() : win;
+        } catch (err) {
+            // pass
+        }
+
+        if (!myWin || myWin.closed || typeof myWin.closed === 'undefined' || safeGet(myWin, 'mockclosed')) {
             clearInterval(interval);
-            callback();
+            return callback();
         }
     };
 

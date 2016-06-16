@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from './base';
-import { parseWindowName } from './util';
+import { getParentComponentWindow } from './util';
 import { noop, extend, getParentWindow, onCloseWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
@@ -28,8 +28,8 @@ export class ChildComponent extends BaseComponent {
 
         this.onEnter = this.tryCatch(options.onEnter || noop);
         this.onClose = this.tryCatch(options.onClose || noop);
-        this.onError = this.tryCatch(options.onError || function(err) { throw err; });
         this.onProps = this.tryCatch(options.onProps || noop, false);
+        this.onError = this.tryCatch(options.onError || function(err) { throw err; });
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
@@ -70,15 +70,15 @@ export class ChildComponent extends BaseComponent {
 
         // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
 
-        if (this.standalone && !this.parentComponentWindow) {
+        if (this.standalone && !getParentComponentWindow()) {
             return Promise.resolve();
         }
 
         // Start listening for post messages
 
-        this.listen(this.parentComponentWindow);
-        if (this.parentWindow !== this.parentComponentWindow) {
-            this.listen(this.parentWindow);
+        this.listen(getParentComponentWindow());
+        if (getParentWindow() !== getParentComponentWindow()) {
+            this.listen(getParentWindow());
         }
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -107,7 +107,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParent(name, data) {
-        return postRobot.send(this.parentWindow, name, data);
+        return postRobot.send(getParentWindow(), name, data);
     }
 
 
@@ -119,7 +119,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParentComponent(name, data) {
-        return postRobot.send(this.parentComponentWindow, name, data);
+        return postRobot.send(getParentComponentWindow(), name, data);
     }
 
 
@@ -143,34 +143,12 @@ export class ChildComponent extends BaseComponent {
 
         // Get the direct parent window
 
-        this.parentWindow = getParentWindow();
-
-        if (!this.parentWindow) {
+        if (!getParentWindow()) {
             throw new Error(`[${this.component.tag}] Can not find parent window`);
         }
 
-        // Get properties from the window name, passed down from our parent component
-
-        let winProps = parseWindowName(window.name);
-
-        if (!winProps) {
-            throw new Error(`[${this.component.tag}] Window has not been rendered by xcomponent - can not attach here`);
-        }
-
-        // Use this to infer which window is our true 'parent component'. This can either be:
-        //
-        // - Our actual parent
-        // - A sibling which rendered us using renderToParent()
-
-        if (winProps.sibling) {
-
-            // We were rendered by a sibling, which we can access cross-domain via parent.frames
-            this.parentComponentWindow = this.parentWindow.frames[winProps.parent];
-
-        } else {
-
-            // Our parent window is the same as our parent component window
-            this.parentComponentWindow = this.parentWindow;
+        if (!getParentComponentWindow()) {
+            throw new Error(`[${this.component.tag}] Can not find parent component window`);
         }
 
         // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
@@ -199,7 +177,8 @@ export class ChildComponent extends BaseComponent {
 
     watchForClose() {
 
-        onCloseWindow(this.parentWindow, () => {
+        onCloseWindow(getParentWindow, () => {
+
             this.onClose(new Error(`[${this.component.tag}] parent window was closed`));
 
             // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
@@ -212,8 +191,8 @@ export class ChildComponent extends BaseComponent {
 
         // Only listen for parent component window if it's actually a different window
 
-        if (this.parentComponentWindow && this.parentComponentWindow !== this.parentWindow) {
-            onCloseWindow(this.parentComponentWindow, () => {
+        if (getParentComponentWindow() && getParentComponentWindow() !== getParentWindow()) {
+            onCloseWindow(getParentComponentWindow, () => {
 
                 // We do actually need to close ourselves in this case, even if we're an iframe, because our component
                 // window is probably a sibling and we'll remain open by default.
@@ -258,7 +237,7 @@ export class ChildComponent extends BaseComponent {
 
                 // Our parent is telling us we're going to close
 
-                if (source === this.parentWindow) {
+                if (source === getParentWindow()) {
                     this.onClose.call(this);
                 }
 

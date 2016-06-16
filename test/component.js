@@ -154,3 +154,30 @@ export var testComponent4 = xcomponent.create({
 });
 
 
+export var testComponent5 = xcomponent.create({
+
+    tag: 'test-component5',
+    url: '/base/test/child.htm',
+
+    envUrls: {
+        dev: '/base/test/child.htm?devenv=true'
+    },
+
+    dimensions: {
+        width: 500,
+        height: 500
+    },
+
+    props: {
+        foo: {
+            type: 'function',
+            required: true
+        }
+    },
+
+    contexts: {
+        popup: false,
+        iframe: false,
+        lightbox: true
+    }
+});

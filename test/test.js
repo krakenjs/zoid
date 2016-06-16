@@ -3,7 +3,7 @@ import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
-import { testComponent, testComponent3, testComponent4 } from './component';
+import { testComponent, testComponent3, testComponent4, testComponent5 } from './component';
 import { loadScript, once, b64encode } from 'src/lib';
 import { CONTEXT_TYPES } from 'src/constants';
 
@@ -517,6 +517,24 @@ describe('xcomponent error cases', function() {
             testComponent.contexts = originalContexts;
             done();
         }
+    });
+
+    it('should render a child component then close the parent window', function(done) {
+
+        component = testComponent.init({
+            foo: function() {
+                window.mockclosed = false;
+                done();
+            },
+
+            onEnter() {
+                window.mockclosed = true;
+            }
+        });
+
+        component.renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponentAndCallFooOnClose');
     });
 });
 
@@ -1496,6 +1514,46 @@ describe('xcomponent validation errors', function() {
                 url: 'http://zombo.com',
                 overlayTemplate: '<script>foo();</script>'
             });
+        });
+    });
+
+    it('should throw validation errors when a component is inited without the correct options', function() {
+
+        expectError(function() {
+            testComponent.init({
+                functionProp: 'foobar'
+            });
+        });
+
+        expectError(function() {
+            testComponent.init({
+                stringProp: function() {}
+            });
+        });
+
+        expectError(function() {
+            testComponent.init({
+                numberProp: function() {}
+            });
+        });
+
+        expectError(function() {
+            var obj = {};
+            obj.obj = obj;
+
+            testComponent.init({
+                objectProp: obj
+            });
+        });
+
+        expectError(function() {
+            testComponent.init({
+                invalidProp: 'foobar'
+            });
+        });
+
+        expectError(function() {
+            testComponent5.init();
         });
     });
 });
