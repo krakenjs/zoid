@@ -39,13 +39,6 @@ export function getElement(id) {
 
 export function popup(url, options) {
 
-    // Condition for when dimensions (optional) for pop-up not specified
-    if(options.width === 0)
-    {
-        let win = window.open(url, options.name);
-        return win;
-    }
-
     let win = window.open(url, options.name, Object.keys(options).map((key) => {
 
         if (!options[key]) {
