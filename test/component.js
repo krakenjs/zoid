@@ -142,3 +142,15 @@ export var testComponent3 = xcomponent.create({
         lightbox: true
     }
 });
+
+export var testComponent4 = xcomponent.create({
+
+    tag: 'test-component4',
+    url: '/base/test/child.htm',
+
+    envUrls: {
+        dev: '/base/test/child.htm?devenv=true'
+    }
+});
+
+

@@ -143,6 +143,15 @@ let RENDER_DRIVERS = {
             this.iframe.style.top = pos.y;
             this.iframe.style.borderRadius = '10px';
 
+            if (this.component.dimensions.width === undefined && this.component.dimensions.height === undefined) {
+                this.iframe.style.left = 0;
+                this.iframe.style.top = 0;
+                this.iframe.style.borderRadius = '0px';
+                this.iframe.height = '100%';
+                this.iframe.width = '100%';
+                this.iframe.style.position = 'fixed';
+            }
+
             return this;
         },
 

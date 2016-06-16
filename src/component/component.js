@@ -29,8 +29,20 @@ export let components = {};
 export class Component {
 
     constructor(options = {}) {
+
+
+        
         this.validate(options);
 
+        if (options.dimensions) {
+            if (typeof options.dimensions.width !== 'number') {
+                throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
+            }
+
+            if (typeof options.dimensions.height !== 'number') {
+                throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number`);
+            }
+        }
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
@@ -46,7 +58,7 @@ export class Component {
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 
-        this.dimensions = options.dimensions;
+        this.dimensions = options.dimensions || {};
 
         // The default environment we should render to if none is specified in the parent
 
@@ -168,19 +180,7 @@ export class Component {
         if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) {
             throw new Error(`Invalid options.tag: ${options.tag}`);
         }
-
-        if (!options.dimensions || !(typeof options.dimensions === 'object')) {
-            throw new Error(`[${options.tag}] Expected options.dimensions to be an object`);
-        }
-
-        if (typeof options.dimensions.width !== 'number') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
-        }
-
-        if (typeof options.dimensions.height !== 'number') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number`);
-        }
-
+        
         if (options.props && !(typeof options.props === 'object')) {
             throw new Error(`[${options.tag}] Expected options.props to be an object`);
         }
