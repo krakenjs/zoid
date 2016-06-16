@@ -3,7 +3,7 @@ import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
-import { testComponent, testComponent3 } from './component';
+import { testComponent, testComponent3, testComponent4 } from './component';
 import { loadScript, once, b64encode } from 'src/lib';
 import { CONTEXT_TYPES } from 'src/constants';
 
@@ -26,6 +26,21 @@ describe('basic xcomponent rendering', function() {
 
         component = testComponent.init({
             onEnter: done
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should enter a component rendered as a lightbox with no dimensions', function(done) {
+
+        component = testComponent4.init({
+            onEnter: function() {
+                if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
+                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
+                } else {
+                    done();
+                }
+            }
         }).renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
