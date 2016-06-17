@@ -59,7 +59,6 @@ let RENDER_DRIVERS = {
                 }
             });
 
-            this.setForCleanup('context', CONSTANTS.CONTEXT.IFRAME);
             this.setForCleanup('window', this.iframe.contentWindow);
 
             return this;
@@ -103,7 +102,6 @@ let RENDER_DRIVERS = {
                 throw err;
             }
 
-            this.setForCleanup('context', CONSTANTS.CONTEXT.POPUP);
             this.setForCleanup('window', this.popup);
 
             return this;
@@ -540,6 +538,8 @@ export class ParentComponent extends BaseComponent {
 
         context = context || this.getRenderContext(element);
 
+        this.setForCleanup('context', context);
+
         this.open(element, context);
         this.listen(this.window);
         this.loadUrl(this.url);
@@ -611,6 +611,8 @@ export class ParentComponent extends BaseComponent {
             sibling: true,
             tag: this.component.tag
         });
+
+        this.setForCleanup('context', context);
 
         // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
         // open them from the child, since we depend on there being a click event to avoid the popup blocker.
@@ -840,6 +842,8 @@ export class ParentComponent extends BaseComponent {
         if (this.window) {
             throw new Error(`[${this.component.tag}] Component is already rendered`);
         }
+
+        this.setForCleanup('context', context);
 
         // Point the element to open in our child window
 
