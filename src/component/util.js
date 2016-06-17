@@ -15,9 +15,10 @@ import { CONSTANTS } from '../constants';
 */
 
 export function buildChildWindowName(props = {}) {
-    return b64encode(JSON.stringify(extend({
+    return b64encode(JSON.stringify({
+        ...props,
         type: CONSTANTS.XCOMPONENT
-    }, props)));
+    }));
 }
 
 

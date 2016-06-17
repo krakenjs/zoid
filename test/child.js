@@ -3,7 +3,7 @@ import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
 import { parseWindowName } from 'src/component/util';
 
-import { testComponent, testComponent2 } from './component';
+import { testComponent, testComponent2, testComponent4 } from './component';
 
 let cases = {
 
@@ -91,6 +91,16 @@ let cases = {
 
     attachTestComponent2() {
         testComponent2.attach({
+            onEnter() {
+                if (this.props.sendUrl) {
+                    this.props.sendUrl(window.location.href);
+                }
+            }
+        });
+    },
+
+    attachTestComponent4() {
+        testComponent4.attach({
             onEnter() {
                 if (this.props.sendUrl) {
                     this.props.sendUrl(window.location.href);

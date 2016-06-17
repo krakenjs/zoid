@@ -88,7 +88,7 @@ describe('basic xcomponent rendering', function() {
             }
         }).renderLightbox();
 
-        postRobot.once('init', () => 'attachTestComponent');
+        postRobot.once('init', () => 'attachTestComponent4');
     });
 
     it('should enter a component rendered as a popup with no dimensions', function(done) {
@@ -118,7 +118,7 @@ describe('basic xcomponent rendering', function() {
 
         window.open = open;
 
-        postRobot.once('init', () => 'attachTestComponent');
+        postRobot.once('init', () => 'attachTestComponent4');
     });
 
     it('should enter a component rendered as a lightbox and call a prop', function(done) {

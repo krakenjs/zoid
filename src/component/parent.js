@@ -204,7 +204,8 @@ export class ParentComponent extends BaseComponent {
 
         this.childWindowName = options.childWindowName || buildChildWindowName({
             parent: window.name,
-            id: this.id
+            id: this.id,
+            tag: this.component.tag
         });
 
         this.screenWidth = options.screenWidth || window.outerWidth;
@@ -607,7 +608,8 @@ export class ParentComponent extends BaseComponent {
         this.childWindowName = buildChildWindowName({
             id: this.id,
             parent: window.name,
-            sibling: true
+            sibling: true,
+            tag: this.component.tag
         });
 
         // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
