@@ -31,6 +31,51 @@ describe('basic xcomponent rendering', function() {
         postRobot.once('init', () => 'attachTestComponent');
     });
 
+    it('should enter a component rendered as a lightbox with the correct dimensions', function(done) {
+
+        component = testComponent.init({
+            onEnter: function() {
+                if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
+                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
+                } else {
+                    done();
+                }
+            }
+        }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should enter a component rendered as a popup with the correct dimensions', function(done) {
+
+        let open = window.open;
+        window.open = function(url, name, options) {
+            assert.isTrue(options.indexOf(`width=${testComponent.dimensions.width}`) !== -1, 'Expected width passed to window.open to be correct');
+            assert.isTrue(options.indexOf(`height=${testComponent.dimensions.height}`) !== -1, 'Expected height passed to window.open to be correct');
+            return open.apply(this, arguments);
+        }
+
+        component = testComponent.init({
+            onEnter: function() {
+                done();
+
+                /* For some reason karma/phantomjs don't respect the passed dimensions, so can't check them this way
+
+                if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
+                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
+                } else {
+                    done();
+                }
+
+                */
+            }
+        }).renderPopup();
+
+        window.open = open;
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
     it('should enter a component rendered as a lightbox with no dimensions', function(done) {
 
         component = testComponent4.init({
@@ -42,6 +87,36 @@ describe('basic xcomponent rendering', function() {
                 }
             }
         }).renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should enter a component rendered as a popup with no dimensions', function(done) {
+
+        let open = window.open;
+        window.open = function(url, name, options) {
+            assert.isTrue(options.indexOf(`width=`) === -1, 'Expected width not to be passed to window.open');
+            assert.isTrue(options.indexOf(`height=`) === -1, 'Expected height not to be passed to window.open');
+            return open.apply(this, arguments);
+        }
+
+        component = testComponent4.init({
+            onEnter: function() {
+                done();
+
+                /* Chrome opens up a new window with different dimensions to the parent, so this doesn't work
+
+                if (!(window.top.innerWidth === this.window.innerWidth && window.top.innerHeight === this.window.innerHeight)) {
+                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
+                } else {
+                    done();
+                }
+
+                */
+            }
+        }).renderPopup();
+
+        window.open = open;
 
         postRobot.once('init', () => 'attachTestComponent');
     });

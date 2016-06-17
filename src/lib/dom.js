@@ -47,7 +47,7 @@ export function popup(url, options) {
 
         return `${key}=${options[key]}`;
 
-    }).filter(Boolean).join(', '), true);
+    }).filter(Boolean).join(','), true);
 
     return win;
 }

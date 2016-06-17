@@ -163,7 +163,7 @@ export function safeGet(obj, prop) {
 
     try {
         result = obj[prop];
-    } catch(err) {
+    } catch (err) {
         // pass
     }
 
