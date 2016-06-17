@@ -345,6 +345,15 @@ let cases = {
         } catch (err) {
             postRobot.sendToParent('complete');
         }
+    },
+
+    attachTestComponent4AndCallCompleteOnError() {
+
+        try {
+            testComponent4.attach();
+        } catch (err) {
+            postRobot.sendToParent('complete');
+        }
     }
 };
 

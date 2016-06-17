@@ -651,6 +651,20 @@ describe('xcomponent error cases', function() {
 
         postRobot.once('init', () => 'attachTestComponent');
     });
+
+    it('should error on the child when trying to attach a different component to that which was rendered', function(done) {
+
+        component = testComponent.init({
+            onEnter() {
+                done();
+            }
+        });
+
+        component.renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent4AndCallCompleteOnError');
+        postRobot.once('complete', () => done());
+    });
 });
 
 describe('xcomponent options', function() {
