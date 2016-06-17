@@ -56,11 +56,6 @@ let RENDER_DRIVERS = {
             this.setForCleanup('context', CONSTANTS.CONTEXT.IFRAME);
             this.setForCleanup('window', this.iframe.contentWindow);
 
-            // There's a possibility that our iframe's dom element could be removed by other code, for a variety of
-            // reasons. As such, we need to periodically check we still have a child window that is open.
-
-            this.watchForClose();
-
             return this;
         },
 
@@ -104,11 +99,6 @@ let RENDER_DRIVERS = {
 
             this.setForCleanup('context', CONSTANTS.CONTEXT.POPUP);
             this.setForCleanup('window', this.popup);
-
-            // With popups, since they can be closed manually by the user with no feedback to us, we need to watch for
-            // them being closed.
-
-            this.watchForClose();
 
             return this;
         },
@@ -552,6 +542,8 @@ export class ParentComponent extends BaseComponent {
         if (RENDER_DRIVERS[context].overlay) {
             this.createOverlayTemplate();
         }
+
+        this.watchForClose();
 
         return this;
     }
