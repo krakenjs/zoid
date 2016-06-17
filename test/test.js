@@ -611,6 +611,46 @@ describe('xcomponent error cases', function() {
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooOnClose');
     });
+
+    it('should call onclose when a popup is closed by someone other than xcomponent', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                setTimeout(() => {
+                    this.window.close();
+                });
+            },
+
+            onClose() {
+                done();
+            }
+        });
+
+        component.renderPopup();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
+
+    it('should call onclose when a lightbox is closed by someone other than xcomponent', function(done) {
+
+        component = testComponent.init({
+
+            onEnter() {
+                setTimeout(() => {
+                    this.iframe.parentNode.removeChild(this.iframe);
+                });
+            },
+
+            onClose() {
+                done();
+            }
+        });
+
+        component.renderLightbox();
+
+        postRobot.once('init', () => 'attachTestComponent');
+    });
 });
 
 describe('xcomponent options', function() {

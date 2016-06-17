@@ -42,13 +42,19 @@ let RENDER_DRIVERS = {
             });
 
             this.registerForCleanup(() => {
+
                 if (this.iframe) {
+
                     try {
                         this.iframe.contentWindow.close();
                     } catch (err) {
                         // pass
                     }
-                    this.iframe.parentNode.removeChild(this.iframe);
+
+                    if (this.iframe.parentNode) {
+                        this.iframe.parentNode.removeChild(this.iframe);
+                    }
+
                     delete this.iframe;
                 }
             });
