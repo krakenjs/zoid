@@ -36,16 +36,22 @@ export function once(method) {
 
 export function memoize(method) {
 
-    let called = false;
-    let result;
+    let results = {};
 
     return function() {
 
-        if (!called) {
-            called = true;
-            result = method.apply(this, arguments);
+        let args;
+
+        try {
+            args = JSON.stringify(arguments);
+        } catch (err) {
+            throw new Error('Arguments not serializable -- can not be used to memoize');
         }
 
-        return result;
+        if (!results.hasOwnProperty(args)) {
+            results[args] = method.apply(this, arguments);
+        }
+
+        return results[args];
     };
 }
