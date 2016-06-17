@@ -1,5 +1,5 @@
 
-import { b64encode, b64decode, extend, memoize, getParentWindow } from '../lib';
+import { b64encode, b64decode, memoize, getParentWindow } from '../lib';
 import { CONSTANTS } from '../constants';
 
 /*  Build Child Window Name

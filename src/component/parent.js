@@ -563,6 +563,8 @@ export class ParentComponent extends BaseComponent {
 
         RENDER_DRIVERS[context].open.call(this, element);
 
+        this.watchForClose();
+
         this.createComponentTemplate();
     }
 
