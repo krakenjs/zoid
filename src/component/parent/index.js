@@ -3,10 +3,11 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { urlEncode, noop, extend, getElement, getParentWindow, once, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter } from '../../lib';
+import { getElement, getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
+import { propsToQuery, normalizeProps } from '../props';
 
 let activeComponents = [];
 
@@ -78,7 +79,7 @@ export class ParentComponent extends BaseComponent {
     setProps(props) {
         validateProps(this.component, props);
 
-        this.props = this.normalizeProps(props);
+        this.props = normalizeProps(this.component, this, props);
         this.url   = this.buildUrl();
     }
 
@@ -102,7 +103,7 @@ export class ParentComponent extends BaseComponent {
             url = this.component.url;
         }
 
-        let queryString = this.propsToQuery(this.props);
+        let queryString = propsToQuery(this.props);
 
         if (queryString) {
             url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;
@@ -127,9 +128,10 @@ export class ParentComponent extends BaseComponent {
 
             let oldProps = stringifyWithFunctions(this.props);
 
-            let newProps = {};
-            extend(newProps, this.props);
-            extend(newProps, props);
+            let newProps = {
+                ...this.props,
+                ...props
+            };
 
             this.setProps(newProps);
 
@@ -141,135 +143,6 @@ export class ParentComponent extends BaseComponent {
                 });
             }
         });
-    }
-
-
-    /*  Normalize Props
-        ---------------
-
-        Turn props into normalized values, using defaults, function options, etc.
-    */
-
-    normalizeProps(props) {
-
-        props = props || {};
-        let result = {};
-
-        for (let key of Object.keys(this.component.props)) {
-            result[key] = this.normalizeProp(props, key);
-        }
-
-        return result;
-    }
-
-
-     /*  Normalize Props
-         ---------------
-
-         Turn prop into normalized value, using defaults, function options, etc.
-     */
-
-    normalizeProp(props, key) {
-
-        let prop = this.component.props[key];
-        let value = props[key];
-
-        let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-        // Substitute in provided default. If prop.def is a function, we call it to get the default.
-
-        if (!hasProp && prop.def) {
-            value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
-        }
-
-        if (prop.type === 'boolean') {
-            return Boolean(value);
-
-        } else if (prop.type === 'function') {
-
-            if (!value) {
-
-                // If prop.noop is set, make the function a noop
-
-                if (!value && prop.noop) {
-                    value = noop;
-                }
-
-            } else {
-
-                // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
-
-                if (prop.denodeify) {
-                    value = denodeify(value);
-                }
-
-                // If prop.once is set, ensure the function can only be called once
-
-                if (prop.once) {
-                    value = once(value);
-                }
-
-                // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
-
-                if (prop.memoize) {
-                    value = memoize(value);
-                }
-
-                value = value.bind(this);
-            }
-
-            return value;
-
-        } else if (prop.type === 'string') {
-            return value || '';
-
-        } else if (prop.type === 'object') {
-            return value;
-
-        } else if (prop.type === 'number') {
-            return parseInt(value || 0, 10);
-        }
-    }
-
-
-    /*  Props to Query
-        --------------
-
-        Turn props into an initial query string to open the component with
-
-        string -> string
-        bool   -> 1
-        object -> json
-        number -> string
-    */
-
-    propsToQuery(props) {
-
-        return Object.keys(props).map(key => {
-
-            let value = props[key];
-
-            if (!value) {
-                return '';
-            }
-
-            let result;
-
-            if (typeof value === 'boolean') {
-                result = '1';
-            } else if (typeof value === 'string') {
-                result = value.toString();
-            } else if (typeof value === 'function') {
-                return;
-            } else if (typeof value === 'object') {
-                result = JSON.stringify(value);
-            } else if (typeof value === 'number') {
-                result = value.toString();
-            }
-
-            return `${urlEncode(key)}=${urlEncode(result)}`;
-
-        }).filter(Boolean).join('&');
     }
 
 
