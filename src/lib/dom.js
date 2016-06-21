@@ -264,7 +264,7 @@ export function createStyleSheet(styleSheet, container) {
 
     return createElement('style', {
 
-        styleSheet: styleSheet,
+        styleSheet,
 
         attributes: {
             type: 'text/css'

@@ -21,7 +21,7 @@ export let htmlComponent = {
                 return;
             }
 
-            var props;
+            let props;
 
             eval(`props = ${element.innerText}`); // eslint-disable-line no-eval
 
@@ -43,7 +43,7 @@ export let htmlComponent = {
         document.addEventListener('DOMContentLoaded', scan);
         window.addEventListener('load', scan);
 
-        document.addEventListener('DOMNodeInserted', function(event) {
+        document.addEventListener('DOMNodeInserted', event => {
             render(event.target);
         });
     }

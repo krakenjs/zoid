@@ -1,25 +1,22 @@
 
 import { values } from './lib';
 
-export const CONSTANTS = {
+export const XCOMPONENT = 'xcomponent';
 
-    XCOMPONENT: 'xcomponent',
+export const CONTEXT = {
+    IFRAME: 'xcomponent_context_iframe',
+    POPUP: 'xcomponent_context_popup'
+};
 
-    CONTEXT: {
-        IFRAME: 'xcomponent_context_iframe',
-        POPUP: 'xcomponent_context_popup'
-    },
-
-    POST_MESSAGE: {
-        INIT: 'xcomponent_init',
-        PROPS: 'xcomponent_props',
-        PROP_CALLBACK: 'xcomponent_prop_callback',
-        CLOSE: 'xcomponent_close',
-        REDIRECT: 'xcomponent_redirect',
-        RESIZE: 'xcomponent_resize',
-        RENDER: 'xcomponent_render',
-        ERROR: 'xcomponent_error'
-    }
+export const POST_MESSAGE = {
+    INIT: 'xcomponent_init',
+    PROPS: 'xcomponent_props',
+    PROP_CALLBACK: 'xcomponent_prop_callback',
+    CLOSE: 'xcomponent_close',
+    REDIRECT: 'xcomponent_redirect',
+    RESIZE: 'xcomponent_resize',
+    RENDER: 'xcomponent_render',
+    ERROR: 'xcomponent_error'
 };
 
 export const PROP_TYPES = {

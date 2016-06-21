@@ -1,6 +1,7 @@
 
 import { b64encode, b64decode, memoize, getParentWindow } from '../lib';
-import { CONSTANTS } from '../constants';
+import { XCOMPONENT } from '../constants';
+
 
 /*  Build Child Window Name
     -----------------------
@@ -17,10 +18,9 @@ import { CONSTANTS } from '../constants';
 export function buildChildWindowName(props = {}) {
     return b64encode(JSON.stringify({
         ...props,
-        type: CONSTANTS.XCOMPONENT
+        type: XCOMPONENT
     }));
 }
-
 
 
 /*  Parse Window Name
@@ -30,7 +30,7 @@ export function buildChildWindowName(props = {}) {
     passed down, including the parent name. Only accepts window names built by xcomponent
 */
 
-export let parseWindowName = memoize(function parseWindowName(name) {
+export let parseWindowName = memoize(name => {
     let winProps;
 
     try {
@@ -39,14 +39,21 @@ export let parseWindowName = memoize(function parseWindowName(name) {
         return;
     }
 
-    if (!winProps || winProps.type !== CONSTANTS.XCOMPONENT) {
+    if (!winProps || winProps.type !== XCOMPONENT) {
         return;
     }
 
     return winProps;
 });
 
-export let getParentComponentWindow = memoize(function getParentComponentWindow() {
+
+/*  Get Parent Component Window
+    ---------------------------
+
+    Get the parent component window, which may be different from the actual parent window
+*/
+
+export let getParentComponentWindow = memoize(() => {
 
     // Get properties from the window name, passed down from our parent component
 

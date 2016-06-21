@@ -1,162 +1,14 @@
 
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { BaseComponent } from './base';
-import { buildChildWindowName } from './util';
-import { urlEncode, popup, noop, extend, getElement, getParentWindow, once, iframe, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID, stringifyWithFunctions } from '../lib';
-import { CONSTANTS, CONTEXT_TYPES, MAX_Z_INDEX } from '../constants';
-import { PopupOpenError } from '../error';
+import { BaseComponent } from '../base';
+import { buildChildWindowName } from '../window';
+import { urlEncode, noop, extend, getElement, getParentWindow, once, onCloseWindow, addEventListener, getParentNode, denodeify, memoize, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter } from '../../lib';
+import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
+import { RENDER_DRIVERS } from './drivers';
+import { validate, validateProps } from './validate';
 
 let activeComponents = [];
-
-/*  Render Drivers
-    --------------
-
-    There are various differences in how we treat:
-
-    - Opening frames and windows
-    - Rendering up to the parent
-    - Showing overlays
-
-    based on the context we're rendering to.
-
-    These render drivers split this functionality out in a driver pattern, so our component code doesn't bunch up into a
-    series of if-popup-then-else-if-lightbox code.
-*/
-
-let RENDER_DRIVERS = {
-
-    // Iframe context is rendered inline on the page, without any kind of overlay. It's the one context that is designed
-    // to feel like a native element on the page.
-
-    [ CONTEXT_TYPES.IFRAME ]: {
-
-        overlay: false,
-
-        open(element) {
-
-            this.iframe = iframe(element, null, {
-                name: this.childWindowName,
-                width: this.component.dimensions.width,
-                height: this.component.dimensions.height
-            });
-
-            this.registerForCleanup(() => {
-
-                if (this.iframe) {
-
-                    try {
-                        this.iframe.contentWindow.close();
-                    } catch (err) {
-                        // pass
-                    }
-
-                    if (this.iframe.parentNode) {
-                        this.iframe.parentNode.removeChild(this.iframe);
-                    }
-
-                    delete this.iframe;
-                }
-            });
-
-            this.setForCleanup('window', this.iframe.contentWindow);
-
-            return this;
-        },
-
-        renderToParent(element) {
-
-            // No special behavior needed to renderToParent
-        }
-    },
-
-    // Popup context opens up a centered lightbox-like popup window on the page, with an overlay behind it.
-
-    [ CONTEXT_TYPES.POPUP ]: {
-
-        overlay: true,
-
-        open() {
-
-            let pos = this.getPosition();
-
-            this.popup = popup('about:blank', {
-                name: this.childWindowName,
-                width: this.component.dimensions.width,
-                height: this.component.dimensions.height,
-                top: pos.y,
-                left: pos.x
-            });
-
-            this.registerForCleanup(() => {
-                if (this.popup) {
-                    this.popup.close();
-                    delete this.popup;
-                }
-            });
-
-            // Sometimes we'll be blocked from opening the popup because we're not in a click event.
-
-            if (!this.popup || this.popup.closed || typeof this.popup.closed === 'undefined') {
-                var err = new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
-                throw err;
-            }
-
-            this.setForCleanup('window', this.popup);
-
-            return this;
-        },
-
-        renderToParent() {
-
-            // Popups are the only case where we need to do anything special to render to parent.
-            // Because we need a click event, we have to open up the popup from the child the moment it's requested,
-            // Then message up and continue the rendering process from the parent as with any other renderToParent.
-
-            this.open(null, CONTEXT_TYPES.POPUP);
-        }
-    },
-
-    // Lightbox context opens up a centered, iframe based lightbox on the page, with an overlay behind it.
-
-    [ CONTEXT_TYPES.LIGHTBOX ]: {
-
-        overlay: true,
-
-        open() {
-
-            this.open(document.body, CONTEXT_TYPES.IFRAME);
-
-            let pos = this.getPosition();
-
-            // TODO: some of this should be done in the parent.css file
-
-            this.iframe.style.zIndex = MAX_Z_INDEX;
-            this.iframe.style.position = 'absolute';
-            this.iframe.style.left = pos.x;
-            this.iframe.style.top = pos.y;
-            this.iframe.style.borderRadius = '10px';
-
-            if (this.component.dimensions.width === undefined && this.component.dimensions.height === undefined) {
-                this.iframe.style.left = 0;
-                this.iframe.style.top = 0;
-                this.iframe.style.borderRadius = '0px';
-                this.iframe.height = '100%';
-                this.iframe.width = '100%';
-                this.iframe.style.position = 'fixed';
-            }
-
-            return this;
-        },
-
-        renderToParent() {
-
-            // No special behavior needed to renderToParent
-        }
-    }
-};
-
-
 
 /*  Parent Component
     ----------------
@@ -172,7 +24,8 @@ export class ParentComponent extends BaseComponent {
         super(component, options);
         this.component = component;
 
-        this.validate(options);
+        validate(component, options);
+        this.generateRenderMethods();
 
         this.id = uniqueID();
 
@@ -223,6 +76,8 @@ export class ParentComponent extends BaseComponent {
     */
 
     setProps(props) {
+        validateProps(this.component, props);
+
         this.props = this.normalizeProps(props);
         this.url   = this.buildUrl();
     }
@@ -264,6 +119,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     updateProps(props) {
+        validateProps(this.component, props);
 
         // Wait for init to complete successfully
 
@@ -280,22 +136,11 @@ export class ParentComponent extends BaseComponent {
             // Only send down the new props if they do not match the old
 
             if (this.window && oldProps !== stringifyWithFunctions(this.props)) {
-                return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.PROPS, {
+                return postRobot.send(this.window, POST_MESSAGE.PROPS, {
                     props: this.props
                 });
             }
         });
-    }
-
-
-    /*  Validate
-        --------
-
-        Validate options passed to
-    */
-
-    validate(options) {
-        this.validateProps(options.props || {});
     }
 
 
@@ -306,7 +151,6 @@ export class ParentComponent extends BaseComponent {
     */
 
     normalizeProps(props) {
-        this.validateProps(props);
 
         props = props || {};
         let result = {};
@@ -516,6 +360,24 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    /*  Validate Render
+        ---------------
+
+        Ensure there is no reason we can't render
+    */
+
+    validateRender(context) {
+
+        if (this.window) {
+            throw new Error(`[${this.component.tag}] Can not render: component is already rendered`);
+        }
+
+        if (context && !this.component.contexts[context]) {
+            throw new Error(`Invalid context: ${context}`);
+        }
+    }
+
+
     /*  Render
         ------
 
@@ -528,15 +390,13 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
 
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Can not render: component is already rendered`);
-        }
-
-        if (context && !this.component.contexts[context]) {
-            throw new Error(`Invalid context: ${context}`);
-        }
+        this.validateRender(context);
 
         context = context || this.getRenderContext(element);
+
+        if (RENDER_DRIVERS[context].render) {
+            RENDER_DRIVERS[context].render.call(this, element);
+        }
 
         this.setForCleanup('context', context);
 
@@ -563,10 +423,6 @@ export class ParentComponent extends BaseComponent {
 
     open(element, context) {
 
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Can not open: component is already rendered`);
-        }
-
         RENDER_DRIVERS[context].open.call(this, element);
 
         this.watchForClose();
@@ -585,13 +441,7 @@ export class ParentComponent extends BaseComponent {
 
     renderToParent(element, context, options = {}) {
 
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
-
-        if (context && !this.component.contexts[context]) {
-            throw new Error(`Invalid context: ${context}`);
-        }
+        this.validateRender(context);
 
         context = context || this.getRenderContext(element);
 
@@ -617,19 +467,21 @@ export class ParentComponent extends BaseComponent {
         // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
         // open them from the child, since we depend on there being a click event to avoid the popup blocker.
 
-        RENDER_DRIVERS[context].renderToParent.call(this, element);
+        if (RENDER_DRIVERS[context].renderToParent) {
+            RENDER_DRIVERS[context].renderToParent.call(this, element);
+        }
 
         // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
         // across, we can pretty much just send all of our props over too without any problems
 
-        return postRobot.sendToParent(CONSTANTS.POST_MESSAGE.RENDER, {
+        return postRobot.sendToParent(POST_MESSAGE.RENDER, {
 
             // <3 ES6
             ...options,
 
             tag: this.component.tag,
-            context: context,
-            element: element,
+            context,
+            element,
 
             options: {
                 props: this.props,
@@ -659,81 +511,31 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Render Iframe
-        -------------
-
-        Render the component to an iframe
-    */
-
-    renderIframe(element) {
-
-        if (!element) {
-            throw new Error(`[${this.component.tag}] Must specify element to render iframe`);
-        }
-
-        return this.render(element, CONTEXT_TYPES.IFRAME);
-    }
-
-
-    /*  Render Iframe to Parent
+    /*  Generate Render Methods
         -----------------------
 
-        Render the component to an iframe in the parent window
+        Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
     */
 
-    renderIframeToParent(element) {
+    generateRenderMethods() {
 
-        if (!element) {
-            throw new Error(`[${this.component.tag}] Must specify element to render iframe to parent`);
-        }
+        [ CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ].forEach(context => {
 
-        return this.renderToParent(element, CONTEXT_TYPES.IFRAME);
+            let contextName = capitalizeFirstLetter(context);
+
+            this[`render${contextName}`] = function(element) {
+                return this.render(element, context);
+            };
+
+            this[`render${contextName}ToParent`] = function(element) {
+                return this.renderToParent(element, context);
+            };
+
+            this[`hijackButtonTo${contextName}`] = function(element) {
+                return this.hijackButton(element, context);
+            };
+        });
     }
-
-
-    /*  Render Lightbox
-        ---------------
-
-        Render the component to a lightbox
-    */
-
-    renderLightbox() {
-        return this.render(null, CONTEXT_TYPES.LIGHTBOX);
-    }
-
-
-    /*  Render Lightbox to Parent
-        -------------------------
-
-        Render the component to a lightbox in the parent window
-    */
-
-    renderLightboxToParent() {
-        return this.renderToParent(null, CONTEXT_TYPES.LIGHTBOX);
-    }
-
-
-    /*  Render Popup
-        ------------
-
-        Render the component to a popup
-    */
-
-    renderPopup() {
-        return this.render(null, CONTEXT_TYPES.POPUP);
-    }
-
-
-    /*  Render Popup to Parent
-        ----------------------
-
-        Render the component to a popup in the parent window
-    */
-
-    renderPopupToParent() {
-        return this.renderToParent(null, CONTEXT_TYPES.POPUP);
-    }
-
 
     /*  Watch For Close
         ---------------
@@ -753,8 +555,8 @@ export class ParentComponent extends BaseComponent {
         // and close the child manually if that happens.
 
         let unloadListener = addEventListener(window, 'beforeunload', () => {
-            if (this.popup) {
-                this.popup.close();
+            if (this.context === CONTEXT_TYPES.POPUP) {
+                this.window.close();
             }
         });
 
@@ -773,12 +575,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     loadUrl(url) {
-
-        if (this.popup) {
-            this.popup.location = url;
-        } else if (this.iframe) {
-            this.iframe.src = url;
-        }
+        return RENDER_DRIVERS[this.context].loadUrl.call(this, url);
     }
 
 
@@ -839,9 +636,7 @@ export class ParentComponent extends BaseComponent {
 
     renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
 
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Component is already rendered`);
-        }
+        this.validateRender(context);
 
         this.setForCleanup('context', context);
 
@@ -861,28 +656,6 @@ export class ParentComponent extends BaseComponent {
         if (RENDER_DRIVERS[context].overlay) {
             this.createOverlayTemplate();
         }
-    }
-
-
-    /*  Hijack Button to Popup
-        ----------------------
-
-        Hijack a link or button to render a popup
-    */
-
-    hijackButtonToPopup(element) {
-        return this.hijackButton(element, CONTEXT_TYPES.POPUP);
-    }
-
-
-    /*  Hijack Button to Lightbox
-        -------------------------
-
-        Hijack a link or button to render a lightbox
-    */
-
-    hijackButtonToLightbox(element) {
-        return this.hijackButton(element, CONTEXT_TYPES.LIGHTBOX);
     }
 
 
@@ -942,7 +715,7 @@ export class ParentComponent extends BaseComponent {
             // We have no way to know when the child has set up its listeners for the first time, so we have to listen
             // for this message to be sure so we can continue doing anything from the parent
 
-            [ CONSTANTS.POST_MESSAGE.INIT ](source, data) {
+            [ POST_MESSAGE.INIT ](source, data) {
                 this.props.onEnter();
                 this.onInit.resolve();
 
@@ -958,14 +731,14 @@ export class ParentComponent extends BaseComponent {
             // The child has requested that we close it. Since lightboxes and iframes can't close themselves, we need
             // this logic to exist in the parent window
 
-            [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
+            [ POST_MESSAGE.CLOSE ](source, data) {
 
                 this.close();
             },
 
             // We got a request to render from the child (renderToParent)
 
-            [ CONSTANTS.POST_MESSAGE.RENDER ](source, data) {
+            [ POST_MESSAGE.RENDER ](source, data) {
 
                 let component = this.component.getByTag(data.tag);
                 let instance  = component.parent(data.options);
@@ -995,7 +768,7 @@ export class ParentComponent extends BaseComponent {
 
             // The child encountered an error
 
-            [ CONSTANTS.POST_MESSAGE.ERROR ](source, data) {
+            [ POST_MESSAGE.ERROR ](source, data) {
                 this.error(new Error(data.error));
             }
         };
@@ -1016,7 +789,7 @@ export class ParentComponent extends BaseComponent {
 
         this.props.onClose();
 
-        return postRobot.send(this.window, CONSTANTS.POST_MESSAGE.CLOSE).catch(err => {
+        return postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
 
             // If we get an error, log it as a warning, but don't error out
 
@@ -1038,8 +811,8 @@ export class ParentComponent extends BaseComponent {
     */
 
     focus() {
-        if (this.popup) {
-            this.popup.focus();
+        if (this.window) {
+            this.window.focus();
         }
         return this;
     }

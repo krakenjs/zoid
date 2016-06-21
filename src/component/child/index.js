@@ -1,10 +1,10 @@
 
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { BaseComponent } from './base';
-import { getParentComponentWindow, parseWindowName } from './util';
-import { noop, extend, getParentWindow, onCloseWindow } from '../lib';
-import { CONSTANTS } from '../constants';
+import { BaseComponent } from '../base';
+import { getParentComponentWindow, parseWindowName } from '../window';
+import { noop, extend, getParentWindow, onCloseWindow } from '../../lib';
+import { POST_MESSAGE, CONTEXT } from '../../constants';
 
 /*  Child Component
     ---------------
@@ -29,7 +29,7 @@ export class ChildComponent extends BaseComponent {
         this.onEnter = this.tryCatch(options.onEnter || noop);
         this.onClose = this.tryCatch(options.onClose || noop);
         this.onProps = this.tryCatch(options.onProps || noop, false);
-        this.onError = this.tryCatch(options.onError || function(err) { throw err; });
+        this.onError = this.tryCatch(options.onError || (err => { throw err; }));
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
@@ -88,7 +88,7 @@ export class ChildComponent extends BaseComponent {
         // - What context are we
         // - What props has the parent specified
 
-        return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.INIT).then(data => {
+        return this.sendToParentComponent(POST_MESSAGE.INIT).then(data => {
 
             this.context = data.context;
             extend(this.props, data.props);
@@ -190,7 +190,7 @@ export class ChildComponent extends BaseComponent {
             // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
             // close us, if we're an iframe
 
-            if (this.context === CONSTANTS.CONTEXT.POPUP) {
+            if (this.context === CONTEXT.POPUP) {
                 window.close();
             }
         });
@@ -232,14 +232,14 @@ export class ChildComponent extends BaseComponent {
 
             // New props are being passed down
 
-            [ CONSTANTS.POST_MESSAGE.PROPS ](source, data) {
+            [ POST_MESSAGE.PROPS ](source, data) {
                 extend(this.props, data.props);
                 this.onProps.call(this);
             },
 
             // The parent wants us to close.
 
-            [ CONSTANTS.POST_MESSAGE.CLOSE ](source, data) {
+            [ POST_MESSAGE.CLOSE ](source, data) {
 
                 // Our parent is telling us we're going to close
 
@@ -250,7 +250,7 @@ export class ChildComponent extends BaseComponent {
                 // Our component parent is asking us to close
 
                 else {
-                    this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE).catch(err => this.onError(err));
+                    this.sendToParent(POST_MESSAGE.CLOSE).catch(err => this.onError(err));
                 }
             }
         };
@@ -269,7 +269,7 @@ export class ChildComponent extends BaseComponent {
 
         // Ask our parent window to close us
 
-        return this.sendToParent(CONSTANTS.POST_MESSAGE.CLOSE);
+        return this.sendToParent(POST_MESSAGE.CLOSE);
     }
 
 
@@ -291,7 +291,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     error(err) {
-        return this.sendToParentComponent(CONSTANTS.POST_MESSAGE.ERROR, {
+        return this.sendToParentComponent(POST_MESSAGE.ERROR, {
             error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
         });
     }

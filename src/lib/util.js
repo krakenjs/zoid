@@ -139,7 +139,7 @@ export function stringifyWithFunctions(obj) {
 let tickMessageName = `__nextTick__${uniqueID()}`;
 let queue = [];
 
-window.addEventListener('message', function(event) {
+window.addEventListener('message', event => {
     if (event.data === tickMessageName) {
         queue.shift().call();
     }
@@ -168,4 +168,13 @@ export function safeGet(obj, prop) {
     }
 
     return result;
+}
+
+
+/* Capitalize First Letter
+   -----------------------
+*/
+
+export function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }

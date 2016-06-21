@@ -1,7 +1,7 @@
 
 import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
-import { parseWindowName } from 'src/component/util';
+import { parseWindowName } from 'src/component/window';
 
 import { testComponent, testComponent2, testComponent4 } from './component';
 

@@ -20,7 +20,7 @@ export function denodeify(method) {
         }
 
         return new Promise((resolve, reject) => {
-            args.push(function denodeifyCallback(err, result) {
+            args.push((err, result) => {
 
                 if (err && !(err instanceof Error)) {
                     throw new Error(`Passed non-Error object in callback: [ ${err} ] -- callbacks should either be called with callback(new Error(...)) or callback(null, result).`);
