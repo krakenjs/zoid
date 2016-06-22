@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -55,11 +55,6 @@ export class ParentComponent extends BaseComponent {
 
         this.screenWidth = options.screenWidth;
         this.screenHeight = options.screenHeight;
-
-
-        // Add parent.css to the parent page
-
-        this.createParentStyle();
 
         // Set up promise for init
 
@@ -217,7 +212,7 @@ export class ParentComponent extends BaseComponent {
         this.runTimeout();
 
         if (RENDER_DRIVERS[context].overlay) {
-            this.createOverlayTemplate();
+            this.createParentTemplate();
         }
 
         this.watchForClose();
@@ -424,7 +419,7 @@ export class ParentComponent extends BaseComponent {
         this.runTimeout();
 
         if (RENDER_DRIVERS[context].overlay) {
-            this.createOverlayTemplate();
+            this.createParentTemplate();
         }
     }
 
@@ -588,17 +583,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Create Parent Style
-        -------------------
-
-        Creates a stylesheet on the parent page, to control how the child component is rendered
-    */
-
-    createParentStyle() {
-        this.overlayStyle = createStyleSheet(this.component.parentStyle, document.body);
-    }
-
-
     /*  Create Component Template
         -------------------------
 
@@ -621,20 +605,26 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Create Overlay Template
-        -----------------------
+    /*  Create Parent Template
+        ----------------------
 
         Create a template and stylesheet for the overlay behind the popup/lightbox
     */
 
-    createOverlayTemplate() {
+    createParentTemplate() {
 
-        this.overlay = createElement('div', {
+        this.parentTemplate = createElement('div', {
 
-            html: this.component.overlayTemplate,
+            html: template(this.component.parentTemplate, {
+                id: `xcomponent-${this.id}`
+            }),
+
+            attributes: {
+                id: `xcomponent-${this.id}`
+            },
 
             class: [
-                `xcomponent-overlay`,
+                `xcomponent`,
                 `xcomponent-${this.context}`
             ],
 
@@ -644,25 +634,21 @@ export class ParentComponent extends BaseComponent {
 
         }, document.body);
 
-        this.overlayStyle = createStyleSheet(this.component.overlayStyle, document.body);
+        this.parentStyle = createStyleSheet(template(this.component.parentStyle, {
+            id: `xcomponent-${this.id}`
+        }), document.body);
 
-        this.overlay.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
+        addEventToClass(this.parentTemplate, 'xcomponent-overlay', 'click', event => {
             this.focus();
         });
 
-        Array.prototype.slice.call(this.overlay.getElementsByClassName('xcomponent-close')).forEach(el => {
-            el.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.close();
-            });
+        addEventToClass(this.parentTemplate, 'xcomponent-close', 'click', event => {
+            this.close();
         });
 
         this.registerForCleanup(() => {
-            document.body.removeChild(this.overlay);
-            document.body.removeChild(this.overlayStyle);
+            document.body.removeChild(this.parentTemplate);
+            document.body.removeChild(this.parentStyle);
         });
     }
 

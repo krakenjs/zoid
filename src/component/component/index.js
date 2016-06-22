@@ -6,9 +6,8 @@ import { scanForJavascript } from '../../lib';
 import { CONTEXT_TYPES_LIST } from '../../constants';
 import { validate } from './validate';
 
+import parentTemplate from './templates/parent.htm';
 import parentStyle from './templates/parent.css';
-import overlayTemplate from './templates/overlay.htm';
-import overlayStyle from './templates/overlay.css';
 import componentTemplate from './templates/component.htm';
 import componentStyle from './templates/component.css';
 
@@ -88,9 +87,8 @@ export class Component {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
+        this.parentTemplate    = scanForJavascript(options.parentTemplate)    || parentTemplate;
         this.parentStyle       = scanForJavascript(options.parentStyle)       || parentStyle;
-        this.overlayTemplate   = scanForJavascript(options.overlayTemplate)   || overlayTemplate;
-        this.overlayStyle      = scanForJavascript(options.overlayStyle)      || overlayStyle;
         this.componentTemplate = scanForJavascript(options.componentTemplate) || componentTemplate;
         this.componentStyle    = scanForJavascript(options.componentStyle)    || componentStyle;
 

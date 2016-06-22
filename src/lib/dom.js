@@ -299,3 +299,33 @@ export function hijackButton(element, callback) {
         callback(event, targetElement);
     });
 }
+
+
+/*  Add Event To Class
+    ------------------
+
+    Find all elements with a class and add an event handler
+*/
+
+export function addEventToClass(element, className, eventName, handler) {
+    for (let el of Array.prototype.slice.call(element.getElementsByClassName(className))) {
+        el.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+            handler();
+        });
+    }
+}
+
+
+/*  Template
+    --------
+
+    Render a simple template with [[substitutions]]
+*/
+
+export function template(html, context) {
+    return html.replace(/\{(\w+)\}/g, variable => {
+        return context[ variable.slice(1, variable.length - 1) ] || '';
+    });
+}

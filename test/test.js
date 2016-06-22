@@ -1641,7 +1641,7 @@ describe('xcomponent validation errors', function() {
                     width: 200
                 },
                 url: 'http://zombo.com',
-                overlayTemplate: '<script>foo();</script>'
+                parentTemplate: '<script>foo();</script>'
             });
         });
     });
