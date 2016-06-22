@@ -2,6 +2,7 @@
 import { PopupOpenError } from '../../error';
 import { iframe, popup } from '../../lib';
 import { CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
+import { getPosition } from '../window';
 
 
 /*  Render Drivers
@@ -88,7 +89,16 @@ export let RENDER_DRIVERS = {
 
         open() {
 
-            let pos = this.getPosition();
+            let dimensions = this.dimensions || {};
+
+            let pos = getPosition({
+                x:            dimensions.x,
+                y:            dimensions.y,
+                width:        dimensions.width,
+                height:       dimensions.height,
+                screenWidth:  this.screenWidth,
+                screenHeight: this.screenHeight
+            });
 
             this.window = popup('about:blank', {
                 name: this.childWindowName,
@@ -139,7 +149,16 @@ export let RENDER_DRIVERS = {
 
             this.open(document.body, CONTEXT_TYPES.IFRAME);
 
-            let pos = this.getPosition();
+            let dimensions = this.dimensions || {};
+
+            let pos = getPosition({
+                x:            dimensions.x,
+                y:            dimensions.y,
+                width:        dimensions.width,
+                height:       dimensions.height,
+                screenWidth:  this.screenWidth,
+                screenHeight: this.screenHeight
+            });
 
             // TODO: some of this should be done in the parent.css file
 

@@ -79,3 +79,51 @@ export let getParentComponentWindow = memoize(() => {
         return getParentWindow();
     }
 });
+
+
+/*  Get Position
+    ------------
+
+    Calculate the position for the popup / lightbox
+
+    This is either
+    - Specified by the user
+    - The center of the screen
+
+    I'd love to do this with pure css, but alas... popup windows :(
+*/
+
+export function getPosition(options) {
+
+    let pos = {};
+
+    options.screenWidth = options.screenWidth || window.outerWidth;
+    options.screenHeight = options.screenHeight || window.outerHeight;
+
+    if (typeof options.x === 'number') {
+        pos.x = options.x;
+    } else {
+        let width = options.screenWidth;
+
+        if (width <= options.width) {
+            pos.x = 0;
+        } else {
+            pos.x = Math.floor((width / 2) - (options.width / 2));
+        }
+    }
+
+    if (typeof options.y === 'number') {
+        pos.y = options.y;
+    } else {
+
+        let height = options.screenHeight;
+
+        if (height <= options.height) {
+            pos.y = 0;
+        } else {
+            pos.y = Math.floor((height / 2) - (options.height / 2));
+        }
+    }
+
+    return pos;
+}

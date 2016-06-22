@@ -272,3 +272,30 @@ export function createStyleSheet(styleSheet, container) {
 
     }, container);
 }
+
+
+/*  Hijack Button
+    -------------
+
+    Hijack a button's click event to set a
+*/
+
+export function hijackButton(element, callback) {
+    let el = getElement(element);
+
+    if (!el) {
+        throw new Error(`Can not find element: ${element}`);
+    }
+
+    let isButton = el.tagName.toLowerCase() === 'button' || (el.tagName.toLowerCase() === 'input' && el.type === 'submit');
+
+    // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
+
+    let targetElement = isButton ? getParentNode(el, 'form') : el;
+
+    // Then we wait for the click event
+
+    el.addEventListener('click', event => {
+        callback(event, targetElement);
+    });
+}

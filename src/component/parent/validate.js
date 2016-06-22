@@ -78,5 +78,6 @@ export function validateProps(component, props) {
 */
 
 export function validate(component, options) {
-    return validateProps(component, options.props || {});
+
+    // pass
 }

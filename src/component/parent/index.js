@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getElement, getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -23,10 +23,9 @@ export class ParentComponent extends BaseComponent {
 
     constructor(component, options = {}) {
         super(component, options);
-        this.component = component;
-
         validate(component, options);
-        this.generateRenderMethods();
+
+        this.component = component;
 
         this.id = uniqueID();
 
@@ -42,8 +41,6 @@ export class ParentComponent extends BaseComponent {
             activeComponents.splice(activeComponents.indexOf(this), 1);
         });
 
-        this.parentWindow = getParentWindow();
-
         this.setProps(options.props || {});
 
 
@@ -56,8 +53,8 @@ export class ParentComponent extends BaseComponent {
             tag: this.component.tag
         });
 
-        this.screenWidth = options.screenWidth || window.outerWidth;
-        this.screenHeight = options.screenHeight || window.outerHeight;
+        this.screenWidth = options.screenWidth;
+        this.screenHeight = options.screenHeight;
 
 
         // Add parent.css to the parent page
@@ -78,9 +75,7 @@ export class ParentComponent extends BaseComponent {
 
     setProps(props) {
         validateProps(this.component, props);
-
         this.props = normalizeProps(this.component, this, props);
-        this.url   = this.buildUrl();
     }
 
 
@@ -146,52 +141,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Get Position
-        ------------
-
-        Calculate the position for the popup / lightbox
-
-        This is either
-        - Specified by the user
-        - The center of the screen
-
-        I'd love to do this with pure css, but alas... popup windows :(
-    */
-
-    getPosition() {
-
-        let pos = {};
-        let dimensions = this.component.dimensions;
-
-        if (typeof dimensions.x === 'number') {
-            pos.x = dimensions.x;
-        } else {
-            let width = this.screenWidth;
-
-            if (width <= dimensions.width) {
-                pos.x = 0;
-            } else {
-                pos.x = Math.floor((width / 2) - (dimensions.width / 2));
-            }
-        }
-
-        if (typeof dimensions.y === 'number') {
-            pos.y = dimensions.y;
-        } else {
-
-            let height = this.screenHeight;
-
-            if (height <= dimensions.height) {
-                pos.y = 0;
-            } else {
-                pos.y = Math.floor((height / 2) - (dimensions.height / 2));
-            }
-        }
-
-        return pos;
-    }
-
-
     /*  Get Render Context
         ------------------
 
@@ -201,7 +150,6 @@ export class ParentComponent extends BaseComponent {
     getRenderContext(el) {
 
         if (el) {
-
             if (!this.component.contexts[CONTEXT_TYPES.IFRAME]) {
                 throw new Error(`[${this.component.tag}] Iframe context not allowed`);
             }
@@ -210,23 +158,13 @@ export class ParentComponent extends BaseComponent {
         }
 
         if (this.component.defaultContext) {
-
-            if (this.component.defaultContext === CONTEXT_TYPES.LIGHTBOX) {
-                return CONTEXT_TYPES.LIGHTBOX;
-            }
-
-            if (this.component.defaultContext === CONTEXT_TYPES.POPUP) {
-                return CONTEXT_TYPES.POPUP;
-            }
+            return this.component.defaultContext;
         }
 
-        if (this.component.contexts[CONTEXT_TYPES.LIGHTBOX]) {
-            return CONTEXT_TYPES.LIGHTBOX;
-
-        }
-
-        if (this.component.contexts[CONTEXT_TYPES.POPUP]) {
-            return CONTEXT_TYPES.POPUP;
+        for (let context of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
+            if (this.component.contexts[context]) {
+                return context;
+            }
         }
 
         throw new Error(`[${this.component.tag}] No context options available for render`);
@@ -275,7 +213,7 @@ export class ParentComponent extends BaseComponent {
 
         this.open(element, context);
         this.listen(this.window);
-        this.loadUrl(this.url);
+        this.loadUrl(this.buildUrl());
         this.runTimeout();
 
         if (RENDER_DRIVERS[context].overlay) {
@@ -299,7 +237,6 @@ export class ParentComponent extends BaseComponent {
         RENDER_DRIVERS[context].open.call(this, element);
 
         this.watchForClose();
-
         this.createComponentTemplate();
     }
 
@@ -318,7 +255,7 @@ export class ParentComponent extends BaseComponent {
 
         context = context || this.getRenderContext(element);
 
-        if (!this.parentWindow) {
+        if (!getParentWindow()) {
             throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
         }
 
@@ -369,7 +306,7 @@ export class ParentComponent extends BaseComponent {
             // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
             if (!this.window) {
-                this.setForCleanup('window', this.parentWindow.frames[this.childWindowName]);
+                this.setForCleanup('window', getParentWindow().frames[this.childWindowName]);
             }
 
             // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
@@ -380,33 +317,6 @@ export class ParentComponent extends BaseComponent {
             this.watchForClose();
 
             return this;
-        });
-    }
-
-
-    /*  Generate Render Methods
-        -----------------------
-
-        Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
-    */
-
-    generateRenderMethods() {
-
-        [ CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ].forEach(context => {
-
-            let contextName = capitalizeFirstLetter(context);
-
-            this[`render${contextName}`] = function(element) {
-                return this.render(element, context);
-            };
-
-            this[`render${contextName}ToParent`] = function(element) {
-                return this.renderToParent(element, context);
-            };
-
-            this[`hijackButtonTo${contextName}`] = function(element) {
-                return this.hijackButton(element, context);
-            };
         });
     }
 
@@ -424,7 +334,7 @@ export class ParentComponent extends BaseComponent {
             this.destroy();
         });
 
-        // Our child has know way of knowing if we navigated off the page. So we have to listen for beforeunload
+        // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
 
         let unloadListener = addEventListener(window, 'beforeunload', () => {
@@ -471,21 +381,8 @@ export class ParentComponent extends BaseComponent {
     */
 
     hijackButton(element, context = CONTEXT_TYPES.LIGHTBOX) {
-        let el = getElement(element);
 
-        if (!el) {
-            throw new Error(`[${this.component.tag}] Can not find element: ${element}`);
-        }
-
-        let isButton = el.tagName.toLowerCase() === 'button' || (el.tagName.toLowerCase() === 'input' && el.type === 'submit');
-
-        // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
-
-        let targetElement = isButton ? getParentNode(el, 'form') : el;
-
-        // We need to wait for the click event, which is necessary for opening a popup (if we need to)
-
-        el.addEventListener('click', event => {
+        hijackButton(element, (event, targetElement) => {
 
             if (this.window) {
                 event.preventDefault();
@@ -563,7 +460,7 @@ export class ParentComponent extends BaseComponent {
 
                 // If this.onInit has been previously resolved, this won't have any effect.
 
-                let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} at ${this.url} timed out after ${this.props.timeout} milliseconds`);
+                let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} timed out after ${this.props.timeout} milliseconds`);
 
                 this.onInit.reject(error).catch(err => {
                     this.props.onTimeout(err);
@@ -792,3 +689,27 @@ export class ParentComponent extends BaseComponent {
         this.destroy();
     }
 }
+
+
+/*  Generate Render Methods
+    -----------------------
+
+    Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
+*/
+
+[ CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ].forEach(context => {
+
+    let contextName = capitalizeFirstLetter(context);
+
+    ParentComponent.prototype[`render${contextName}`] = function(element) {
+        return this.render(element, context);
+    };
+
+    ParentComponent.prototype[`render${contextName}ToParent`] = function(element) {
+        return this.renderToParent(element, context);
+    };
+
+    ParentComponent.prototype[`hijackButtonTo${contextName}`] = function(element) {
+        return this.hijackButton(element, context);
+    };
+});
