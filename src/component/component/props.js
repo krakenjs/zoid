@@ -12,7 +12,8 @@ export const internalProps = {
 
     url: {
         type: 'string',
-        required: false
+        required: false,
+        queryParam: false
     },
 
     // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
@@ -26,7 +27,8 @@ export const internalProps = {
 
     timeout: {
         type: 'number',
-        required: false
+        required: false,
+        queryParam: false
     },
 
     // When we get an INIT message from the child

@@ -90,7 +90,7 @@ export class ParentComponent extends BaseComponent {
             url = this.component.url;
         }
 
-        let queryString = propsToQuery(this.props);
+        let queryString = propsToQuery(this.component.props, this.props);
 
         if (queryString) {
             url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;

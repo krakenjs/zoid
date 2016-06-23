@@ -11,7 +11,7 @@ let cases = {
         testComponent.attach({
             onEnter() {
                 if (this.props.sendUrl) {
-                    this.props.sendUrl(window.location.href);
+                    this.props.sendUrl(window.location.pathname + window.location.search);
                 }
             }
         });

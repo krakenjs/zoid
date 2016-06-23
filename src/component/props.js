@@ -100,14 +100,18 @@ export function normalizeProps(component, instance, props) {
     number -> string
 */
 
-export function propsToQuery(props) {
+export function propsToQuery(propsDef, props) {
 
     return Object.keys(props).map(key => {
 
         let value = props[key];
 
         if (!value) {
-            return '';
+            return;
+        }
+
+        if (propsDef[key].queryParam === false) {
+            return;
         }
 
         let result;

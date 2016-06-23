@@ -675,7 +675,7 @@ describe('xcomponent options', function() {
             url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl: function(url) {
-                assert.isTrue(url.indexOf('xyztest') !== -1, 'Expected url to be custom url passed during init');
+                assert.isTrue(url === '/base/test/child.htm?foo=xyztest', 'Expected url to be custom url passed during init');
                 done();
             }
         }).renderLightbox();
