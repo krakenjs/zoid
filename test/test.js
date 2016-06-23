@@ -1632,18 +1632,6 @@ describe('xcomponent validation errors', function() {
                 url: 12345
             });
         });
-
-        expectError(function() {
-            xcomponent.create({
-                tag: 'my-component',
-                dimensions: {
-                    height: 50,
-                    width: 200
-                },
-                url: 'http://zombo.com',
-                parentTemplate: '<script>foo();</script>'
-            });
-        });
     });
 
     it('should throw validation errors when a component is inited without the correct options', function() {

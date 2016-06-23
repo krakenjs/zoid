@@ -3,3 +3,56 @@
 
     {outlet}
 </div>
+
+<style>
+    #{id} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    #{id} .xcomponent-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    #{id}  .xcomponent-overlay.xcomponent-popup {
+        cursor: pointer;
+    }
+
+    #{id} .xcomponent-close {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
+    }
+
+    #{id} .xcomponent-close:hover {
+        opacity: 1;
+    }
+
+    #{id} .xcomponent-close:before, .xcomponent-close:after {
+        position: absolute;
+        left: 8px;
+        content: ' ';
+        height: 16px;
+        width: 2px;
+        background-color: white;
+    }
+
+    #{id} .xcomponent-close:before {
+        transform: rotate(45deg);
+    }
+
+    #{id} .xcomponent-close:after {
+        transform: rotate(-45deg);
+    }
+</style>

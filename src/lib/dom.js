@@ -254,26 +254,6 @@ export function createElement(tag = 'div', options = {}, container = null) {
 }
 
 
-/*  Create Stylesheet
-    -----------------
-
-    Create a stylesheet with the specified css, and append it to a a container
-*/
-
-export function createStyleSheet(styleSheet, container) {
-
-    return createElement('style', {
-
-        styleSheet,
-
-        attributes: {
-            type: 'text/css'
-        }
-
-    }, container);
-}
-
-
 /*  Hijack Button
     -------------
 

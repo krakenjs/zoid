@@ -2,14 +2,11 @@
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { internalProps } from './props';
-import { scanForJavascript } from '../../lib';
 import { CONTEXT_TYPES_LIST } from '../../constants';
 import { validate } from './validate';
 
 import parentTemplate from './templates/parent.htm';
-import parentStyle from './templates/parent.css';
 import componentTemplate from './templates/component.htm';
-import componentStyle from './templates/component.css';
 
 import * as drivers from '../../drivers';
 
@@ -87,10 +84,8 @@ export class Component {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.parentTemplate    = scanForJavascript(options.parentTemplate)    || parentTemplate;
-        this.parentStyle       = scanForJavascript(options.parentStyle)       || parentStyle;
-        this.componentTemplate = scanForJavascript(options.componentTemplate) || componentTemplate;
-        this.componentStyle    = scanForJavascript(options.componentStyle)    || componentStyle;
+        this.parentTemplate    = options.parentTemplate    || parentTemplate;
+        this.componentTemplate = options.componentTemplate || componentTemplate;
 
         // A mapping of tag->component so we can reference components by string tag name
 

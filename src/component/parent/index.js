@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, createStyleSheet, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -600,8 +600,6 @@ export class ParentComponent extends BaseComponent {
             ]
 
         }, this.window.document.body);
-
-        createStyleSheet(this.component.componentStyle, this.window.document.body);
     }
 
 
@@ -634,10 +632,6 @@ export class ParentComponent extends BaseComponent {
 
         }, document.body);
 
-        this.parentStyle = createStyleSheet(template(this.component.parentStyle, {
-            id: `xcomponent-${this.id}`
-        }), document.body);
-
         addEventToClass(this.parentTemplate, 'xcomponent-overlay', 'click', event => {
             this.focus();
         });
@@ -648,7 +642,7 @@ export class ParentComponent extends BaseComponent {
 
         this.registerForCleanup(() => {
             document.body.removeChild(this.parentTemplate);
-            document.body.removeChild(this.parentStyle);
+            delete this.parentTemplate;
         });
     }
 
