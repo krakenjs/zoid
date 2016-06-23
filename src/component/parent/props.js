@@ -1,5 +1,5 @@
 
-import { noop, denodeify, once, memoize, urlEncode } from '../lib';
+import { noop, denodeify, once, memoize, urlEncode } from '../../lib';
 
 /*  Normalize Prop
     --------------
