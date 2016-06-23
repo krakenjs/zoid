@@ -89,7 +89,7 @@ export let RENDER_DRIVERS = {
 
         open() {
 
-            let dimensions = this.dimensions || {};
+            let dimensions = this.component.dimensions || {};
 
             let pos = getPosition({
                 x:            dimensions.x,
@@ -149,7 +149,7 @@ export let RENDER_DRIVERS = {
 
             this.open(document.body, CONTEXT_TYPES.IFRAME);
 
-            let dimensions = this.dimensions || {};
+            let dimensions = this.component.dimensions || {};
 
             let pos = getPosition({
                 x:            dimensions.x,
