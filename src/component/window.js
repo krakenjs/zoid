@@ -97,13 +97,10 @@ export function getPosition(options) {
 
     let pos = {};
 
-    options.screenWidth = options.screenWidth || window.outerWidth;
-    options.screenHeight = options.screenHeight || window.outerHeight;
-
     if (typeof options.x === 'number') {
         pos.x = options.x;
     } else {
-        let width = options.screenWidth;
+        let width = window.outerWidth;
 
         if (width <= options.width) {
             pos.x = 0;
@@ -116,7 +113,7 @@ export function getPosition(options) {
         pos.y = options.y;
     } else {
 
-        let height = options.screenHeight;
+        let height = window.outerHeight;
 
         if (height <= options.height) {
             pos.y = 0;

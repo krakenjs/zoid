@@ -53,9 +53,6 @@ export class ParentComponent extends BaseComponent {
             tag: this.component.tag
         });
 
-        this.screenWidth = options.screenWidth;
-        this.screenHeight = options.screenHeight;
-
         // Set up promise for init
 
         this.onInit = new Promise();
@@ -291,9 +288,7 @@ export class ParentComponent extends BaseComponent {
             options: {
                 props: this.props,
 
-                childWindowName: this.childWindowName,
-                screenWidth:     this.screenWidth,
-                screenHeight:    this.screenHeight
+                childWindowName: this.childWindowName
             }
 
         }).then(data => {

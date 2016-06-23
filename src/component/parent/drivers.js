@@ -95,9 +95,7 @@ export let RENDER_DRIVERS = {
                 x:            dimensions.x,
                 y:            dimensions.y,
                 width:        dimensions.width,
-                height:       dimensions.height,
-                screenWidth:  this.screenWidth,
-                screenHeight: this.screenHeight
+                height:       dimensions.height
             });
 
             this.window = popup('about:blank', {
@@ -155,9 +153,7 @@ export let RENDER_DRIVERS = {
                 x:            dimensions.x,
                 y:            dimensions.y,
                 width:        dimensions.width,
-                height:       dimensions.height,
-                screenWidth:  this.screenWidth,
-                screenHeight: this.screenHeight
+                height:       dimensions.height
             });
 
             // TODO: some of this should be done in the parent.css file
