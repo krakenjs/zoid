@@ -1,6 +1,6 @@
 
-import { once } from './fn';
-import { extend, nextTick, safeGet } from './util';
+import { once, noop } from './fn';
+import { extend, nextTick, safeGet, get } from './util';
 
 
 /*  Get Element
@@ -127,11 +127,7 @@ export function onCloseWindow(win, callback) {
     return {
         cancel() {
             clearInterval(interval);
-            try {
-                win.close = close;
-            } catch (err) {
-                // pass
-            }
+            callback = noop;
         }
     };
 }
@@ -305,7 +301,7 @@ export function addEventToClass(element, className, eventName, handler) {
 */
 
 export function template(html, context) {
-    return html.replace(/\{(\w+)\}/g, variable => {
-        return context[ variable.slice(1, variable.length - 1) ] || '';
+    return html.replace(/\{([\w_\.]+)\}/g, variable => {
+        return get(context, variable.slice(1, variable.length - 1), '');
     });
 }

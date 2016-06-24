@@ -34,11 +34,9 @@ export class BaseComponent {
     */
 
     cleanup() {
-        if (this.cleanupTasks) {
-            for (let task of this.cleanupTasks) {
-                task();
-            }
-            this.cleanupTasks = [];
+        while (this.cleanupTasks && this.cleanupTasks.length) {
+            let task = this.cleanupTasks.pop();
+            task();
         }
     }
 

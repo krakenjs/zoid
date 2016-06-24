@@ -1,7 +1,7 @@
 
 import { PopupOpenError } from '../../error';
 import { iframe, popup } from '../../lib';
-import { CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
+import { CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES } from '../../constants';
 import { getPosition } from '../window';
 
 
@@ -47,17 +47,14 @@ export let RENDER_DRIVERS = {
                 height: this.component.dimensions.height
             });
 
-            this.setForCleanup('window', this.iframe.contentWindow);
+            this.window = this.iframe.contentWindow;
 
             this.registerForCleanup(() => {
 
-                if (this.iframe) {
+                this.window.close();
+                delete this.window;
 
-                    try {
-                        this.iframe.contentWindow.close();
-                    } catch (err) {
-                        // pass
-                    }
+                if (this.iframe) {
 
                     if (this.iframe.parentNode) {
                         this.iframe.parentNode.removeChild(this.iframe);
@@ -145,7 +142,9 @@ export let RENDER_DRIVERS = {
 
         open() {
 
-            this.open(document.body, CONTEXT_TYPES.IFRAME);
+            let element = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
+
+            this.open(element, CONTEXT_TYPES.IFRAME);
 
             let dimensions = this.component.dimensions || {};
 

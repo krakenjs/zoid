@@ -4,10 +4,10 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
 import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
-import { propsToQuery, normalizeProps } from '../props';
+import { propsToQuery, normalizeProps } from './props';
 
 let activeComponents = [];
 
@@ -203,14 +203,14 @@ export class ParentComponent extends BaseComponent {
 
         this.setForCleanup('context', context);
 
+        if (RENDER_DRIVERS[context].overlay) {
+            this.createParentTemplate();
+        }
+
         this.open(element, context);
         this.listen(this.window);
         this.loadUrl(this.buildUrl());
         this.runTimeout();
-
-        if (RENDER_DRIVERS[context].overlay) {
-            this.createParentTemplate();
-        }
 
         this.watchForClose();
 
@@ -404,6 +404,10 @@ export class ParentComponent extends BaseComponent {
 
         el.target = this.childWindowName;
 
+        if (RENDER_DRIVERS[context].overlay) {
+            this.createParentTemplate();
+        }
+
         // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
         this.open(null, context);
@@ -412,10 +416,6 @@ export class ParentComponent extends BaseComponent {
 
         this.listen(this.window);
         this.runTimeout();
-
-        if (RENDER_DRIVERS[context].overlay) {
-            this.createParentTemplate();
-        }
     }
 
 
@@ -587,13 +587,11 @@ export class ParentComponent extends BaseComponent {
     createComponentTemplate() {
 
         createElement('body', {
-
-            html: this.component.componentTemplate,
-
-            class: [
-                'xcomponent-component'
-            ]
-
+            html: template(this.component.componentTemplate, {
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
+                CLASS: CLASS_NAMES
+            }),
+            class: [ CLASS_NAMES.XCOMPONENT ]
         }, this.window.document.body);
     }
 
@@ -609,16 +607,17 @@ export class ParentComponent extends BaseComponent {
         this.parentTemplate = createElement('div', {
 
             html: template(this.component.parentTemplate, {
-                id: `xcomponent-${this.id}`
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
+                CLASS: CLASS_NAMES
             }),
 
             attributes: {
-                id: `xcomponent-${this.id}`
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`
             },
 
             class: [
-                `xcomponent`,
-                `xcomponent-${this.context}`
+                CLASS_NAMES.XCOMPONENT,
+                `${CLASS_NAMES.XCOMPONENT}-${this.context}`
             ],
 
             style: {
@@ -627,11 +626,11 @@ export class ParentComponent extends BaseComponent {
 
         }, document.body);
 
-        addEventToClass(this.parentTemplate, 'xcomponent-overlay', 'click', event => {
+        addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, 'click', event => {
             this.focus();
         });
 
-        addEventToClass(this.parentTemplate, 'xcomponent-close', 'click', event => {
+        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, 'click', event => {
             this.close();
         });
 

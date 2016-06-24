@@ -1,11 +1,11 @@
-<div class="xcomponent-overlay">
-    <a href="#xcomponent-close" class="xcomponent-close"></a>
+<div class="{CLASS.OVERLAY} {CLASS.FOCUS}">
+    <a href="#{CLASS.CLOSE}" class="{CLASS.CLOSE}"></a>
 
-    {outlet}
+    <div class="{CLASS.ELEMENT}"></div>
 </div>
 
 <style>
-    #{id} {
+    #{id}.{CLASS.XCOMPONENT} {
         position: absolute;
         top: 0;
         left: 0;
@@ -13,7 +13,7 @@
         height: 100%;
     }
 
-    #{id} .xcomponent-overlay {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY} {
         position: absolute;
         top: 0;
         left: 0;
@@ -22,11 +22,11 @@
         background-color: rgba(0, 0, 0, 0.8);
     }
 
-    #{id}  .xcomponent-overlay.xcomponent-popup {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY}.xcomponent-popup {
         cursor: pointer;
     }
 
-    #{id} .xcomponent-close {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE} {
         position: absolute;
         right: 16px;
         top: 16px;
@@ -35,11 +35,11 @@
         opacity: 0.6;
     }
 
-    #{id} .xcomponent-close:hover {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:hover {
         opacity: 1;
     }
 
-    #{id} .xcomponent-close:before, .xcomponent-close:after {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {
         position: absolute;
         left: 8px;
         content: ' ';
@@ -48,11 +48,11 @@
         background-color: white;
     }
 
-    #{id} .xcomponent-close:before {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before {
         transform: rotate(45deg);
     }
 
-    #{id} .xcomponent-close:after {
+    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:after {
         transform: rotate(-45deg);
     }
 </style>

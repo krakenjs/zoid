@@ -178,3 +178,38 @@ export function safeGet(obj, prop) {
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
+
+
+/*  Get
+    ---
+
+    Recursively gets a deep path from an object, returning a default value if any level is not found
+*/
+
+export function get(item, path, def) {
+
+    if (!path) {
+        return def;
+    }
+
+    path = path.split('.');
+
+    // Loop through each section of our key path
+
+    for (let i = 0; i < path.length; i++) {
+
+        // If we have an object, we can get the key
+
+        if (typeof item === 'object' && item !== null) {
+            item = item[path[i]];
+
+        // Otherwise, we should return the default (undefined if not provided)
+        } else {
+            return def;
+        }
+    }
+
+    // If our final result is undefined, we should return the default
+
+    return item === undefined ? def : item;
+}
