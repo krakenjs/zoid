@@ -192,29 +192,31 @@ export class ParentComponent extends BaseComponent {
     */
 
     render(element, context) {
+        return Promise.resolve().then(() => {
 
-        this.validateRender(context);
+            this.validateRender(context);
 
-        context = context || this.getRenderContext(element);
+            context = context || this.getRenderContext(element);
 
-        if (RENDER_DRIVERS[context].render) {
-            RENDER_DRIVERS[context].render.call(this, element);
-        }
+            if (RENDER_DRIVERS[context].render) {
+                RENDER_DRIVERS[context].render.call(this, element);
+            }
 
-        this.setForCleanup('context', context);
+            this.setForCleanup('context', context);
 
-        if (RENDER_DRIVERS[context].overlay) {
-            this.createParentTemplate();
-        }
+            if (RENDER_DRIVERS[context].overlay) {
+                this.createParentTemplate();
+            }
 
-        this.open(element, context);
-        this.listen(this.window);
-        this.loadUrl(this.buildUrl());
-        this.runTimeout();
+            this.open(element, context);
+            this.listen(this.window);
+            this.loadUrl(this.buildUrl());
+            this.runTimeout();
 
-        this.watchForClose();
+            this.watchForClose();
 
-        return this;
+            return this.onInit;
+        });
     }
 
 
@@ -242,71 +244,73 @@ export class ParentComponent extends BaseComponent {
     */
 
     renderToParent(element, context, options = {}) {
+        return Promise.resolve().then(() => {
 
-        this.validateRender(context);
+            this.validateRender(context);
 
-        context = context || this.getRenderContext(element);
+            context = context || this.getRenderContext(element);
 
-        if (!getParentWindow()) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
-        }
-
-        if (!window.name) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
-        }
-
-        // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
-
-        this.childWindowName = buildChildWindowName({
-            id: this.id,
-            parent: window.name,
-            sibling: true,
-            tag: this.component.tag
-        });
-
-        this.setForCleanup('context', context);
-
-        // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
-        // open them from the child, since we depend on there being a click event to avoid the popup blocker.
-
-        if (RENDER_DRIVERS[context].renderToParent) {
-            RENDER_DRIVERS[context].renderToParent.call(this, element);
-        }
-
-        // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
-        // across, we can pretty much just send all of our props over too without any problems
-
-        return postRobot.sendToParent(POST_MESSAGE.RENDER, {
-
-            // <3 ES6
-            ...options,
-
-            tag: this.component.tag,
-            context,
-            element,
-
-            options: {
-                props: this.props,
-
-                childWindowName: this.childWindowName
+            if (!getParentWindow()) {
+                throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
             }
 
-        }).then(data => {
-
-            // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
-
-            if (!this.window) {
-                this.setForCleanup('window', getParentWindow().frames[this.childWindowName]);
+            if (!window.name) {
+                throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
             }
 
-            // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
-            // messages on the sibling window, since we have a handle on it.
+            // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
 
-            this.listen(this.window);
+            this.childWindowName = buildChildWindowName({
+                id: this.id,
+                parent: window.name,
+                sibling: true,
+                tag: this.component.tag
+            });
 
-            this.watchForClose();
+            this.setForCleanup('context', context);
 
-            return this;
+            // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
+            // open them from the child, since we depend on there being a click event to avoid the popup blocker.
+
+            if (RENDER_DRIVERS[context].renderToParent) {
+                RENDER_DRIVERS[context].renderToParent.call(this, element);
+            }
+
+            // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
+            // across, we can pretty much just send all of our props over too without any problems
+
+            return postRobot.sendToParent(POST_MESSAGE.RENDER, {
+
+                // <3 ES6
+                ...options,
+
+                tag: this.component.tag,
+                context,
+                element,
+
+                options: {
+                    props: this.props,
+
+                    childWindowName: this.childWindowName
+                }
+
+            }).then(data => {
+
+                // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
+
+                if (!this.window) {
+                    this.setForCleanup('window', getParentWindow().frames[this.childWindowName]);
+                }
+
+                // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
+                // messages on the sibling window, since we have a handle on it.
+
+                this.listen(this.window);
+
+                this.watchForClose();
+
+                return this.onInit;
+            });
         });
     }
 
@@ -395,27 +399,31 @@ export class ParentComponent extends BaseComponent {
     */
 
     renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
+        return Promise.resolve().then(() => {
 
-        this.validateRender(context);
+            this.validateRender(context);
 
-        this.setForCleanup('context', context);
+            this.setForCleanup('context', context);
 
-        // Point the element to open in our child window
+            // Point the element to open in our child window
 
-        el.target = this.childWindowName;
+            el.target = this.childWindowName;
 
-        if (RENDER_DRIVERS[context].overlay) {
-            this.createParentTemplate();
-        }
+            if (RENDER_DRIVERS[context].overlay) {
+                this.createParentTemplate();
+            }
 
-        // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
+            // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
-        this.open(null, context);
+            this.open(null, context);
 
-        // Do everything else the same way -- listen for events, render the overlay, etc.
+            // Do everything else the same way -- listen for events, render the overlay, etc.
 
-        this.listen(this.window);
-        this.runTimeout();
+            this.listen(this.window);
+            this.runTimeout();
+
+            return this.onInit;
+        });
     }
 
 
@@ -477,7 +485,7 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.INIT ](source, data) {
                 this.props.onEnter();
-                this.onInit.resolve();
+                this.onInit.resolve(this);
 
                 // Let the child know what its context is, and what its initial props are.
 
@@ -659,6 +667,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     error(err) {
+        this.onInit.reject(err);
         this.props.onError(err);
         this.destroy();
     }

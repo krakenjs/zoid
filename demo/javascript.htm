@@ -39,7 +39,9 @@
 
         timeout: 5000
 
-    }).render('#container');
+    })
+
+    login.render('#container');
 
     document.getElementById('email').addEventListener('keyup', function(event) {
         login.updateProps({

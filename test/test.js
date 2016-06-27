@@ -26,7 +26,9 @@ describe('basic xcomponent rendering', function() {
 
         component = testComponent.init({
             onEnter: done
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -41,7 +43,9 @@ describe('basic xcomponent rendering', function() {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -69,7 +73,9 @@ describe('basic xcomponent rendering', function() {
 
                 */
             }
-        }).renderPopup();
+        });
+
+        component.renderPopup();
 
         window.open = open;
 
@@ -86,7 +92,9 @@ describe('basic xcomponent rendering', function() {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent4');
     });
@@ -114,7 +122,9 @@ describe('basic xcomponent rendering', function() {
 
                 */
             }
-        }).renderPopup();
+        });
+
+        component.renderPopup();
 
         window.open = open;
 
@@ -128,7 +138,9 @@ describe('basic xcomponent rendering', function() {
                 assert.equal(bar, 'bar');
                 done();
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
@@ -137,7 +149,9 @@ describe('basic xcomponent rendering', function() {
 
         component = testComponent.init({
             onEnter: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -149,7 +163,9 @@ describe('basic xcomponent rendering', function() {
                 assert.equal(bar, 'bar');
                 done();
             }
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
@@ -158,7 +174,9 @@ describe('basic xcomponent rendering', function() {
 
         component = testComponent.init({
             onEnter: done
-        }).renderPopup();
+        });
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -170,7 +188,9 @@ describe('basic xcomponent rendering', function() {
                 assert.equal(bar, 'bar');
                 done();
             }
-        }).renderPopup();
+        });
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
@@ -191,7 +211,9 @@ describe('basic xcomponent rendering', function() {
             foo: function(bar) {
                 throw new Error('Expected foo to not be called yet');
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooOnProps');
     });
@@ -200,7 +222,9 @@ describe('basic xcomponent rendering', function() {
 
         component = testComponent.init({
             onEnter: done
-        }).render(document.body);
+        });
+
+        component.render(document.body);
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -215,7 +239,9 @@ describe('basic xcomponent rendering', function() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        }).render();
+        });
+
+        component.render();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -230,7 +256,9 @@ describe('basic xcomponent rendering', function() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        }).render();
+        });
+
+        component.render();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -253,7 +281,9 @@ describe('basic xcomponent rendering', function() {
                 testComponent.contexts = originalContexts;
                 done();
             }
-        }).render();
+        });
+
+        component.render();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -276,7 +306,9 @@ describe('basic xcomponent rendering', function() {
                 testComponent.contexts = originalContexts;
                 done();
             }
-        }).render();
+        });
+
+        component.render();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -292,7 +324,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithStringProp');
     });
@@ -308,7 +343,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
     });
@@ -324,7 +362,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
     });
@@ -340,7 +381,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
     });
@@ -356,7 +400,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
     });
@@ -372,7 +419,10 @@ describe('basic xcomponent rendering', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
     });
@@ -391,7 +441,10 @@ describe('basic xcomponent rendering', function() {
                 result.fn();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithObjectProp');
     });
@@ -407,7 +460,10 @@ describe('basic xcomponent rendering', function() {
                 result();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallFooWithFunctionProp');
     });
@@ -450,7 +506,10 @@ describe('xcomponent error cases', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndThrowRegularError');
     });
@@ -464,29 +523,36 @@ describe('xcomponent error cases', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndThrowIntegrationError');
     });
 
     it('should enter a component and timeout, then call onTimeout', function(done) {
 
-        testComponent.init({
+        component = testComponent.init({
             timeout: 1,
             onTimeout() {
                 done();
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
     });
 
     it('should enter a component and timeout, then call onError in the absense of onTimeout', function(done) {
 
-        testComponent.init({
+        component = testComponent.init({
             timeout: 1,
             onError() {
                 done();
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
     });
 
     it('should enter a component and timeout, then log an error in the absense of onTimeout and onError', function(done) {
@@ -500,9 +566,11 @@ describe('xcomponent error cases', function() {
             }
         };
 
-        testComponent.init({
+        component = testComponent.init({
             timeout: 1
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
     });
 
     it('should enter a component and error out when the page name is not valid', function(done) {
@@ -531,7 +599,9 @@ describe('xcomponent error cases', function() {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -540,35 +610,31 @@ describe('xcomponent error cases', function() {
 
         component = testComponent.init();
 
-        component.render();
+        component.render().then(() => {
+            component.render().catch(() => {
+                done();
+            });
+        });
 
-        try {
-            component.render();
-        } catch (err) {
-            done();
-        }
+        postRobot.once('init', () => 'attachTestComponent');
     });
 
     it('should try to render a component to an unsupported context and error out', function(done) {
 
         component = testComponent3.init();
 
-        try {
-            component.render(null, CONTEXT_TYPES.POPUP);
-        } catch (err) {
+        component.render(null, CONTEXT_TYPES).catch(() => {
             done();
-        }
+        });
     });
 
     it('should try to render a component with a specified element when iframe mode is not supported', function(done) {
 
         component = testComponent3.init();
 
-        try {
-            component.render(document.body);
-        } catch (err) {
+        component.render(document.body).catch(() => {
             done();
-        }
+        });
     });
 
     it('should try to render to when iframe is the only available option but no element is passed', function(done) {
@@ -585,13 +651,11 @@ describe('xcomponent error cases', function() {
 
         component = testComponent.init();
 
-        try {
-            component.render();
-        } catch (err) {
+        component.render().catch(err => {
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
             done();
-        }
+        });
     });
 
     it('should render a child component then close the parent window', function(done) {
@@ -678,7 +742,9 @@ describe('xcomponent options', function() {
                 assert.isTrue(url === '/base/test/child.htm?foo=xyztest', 'Expected url to be custom url passed during init');
                 done();
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -692,7 +758,9 @@ describe('xcomponent options', function() {
                 assert.isTrue(url.indexOf('devenv') !== -1, 'Expected url to be custom env url');
                 done();
             }
-        }).renderLightbox();
+        });
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -713,7 +781,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallMemoizedFunction');
     });
@@ -734,7 +805,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallOnceFunction');
     });
@@ -756,7 +830,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
     });
@@ -776,7 +853,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
     });
@@ -798,7 +878,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunctionWithError');
     });
@@ -824,7 +907,10 @@ describe('xcomponent options', function() {
                 done();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
     });
@@ -848,7 +934,10 @@ describe('xcomponent actions', function() {
                 component.close();
             }
 
-        }).renderPopup();
+        });
+
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -868,7 +957,10 @@ describe('xcomponent actions', function() {
                 component.close();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -882,7 +974,10 @@ describe('xcomponent actions', function() {
                 component.focus();
             }
 
-        }).renderPopup();
+        });
+
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -900,7 +995,10 @@ describe('xcomponent templates and styles', function() {
                 document.querySelector('.xcomponent-overlay').click();
             }
 
-        }).renderPopup();
+        });
+
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -920,7 +1018,10 @@ describe('xcomponent templates and styles', function() {
                 document.querySelector('.xcomponent-close').click();
             }
 
-        }).renderPopup();
+        });
+
+
+        component.renderPopup();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -941,7 +1042,10 @@ describe('xcomponent templates and styles', function() {
                 document.querySelector('.xcomponent-close').click();
             }
 
-        }).renderLightbox();
+        });
+
+
+        component.renderLightbox();
 
         postRobot.once('init', () => 'attachTestComponent');
     });
@@ -953,7 +1057,9 @@ describe('xcomponent render to parent', function() {
 
         component = testComponent.init({
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentLightbox');
     });
@@ -962,7 +1068,9 @@ describe('xcomponent render to parent', function() {
 
         component = testComponent.init({
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
     });
@@ -971,7 +1079,9 @@ describe('xcomponent render to parent', function() {
 
         component = testComponent.init({
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentIframe');
     });
@@ -980,7 +1090,9 @@ describe('xcomponent render to parent', function() {
 
         component = testComponent.init({
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndPassFoo');
     });
@@ -989,7 +1101,9 @@ describe('xcomponent render to parent', function() {
 
         component = testComponent.init({
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndClose');
     });
@@ -1002,7 +1116,9 @@ describe('xcomponent render to parent', function() {
             },
 
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndCallFooOnClose');
     });
@@ -1015,7 +1131,9 @@ describe('xcomponent render to parent', function() {
             },
 
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnClose');
     });
@@ -1028,7 +1146,9 @@ describe('xcomponent render to parent', function() {
             },
 
             foo: done
-        }).renderIframe(document.body);
+        });
+
+        component.renderIframe(document.body);
 
         postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnFocus');
     });
@@ -1143,7 +1263,9 @@ describe('xcomponent hijack', function() {
                 document.body.removeChild(form);
                 done();
             }
-        }).renderIframe('#hijackForm');
+        });
+
+        component.renderIframe('#hijackForm');
 
         postRobot.once('init', () => 'attachTestComponentAndSubmitParentButton');
     });

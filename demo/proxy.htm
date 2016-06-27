@@ -6,11 +6,13 @@
 <div id="container"></div>
 
 <script>
-    PayPalButton.init({
+    var login = PayPalButton.init({
 
         onSuccess() {
             console.log('payment was completed!');
         }
 
-    }).render('#container')
+    });
+
+    login.render('#container');
 </script>
