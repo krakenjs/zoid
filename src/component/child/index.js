@@ -4,7 +4,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, parseWindowName } from '../window';
 import { noop, extend, getParentWindow, onCloseWindow } from '../../lib';
-import { POST_MESSAGE, CONTEXT } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
 
 /*  Child Component
     ---------------
@@ -190,7 +190,7 @@ export class ChildComponent extends BaseComponent {
             // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
             // close us, if we're an iframe
 
-            if (this.context === CONTEXT.POPUP) {
+            if (this.context === CONTEXT_TYPES.POPUP) {
                 window.close();
             }
         });
@@ -254,6 +254,24 @@ export class ChildComponent extends BaseComponent {
                 }
             }
         };
+    }
+
+
+    /*  Resize
+        ------
+
+        Resize the child window. Must be done on a user action like a click if we're in a popup
+    */
+
+    resize(width, height) {
+        return Promise.resolve().then(() => {
+
+            if (this.context === CONTEXT_TYPES.POPUP) {
+                return window.resizeTo(width, height);
+            }
+
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
+        });
     }
 
 

@@ -534,12 +534,37 @@ export class ParentComponent extends BaseComponent {
             },
 
 
+            // Iframes can't resize themselves, so they need the parent to take care of it for them.
+
+            [ POST_MESSAGE.RESIZE ](source, data) {
+
+                if (this.context === CONTEXT_TYPES.POPUP) {
+                    return;
+                }
+
+                return this.resize(data.width, data.height);
+            },
+
+
             // The child encountered an error
 
             [ POST_MESSAGE.ERROR ](source, data) {
                 this.error(new Error(data.error));
             }
         };
+    }
+
+
+    /*  Resize
+        ------
+        Resize the child component window
+    */
+
+    resize(height, width) {
+        if (this.iframe) {
+            this.iframe.height = height;
+            this.iframe.width = width;
+        }
     }
 
 

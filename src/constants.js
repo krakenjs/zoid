@@ -3,11 +3,6 @@ import { values } from './lib';
 
 export const XCOMPONENT = `xcomponent`;
 
-export const CONTEXT = {
-    IFRAME: `${XCOMPONENT}_context_iframe`,
-    POPUP: `${XCOMPONENT}_context_popup`
-};
-
 export const POST_MESSAGE = {
     INIT: `${XCOMPONENT}_init`,
     PROPS: `${XCOMPONENT}_props`,
