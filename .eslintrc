@@ -22,7 +22,11 @@
         "window": true,
         "document": true,
         "Promise": false,
-        "performance": true
+        "performance": true,
+        "assert": true,
+        "ReactDOM": true,
+        "React": true,
+        "angular": true
     },
 
     "fix": true,

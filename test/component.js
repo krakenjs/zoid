@@ -1,7 +1,7 @@
 
 import xcomponent from 'src/index';
 
-export var testComponent = xcomponent.create({
+export let testComponent = xcomponent.create({
 
     tag: 'test-component',
     url: '/base/test/child.htm',
@@ -83,7 +83,7 @@ export var testComponent = xcomponent.create({
     }
 });
 
-export var testComponent2 = xcomponent.create({
+export let testComponent2 = xcomponent.create({
 
     tag: 'test-component2',
     url: '/base/test/child.htm',
@@ -110,7 +110,7 @@ export var testComponent2 = xcomponent.create({
     }
 });
 
-export var testComponent3 = xcomponent.create({
+export let testComponent3 = xcomponent.create({
 
     tag: 'test-component3',
     url: '/base/test/child.htm',
@@ -143,7 +143,7 @@ export var testComponent3 = xcomponent.create({
     }
 });
 
-export var testComponent4 = xcomponent.create({
+export let testComponent4 = xcomponent.create({
 
     tag: 'test-component4',
     url: '/base/test/child.htm',
@@ -154,7 +154,7 @@ export var testComponent4 = xcomponent.create({
 });
 
 
-export var testComponent5 = xcomponent.create({
+export let testComponent5 = xcomponent.create({
 
     tag: 'test-component5',
     url: '/base/test/child.htm',

@@ -72,7 +72,7 @@ gulp.task('webpack-min', ['lint'], function() {
 });
 
 gulp.task('lint', function() {
-  return gulp.src('src/**/*.js').pipe(eslint())
+  return gulp.src([ 'src/**/*.js', 'test/**/*.js' ]).pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
 });

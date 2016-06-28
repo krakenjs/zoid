@@ -19,7 +19,7 @@ let cases = {
 
     attachTestComponentAndCallFoo() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo('bar');
             }
         });
@@ -27,7 +27,7 @@ let cases = {
 
     attachTestComponentAndCallFooWithBooleanProp() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo(this.props.booleanProp);
             }
         });
@@ -35,7 +35,7 @@ let cases = {
 
     attachTestComponentAndCallFooWithFunctionProp() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo(this.props.functionProp);
             }
         });
@@ -43,7 +43,7 @@ let cases = {
 
     attachTestComponentAndCallFooWithStringProp() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo(this.props.stringProp);
             }
         });
@@ -51,7 +51,7 @@ let cases = {
 
     attachTestComponentAndCallFooWithObjectProp() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo(this.props.objectProp);
             }
         });
@@ -59,7 +59,7 @@ let cases = {
 
     attachTestComponentAndCallFooWithNumberProp() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo(this.props.numberProp);
             }
         });
@@ -67,7 +67,7 @@ let cases = {
 
     attachTestComponentAndCallFooOnProps() {
         testComponent.attach({
-            onProps: function() {
+            onProps() {
                 this.props.foo('bar');
             }
         });
@@ -75,7 +75,7 @@ let cases = {
 
     attachTestComponentAndThrowRegularError() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 throw new Error('xxxxx');
             }
         });
@@ -83,7 +83,7 @@ let cases = {
 
     attachTestComponentAndThrowIntegrationError() {
         testComponent.attach({
-            onEnter: function() {
+            onEnter() {
                 throw new xcomponent.IntegrationError('xxxxx');
             }
         });
@@ -111,7 +111,7 @@ let cases = {
 
     attachTestComponent2AndCallFoo() {
         testComponent2.attach({
-            onEnter: function() {
+            onEnter() {
                 this.props.foo('bar');
             }
         });
@@ -119,9 +119,9 @@ let cases = {
 
     attachTestComponentAndCallFooOnClose() {
         testComponent.attach({
-            onClose: function() {
+            onClose() {
                 this.props.foo();
-                window.close = function() {};
+                window.close = () => {};
             }
         });
     },
@@ -275,7 +275,7 @@ let cases = {
     },
 
     attachTestComponentAndSubmitParentButton() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
 
                 let comp2 = testComponent2.init({
@@ -284,7 +284,7 @@ let cases = {
 
                 postRobot.once('init', () => 'attachTestComponent2');
 
-                var button = document.createElement('button');
+                let button = document.createElement('button');
                 button.addEventListener('click', () => {
                     comp2.hijackSubmitParentForm();
                 });
@@ -295,7 +295,7 @@ let cases = {
     },
 
     attachTestComponentAndCallMemoizedFunction() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
                 return this.props.memoizedFunction().then(() => {
                     return this.props.memoizedFunction().then((result) => {
@@ -307,7 +307,7 @@ let cases = {
     },
 
     attachTestComponentAndCallOnceFunction() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
                 return this.props.onceFunction().then(() => {
                     return this.props.onceFunction().then((result) => {
@@ -319,7 +319,7 @@ let cases = {
     },
 
     attachTestComponentAndCallDenodeifyFunction() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
                 return this.props.denodeifyFunction('foo').then(result => {
                     return this.props.complete(result);
@@ -329,9 +329,9 @@ let cases = {
     },
 
     attachTestComponentAndCallDenodeifyFunctionWithError() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
-                return this.props.denodeifyFunction('foo').catch(err => {
+                return this.props.denodeifyFunction('foo').catch(() => {
                     return this.props.complete('foobar');
                 });
             }
@@ -373,6 +373,6 @@ function getParentWindow() {
     }
 }
 
-postRobot.send(getParentWindow(), 'init').then(function(caseName) {
+postRobot.send(getParentWindow(), 'init').then(caseName => {
     cases[caseName]();
 });

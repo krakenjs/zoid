@@ -1,7 +1,6 @@
 import postRobot from 'post-robot/src';
 
 import { once } from '../lib';
-import { IntegrationError } from '../error';
 
 
 /*  Base Component
@@ -76,12 +75,7 @@ export class BaseComponent {
                 return method.apply(this, arguments);
             } catch (err) {
                 errored = true;
-
-                if (err instanceof IntegrationError) {
-                    return self.error(err);
-                }
-
-                return self.error(new Error(`[${this.component.tag}] Child lifecycle method threw an error`));
+                return self.error(err);
             }
         };
 

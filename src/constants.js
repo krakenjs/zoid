@@ -39,6 +39,10 @@ export const CLASS_NAMES = {
     ELEMENT: `${XCOMPONENT}-element`
 };
 
+export const EVENT_NAMES = {
+    CLICK: 'click'
+};
+
 export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
 export const MAX_Z_INDEX = 2147483647;

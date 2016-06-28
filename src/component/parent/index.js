@@ -4,7 +4,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
 import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery, normalizeProps } from './props';
@@ -659,13 +659,8 @@ export class ParentComponent extends BaseComponent {
 
         }, document.body);
 
-        addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, 'click', event => {
-            this.focus();
-        });
-
-        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, 'click', event => {
-            this.close();
-        });
+        addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
+        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close());
 
         this.registerForCleanup(() => {
             document.body.removeChild(this.parentTemplate);
