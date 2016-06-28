@@ -111,6 +111,7 @@ export class BaseComponent {
         for (let listenerName of Object.keys(listeners)) {
 
             let listener = postRobot.on(listenerName, { window: win, errorHandler: err => this.error(err) }, (source, data) => {
+                this.component.log(`listener_${listenerName.replace(/^xcomponent_/, '')}`);
                 return listeners[listenerName].call(this, source, data);
             });
 

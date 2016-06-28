@@ -1,5 +1,7 @@
 
+import $logger from 'beaver-logger/client';
 import postRobot from 'post-robot/src';
+
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
@@ -56,6 +58,8 @@ export class ParentComponent extends BaseComponent {
         // Set up promise for init
 
         this.onInit = new Promise();
+
+        this.component.log('init_parent');
     }
 
 
@@ -125,6 +129,7 @@ export class ParentComponent extends BaseComponent {
             // Only send down the new props if they do not match the old
 
             if (this.window && oldProps !== stringifyWithFunctions(this.props)) {
+                this.component.log('parent_update_props');
                 return postRobot.send(this.window, POST_MESSAGE.PROPS, {
                     props: this.props
                 });
@@ -198,6 +203,8 @@ export class ParentComponent extends BaseComponent {
 
             context = context || this.getRenderContext(element);
 
+            this.component.log(`render_${context}`, { context, element });
+
             if (RENDER_DRIVERS[context].render) {
                 RENDER_DRIVERS[context].render.call(this, element);
             }
@@ -228,6 +235,8 @@ export class ParentComponent extends BaseComponent {
 
     open(element, context) {
 
+        this.component.log(`open_${context}`, { element });
+
         RENDER_DRIVERS[context].open.call(this, element);
 
         this.watchForClose();
@@ -257,6 +266,8 @@ export class ParentComponent extends BaseComponent {
             if (!window.name) {
                 throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
             }
+
+            this.component.log(`render_${context}_to_parent`, { element, context });
 
             // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
 
@@ -332,6 +343,8 @@ export class ParentComponent extends BaseComponent {
         // and close the child manually if that happens.
 
         let unloadListener = addEventListener(window, 'beforeunload', () => {
+            this.component.log(`navigate_away`);
+            $logger.flush();
             if (this.context === CONTEXT_TYPES.POPUP) {
                 this.window.close();
             }
@@ -352,6 +365,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     loadUrl(url) {
+        this.component.log(`load_url`);
         return RENDER_DRIVERS[this.context].loadUrl.call(this, url);
     }
 
@@ -376,6 +390,8 @@ export class ParentComponent extends BaseComponent {
 
     hijackButton(element, context = CONTEXT_TYPES.LIGHTBOX) {
 
+        this.component.log(`hijack_button`, { element, context });
+
         hijackButton(element, (event, targetElement) => {
 
             if (this.window) {
@@ -399,6 +415,9 @@ export class ParentComponent extends BaseComponent {
     */
 
     renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
+
+        this.component.log(`render_hijack_${context}`);
+
         return Promise.resolve().then(() => {
 
             this.validateRender(context);
@@ -439,6 +458,9 @@ export class ParentComponent extends BaseComponent {
     */
 
     hijackSubmitParentForm() {
+
+        this.component.log(`hijack_submit_parent_form`);
+
         return this.renderToParent(null, CONTEXT_TYPES.POPUP, {
             hijackSubmitParentForm: true
         });
@@ -461,6 +483,7 @@ export class ParentComponent extends BaseComponent {
                 let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} timed out after ${this.props.timeout} milliseconds`);
 
                 this.onInit.reject(error).catch(err => {
+                    this.component.log(`timed_out`, { timeout: this.props.timeout });
                     this.props.onTimeout(err);
                     this.destroy();
                 });
@@ -561,6 +584,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     resize(height, width) {
+        this.component.log(`resize`, { height, width });
         if (this.iframe) {
             this.iframe.height = height;
             this.iframe.width = width;
@@ -575,6 +599,8 @@ export class ParentComponent extends BaseComponent {
     */
 
     close() {
+
+        this.component.log(`close`);
 
         // We send a post message to the child to close. This has two effects:
         // 1. We let the child do any cleanup it needs to do
@@ -604,6 +630,9 @@ export class ParentComponent extends BaseComponent {
     */
 
     focus() {
+
+        this.component.log(`focus`);
+
         if (this.window) {
             this.window.focus();
         }
@@ -676,6 +705,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     destroy() {
+        this.component.log(`destroy`);
         this.cleanup();
     }
 
@@ -687,6 +717,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     error(err) {
+        this.component.log(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
         this.props.onError(err);
         this.destroy();
