@@ -1,6 +1,6 @@
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup } from '../../lib';
+import { iframe, popup, isWindowClosed } from '../../lib';
 import { CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES } from '../../constants';
 import { getPosition } from '../window';
 
@@ -112,7 +112,7 @@ export let RENDER_DRIVERS = {
 
             // Sometimes we'll be blocked from opening the popup because we're not in a click event.
 
-            if (!this.window || this.window.closed || typeof this.window.closed === 'undefined') {
+            if (isWindowClosed(this.window)) {
                 let err = new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
                 throw err;
             }
@@ -144,7 +144,7 @@ export let RENDER_DRIVERS = {
 
             let element = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
 
-            this.open(element, CONTEXT_TYPES.IFRAME);
+            RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
 
             let dimensions = this.component.dimensions || {};
 

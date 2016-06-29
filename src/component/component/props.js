@@ -28,7 +28,8 @@ export const internalProps = {
     timeout: {
         type: 'number',
         required: false,
-        queryParam: false
+        queryParam: false,
+        autoClose: true
     },
 
     // When we get an INIT message from the child
@@ -54,6 +55,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         once: true,
+        autoClose: true,
         def(err) {
             return this.props.onError(err);
         }
@@ -64,6 +66,7 @@ export const internalProps = {
     onError: {
         type: 'function',
         required: false,
+        autoClose: true,
         def(err) {
             console.error(err.message, '\n', err.stack || err.toString());
         },

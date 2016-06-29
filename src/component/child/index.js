@@ -6,6 +6,7 @@ import { getParentComponentWindow, parseWindowName } from '../window';
 import { noop, extend, getParentWindow, onCloseWindow } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
 import { IntegrationError } from '../../error';
+import { normalizeProps } from '../parent/props';
 
 /*  Child Component
     ---------------
@@ -36,7 +37,7 @@ export class ChildComponent extends BaseComponent {
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
         // has provided them or not, and fall-back to some default behavior.
 
-        this.props = options.defaultProps || {};
+        this.props = normalizeProps(this.component, this, options.defaultProps || {});
 
         // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
         // there's an existing full-page implementation which uses redirects. In this case, the user can specify

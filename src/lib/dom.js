@@ -80,6 +80,17 @@ export function iframe(container, url, options) {
 }
 
 
+/*  Is Window Closed
+    ----------------
+
+    Determine if a window is closed
+*/
+
+export function isWindowClosed(win) {
+    return !win || win.closed || typeof win.closed === 'undefined' || safeGet(win, 'mockclosed');
+}
+
+
 /*  On Close Window
     ---------------
 
@@ -104,7 +115,7 @@ export function onCloseWindow(win, callback) {
             // pass
         }
 
-        if (!myWin || myWin.closed || typeof myWin.closed === 'undefined' || safeGet(myWin, 'mockclosed')) {
+        if (isWindowClosed(myWin)) {
             clearInterval(interval);
             return callback();
         }

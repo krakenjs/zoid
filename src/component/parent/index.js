@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -57,6 +57,7 @@ export class ParentComponent extends BaseComponent {
 
         // Set up promise for init
 
+        this.entered = false;
         this.onInit = new Promise();
 
         this.component.log('init_parent');
@@ -72,6 +73,30 @@ export class ParentComponent extends BaseComponent {
     setProps(props) {
         validateProps(this.component, props);
         this.props = normalizeProps(this.component, this, props);
+
+        for (let key of Object.keys(this.props)) {
+            let value = this.props[key];
+
+            if (value) {
+                let prop = this.component.props[key];
+
+                if (prop.precall) {
+                    let result = value.call();
+                    this.props[key] = () => {
+                        return result;
+                    };
+                }
+
+                if (prop.autoClose) {
+                    let self = this;
+                    this.props[key] = function() {
+                        self.component.log(`autoclose`, { prop: key });
+                        self.close();
+                        return value.apply(this, arguments);
+                    };
+                }
+            }
+        }
     }
 
 
@@ -111,11 +136,9 @@ export class ParentComponent extends BaseComponent {
     */
 
     updateProps(props) {
-        validateProps(this.component, props);
+        return Promise.resolve().then(() => {
 
-        // Wait for init to complete successfully
-
-        return this.onInit.then(() => {
+            validateProps(this.component, props);
 
             let oldProps = stringifyWithFunctions(this.props);
 
@@ -126,10 +149,11 @@ export class ParentComponent extends BaseComponent {
 
             this.setProps(newProps);
 
-            // Only send down the new props if they do not match the old
+            // Only send down the new props if they do not match the old, and if we have already sent down initial props
 
-            if (this.window && oldProps !== stringifyWithFunctions(this.props)) {
+            if (this.entered && this.window && oldProps !== stringifyWithFunctions(this.props)) {
                 this.component.log('parent_update_props');
+
                 return postRobot.send(this.window, POST_MESSAGE.PROPS, {
                     props: this.props
                 });
@@ -144,23 +168,31 @@ export class ParentComponent extends BaseComponent {
         Determine the ideal context to render to, if unspecified by the user
     */
 
-    getRenderContext(el) {
+    getRenderContext(el, context) {
 
         if (el) {
-            if (!this.component.contexts[CONTEXT_TYPES.IFRAME]) {
-                throw new Error(`[${this.component.tag}] Iframe context not allowed`);
+            if (context && context !== CONTEXT_TYPES.IFRAME) {
+                throw new Error(`[${this.component.tag}] ${context} context can not be rendered into element`);
             }
 
-            return CONTEXT_TYPES.IFRAME;
+            context = CONTEXT_TYPES.IFRAME;
+        }
+
+        if (context) {
+            if (!this.component.contexts[context]) {
+                throw new Error(`[${this.component.tag}] ${context} context not allowed by component`);
+            }
+
+            return context;
         }
 
         if (this.component.defaultContext) {
             return this.component.defaultContext;
         }
 
-        for (let context of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
-            if (this.component.contexts[context]) {
-                return context;
+        for (let renderContext of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
+            if (this.component.contexts[renderContext]) {
+                return renderContext;
             }
         }
 
@@ -201,7 +233,7 @@ export class ParentComponent extends BaseComponent {
 
             this.validateRender(context);
 
-            context = context || this.getRenderContext(element);
+            context = this.getRenderContext(element, context);
 
             this.component.log(`render_${context}`, { context, element });
 
@@ -235,6 +267,8 @@ export class ParentComponent extends BaseComponent {
 
     open(element, context) {
 
+        context = this.getRenderContext(element, context);
+
         this.component.log(`open_${context}`, { element });
 
         RENDER_DRIVERS[context].open.call(this, element);
@@ -257,7 +291,7 @@ export class ParentComponent extends BaseComponent {
 
             this.validateRender(context);
 
-            context = context || this.getRenderContext(element);
+            context = this.getRenderContext(element, context);
 
             if (!getParentWindow()) {
                 throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
@@ -335,6 +369,7 @@ export class ParentComponent extends BaseComponent {
     watchForClose() {
 
         let closeWindowListener = onCloseWindow(this.window, () => {
+            this.component.log(`detect_close_child`);
             this.props.onClose();
             this.destroy();
         });
@@ -345,9 +380,7 @@ export class ParentComponent extends BaseComponent {
         let unloadListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
             $logger.flush();
-            if (this.context === CONTEXT_TYPES.POPUP) {
-                this.window.close();
-            }
+            this.destroy();
         });
 
         this.registerForCleanup(() => {
@@ -388,11 +421,13 @@ export class ParentComponent extends BaseComponent {
         worrying about it.
     */
 
-    hijackButton(element, context = CONTEXT_TYPES.LIGHTBOX) {
+    hijackButton(button, element, context) {
+
+        context = this.getRenderContext(element, context);
 
         this.component.log(`hijack_button`, { element, context });
 
-        hijackButton(element, (event, targetElement) => {
+        hijackButton(button, (event, targetElement) => {
 
             if (this.window) {
                 event.preventDefault();
@@ -401,7 +436,7 @@ export class ParentComponent extends BaseComponent {
 
             // Open the window to render into
 
-            this.renderHijack(targetElement, context);
+            this.renderHijack(targetElement, element, context);
         });
 
         return this;
@@ -414,7 +449,9 @@ export class ParentComponent extends BaseComponent {
         Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
     */
 
-    renderHijack(el, context = CONTEXT_TYPES.LIGHTBOX) {
+    renderHijack(targetElement, element, context) {
+
+        context = this.getRenderContext(element, context);
 
         this.component.log(`render_hijack_${context}`);
 
@@ -426,7 +463,7 @@ export class ParentComponent extends BaseComponent {
 
             // Point the element to open in our child window
 
-            el.target = this.childWindowName;
+            targetElement.target = this.childWindowName;
 
             if (RENDER_DRIVERS[context].overlay) {
                 this.createParentTemplate();
@@ -507,6 +544,7 @@ export class ParentComponent extends BaseComponent {
             // for this message to be sure so we can continue doing anything from the parent
 
             [ POST_MESSAGE.INIT ](source, data) {
+                this.entered = true;
                 this.props.onEnter();
                 this.onInit.resolve(this);
 
@@ -542,7 +580,7 @@ export class ParentComponent extends BaseComponent {
 
                     // Open the window and do everything except load the url
 
-                    instance.renderHijack(form, data.context);
+                    instance.renderHijack(form, data.element, data.context);
 
                     // Submit the form to load the url into the new window
 
@@ -599,26 +637,38 @@ export class ParentComponent extends BaseComponent {
     */
 
     close() {
+        return Promise.resolve().then(() => {
 
-        this.component.log(`close`);
+            if (isWindowClosed(this.window)) {
+                return this.props.onClose();
+            }
 
-        // We send a post message to the child to close. This has two effects:
-        // 1. We let the child do any cleanup it needs to do
-        // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
+            if (this.closePromise) {
+                return this.closePromise;
+            }
 
-        this.props.onClose();
+            this.component.log(`close`);
 
-        return postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
+            // We send a post message to the child to close. This has two effects:
+            // 1. We let the child do any cleanup it needs to do
+            // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
 
-            // If we get an error, log it as a warning, but don't error out
+            this.props.onClose();
 
-            console.warn(`Error sending message to child`, err.stack || err.toString());
+            this.closePromise = postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
 
-        }).then(() => {
+                // If we get an error, log it as a warning, but don't error out
 
-            // Whatever happens, we'll destroy the child window
+                console.warn(`Error sending message to child`, err.stack || err.toString());
 
-            this.destroy();
+            }).then(() => {
+
+                // Whatever happens, we'll destroy the child window
+
+                this.destroy();
+            });
+
+            return this.closePromise;
         });
     }
 
@@ -705,8 +755,11 @@ export class ParentComponent extends BaseComponent {
     */
 
     destroy() {
-        this.component.log(`destroy`);
-        this.cleanup();
+        if (!this.destroyed) {
+            this.destroyed = true;
+            this.component.log(`destroy`);
+            this.cleanup();
+        }
     }
 
 
@@ -743,7 +796,7 @@ export class ParentComponent extends BaseComponent {
         return this.renderToParent(element, context);
     };
 
-    ParentComponent.prototype[`hijackButtonTo${contextName}`] = function(element) {
-        return this.hijackButton(element, context);
+    ParentComponent.prototype[`hijackButtonTo${contextName}`] = function(button, element) {
+        return this.hijackButton(button, element, context);
     };
 });

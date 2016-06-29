@@ -1,6 +1,6 @@
 
 import postRobot from 'post-robot/src';
-
+import { once } from 'src/lib';
 import { testComponent } from '../component';
 
 let component;
@@ -11,6 +11,8 @@ afterEach(() => {
         component = null;
     }
 });
+
+angular.bootstrap = once(angular.bootstrap);
 
 describe('xcomponent drivers', () => {
 
