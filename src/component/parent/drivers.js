@@ -97,8 +97,8 @@ export let RENDER_DRIVERS = {
 
             this.window = popup('about:blank', {
                 name: this.childWindowName,
-                width: this.component.dimensions.width,
-                height: this.component.dimensions.height,
+                width: dimensions.width,
+                height: dimensions.height,
                 top: pos.y,
                 left: pos.x
             });
@@ -148,28 +148,31 @@ export let RENDER_DRIVERS = {
 
             let dimensions = this.component.dimensions || {};
 
-            let pos = getPosition({
-                x:            dimensions.x,
-                y:            dimensions.y,
-                width:        dimensions.width,
-                height:       dimensions.height
-            });
-
             // TODO: some of this should be done in the parent.css file
 
-            this.iframe.style.zIndex = MAX_Z_INDEX;
-            this.iframe.style.position = 'absolute';
-            this.iframe.style.left = pos.x;
-            this.iframe.style.top = pos.y;
-            this.iframe.style.borderRadius = '10px';
+            this.iframe.style.zIndex   = MAX_Z_INDEX;
+            this.iframe.style.position = 'fixed';
 
-            if (!this.component.dimensions.width && !this.component.dimensions.height) {
-                this.iframe.style.left = 0;
-                this.iframe.style.top = 0;
-                this.iframe.style.borderRadius = '0px';
-                this.iframe.height = '100%';
-                this.iframe.width = '100%';
-                this.iframe.style.position = 'fixed';
+            if (dimensions.width) {
+                this.iframe.style.width      = `${dimensions.width}px`;
+                this.iframe.style.left       = '50%';
+                this.iframe.style.marginLeft = `-${Math.floor(dimensions.width / 2)}px`;
+            } else {
+                this.iframe.style.left       = 0;
+                this.iframe.style.width      = '100%';
+                this.iframe.style.marginLeft = '0px';
+                this.iframe.width            = '100%';
+            }
+
+            if (dimensions.height) {
+                this.iframe.style.height    = `${dimensions.height}px`;
+                this.iframe.style.top       = '50%';
+                this.iframe.style.marginTop = `-${Math.floor(dimensions.height / 2)}px`;
+            } else {
+                this.iframe.style.top       = 0;
+                this.iframe.style.height    = '100%';
+                this.iframe.style.marginTop = '0px';
+                this.iframe.height          = '100%';
             }
 
             return this;

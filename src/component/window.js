@@ -95,32 +95,21 @@ export let getParentComponentWindow = memoize(() => {
 
 export function getPosition(options) {
 
-    let pos = {};
+    let left;
+    let top;
+    let width = options.width;
+    let height = options.height;
 
-    if (typeof options.x === 'number') {
-        pos.x = options.x;
-    } else {
-        let width = window.outerWidth;
-
-        if (width <= options.width) {
-            pos.x = 0;
-        } else {
-            pos.x = Math.floor((width / 2) - (options.width / 2));
-        }
+    if (window.outerWidth) {
+        left = Math.round((window.outerWidth - width) / 2) + window.screenX;
+        top = Math.round((window.outerHeight - height) / 2) + window.screenY;
+    } else if (window.screen.width) {
+        left = Math.round((window.screen.width - width) / 2);
+        top = Math.round((window.screen.height - height) / 2);
     }
 
-    if (typeof options.y === 'number') {
-        pos.y = options.y;
-    } else {
-
-        let height = window.outerHeight;
-
-        if (height <= options.height) {
-            pos.y = 0;
-        } else {
-            pos.y = Math.floor((height / 2) - (options.height / 2));
-        }
-    }
-
-    return pos;
+    return {
+        x: left,
+        y: top
+    };
 }

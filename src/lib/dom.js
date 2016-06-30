@@ -39,15 +39,15 @@ export function getElement(id) {
 
 export function popup(url, options) {
 
-    let win = window.open(url, options.name, Object.keys(options).map((key) => {
-
-        if (!options[key]) {
-            return;
+    let params = Object.keys(options).map((key) => {
+        if (options[key]) {
+            return `${key}=${options[key]}`;
         }
+    }).filter(Boolean).join(',');
 
-        return `${key}=${options[key]}`;
+    console.log(params);
 
-    }).filter(Boolean).join(','), true);
+    let win = window.open(url, options.name, params, true);
 
     return win;
 }
@@ -274,11 +274,9 @@ export function hijackButton(element, callback) {
         throw new Error(`Can not find element: ${element}`);
     }
 
-    let isButton = el.tagName.toLowerCase() === 'button' || (el.tagName.toLowerCase() === 'input' && el.type === 'submit');
-
     // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
 
-    let targetElement = isButton ? getParentNode(el, 'form') : el;
+    let targetElement = el.form ? el.form : el;
 
     // Then we wait for the click event
 
