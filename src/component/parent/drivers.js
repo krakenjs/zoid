@@ -148,8 +148,6 @@ export let RENDER_DRIVERS = {
 
             let dimensions = this.component.dimensions || {};
 
-            // TODO: some of this should be done in the parent.css file
-
             this.iframe.style.zIndex   = MAX_Z_INDEX;
             this.iframe.style.position = 'fixed';
 
