@@ -16,6 +16,8 @@ export let react = {
             },
 
             componentDidMount() {
+                component.log(`instantiate_react_component`);
+
                 let parent = component.init(extend({}, this.props));
 
                 this.setState({ parent });

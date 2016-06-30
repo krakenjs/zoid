@@ -21,6 +21,8 @@ export let htmlComponent = {
                 return;
             }
 
+            component.log(`instantiate_script_component`);
+
             let props;
 
             eval(`props = ${element.innerText}`); // eslint-disable-line no-eval

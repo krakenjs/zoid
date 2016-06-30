@@ -9,7 +9,8 @@ import { getParentWindow, onCloseWindow, addEventListener, getParentNode, create
 import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
-import { propsToQuery, normalizeProps } from './props';
+import { propsToQuery } from './props';
+import { normalizeProps } from '../props';
 
 let activeComponents = [];
 
@@ -28,6 +29,8 @@ export class ParentComponent extends BaseComponent {
         validate(component, options);
 
         this.component = component;
+
+        this.component.log(`construct_parent`);
 
         this.id = uniqueID();
 
@@ -59,8 +62,6 @@ export class ParentComponent extends BaseComponent {
 
         this.entered = false;
         this.onInit = new Promise();
-
-        this.component.log('init_parent');
     }
 
 
@@ -644,6 +645,7 @@ export class ParentComponent extends BaseComponent {
             }
 
             if (this.closePromise) {
+                console.log('returning close promise');
                 return this.closePromise;
             }
 
@@ -770,7 +772,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     error(err) {
-        this.component.log(`error`, { error: err.stack || err.toString() });
+        this.component.logError(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
         this.props.onError(err);
         this.destroy();

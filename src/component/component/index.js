@@ -4,7 +4,7 @@ import $logger from 'beaver-logger/client';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { internalProps } from './props';
-import { XCOMPONENT, CONTEXT_TYPES_LIST } from '../../constants';
+import { CONTEXT_TYPES_LIST } from '../../constants';
 import { validate } from './validate';
 
 import parentTemplate from './templates/parent.htm';
@@ -44,7 +44,10 @@ export class Component {
         // e.g. <my-component>
 
         this.tag = options.tag;
-        this.name = options.tag.replace(/-/g, '_');
+
+        // Name of the component, used for logging. Auto-generated from the tag name by default.
+
+        this.name = options.name || options.tag.replace(/-/g, '_');
 
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
@@ -182,7 +185,7 @@ export class Component {
     */
 
     log(event, payload) {
-        $logger.info(`${XCOMPONENT}_${this.name}_${event}`, payload);
+        $logger.info(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -193,7 +196,7 @@ export class Component {
     */
 
     logWarning(event, payload) {
-        $logger.warn(`${XCOMPONENT}_${this.name}_${event}`, payload);
+        $logger.warn(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -204,6 +207,6 @@ export class Component {
     */
 
     logError(event, payload) {
-        $logger.error(`${XCOMPONENT}_${this.name}_${event}`, payload);
+        $logger.error(`xc_${this.name}_${event}`, payload);
     }
 }

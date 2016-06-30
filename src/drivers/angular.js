@@ -32,6 +32,8 @@ export let angular = {
 
                     controller: ($scope, $element) => {
 
+                        component.log(`instantiate_angular_component`);
+
                         function getProps() {
                             let instanceProps = {};
                             for (let key of Object.keys(scope)) {
