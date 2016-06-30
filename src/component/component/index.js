@@ -156,6 +156,17 @@ export class Component {
     }
 
 
+    /*  Render
+        ------
+
+        Shortcut to render a parent component
+    */
+
+    render(props, element) {
+        return this.init(props).render(element);
+    }
+
+
     /*  Get By Tag
         ----------
 
