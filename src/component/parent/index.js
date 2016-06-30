@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
 import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -60,7 +60,6 @@ export class ParentComponent extends BaseComponent {
 
         // Set up promise for init
 
-        this.entered = false;
         this.onInit = new Promise();
     }
 
@@ -137,7 +136,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     updateProps(props) {
-        return Promise.resolve().then(() => {
+        return this.onInit.then(() => {
 
             validateProps(this.component, props);
 
@@ -152,7 +151,7 @@ export class ParentComponent extends BaseComponent {
 
             // Only send down the new props if they do not match the old, and if we have already sent down initial props
 
-            if (this.entered && this.window && oldProps !== stringifyWithFunctions(this.props)) {
+            if (oldProps !== stringifyWithFunctions(this.props)) {
                 this.component.log('parent_update_props');
 
                 return postRobot.send(this.window, POST_MESSAGE.PROPS, {
@@ -545,7 +544,6 @@ export class ParentComponent extends BaseComponent {
             // for this message to be sure so we can continue doing anything from the parent
 
             [ POST_MESSAGE.INIT ](source, data) {
-                this.entered = true;
                 this.props.onEnter();
                 this.onInit.resolve(this);
 
@@ -645,7 +643,6 @@ export class ParentComponent extends BaseComponent {
             }
 
             if (this.closePromise) {
-                console.log('returning close promise');
                 return this.closePromise;
             }
 
@@ -657,7 +654,7 @@ export class ParentComponent extends BaseComponent {
 
             this.props.onClose();
 
-            this.closePromise = postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
+            let closePromise = postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
 
                 // If we get an error, log it as a warning, but don't error out
 
@@ -670,6 +667,7 @@ export class ParentComponent extends BaseComponent {
                 this.destroy();
             });
 
+            this.setForCleanup('closePromise', closePromise);
             return this.closePromise;
         });
     }
@@ -757,8 +755,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     destroy() {
-        if (!this.destroyed) {
-            this.destroyed = true;
+        if (this.hasCleanupTasks()) {
             this.component.log(`destroy`);
             this.cleanup();
         }
@@ -786,7 +783,7 @@ export class ParentComponent extends BaseComponent {
     Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
 */
 
-[ CONTEXT_TYPES.IFRAME, CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ].forEach(context => {
+for (let context of CONTEXT_TYPES_LIST) {
 
     let contextName = capitalizeFirstLetter(context);
 
@@ -801,4 +798,4 @@ export class ParentComponent extends BaseComponent {
     ParentComponent.prototype[`hijackButtonTo${contextName}`] = function(button, element) {
         return this.hijackButton(button, element, context);
     };
-});
+}

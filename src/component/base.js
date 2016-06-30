@@ -40,6 +40,17 @@ export class BaseComponent {
     }
 
 
+    /*  Has Cleanup Tasks
+        -----------------
+
+        Returns whether or not there is any state to be cleaned up
+    */
+
+    hasCleanupTasks() {
+        return Boolean(this.cleanupTasks.length);
+    }
+
+
     /*  Set For Cleanup
         ---------------
 
