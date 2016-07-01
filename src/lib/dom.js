@@ -45,8 +45,6 @@ export function popup(url, options) {
         }
     }).filter(Boolean).join(',');
 
-    console.log(params);
-
     let win = window.open(url, options.name, params, true);
 
     return win;
