@@ -136,7 +136,7 @@ export function stringifyWithFunctions(obj) {
     Use postMessage to emulate nextTick
 */
 
-let tickMessageName = `__nextTick__${uniqueID()}`;
+let tickMessageName = `__nextTick__xcomponent__${uniqueID()}`;
 let queue = [];
 
 window.addEventListener('message', event => {
@@ -146,6 +146,15 @@ window.addEventListener('message', event => {
 });
 
 export function nextTick(method) {
+
+    if (window.setImmediate) {
+        return window.setImmediate.call(window, method);
+    }
+
+    if (window.nextTick) {
+        return window.nextTick.call(window, method);
+    }
+
     queue.push(method);
     window.postMessage(tickMessageName, '*');
 }
@@ -212,4 +221,46 @@ export function get(item, path, def) {
     // If our final result is undefined, we should return the default
 
     return item === undefined ? def : item;
+}
+
+
+/*  Safe Interval
+    -------------
+
+    Implement setInterval using setTimeout, to avoid stacking up calls from setInterval
+*/
+
+export function safeInterval(method, time) {
+
+    let timeout;
+
+    function runInterval() {
+        timeout = setTimeout(runInterval, time);
+        method.call();
+    }
+
+    timeout = setTimeout(runInterval, time);
+
+    return {
+        cancel() {
+            clearTimeout(timeout);
+        }
+    };
+}
+
+/*  Safe Interval
+    -------------
+
+    Run timeouts at 100ms intervals so we can account for busy browsers
+*/
+
+export function safeTimeout(method, time) {
+
+    let interval = safeInterval(() => {
+        time -= 100;
+        if (time <= 0) {
+            interval.cancel();
+            method();
+        }
+    }, 100);
 }

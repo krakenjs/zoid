@@ -1,6 +1,6 @@
 
 import { once, noop } from './fn';
-import { extend, nextTick, safeGet, get } from './util';
+import { extend, nextTick, safeGet, get, safeInterval } from './util';
 
 
 /*  Get Element
@@ -85,7 +85,11 @@ export function iframe(container, url, options) {
 */
 
 export function isWindowClosed(win) {
-    return !win || win.closed || typeof win.closed === 'undefined' || safeGet(win, 'mockclosed');
+    try {
+        return !win || win.closed || typeof win.closed === 'undefined' || safeGet(win, 'mockclosed');
+    } catch (err) {
+        return true;
+    }
 }
 
 
@@ -119,7 +123,7 @@ export function onCloseWindow(win, callback) {
         }
     };
 
-    interval = setInterval(checkWindowClosed, 50);
+    interval = safeInterval(checkWindowClosed, 50);
     nextTick(checkWindowClosed);
 
     let close = win.close;
@@ -135,7 +139,7 @@ export function onCloseWindow(win, callback) {
 
     return {
         cancel() {
-            clearInterval(interval);
+            interval.cancel();
             callback = noop;
         }
     };

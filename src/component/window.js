@@ -15,11 +15,10 @@ import { XCOMPONENT } from '../constants';
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(props = {}) {
-    return b64encode(JSON.stringify({
-        ...props,
-        type: XCOMPONENT
-    }));
+export function buildChildWindowName(prefix, props = {}) {
+
+    let name = b64encode(JSON.stringify(props));
+    return `${XCOMPONENT}_${prefix.replace(/_/g, '')}_${name}`;
 }
 
 
@@ -33,13 +32,24 @@ export function buildChildWindowName(props = {}) {
 export let parseWindowName = memoize(name => {
     let winProps;
 
+    if (!name) {
+        return;
+    }
+
+    let segments = name.split('_');
+    let props = segments.slice(2).join('_');
+
+    if (segments[0] !== XCOMPONENT) {
+        return;
+    }
+
     try {
-        winProps = JSON.parse(b64decode(name));
+        winProps = JSON.parse(b64decode(props));
     } catch (err) {
         return;
     }
 
-    if (!winProps || winProps.type !== XCOMPONENT) {
+    if (!winProps) {
         return;
     }
 

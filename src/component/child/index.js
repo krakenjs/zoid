@@ -161,12 +161,11 @@ export class ChildComponent extends BaseComponent {
         }
 
         let winProps = parseWindowName(window.name);
-        let tag = winProps.tag;
 
         this.component.log(`child_win_props`, winProps);
 
-        if (tag !== this.component.tag) {
-            throw new Error(`[${this.component.tag}] Parent is ${tag} - can not attach ${this.component.tag}`);
+        if (winProps.tag !== this.component.tag) {
+            throw new Error(`[${this.component.tag}] Parent is ${winProps.tag} - can not attach ${this.component.tag}`);
         }
 
         // Note -- getting references to other windows is probably one of the hardest things to do. There's basically

@@ -52,10 +52,10 @@ export class ParentComponent extends BaseComponent {
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
 
-        this.childWindowName = options.childWindowName || buildChildWindowName({
+        this.childWindowName = options.childWindowName || buildChildWindowName(this.component.name, {
+            tag: this.component.tag,
             parent: window.name,
-            id: this.id,
-            tag: this.component.tag
+            ts: Date.now()
         });
 
         // Set up promise for init
@@ -305,11 +305,11 @@ export class ParentComponent extends BaseComponent {
 
             // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
 
-            this.childWindowName = buildChildWindowName({
-                id: this.id,
+            this.childWindowName = buildChildWindowName(this.component.name, {
+                tag: this.component.tag,
+                ts: Date.now(),
                 parent: window.name,
-                sibling: true,
-                tag: this.component.tag
+                sibling: 1
             });
 
             this.setForCleanup('context', context);
@@ -698,13 +698,12 @@ export class ParentComponent extends BaseComponent {
 
     createComponentTemplate() {
 
-        createElement('body', {
-            html: template(this.component.componentTemplate, {
-                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
-                CLASS: CLASS_NAMES
-            }),
-            class: [ CLASS_NAMES.XCOMPONENT ]
-        }, this.window.document.body);
+        let html = template(this.component.componentTemplate, {
+            id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
+            CLASS: CLASS_NAMES
+        });
+
+        this.window.document.write(html);
     }
 
 
