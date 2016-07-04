@@ -492,6 +492,8 @@ export class ParentComponent extends BaseComponent {
         url into an xcomponent.
 
         This is, again, an esoteric case within an esoteric case -- so probably only consider using it if you're sure you want to.
+
+        TODO: Support more than just popup
     */
 
     hijackSubmitParentForm() {

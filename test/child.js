@@ -358,12 +358,20 @@ let cases = {
 };
 
 
-
-
 function getParentWindow() {
+    if (window.opener) {
+        return window.opener;
+    }
+
+    if (window.parent !== window) {
+        return window.parent;
+    }
+}
+
+function getParentComponentWindow() {
 
     let winProps = parseWindowName(window.name);
-    let parent = window.opener || window.parent;
+    let parent = getParentWindow();
 
     if (winProps && winProps.sibling) {
         return parent.frames[winProps.parent];
@@ -373,6 +381,10 @@ function getParentWindow() {
     }
 }
 
-postRobot.send(getParentWindow(), 'init').then(caseName => {
+let parent = getParentComponentWindow();
+
+postRobot.send(parent, 'init').then(caseName => {
     cases[caseName]();
+}).catch(err => {
+    console.error(err.stack || err.toString());
 });
