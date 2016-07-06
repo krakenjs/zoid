@@ -55,7 +55,7 @@ export class ParentComponent extends BaseComponent {
         this.childWindowName = options.childWindowName || buildChildWindowName(this.component.name, {
             tag: this.component.tag,
             parent: window.name,
-            ts: Date.now()
+            id: uniqueID()
         });
 
         // Set up promise for init
@@ -91,8 +91,9 @@ export class ParentComponent extends BaseComponent {
                     let self = this;
                     this.props[key] = function() {
                         self.component.log(`autoclose`, { prop: key });
-                        self.close();
-                        return value.apply(this, arguments);
+                        return self.close().then(() => {
+                            return value.apply(this, arguments);
+                        });
                     };
                 }
             }
@@ -307,7 +308,7 @@ export class ParentComponent extends BaseComponent {
 
             this.childWindowName = buildChildWindowName(this.component.name, {
                 tag: this.component.tag,
-                ts: Date.now(),
+                id: uniqueID(),
                 parent: window.name,
                 sibling: 1
             });
@@ -524,7 +525,6 @@ export class ParentComponent extends BaseComponent {
                 this.onInit.reject(error).catch(err => {
                     this.component.log(`timed_out`, { timeout: this.props.timeout });
                     this.props.onTimeout(err);
-                    this.destroy();
                 });
 
             }, this.props.timeout);
@@ -773,7 +773,6 @@ export class ParentComponent extends BaseComponent {
         this.component.logError(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
         this.props.onError(err);
-        this.destroy();
     }
 }
 

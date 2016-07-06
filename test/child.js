@@ -117,15 +117,6 @@ let cases = {
         });
     },
 
-    attachTestComponentAndCallFooOnClose() {
-        testComponent.attach({
-            onClose() {
-                this.props.foo();
-                window.close = () => {};
-            }
-        });
-    },
-
 
     renderTestComponent2ToParentLightbox() {
         let comp = testComponent.attach({

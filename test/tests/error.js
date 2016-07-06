@@ -205,24 +205,6 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should render a child component then close the parent window', done => {
-
-        component = testComponent.init({
-            foo() {
-                window.mockclosed = false;
-                done();
-            },
-
-            onEnter() {
-                window.mockclosed = true;
-            }
-        });
-
-        component.renderPopup();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooOnClose');
-    });
-
     it('should call onclose when a popup is closed by someone other than xcomponent', done => {
 
         component = testComponent.init({
