@@ -80,7 +80,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _component = __webpack_require__(/*! ./component */ 31);
+	var _component = __webpack_require__(/*! ./component */ 30);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -143,7 +143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	var _lib = __webpack_require__(/*! ./lib */ 12);
+	var _lib = __webpack_require__(/*! ./lib */ 10);
 
 	Object.defineProperty(exports, 'Promise', {
 	    enumerable: true,
@@ -152,11 +152,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	var _conf = __webpack_require__(/*! ./conf */ 5);
+	var _drivers = __webpack_require__(/*! ./drivers */ 8);
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 10);
-
-	var _compat = __webpack_require__(/*! ./compat */ 20);
+	var _compat = __webpack_require__(/*! ./compat */ 19);
 
 	function init() {
 
@@ -164,9 +162,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Listen for all incoming post-messages
 	    _lib.util.listen(window, 'message', _drivers.messageListener);
-
-	    // Register the current window
-	    _lib.childWindows.register((0, _conf.getWindowID)(), window, _lib.util.getType());
 
 	    (0, _lib.initOnReady)();
 	}
@@ -201,7 +196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(/*! ./server */ 28);
+	var _server = __webpack_require__(/*! ./server */ 27);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -213,7 +208,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(/*! ./proxy */ 29);
+	var _proxy = __webpack_require__(/*! ./proxy */ 28);
 
 	Object.keys(_proxy).forEach(function (key) {
 	  if (key === "default") return;
@@ -225,7 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(/*! ./config */ 30);
+	var _config = __webpack_require__(/*! ./config */ 29);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -237,7 +232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 10);
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
 	Object.defineProperty(exports, 'reset', {
 	  enumerable: true,
@@ -246,7 +241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(/*! ../compat/bridge */ 21);
+	var _bridge = __webpack_require__(/*! ../compat/bridge */ 20);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -255,7 +250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _util = __webpack_require__(/*! ../lib/util */ 9);
+	var _util = __webpack_require__(/*! ../lib/util */ 14);
 
 	Object.defineProperty(exports, 'util', {
 	  enumerable: true,
@@ -264,7 +259,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _windows = __webpack_require__(/*! ../lib/windows */ 17);
+	var _windows = __webpack_require__(/*! ../lib/windows */ 16);
 
 	var parent = exports.parent = (0, _windows.getParentWindow)();
 
@@ -286,9 +281,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 10);
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
 	function request(options) {
 
@@ -325,7 +320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var hash = options.name + '_' + _lib.util.uniqueID();
 	        _drivers.listeners.response[hash] = options;
 
-	        if (options.window.closed) {
+	        if ((0, _lib.isWindowClosed)(options.window)) {
 	            throw new Error('Target window is closed');
 	        }
 
@@ -452,18 +447,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _id = __webpack_require__(/*! ./id */ 8);
-
-	Object.keys(_id).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _id[key];
-	    }
-	  });
-	});
-
 /***/ },
 /* 6 */
 /*!*****************************************!*\
@@ -557,300 +540,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 8 */
-/*!*************************************!*\
-  !*** ./~/post-robot/src/conf/id.js ***!
-  \*************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.getWindowID = undefined;
-
-	var _util = __webpack_require__(/*! ../lib/util */ 9);
-
-	var getWindowID = exports.getWindowID = _util.util.memoize(function () {
-	    return window.name || _util.util.getType() + '_' + _util.util.uniqueID();
-	});
-
-/***/ },
-/* 9 */
-/*!**************************************!*\
-  !*** ./~/post-robot/src/lib/util.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.util = undefined;
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var util = exports.util = {
-	    isPopup: function isPopup() {
-	        return Boolean(window.opener);
-	    },
-	    isIframe: function isIframe() {
-	        return Boolean(window.parent && window !== window.parent);
-	    },
-	    isFullpage: function isFullpage() {
-	        return Boolean(!util.isIframe() && !util.isPopup());
-	    },
-	    getType: function getType() {
-	        if (util.isPopup()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
-	        }
-	        if (util.isIframe()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
-	    },
-	    once: function once(method) {
-	        if (!method) {
-	            return method;
-	        }
-	        var called = false;
-	        return function onceWrapper() {
-	            if (!called) {
-	                called = true;
-	                return method.apply(this, arguments);
-	            }
-	        };
-	    },
-	    noop: function noop() {},
-	    // eslint-disable-line no-empty-function
-
-	    safeHasProp: function safeHasProp(obj, name) {
-	        try {
-	            if (obj[name]) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-	            return false;
-	        }
-	    },
-	    safeGetProp: function safeGetProp(obj, name) {
-	        try {
-	            return obj[name];
-	        } catch (err) {
-	            return;
-	        }
-	    },
-	    listen: function listen(win, event, handler) {
-	        if (win.addEventListener) {
-	            win.addEventListener(event, handler);
-	        } else {
-	            win.attachEvent('on' + event, handler);
-	        }
-
-	        return {
-	            cancel: function cancel() {
-	                if (win.removeEventListener) {
-	                    win.removeEventListener(event, handler);
-	                } else {
-	                    win.detachEvent('on' + event, handler);
-	                }
-	            }
-	        };
-	    },
-	    apply: function apply(method, context, args) {
-	        if (method.apply instanceof Function) {
-	            return method.apply(context, args);
-	        }
-	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-	    },
-	    find: function find(collection, method, def) {
-	        if (!collection) {
-	            return def;
-	        }
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return collection[i];
-	            }
-	        }
-	        return def;
-	    },
-	    map: function map(collection, method) {
-	        var results = [];
-	        for (var i = 0; i < collection.length; i++) {
-	            results.push(method(collection[i]));
-	        }
-	        return results;
-	    },
-	    some: function some(collection, method) {
-	        method = method || Boolean;
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return true;
-	            }
-	        }
-	        return false;
-	    },
-	    keys: function keys(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(key);
-	            }
-	        }
-	        return result;
-	    },
-	    values: function values(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(mapping[key]);
-	            }
-	        }
-	        return result;
-	    },
-	    getByValue: function getByValue(mapping, value) {
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
-	                return key;
-	            }
-	        }
-	    },
-	    uniqueID: function uniqueID() {
-
-	        var chars = '0123456789abcdef';
-
-	        return 'xxxxxxxxxx'.replace(/./g, function () {
-	            return chars.charAt(Math.floor(Math.random() * chars.length));
-	        });
-	    },
-	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
-
-	        if (frame.opener === win) {
-	            return false;
-	        }
-
-	        try {
-	            if (frame.parent === win) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-
-	            try {
-	                for (var i = 0; i < win.frames.length; i++) {
-	                    if (win.frames[i] === frame) {
-	                        return true;
-	                    }
-	                }
-	            } catch (err2) {
-	                return false;
-	            }
-	        }
-
-	        return false;
-	    },
-	    memoize: function memoize(method) {
-
-	        var results = {};
-
-	        return function memoized() {
-	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
-	            if (!results.hasOwnProperty(args)) {
-	                results[args] = method.apply(this, arguments);
-	            }
-	            return results[args];
-	        };
-	    },
-	    extend: function extend(obj, source) {
-	        if (!source) {
-	            return obj;
-	        }
-
-	        for (var key in source) {
-	            if (source.hasOwnProperty(key)) {
-	                obj[key] = source[key];
-	            }
-	        }
-
-	        return obj;
-	    },
-	    each: function each(obj, callback) {
-	        if (obj instanceof Array) {
-	            for (var i = 0; i < obj.length; i++) {
-	                callback(obj[i], i);
-	            }
-	        } else if (obj instanceof Object && !(obj instanceof Function)) {
-	            for (var key in obj) {
-	                if (obj.hasOwnProperty(key)) {
-	                    callback(obj[key], key);
-	                }
-	            }
-	        }
-	    },
-	    replaceObject: function replaceObject(obj, callback) {
-
-	        var newobj = obj instanceof Array ? [] : {};
-
-	        util.each(obj, function (item, key) {
-
-	            var result = callback(item);
-
-	            if (result !== undefined) {
-	                newobj[key] = result;
-	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
-	                newobj[key] = util.replaceObject(item, callback);
-	            } else {
-	                newobj[key] = item;
-	            }
-	        });
-
-	        return newobj;
-	    },
-	    safeInterval: function safeInterval(method, time) {
-	        var timeout = void 0;
-
-	        function runInterval() {
-	            timeout = setTimeout(runInterval, time);
-	            method.call();
-	        }
-
-	        timeout = setTimeout(runInterval, time);
-
-	        return {
-	            cancel: function cancel() {
-	                clearTimeout(timeout);
-	            }
-	        };
-	    },
-	    intervalTimeout: function intervalTimeout(time, interval, method) {
-
-	        var safeInterval = util.safeInterval(function () {
-	            time -= interval;
-
-	            time = time <= 0 ? 0 : time;
-
-	            if (time === 0) {
-	                safeInterval.cancel();
-	            }
-
-	            method(time);
-	        }, interval);
-
-	        return safeInterval;
-	    },
-	    getDomain: function getDomain(win) {
-	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
-	    }
-	};
-
-/***/ },
-/* 10 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/drivers/index.js ***!
   \*******************************************/
@@ -862,7 +551,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _receive = __webpack_require__(/*! ./receive */ 11);
+	var _receive = __webpack_require__(/*! ./receive */ 9);
 
 	Object.keys(_receive).forEach(function (key) {
 	  if (key === "default") return;
@@ -874,7 +563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(/*! ./send */ 24);
+	var _send = __webpack_require__(/*! ./send */ 23);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -886,7 +575,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(/*! ./listeners */ 26);
+	var _listeners = __webpack_require__(/*! ./listeners */ 25);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -899,7 +588,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 11 */
+/* 9 */
 /*!***************************************************!*\
   !*** ./~/post-robot/src/drivers/receive/index.js ***!
   \***************************************************/
@@ -915,15 +604,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 12);
+	var _lib = __webpack_require__(/*! ../../lib */ 10);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 20);
+	var _compat = __webpack_require__(/*! ../../compat */ 19);
 
-	var _send = __webpack_require__(/*! ../send */ 24);
+	var _send = __webpack_require__(/*! ../send */ 23);
 
-	var _listeners = __webpack_require__(/*! ../listeners */ 26);
+	var _listeners = __webpack_require__(/*! ../listeners */ 25);
 
-	var _types = __webpack_require__(/*! ./types */ 27);
+	var _types = __webpack_require__(/*! ./types */ 26);
 
 	var receivedMessages = [];
 
@@ -1009,9 +698,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return win;
 	    }
 
-	    if (message.target && message.target !== (0, _conf.getWindowID)()) {
+	    if (message.target && message.target !== (0, _lib.getWindowId)(window)) {
 
-	        var _win = _lib.childWindows.getWindowById(message.target);
+	        var _win = (0, _lib.getWindowById)(message.target);
 
 	        if (!_win) {
 	            throw new Error('Unable to find window to proxy message to: ' + message.target);
@@ -1046,14 +735,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    _lib.childWindows.register(message.source, source, message.windowType);
+	    (0, _lib.registerWindow)(message.source, source);
 
-	    var proxyWindow = getProxy(source, message);
+	    var proxyWindow = void 0;
+
+	    try {
+	        proxyWindow = getProxy(source, message);
+	    } catch (err) {
+	        return _lib.log.debug(err.message);
+	    }
 
 	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
+
+	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
+	            return _lib.log.debug('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
+	        }
+
 	        delete message.target;
 	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
 	    }
@@ -1064,7 +764,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            source = getWindow(message.sourceHint, message.originalSource);
 	            delete message.sourceHint;
 	        } else {
-	            var originalSource = _lib.childWindows.getWindowById(message.originalSource);
+	            var originalSource = (0, _lib.getWindowById)(message.originalSource);
 	            if (originalSource) {
 	                source = originalSource;
 	            } else {
@@ -1072,7 +772,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        _lib.childWindows.register(message.originalSource, source, message.originalWindowType);
+	        (0, _lib.registerWindow)(message.originalSource, source);
+	    }
+
+	    if ((0, _lib.isWindowClosed)(source)) {
+	        return _lib.log.debug('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
@@ -1110,7 +814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 12 */
+/* 10 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/lib/index.js ***!
   \***************************************/
@@ -1122,7 +826,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _promise = __webpack_require__(/*! ./promise */ 13);
+	var _promise = __webpack_require__(/*! ./promise */ 11);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -1134,7 +838,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _util = __webpack_require__(/*! ./util */ 9);
+	var _util = __webpack_require__(/*! ./util */ 14);
 
 	Object.keys(_util).forEach(function (key) {
 	  if (key === "default") return;
@@ -1146,7 +850,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _log = __webpack_require__(/*! ./log */ 16);
+	var _log = __webpack_require__(/*! ./log */ 15);
 
 	Object.keys(_log).forEach(function (key) {
 	  if (key === "default") return;
@@ -1158,7 +862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _windows = __webpack_require__(/*! ./windows */ 17);
+	var _windows = __webpack_require__(/*! ./windows */ 16);
 
 	Object.keys(_windows).forEach(function (key) {
 	  if (key === "default") return;
@@ -1170,7 +874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(/*! ./methods */ 18);
+	var _methods = __webpack_require__(/*! ./methods */ 17);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -1182,7 +886,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _tick = __webpack_require__(/*! ./tick */ 15);
+	var _tick = __webpack_require__(/*! ./tick */ 13);
 
 	Object.keys(_tick).forEach(function (key) {
 	  if (key === "default") return;
@@ -1194,7 +898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ready = __webpack_require__(/*! ./ready */ 19);
+	var _ready = __webpack_require__(/*! ./ready */ 18);
 
 	Object.keys(_ready).forEach(function (key) {
 	  if (key === "default") return;
@@ -1207,7 +911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 13 */
+/* 11 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/promise.js ***!
   \*****************************************/
@@ -1220,9 +924,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.promise = exports.Promise = undefined;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
 
-	var _tick = __webpack_require__(/*! ./tick */ 15);
+	var _tick = __webpack_require__(/*! ./tick */ 13);
 
 	var Promise = exports.Promise = _promise.SyncPromise;
 
@@ -1299,7 +1003,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 14 */
+/* 12 */
 /*!*********************************************!*\
   !*** ./~/sync-browser-mocks/src/promise.js ***!
   \*********************************************/
@@ -1511,7 +1215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
+/* 13 */
 /*!**************************************!*\
   !*** ./~/post-robot/src/lib/tick.js ***!
   \**************************************/
@@ -1524,7 +1228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.nextTick = nextTick;
 
-	var _util = __webpack_require__(/*! ./util */ 9);
+	var _util = __webpack_require__(/*! ./util */ 14);
 
 	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
 	var queue = [];
@@ -1551,7 +1255,254 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 16 */
+/* 14 */
+/*!**************************************!*\
+  !*** ./~/post-robot/src/lib/util.js ***!
+  \**************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.util = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _conf = __webpack_require__(/*! ../conf */ 5);
+
+	var util = exports.util = {
+	    isPopup: function isPopup() {
+	        return Boolean(window.opener);
+	    },
+	    isIframe: function isIframe() {
+	        return Boolean(window.parent && window !== window.parent);
+	    },
+	    isFullpage: function isFullpage() {
+	        return Boolean(!util.isIframe() && !util.isPopup());
+	    },
+	    getType: function getType() {
+	        if (util.isPopup()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
+	        }
+	        if (util.isIframe()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
+	        }
+	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+	    },
+	    once: function once(method) {
+	        if (!method) {
+	            return method;
+	        }
+	        var called = false;
+	        return function onceWrapper() {
+	            if (!called) {
+	                called = true;
+	                return method.apply(this, arguments);
+	            }
+	        };
+	    },
+	    noop: function noop() {},
+	    // eslint-disable-line no-empty-function
+
+	    safeHasProp: function safeHasProp(obj, name) {
+	        try {
+	            if (obj[name]) {
+	                return true;
+	            } else {
+	                return false;
+	            }
+	        } catch (err) {
+	            return false;
+	        }
+	    },
+	    safeGetProp: function safeGetProp(obj, name) {
+	        try {
+	            return obj[name];
+	        } catch (err) {
+	            return;
+	        }
+	    },
+	    listen: function listen(win, event, handler) {
+	        if (win.addEventListener) {
+	            win.addEventListener(event, handler);
+	        } else {
+	            win.attachEvent('on' + event, handler);
+	        }
+
+	        return {
+	            cancel: function cancel() {
+	                if (win.removeEventListener) {
+	                    win.removeEventListener(event, handler);
+	                } else {
+	                    win.detachEvent('on' + event, handler);
+	                }
+	            }
+	        };
+	    },
+	    apply: function apply(method, context, args) {
+	        if (method.apply instanceof Function) {
+	            return method.apply(context, args);
+	        }
+	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+	    },
+	    find: function find(collection, method, def) {
+	        if (!collection) {
+	            return def;
+	        }
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return collection[i];
+	            }
+	        }
+	        return def;
+	    },
+	    map: function map(collection, method) {
+	        var results = [];
+	        for (var i = 0; i < collection.length; i++) {
+	            results.push(method(collection[i]));
+	        }
+	        return results;
+	    },
+	    some: function some(collection, method) {
+	        method = method || Boolean;
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    },
+	    keys: function keys(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(key);
+	            }
+	        }
+	        return result;
+	    },
+	    values: function values(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(mapping[key]);
+	            }
+	        }
+	        return result;
+	    },
+	    getByValue: function getByValue(mapping, value) {
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
+	                return key;
+	            }
+	        }
+	    },
+	    uniqueID: function uniqueID() {
+
+	        var chars = '0123456789abcdef';
+
+	        return 'xxxxxxxxxx'.replace(/./g, function () {
+	            return chars.charAt(Math.floor(Math.random() * chars.length));
+	        });
+	    },
+	    memoize: function memoize(method) {
+
+	        var results = {};
+
+	        return function memoized() {
+	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
+	            if (!results.hasOwnProperty(args)) {
+	                results[args] = method.apply(this, arguments);
+	            }
+	            return results[args];
+	        };
+	    },
+	    extend: function extend(obj, source) {
+	        if (!source) {
+	            return obj;
+	        }
+
+	        for (var key in source) {
+	            if (source.hasOwnProperty(key)) {
+	                obj[key] = source[key];
+	            }
+	        }
+
+	        return obj;
+	    },
+	    each: function each(obj, callback) {
+	        if (obj instanceof Array) {
+	            for (var i = 0; i < obj.length; i++) {
+	                callback(obj[i], i);
+	            }
+	        } else if (obj instanceof Object && !(obj instanceof Function)) {
+	            for (var key in obj) {
+	                if (obj.hasOwnProperty(key)) {
+	                    callback(obj[key], key);
+	                }
+	            }
+	        }
+	    },
+	    replaceObject: function replaceObject(obj, callback) {
+
+	        var newobj = obj instanceof Array ? [] : {};
+
+	        util.each(obj, function (item, key) {
+
+	            var result = callback(item);
+
+	            if (result !== undefined) {
+	                newobj[key] = result;
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
+	                newobj[key] = util.replaceObject(item, callback);
+	            } else {
+	                newobj[key] = item;
+	            }
+	        });
+
+	        return newobj;
+	    },
+	    safeInterval: function safeInterval(method, time) {
+	        var timeout = void 0;
+
+	        function runInterval() {
+	            timeout = setTimeout(runInterval, time);
+	            method.call();
+	        }
+
+	        timeout = setTimeout(runInterval, time);
+
+	        return {
+	            cancel: function cancel() {
+	                clearTimeout(timeout);
+	            }
+	        };
+	    },
+	    intervalTimeout: function intervalTimeout(time, interval, method) {
+
+	        var safeInterval = util.safeInterval(function () {
+	            time -= interval;
+
+	            time = time <= 0 ? 0 : time;
+
+	            if (time === 0) {
+	                safeInterval.cancel();
+	            }
+
+	            method(time);
+	        }, interval);
+
+	        return safeInterval;
+	    },
+	    getDomain: function getDomain(win) {
+	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
+	    }
+	};
+
+/***/ },
+/* 15 */
 /*!*************************************!*\
   !*** ./~/post-robot/src/lib/log.js ***!
   \*************************************/
@@ -1564,7 +1515,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.log = undefined;
 
-	var _util = __webpack_require__(/*! ./util */ 9);
+	var _util = __webpack_require__(/*! ./util */ 14);
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
@@ -1682,7 +1633,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 17 */
+/* 16 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/windows.js ***!
   \*****************************************/
@@ -1693,14 +1644,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.childWindows = undefined;
 	exports.isSameDomain = isSameDomain;
 	exports.getOpener = getOpener;
 	exports.getParentWindow = getParentWindow;
+	exports.getWindowId = getWindowId;
+	exports.getWindowById = getWindowById;
+	exports.registerWindow = registerWindow;
+	exports.isWindowEqual = isWindowEqual;
+	exports.isSameTopWindow = isSameTopWindow;
+	exports.isWindowClosed = isWindowClosed;
 
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _util = __webpack_require__(/*! ./util */ 9);
+	var _util = __webpack_require__(/*! ./util */ 14);
 
 	var domainMatches = [];
 
@@ -1721,6 +1675,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
+
+	            if (!_match.match) {
+	                return false;
+	            }
+
+	            _match.match = false;
+
+	            try {
+	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
+	            } catch (err) {
+	                return;
+	            }
+
 	            return _match.match;
 	        }
 	    }
@@ -1799,56 +1766,108 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var windows = [];
+	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
 
-	function getMap(key, value) {
-	    return _util.util.find(windows, function (map) {
-	        return map[key] === value;
-	    }, {});
+	function getWindowId(win) {
+
+	    if (win === window) {
+	        return windowId;
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+
+	        try {
+	            if (map.win === win) {
+	                return map.id;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+	    }
 	}
 
-	var childWindows = exports.childWindows = {
-	    getWindowId: function getWindowId(win) {
-	        return getMap('win', win).id;
-	    },
-	    getWindowById: function getWindowById(id) {
-	        if (window.frames && window.frames[id]) {
-	            return window.frames[id];
+	function getWindowById(id) {
+
+	    if (id === window.name || id === windowId) {
+	        return window;
+	    }
+
+	    if (window.frames && window.frames[id]) {
+	        return window.frames[id];
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+
+	        try {
+	            if (map.id === id) {
+	                return map.win;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+	    }
+	}
+
+	function registerWindow(id, win) {
+
+	    for (var _iterator3 = windows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
 	        }
 
-	        return getMap('id', id).win;
-	    },
-	    register: function register(id, win, type) {
+	        var map = _ref3;
 
-	        var existing = _util.util.find(windows, function (map) {
-	            return map.id === id && map.win === win;
-	        });
-
-	        if (existing) {
-	            return;
+	        try {
+	            if (map.id === id && map.win === win) {
+	                return;
+	            }
+	        } catch (err) {
+	            continue;
 	        }
 
-	        windows.push({
-	            id: id,
-	            win: win,
-	            type: type
-	        });
-	    },
-	    isEqual: function isEqual(win1, win2) {
-
-	        if (win1 === win2) {
-	            return true;
+	        if (map.id === id && map.win !== win) {
+	            throw new Error('Can not register a duplicate window with name ' + id);
 	        }
+	    }
 
-	        var id1 = this.getWindowId(win1);
-	        var id2 = this.getWindowId(win2);
+	    windows.push({
+	        id: id,
+	        win: win
+	    });
+	}
 
-	        if (id1 && id2 && id1 === id2) {
-	            return true;
-	        }
+	function isWindowEqual(win1, win2) {
 
+	    if (win1 === win2) {
+	        return true;
+	    }
+
+	    var id1 = getWindowId(win1);
+	    var id2 = getWindowId(win2);
+
+	    if (id1 && id2 && id1 === id2) {
+	        return true;
+	    }
+
+	    return false;
+	}
+
+	function isSameTopWindow(win1, win2) {
+	    try {
+	        return win1.top === win2.top;
+	    } catch (err) {
 	        return false;
 	    }
-	};
+	}
 
 	var openWindow = window.open;
 
@@ -1861,15 +1880,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var win = _util.util.apply(openWindow, this, arguments);
 
-	    childWindows.register(name, win, _conf.CONSTANTS.WINDOW_TYPES.POPUP);
+	    registerWindow(name, win);
 
 	    getOpener(win);
 
 	    return win;
 	};
 
+	function safeGet(obj, prop) {
+
+	    var result = void 0;
+
+	    try {
+	        result = obj[prop];
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return result;
+	}
+
+	function isWindowClosed(win) {
+	    try {
+	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
+	    } catch (err) {
+	        return true;
+	    }
+	}
+
 /***/ },
-/* 18 */
+/* 17 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/methods.js ***!
   \*****************************************/
@@ -1888,7 +1928,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _util = __webpack_require__(/*! ./util */ 9);
+	var _util = __webpack_require__(/*! ./util */ 14);
 
 	var _interface = __webpack_require__(/*! ../interface */ 3);
 
@@ -1960,7 +2000,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 19 */
+/* 18 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/lib/ready.js ***!
   \***************************************/
@@ -1976,13 +2016,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _windows = __webpack_require__(/*! ./windows */ 17);
+	var _windows = __webpack_require__(/*! ./windows */ 16);
 
 	var _interface = __webpack_require__(/*! ../interface */ 3);
 
-	var _log = __webpack_require__(/*! ./log */ 16);
+	var _log = __webpack_require__(/*! ./log */ 15);
 
-	var _promise = __webpack_require__(/*! ./promise */ 13);
+	var _promise = __webpack_require__(/*! ./promise */ 11);
 
 	var readyWindows = [];
 	var readyPromises = [];
@@ -2035,7 +2075,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 20 */
+/* 19 */
 /*!******************************************!*\
   !*** ./~/post-robot/src/compat/index.js ***!
   \******************************************/
@@ -2047,7 +2087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(/*! ./bridge */ 21);
+	var _bridge = __webpack_require__(/*! ./bridge */ 20);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -2059,7 +2099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(/*! ./global */ 22);
+	var _global = __webpack_require__(/*! ./global */ 21);
 
 	Object.keys(_global).forEach(function (key) {
 	  if (key === "default") return;
@@ -2071,7 +2111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(/*! ./ie */ 23);
+	var _ie = __webpack_require__(/*! ./ie */ 22);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -2084,7 +2124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 21 */
+/* 20 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/compat/bridge.js ***!
   \*******************************************/
@@ -2101,7 +2141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
 	var BRIDGE_NAME_PREFIX = 'postrobot_bridge';
 
@@ -2191,7 +2231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 22 */
+/* 21 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/compat/global.js ***!
   \*******************************************/
@@ -2206,9 +2246,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 10);
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
 	function registerGlobals() {
 
@@ -2228,7 +2268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 23 */
+/* 22 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/compat/ie.js ***!
   \***************************************/
@@ -2243,26 +2283,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-	        var isIframeMessagingParent = _lib.util.isFrameOwnedBy(targetWindow, sourceWindow);
-	        var isParentMessagingIframe = _lib.util.isFrameOwnedBy(sourceWindow, targetWindow);
-
-	        if (!isIframeMessagingParent && !isParentMessagingIframe) {
-	            if (sourceWindow === window) {
-	                throw new Error('Can not send post messages to another window (disabled by config to emulate IE)');
-	            } else {
-	                throw new Error('Can not receive post messages sent from another window (disabled by config to emulate IE)');
-	            }
+	        if (!(0, _lib.isSameTopWindow)(sourceWindow, targetWindow)) {
+	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
 	        }
 	    }
 	}
 
 /***/ },
-/* 24 */
+/* 23 */
 /*!************************************************!*\
   !*** ./~/post-robot/src/drivers/send/index.js ***!
   \************************************************/
@@ -2281,18 +2314,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 12);
+	var _lib = __webpack_require__(/*! ../../lib */ 10);
 
-	var _strategies = __webpack_require__(/*! ./strategies */ 25);
+	var _strategies = __webpack_require__(/*! ./strategies */ 24);
 
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 
 	    var id = _lib.util.uniqueID();
-	    var source = (0, _conf.getWindowID)();
+	    var source = (0, _lib.getWindowId)(window);
 	    var type = _lib.util.getType();
-	    var target = _lib.childWindows.getWindowId(win);
+	    var target = (0, _lib.getWindowId)(win);
 
 	    return _extends({}, message, options, {
 	        id: message.id || id,
@@ -2328,7 +2361,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Attemping to send message to self');
 	        }
 
-	        if (win.closed) {
+	        if ((0, _lib.isWindowClosed)(win)) {
 	            throw new Error('Window is closed');
 	        }
 
@@ -2367,7 +2400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 24 */
 /*!*****************************************************!*\
   !*** ./~/post-robot/src/drivers/send/strategies.js ***!
   \*****************************************************/
@@ -2384,9 +2417,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 12);
+	var _lib = __webpack_require__(/*! ../../lib */ 10);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 20);
+	var _compat = __webpack_require__(/*! ../../compat */ 19);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2429,8 +2462,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, function (win, message, domain) {
 
-	    if ((0, _lib.getOpener)(win) !== window && (0, _lib.getOpener)(window) !== win) {
-	        throw new Error('Can only use bridge to communicate between a window and a child or parent window');
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
 	    var frame = (0, _compat.getBridgeFor)(win);
@@ -2475,8 +2508,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
-	    if ((0, _lib.getOpener)(win) !== window && (0, _lib.getOpener)(window) !== win) {
-	        throw new Error('Can only use bridge to communicate between a window and a child or parent window');
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
 	    if (!message.target) {
@@ -2510,7 +2543,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 26 */
+/* 25 */
 /*!***********************************************!*\
   !*** ./~/post-robot/src/drivers/listeners.js ***!
   \***********************************************/
@@ -2527,7 +2560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.removeRequestListener = removeRequestListener;
 	exports.addRequestListener = addRequestListener;
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
 	var listeners = exports.listeners = void 0;
 
@@ -2563,7 +2596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return requestListener.options;
 	        }
 
-	        if (win && _lib.childWindows.isEqual(win, requestListener.win)) {
+	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
 	            return requestListener.options;
 	        }
 	    }
@@ -2616,7 +2649,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	resetListeners();
 
 /***/ },
-/* 27 */
+/* 26 */
 /*!***************************************************!*\
   !*** ./~/post-robot/src/drivers/receive/types.js ***!
   \***************************************************/
@@ -2635,11 +2668,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 12);
+	var _lib = __webpack_require__(/*! ../../lib */ 10);
 
-	var _send = __webpack_require__(/*! ../send */ 24);
+	var _send = __webpack_require__(/*! ../send */ 23);
 
-	var _listeners = __webpack_require__(/*! ../listeners */ 26);
+	var _listeners = __webpack_require__(/*! ../listeners */ 25);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2657,6 +2690,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
 	    function respond(data) {
+
+	        if ((0, _lib.isWindowClosed)(source)) {
+	            return;
+	        }
+
 	        return (0, _send.sendMessage)(source, _extends({
 	            target: message.originalSource,
 	            hash: message.hash,
@@ -2673,10 +2711,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (!options) {
 	                throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
-	            }
-
-	            if (options.window && source && options.window !== source) {
-	                return;
 	            }
 
 	            if (options.domain) {
@@ -2729,7 +2763,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 28 */
+/* 27 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/server.js ***!
   \**********************************************/
@@ -2746,9 +2780,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 12);
+	var _lib = __webpack_require__(/*! ../lib */ 10);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 10);
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
 	function listen(options) {
 
@@ -2784,7 +2818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.window && options.errorOnClose) {
 	        (function () {
 	            var interval = _lib.util.safeInterval(function () {
-	                if (options.window.closed) {
+	                if ((0, _lib.isWindowClosed)(options.window)) {
 	                    interval.cancel();
 	                    options.handleError(new Error('Post message target window is closed'));
 	                }
@@ -2840,7 +2874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 28 */
 /*!*********************************************!*\
   !*** ./~/post-robot/src/interface/proxy.js ***!
   \*********************************************/
@@ -2854,7 +2888,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.proxy = proxy;
 	exports.unproxy = unproxy;
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 10);
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
 	function proxy(window1, window2) {
 
@@ -2886,7 +2920,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 29 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/config.js ***!
   \**********************************************/
@@ -2924,7 +2958,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 30 */
 /*!********************************!*\
   !*** ./src/component/index.js ***!
   \********************************/
@@ -2936,7 +2970,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _component = __webpack_require__(/*! ./component */ 32);
+	var _component = __webpack_require__(/*! ./component */ 31);
 
 	Object.keys(_component).forEach(function (key) {
 	  if (key === "default") return;
@@ -2948,7 +2982,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _parent = __webpack_require__(/*! ./parent */ 53);
+	var _parent = __webpack_require__(/*! ./parent */ 52);
 
 	Object.keys(_parent).forEach(function (key) {
 	  if (key === "default") return;
@@ -2960,7 +2994,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _child = __webpack_require__(/*! ./child */ 43);
+	var _child = __webpack_require__(/*! ./child */ 42);
 
 	Object.keys(_child).forEach(function (key) {
 	  if (key === "default") return;
@@ -2973,7 +3007,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 32 */
+/* 31 */
 /*!******************************************!*\
   !*** ./src/component/component/index.js ***!
   \******************************************/
@@ -2990,29 +3024,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _client = __webpack_require__(/*! beaver-logger/client */ 33);
+	var _client = __webpack_require__(/*! beaver-logger/client */ 32);
 
 	var _client2 = _interopRequireDefault(_client);
 
-	var _child = __webpack_require__(/*! ../child */ 43);
+	var _child = __webpack_require__(/*! ../child */ 42);
 
-	var _parent = __webpack_require__(/*! ../parent */ 53);
+	var _parent = __webpack_require__(/*! ../parent */ 52);
 
-	var _props = __webpack_require__(/*! ./props */ 57);
+	var _props = __webpack_require__(/*! ./props */ 56);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 50);
 
-	var _validate2 = __webpack_require__(/*! ./validate */ 58);
+	var _validate2 = __webpack_require__(/*! ./validate */ 57);
 
-	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 59);
+	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 58);
 
 	var _parent3 = _interopRequireDefault(_parent2);
 
-	var _component = __webpack_require__(/*! ./templates/component.htm */ 60);
+	var _component = __webpack_require__(/*! ./templates/component.htm */ 59);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _drivers = __webpack_require__(/*! ../../drivers */ 61);
+	var _drivers = __webpack_require__(/*! ../../drivers */ 60);
 
 	var drivers = _interopRequireWildcard(_drivers);
 
@@ -3260,7 +3294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 /***/ },
-/* 33 */
+/* 32 */
 /*!*****************************************!*\
   !*** ./~/beaver-logger/client/index.js ***!
   \*****************************************/
@@ -3272,7 +3306,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _logger = __webpack_require__(/*! ./logger */ 34);
+	var _logger = __webpack_require__(/*! ./logger */ 33);
 
 	Object.keys(_logger).forEach(function (key) {
 	  if (key === "default") return;
@@ -3284,7 +3318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _init = __webpack_require__(/*! ./init */ 40);
+	var _init = __webpack_require__(/*! ./init */ 39);
 
 	Object.keys(_init).forEach(function (key) {
 	  if (key === "default") return;
@@ -3296,7 +3330,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _transitions = __webpack_require__(/*! ./transitions */ 42);
+	var _transitions = __webpack_require__(/*! ./transitions */ 41);
 
 	Object.keys(_transitions).forEach(function (key) {
 	  if (key === "default") return;
@@ -3308,7 +3342,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _builders = __webpack_require__(/*! ./builders */ 38);
+	var _builders = __webpack_require__(/*! ./builders */ 37);
 
 	Object.keys(_builders).forEach(function (key) {
 	  if (key === "default") return;
@@ -3322,7 +3356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports['default'] = module.exports;
 
 /***/ },
-/* 34 */
+/* 33 */
 /*!******************************************!*\
   !*** ./~/beaver-logger/client/logger.js ***!
   \******************************************/
@@ -3343,11 +3377,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.error = error;
 	exports.track = track;
 
-	var _util = __webpack_require__(/*! ./util */ 35);
+	var _util = __webpack_require__(/*! ./util */ 34);
 
-	var _builders = __webpack_require__(/*! ./builders */ 38);
+	var _builders = __webpack_require__(/*! ./builders */ 37);
 
-	var _config = __webpack_require__(/*! ./config */ 39);
+	var _config = __webpack_require__(/*! ./config */ 38);
 
 	var buffer = exports.buffer = [];
 	var tracking = exports.tracking = {};
@@ -3553,7 +3587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 34 */
 /*!****************************************!*\
   !*** ./~/beaver-logger/client/util.js ***!
   \****************************************/
@@ -3572,7 +3606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.safeInterval = safeInterval;
 	exports.uniqueID = uniqueID;
 
-	var _es6PromiseMin = __webpack_require__(/*! es6-promise-min */ 36);
+	var _es6PromiseMin = __webpack_require__(/*! es6-promise-min */ 35);
 
 	function extend(dest, src) {
 	    var over = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
@@ -3708,7 +3742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 35 */
 /*!***************************************************!*\
   !*** ./~/es6-promise-min/dist/es6-promise.min.js ***!
   \***************************************************/
@@ -3733,10 +3767,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	q(c,a);return c};h.reject=function(a,b){var c=new this(p,b);g(c,a);return c};h.prototype={constructor:h,then:function(a,b){var c=this.a;if(1===c&&!a||2===c&&!b)return this;var d=new this.constructor(p),e=this.b;if(c){var f=arguments[c-1];r(function(){C(c,d,f,e)})}else u(this,d,a,b);return d},"catch":function(a){return this.then(null,a)}};var z={Promise:h,polyfill:function(){var a;a="undefined"!==typeof global?global:"undefined"!==typeof window&&window.document?window:self;"Promise"in a&&"resolve"in
 	a.Promise&&"reject"in a.Promise&&"all"in a.Promise&&"race"in a.Promise&&function(){var b;new a.Promise(function(a){b=a});return s(b)}()||(a.Promise=h)}}; true?!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return z}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"undefined"!==typeof module&&module.exports?module.exports=z:"undefined"!==typeof this&&(this.ES6Promise=z)}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 37), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 36), (function() { return this; }())))
 
 /***/ },
-/* 37 */
+/* 36 */
 /*!******************************!*\
   !*** ./~/process/browser.js ***!
   \******************************/
@@ -3844,7 +3878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 38 */
+/* 37 */
 /*!********************************************!*\
   !*** ./~/beaver-logger/client/builders.js ***!
   \********************************************/
@@ -3881,7 +3915,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 38 */
 /*!******************************************!*\
   !*** ./~/beaver-logger/client/config.js ***!
   \******************************************/
@@ -3917,7 +3951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 40 */
+/* 39 */
 /*!****************************************!*\
   !*** ./~/beaver-logger/client/init.js ***!
   \****************************************/
@@ -3930,13 +3964,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.init = init;
 
-	var _config = __webpack_require__(/*! ./config */ 39);
+	var _config = __webpack_require__(/*! ./config */ 38);
 
-	var _util = __webpack_require__(/*! ./util */ 35);
+	var _util = __webpack_require__(/*! ./util */ 34);
 
-	var _performance = __webpack_require__(/*! ./performance */ 41);
+	var _performance = __webpack_require__(/*! ./performance */ 40);
 
-	var _logger = __webpack_require__(/*! ./logger */ 34);
+	var _logger = __webpack_require__(/*! ./logger */ 33);
 
 	var initiated = false;
 
@@ -3986,7 +4020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 40 */
 /*!***********************************************!*\
   !*** ./~/beaver-logger/client/performance.js ***!
   \***********************************************/
@@ -4003,13 +4037,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.initHeartBeat = initHeartBeat;
 	exports.initPerformance = initPerformance;
 
-	var _config = __webpack_require__(/*! ./config */ 39);
+	var _config = __webpack_require__(/*! ./config */ 38);
 
-	var _logger = __webpack_require__(/*! ./logger */ 34);
+	var _logger = __webpack_require__(/*! ./logger */ 33);
 
-	var _builders = __webpack_require__(/*! ./builders */ 38);
+	var _builders = __webpack_require__(/*! ./builders */ 37);
 
-	var _util = __webpack_require__(/*! ./util */ 35);
+	var _util = __webpack_require__(/*! ./util */ 34);
 
 	var enablePerformance = window && window.performance && performance.now && performance.timing && performance.timing.connectEnd && performance.timing.navigationStart && Math.abs(performance.now() - Date.now()) > 1000 && performance.now() - (performance.timing.connectEnd - performance.timing.navigationStart) > 0;
 
@@ -4144,7 +4178,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 41 */
 /*!***********************************************!*\
   !*** ./~/beaver-logger/client/transitions.js ***!
   \***********************************************/
@@ -4159,15 +4193,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.endTransition = endTransition;
 	exports.transition = transition;
 
-	var _performance = __webpack_require__(/*! ./performance */ 41);
+	var _performance = __webpack_require__(/*! ./performance */ 40);
 
-	var _logger = __webpack_require__(/*! ./logger */ 34);
+	var _logger = __webpack_require__(/*! ./logger */ 33);
 
-	var _builders = __webpack_require__(/*! ./builders */ 38);
+	var _builders = __webpack_require__(/*! ./builders */ 37);
 
-	var _util = __webpack_require__(/*! ./util */ 35);
+	var _util = __webpack_require__(/*! ./util */ 34);
 
-	var _config = __webpack_require__(/*! ./config */ 39);
+	var _config = __webpack_require__(/*! ./config */ 38);
 
 	var windowID = (0, _util.uniqueID)();
 	var pageID = (0, _util.uniqueID)();
@@ -4226,7 +4260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 43 */
+/* 42 */
 /*!**************************************!*\
   !*** ./src/component/child/index.js ***!
   \**************************************/
@@ -4245,19 +4279,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
 
-	var _base = __webpack_require__(/*! ../base */ 44);
+	var _base = __webpack_require__(/*! ../base */ 43);
 
-	var _window = __webpack_require__(/*! ../window */ 50);
+	var _window = __webpack_require__(/*! ../window */ 49);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 45);
+	var _lib = __webpack_require__(/*! ../../lib */ 44);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 50);
 
 	var _error = __webpack_require__(/*! ../../error */ 1);
 
-	var _props = __webpack_require__(/*! ../props */ 52);
+	var _props = __webpack_require__(/*! ../props */ 51);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -4619,7 +4653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 44 */
+/* 43 */
 /*!*******************************!*\
   !*** ./src/component/base.js ***!
   \*******************************/
@@ -4638,7 +4672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _lib = __webpack_require__(/*! ../lib */ 45);
+	var _lib = __webpack_require__(/*! ../lib */ 44);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -4806,7 +4840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 /***/ },
-/* 45 */
+/* 44 */
 /*!**************************!*\
   !*** ./src/lib/index.js ***!
   \**************************/
@@ -4818,7 +4852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _dom = __webpack_require__(/*! ./dom */ 46);
+	var _dom = __webpack_require__(/*! ./dom */ 45);
 
 	Object.keys(_dom).forEach(function (key) {
 	  if (key === "default") return;
@@ -4830,7 +4864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _fn = __webpack_require__(/*! ./fn */ 47);
+	var _fn = __webpack_require__(/*! ./fn */ 46);
 
 	Object.keys(_fn).forEach(function (key) {
 	  if (key === "default") return;
@@ -4842,7 +4876,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _promise = __webpack_require__(/*! ./promise */ 49);
+	var _promise = __webpack_require__(/*! ./promise */ 48);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -4854,7 +4888,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _util = __webpack_require__(/*! ./util */ 48);
+	var _util = __webpack_require__(/*! ./util */ 47);
 
 	Object.keys(_util).forEach(function (key) {
 	  if (key === "default") return;
@@ -4867,7 +4901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 46 */
+/* 45 */
 /*!************************!*\
   !*** ./src/lib/dom.js ***!
   \************************/
@@ -4892,9 +4926,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.addEventToClass = addEventToClass;
 	exports.template = template;
 
-	var _fn = __webpack_require__(/*! ./fn */ 47);
+	var _fn = __webpack_require__(/*! ./fn */ 46);
 
-	var _util = __webpack_require__(/*! ./util */ 48);
+	var _util = __webpack_require__(/*! ./util */ 47);
 
 	/*  Get Element
 	    -----------
@@ -5241,7 +5275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 47 */
+/* 46 */
 /*!***********************!*\
   !*** ./src/lib/fn.js ***!
   \***********************/
@@ -5312,7 +5346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 48 */
+/* 47 */
 /*!*************************!*\
   !*** ./src/lib/util.js ***!
   \*************************/
@@ -5596,7 +5630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 49 */
+/* 48 */
 /*!****************************!*\
   !*** ./src/lib/promise.js ***!
   \****************************/
@@ -5609,7 +5643,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.denodeify = denodeify;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
 
 	/*  DeNodeify
 	    ---------
@@ -5643,7 +5677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 50 */
+/* 49 */
 /*!*********************************!*\
   !*** ./src/component/window.js ***!
   \*********************************/
@@ -5658,9 +5692,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildChildWindowName = buildChildWindowName;
 	exports.getPosition = getPosition;
 
-	var _lib = __webpack_require__(/*! ../lib */ 45);
+	var _lib = __webpack_require__(/*! ../lib */ 44);
 
-	var _constants = __webpack_require__(/*! ../constants */ 51);
+	var _constants = __webpack_require__(/*! ../constants */ 50);
 
 	/*  Build Child Window Name
 	    -----------------------
@@ -5782,7 +5816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 51 */
+/* 50 */
 /*!**************************!*\
   !*** ./src/constants.js ***!
   \**************************/
@@ -5795,7 +5829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.MAX_Z_INDEX = exports.CONTEXT_TYPES_LIST = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
-	var _lib = __webpack_require__(/*! ./lib */ 45);
+	var _lib = __webpack_require__(/*! ./lib */ 44);
 
 	var XCOMPONENT = exports.XCOMPONENT = 'xcomponent';
 
@@ -5844,7 +5878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var MAX_Z_INDEX = exports.MAX_Z_INDEX = 2147483647;
 
 /***/ },
-/* 52 */
+/* 51 */
 /*!********************************!*\
   !*** ./src/component/props.js ***!
   \********************************/
@@ -5858,7 +5892,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.normalizeProp = normalizeProp;
 	exports.normalizeProps = normalizeProps;
 
-	var _lib = __webpack_require__(/*! ../lib */ 45);
+	var _lib = __webpack_require__(/*! ../lib */ 44);
 
 	/*  Normalize Prop
 	    --------------
@@ -5965,7 +5999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 53 */
+/* 52 */
 /*!***************************************!*\
   !*** ./src/component/parent/index.js ***!
   \***************************************/
@@ -5982,7 +6016,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _client = __webpack_require__(/*! beaver-logger/client */ 33);
+	var _client = __webpack_require__(/*! beaver-logger/client */ 32);
 
 	var _client2 = _interopRequireDefault(_client);
 
@@ -5990,23 +6024,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
 
-	var _base = __webpack_require__(/*! ../base */ 44);
+	var _base = __webpack_require__(/*! ../base */ 43);
 
-	var _window = __webpack_require__(/*! ../window */ 50);
+	var _window = __webpack_require__(/*! ../window */ 49);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 45);
+	var _lib = __webpack_require__(/*! ../../lib */ 44);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 50);
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 54);
+	var _drivers = __webpack_require__(/*! ./drivers */ 53);
 
-	var _validate = __webpack_require__(/*! ./validate */ 55);
+	var _validate = __webpack_require__(/*! ./validate */ 54);
 
-	var _props = __webpack_require__(/*! ./props */ 56);
+	var _props = __webpack_require__(/*! ./props */ 55);
 
-	var _props2 = __webpack_require__(/*! ../props */ 52);
+	var _props2 = __webpack_require__(/*! ../props */ 51);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -6068,7 +6102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.childWindowName = options.childWindowName || (0, _window.buildChildWindowName)(_this.component.name, {
 	            tag: _this.component.tag,
 	            parent: window.name,
-	            ts: Date.now()
+	            id: (0, _lib.uniqueID)()
 	        });
 
 	        // Set up promise for init
@@ -6120,9 +6154,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        (function () {
 	                            var self = _this2;
 	                            _this2.props[key] = function () {
+	                                var _this3 = this,
+	                                    _arguments = arguments;
+
 	                                self.component.log('autoclose', { prop: key });
-	                                self.close();
-	                                return value.apply(this, arguments);
+	                                return self.close().then(function () {
+	                                    return value.apply(_this3, _arguments);
+	                                });
 	                            };
 	                        })();
 	                    }
@@ -6175,25 +6213,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps(props) {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            return this.onInit.then(function () {
 
-	                (0, _validate.validateProps)(_this3.component, props);
+	                (0, _validate.validateProps)(_this4.component, props);
 
-	                var oldProps = (0, _lib.stringifyWithFunctions)(_this3.props);
+	                var oldProps = (0, _lib.stringifyWithFunctions)(_this4.props);
 
-	                var newProps = _extends({}, _this3.props, props);
+	                var newProps = _extends({}, _this4.props, props);
 
-	                _this3.setProps(newProps);
+	                _this4.setProps(newProps);
 
 	                // Only send down the new props if they do not match the old, and if we have already sent down initial props
 
-	                if (oldProps !== (0, _lib.stringifyWithFunctions)(_this3.props)) {
-	                    _this3.component.log('parent_update_props');
+	                if (oldProps !== (0, _lib.stringifyWithFunctions)(_this4.props)) {
+	                    _this4.component.log('parent_update_props');
 
-	                    return _src2['default'].send(_this3.window, _constants.POST_MESSAGE.PROPS, {
-	                        props: _this3.props
+	                    return _src2['default'].send(_this4.window, _constants.POST_MESSAGE.PROPS, {
+	                        props: _this4.props
 	                    });
 	                }
 	            });
@@ -6268,34 +6306,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render(element, context) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this4.validateRender(context);
+	                _this5.validateRender(context);
 
-	                context = _this4.getRenderContext(element, context);
+	                context = _this5.getRenderContext(element, context);
 
-	                _this4.component.log('render_' + context, { context: context, element: element });
+	                _this5.component.log('render_' + context, { context: context, element: element });
 
 	                if (_drivers.RENDER_DRIVERS[context].render) {
-	                    _drivers.RENDER_DRIVERS[context].render.call(_this4, element);
+	                    _drivers.RENDER_DRIVERS[context].render.call(_this5, element);
 	                }
 
-	                _this4.setForCleanup('context', context);
+	                _this5.setForCleanup('context', context);
 
 	                if (_drivers.RENDER_DRIVERS[context].overlay) {
-	                    _this4.createParentTemplate();
+	                    _this5.createParentTemplate();
 	                }
 
-	                _this4.open(element, context);
-	                _this4.listen(_this4.window);
-	                _this4.loadUrl(_this4.buildUrl());
-	                _this4.runTimeout();
+	                _this5.open(element, context);
+	                _this5.listen(_this5.window);
+	                _this5.loadUrl(_this5.buildUrl());
+	                _this5.runTimeout();
 
-	                _this4.watchForClose();
+	                _this5.watchForClose();
 
-	                return _this4.onInit;
+	                return _this5.onInit;
 	            });
 	        }
 
@@ -6328,42 +6366,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this5.validateRender(context);
+	                _this6.validateRender(context);
 
-	                context = _this5.getRenderContext(element, context);
+	                context = _this6.getRenderContext(element, context);
 
 	                if (!(0, _lib.getParentWindow)()) {
-	                    throw new Error('[' + _this5.component.tag + '] Can not render to parent - no parent exists');
+	                    throw new Error('[' + _this6.component.tag + '] Can not render to parent - no parent exists');
 	                }
 
 	                if (!window.name) {
-	                    throw new Error('[' + _this5.component.tag + '] Can not render to parent - not in a child component window');
+	                    throw new Error('[' + _this6.component.tag + '] Can not render to parent - not in a child component window');
 	                }
 
-	                _this5.component.log('render_' + context + '_to_parent', { element: element, context: context });
+	                _this6.component.log('render_' + context + '_to_parent', { element: element, context: context });
 
 	                // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
 
-	                _this5.childWindowName = (0, _window.buildChildWindowName)(_this5.component.name, {
-	                    tag: _this5.component.tag,
-	                    ts: Date.now(),
+	                _this6.childWindowName = (0, _window.buildChildWindowName)(_this6.component.name, {
+	                    tag: _this6.component.tag,
+	                    id: (0, _lib.uniqueID)(),
 	                    parent: window.name,
 	                    sibling: 1
 	                });
 
-	                _this5.setForCleanup('context', context);
+	                _this6.setForCleanup('context', context);
 
 	                // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
 	                // open them from the child, since we depend on there being a click event to avoid the popup blocker.
 
 	                if (_drivers.RENDER_DRIVERS[context].renderToParent) {
-	                    _drivers.RENDER_DRIVERS[context].renderToParent.call(_this5, element);
+	                    _drivers.RENDER_DRIVERS[context].renderToParent.call(_this6, element);
 	                }
 
 	                // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
@@ -6371,32 +6409,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _src2['default'].sendToParent(_constants.POST_MESSAGE.RENDER, _extends({}, options, {
 
-	                    tag: _this5.component.tag,
+	                    tag: _this6.component.tag,
 	                    context: context,
 	                    element: element,
 
 	                    options: {
-	                        props: _this5.props,
+	                        props: _this6.props,
 
-	                        childWindowName: _this5.childWindowName
+	                        childWindowName: _this6.childWindowName
 	                    }
 
 	                })).then(function (data) {
 
 	                    // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
-	                    if (!_this5.window) {
-	                        _this5.setForCleanup('window', (0, _lib.getParentWindow)().frames[_this5.childWindowName]);
+	                    if (!_this6.window) {
+	                        _this6.setForCleanup('window', (0, _lib.getParentWindow)().frames[_this6.childWindowName]);
 	                    }
 
 	                    // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
 	                    // messages on the sibling window, since we have a handle on it.
 
-	                    _this5.listen(_this5.window);
+	                    _this6.listen(_this6.window);
 
-	                    _this5.watchForClose();
+	                    _this6.watchForClose();
 
-	                    return _this5.onInit;
+	                    return _this6.onInit;
 	                });
 	            });
 	        }
@@ -6410,21 +6448,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this6.component.log('detect_close_child');
-	                _this6.props.onClose();
-	                _this6.destroy();
+	                _this7.component.log('detect_close_child');
+	                _this7.props.onClose();
+	                _this7.destroy();
 	            });
 
 	            // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
 	            // and close the child manually if that happens.
 
 	            var unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this6.component.log('navigate_away');
+	                _this7.component.log('navigate_away');
 	                _client2['default'].flush();
-	                _this6.destroy();
+	                _this7.destroy();
 	            });
 
 	            this.registerForCleanup(function () {
@@ -6463,7 +6501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'hijackButton',
 	        value: function hijackButton(button, element, context) {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            context = this.getRenderContext(element, context);
 
@@ -6471,14 +6509,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _lib.hijackButton)(button, function (event, targetElement) {
 
-	                if (_this7.window) {
+	                if (_this8.window) {
 	                    event.preventDefault();
-	                    throw new Error('[' + _this7.component.tag + '] Component is already rendered');
+	                    throw new Error('[' + _this8.component.tag + '] Component is already rendered');
 	                }
 
 	                // Open the window to render into
 
-	                _this7.renderHijack(targetElement, element, context);
+	                _this8.renderHijack(targetElement, element, context);
 	            });
 
 	            return this;
@@ -6492,7 +6530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            context = this.getRenderContext(element, context);
 
@@ -6500,28 +6538,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this8.validateRender(context);
+	                _this9.validateRender(context);
 
-	                _this8.setForCleanup('context', context);
+	                _this9.setForCleanup('context', context);
 
 	                // Point the element to open in our child window
 
-	                targetElement.target = _this8.childWindowName;
+	                targetElement.target = _this9.childWindowName;
 
 	                if (_drivers.RENDER_DRIVERS[context].overlay) {
-	                    _this8.createParentTemplate();
+	                    _this9.createParentTemplate();
 	                }
 
 	                // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
-	                _this8.open(null, context);
+	                _this9.open(null, context);
 
 	                // Do everything else the same way -- listen for events, render the overlay, etc.
 
-	                _this8.listen(_this8.window);
-	                _this8.runTimeout();
+	                _this9.listen(_this9.window);
+	                _this9.runTimeout();
 
-	                return _this8.onInit;
+	                return _this9.onInit;
 	            });
 	        }
 
@@ -6554,19 +6592,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this9.component.tag + '] Loading component ' + _this9.component.tag + ' timed out after ' + _this9.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this10.component.tag + '] Loading component ' + _this10.component.tag + ' timed out after ' + _this10.props.timeout + ' milliseconds');
 
-	                    _this9.onInit.reject(error)['catch'](function (err) {
-	                        _this9.component.log('timed_out', { timeout: _this9.props.timeout });
-	                        _this9.props.onTimeout(err);
-	                        _this9.destroy();
+	                    _this10.onInit.reject(error)['catch'](function (err) {
+	                        _this10.component.log('timed_out', { timeout: _this10.props.timeout });
+	                        _this10.props.onTimeout(err);
 	                    });
 	                }, this.props.timeout);
 	            }
@@ -6655,27 +6692,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                if ((0, _lib.isWindowClosed)(_this10.window)) {
-	                    return _this10.props.onClose();
+	                if ((0, _lib.isWindowClosed)(_this11.window)) {
+	                    return _this11.props.onClose();
 	                }
 
-	                if (_this10.closePromise) {
-	                    return _this10.closePromise;
+	                if (_this11.closePromise) {
+	                    return _this11.closePromise;
 	                }
 
-	                _this10.component.log('close');
+	                _this11.component.log('close');
 
 	                // We send a post message to the child to close. This has two effects:
 	                // 1. We let the child do any cleanup it needs to do
 	                // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
 
-	                _this10.props.onClose();
+	                _this11.props.onClose();
 
-	                var closePromise = _src2['default'].send(_this10.window, _constants.POST_MESSAGE.CLOSE)['catch'](function (err) {
+	                var closePromise = _src2['default'].send(_this11.window, _constants.POST_MESSAGE.CLOSE)['catch'](function (err) {
 
 	                    // If we get an error, log it as a warning, but don't error out
 
@@ -6684,11 +6721,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    // Whatever happens, we'll destroy the child window
 
-	                    _this10.destroy();
+	                    _this11.destroy();
 	                });
 
-	                _this10.setForCleanup('closePromise', closePromise);
-	                return _this10.closePromise;
+	                _this11.setForCleanup('closePromise', closePromise);
+	                return _this11.closePromise;
 	            });
 	        }
 
@@ -6734,7 +6771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            this.parentTemplate = (0, _lib.createElement)('div', {
 
@@ -6756,15 +6793,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }, document.body);
 
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this11.focus();
+	                return _this12.focus();
 	            });
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this11.close();
+	                return _this12.close();
 	            });
 
 	            this.registerForCleanup(function () {
-	                document.body.removeChild(_this11.parentTemplate);
-	                delete _this11.parentTemplate;
+	                document.body.removeChild(_this12.parentTemplate);
+	                delete _this12.parentTemplate;
 	            });
 	        }
 
@@ -6793,7 +6830,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.component.logError('error', { error: err.stack || err.toString() });
 	            this.onInit.reject(err);
 	            this.props.onError(err);
-	            this.destroy();
 	        }
 	    }]);
 
@@ -6843,7 +6879,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 54 */
+/* 53 */
 /*!*****************************************!*\
   !*** ./src/component/parent/drivers.js ***!
   \*****************************************/
@@ -6860,11 +6896,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _error = __webpack_require__(/*! ../../error */ 1);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 45);
+	var _lib = __webpack_require__(/*! ../../lib */ 44);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 50);
 
-	var _window = __webpack_require__(/*! ../window */ 50);
+	var _window = __webpack_require__(/*! ../window */ 49);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -7028,7 +7064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RENDER_DRIVERS);
 
 /***/ },
-/* 55 */
+/* 54 */
 /*!******************************************!*\
   !*** ./src/component/parent/validate.js ***!
   \******************************************/
@@ -7148,7 +7184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 56 */
+/* 55 */
 /*!***************************************!*\
   !*** ./src/component/parent/props.js ***!
   \***************************************/
@@ -7164,7 +7200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.propsToQuery = propsToQuery;
 
-	var _lib = __webpack_require__(/*! ../../lib */ 45);
+	var _lib = __webpack_require__(/*! ../../lib */ 44);
 
 	/*  Props to Query
 	    --------------
@@ -7210,7 +7246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 57 */
+/* 56 */
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
@@ -7299,7 +7335,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 58 */
+/* 57 */
 /*!*********************************************!*\
   !*** ./src/component/component/validate.js ***!
   \*********************************************/
@@ -7315,9 +7351,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.validate = validate;
 
-	var _props = __webpack_require__(/*! ./props */ 57);
+	var _props = __webpack_require__(/*! ./props */ 56);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 50);
 
 	function validateProps(options) {
 
@@ -7457,7 +7493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 59 */
+/* 58 */
 /*!******************************************************!*\
   !*** ./src/component/component/templates/parent.htm ***!
   \******************************************************/
@@ -7466,7 +7502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = "<div class=\"{CLASS.OVERLAY} {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id}.{CLASS.XCOMPONENT} {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY} {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY}.xcomponent-popup {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
-/* 60 */
+/* 59 */
 /*!*********************************************************!*\
   !*** ./src/component/component/templates/component.htm ***!
   \*********************************************************/
@@ -7475,7 +7511,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ""
 
 /***/ },
-/* 61 */
+/* 60 */
 /*!******************************!*\
   !*** ./src/drivers/index.js ***!
   \******************************/
@@ -7487,7 +7523,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _script = __webpack_require__(/*! ./script */ 62);
+	var _script = __webpack_require__(/*! ./script */ 61);
 
 	Object.keys(_script).forEach(function (key) {
 	  if (key === "default") return;
@@ -7499,7 +7535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _react = __webpack_require__(/*! ./react */ 63);
+	var _react = __webpack_require__(/*! ./react */ 62);
 
 	Object.keys(_react).forEach(function (key) {
 	  if (key === "default") return;
@@ -7511,7 +7547,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _angular = __webpack_require__(/*! ./angular */ 64);
+	var _angular = __webpack_require__(/*! ./angular */ 63);
 
 	Object.keys(_angular).forEach(function (key) {
 	  if (key === "default") return;
@@ -7523,7 +7559,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ember = __webpack_require__(/*! ./ember */ 65);
+	var _ember = __webpack_require__(/*! ./ember */ 64);
 
 	Object.keys(_ember).forEach(function (key) {
 	  if (key === "default") return;
@@ -7536,7 +7572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 62 */
+/* 61 */
 /*!*******************************!*\
   !*** ./src/drivers/script.js ***!
   \*******************************/
@@ -7611,7 +7647,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 63 */
+/* 62 */
 /*!******************************!*\
   !*** ./src/drivers/react.js ***!
   \******************************/
@@ -7624,7 +7660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.react = undefined;
 
-	var _lib = __webpack_require__(/*! ../lib */ 45);
+	var _lib = __webpack_require__(/*! ../lib */ 44);
 
 	var react = exports.react = {
 	    isActive: function isActive() {
@@ -7656,7 +7692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 64 */
+/* 63 */
 /*!********************************!*\
   !*** ./src/drivers/angular.js ***!
   \********************************/
@@ -7669,7 +7705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.angular = undefined;
 
-	var _lib = __webpack_require__(/*! ../lib */ 45);
+	var _lib = __webpack_require__(/*! ../lib */ 44);
 
 	var angular = exports.angular = {
 	    isActive: function isActive() {
@@ -7765,7 +7801,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 65 */
+/* 64 */
 /*!******************************!*\
   !*** ./src/drivers/ember.js ***!
   \******************************/
