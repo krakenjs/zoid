@@ -54,8 +54,7 @@ export class ParentComponent extends BaseComponent {
 
         this.childWindowName = options.childWindowName || buildChildWindowName(this.component.name, {
             tag: this.component.tag,
-            parent: window.name,
-            id: uniqueID()
+            parent: window.name
         });
 
         // Set up promise for init
@@ -270,7 +269,7 @@ export class ParentComponent extends BaseComponent {
 
         context = this.getRenderContext(element, context);
 
-        this.component.log(`open_${context}`, { element });
+        this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
 
         RENDER_DRIVERS[context].open.call(this, element);
 
@@ -308,7 +307,6 @@ export class ParentComponent extends BaseComponent {
 
             this.childWindowName = buildChildWindowName(this.component.name, {
                 tag: this.component.tag,
-                id: uniqueID(),
                 parent: window.name,
                 sibling: 1
             });
@@ -493,15 +491,15 @@ export class ParentComponent extends BaseComponent {
         url into an xcomponent.
 
         This is, again, an esoteric case within an esoteric case -- so probably only consider using it if you're sure you want to.
-
-        TODO: Support more than just popup
     */
 
-    hijackSubmitParentForm() {
+    hijackSubmitParentForm(element, context) {
 
-        this.component.log(`hijack_submit_parent_form`);
+        context = this.getRenderContext(element, context);
 
-        return this.renderToParent(null, CONTEXT_TYPES.POPUP, {
+        this.component.log(`hijack_submit_parent_form_${context}`);
+
+        return this.renderToParent(element, context, {
             hijackSubmitParentForm: true
         });
     }
@@ -657,17 +655,15 @@ export class ParentComponent extends BaseComponent {
             this.props.onClose();
 
             let closePromise = postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
-
-                // If we get an error, log it as a warning, but don't error out
-
                 console.warn(`Error sending message to child`, err.stack || err.toString());
-
-            }).then(() => {
-
-                // Whatever happens, we'll destroy the child window
-
-                this.destroy();
+                throw err;
             });
+
+            if (getParentWindow(this.window) !== window) {
+                closePromise = closePromise.catch(() => this.destroy());
+            } else {
+                closePromise = closePromise.then(() => this.destroy(), () => this.destroy());
+            }
 
             this.setForCleanup('closePromise', closePromise);
             return this.closePromise;

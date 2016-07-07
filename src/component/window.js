@@ -1,5 +1,5 @@
 
-import { b64encode, b64decode, memoize, getParentWindow } from '../lib';
+import { b64encode, b64decode, memoize, getParentWindow, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -17,6 +17,7 @@ import { XCOMPONENT } from '../constants';
 
 export function buildChildWindowName(prefix, props = {}) {
 
+    props.id = uniqueID();
     let name = b64encode(JSON.stringify(props));
     return `${XCOMPONENT}_${prefix.replace(/_/g, '')}_${name}`;
 }

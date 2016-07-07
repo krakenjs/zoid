@@ -195,7 +195,9 @@ export class Component {
         Log an event using the component name
     */
 
-    log(event, payload) {
+    log(event, payload = {}) {
+        payload.host = window.location.host;
+        payload.path = window.location.pathname;
         $logger.info(`xc_${this.name}_${event}`, payload);
     }
 
