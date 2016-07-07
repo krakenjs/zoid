@@ -745,7 +745,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _lib.log.debug(err.message);
 	    }
 
-	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow ? 'debug' : 'info';
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
@@ -1242,14 +1242,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function nextTick(method) {
 
-	    if (window.setImmediate) {
-	        return window.setImmediate.call(window, method);
-	    }
-
-	    if (window.nextTick) {
-	        return window.nextTick.call(window, method);
-	    }
-
 	    queue.push(method);
 	    window.postMessage(tickMessageName, '*');
 	}
@@ -1645,6 +1637,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.isSameDomain = isSameDomain;
+	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
 	exports.getParentWindow = getParentWindow;
 	exports.getWindowId = getWindowId;
@@ -1652,9 +1645,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.registerWindow = registerWindow;
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
-	exports.isWindowClosed = isWindowClosed;
 
 	var _util = __webpack_require__(/*! ./util */ 14);
+
+	function safeGet(obj, prop) {
+
+	    var result = void 0;
+
+	    try {
+	        result = obj[prop];
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return result;
+	}
 
 	var domainMatches = [];
 
@@ -1710,7 +1715,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return match;
 	}
 
-	var openers = [];
+	function isWindowClosed(win) {
+	    try {
+	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
+	    } catch (err) {
+	        return true;
+	    }
+	}
 
 	function getOpener(win) {
 
@@ -1718,38 +1729,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    for (var _iterator2 = openers, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var _match2 = _ref2;
-
-	        if (_match2.win === win) {
-	            return _match2.match;
-	        }
+	    try {
+	        return win.opener;
+	    } catch (err) {
+	        return;
 	    }
-
-	    var match = win.opener;
-
-	    openers.push({
-	        win: win,
-	        match: match
-	    });
-
-	    return match;
 	}
-
-	getOpener(window);
-	getOpener(window.parent);
-	getOpener(window.opener);
 
 	function getParentWindow(win) {
 	    win = win || window;
@@ -1812,19 +1797,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win) {
 
-	    for (var _iterator3 = windows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref3;
+	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
 
-	        if (_isArray3) {
-	            if (_i3 >= _iterator3.length) break;
-	            _ref3 = _iterator3[_i3++];
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
 	        } else {
-	            _i3 = _iterator3.next();
-	            if (_i3.done) break;
-	            _ref3 = _i3.value;
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
 	        }
 
-	        var map = _ref3;
+	        var map = _ref2;
 
 	        try {
 	            if (map.id === id && map.win === win) {
@@ -1835,7 +1820,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (map.id === id && map.win !== win) {
-	            throw new Error('Can not register a duplicate window with name ' + id);
+	            if (!isWindowClosed(map.win)) {
+	                throw new Error('Can not register a duplicate window with name ' + id);
+	            }
 	        }
 	    }
 
@@ -1882,31 +1869,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    registerWindow(name, win);
 
-	    getOpener(win);
-
 	    return win;
 	};
-
-	function safeGet(obj, prop) {
-
-	    var result = void 0;
-
-	    try {
-	        result = obj[prop];
-	    } catch (err) {
-	        // pass
-	    }
-
-	    return result;
-	}
-
-	function isWindowClosed(win) {
-	    try {
-	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
-	    } catch (err) {
-	        return true;
-	    }
-	}
 
 /***/ },
 /* 17 */
@@ -2246,8 +2210,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(/*! ../conf */ 5);
 
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
 	var _drivers = __webpack_require__(/*! ../drivers */ 8);
 
 	function registerGlobals() {
@@ -2260,9 +2222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
 	        postMessage: function postMessage(event) {
-	            (0, _lib.nextTick)(function () {
-	                return (0, _drivers.receiveMessage)(event);
-	            });
+	            (0, _drivers.receiveMessage)(event);
 	        }
 	    };
 	}
@@ -2345,7 +2305,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            domain: domain
 	        });
 
-	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy ? 'debug' : 'info';
 	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
 
 	        if (_conf.CONFIG.MOCK_MODE) {
@@ -2432,6 +2392,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!(0, _lib.isSameDomain)(win)) {
 	        throw new Error('Window is not on the same domain');
+	    }
+
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use global method to communicate between two different windows, not between frames');
 	    }
 
 	    var sourceDomain = _lib.util.getDomain(window);
@@ -3263,7 +3227,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'log',
-	        value: function log(event, payload) {
+	        value: function log(event) {
+	            var payload = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	            payload.host = window.location.host;
+	            payload.path = window.location.pathname;
 	            _client2['default'].info('xc_' + this.name + '_' + event, payload);
 	        }
 
@@ -5712,6 +5680,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 
+	    props.id = (0, _lib.uniqueID)();
 	    var name = (0, _lib.b64encode)(JSON.stringify(props));
 	    return _constants.XCOMPONENT + '_' + prefix.replace(/_/g, '') + '_' + name;
 	}
@@ -6101,8 +6070,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.childWindowName = options.childWindowName || (0, _window.buildChildWindowName)(_this.component.name, {
 	            tag: _this.component.tag,
-	            parent: window.name,
-	            id: (0, _lib.uniqueID)()
+	            parent: window.name
 	        });
 
 	        // Set up promise for init
@@ -6348,7 +6316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            context = this.getRenderContext(element, context);
 
-	            this.component.log('open_' + context, { element: element });
+	            this.component.log('open_' + context, { element: element, windowName: this.childWindowName });
 
 	            _drivers.RENDER_DRIVERS[context].open.call(this, element);
 
@@ -6390,7 +6358,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _this6.childWindowName = (0, _window.buildChildWindowName)(_this6.component.name, {
 	                    tag: _this6.component.tag,
-	                    id: (0, _lib.uniqueID)(),
 	                    parent: window.name,
 	                    sibling: 1
 	                });
@@ -6570,16 +6537,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            component is a button, this can be used to submit the parent form using the child button and hijack the resulting
 	            url into an xcomponent.
 	             This is, again, an esoteric case within an esoteric case -- so probably only consider using it if you're sure you want to.
-	             TODO: Support more than just popup
 	        */
 
 	    }, {
 	        key: 'hijackSubmitParentForm',
-	        value: function hijackSubmitParentForm() {
+	        value: function hijackSubmitParentForm(element, context) {
 
-	            this.component.log('hijack_submit_parent_form');
+	            context = this.getRenderContext(element, context);
 
-	            return this.renderToParent(null, _constants.CONTEXT_TYPES.POPUP, {
+	            this.component.log('hijack_submit_parent_form_' + context);
+
+	            return this.renderToParent(element, context, {
 	                hijackSubmitParentForm: true
 	            });
 	        }
@@ -6713,16 +6681,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this11.props.onClose();
 
 	                var closePromise = _src2['default'].send(_this11.window, _constants.POST_MESSAGE.CLOSE)['catch'](function (err) {
-
-	                    // If we get an error, log it as a warning, but don't error out
-
 	                    console.warn('Error sending message to child', err.stack || err.toString());
-	                }).then(function () {
-
-	                    // Whatever happens, we'll destroy the child window
-
-	                    _this11.destroy();
+	                    throw err;
 	                });
+
+	                if ((0, _lib.getParentWindow)(_this11.window) !== window) {
+	                    closePromise = closePromise['catch'](function () {
+	                        return _this11.destroy();
+	                    });
+	                } else {
+	                    closePromise = closePromise.then(function () {
+	                        return _this11.destroy();
+	                    }, function () {
+	                        return _this11.destroy();
+	                    });
+	                }
 
 	                _this11.setForCleanup('closePromise', closePromise);
 	                return _this11.closePromise;
