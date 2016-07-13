@@ -61,7 +61,7 @@ describe('xcomponent render to parent', () => {
     it('should render a component to the parent as a lightbox and close on enter', done => {
 
         component = testComponent.init({
-            foo: done
+            onClose: done
         });
 
         component.renderIframe(document.body);
@@ -76,12 +76,12 @@ describe('xcomponent render to parent', () => {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            foo: done
+            onClose: done
         });
 
         component.renderIframe(document.body);
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndCallFooOnClose');
+        postRobot.once('init', () => 'renderTestComponent2ToParentLightbox');
     });
 
     it('should close an xcomponent renderToParent popup on click of the overlay close button', done => {
@@ -91,26 +91,44 @@ describe('xcomponent render to parent', () => {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            foo: done
+            onClose: done
         });
 
         component.renderIframe(document.body);
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnClose');
+        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
     });
 
     it('should focus an xcomponent renderToParent popup on click of the overlay', done => {
 
+        let win;
+
         component = testComponent.init({
-            childEntered() {
-                document.querySelector('.xcomponent-overlay').click();
+
+            onEnter() {
+
+                let open = window.open;
+
+                window.open = function() {
+                    win = open.apply(this, arguments);
+                    return win;
+                };
             },
 
-            foo: done
+            foo() {
+
+                let focus = win.focus;
+                win.focus = function() {
+                    focus.apply(this, arguments);
+                    done();
+                };
+
+                document.querySelector('.xcomponent-overlay').click();
+            }
         });
 
         component.renderIframe(document.body);
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentPopupAndCallFooOnFocus');
+        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
     });
 });

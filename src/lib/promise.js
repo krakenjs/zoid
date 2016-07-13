@@ -32,3 +32,13 @@ export function denodeify(method) {
         });
     };
 }
+
+export function promisify(method) {
+    let prom = Promise.resolve();
+
+    return function() {
+        return prom.then(() => {
+            return method.apply(this, arguments);
+        });
+    };
+}

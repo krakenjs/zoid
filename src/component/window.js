@@ -74,6 +74,8 @@ export let getParentComponentWindow = memoize(() => {
         throw new Error(`Window has not been rendered by xcomponent - can not attach here`);
     }
 
+    let parentWindow = getParentWindow();
+
     // Use this to infer which window is our true 'parent component'. This can either be:
     //
     // - Our actual parent
@@ -81,14 +83,15 @@ export let getParentComponentWindow = memoize(() => {
 
     if (winProps.sibling) {
 
-        // We were rendered by a sibling, which we can access cross-domain via parent.frames
-        return getParentWindow().frames[winProps.parent];
+        if (parentWindow.frames && parentWindow.frames.length && parentWindow.frames[winProps.parent]) {
+            parentWindow = parentWindow.frames[winProps.parent];
 
-    } else {
-
-        // Our parent window is the same as our parent component window
-        return getParentWindow();
+        } else if (parentWindow.parent !== parentWindow && parentWindow.parent.frames && parentWindow.parent.frames.length && parentWindow.parent.frames[winProps.parent]) {
+            parentWindow = parentWindow.parent.frames[winProps.parent];
+        }
     }
+
+    return parentWindow;
 });
 
 

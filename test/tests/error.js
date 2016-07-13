@@ -32,15 +32,12 @@ describe('xcomponent error cases', () => {
             onEnter: done
         });
 
-        try {
-            component.renderPopup();
-        } catch (err) {
+        component.renderPopup().catch(err => {
+            console.log(err.message, err.stack);
             assert.isTrue(err instanceof xcomponent.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
-        }
-
-        window.open = windowOpen;
-
-        done();
+            window.open = windowOpen;
+            done();
+        });
     });
 
     it('should enter a component, throw an error, and return a new error to the parent without the original stack', done => {

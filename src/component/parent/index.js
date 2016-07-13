@@ -5,12 +5,12 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, noop } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
-import { normalizeProps } from '../props';
+import { normalizeParentProps } from './props';
 
 let activeComponents = [];
 
@@ -30,8 +30,6 @@ export class ParentComponent extends BaseComponent {
 
         this.component = component;
 
-        this.component.log(`construct_parent`);
-
         this.id = uniqueID();
 
         // Ensure the component is not loaded twice on the same page, if it is a singleton
@@ -46,8 +44,6 @@ export class ParentComponent extends BaseComponent {
             activeComponents.splice(activeComponents.indexOf(this), 1);
         });
 
-        this.setProps(options.props || {});
-
 
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
@@ -56,6 +52,11 @@ export class ParentComponent extends BaseComponent {
             tag: this.component.tag,
             parent: window.name
         });
+
+        this.setProps(options.props || {});
+
+        this.component.log(`construct_parent`);
+
 
         // Set up promise for init
 
@@ -71,32 +72,7 @@ export class ParentComponent extends BaseComponent {
 
     setProps(props) {
         validateProps(this.component, props);
-        this.props = normalizeProps(this.component, this, props);
-
-        for (let key of Object.keys(this.props)) {
-            let value = this.props[key];
-
-            if (value) {
-                let prop = this.component.props[key];
-
-                if (prop.precall) {
-                    let result = value.call();
-                    this.props[key] = () => {
-                        return result;
-                    };
-                }
-
-                if (prop.autoClose) {
-                    let self = this;
-                    this.props[key] = function() {
-                        self.component.log(`autoclose`, { prop: key });
-                        return self.close().then(() => {
-                            return value.apply(this, arguments);
-                        });
-                    };
-                }
-            }
-        }
+        this.props = normalizeParentProps(this.component, this, props);
     }
 
 
@@ -154,9 +130,7 @@ export class ParentComponent extends BaseComponent {
             if (oldProps !== stringifyWithFunctions(this.props)) {
                 this.component.log('parent_update_props');
 
-                return postRobot.send(this.window, POST_MESSAGE.PROPS, {
-                    props: this.props
-                });
+                return this.childExports.updateProps(this.props);
             }
         });
     }
@@ -248,10 +222,10 @@ export class ParentComponent extends BaseComponent {
             }
 
             this.open(element, context);
+            this.createComponentTemplate();
             this.listen(this.window);
-            this.loadUrl(this.buildUrl());
+            this.loadUrl(context, this.buildUrl());
             this.runTimeout();
-
             this.watchForClose();
 
             return this.onInit;
@@ -274,7 +248,6 @@ export class ParentComponent extends BaseComponent {
         RENDER_DRIVERS[context].open.call(this, element);
 
         this.watchForClose();
-        this.createComponentTemplate();
     }
 
 
@@ -333,12 +306,15 @@ export class ParentComponent extends BaseComponent {
                 element,
 
                 options: {
-                    props: this.props,
-
-                    childWindowName: this.childWindowName
+                    renderedToParent: true,
+                    childWindowName: this.childWindowName,
+                    props: this.props
                 }
 
             }).then(data => {
+
+                this.childExports = data.childExports;
+                this.close = data.close;
 
                 // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
@@ -355,6 +331,7 @@ export class ParentComponent extends BaseComponent {
 
                 return this.onInit;
             });
+
         });
     }
 
@@ -369,8 +346,9 @@ export class ParentComponent extends BaseComponent {
 
         let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
-            this.props.onClose();
-            this.destroy();
+            this.props.onClose().finally(() => {
+                this.destroy();
+            });
         });
 
         // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
@@ -396,9 +374,9 @@ export class ParentComponent extends BaseComponent {
         where opening the child window and loading the url happen at different points.
     */
 
-    loadUrl(url) {
+    loadUrl(context, url) {
         this.component.log(`load_url`);
-        return RENDER_DRIVERS[this.context].loadUrl.call(this, url);
+        return RENDER_DRIVERS[context].loadUrl.call(this, url);
     }
 
 
@@ -471,6 +449,7 @@ export class ParentComponent extends BaseComponent {
             // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
             this.open(null, context);
+            this.createComponentTemplate();
 
             // Do everything else the same way -- listen for events, render the overlay, etc.
 
@@ -521,8 +500,9 @@ export class ParentComponent extends BaseComponent {
                 let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} timed out after ${this.props.timeout} milliseconds`);
 
                 this.onInit.reject(error).catch(err => {
-                    this.component.log(`timed_out`, { timeout: this.props.timeout });
-                    this.props.onTimeout(err);
+                    return this.props.onTimeout(err).finally(() => {
+                        this.component.log(`timed_out`, { timeout: this.props.timeout });
+                    });
                 });
 
             }, this.props.timeout);
@@ -544,15 +524,19 @@ export class ParentComponent extends BaseComponent {
             // for this message to be sure so we can continue doing anything from the parent
 
             [ POST_MESSAGE.INIT ](source, data) {
-                this.props.onEnter();
+
+                this.childExports = data.exports;
+
                 this.onInit.resolve(this);
+                return this.props.onEnter().then(() => {
 
-                // Let the child know what its context is, and what its initial props are.
+                    // Let the child know what its context is, and what its initial props are.
 
-                return {
-                    context: this.context,
-                    props: this.props
-                };
+                    return {
+                        context: this.context,
+                        props: this.props
+                    };
+                });
             },
 
 
@@ -560,7 +544,6 @@ export class ParentComponent extends BaseComponent {
             // this logic to exist in the parent window
 
             [ POST_MESSAGE.CLOSE ](source, data) {
-
                 this.close();
             },
 
@@ -570,6 +553,10 @@ export class ParentComponent extends BaseComponent {
 
                 let component = this.component.getByTag(data.tag);
                 let instance  = component.parent(data.options);
+
+                this.registerForCleanup(() => {
+                    instance.destroy();
+                });
 
                 // In the case where we're submitting the parent form using hijackSubmitParentForm
 
@@ -589,7 +576,14 @@ export class ParentComponent extends BaseComponent {
                 // Otherwise we're just doing a normal render on behalf of the child
 
                 else {
-                    instance.render(data.element, data.context);
+
+                    return instance.render(data.element, data.context).then(() => {
+
+                        return {
+                            childExports: instance.childExports,
+                            close: () => this.close()
+                        };
+                    });
                 }
             },
 
@@ -636,37 +630,13 @@ export class ParentComponent extends BaseComponent {
     */
 
     close() {
-        return Promise.resolve().then(() => {
 
-            if (isWindowClosed(this.window)) {
-                return this.props.onClose();
-            }
+        return this.onInit.catch(noop).then(() => {
+            return this.props.onClose();
 
-            if (this.closePromise) {
-                return this.closePromise;
-            }
-
+        }).then(() => {
             this.component.log(`close`);
-
-            // We send a post message to the child to close. This has two effects:
-            // 1. We let the child do any cleanup it needs to do
-            // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
-
-            this.props.onClose();
-
-            let closePromise = postRobot.send(this.window, POST_MESSAGE.CLOSE).catch(err => {
-                console.warn(`Error sending message to child`, err.stack || err.toString());
-                throw err;
-            });
-
-            if (getParentWindow(this.window) !== window) {
-                closePromise = closePromise.catch(() => this.destroy());
-            } else {
-                closePromise = closePromise.then(() => this.destroy(), () => this.destroy());
-            }
-
-            this.setForCleanup('closePromise', closePromise);
-            return this.closePromise;
+            this.destroy();
         });
     }
 
@@ -701,7 +671,11 @@ export class ParentComponent extends BaseComponent {
             CLASS: CLASS_NAMES
         });
 
-        this.window.document.write(html);
+        try {
+            this.window.document.write(html);
+        } catch (err) {
+            // pass
+        }
     }
 
 
@@ -768,7 +742,7 @@ export class ParentComponent extends BaseComponent {
     error(err) {
         this.component.logError(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
-        this.props.onError(err);
+        return this.props.onError(err);
     }
 }
 

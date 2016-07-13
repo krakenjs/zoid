@@ -95,7 +95,7 @@ export let RENDER_DRIVERS = {
                 height:       dimensions.height
             });
 
-            this.window = popup('about:blank', {
+            this.window = popup('', {
                 name: this.childWindowName,
                 width: dimensions.width,
                 height: dimensions.height,
@@ -127,6 +127,7 @@ export let RENDER_DRIVERS = {
             // Then message up and continue the rendering process from the parent as with any other renderToParent.
 
             this.open(null, CONTEXT_TYPES.POPUP);
+            this.createComponentTemplate();
         },
 
         loadUrl(url) {

@@ -1,5 +1,5 @@
 
-import { noop, denodeify, once, memoize } from '../lib';
+import { noop, denodeify, once, memoize, promisify } from '../lib';
 
 /*  Normalize Prop
     --------------
@@ -31,6 +31,14 @@ export function normalizeProp(component, instance, props, key) {
 
             if (!value && prop.noop) {
                 value = noop;
+
+                if (prop.denodeify) {
+                    value = denodeify(value);
+                }
+
+                if (prop.promisify) {
+                    value = promisify(value);
+                }
             }
 
         } else {
@@ -39,6 +47,10 @@ export function normalizeProp(component, instance, props, key) {
 
             if (prop.denodeify) {
                 value = denodeify(value);
+            }
+
+            if (prop.promisify) {
+                value = promisify(value);
             }
 
             // Wrap the function in order to log when it is called

@@ -1,6 +1,6 @@
 
 import { once, noop } from './fn';
-import { extend, nextTick, safeGet, get, safeInterval } from './util';
+import { extend, safeGet, get, safeInterval } from './util';
 
 
 /*  Get Element
@@ -124,14 +124,14 @@ export function onCloseWindow(win, callback) {
     };
 
     interval = safeInterval(checkWindowClosed, 50);
-    nextTick(checkWindowClosed);
+    checkWindowClosed();
 
     let close = win.close;
 
     try {
         win.close = function() {
             close.apply(this, arguments);
-            nextTick(checkWindowClosed);
+            checkWindowClosed();
         };
     } catch (err) {
         // pass

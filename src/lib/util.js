@@ -130,36 +130,6 @@ export function stringifyWithFunctions(obj) {
 }
 
 
-/*  nextTick
-    --------
-
-    Use postMessage to emulate nextTick
-*/
-
-let tickMessageName = `__nextTick__xcomponent__${uniqueID()}`;
-let queue = [];
-
-window.addEventListener('message', event => {
-    if (event.data === tickMessageName) {
-        queue.shift().call();
-    }
-});
-
-export function nextTick(method) {
-
-    if (window.setImmediate) {
-        return window.setImmediate.call(window, method);
-    }
-
-    if (window.nextTick) {
-        return window.nextTick.call(window, method);
-    }
-
-    queue.push(method);
-    window.postMessage(tickMessageName, '*');
-}
-
-
 /*  Safe Get
     --------
 

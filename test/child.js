@@ -177,88 +177,15 @@ let cases = {
     },
 
     renderTestComponent2ToParentLightboxAndClose() {
-        let comp = testComponent.attach({
+        testComponent.attach({
             onEnter() {
                 let comp2 = testComponent2.init({
                     onEnter() {
                         comp2.close();
-                    },
-
-                    onClose() {
-                        comp.props.foo();
                     }
                 });
 
                 comp2.renderLightboxToParent();
-
-                postRobot.once('init', () => 'attachTestComponent2');
-            }
-        });
-    },
-
-    renderTestComponent2ToParentLightboxAndCallFooOnClose() {
-        let comp = testComponent.attach({
-            onEnter() {
-                let comp2 = testComponent2.init({
-                    onEnter() {
-
-                        let close = comp2.window.close;
-
-                        comp2.window.close = function() {
-                            close.apply(this, arguments);
-                            comp.props.foo();
-                        };
-
-                        comp.props.childEntered();
-                    }
-                });
-
-                comp2.renderLightboxToParent();
-
-                postRobot.once('init', () => 'attachTestComponent2');
-            }
-        });
-    },
-
-    renderTestComponent2ToParentPopupAndCallFooOnClose() {
-        let comp = testComponent.attach({
-            onEnter() {
-                let comp2 = testComponent2.init({
-                    onEnter() {
-                        let close = comp2.window.close;
-
-                        comp2.window.close = function() {
-                            close.apply(this, arguments);
-                            comp.props.foo();
-                        };
-                        comp.props.childEntered();
-                    }
-                });
-
-                comp2.renderPopupToParent();
-
-                postRobot.once('init', () => 'attachTestComponent2');
-            }
-        });
-    },
-
-    renderTestComponent2ToParentPopupAndCallFooOnFocus() {
-        let comp = testComponent.attach({
-            onEnter() {
-                let comp2 = testComponent2.init({
-                    onEnter() {
-                        let focus = comp2.window.focus;
-
-                        comp2.window.focus = function() {
-                            focus.apply(this, arguments);
-                            comp.props.foo();
-                        };
-
-                        comp.props.childEntered();
-                    }
-                });
-
-                comp2.renderPopupToParent();
 
                 postRobot.once('init', () => 'attachTestComponent2');
             }

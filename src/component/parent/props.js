@@ -1,5 +1,6 @@
 
 import { urlEncode } from '../../lib';
+import { normalizeProps } from '../props';
 
 
 /*  Props to Query
@@ -44,4 +45,36 @@ export function propsToQuery(propsDef, props) {
         return `${urlEncode(key)}=${urlEncode(result)}`;
 
     }).filter(Boolean).join('&');
+}
+
+
+
+export function normalizeParentProps(component, instance, props) {
+    props = normalizeProps(component, instance, props);
+
+    for (let key of Object.keys(props)) {
+        let value = props[key];
+
+        if (value) {
+            let prop = component.props[key];
+
+            if (prop.precall) {
+                let result = value.call();
+                props[key] = () => {
+                    return result;
+                };
+            }
+
+            if (prop.autoClose) {
+                props[key] = function() {
+                    instance.component.log(`autoclose`, { prop: key });
+                    return instance.close().then(() => {
+                        return value.apply(this, arguments);
+                    });
+                };
+            }
+        }
+    }
+
+    return props;
 }

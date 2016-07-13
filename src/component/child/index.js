@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, parseWindowName } from '../window';
-import { noop, extend, getParentWindow, onCloseWindow } from '../../lib';
+import { noop, extend, getParentWindow, onCloseWindow, addEventListener } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
 import { IntegrationError } from '../../error';
 import { normalizeProps } from '../props';
@@ -77,15 +77,8 @@ export class ChildComponent extends BaseComponent {
 
         // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
 
-        if (this.standalone && !getParentComponentWindow()) {
+        if (this.standalone && !getParentWindow()) {
             return Promise.resolve();
-        }
-
-        // Start listening for post messages
-
-        this.listen(getParentComponentWindow());
-        if (getParentWindow() !== getParentComponentWindow()) {
-            this.listen(getParentWindow());
         }
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -95,7 +88,11 @@ export class ChildComponent extends BaseComponent {
         // - What context are we
         // - What props has the parent specified
 
-        return this.sendToParentComponent(POST_MESSAGE.INIT).then(data => {
+        return this.sendToParent(POST_MESSAGE.INIT, {
+
+            exports: this.exports()
+
+        }).then(data => {
 
             this.context = data.context;
             extend(this.props, data.props);
@@ -116,19 +113,6 @@ export class ChildComponent extends BaseComponent {
     sendToParent(name, data) {
         this.component.log(`send_to_parent_${name}`);
         return postRobot.send(getParentWindow(), name, data);
-    }
-
-
-    /*  Send to Parent Component
-        ------------------------
-
-        Send a post message to our parent component window. Note -- this may not be our immediate parent, if we were
-        rendered using renderToParent.
-    */
-
-    sendToParentComponent(name, data) {
-        this.component.log(`send_to_parent_component_${name}`);
-        return postRobot.send(getParentComponentWindow(), name, data);
     }
 
 
@@ -154,10 +138,6 @@ export class ChildComponent extends BaseComponent {
 
         if (!getParentWindow()) {
             throw new Error(`[${this.component.tag}] Can not find parent window`);
-        }
-
-        if (!getParentComponentWindow()) {
-            throw new Error(`[${this.component.tag}] Can not find parent component window`);
         }
 
         let winProps = parseWindowName(window.name);
@@ -211,7 +191,7 @@ export class ChildComponent extends BaseComponent {
         // Only listen for parent component window if it's actually a different window
 
         if (getParentComponentWindow() && getParentComponentWindow() !== getParentWindow()) {
-            onCloseWindow(getParentComponentWindow, () => {
+            onCloseWindow(getParentComponentWindow(), () => {
 
                 this.component.log(`parent_component_window_closed`);
 
@@ -221,6 +201,8 @@ export class ChildComponent extends BaseComponent {
                 this.close(new Error(`[${this.component.tag}] parent component window was closed`));
             });
         }
+
+        addEventListener(window, 'beforeunload', () => this.onClose());
     }
 
 
@@ -236,37 +218,13 @@ export class ChildComponent extends BaseComponent {
     }
 
 
-    /*  Listeners
-        ---------
 
-        Post-message listeners that will be automatically set up to listen for messages from the parent component
-    */
+    exports() {
 
-    listeners() {
         return {
-
-            // New props are being passed down
-
-            [ POST_MESSAGE.PROPS ](source, data) {
-                extend(this.props, data.props);
+            updateProps: props => {
+                extend(this.props, props || {});
                 this.onProps.call(this);
-            },
-
-            // The parent wants us to close.
-
-            [ POST_MESSAGE.CLOSE ](source, data) {
-
-                // Our parent is telling us we're going to close
-
-                if (source === getParentWindow()) {
-                    this.onClose.call(this);
-                }
-
-                // Our component parent is asking us to close
-
-                else {
-                    this.sendToParent(POST_MESSAGE.CLOSE).catch(err => this.onError(err));
-                }
             }
         };
     }
@@ -306,7 +264,9 @@ export class ChildComponent extends BaseComponent {
 
         // Ask our parent window to close us
 
-        return this.sendToParent(POST_MESSAGE.CLOSE);
+        this.sendToParent(POST_MESSAGE.CLOSE, {}, {
+            fireAndForget: true
+        });
     }
 
 
@@ -338,7 +298,7 @@ export class ChildComponent extends BaseComponent {
             err = new Error(`[${this.component.tag}] Child lifecycle method threw an error`);
         }
 
-        return this.sendToParentComponent(POST_MESSAGE.ERROR, {
+        return this.sendToParent(POST_MESSAGE.ERROR, {
             error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
         });
     }

@@ -28,8 +28,7 @@ export const internalProps = {
     timeout: {
         type: 'number',
         required: false,
-        queryParam: false,
-        autoClose: true
+        queryParam: false
     },
 
     // When we get an INIT message from the child
@@ -37,7 +36,8 @@ export const internalProps = {
     onEnter: {
         type: 'function',
         required: false,
-        noop: true
+        noop: true,
+        promisify: true
     },
 
     // When the user closes the component. Defaults to onError if no handler passed.
@@ -46,7 +46,8 @@ export const internalProps = {
         type: 'function',
         required: false,
         noop: true,
-        once: true
+        once: true,
+        promisify: true
     },
 
     // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -56,6 +57,7 @@ export const internalProps = {
         required: false,
         once: true,
         autoClose: true,
+        promisify: true,
         def(err) {
             return this.props.onError(err);
         }
@@ -67,6 +69,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         autoClose: true,
+        promisify: true,
         def(err) {
             console.error(err.message, '\n', err.stack || err.toString());
         },
