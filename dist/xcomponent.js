@@ -341,11 +341,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }).then(function () {
 
+	            (0, _drivers.sendMessage)(options.window, {
+	                hash: hash,
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+	                name: options.name,
+	                data: options.data,
+	                fireAndForget: options.fireAndForget
+	            }, options.domain || '*')['catch'](reject);
+
+	            if (options.fireAndForget) {
+	                return resolve();
+	            }
+
+	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
+
+	                if (options.ack || (0, _lib.isWindowClosed)(options.window)) {
+	                    return ackTimeout.cancel();
+	                }
+
+	                if (!remaining) {
+	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
+	                }
+	            });
+
 	            if (options.timeout) {
 	                (function () {
 	                    var timeout = _lib.util.intervalTimeout(options.timeout, 100, function (remaining) {
 
-	                        if (hasResult) {
+	                        if (hasResult || (0, _lib.isWindowClosed)(options.window)) {
 	                            return timeout.cancel();
 	                        }
 
@@ -355,24 +378,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }, options.timeout);
 	                })();
 	            }
-
-	            (0, _drivers.sendMessage)(options.window, {
-	                hash: hash,
-	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-	                name: options.name,
-	                data: options.data
-	            }, options.domain || '*')['catch'](reject);
-
-	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
-
-	                if (options.ack) {
-	                    return ackTimeout.cancel();
-	                }
-
-	                if (!remaining) {
-	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
-	                }
-	            });
 	        })['catch'](reject);
 	    }), options.callback);
 	}
@@ -745,7 +750,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _lib.log.debug(err.message);
 	    }
 
-	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow ? 'debug' : 'info';
+	    var level = void 0;
+
+	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
+	        level = 'debug';
+	    } else if (message.ack === 'error') {
+	        level = 'error';
+	    } else {
+	        level = 'info';
+	    }
+
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
@@ -1093,8 +1107,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can not resolve promise with another promise');
 	    }
 
-	    //console.log('resolve!', result)
-
 	    this.resolved = true;
 	    this.value = result;
 	    this.dispatch();
@@ -1110,8 +1122,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (error && error.then) {
 	        throw new Error('Can not reject promise with another promise');
 	    }
-
-	    //console.log('reject!', error.message)
 
 	    this.rejected = true;
 	    this.value = error;
@@ -1147,7 +1157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (result === this) {
-	            throw new Error('Can not return a promise from the the same promise');
+	            throw new Error('Can not return a promise from the the then handler of the same promise');
 	        }
 
 	        if (error) {
@@ -1183,9 +1193,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this.then(null, onError);
 	};
 
-	SyncPromise.prototype.done = function (successHandler, errorHandler) {
-	    this.then(successHandler, errorHandler || function (err) {
-	        console.error(err.stack || err.toString());
+	SyncPromise.prototype['finally'] = function (handler) {
+	    return this.then(function (result) {
+	        handler();
+	        return result;
+	    }, function (error) {
+	        handler();
+	        throw error;
 	    });
 	};
 
@@ -1443,7 +1457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        util.each(obj, function (item, key) {
 
-	            var result = callback(item);
+	            var result = callback(item, key);
 
 	            if (result !== undefined) {
 	                newobj[key] = result;
@@ -1896,6 +1910,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _interface = __webpack_require__(/*! ../interface */ 3);
 
+	var _log = __webpack_require__(/*! ./log */ 15);
+
+	var _promise = __webpack_require__(/*! ./promise */ 11);
+
 	var methods = {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
@@ -1909,7 +1927,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Method window does not match');
 	        }
 
-	        return methods[data.id].method.apply(null, data.args);
+	        var method = methods[data.id].method;
+
+	        _log.log.debug('Call local method', data.name, data.args);
+
+	        return _promise.promise.run(function () {
+	            return method.apply(null, data.args);
+	        }).then(function (result) {
+
+	            return {
+	                result: result,
+	                id: data.id,
+	                name: data.name
+	            };
+	        });
 	    });
 	});
 
@@ -1917,7 +1948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 	}
 
-	function serializeMethod(destination, method) {
+	function serializeMethod(destination, method, name) {
 
 	    var id = _util.util.uniqueID();
 
@@ -1928,7 +1959,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return {
 	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
-	        __id__: id
+	        __id__: id,
+	        __name__: name
 	    };
 	}
 
@@ -1936,27 +1968,38 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    listenForMethods();
 
-	    return _util.util.replaceObject({ obj: obj }, function (item) {
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (item instanceof Function) {
-	            return serializeMethod(destination, item);
+	            return serializeMethod(destination, item, key);
 	        }
 	    }).obj;
 	}
 
 	function deserializeMethod(source, obj) {
 
-	    return function () {
+	    function wrapper() {
 	        var args = Array.prototype.slice.call(arguments);
+	        _log.log.debug('Call foreign method', obj.__name__, args);
 	        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
 	            id: obj.__id__,
+	            name: obj.__name__,
 	            args: args
+
+	        }).then(function (data) {
+
+	            _log.log.debug('Got foreign method result', obj.__name__, data.result);
+	            return data.result;
 	        });
-	    };
+	    }
+
+	    wrapper.__name__ = obj.__name__;
+
+	    return wrapper;
 	}
 
 	function deserializeMethods(source, obj) {
 
-	    return _util.util.replaceObject({ obj: obj }, function (item) {
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (isSerializedMethod(item)) {
 	            return deserializeMethod(source, item);
 	        }
@@ -2305,7 +2348,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            domain: domain
 	        });
 
-	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy ? 'debug' : 'info';
+	        var level = void 0;
+
+	        if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
+	            level = 'debug';
+	        } else if (message.ack === 'error') {
+	            level = 'error';
+	        } else {
+	            level = 'info';
+	        }
+
 	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
 
 	        if (_conf.CONFIG.MOCK_MODE) {
@@ -2655,8 +2707,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function respond(data) {
 
-	        if ((0, _lib.isWindowClosed)(source)) {
-	            return;
+	        if (message.fireAndForget || (0, _lib.isWindowClosed)(source)) {
+	            return _lib.promise.Promise.resolve();
 	        }
 
 	        return (0, _send.sendMessage)(source, _extends({
@@ -4263,8 +4315,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -4351,15 +4401,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
 
-	            if (this.standalone && !(0, _window.getParentComponentWindow)()) {
+	            if (this.standalone && !(0, _lib.getParentWindow)()) {
 	                return _promise.SyncPromise.resolve();
-	            }
-
-	            // Start listening for post messages
-
-	            this.listen((0, _window.getParentComponentWindow)());
-	            if ((0, _lib.getParentWindow)() !== (0, _window.getParentComponentWindow)()) {
-	                this.listen((0, _lib.getParentWindow)());
 	            }
 
 	            // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -4369,7 +4412,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // - What context are we
 	            // - What props has the parent specified
 
-	            return this.sendToParentComponent(_constants.POST_MESSAGE.INIT).then(function (data) {
+	            return this.sendToParent(_constants.POST_MESSAGE.INIT, {
+
+	                exports: this.exports()
+
+	            }).then(function (data) {
 
 	                _this2.context = data.context;
 	                (0, _lib.extend)(_this2.props, data.props);
@@ -4391,19 +4438,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function sendToParent(name, data) {
 	            this.component.log('send_to_parent_' + name);
 	            return _src2['default'].send((0, _lib.getParentWindow)(), name, data);
-	        }
-
-	        /*  Send to Parent Component
-	            ------------------------
-	             Send a post message to our parent component window. Note -- this may not be our immediate parent, if we were
-	            rendered using renderToParent.
-	        */
-
-	    }, {
-	        key: 'sendToParentComponent',
-	        value: function sendToParentComponent(name, data) {
-	            this.component.log('send_to_parent_component_' + name);
-	            return _src2['default'].send((0, _window.getParentComponentWindow)(), name, data);
 	        }
 
 	        /*  Set Windows
@@ -4428,10 +4462,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (!(0, _lib.getParentWindow)()) {
 	                throw new Error('[' + this.component.tag + '] Can not find parent window');
-	            }
-
-	            if (!(0, _window.getParentComponentWindow)()) {
-	                throw new Error('[' + this.component.tag + '] Can not find parent component window');
 	            }
 
 	            var winProps = (0, _window.parseWindowName)(window.name);
@@ -4486,7 +4516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // Only listen for parent component window if it's actually a different window
 
 	            if ((0, _window.getParentComponentWindow)() && (0, _window.getParentComponentWindow)() !== (0, _lib.getParentWindow)()) {
-	                (0, _lib.onCloseWindow)(_window.getParentComponentWindow, function () {
+	                (0, _lib.onCloseWindow)((0, _window.getParentComponentWindow)(), function () {
 
 	                    _this3.component.log('parent_component_window_closed');
 
@@ -4496,6 +4526,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this3.close(new Error('[' + _this3.component.tag + '] parent component window was closed'));
 	                });
 	            }
+
+	            (0, _lib.addEventListener)(window, 'beforeunload', function () {
+	                return _this3.onClose();
+	            });
 	        }
 
 	        /*  Validate
@@ -4505,41 +4539,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'validate',
-	        value: function validate(options) {}
+	        value: function validate(options) {
 
-	        // TODO: Implement this
-
-
-	        /*  Listeners
-	            ---------
-	             Post-message listeners that will be automatically set up to listen for messages from the parent component
-	        */
-
+	            // TODO: Implement this
+	        }
 	    }, {
-	        key: 'listeners',
-	        value: function listeners() {
-	            var _ref;
+	        key: 'exports',
+	        value: function exports() {
+	            var _this4 = this;
 
-	            return _ref = {}, _defineProperty(_ref, _constants.POST_MESSAGE.PROPS, function (source, data) {
-	                (0, _lib.extend)(this.props, data.props);
-	                this.onProps.call(this);
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
-	                var _this4 = this;
-
-	                // Our parent is telling us we're going to close
-
-	                if (source === (0, _lib.getParentWindow)()) {
-	                    this.onClose.call(this);
+	            return {
+	                updateProps: function updateProps(props) {
+	                    (0, _lib.extend)(_this4.props, props || {});
+	                    _this4.onProps.call(_this4);
 	                }
-
-	                // Our component parent is asking us to close
-
-	                else {
-	                        this.sendToParent(_constants.POST_MESSAGE.CLOSE)['catch'](function (err) {
-	                            return _this4.onError(err);
-	                        });
-	                    }
-	            }), _ref;
+	            };
 	        }
 
 	        /*  Resize
@@ -4579,7 +4593,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // Ask our parent window to close us
 
-	            return this.sendToParent(_constants.POST_MESSAGE.CLOSE);
+	            this.sendToParent(_constants.POST_MESSAGE.CLOSE, {}, {
+	                fireAndForget: true
+	            });
 	        }
 
 	        /*  Focus
@@ -4611,7 +4627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                err = new Error('[' + this.component.tag + '] Child lifecycle method threw an error');
 	            }
 
-	            return this.sendToParentComponent(_constants.POST_MESSAGE.ERROR, {
+	            return this.sendToParent(_constants.POST_MESSAGE.ERROR, {
 	                error: err.stack ? err.message + '\n' + err.stack : err.toString()
 	            });
 	        }
@@ -5027,14 +5043,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    interval = (0, _util.safeInterval)(checkWindowClosed, 50);
-	    (0, _util.nextTick)(checkWindowClosed);
+	    checkWindowClosed();
 
 	    var close = win.close;
 
 	    try {
 	        win.close = function () {
 	            close.apply(this, arguments);
-	            (0, _util.nextTick)(checkWindowClosed);
+	            checkWindowClosed();
 	        };
 	    } catch (err) {
 	        // pass
@@ -5337,7 +5353,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.b64encode = b64encode;
 	exports.b64decode = b64decode;
 	exports.stringifyWithFunctions = stringifyWithFunctions;
-	exports.nextTick = nextTick;
 	exports.safeGet = safeGet;
 	exports.capitalizeFirstLetter = capitalizeFirstLetter;
 	exports.get = get;
@@ -5466,35 +5481,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	/*  nextTick
-	    --------
-
-	    Use postMessage to emulate nextTick
-	*/
-
-	var tickMessageName = '__nextTick__xcomponent__' + uniqueID();
-	var queue = [];
-
-	window.addEventListener('message', function (event) {
-	    if (event.data === tickMessageName) {
-	        queue.shift().call();
-	    }
-	});
-
-	function nextTick(method) {
-
-	    if (window.setImmediate) {
-	        return window.setImmediate.call(window, method);
-	    }
-
-	    if (window.nextTick) {
-	        return window.nextTick.call(window, method);
-	    }
-
-	    queue.push(method);
-	    window.postMessage(tickMessageName, '*');
-	}
-
 	/*  Safe Get
 	    --------
 
@@ -5610,6 +5596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.denodeify = denodeify;
+	exports.promisify = promisify;
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
 
@@ -5640,6 +5627,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return err ? reject(err) : resolve(result);
 	            });
 	            return method.apply(self, args);
+	        });
+	    };
+	}
+
+	function promisify(method) {
+	    var prom = _promise.SyncPromise.resolve();
+
+	    return function () {
+	        var _this = this,
+	            _arguments = arguments;
+
+	        return prom.then(function () {
+	            return method.apply(_this, _arguments);
 	        });
 	    };
 	}
@@ -5735,6 +5735,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Window has not been rendered by xcomponent - can not attach here');
 	    }
 
+	    var parentWindow = (0, _lib.getParentWindow)();
+
 	    // Use this to infer which window is our true 'parent component'. This can either be:
 	    //
 	    // - Our actual parent
@@ -5742,13 +5744,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (winProps.sibling) {
 
-	        // We were rendered by a sibling, which we can access cross-domain via parent.frames
-	        return (0, _lib.getParentWindow)().frames[winProps.parent];
-	    } else {
-
-	        // Our parent window is the same as our parent component window
-	        return (0, _lib.getParentWindow)();
+	        if (parentWindow.frames && parentWindow.frames.length && parentWindow.frames[winProps.parent]) {
+	            parentWindow = parentWindow.frames[winProps.parent];
+	        } else if (parentWindow.parent !== parentWindow && parentWindow.parent.frames && parentWindow.parent.frames.length && parentWindow.parent.frames[winProps.parent]) {
+	            parentWindow = parentWindow.parent.frames[winProps.parent];
+	        }
 	    }
+
+	    return parentWindow;
 	});
 
 	/*  Get Position
@@ -5892,6 +5895,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (!value && prop.noop) {
 	                value = _lib.noop;
+
+	                if (prop.denodeify) {
+	                    value = (0, _lib.denodeify)(value);
+	                }
+
+	                if (prop.promisify) {
+	                    value = (0, _lib.promisify)(value);
+	                }
 	            }
 	        } else {
 	            (function () {
@@ -5900,6 +5911,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                if (prop.denodeify) {
 	                    value = (0, _lib.denodeify)(value);
+	                }
+
+	                if (prop.promisify) {
+	                    value = (0, _lib.promisify)(value);
 	                }
 
 	                // Wrap the function in order to log when it is called
@@ -6009,8 +6024,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _props = __webpack_require__(/*! ./props */ 55);
 
-	var _props2 = __webpack_require__(/*! ../props */ 51);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -6045,8 +6058,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.component = component;
 
-	        _this.component.log('construct_parent');
-
 	        _this.id = (0, _lib.uniqueID)();
 
 	        // Ensure the component is not loaded twice on the same page, if it is a singleton
@@ -6063,8 +6074,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            activeComponents.splice(activeComponents.indexOf(_this), 1);
 	        });
 
-	        _this.setProps(options.props || {});
-
 	        // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
 	        // them only when we're trying to render from a sibling to a sibling
 
@@ -6072,6 +6081,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            tag: _this.component.tag,
 	            parent: window.name
 	        });
+
+	        _this.setProps(options.props || {});
+
+	        _this.component.log('construct_parent');
 
 	        // Set up promise for init
 
@@ -6087,61 +6100,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(ParentComponent, [{
 	        key: 'setProps',
 	        value: function setProps(props) {
-	            var _this2 = this;
-
 	            (0, _validate.validateProps)(this.component, props);
-	            this.props = (0, _props2.normalizeProps)(this.component, this, props);
-
-	            var _loop = function _loop() {
-	                if (_isArray) {
-	                    if (_i >= _iterator.length) return 'break';
-	                    _ref = _iterator[_i++];
-	                } else {
-	                    _i = _iterator.next();
-	                    if (_i.done) return 'break';
-	                    _ref = _i.value;
-	                }
-
-	                var key = _ref;
-
-	                var value = _this2.props[key];
-
-	                if (value) {
-	                    var prop = _this2.component.props[key];
-
-	                    if (prop.precall) {
-	                        (function () {
-	                            var result = value.call();
-	                            _this2.props[key] = function () {
-	                                return result;
-	                            };
-	                        })();
-	                    }
-
-	                    if (prop.autoClose) {
-	                        (function () {
-	                            var self = _this2;
-	                            _this2.props[key] = function () {
-	                                var _this3 = this,
-	                                    _arguments = arguments;
-
-	                                self.component.log('autoclose', { prop: key });
-	                                return self.close().then(function () {
-	                                    return value.apply(_this3, _arguments);
-	                                });
-	                            };
-	                        })();
-	                    }
-	                }
-	            };
-
-	            for (var _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                var _ref;
-
-	                var _ret = _loop();
-
-	                if (_ret === 'break') break;
-	            }
+	            this.props = (0, _props.normalizeParentProps)(this.component, this, props);
 	        }
 
 	        /*  Build Url
@@ -6181,26 +6141,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps(props) {
-	            var _this4 = this;
+	            var _this2 = this;
 
 	            return this.onInit.then(function () {
 
-	                (0, _validate.validateProps)(_this4.component, props);
+	                (0, _validate.validateProps)(_this2.component, props);
 
-	                var oldProps = (0, _lib.stringifyWithFunctions)(_this4.props);
+	                var oldProps = (0, _lib.stringifyWithFunctions)(_this2.props);
 
-	                var newProps = _extends({}, _this4.props, props);
+	                var newProps = _extends({}, _this2.props, props);
 
-	                _this4.setProps(newProps);
+	                _this2.setProps(newProps);
 
 	                // Only send down the new props if they do not match the old, and if we have already sent down initial props
 
-	                if (oldProps !== (0, _lib.stringifyWithFunctions)(_this4.props)) {
-	                    _this4.component.log('parent_update_props');
+	                if (oldProps !== (0, _lib.stringifyWithFunctions)(_this2.props)) {
+	                    _this2.component.log('parent_update_props');
 
-	                    return _src2['default'].send(_this4.window, _constants.POST_MESSAGE.PROPS, {
-	                        props: _this4.props
-	                    });
+	                    return _this2.childExports.updateProps(_this2.props);
 	                }
 	            });
 	        }
@@ -6235,8 +6193,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            var _arr = [_constants.CONTEXT_TYPES.LIGHTBOX, _constants.CONTEXT_TYPES.POPUP];
-	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
-	                var renderContext = _arr[_i2];
+	            for (var _i = 0; _i < _arr.length; _i++) {
+	                var renderContext = _arr[_i];
 	                if (this.component.contexts[renderContext]) {
 	                    return renderContext;
 	                }
@@ -6274,34 +6232,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render(element, context) {
-	            var _this5 = this;
+	            var _this3 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this5.validateRender(context);
+	                _this3.validateRender(context);
 
-	                context = _this5.getRenderContext(element, context);
+	                context = _this3.getRenderContext(element, context);
 
-	                _this5.component.log('render_' + context, { context: context, element: element });
+	                _this3.component.log('render_' + context, { context: context, element: element });
 
 	                if (_drivers.RENDER_DRIVERS[context].render) {
-	                    _drivers.RENDER_DRIVERS[context].render.call(_this5, element);
+	                    _drivers.RENDER_DRIVERS[context].render.call(_this3, element);
 	                }
 
-	                _this5.setForCleanup('context', context);
+	                _this3.setForCleanup('context', context);
 
 	                if (_drivers.RENDER_DRIVERS[context].overlay) {
-	                    _this5.createParentTemplate();
+	                    _this3.createParentTemplate();
 	                }
 
-	                _this5.open(element, context);
-	                _this5.listen(_this5.window);
-	                _this5.loadUrl(_this5.buildUrl());
-	                _this5.runTimeout();
+	                _this3.open(element, context);
+	                _this3.createComponentTemplate();
+	                _this3.listen(_this3.window);
+	                _this3.loadUrl(context, _this3.buildUrl());
+	                _this3.runTimeout();
+	                _this3.watchForClose();
 
-	                _this5.watchForClose();
-
-	                return _this5.onInit;
+	                return _this3.onInit;
 	            });
 	        }
 
@@ -6321,7 +6279,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _drivers.RENDER_DRIVERS[context].open.call(this, element);
 
 	            this.watchForClose();
-	            this.createComponentTemplate();
 	        }
 
 	        /*  Render to Parent
@@ -6334,41 +6291,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
-	            var _this6 = this;
+	            var _this4 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this6.validateRender(context);
+	                _this4.validateRender(context);
 
-	                context = _this6.getRenderContext(element, context);
+	                context = _this4.getRenderContext(element, context);
 
 	                if (!(0, _lib.getParentWindow)()) {
-	                    throw new Error('[' + _this6.component.tag + '] Can not render to parent - no parent exists');
+	                    throw new Error('[' + _this4.component.tag + '] Can not render to parent - no parent exists');
 	                }
 
 	                if (!window.name) {
-	                    throw new Error('[' + _this6.component.tag + '] Can not render to parent - not in a child component window');
+	                    throw new Error('[' + _this4.component.tag + '] Can not render to parent - not in a child component window');
 	                }
 
-	                _this6.component.log('render_' + context + '_to_parent', { element: element, context: context });
+	                _this4.component.log('render_' + context + '_to_parent', { element: element, context: context });
 
 	                // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
 
-	                _this6.childWindowName = (0, _window.buildChildWindowName)(_this6.component.name, {
-	                    tag: _this6.component.tag,
+	                _this4.childWindowName = (0, _window.buildChildWindowName)(_this4.component.name, {
+	                    tag: _this4.component.tag,
 	                    parent: window.name,
 	                    sibling: 1
 	                });
 
-	                _this6.setForCleanup('context', context);
+	                _this4.setForCleanup('context', context);
 
 	                // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
 	                // open them from the child, since we depend on there being a click event to avoid the popup blocker.
 
 	                if (_drivers.RENDER_DRIVERS[context].renderToParent) {
-	                    _drivers.RENDER_DRIVERS[context].renderToParent.call(_this6, element);
+	                    _drivers.RENDER_DRIVERS[context].renderToParent.call(_this4, element);
 	                }
 
 	                // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
@@ -6376,32 +6333,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _src2['default'].sendToParent(_constants.POST_MESSAGE.RENDER, _extends({}, options, {
 
-	                    tag: _this6.component.tag,
+	                    tag: _this4.component.tag,
 	                    context: context,
 	                    element: element,
 
 	                    options: {
-	                        props: _this6.props,
-
-	                        childWindowName: _this6.childWindowName
+	                        renderedToParent: true,
+	                        childWindowName: _this4.childWindowName,
+	                        props: _this4.props
 	                    }
 
 	                })).then(function (data) {
 
+	                    _this4.childExports = data.childExports;
+	                    _this4.close = data.close;
+
 	                    // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
-	                    if (!_this6.window) {
-	                        _this6.setForCleanup('window', (0, _lib.getParentWindow)().frames[_this6.childWindowName]);
+	                    if (!_this4.window) {
+	                        _this4.setForCleanup('window', (0, _lib.getParentWindow)().frames[_this4.childWindowName]);
 	                    }
 
 	                    // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
 	                    // messages on the sibling window, since we have a handle on it.
 
-	                    _this6.listen(_this6.window);
+	                    _this4.listen(_this4.window);
 
-	                    _this6.watchForClose();
+	                    _this4.watchForClose();
 
-	                    return _this6.onInit;
+	                    return _this4.onInit;
 	                });
 	            });
 	        }
@@ -6415,21 +6375,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this7 = this;
+	            var _this5 = this;
 
 	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this7.component.log('detect_close_child');
-	                _this7.props.onClose();
-	                _this7.destroy();
+	                _this5.component.log('detect_close_child');
+	                _this5.props.onClose()['finally'](function () {
+	                    _this5.destroy();
+	                });
 	            });
 
 	            // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
 	            // and close the child manually if that happens.
 
 	            var unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this7.component.log('navigate_away');
+	                _this5.component.log('navigate_away');
 	                _client2['default'].flush();
-	                _this7.destroy();
+	                _this5.destroy();
 	            });
 
 	            this.registerForCleanup(function () {
@@ -6446,9 +6407,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'loadUrl',
-	        value: function loadUrl(url) {
+	        value: function loadUrl(context, url) {
 	            this.component.log('load_url');
-	            return _drivers.RENDER_DRIVERS[this.context].loadUrl.call(this, url);
+	            return _drivers.RENDER_DRIVERS[context].loadUrl.call(this, url);
 	        }
 
 	        /*  Hijack Button
@@ -6468,7 +6429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'hijackButton',
 	        value: function hijackButton(button, element, context) {
-	            var _this8 = this;
+	            var _this6 = this;
 
 	            context = this.getRenderContext(element, context);
 
@@ -6476,14 +6437,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _lib.hijackButton)(button, function (event, targetElement) {
 
-	                if (_this8.window) {
+	                if (_this6.window) {
 	                    event.preventDefault();
-	                    throw new Error('[' + _this8.component.tag + '] Component is already rendered');
+	                    throw new Error('[' + _this6.component.tag + '] Component is already rendered');
 	                }
 
 	                // Open the window to render into
 
-	                _this8.renderHijack(targetElement, element, context);
+	                _this6.renderHijack(targetElement, element, context);
 	            });
 
 	            return this;
@@ -6497,7 +6458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this9 = this;
+	            var _this7 = this;
 
 	            context = this.getRenderContext(element, context);
 
@@ -6505,28 +6466,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this9.validateRender(context);
+	                _this7.validateRender(context);
 
-	                _this9.setForCleanup('context', context);
+	                _this7.setForCleanup('context', context);
 
 	                // Point the element to open in our child window
 
-	                targetElement.target = _this9.childWindowName;
+	                targetElement.target = _this7.childWindowName;
 
 	                if (_drivers.RENDER_DRIVERS[context].overlay) {
-	                    _this9.createParentTemplate();
+	                    _this7.createParentTemplate();
 	                }
 
 	                // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
-	                _this9.open(null, context);
+	                _this7.open(null, context);
+	                _this7.createComponentTemplate();
 
 	                // Do everything else the same way -- listen for events, render the overlay, etc.
 
-	                _this9.listen(_this9.window);
-	                _this9.runTimeout();
+	                _this7.listen(_this7.window);
+	                _this7.runTimeout();
 
-	                return _this9.onInit;
+	                return _this7.onInit;
 	            });
 	        }
 
@@ -6560,18 +6522,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this10 = this;
+	            var _this8 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this10.component.tag + '] Loading component ' + _this10.component.tag + ' timed out after ' + _this10.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this8.component.tag + '] Loading component ' + _this8.component.tag + ' timed out after ' + _this8.props.timeout + ' milliseconds');
 
-	                    _this10.onInit.reject(error)['catch'](function (err) {
-	                        _this10.component.log('timed_out', { timeout: _this10.props.timeout });
-	                        _this10.props.onTimeout(err);
+	                    _this8.onInit.reject(error)['catch'](function (err) {
+	                        return _this8.props.onTimeout(err)['finally'](function () {
+	                            _this8.component.log('timed_out', { timeout: _this8.props.timeout });
+	                        });
 	                    });
 	                }, this.props.timeout);
 	            }
@@ -6585,25 +6548,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
-	            var _ref2;
+	            var _ref;
 
-	            return _ref2 = {}, _defineProperty(_ref2, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                this.props.onEnter();
+	            return _ref = {}, _defineProperty(_ref, _constants.POST_MESSAGE.INIT, function (source, data) {
+	                var _this9 = this;
+
+	                this.childExports = data.exports;
+
 	                this.onInit.resolve(this);
+	                return this.props.onEnter().then(function () {
 
-	                // Let the child know what its context is, and what its initial props are.
+	                    // Let the child know what its context is, and what its initial props are.
 
-	                return {
-	                    context: this.context,
-	                    props: this.props
-	                };
-	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.CLOSE, function (source, data) {
-
+	                    return {
+	                        context: _this9.context,
+	                        props: _this9.props
+	                    };
+	                });
+	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close();
-	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.RENDER, function (source, data) {
+	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER, function (source, data) {
+	                var _this10 = this;
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
+
+	                this.registerForCleanup(function () {
+	                    instance.destroy();
+	                });
 
 	                // In the case where we're submitting the parent form using hijackSubmitParentForm
 
@@ -6623,18 +6595,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // Otherwise we're just doing a normal render on behalf of the child
 
 	                else {
-	                        instance.render(data.element, data.context);
+
+	                        return instance.render(data.element, data.context).then(function () {
+
+	                            return {
+	                                childExports: instance.childExports,
+	                                close: function close() {
+	                                    return _this10.close();
+	                                }
+	                            };
+	                        });
 	                    }
-	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.RESIZE, function (source, data) {
+	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RESIZE, function (source, data) {
 
 	                if (this.context === _constants.CONTEXT_TYPES.POPUP) {
 	                    return;
 	                }
 
 	                return this.resize(data.width, data.height);
-	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.ERROR, function (source, data) {
+	            }), _defineProperty(_ref, _constants.POST_MESSAGE.ERROR, function (source, data) {
 	                this.error(new Error(data.error));
-	            }), _ref2;
+	            }), _ref;
 	        }
 
 	        /*  Resize
@@ -6662,43 +6643,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function close() {
 	            var _this11 = this;
 
-	            return _promise.SyncPromise.resolve().then(function () {
-
-	                if ((0, _lib.isWindowClosed)(_this11.window)) {
-	                    return _this11.props.onClose();
-	                }
-
-	                if (_this11.closePromise) {
-	                    return _this11.closePromise;
-	                }
-
+	            return this.onInit['catch'](_lib.noop).then(function () {
+	                return _this11.props.onClose();
+	            }).then(function () {
 	                _this11.component.log('close');
-
-	                // We send a post message to the child to close. This has two effects:
-	                // 1. We let the child do any cleanup it needs to do
-	                // 2. We let the child message its actual parent to close it, which we can't do here if it's a renderToParent
-
-	                _this11.props.onClose();
-
-	                var closePromise = _src2['default'].send(_this11.window, _constants.POST_MESSAGE.CLOSE)['catch'](function (err) {
-	                    console.warn('Error sending message to child', err.stack || err.toString());
-	                    throw err;
-	                });
-
-	                if ((0, _lib.getParentWindow)(_this11.window) !== window) {
-	                    closePromise = closePromise['catch'](function () {
-	                        return _this11.destroy();
-	                    });
-	                } else {
-	                    closePromise = closePromise.then(function () {
-	                        return _this11.destroy();
-	                    }, function () {
-	                        return _this11.destroy();
-	                    });
-	                }
-
-	                _this11.setForCleanup('closePromise', closePromise);
-	                return _this11.closePromise;
+	                _this11.destroy();
 	            });
 	        }
 
@@ -6733,7 +6682,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                CLASS: _constants.CLASS_NAMES
 	            });
 
-	            this.window.document.write(html);
+	            try {
+	                this.window.document.write(html);
+	            } catch (err) {
+	                // pass
+	            }
 	        }
 
 	        /*  Create Parent Template
@@ -6802,7 +6755,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function error(err) {
 	            this.component.logError('error', { error: err.stack || err.toString() });
 	            this.onInit.reject(err);
-	            this.props.onError(err);
+	            return this.props.onError(err);
 	        }
 	    }]);
 
@@ -6815,17 +6768,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
 	*/
 
-	var _loop2 = function _loop2() {
-	    if (_isArray2) {
-	        if (_i3 >= _iterator2.length) return 'break';
-	        _ref3 = _iterator2[_i3++];
+	var _loop = function _loop() {
+	    if (_isArray) {
+	        if (_i2 >= _iterator.length) return 'break';
+	        _ref2 = _iterator[_i2++];
 	    } else {
-	        _i3 = _iterator2.next();
-	        if (_i3.done) return 'break';
-	        _ref3 = _i3.value;
+	        _i2 = _iterator.next();
+	        if (_i2.done) return 'break';
+	        _ref2 = _i2.value;
 	    }
 
-	    var context = _ref3;
+	    var context = _ref2;
 
 
 	    var contextName = (0, _lib.capitalizeFirstLetter)(context);
@@ -6843,12 +6796,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	};
 
-	for (var _iterator2 = _constants.CONTEXT_TYPES_LIST, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	    var _ref3;
+	for (var _iterator = _constants.CONTEXT_TYPES_LIST, _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    var _ref2;
 
-	    var _ret4 = _loop2();
+	    var _ret = _loop();
 
-	    if (_ret4 === 'break') break;
+	    if (_ret === 'break') break;
 	}
 
 /***/ },
@@ -6957,7 +6910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            height: dimensions.height
 	        });
 
-	        this.window = (0, _lib.popup)('about:blank', {
+	        this.window = (0, _lib.popup)('', {
 	            name: this.childWindowName,
 	            width: dimensions.width,
 	            height: dimensions.height,
@@ -6988,6 +6941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Then message up and continue the rendering process from the parent as with any other renderToParent.
 
 	        this.open(null, _constants.CONTEXT_TYPES.POPUP);
+	        this.createComponentTemplate();
 	    },
 	    loadUrl: function loadUrl(url) {
 	        this.window.location = url;
@@ -7172,8 +7126,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	exports.propsToQuery = propsToQuery;
+	exports.normalizeParentProps = normalizeParentProps;
 
 	var _lib = __webpack_require__(/*! ../../lib */ 44);
+
+	var _props = __webpack_require__(/*! ../props */ 51);
 
 	/*  Props to Query
 	    --------------
@@ -7218,6 +7175,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).filter(Boolean).join('&');
 	}
 
+	function normalizeParentProps(component, instance, props) {
+	    props = (0, _props.normalizeProps)(component, instance, props);
+
+	    var _loop = function _loop() {
+	        if (_isArray) {
+	            if (_i >= _iterator.length) return 'break';
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) return 'break';
+	            _ref = _i.value;
+	        }
+
+	        var key = _ref;
+
+	        var value = props[key];
+
+	        if (value) {
+	            var prop = component.props[key];
+
+	            if (prop.precall) {
+	                (function () {
+	                    var result = value.call();
+	                    props[key] = function () {
+	                        return result;
+	                    };
+	                })();
+	            }
+
+	            if (prop.autoClose) {
+	                props[key] = function () {
+	                    var _this = this,
+	                        _arguments = arguments;
+
+	                    instance.component.log('autoclose', { prop: key });
+	                    return instance.close().then(function () {
+	                        return value.apply(_this, _arguments);
+	                    });
+	                };
+	            }
+	        }
+	    };
+
+	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'break') break;
+	    }
+
+	    return props;
+	}
+
 /***/ },
 /* 56 */
 /*!******************************************!*\
@@ -7260,8 +7271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    timeout: {
 	        type: 'number',
 	        required: false,
-	        queryParam: false,
-	        autoClose: true
+	        queryParam: false
 	    },
 
 	    // When we get an INIT message from the child
@@ -7269,7 +7279,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    onEnter: {
 	        type: 'function',
 	        required: false,
-	        noop: true
+	        noop: true,
+	        promisify: true
 	    },
 
 	    // When the user closes the component. Defaults to onError if no handler passed.
@@ -7278,7 +7289,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'function',
 	        required: false,
 	        noop: true,
-	        once: true
+	        once: true,
+	        promisify: true
 	    },
 
 	    // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -7288,6 +7300,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        required: false,
 	        once: true,
 	        autoClose: true,
+	        promisify: true,
 	        def: function def(err) {
 	            return this.props.onError(err);
 	        }
@@ -7299,6 +7312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'function',
 	        required: false,
 	        autoClose: true,
+	        promisify: true,
 	        def: function def(err) {
 	            console.error(err.message, '\n', err.stack || err.toString());
 	        },
