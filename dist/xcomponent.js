@@ -6625,12 +6625,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'resize',
-	        value: function resize(height, width) {
+	        value: function resize(width, height) {
 	            this.component.log('resize', { height: height, width: width });
-	            if (this.iframe) {
-	                this.iframe.height = height;
-	                this.iframe.width = width;
-	            }
+	            return _drivers.RENDER_DRIVERS[this.context].resize.call(this, width, height);
 	        }
 
 	        /*  Close
@@ -6862,10 +6859,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        this.iframe = (0, _lib.iframe)(element, null, {
-	            name: this.childWindowName,
-	            width: this.component.dimensions.width,
-	            height: this.component.dimensions.height
+	            name: this.childWindowName
 	        });
+
+	        var dimensions = this.component.dimensions || {};
+	        this.resize(dimensions.width, dimensions.height);
 
 	        this.window = this.iframe.contentWindow;
 
@@ -6885,6 +6883,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 
 	        return this;
+	    },
+	    resize: function resize(width, height) {
+	        this.iframe.style.width = width + 'px';
+	        this.iframe.style.height = height + 'px';
 	    },
 	    renderToParent: function renderToParent(element) {
 	        if (!element) {
@@ -6934,6 +6936,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return this;
 	    },
+	    resize: function resize() {
+	        // pass
+	    },
 	    renderToParent: function renderToParent() {
 
 	        // Popups are the only case where we need to do anything special to render to parent.
@@ -6956,15 +6961,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        RENDER_DRIVERS[_constants.CONTEXT_TYPES.IFRAME].open.call(this, element);
 
-	        var dimensions = this.component.dimensions || {};
-
 	        this.iframe.style.zIndex = _constants.MAX_Z_INDEX;
 	        this.iframe.style.position = 'fixed';
 
-	        if (dimensions.width) {
-	            this.iframe.style.width = dimensions.width + 'px';
+	        return this;
+	    },
+	    resize: function resize(width, height) {
+
+	        if (width) {
+	            this.iframe.style.width = width + 'px';
 	            this.iframe.style.left = '50%';
-	            this.iframe.style.marginLeft = '-' + Math.floor(dimensions.width / 2) + 'px';
+	            this.iframe.style.marginLeft = '-' + Math.floor(width / 2) + 'px';
 	        } else {
 	            this.iframe.style.left = 0;
 	            this.iframe.style.width = '100%';
@@ -6972,18 +6979,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.iframe.width = '100%';
 	        }
 
-	        if (dimensions.height) {
-	            this.iframe.style.height = dimensions.height + 'px';
+	        if (height) {
+	            this.iframe.style.height = height + 'px';
 	            this.iframe.style.top = '50%';
-	            this.iframe.style.marginTop = '-' + Math.floor(dimensions.height / 2) + 'px';
+	            this.iframe.style.marginTop = '-' + Math.floor(height / 2) + 'px';
 	        } else {
 	            this.iframe.style.top = 0;
 	            this.iframe.style.height = '100%';
 	            this.iframe.style.marginTop = '0px';
 	            this.iframe.height = '100%';
 	        }
-
-	        return this;
 	    },
 	    loadUrl: function loadUrl(url) {
 	        this.iframe.src = url;
@@ -7426,6 +7431,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (!anyEnabled) {
 	            throw new Error('[' + options.tag + '] No context type is enabled');
+	        }
+
+	        if (options.contexts.iframe !== false) {
+	            if (!options.dimensions || !options.dimensions.width || !options.dimensions.height) {
+	                throw new Error('[' + options.tag + '] dimesions.width and dimensions.height required for rendering to iframe');
+	            }
 	        }
 	    }
 
