@@ -40,7 +40,7 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should enter a component, throw an error, and return a new error to the parent without the original stack', done => {
+    it.skip('should enter a component, throw an error, and return a new error to the parent without the original stack', done => {
 
         component = testComponent.init({
 

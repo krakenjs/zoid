@@ -5,7 +5,6 @@ import { BaseComponent } from '../base';
 import { getParentComponentWindow, parseWindowName } from '../window';
 import { noop, extend, getParentWindow, onCloseWindow, addEventListener } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
-import { IntegrationError } from '../../error';
 import { normalizeProps } from '../props';
 
 /*  Child Component
@@ -292,11 +291,6 @@ export class ChildComponent extends BaseComponent {
     error(err) {
 
         this.component.log(`error`, { error: err.stack || err.toString() });
-
-        if (!(err instanceof IntegrationError)) {
-            console.error(err.stack);
-            err = new Error(`[${this.component.tag}] Child lifecycle method threw an error`);
-        }
 
         return this.sendToParent(POST_MESSAGE.ERROR, {
             error: err.stack ? `${err.message}\n${err.stack}` : err.toString()

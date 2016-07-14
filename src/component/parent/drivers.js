@@ -47,6 +47,7 @@ export let RENDER_DRIVERS = {
 
             let dimensions = this.component.dimensions || {};
             this.resize(dimensions.width, dimensions.height);
+            this.restyle();
 
             this.window = this.iframe.contentWindow;
 
@@ -71,6 +72,10 @@ export let RENDER_DRIVERS = {
         resize(width, height) {
             this.iframe.style.width = `${width}px`;
             this.iframe.style.height = `${height}px`;
+        },
+
+        restyle() {
+            this.iframe.style.backgroundColor = 'transparent';
         },
 
         renderToParent(element) {
@@ -130,6 +135,10 @@ export let RENDER_DRIVERS = {
             // pass
         },
 
+        restyle() {
+            // pass
+        },
+
         renderToParent() {
 
             // Popups are the only case where we need to do anything special to render to parent.
@@ -186,6 +195,10 @@ export let RENDER_DRIVERS = {
                 this.iframe.style.marginTop = '0px';
                 this.iframe.height          = '100%';
             }
+        },
+
+        restyle() {
+            // pass
         },
 
         loadUrl(url) {

@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, noop } from '../../lib';
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -112,26 +112,31 @@ export class ParentComponent extends BaseComponent {
     */
 
     updateProps(props) {
-        return this.onInit.then(() => {
+        return Promise.resolve().then(() => {
 
             validateProps(this.component, props);
 
             let oldProps = stringifyWithFunctions(this.props);
 
-            let newProps = {
+            this.setProps({
                 ...this.props,
                 ...props
-            };
+            });
 
-            this.setProps(newProps);
-
-            // Only send down the new props if they do not match the old, and if we have already sent down initial props
-
-            if (oldProps !== stringifyWithFunctions(this.props)) {
-                this.component.log('parent_update_props');
-
-                return this.childExports.updateProps(this.props);
+            if (!this.initialPropsSent) {
+                return;
             }
+
+            return this.onInit.then(() => {
+
+                // Only send down the new props if they do not match the old, and if we have already sent down initial props
+
+                if (oldProps !== stringifyWithFunctions(this.props)) {
+                    this.component.log('parent_update_props');
+
+                    return this.childExports.updateProps(this.props);
+                }
+            });
         });
     }
 
@@ -182,7 +187,7 @@ export class ParentComponent extends BaseComponent {
 
     validateRender(context) {
 
-        if (this.window) {
+        if (this.window && !this.preRendered) {
             throw new Error(`[${this.component.tag}] Can not render: component is already rendered`);
         }
 
@@ -217,12 +222,8 @@ export class ParentComponent extends BaseComponent {
 
             this.setForCleanup('context', context);
 
-            if (RENDER_DRIVERS[context].overlay) {
-                this.createParentTemplate();
-            }
+            this.preRender(element, context);
 
-            this.open(element, context);
-            this.createComponentTemplate();
             this.listen(this.window);
             this.loadUrl(context, this.buildUrl());
             this.runTimeout();
@@ -248,6 +249,33 @@ export class ParentComponent extends BaseComponent {
         RENDER_DRIVERS[context].open.call(this, element);
 
         this.watchForClose();
+    }
+
+
+
+    /*  Pre Open
+        --------
+
+        Pre-pen a new window in the desired context
+    */
+
+    preRender(element, context) {
+
+        if (this.preRendered) {
+            return;
+        }
+
+        context = this.getRenderContext(element, context);
+
+        this.component.log(`preRender_${context}`, { element, windowName: this.childWindowName });
+
+        this.setForCleanup('context', context);
+
+        this.createParentTemplate(context);
+        this.open(element, context);
+        this.createComponentTemplate();
+
+        this.setForCleanup('preRendered', true);
     }
 
 
@@ -406,7 +434,7 @@ export class ParentComponent extends BaseComponent {
 
         hijackButton(button, (event, targetElement) => {
 
-            if (this.window) {
+            if (this.window && !this.preRendered) {
                 event.preventDefault();
                 throw new Error(`[${this.component.tag}] Component is already rendered`);
             }
@@ -427,12 +455,11 @@ export class ParentComponent extends BaseComponent {
     */
 
     renderHijack(targetElement, element, context) {
-
-        context = this.getRenderContext(element, context);
-
-        this.component.log(`render_hijack_${context}`);
-
         return Promise.resolve().then(() => {
+
+            context = this.getRenderContext(element, context);
+
+            this.component.log(`render_hijack_${context}`);
 
             this.validateRender(context);
 
@@ -442,14 +469,11 @@ export class ParentComponent extends BaseComponent {
 
             targetElement.target = this.childWindowName;
 
-            if (RENDER_DRIVERS[context].overlay) {
-                this.createParentTemplate();
-            }
-
             // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
 
-            this.open(null, context);
-            this.createComponentTemplate();
+            this.preRender(element, context);
+
+
 
             // Do everything else the same way -- listen for events, render the overlay, etc.
 
@@ -529,6 +553,8 @@ export class ParentComponent extends BaseComponent {
 
                 this.onInit.resolve(this);
                 return this.props.onEnter().then(() => {
+
+                    this.setForCleanup('initialPropsSent', true);
 
                     // Let the child know what its context is, and what its initial props are.
 
@@ -611,12 +637,24 @@ export class ParentComponent extends BaseComponent {
 
     /*  Resize
         ------
+
         Resize the child component window
     */
 
     resize(width, height) {
         this.component.log(`resize`, { height, width });
         return RENDER_DRIVERS[this.context].resize.call(this, width, height);
+    }
+
+
+    /*  Restyle
+        -------
+
+        Restyle the child component window
+    */
+
+    restyle() {
+        return RENDER_DRIVERS[this.context].restyle.call(this);
     }
 
 
@@ -628,10 +666,7 @@ export class ParentComponent extends BaseComponent {
 
     close() {
 
-        return this.onInit.catch(noop).then(() => {
-            return this.props.onClose();
-
-        }).then(() => {
+        return this.props.onClose().then(() => {
             this.component.log(`close`);
             this.destroy();
         });
@@ -682,7 +717,11 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the overlay behind the popup/lightbox
     */
 
-    createParentTemplate() {
+    createParentTemplate(context) {
+
+        if (!RENDER_DRIVERS[context].overlay) {
+            return;
+        }
 
         this.parentTemplate = createElement('div', {
 
