@@ -182,7 +182,7 @@
         "max-len": [0, 80, 4],
         "max-nested-callbacks": [0, 2],
         "max-params": [2, 5],
-        "max-statements": [2, 30],
+        "max-statements": [2, 40],
         "new-cap": 2,
         "new-parens": 2,
         "newline-after-var": 0,

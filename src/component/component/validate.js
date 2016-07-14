@@ -60,6 +60,12 @@ export function validate(options) { // eslint-ignore-line
         if (!anyEnabled) {
             throw new Error(`[${options.tag}] No context type is enabled`);
         }
+
+        if (options.contexts.iframe !== false) {
+            if (!options.dimensions || !options.dimensions.width || !options.dimensions.height) {
+                throw new Error(`[${options.tag}] dimesions.width and dimensions.height required for rendering to iframe`);
+            }
+        }
     }
 
     if (options.defaultContext) {

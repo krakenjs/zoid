@@ -614,12 +614,9 @@ export class ParentComponent extends BaseComponent {
         Resize the child component window
     */
 
-    resize(height, width) {
+    resize(width, height) {
         this.component.log(`resize`, { height, width });
-        if (this.iframe) {
-            this.iframe.height = height;
-            this.iframe.width = width;
-        }
+        return RENDER_DRIVERS[this.context].resize.call(this, width, height);
     }
 
 
