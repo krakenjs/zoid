@@ -1,5 +1,55 @@
 
 
+
+export function validateProp(prop, key, value) {
+
+    let hasProp = value !== null && value !== undefined && value !== '';
+
+    if (!hasProp) {
+
+        // Props can either be optional, or specify a default value
+
+        if (prop.required !== false && !prop.hasOwnProperty('def')) {
+            throw new Error(`Prop is required: ${key}`);
+        }
+
+        return;
+    }
+
+    if (prop.type === 'function') {
+
+        if (!(value instanceof Function)) {
+            throw new Error(`Prop is not of type function: ${key}`);
+        }
+
+    } else if (prop.type === 'string') {
+
+        if (typeof value !== 'string') {
+
+            if (!(prop.getter && value instanceof Function)) {
+                throw new Error(`Prop is not of type string: ${key}`);
+            }
+        }
+
+    } else if (prop.type === 'object') {
+
+        // Since we're sending everything by post-message, everything must be json serializable
+
+        try {
+            JSON.stringify(value);
+        } catch (err) {
+            throw new Error(`Unable to serialize prop: ${key}`);
+        }
+
+    } else if (prop.type === 'number') {
+
+        if (isNaN(parseInt(value, 10))) {
+            throw new Error(`Prop is not a number: ${key}`);
+        }
+    }
+}
+
+
 /*  Validate Props
     --------------
 
@@ -26,47 +76,7 @@ export function validateProps(component, props) {
         let prop = component.props[key];
         let value = props[key];
 
-        let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-        if (!hasProp) {
-
-            // Props can either be optional, or specify a default value
-
-            if (prop.required !== false && !prop.hasOwnProperty('def')) {
-                throw new Error(`[${component.tag}] Prop is required: ${key}`);
-            }
-
-            continue;
-        }
-
-        if (prop.type === 'function') {
-
-            if (!(value instanceof Function)) {
-                throw new Error(`[${component.tag}] Prop is not of type function: ${key}`);
-            }
-
-        } else if (prop.type === 'string') {
-
-            if (typeof value !== 'string') {
-                throw new Error(`[${component.tag}] Prop is not of type string: ${key}`);
-            }
-
-        } else if (prop.type === 'object') {
-
-            // Since we're sending everything by post-message, everything must be json serializable
-
-            try {
-                JSON.stringify(value);
-            } catch (err) {
-                throw new Error(`[${component.tag}] Unable to serialize prop: ${key}`);
-            }
-
-        } else if (prop.type === 'number') {
-
-            if (isNaN(parseInt(value, 10))) {
-                throw new Error(`[${component.tag}] Prop is not a number: ${key}`);
-            }
-        }
+        validateProp(prop, key, value);
     }
 }
 

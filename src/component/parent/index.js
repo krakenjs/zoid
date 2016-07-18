@@ -84,24 +84,24 @@ export class ParentComponent extends BaseComponent {
     */
 
     buildUrl() {
+        return propsToQuery(this.component.props, this.props).then(queryString => {
 
-        let url;
+            let url;
 
-        if (this.props.url) {
-            url = this.props.url;
-        } else if (this.props.env) {
-            url = this.component.envUrls[this.props.env];
-        } else {
-            url = this.component.url;
-        }
+            if (this.props.url) {
+                url = this.props.url;
+            } else if (this.props.env) {
+                url = this.component.envUrls[this.props.env];
+            } else {
+                url = this.component.url;
+            }
 
-        let queryString = propsToQuery(this.component.props, this.props);
+            if (queryString) {
+                url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;
+            }
 
-        if (queryString) {
-            url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;
-        }
-
-        return url;
+            return url;
+        });
     }
 
 
@@ -225,11 +225,15 @@ export class ParentComponent extends BaseComponent {
             this.preRender(element, context);
 
             this.listen(this.window);
-            this.loadUrl(context, this.buildUrl());
-            this.runTimeout();
-            this.watchForClose();
 
-            return this.onInit;
+            return this.buildUrl().then(url => {
+
+                this.loadUrl(context, url);
+                this.runTimeout();
+                this.watchForClose();
+
+                return this.onInit;
+            });
         });
     }
 

@@ -1,5 +1,6 @@
 
-import { noop, denodeify, once, memoize, promisify } from '../lib';
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { noop, denodeify, once, memoize, promisify, getter } from '../lib';
 
 /*  Normalize Prop
     --------------
@@ -102,7 +103,28 @@ export function normalizeProps(component, instance, props) {
     let result = {};
 
     for (let key of Object.keys(component.props)) {
-        result[key] = normalizeProp(component, instance, props, key);
+
+        let prop = component.props[key];
+        let value = normalizeProp(component, instance, props, key);
+
+        if (prop.getter) {
+
+            if (value instanceof Function) {
+
+                value = getter(value);
+
+            } else {
+                let val = value;
+
+                value = function() {
+                    return Promise.resolve(val);
+                };
+            }
+
+            value = memoize(value);
+        }
+
+        result[key] = value;
     }
 
     return result;

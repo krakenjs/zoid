@@ -1,4 +1,6 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { validateProp } from './validate';
 import { urlEncode } from '../../lib';
 import { normalizeProps } from '../props';
 
@@ -16,35 +18,62 @@ import { normalizeProps } from '../props';
 
 export function propsToQuery(propsDef, props) {
 
-    return Object.keys(props).map(key => {
+    let params = [];
 
-        let value = props[key];
+    return Promise.all(Object.keys(props).map(key => {
 
-        if (!value) {
-            return;
+        let prop = propsDef[key];
+        let queryParam = key;
+
+        if (typeof prop.queryParam === 'string') {
+            queryParam = prop.queryParam;
         }
 
-        if (propsDef[key].queryParam === false) {
-            return;
-        }
+        return Promise.resolve().then(() => {
 
-        let result;
+            let value = props[key];
 
-        if (typeof value === 'boolean') {
-            result = '1';
-        } else if (typeof value === 'string') {
-            result = value.toString();
-        } else if (typeof value === 'function') {
-            return;
-        } else if (typeof value === 'object') {
-            result = JSON.stringify(value);
-        } else if (typeof value === 'number') {
-            result = value.toString();
-        }
+            if (!value) {
+                return;
+            }
 
-        return `${urlEncode(key)}=${urlEncode(result)}`;
+            if (prop.queryParam === false) {
+                return;
+            }
 
-    }).filter(Boolean).join('&');
+            if (prop.getter) {
+                return value.call().then(result => {
+                    validateProp(prop, key, result);
+                    return result;
+                });
+            }
+
+        }).then(value => {
+
+            if (!value) {
+                return;
+            }
+
+            let result;
+
+            if (typeof value === 'boolean') {
+                result = '1';
+            } else if (typeof value === 'string') {
+                result = value.toString();
+            } else if (typeof value === 'function') {
+                return;
+            } else if (typeof value === 'object') {
+                result = JSON.stringify(value);
+            } else if (typeof value === 'number') {
+                result = value.toString();
+            }
+
+            params.push(`${urlEncode(queryParam)}=${urlEncode(result)}`);
+        });
+
+    })).then(() => {
+        return params.join('&');
+    });
 }
 
 
@@ -57,13 +86,6 @@ export function normalizeParentProps(component, instance, props) {
 
         if (value) {
             let prop = component.props[key];
-
-            if (prop.precall) {
-                let result = value.call();
-                props[key] = () => {
-                    return result;
-                };
-            }
 
             if (prop.autoClose) {
                 props[key] = function() {
