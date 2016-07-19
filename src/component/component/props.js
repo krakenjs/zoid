@@ -46,7 +46,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         noop: true,
-        once: true,
+        memoize: true,
         promisify: true
     },
 
@@ -55,7 +55,7 @@ export const internalProps = {
     onTimeout: {
         type: 'function',
         required: false,
-        once: true,
+        memoize: true,
         autoClose: true,
         promisify: true,
         def(err) {

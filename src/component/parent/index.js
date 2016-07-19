@@ -709,9 +709,13 @@ export class ParentComponent extends BaseComponent {
         });
 
         try {
-            this.window.document.write(html);
+            createElement('body', { html }, this.window.document.body);
         } catch (err) {
-            // pass
+            try {
+                this.window.document.write(html);
+            } catch (err) {
+                this.window.location = `javascript: document.write(JSON.stringify(html))`;
+            }
         }
     }
 
