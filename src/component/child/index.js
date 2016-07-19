@@ -80,6 +80,11 @@ export class ChildComponent extends BaseComponent {
             return Promise.resolve();
         }
 
+        if (this.component.autoResize)
+        {
+            this.watchForResize();
+        }
+
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -216,6 +221,30 @@ export class ChildComponent extends BaseComponent {
         // TODO: Implement this
     }
 
+    watchForResize() {
+        let elm = document.body;
+
+        if (!elm) {
+            return;
+        }
+
+        let lastWidth = elm.scrollWidth;
+        let newWidth;
+        let lastHeight = elm.scrollHeight;
+        let newHeight;
+
+        setInterval(() => {
+            newWidth = elm.scrollWidth;
+            newHeight = elm.scrollHeight;
+            // Dimensions changed if this condition is true
+            if (lastHeight !== newHeight || lastWidth !== newWidth) {
+                this.resize(newWidth, newHeight);
+            }
+            lastWidth = newWidth;
+            lastHeight = newHeight;
+        }, 50);
+
+    }
 
 
     exports() {
