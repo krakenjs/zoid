@@ -168,6 +168,7 @@ export let RENDER_DRIVERS = {
 
             this.iframe.style.zIndex   = MAX_Z_INDEX;
             this.iframe.style.position = 'fixed';
+            this.iframe.className = 'xcomponent-lightbox-open';
 
             return this;
         },

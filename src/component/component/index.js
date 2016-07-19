@@ -88,6 +88,10 @@ export class Component {
 
         this.singleton = options.singleton;
 
+        // Auto Resize option
+
+        this.autoResize = options.autoResize || false;
+
         // Templates and styles for the parent page and the initial rendering of the component
 
         this.parentTemplate    = options.parentTemplate    || parentTemplate;
