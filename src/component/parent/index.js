@@ -713,7 +713,7 @@ export class ParentComponent extends BaseComponent {
         } catch (err) {
             try {
                 this.window.document.write(html);
-            } catch (err) {
+            } catch (err2) {
                 this.window.location = `javascript: document.write(JSON.stringify(html))`;
             }
         }
