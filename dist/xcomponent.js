@@ -6890,9 +6890,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            try {
-	                this.window.document.write(html);
+	                (0, _lib.createElement)('body', { html: html }, this.window.document.body);
 	            } catch (err) {
-	                // pass
+	                try {
+	                    this.window.document.write(html);
+	                } catch (err2) {
+	                    this.window.location = 'javascript: document.write(JSON.stringify(html))';
+	                }
 	            }
 	        }
 
@@ -7563,7 +7567,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'function',
 	        required: false,
 	        noop: true,
-	        once: true,
+	        memoize: true,
 	        promisify: true
 	    },
 
@@ -7572,7 +7576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    onTimeout: {
 	        type: 'function',
 	        required: false,
-	        once: true,
+	        memoize: true,
 	        autoClose: true,
 	        promisify: true,
 	        def: function def(err) {
