@@ -1,6 +1,7 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { noop, denodeify, once, memoize, promisify, getter } from '../lib';
+import { PROP_DEFER_TO_URL } from '../constants';
 
 /*  Normalize Prop
     --------------
@@ -21,8 +22,13 @@ export function normalizeProp(component, instance, props, key) {
         value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def() : prop.def;
     }
 
-    if (prop.type === 'boolean') {
-        return Boolean(value);
+    if (value === PROP_DEFER_TO_URL) {
+
+        // pass
+
+    } else if (prop.type === 'boolean') {
+
+        value = Boolean(value);
 
     } else if (prop.type === 'function') {
 
@@ -43,6 +49,8 @@ export function normalizeProp(component, instance, props, key) {
             }
 
         } else {
+
+            value = value.bind(instance);
 
             // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
 
@@ -73,21 +81,35 @@ export function normalizeProp(component, instance, props, key) {
             if (prop.memoize) {
                 value = memoize(value);
             }
-
-            value = value.bind(instance);
         }
 
-        return value;
-
     } else if (prop.type === 'string') {
-        return value || '';
+        value = value || '';
 
     } else if (prop.type === 'object') {
-        return value;
+        // pass
 
     } else if (prop.type === 'number') {
-        return parseInt(value || 0, 10);
+        value = parseInt(value || 0, 10);
     }
+
+    if (prop.getter && value !== PROP_DEFER_TO_URL) {
+
+        if (value instanceof Function) {
+            value = getter(value.bind(instance));
+
+        } else {
+            let val = value;
+
+            value = function() {
+                return Promise.resolve(val);
+            };
+        }
+
+        value = memoize(value);
+    }
+
+    return value;
 }
 
 
@@ -103,28 +125,7 @@ export function normalizeProps(component, instance, props) {
     let result = {};
 
     for (let key of Object.keys(component.props)) {
-
-        let prop = component.props[key];
-        let value = normalizeProp(component, instance, props, key);
-
-        if (prop.getter) {
-
-            if (value instanceof Function) {
-
-                value = getter(value);
-
-            } else {
-                let val = value;
-
-                value = function() {
-                    return Promise.resolve(val);
-                };
-            }
-
-            value = memoize(value);
-        }
-
-        result[key] = value;
+        result[key] = normalizeProp(component, instance, props, key);
     }
 
     return result;

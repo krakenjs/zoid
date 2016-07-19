@@ -436,19 +436,20 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`hijack_button`, { element, context });
 
-        hijackButton(button, (event, targetElement) => {
+        return new Promise((resolve, reject) => {
 
-            if (this.window && !this.preRendered) {
-                event.preventDefault();
-                throw new Error(`[${this.component.tag}] Component is already rendered`);
-            }
+            hijackButton(button, (event, targetElement) => {
 
-            // Open the window to render into
+                if (this.window && !this.preRendered) {
+                    event.preventDefault();
+                    throw new Error(`[${this.component.tag}] Component is already rendered`);
+                }
 
-            this.renderHijack(targetElement, element, context);
+                // Open the window to render into
+
+                this.renderHijack(targetElement, element, context).then(resolve, reject);
+            });
         });
-
-        return this;
     }
 
 

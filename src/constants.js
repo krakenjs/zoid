@@ -46,3 +46,5 @@ export const EVENT_NAMES = {
 export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
 export const MAX_Z_INDEX = 2147483647;
+
+export const PROP_DEFER_TO_URL = `xcomponent_prop_defer_to_url`;

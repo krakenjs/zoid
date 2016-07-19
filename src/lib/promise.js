@@ -46,7 +46,7 @@ export function promisify(method) {
 export function getter(method) {
     return function() {
         return new Promise((resolve, reject) => {
-            let result = method(resolve, reject);
+            let result = method.call(this, resolve, reject);
 
             if (result && result.then instanceof Function) {
                 return result.then(resolve, reject);

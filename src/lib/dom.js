@@ -315,3 +315,29 @@ export function template(html, context) {
         return get(context, variable.slice(1, variable.length - 1), '');
     });
 }
+
+export function getUrlParams(queryString) {
+
+    queryString = queryString || window.location.search.slice(1);
+
+    let params = {};
+
+    if (!queryString) {
+        return params;
+    }
+
+    for (let pair of queryString.split('&')) {
+        pair = pair.split('=');
+
+        if (pair[0] && pair[1]) {
+            params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        }
+    }
+
+    return params;
+}
+
+
+export function getUrlParam(name) {
+    return getUrlParams()[name];
+}

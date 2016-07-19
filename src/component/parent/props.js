@@ -3,6 +3,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
 import { urlEncode } from '../../lib';
 import { normalizeProps } from '../props';
+import { PROP_DEFER_TO_URL } from '../../constants';
 
 
 /*  Props to Query
@@ -38,6 +39,10 @@ export function propsToQuery(propsDef, props) {
             }
 
             if (prop.queryParam === false) {
+                return;
+            }
+
+            if (value === PROP_DEFER_TO_URL) {
                 return;
             }
 

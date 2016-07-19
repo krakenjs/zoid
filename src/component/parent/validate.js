@@ -1,5 +1,5 @@
 
-
+import { PROP_DEFER_TO_URL } from '../../constants';
 
 export function validateProp(prop, key, value) {
 
@@ -13,6 +13,10 @@ export function validateProp(prop, key, value) {
             throw new Error(`Prop is required: ${key}`);
         }
 
+        return;
+    }
+
+    if (value === PROP_DEFER_TO_URL) {
         return;
     }
 
@@ -89,5 +93,9 @@ export function validateProps(component, props) {
 
 export function validate(component, options) {
 
-    // pass
+    let props = options.props || {};
+
+    if (props.env && !component.envUrls[props.env]) {
+        throw new Error(`Invalid env: ${props.env}`);
+    }
 }

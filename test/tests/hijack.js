@@ -32,7 +32,9 @@ describe('xcomponent hijack', () => {
                 document.body.removeChild(form);
                 done();
             }
-        }).hijackButtonToLightbox('#hijackButton');
+        });
+
+        component.hijackButtonToLightbox('#hijackButton');
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -57,7 +59,9 @@ describe('xcomponent hijack', () => {
                 document.body.removeChild(form);
                 done();
             }
-        }).hijackButtonToPopup('#hijackButton');
+        });
+
+        component.hijackButtonToPopup('#hijackButton');
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -78,7 +82,9 @@ describe('xcomponent hijack', () => {
                 document.body.removeChild(link);
                 done();
             }
-        }).hijackButtonToLightbox('hijackLink');
+        });
+
+        component.hijackButtonToLightbox('hijackLink');
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -99,7 +105,9 @@ describe('xcomponent hijack', () => {
                 document.body.removeChild(link);
                 done();
             }
-        }).hijackButtonToPopup('#hijackLink');
+        });
+
+        component.hijackButtonToPopup('#hijackLink');
 
         postRobot.once('init', () => 'attachTestComponent');
 

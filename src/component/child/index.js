@@ -6,6 +6,7 @@ import { getParentComponentWindow, parseWindowName } from '../window';
 import { noop, extend, getParentWindow, onCloseWindow, addEventListener } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
 import { normalizeProps } from '../props';
+import { normalizeChildProps } from './props';
 
 /*  Child Component
     ---------------
@@ -38,7 +39,7 @@ export class ChildComponent extends BaseComponent {
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
         // has provided them or not, and fall-back to some default behavior.
 
-        this.props = normalizeProps(this.component, this, options.defaultProps || {});
+        this.setProps(normalizeProps(this.component, this, options.defaultProps || {}), false);
 
         // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
         // there's an existing full-page implementation which uses redirects. In this case, the user can specify
@@ -94,12 +95,21 @@ export class ChildComponent extends BaseComponent {
         }).then(data => {
 
             this.context = data.context;
-            extend(this.props, data.props);
+            this.setProps(data.props);
 
             this.onEnter.call(this);
-            this.onProps.call(this);
 
         }).catch(err => this.onError(err));
+    }
+
+
+    setProps(props = {}, onProps = true) {
+        this.props = this.props || {};
+        extend(this.props, normalizeChildProps(this.component, props));
+
+        if (onProps) {
+            this.onProps.call(this);
+        }
     }
 
 
@@ -221,10 +231,7 @@ export class ChildComponent extends BaseComponent {
     exports() {
 
         return {
-            updateProps: props => {
-                extend(this.props, props || {});
-                this.onProps.call(this);
-            }
+            updateProps: props => this.setProps(props)
         };
     }
 
