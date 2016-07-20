@@ -1,4 +1,7 @@
 
+import base64 from 'Base64';
+
+
 /*  Url Encode
     ----------
 
@@ -99,7 +102,7 @@ export function uniqueID() {
 */
 
 export function b64encode(str) {
-    return window.btoa(str).replace(/[=]/g, '_');
+    return (window.btoa ? window.btoa(str) : base64.btoa(str)).replace(/[=]/g, '_');
 }
 
 
@@ -110,7 +113,8 @@ export function b64encode(str) {
 */
 
 export function b64decode(str) {
-    return window.atob(str.replace(/[_]/g, '='));
+    str = str.replace(/[_]/g, '=');
+    return (window.btoa ? window.btoa(str) : base64.btoa(str));
 }
 
 
