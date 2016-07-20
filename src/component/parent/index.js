@@ -234,6 +234,11 @@ export class ParentComponent extends BaseComponent {
 
                 return this.onInit;
             });
+
+        }).catch(err => {
+
+            this.destroy();
+            throw err;
         });
     }
 
@@ -346,7 +351,7 @@ export class ParentComponent extends BaseComponent {
                 }
 
             }).then(data => {
-                
+
                 this.childExports = data.childExports;
                 this.close = data.close;
 
