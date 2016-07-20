@@ -114,7 +114,7 @@ export function b64encode(str) {
 
 export function b64decode(str) {
     str = str.replace(/[_]/g, '=');
-    return (window.btoa ? window.btoa(str) : base64.btoa(str));
+    return (window.atob ? window.atob(str) : base64.atob(str));
 }
 
 
