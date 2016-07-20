@@ -709,7 +709,7 @@ export class ParentComponent extends BaseComponent {
         });
 
         try {
-            createElement('body', { html }, this.window.document.body);
+            createElement('div', { html }, this.window.document.body);
         } catch (err) {
             try {
                 this.window.document.write(html);
