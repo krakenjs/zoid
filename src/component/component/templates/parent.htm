@@ -5,7 +5,7 @@
 </div>
 
 <style>
-    #{id}.{CLASS.XCOMPONENT} .overlay {
+    #{id} .overlay {
         position: absolute;
         top: 0;
         left: 0;
@@ -14,11 +14,11 @@
         background-color: rgba(0, 0, 0, 0.8);
     }
 
-    #{id}.{CLASS.XCOMPONENT}.{CLASS.POPUP} .overlay {
+    #{id}.{CLASS.POPUP} .overlay {
         cursor: pointer;
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE} {
+    #{id} .{CLASS.CLOSE} {
         position: absolute;
         right: 16px;
         top: 16px;
@@ -27,11 +27,11 @@
         opacity: 0.6;
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:hover {
+    #{id} .{CLASS.CLOSE}:hover {
         opacity: 1;
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {
+    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {
         position: absolute;
         left: 8px;
         content: ' ';
@@ -40,11 +40,11 @@
         background-color: white;
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before {
+    #{id} .{CLASS.CLOSE}:before {
         transform: rotate(45deg);
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:after {
+    #{id} .{CLASS.CLOSE}:after {
         transform: rotate(-45deg);
     }
 </style>

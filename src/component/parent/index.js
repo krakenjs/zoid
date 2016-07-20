@@ -671,6 +671,10 @@ export class ParentComponent extends BaseComponent {
 
     close() {
 
+        if (this.parentTemplate) {
+            this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
+        }
+
         return this.props.onClose().then(() => {
             this.component.log(`close`);
             this.destroy();

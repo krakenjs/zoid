@@ -38,7 +38,8 @@ export const CLASS_NAMES = {
     ELEMENT: `${XCOMPONENT}-element`,
     IFRAME: `${XCOMPONENT}-iframe`,
     LIGHTBOX: `${XCOMPONENT}-lightbox`,
-    POPUP: `${XCOMPONENT}-popup`
+    POPUP: `${XCOMPONENT}-popup`,
+    CLOSING: `${XCOMPONENT}-closing`
 };
 
 export const EVENT_NAMES = {
