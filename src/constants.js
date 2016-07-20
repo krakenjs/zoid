@@ -35,8 +35,10 @@ export const CLASS_NAMES = {
     COMPONENT: `${XCOMPONENT}-component`,
     CLOSE: `${XCOMPONENT}-close`,
     FOCUS: `${XCOMPONENT}-focus`,
-    OVERLAY: `${XCOMPONENT}-overlay`,
-    ELEMENT: `${XCOMPONENT}-element`
+    ELEMENT: `${XCOMPONENT}-element`,
+    IFRAME: `${XCOMPONENT}-iframe`,
+    LIGHTBOX: `${XCOMPONENT}-lightbox`,
+    POPUP: `${XCOMPONENT}-popup`
 };
 
 export const EVENT_NAMES = {

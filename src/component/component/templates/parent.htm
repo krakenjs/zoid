@@ -1,19 +1,11 @@
-<div class="{CLASS.OVERLAY} {CLASS.FOCUS}">
+<div class="overlay {CLASS.FOCUS}">
     <a href="#{CLASS.CLOSE}" class="{CLASS.CLOSE}"></a>
 
     <div class="{CLASS.ELEMENT}"></div>
 </div>
 
 <style>
-    #{id}.{CLASS.XCOMPONENT} {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY} {
+    #{id}.{CLASS.XCOMPONENT} .overlay {
         position: absolute;
         top: 0;
         left: 0;
@@ -22,7 +14,7 @@
         background-color: rgba(0, 0, 0, 0.8);
     }
 
-    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY}.xcomponent-popup {
+    #{id}.{CLASS.XCOMPONENT}.{CLASS.POPUP} .overlay {
         cursor: pointer;
     }
 
