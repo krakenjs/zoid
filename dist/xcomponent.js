@@ -177,8 +177,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    COMPONENT: XCOMPONENT + '-component',
 	    CLOSE: XCOMPONENT + '-close',
 	    FOCUS: XCOMPONENT + '-focus',
-	    OVERLAY: XCOMPONENT + '-overlay',
-	    ELEMENT: XCOMPONENT + '-element'
+	    ELEMENT: XCOMPONENT + '-element',
+	    IFRAME: XCOMPONENT + '-iframe',
+	    LIGHTBOX: XCOMPONENT + '-lightbox',
+	    POPUP: XCOMPONENT + '-popup',
+	    CLOSING: XCOMPONENT + '-closing'
 	};
 
 	var EVENT_NAMES = exports.EVENT_NAMES = {
@@ -1816,6 +1819,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        'window.parent.opener': function windowParentOpener(id) {
 	            return (0, _lib.getOpener)(window.parent);
+	        },
+	        'window.opener.parent': function windowOpenerParent(id) {
+	            return (0, _lib.getOpener)(window).parent;
 	        }
 	    };
 
@@ -2555,8 +2561,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        args = Array.prototype.slice.call(args);
 
+	        args.unshift(window.location.pathname);
 	        args.unshift(window.location.host);
-	        args.unshift(_util.util.getType().toLowerCase());
+	        args.unshift('<' + _util.util.getType().toLowerCase() + '>');
 	        args.unshift('[post-robot]');
 
 	        if (_conf.CONFIG.LOG_TO_PAGE) {
@@ -3096,8 +3103,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.openBridge = undefined;
-	exports.getBridge = getBridge;
 	exports.getBridgeFor = getBridgeFor;
+	exports.getBridge = getBridge;
 
 	var _conf = __webpack_require__(/*! ../conf */ 12);
 
@@ -3131,7 +3138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var iframe = document.createElement('iframe');
 
-	        iframe.setAttribute('name', id);
+	        iframe.setAttribute('name', '__postrobot_bridge__');
 	        iframe.setAttribute('id', id);
 
 	        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
@@ -3161,13 +3168,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return bridge;
 	});
 
-	function getBridge() {
-	    return _lib.promise.Promise.resolve().then(function () {
-	        return bridge;
-	    });
-	}
-
 	function getBridgeFor(win) {
+
+	    try {
+	        var frame = win.frames.__postrobot_bridge__;
+
+	        if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	            return frame;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
 
 	    try {
 	        if (!win || !win.frames || !win.frames.length) {
@@ -3176,10 +3187,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        for (var i = 0; i < win.frames.length; i++) {
 	            try {
-	                var frame = win.frames[i];
+	                var _frame = win.frames[i];
 
-	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	                    return frame;
+	                if (_frame && _frame !== window && (0, _lib.isSameDomain)(_frame) && _frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                    return _frame;
 	                }
 	            } catch (err) {
 	                continue;
@@ -3188,6 +3199,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } catch (err) {
 	        return;
 	    }
+	}
+
+	function getBridge() {
+	    return _lib.promise.Promise.resolve().then(function () {
+	        return bridge || getBridgeFor(window);
+	    });
 	}
 
 /***/ },
@@ -3495,6 +3512,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (window === (0, _lib.getOpener)(win)) {
 	        message.sourceHint = 'window.opener';
+	    }
+
+	    if (window === (0, _lib.getOpener)(win).parent) {
+	        message.sourceHint = 'window.opener.parent';
 	    }
 
 	    return (0, _compat.getBridge)().then(function (bridge) {
@@ -4111,6 +4132,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
 
 	        this.singleton = options.singleton;
+
+	        // Auto Resize option
+
+	        this.autoResize = options.autoResize || false;
 
 	        // Templates and styles for the parent page and the initial rendering of the component
 
@@ -5354,8 +5379,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
 
-	            if (this.standalone && !(0, _lib.getParentWindow)()) {
+	            if (this.standalone && !(0, _window.getParentWindow)()) {
 	                return _promise.SyncPromise.resolve();
+	            }
+
+	            if (this.component.autoResize) {
+	                this.watchForResize();
 	            }
 
 	            // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -5402,7 +5431,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'sendToParent',
 	        value: function sendToParent(name, data) {
 	            this.component.log('send_to_parent_' + name);
-	            return _src2['default'].send((0, _lib.getParentWindow)(), name, data);
+	            return _src2['default'].send((0, _window.getParentWindow)(), name, data);
 	        }
 
 	        /*  Set Windows
@@ -5425,7 +5454,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // Get the direct parent window
 
-	            if (!(0, _lib.getParentWindow)()) {
+	            if (!(0, _window.getParentWindow)()) {
 	                throw new Error('[' + this.component.tag + '] Can not find parent window');
 	            }
 
@@ -5464,7 +5493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function watchForClose() {
 	            var _this3 = this;
 
-	            (0, _lib.onCloseWindow)(_lib.getParentWindow, function () {
+	            (0, _lib.onCloseWindow)(_window.getParentWindow, function () {
 
 	                _this3.component.log('parent_window_closed');
 
@@ -5480,7 +5509,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // Only listen for parent component window if it's actually a different window
 
-	            if ((0, _window.getParentComponentWindow)() && (0, _window.getParentComponentWindow)() !== (0, _lib.getParentWindow)()) {
+	            if ((0, _window.getParentComponentWindow)() && (0, _window.getParentComponentWindow)() !== (0, _window.getParentWindow)()) {
 	                (0, _lib.onCloseWindow)((0, _window.getParentComponentWindow)(), function () {
 
 	                    _this3.component.log('parent_component_window_closed');
@@ -5509,13 +5538,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // TODO: Implement this
 	        }
 	    }, {
+	        key: 'watchForResize',
+	        value: function watchForResize() {
+	            var _this4 = this;
+
+	            var elm = document.body;
+
+	            if (!elm) {
+	                return;
+	            }
+
+	            var lastWidth = elm.scrollWidth;
+	            var newWidth = void 0;
+	            var lastHeight = elm.scrollHeight;
+	            var newHeight = void 0;
+
+	            setInterval(function () {
+	                newWidth = elm.scrollWidth;
+	                newHeight = elm.scrollHeight;
+	                // Dimensions changed if this condition is true
+	                if (lastHeight !== newHeight || lastWidth !== newWidth) {
+	                    _this4.resize(newWidth, newHeight);
+	                }
+	                lastWidth = newWidth;
+	                lastHeight = newHeight;
+	            }, 50);
+	        }
+	    }, {
 	        key: 'exports',
 	        value: function exports() {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            return {
 	                updateProps: function updateProps(props) {
-	                    return _this4.setProps(props);
+	                    return _this5.setProps(props);
+	                },
+	                close: function close() {
+	                    return window.close();
 	                }
 	            };
 	        }
@@ -5528,17 +5587,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(width, height) {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this5.component.log('resize', { width: width, height: height });
+	                _this6.component.log('resize', { width: width, height: height });
 
-	                if (_this5.context === _constants.CONTEXT_TYPES.POPUP) {
+	                if (_this6.context === _constants.CONTEXT_TYPES.POPUP) {
 	                    return window.resizeTo(width, height);
 	                }
 
-	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
 	            });
 	        }
 
@@ -5794,7 +5853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.getParentComponentWindow = exports.parseWindowName = undefined;
+	exports.getParentComponentWindow = exports.getParentWindow = exports.parseWindowName = undefined;
 	exports.buildChildWindowName = buildChildWindowName;
 	exports.getPosition = getPosition;
 
@@ -5857,6 +5916,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return winProps;
 	});
 
+	var getParentWindow = exports.getParentWindow = (0, _lib.memoize)(function () {
+
+	    var win = void 0;
+
+	    if (window.opener) {
+	        win = window.opener;
+	    } else if (window.parent && window.parent !== window) {
+	        win = window.parent;
+	    } else {
+	        throw new Error('Can not find parent window');
+	    }
+
+	    var winProps = parseWindowName(window.name);
+
+	    if (!winProps) {
+	        throw new Error('Window has not been rendered by xcomponent');
+	    }
+
+	    if (!win.parent || win.parent === win) {
+	        return win;
+	    }
+
+	    if (winProps.sibling && win.parent.frames && win.parent.frames[winProps.parent] === win) {
+	        return win.parent;
+	    }
+
+	    return win;
+	});
+
 	/*  Get Parent Component Window
 	    ---------------------------
 
@@ -5873,7 +5961,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Window has not been rendered by xcomponent - can not attach here');
 	    }
 
-	    var parentWindow = (0, _lib.getParentWindow)();
+	    var parentWindow = getParentWindow();
 
 	    // Use this to infer which window is our true 'parent component'. This can either be:
 	    //
@@ -5881,12 +5969,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // - A sibling which rendered us using renderToParent()
 
 	    if (winProps.sibling) {
-
-	        if (parentWindow.frames && parentWindow.frames.length && parentWindow.frames[winProps.parent]) {
-	            parentWindow = parentWindow.frames[winProps.parent];
-	        } else if (parentWindow.parent !== parentWindow && parentWindow.parent.frames && parentWindow.parent.frames.length && parentWindow.parent.frames[winProps.parent]) {
-	            parentWindow = parentWindow.parent.frames[winProps.parent];
-	        }
+	        return parentWindow.frames[winProps.parent];
 	    }
 
 	    return parentWindow;
@@ -6428,12 +6511,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this4.preRender(element, context);
 
 	                _this4.listen(_this4.window);
+	                _this4.watchForClose();
 
 	                return _this4.buildUrl().then(function (url) {
 
 	                    _this4.loadUrl(context, url);
 	                    _this4.runTimeout();
-	                    _this4.watchForClose();
 
 	                    return _this4.onInit;
 	                });
@@ -6487,7 +6570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /*  Render to Parent
 	            ----------------
 	             Instruct the parent window to render our component for us -- so, for example, we can have a button component
-	            which opens a lightbox on the parent page, with a full overlay. Or, we could use this to render an iframe based
+	            which opens a lightbox on the parent page, with a full template. Or, we could use this to render an iframe based
 	            modal on top of our existing iframe component, without having to expand out the size of our current iframe.
 	        */
 
@@ -6504,7 +6587,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                context = _this5.getRenderContext(element, context);
 
-	                if (!(0, _lib.getParentWindow)()) {
+	                var parentWindow = (0, _lib.getParentWindow)();
+
+	                if (!parentWindow) {
 	                    throw new Error('[' + _this5.component.tag + '] Can not render to parent - no parent exists');
 	                }
 
@@ -6554,7 +6639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
 	                    if (!_this5.window) {
-	                        _this5.setForCleanup('window', (0, _lib.getParentWindow)().frames[_this5.childWindowName]);
+	                        _this5.setForCleanup('window', parentWindow.frames[_this5.childWindowName]);
 	                    }
 
 	                    // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
@@ -6682,7 +6767,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _this8.preRender(element, context);
 
-	                // Do everything else the same way -- listen for events, render the overlay, etc.
+	                // Do everything else the same way -- listen for events, render the parent template, etc.
 
 	                _this8.listen(_this8.window);
 	                _this8.runTimeout();
@@ -6769,7 +6854,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close();
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER, function (source, data) {
-	                var _this11 = this;
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
@@ -6802,7 +6886,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            return {
 	                                childExports: instance.childExports,
 	                                close: function close() {
-	                                    return _this11.close();
+	                                    return instance.close();
 	                                }
 	                            };
 	                        });
@@ -6850,11 +6934,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this12 = this;
+	            var _this11 = this;
+
+	            this.component.log('close');
+
+	            if (this.parentTemplate) {
+	                this.parentTemplate.className += ' ' + _constants.CLASS_NAMES.CLOSING;
+	            }
 
 	            return this.props.onClose().then(function () {
-	                _this12.component.log('close');
-	                _this12.destroy();
+
+	                if (_this11.childExports) {
+	                    _this11.childExports.close();
+	                }
+
+	                _this11.destroy();
 	            });
 	        }
 
@@ -6890,27 +6984,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            try {
-	                (0, _lib.createElement)('body', { html: html }, this.window.document.body);
+	                this.window.document.open();
+	                this.window.document.write(html);
+	                this.window.document.close();
 	            } catch (err) {
-	                try {
-	                    this.window.document.write(html);
-	                } catch (err2) {
-	                    this.window.location = 'javascript: document.write(JSON.stringify(html))';
-	                }
+	                this.window.location = 'javascript: document.open(); document.write(JSON.stringify(html)); document.close();';
 	            }
 	        }
 
 	        /*  Create Parent Template
 	            ----------------------
-	             Create a template and stylesheet for the overlay behind the popup/lightbox
+	             Create a template and stylesheet for the parent template behind the popup/lightbox
 	        */
 
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this13 = this;
+	            var _this12 = this;
 
-	            if (!_drivers.RENDER_DRIVERS[context].overlay) {
+	            if (!_drivers.RENDER_DRIVERS[context].parentTemplate) {
 	                return;
 	            }
 
@@ -6934,15 +7026,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }, document.body);
 
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this13.focus();
+	                return _this12.focus();
 	            });
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this13.close();
+	                return _this12.close();
 	            });
 
 	            this.registerForCleanup(function () {
-	                document.body.removeChild(_this13.parentTemplate);
-	                delete _this13.parentTemplate;
+	                document.body.removeChild(_this12.parentTemplate);
+	                delete _this12.parentTemplate;
 	            });
 	        }
 
@@ -7052,7 +7144,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    - Opening frames and windows
 	    - Rendering up to the parent
-	    - Showing overlays
+	    - Resizing
+	    - etc.
 
 	    based on the context we're rendering to.
 
@@ -7062,7 +7155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var RENDER_DRIVERS = exports.RENDER_DRIVERS = (_RENDER_DRIVERS = {}, _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.IFRAME, {
 
-	    overlay: false,
+	    parentTemplate: false,
 
 	    render: function render(element) {
 	        if (!element) {
@@ -7120,7 +7213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}), _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.POPUP, {
 
-	    overlay: true,
+	    parentTemplate: true,
 
 	    open: function open() {
 	        var _this2 = this;
@@ -7178,7 +7271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}), _defineProperty(_RENDER_DRIVERS, _constants.CONTEXT_TYPES.LIGHTBOX, {
 
-	    overlay: true,
+	    parentTemplate: true,
 
 	    open: function open() {
 
@@ -7770,7 +7863,7 @@ return /******/ (function(modules) { // webpackBootstrap
   \******************************************************/
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"{CLASS.OVERLAY} {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id}.{CLASS.XCOMPONENT} {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY} {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.OVERLAY}.xcomponent-popup {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id}.{CLASS.XCOMPONENT} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
+	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
 /* 60 */
