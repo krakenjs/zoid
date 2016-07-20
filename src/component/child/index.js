@@ -2,8 +2,8 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
-import { getParentComponentWindow, parseWindowName } from '../window';
-import { noop, extend, getParentWindow, onCloseWindow, addEventListener } from '../../lib';
+import { getParentComponentWindow, getParentWindow, parseWindowName } from '../window';
+import { noop, extend, onCloseWindow, addEventListener } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
 import { normalizeProps } from '../props';
 import { normalizeChildProps } from './props';
@@ -260,7 +260,8 @@ export class ChildComponent extends BaseComponent {
     exports() {
 
         return {
-            updateProps: props => this.setProps(props)
+            updateProps: props => this.setProps(props),
+            close: () => window.close()
         };
     }
 

@@ -225,12 +225,12 @@ export class ParentComponent extends BaseComponent {
             this.preRender(element, context);
 
             this.listen(this.window);
+            this.watchForClose();
 
             return this.buildUrl().then(url => {
 
                 this.loadUrl(context, url);
                 this.runTimeout();
-                this.watchForClose();
 
                 return this.onInit;
             });
@@ -298,7 +298,9 @@ export class ParentComponent extends BaseComponent {
 
             context = this.getRenderContext(element, context);
 
-            if (!getParentWindow()) {
+            let parentWindow = getParentWindow();
+
+            if (!parentWindow) {
                 throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
             }
 
@@ -351,7 +353,7 @@ export class ParentComponent extends BaseComponent {
                 // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
                 if (!this.window) {
-                    this.setForCleanup('window', getParentWindow().frames[this.childWindowName]);
+                    this.setForCleanup('window', parentWindow.frames[this.childWindowName]);
                 }
 
                 // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
@@ -612,7 +614,7 @@ export class ParentComponent extends BaseComponent {
 
                         return {
                             childExports: instance.childExports,
-                            close: () => this.close()
+                            close: () => instance.close()
                         };
                     });
                 }
@@ -671,12 +673,18 @@ export class ParentComponent extends BaseComponent {
 
     close() {
 
+        this.component.log(`close`);
+
         if (this.parentTemplate) {
             this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
         }
 
         return this.props.onClose().then(() => {
-            this.component.log(`close`);
+
+            if (this.childExports) {
+                this.childExports.close();
+            }
+
             this.destroy();
         });
     }
@@ -713,13 +721,11 @@ export class ParentComponent extends BaseComponent {
         });
 
         try {
-            createElement('div', { html }, this.window.document.body);
+            this.window.document.open();
+            this.window.document.write(html);
+            this.window.document.close();
         } catch (err) {
-            try {
-                this.window.document.write(html);
-            } catch (err2) {
-                this.window.location = `javascript: document.write(JSON.stringify(html))`;
-            }
+            this.window.location = `javascript: document.open(); document.write(JSON.stringify(html)); document.close();`;
         }
     }
 

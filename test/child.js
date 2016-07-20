@@ -124,6 +124,10 @@ let cases = {
                 testComponent2.init({
                     onEnter() {
                         return comp.props.foo();
+                    },
+
+                    onClose() {
+                        comp.close();
                     }
                 }).renderLightboxToParent();
 
@@ -139,6 +143,10 @@ let cases = {
                 testComponent2.init({
                     onEnter() {
                         return comp.props.foo();
+                    },
+
+                    onClose() {
+                        comp.close();
                     }
                 }).renderPopupToParent();
 
@@ -177,11 +185,15 @@ let cases = {
     },
 
     renderTestComponent2ToParentLightboxAndClose() {
-        testComponent.attach({
+        let comp = testComponent.attach({
             onEnter() {
                 let comp2 = testComponent2.init({
                     onEnter() {
                         comp2.close();
+                    },
+
+                    onClose() {
+                        comp.close();
                     }
                 });
 

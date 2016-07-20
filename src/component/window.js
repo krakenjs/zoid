@@ -1,5 +1,5 @@
 
-import { b64encode, b64decode, memoize, getParentWindow, uniqueID } from '../lib';
+import { b64encode, b64decode, memoize, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -57,6 +57,36 @@ export let parseWindowName = memoize(name => {
     return winProps;
 });
 
+export let getParentWindow = memoize(() => {
+
+    let win;
+
+    if (window.opener) {
+        win = window.opener;
+    } else if (window.parent && window.parent !== window) {
+        win = window.parent;
+    } else {
+        throw new Error(`Can not find parent window`);
+    }
+
+    let winProps = parseWindowName(window.name);
+
+    if (!winProps) {
+        throw new Error(`Window has not been rendered by xcomponent`);
+    }
+
+    if (!win.parent || win.parent === win) {
+        return win;
+    }
+
+    if (winProps.sibling && win.parent.frames && win.parent.frames[winProps.parent] === win) {
+        return win.parent;
+    }
+
+    return win;
+});
+
+
 
 /*  Get Parent Component Window
     ---------------------------
@@ -82,13 +112,7 @@ export let getParentComponentWindow = memoize(() => {
     // - A sibling which rendered us using renderToParent()
 
     if (winProps.sibling) {
-
-        if (parentWindow.frames && parentWindow.frames.length && parentWindow.frames[winProps.parent]) {
-            parentWindow = parentWindow.frames[winProps.parent];
-
-        } else if (parentWindow.parent !== parentWindow && parentWindow.parent.frames && parentWindow.parent.frames.length && parentWindow.parent.frames[winProps.parent]) {
-            parentWindow = parentWindow.parent.frames[winProps.parent];
-        }
+        return parentWindow.frames[winProps.parent];
     }
 
     return parentWindow;
