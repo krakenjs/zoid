@@ -12,7 +12,8 @@ import { getPosition } from '../window';
 
     - Opening frames and windows
     - Rendering up to the parent
-    - Showing overlays
+    - Resizing
+    - etc.
 
     based on the context we're rendering to.
 
@@ -22,12 +23,12 @@ import { getPosition } from '../window';
 
 export let RENDER_DRIVERS = {
 
-    // Iframe context is rendered inline on the page, without any kind of overlay. It's the one context that is designed
+    // Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
     // to feel like a native element on the page.
 
     [ CONTEXT_TYPES.IFRAME ]: {
 
-        overlay: false,
+        parentTemplate: false,
 
         render(element) {
             if (!element) {
@@ -93,7 +94,7 @@ export let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.POPUP ]: {
 
-        overlay: true,
+        parentTemplate: true,
 
         open() {
 
@@ -154,11 +155,11 @@ export let RENDER_DRIVERS = {
         }
     },
 
-    // Lightbox context opens up a centered, iframe based lightbox on the page, with an overlay behind it.
+    // Lightbox context opens up a centered, iframe based lightbox on the page, with a template behind it.
 
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
-        overlay: true,
+        parentTemplate: true,
 
         open() {
 

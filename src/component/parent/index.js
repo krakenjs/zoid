@@ -287,7 +287,7 @@ export class ParentComponent extends BaseComponent {
         ----------------
 
         Instruct the parent window to render our component for us -- so, for example, we can have a button component
-        which opens a lightbox on the parent page, with a full overlay. Or, we could use this to render an iframe based
+        which opens a lightbox on the parent page, with a full template. Or, we could use this to render an iframe based
         modal on top of our existing iframe component, without having to expand out the size of our current iframe.
     */
 
@@ -480,7 +480,7 @@ export class ParentComponent extends BaseComponent {
 
 
 
-            // Do everything else the same way -- listen for events, render the overlay, etc.
+            // Do everything else the same way -- listen for events, render the parent template, etc.
 
             this.listen(this.window);
             this.runTimeout();
@@ -723,12 +723,12 @@ export class ParentComponent extends BaseComponent {
     /*  Create Parent Template
         ----------------------
 
-        Create a template and stylesheet for the overlay behind the popup/lightbox
+        Create a template and stylesheet for the parent template behind the popup/lightbox
     */
 
     createParentTemplate(context) {
 
-        if (!RENDER_DRIVERS[context].overlay) {
+        if (!RENDER_DRIVERS[context].parentTemplate) {
             return;
         }
 
