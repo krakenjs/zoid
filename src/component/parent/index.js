@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template } from '../../lib';
+import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -346,7 +346,7 @@ export class ParentComponent extends BaseComponent {
                 }
 
             }).then(data => {
-
+                
                 this.childExports = data.childExports;
                 this.close = data.close;
 
@@ -591,33 +591,34 @@ export class ParentComponent extends BaseComponent {
                     instance.destroy();
                 });
 
-                // In the case where we're submitting the parent form using hijackSubmitParentForm
+                return Promise.resolve().then(() => {
 
-                if (data.hijackSubmitParentForm) {
+                    if (data.hijackSubmitParentForm) {
 
-                    let form = getParentNode(this.iframe, 'form');
+                        let form = getParentNode(this.iframe, 'form');
 
-                    // Open the window and do everything except load the url
+                        // Open the window and do everything except load the url
 
-                    instance.renderHijack(form, data.element, data.context);
+                        let promise = instance.renderHijack(form, data.element, data.context);
 
-                    // Submit the form to load the url into the new window
+                        // Submit the form to load the url into the new window
 
-                    form.submit();
-                }
+                        form.submit();
 
-                // Otherwise we're just doing a normal render on behalf of the child
+                        return promise;
 
-                else {
+                    } else {
 
-                    return instance.render(data.element, data.context).then(() => {
+                        return instance.render(data.element, data.context);
+                    }
 
-                        return {
-                            childExports: instance.childExports,
-                            close: () => instance.close()
-                        };
-                    });
-                }
+                }).then(() => {
+
+                    return {
+                        childExports: instance.childExports,
+                        close: () => instance.close()
+                    };
+                });
             },
 
 
@@ -681,8 +682,8 @@ export class ParentComponent extends BaseComponent {
 
         return this.props.onClose().then(() => {
 
-            if (this.childExports) {
-                this.childExports.close();
+            if (this.childExports && !isWindowClosed(this.window)) {
+                this.childExports.close().catch(noop);
             }
 
             this.destroy();
