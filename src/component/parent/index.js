@@ -138,8 +138,6 @@ export class ParentComponent extends BaseComponent {
     updateProps(props) {
         return Promise.resolve().then(() => {
 
-            validateProps(this.component, props);
-
             let oldProps = stringifyWithFunctions(this.props);
 
             this.setProps({
