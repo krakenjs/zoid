@@ -80,6 +80,8 @@ export class Component {
             this.contexts[context] = (this.contexts[context] === undefined) ? true : Boolean(this.contexts[context]);
         }
 
+        this.closeDelay = options.closeDelay;
+
         // The default context to render to
 
         this.defaultContext = options.defaultContext;

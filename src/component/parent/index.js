@@ -418,7 +418,10 @@ export class ParentComponent extends BaseComponent {
         let unloadListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
             $logger.flush();
-            this.destroy();
+
+            if (this.context === CONTEXT_TYPES.POPUP) {
+                this.destroy();
+            }
         });
 
         this.registerForCleanup(() => {
@@ -732,11 +735,22 @@ export class ParentComponent extends BaseComponent {
 
         return this.props.onClose().then(() => {
 
-            if (this.childExports && !isWindowClosed(this.window)) {
-                this.childExports.close().catch(noop);
-            }
+            return new Promise(resolve => {
 
-            this.destroy();
+                if (this.component.closeDelay && this.context !== CONTEXT_TYPES.POPUP) {
+                    setTimeout(resolve, this.component.closeDelay);
+                } else {
+                    resolve();
+                }
+
+            }).then(() => {
+
+                if (this.childExports && !isWindowClosed(this.window)) {
+                    this.childExports.close().catch(noop);
+                }
+
+                this.destroy();
+            });
         });
     }
 

@@ -186,11 +186,13 @@ export let RENDER_DRIVERS = {
             container.style.position = 'fixed';
 
             if (width) {
+                container.className += ' set-width';
                 this.iframe.style.width    = `${width}px`;
                 container.style.width      = `${width}px`;
                 container.style.left       = '50%';
                 container.style.marginLeft = `-${Math.floor(width / 2)}px`;
             } else {
+                container.className += ' max-width';
                 this.iframe.style.width    = '100%';
                 container.style.width      = '100%';
                 container.style.left       = 0;
@@ -199,11 +201,13 @@ export let RENDER_DRIVERS = {
             }
 
             if (height) {
+                container.className += ' set-height';
                 this.iframe.style.height  = `${height}px`;
                 container.style.height    = `${height}px`;
                 container.style.top       = '50%';
                 container.style.marginTop = `-${Math.floor(height / 2)}px`;
             } else {
+                container.className += ' max-height';
                 this.iframe.style.height  = '100%';
                 container.style.height    = '100%';
                 container.style.top       = 0;
