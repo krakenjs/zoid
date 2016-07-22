@@ -641,6 +641,13 @@ export class ParentComponent extends BaseComponent {
 
             // The child encountered an error
 
+            [ POST_MESSAGE.HIDE ](source, data) {
+                this.hide();
+            },
+
+
+            // The child encountered an error
+
             [ POST_MESSAGE.ERROR ](source, data) {
                 this.error(new Error(data.error));
             }
@@ -668,6 +675,22 @@ export class ParentComponent extends BaseComponent {
 
     restyle() {
         return RENDER_DRIVERS[this.context].restyle.call(this);
+    }
+
+
+    /*  Hide
+        ----
+
+        Hide the component and any parent template
+    */
+
+    hide() {
+
+        if (this.parentTemplate) {
+            this.parentTemplate.style.display = 'none';
+        }
+
+        return RENDER_DRIVERS[this.context].hide.call(this);
     }
 
 

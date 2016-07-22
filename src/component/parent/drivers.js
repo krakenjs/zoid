@@ -75,6 +75,10 @@ export let RENDER_DRIVERS = {
             this.iframe.style.height = `${height}px`;
         },
 
+        hide() {
+            this.iframe.style.display = 'none';
+        },
+
         restyle() {
             this.iframe.style.backgroundColor = 'transparent';
         },
@@ -134,6 +138,10 @@ export let RENDER_DRIVERS = {
 
         resize() {
             // pass
+        },
+
+        hide() {
+            throw new Error('Can not hide popup');
         },
 
         restyle() {
@@ -196,6 +204,10 @@ export let RENDER_DRIVERS = {
                 this.iframe.style.marginTop = '0px';
                 this.iframe.height          = '100%';
             }
+        },
+
+        hide() {
+            this.iframe.style.display = 'none';
         },
 
         restyle() {

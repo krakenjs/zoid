@@ -285,6 +285,17 @@ export class ChildComponent extends BaseComponent {
     }
 
 
+    /*  Hide
+        ----
+
+        Hide the window and any parent template
+    */
+
+    hide() {
+        return this.sendToParent(POST_MESSAGE.HIDE);
+    }
+
+
     /*  Close
         -----
 

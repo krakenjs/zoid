@@ -11,7 +11,8 @@ export const POST_MESSAGE = {
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
     RENDER: `${XCOMPONENT}_render`,
-    ERROR: `${XCOMPONENT}_error`
+    ERROR: `${XCOMPONENT}_error`,
+    HIDE: `${XCOMPONENT}_hide`
 };
 
 export const PROP_TYPES = {
