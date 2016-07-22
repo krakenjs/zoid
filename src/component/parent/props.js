@@ -3,7 +3,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
 import { urlEncode } from '../../lib';
 import { normalizeProps } from '../props';
-import { PROP_DEFER_TO_URL } from '../../constants';
+import { PROP_DEFER_TO_URL, CLOSE_REASONS } from '../../constants';
 
 
 /*  Props to Query
@@ -95,7 +95,7 @@ export function normalizeParentProps(component, instance, props) {
             if (prop.autoClose) {
                 props[key] = function() {
                     instance.component.log(`autoclose`, { prop: key });
-                    return instance.close().then(() => {
+                    return instance.close(CLOSE_REASONS.AUTOCLOSE).then(() => {
                         return value.apply(this, arguments);
                     });
                 };

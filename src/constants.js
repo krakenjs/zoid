@@ -47,6 +47,15 @@ export const EVENT_NAMES = {
     CLICK: 'click'
 };
 
+export const CLOSE_REASONS = {
+    TEMPLATE_BUTTON: 'template_button',
+    PARENT_CALL: 'parent_call',
+    CHILD_CALL: 'child_call',
+    AUTOCLOSE: 'autoclose',
+    CLOSE_DETECTED: 'close_detected',
+    PARENT_CLOSE_DETECTED: 'parent_close_detected'
+};
+
 export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
 export const MAX_Z_INDEX = 2147483647;

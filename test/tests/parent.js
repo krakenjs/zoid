@@ -61,7 +61,7 @@ describe('xcomponent render to parent', () => {
     it('should render a component to the parent as a lightbox and close on enter', done => {
 
         component = testComponent.init({
-            onClose: done
+            onClose: () => done()
         });
 
         component.renderIframe(document.body);
@@ -76,7 +76,7 @@ describe('xcomponent render to parent', () => {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            onClose: done
+            onClose: () => done()
         });
 
         component.renderIframe(document.body);
@@ -91,7 +91,7 @@ describe('xcomponent render to parent', () => {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            onClose: done
+            onClose: () => done()
         });
 
         component.renderIframe(document.body);

@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -407,7 +407,7 @@ export class ParentComponent extends BaseComponent {
 
         let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
-            this.props.onClose().finally(() => {
+            this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED).finally(() => {
                 this.destroy();
             });
         });
@@ -607,7 +607,7 @@ export class ParentComponent extends BaseComponent {
             // this logic to exist in the parent window
 
             [ POST_MESSAGE.CLOSE ](source, data) {
-                this.close();
+                this.close(data.reason);
             },
 
             // We got a request to render from the child (renderToParent)
@@ -646,7 +646,7 @@ export class ParentComponent extends BaseComponent {
 
                     return {
                         childExports: instance.childExports,
-                        close: () => instance.close()
+                        close: reason => instance.close(reason)
                     };
                 });
             },
@@ -725,7 +725,7 @@ export class ParentComponent extends BaseComponent {
         Close the child component
     */
 
-    close() {
+    close(reason = CLOSE_REASONS.PARENT_CALL) {
 
         this.component.log(`close`);
 
@@ -733,7 +733,7 @@ export class ParentComponent extends BaseComponent {
             this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
         }
 
-        return this.props.onClose().then(() => {
+        return this.props.onClose(reason).then(() => {
 
             return new Promise(resolve => {
 
@@ -830,7 +830,7 @@ export class ParentComponent extends BaseComponent {
         }, document.body);
 
         addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
-        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close());
+        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close(CLOSE_REASONS.TEMPLATE_BUTTON));
 
         this.registerForCleanup(() => {
             document.body.removeChild(this.parentTemplate);

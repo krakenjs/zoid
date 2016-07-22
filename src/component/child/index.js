@@ -4,7 +4,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getParentWindow, parseWindowName, isXComponentWindow } from '../window';
 import { noop, extend, onCloseWindow, addEventListener } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
 import { normalizeProps } from '../props';
 import { normalizeChildProps } from './props';
 
@@ -191,13 +191,13 @@ export class ChildComponent extends BaseComponent {
 
             this.component.log(`parent_window_closed`);
 
-            this.onClose(new Error(`[${this.component.tag}] parent window was closed`));
+            this.onClose(CLOSE_REASONS.PARENT_CLOSE_DETECTED);
 
             // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
             // close us, if we're an iframe
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                window.close();
+                this.destroy();
             }
         });
 
@@ -211,7 +211,7 @@ export class ChildComponent extends BaseComponent {
                 // We do actually need to close ourselves in this case, even if we're an iframe, because our component
                 // window is probably a sibling and we'll remain open by default.
 
-                this.close(new Error(`[${this.component.tag}] parent component window was closed`));
+                this.close(CLOSE_REASONS.PARENT_CLOSE_DETECTED);
             });
         }
 
@@ -302,17 +302,22 @@ export class ChildComponent extends BaseComponent {
         Close the child window
     */
 
-    close(err) {
+    close(reason = CLOSE_REASONS.CHILD_CALL) {
 
         this.component.log(`close_child`);
 
-        this.onClose.call(this, err);
+        this.onClose.call(this, reason);
 
         // Ask our parent window to close us
 
-        this.sendToParent(POST_MESSAGE.CLOSE, {}, {
+        this.sendToParent(POST_MESSAGE.CLOSE, { reason }, {
             fireAndForget: true
         });
+    }
+
+
+    destroy() {
+        window.close();
     }
 
 

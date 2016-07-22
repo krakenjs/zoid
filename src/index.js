@@ -7,7 +7,9 @@ export function create(options) {
 
 export * from './error';
 
-export { PROP_DEFER_TO_URL } from './constants';
+import * as CONSTANTS from './constants';
+
+module.exports.CONSTANTS = CONSTANTS;
 
 module.exports.postRobot = postRobot;
 export default module.exports;
