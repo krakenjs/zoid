@@ -175,34 +175,40 @@ export let RENDER_DRIVERS = {
 
             RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
 
-            this.iframe.style.zIndex   = MAX_Z_INDEX;
-            this.iframe.style.position = 'fixed';
-
             return this;
         },
 
         resize(width, height) {
 
+            let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
+
+            container.style.zIndex   = MAX_Z_INDEX;
+            container.style.position = 'fixed';
+
             if (width) {
-                this.iframe.style.width      = `${width}px`;
-                this.iframe.style.left       = '50%';
-                this.iframe.style.marginLeft = `-${Math.floor(width / 2)}px`;
+                this.iframe.style.width    = `${width}px`;
+                container.style.width      = `${width}px`;
+                container.style.left       = '50%';
+                container.style.marginLeft = `-${Math.floor(width / 2)}px`;
             } else {
-                this.iframe.style.left       = 0;
-                this.iframe.style.width      = '100%';
-                this.iframe.style.marginLeft = '0px';
-                this.iframe.width            = '100%';
+                this.iframe.style.width    = '100%';
+                container.style.width      = '100%';
+                container.style.left       = 0;
+                container.style.marginLeft = '0px';
+                container.width            = '100%';
             }
 
             if (height) {
-                this.iframe.style.height    = `${height}px`;
-                this.iframe.style.top       = '50%';
-                this.iframe.style.marginTop = `-${Math.floor(height / 2)}px`;
+                this.iframe.style.height  = `${height}px`;
+                container.style.height    = `${height}px`;
+                container.style.top       = '50%';
+                container.style.marginTop = `-${Math.floor(height / 2)}px`;
             } else {
-                this.iframe.style.top       = 0;
-                this.iframe.style.height    = '100%';
-                this.iframe.style.marginTop = '0px';
-                this.iframe.height          = '100%';
+                this.iframe.style.height  = '100%';
+                container.style.height    = '100%';
+                container.style.top       = 0;
+                container.style.marginTop = '0px';
+                container.height          = '100%';
             }
         },
 
