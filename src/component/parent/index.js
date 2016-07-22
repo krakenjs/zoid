@@ -97,7 +97,31 @@ export class ParentComponent extends BaseComponent {
             }
 
             if (queryString) {
-                url = `${ url }${ url.indexOf('?') === -1 ? '?' : '&' }${ queryString }`;
+
+                let base;
+                let query;
+                let hash;
+
+                [ base, hash ]  = url.split('#');
+                [ base, query ] = base.split('?');
+
+                if (query) {
+                    query = `${query}&${queryString}`;
+                } else {
+                    query = queryString;
+                }
+
+                url = base;
+
+                if (query) {
+                    url = `${url}?${query}`;
+                }
+
+                if (hash) {
+                    url = `${url}#${hash}`;
+                }
+
+                return url;
             }
 
             return url;
