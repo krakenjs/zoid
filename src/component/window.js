@@ -57,6 +57,12 @@ export let parseWindowName = memoize(name => {
     return winProps;
 });
 
+
+export let isXComponentWindow = memoize(name => {
+    return Boolean(parseWindowName(name));
+});
+
+
 export let getParentWindow = memoize(() => {
 
     let win;
