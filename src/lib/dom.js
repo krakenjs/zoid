@@ -341,3 +341,19 @@ export function getUrlParams(queryString) {
 export function getUrlParam(name) {
     return getUrlParams()[name];
 }
+
+
+export function getDomain(url) {
+
+    let domain;
+
+    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+        domain = url;
+    } else {
+        domain = window.location.href;
+    }
+
+    domain = domain.split('/').slice(0, 3).join('/');
+
+    return domain;
+}

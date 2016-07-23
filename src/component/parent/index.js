@@ -280,8 +280,6 @@ export class ParentComponent extends BaseComponent {
         this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
 
         RENDER_DRIVERS[context].open.call(this, element);
-
-        this.watchForClose();
     }
 
 
@@ -306,6 +304,7 @@ export class ParentComponent extends BaseComponent {
 
         this.createParentTemplate(context);
         this.open(element, context);
+        this.watchForClose();
         this.createComponentTemplate();
 
         this.setForCleanup('preRendered', true);
@@ -385,16 +384,8 @@ export class ParentComponent extends BaseComponent {
                     this.setForCleanup('window', parentWindow.frames[this.childWindowName]);
                 }
 
-                // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
-                // messages on the sibling window, since we have a handle on it.
-
-                this.listen(this.window);
-
-                this.watchForClose();
-
-                return this.onInit;
+                return this;
             });
-
         });
     }
 
@@ -792,7 +783,11 @@ export class ParentComponent extends BaseComponent {
             this.window.document.write(html);
             this.window.document.close();
         } catch (err) {
-            this.window.location = `javascript: document.open(); document.write(JSON.stringify(html)); document.close();`;
+            try {
+                this.window.location = `javascript: document.open(); document.write(JSON.stringify(html)); document.close();`;
+            } catch (err2) {
+                // pass
+            }
         }
     }
 
