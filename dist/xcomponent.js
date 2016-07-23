@@ -190,7 +190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.linkUrl = exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(/*! ./client */ 4);
 
@@ -269,6 +269,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _windows = __webpack_require__(/*! ../lib/windows */ 16);
 
+	Object.defineProperty(exports, 'linkUrl', {
+	  enumerable: true,
+	  get: function get() {
+	    return _windows.linkUrl;
+	  }
+	});
 	var parent = exports.parent = (0, _windows.getParentWindow)();
 
 /***/ },
@@ -1744,6 +1750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
 	exports.onOpenWindow = onOpenWindow;
+	exports.linkUrl = linkUrl;
 
 	var _util = __webpack_require__(/*! ./util */ 14);
 
@@ -1993,6 +2000,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return win;
 	};
+
+	function linkUrl(win, url) {
+
+	    for (var _iterator4 = windowOpenListeners, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	        var _ref4;
+
+	        if (_isArray4) {
+	            if (_i4 >= _iterator4.length) break;
+	            _ref4 = _iterator4[_i4++];
+	        } else {
+	            _i4 = _iterator4.next();
+	            if (_i4.done) break;
+	            _ref4 = _i4.value;
+	        }
+
+	        var listener = _ref4;
+
+	        listener(url, win);
+	    }
+	}
 
 /***/ },
 /* 17 */
@@ -2338,11 +2365,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return bridge.bridge;
 	        }
 	    }
+
+	    return Promise.resolve();
 	}
 
 	var windowBuffer = {};
 
 	(0, _lib.onOpenWindow)(function (url, win) {
+	    if (!url) {
+	        return;
+	    }
+
 	    var domain = getDomain(url);
 
 	    for (var _iterator3 = bridges, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
@@ -5193,6 +5226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.template = template;
 	exports.getUrlParams = getUrlParams;
 	exports.getUrlParam = getUrlParam;
+	exports.getDomain = getDomain;
 
 	var _fn = __webpack_require__(/*! ./fn */ 46);
 
@@ -5577,6 +5611,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function getUrlParam(name) {
 	    return getUrlParams()[name];
+	}
+
+	function getDomain(url) {
+
+	    var domain = void 0;
+
+	    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+	        domain = url;
+	    } else {
+	        domain = window.location.href;
+	    }
+
+	    domain = domain.split('/').slice(0, 3).join('/');
+
+	    return domain;
 	}
 
 /***/ },
@@ -6848,6 +6897,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _this4.buildUrl().then(function (url) {
 
+	                    _src2['default'].linkUrl(_this4.window, url);
+
 	                    _this4.loadUrl(context, url);
 	                    _this4.runTimeout();
 
@@ -6874,8 +6925,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.component.log('open_' + context, { element: element, windowName: this.childWindowName });
 
 	            _drivers.RENDER_DRIVERS[context].open.call(this, element);
-
-	            this.watchForClose();
 	        }
 
 	        /*  Pre Open
@@ -6899,6 +6948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.createParentTemplate(context);
 	            this.open(element, context);
+	            this.watchForClose();
 	            this.createComponentTemplate();
 
 	            this.setForCleanup('preRendered', true);
@@ -6979,14 +7029,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        _this5.setForCleanup('window', parentWindow.frames[_this5.childWindowName]);
 	                    }
 
-	                    // We don't want to proxy all of our messages through the parent window. Instead we'll just listen directly for
-	                    // messages on the sibling window, since we have a handle on it.
-
-	                    _this5.listen(_this5.window);
-
-	                    _this5.watchForClose();
-
-	                    return _this5.onInit;
+	                    return _this5;
 	                });
 	            });
 	        }
@@ -7359,7 +7402,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.window.document.write(html);
 	                this.window.document.close();
 	            } catch (err) {
-	                this.window.location = 'javascript: document.open(); document.write(JSON.stringify(html)); document.close();';
+	                try {
+	                    this.window.location = 'javascript: document.open(); document.write(JSON.stringify(html)); document.close();';
+	                } catch (err2) {
+	                    // pass
+	                }
 	            }
 	        }
 
@@ -7666,13 +7713,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        container.style.position = 'fixed';
 
 	        if (width) {
-	            container.className += ' set-width';
-	            this.iframe.style.width = width + 'px';
+	            this.parentTemplate.className += ' set-width';
+	            this.iframe.style.width = '100%';
 	            container.style.width = width + 'px';
 	            container.style.left = '50%';
 	            container.style.marginLeft = '-' + Math.floor(width / 2) + 'px';
 	        } else {
-	            container.className += ' max-width';
+	            this.parentTemplate.className += ' max-width';
 	            this.iframe.style.width = '100%';
 	            container.style.width = '100%';
 	            container.style.left = 0;
@@ -7681,13 +7728,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (height) {
-	            container.className += ' set-height';
-	            this.iframe.style.height = height + 'px';
+	            this.parentTemplate.className += ' set-height';
+	            this.iframe.style.height = '100%';
 	            container.style.height = height + 'px';
 	            container.style.top = '50%';
 	            container.style.marginTop = '-' + Math.floor(height / 2) + 'px';
 	        } else {
-	            container.className += ' max-height';
+	            this.parentTemplate.className += ' max-height';
 	            this.iframe.style.height = '100%';
 	            container.style.height = '100%';
 	            container.style.top = 0;
