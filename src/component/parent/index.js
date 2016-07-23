@@ -251,6 +251,8 @@ export class ParentComponent extends BaseComponent {
 
             return this.buildUrl().then(url => {
 
+                postRobot.linkUrl(this.window, url);
+
                 this.loadUrl(context, url);
                 this.runTimeout();
 
