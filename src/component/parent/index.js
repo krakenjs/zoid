@@ -456,13 +456,13 @@ export class ParentComponent extends BaseComponent {
 
     hijackButton(button, element, context) {
 
-        context = this.getRenderContext(element, context);
-
-        this.component.log(`hijack_button`, { element, context });
+        this.component.log(`hijack_button`, { element });
 
         return new Promise((resolve, reject) => {
 
             hijackButton(button, (event, targetElement) => {
+
+                context = this.getRenderContext(element, context);
 
                 if (this.window && !this.preRendered) {
                     event.preventDefault();
