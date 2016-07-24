@@ -4,6 +4,7 @@ import $logger from 'beaver-logger/client';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { internalProps } from './props';
+import { isXComponentWindow } from '../window';
 import { CONTEXT_TYPES_LIST } from '../../constants';
 import { validate } from './validate';
 
@@ -113,6 +114,11 @@ export class Component {
                 driver.register(this);
             }
         }
+    }
+
+
+    isXComponent() {
+        return isXComponentWindow(window.name);
     }
 
 

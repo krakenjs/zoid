@@ -102,11 +102,6 @@ export class ChildComponent extends BaseComponent {
     }
 
 
-    isXComponent() {
-        return isXComponentWindow(window.name);
-    }
-
-
     setProps(props = {}, onProps = true) {
         this.props = this.props || {};
         extend(this.props, normalizeChildProps(this.component, props));
