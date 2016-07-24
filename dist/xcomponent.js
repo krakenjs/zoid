@@ -2555,6 +2555,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return existingBridge;
 	        }
 
+	        if (_lib.util.getDomain() === domain) {
+	            return;
+	        }
+
 	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
 
 	        _lib.log.debug('Opening bridge:', url);
@@ -3342,12 +3346,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _conf.CONSTANTS;
 	    }
 	});
+	exports.disable = disable;
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 8);
+
 	function enableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = true;
 	}
 
 	function disableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = false;
+	}
+
+	function disable() {
+	    delete window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+	    window.removeEventListener('message', _drivers.messageListener);
 	}
 
 /***/ },
@@ -3426,6 +3439,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _parent = __webpack_require__(/*! ../parent */ 54);
 
 	var _props = __webpack_require__(/*! ./props */ 58);
+
+	var _window = __webpack_require__(/*! ../window */ 50);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 51);
 
@@ -3576,12 +3591,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    /*  Parent
-	        ------
-	         Get an instance of the parent for this component (lives on the parent page which contains the component)
-	    */
-
 	    _createClass(Component, [{
+	        key: 'isXComponent',
+	        value: function isXComponent() {
+	            return (0, _window.isXComponentWindow)(window.name);
+	        }
+
+	        /*  Parent
+	            ------
+	             Get an instance of the parent for this component (lives on the parent page which contains the component)
+	        */
+
+	    }, {
 	        key: 'parent',
 	        value: function parent(options) {
 	            return new _parent.ParentComponent(this, options);
@@ -4807,11 +4828,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            })['catch'](function (err) {
 	                return _this2.onError(err);
 	            });
-	        }
-	    }, {
-	        key: 'isXComponent',
-	        value: function isXComponent() {
-	            return (0, _window.isXComponentWindow)(window.name);
 	        }
 	    }, {
 	        key: 'setProps',
