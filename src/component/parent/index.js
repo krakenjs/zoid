@@ -251,8 +251,6 @@ export class ParentComponent extends BaseComponent {
 
             return this.buildUrl().then(url => {
 
-                postRobot.linkUrl(this.window, url);
-
                 this.loadUrl(context, url);
                 this.runTimeout();
 
@@ -433,6 +431,7 @@ export class ParentComponent extends BaseComponent {
 
     loadUrl(context, url) {
         this.component.log(`load_url`);
+        postRobot.linkUrl(this.childWindowName, this.window, url);
         return RENDER_DRIVERS[context].loadUrl.call(this, url);
     }
 
