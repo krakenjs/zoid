@@ -1,7 +1,7 @@
 
 import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
-import { parseWindowName } from 'src/component/window';
+import { getParentWindow, getParentComponentWindow } from 'src/component/window';
 
 import { testComponent, testComponent2, testComponent4 } from './component';
 
@@ -287,31 +287,13 @@ let cases = {
     }
 };
 
+let parent;
 
-function getParentWindow() {
-    if (window.opener) {
-        return window.opener;
-    }
-
-    if (window.parent !== window) {
-        return window.parent;
-    }
+try {
+    parent = getParentComponentWindow();
+} catch (err) {
+    parent = getParentWindow();
 }
-
-function getParentComponentWindow() {
-
-    let winProps = parseWindowName(window.name);
-    let parent = getParentWindow();
-
-    if (winProps && winProps.sibling) {
-        return parent.frames[winProps.parent];
-
-    } else {
-        return parent;
-    }
-}
-
-let parent = getParentComponentWindow();
 
 postRobot.send(parent, 'init').then(caseName => {
     cases[caseName]();

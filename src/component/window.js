@@ -15,10 +15,11 @@ import { XCOMPONENT } from '../constants';
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(prefix, props = {}) {
+export function buildChildWindowName(prefix, options = {}) {
 
-    props.id = uniqueID();
-    let name = b64encode(JSON.stringify(props));
+    options.id = uniqueID();
+    let name = b64encode(JSON.stringify(options));
+
     return `${XCOMPONENT}_${prefix.replace(/_/g, '')}_${name}`;
 }
 
@@ -30,66 +31,59 @@ export function buildChildWindowName(prefix, props = {}) {
     passed down, including the parent name. Only accepts window names built by xcomponent
 */
 
-export let parseWindowName = memoize(name => {
-    let winProps;
+export let getComponentMeta = memoize(() => {
 
-    if (!name) {
+    if (!window.name) {
         return;
     }
 
-    let segments = name.split('_');
-    let props = segments.slice(2).join('_');
+    let segments = window.name.split('_');
+    let options = segments.slice(2).join('_');
 
     if (segments[0] !== XCOMPONENT) {
         return;
     }
 
     try {
-        winProps = JSON.parse(b64decode(props));
+        return JSON.parse(b64decode(options));
     } catch (err) {
         return;
     }
-
-    if (!winProps) {
-        return;
-    }
-
-    return winProps;
 });
 
 
-export let isXComponentWindow = memoize(name => {
-    return Boolean(parseWindowName(name));
+export let isXComponentWindow = memoize(() => {
+    return Boolean(getComponentMeta());
 });
 
 
 export let getParentWindow = memoize(() => {
 
-    let win;
+    let parentWindow;
 
     if (window.opener) {
-        win = window.opener;
+        parentWindow = window.opener;
     } else if (window.parent && window.parent !== window) {
-        win = window.parent;
+        parentWindow = window.parent;
     } else {
         throw new Error(`Can not find parent window`);
     }
 
-    let winProps = parseWindowName(window.name);
+    let componentMeta = getComponentMeta();
 
-    if (!winProps) {
-        throw new Error(`Window has not been rendered by xcomponent`);
+    if (!componentMeta) {
+        return parentWindow;
     }
 
-    if (!win.parent || win.parent === win) {
-        return win;
+    if (!parentWindow.parent || parentWindow.parent === parentWindow) {
+        return parentWindow;
     }
 
-    if (winProps.sibling && win.parent.frames && win.parent.frames[winProps.parent] === win) {
-        return win.parent;
+    if (componentMeta.sibling && parentWindow.parent.frames && parentWindow.parent.frames[componentMeta.parent] === parentWindow) {
+        return parentWindow.parent;
     }
 
-    return win;
+    return parentWindow;
 });
 
 
@@ -104,10 +98,10 @@ export let getParentComponentWindow = memoize(() => {
 
     // Get properties from the window name, passed down from our parent component
 
-    let winProps = parseWindowName(window.name);
+    let componentMeta = getComponentMeta();
 
-    if (!winProps) {
-        throw new Error(`Window has not been rendered by xcomponent - can not attach here`);
+    if (!componentMeta) {
+        throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
     let parentWindow = getParentWindow();
@@ -117,8 +111,8 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
-    if (winProps.sibling) {
-        return parentWindow.frames[winProps.parent];
+    if (componentMeta.sibling && parentWindow.frames[componentMeta.parent]) {
+        return parentWindow.frames[componentMeta.parent];
     }
 
     return parentWindow;

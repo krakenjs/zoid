@@ -4,7 +4,6 @@ import postRobot from 'post-robot/src';
 
 import { testComponent, testComponent3 } from '../component';
 import { b64encode } from 'src/lib';
-import { CONTEXT_TYPES } from 'src/constants';
 
 let component;
 
@@ -166,7 +165,7 @@ describe('xcomponent error cases', () => {
 
         component = testComponent3.init();
 
-        component.render(null, CONTEXT_TYPES).catch(() => {
+        component.render(null, 'moo').catch(() => {
             done();
         });
     });

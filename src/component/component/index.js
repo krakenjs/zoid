@@ -118,7 +118,7 @@ export class Component {
 
 
     isXComponent() {
-        return isXComponentWindow(window.name);
+        return isXComponentWindow();
     }
 
 
