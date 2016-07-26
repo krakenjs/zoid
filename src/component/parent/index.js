@@ -801,7 +801,9 @@ export class ParentComponent extends BaseComponent {
 
     createComponentTemplate() {
 
-        let html = template(this.component.componentTemplate, {
+        let componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
+
+        let html = template(componentTemplate, {
             id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
             CLASS: CLASS_NAMES
         });
@@ -832,9 +834,11 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
-        this.parentTemplate = createElement('div', {
+        let parentTemplate = this.component.parentTemplate instanceof Function ? this.component.parentTemplate() : this.component.parentTemplate;
 
-            html: template(this.component.parentTemplate, {
+        this.parentTemplate = createElement('div', {
+        
+            html: template(parentTemplate, {
                 id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
                 CLASS: CLASS_NAMES
             }),
