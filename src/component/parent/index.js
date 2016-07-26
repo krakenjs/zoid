@@ -748,6 +748,10 @@ export class ParentComponent extends BaseComponent {
 
         if (this.parentTemplate) {
             this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
+
+            if (this.component.autocloseParentTemplate) {
+                this.parentTemplate.className += ` ${CLASS_NAMES.AUTOCLOSE}`;
+            }
         }
 
         let closePromise = this.props.onClose(reason).then(() => {
@@ -837,7 +841,7 @@ export class ParentComponent extends BaseComponent {
         let parentTemplate = this.component.parentTemplate instanceof Function ? this.component.parentTemplate() : this.component.parentTemplate;
 
         this.parentTemplate = createElement('div', {
-        
+
             html: template(parentTemplate, {
                 id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
                 CLASS: CLASS_NAMES
@@ -862,9 +866,18 @@ export class ParentComponent extends BaseComponent {
         addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close(CLOSE_REASONS.TEMPLATE_BUTTON));
 
         this.registerForCleanup(() => {
+            if (this.component.autocloseParentTemplate && this.parentTemplate) {
+                this.closeParentTemplate();
+            }
+        });
+    }
+
+
+    closeParentTemplate() {
+        if (this.parentTemplate) {
             document.body.removeChild(this.parentTemplate);
             delete this.parentTemplate;
-        });
+        }
     }
 
 

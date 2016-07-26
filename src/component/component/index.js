@@ -95,6 +95,8 @@ export class Component {
 
         this.autoResize = options.autoResize || false;
 
+        this.autocloseParentTemplate = options.autocloseParentTemplate === undefined ? true : options.autocloseParentTemplate;
+
         // Templates and styles for the parent page and the initial rendering of the component
 
         this.parentTemplate    = options.parentTemplate    || parentTemplate;
