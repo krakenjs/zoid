@@ -335,7 +335,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _drivers.listeners.response[hash] = options;
 
 	        if ((0, _lib.isWindowClosed)(options.window)) {
-	            throw new Error('Target window is closed');
+	            console.log(111111111, window.location.pathname);
+	            console.log(JSON.stringify({
+	                hash: hash,
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+	                name: options.name,
+	                data: options.data,
+	                fireAndForget: options.fireAndForget
+	            }, 0, 2));
+	            throw new Error('Target window is closed33333');
 	        }
 
 	        var hasResult = false;
@@ -490,7 +498,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ALLOW_POSTMESSAGE_POPUP: false,
 
-	    LOG_LEVEL: 'info',
+	    LOG_LEVEL: 'debug',
 
 	    ACK_TIMEOUT: 500,
 
@@ -498,7 +506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    MOCK_MODE: false,
 
-	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
 /***/ },
@@ -1079,6 +1087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            flush();
 	        });
 	    } catch (error) {
+	        console.log('!!!!', error.message);
 	        return errorHandler(error);
 	    }
 
@@ -2815,6 +2824,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _compat.emulateIERestrictions)(window, win);
 
+	    console.log('???', win.location.pathname);
+
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
 
@@ -2852,48 +2863,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	        source: window,
 	        data: JSON.stringify(message, 0, 2)
 	    });
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, function (win, message, domain) {
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, function (win, message, domain) {
 
 	    if ((0, _lib.isSameTopWindow)(window, win)) {
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    return (0, _compat.getRemoteBridgeForWindow)(win).then(function (bridge) {
+	    var frame = (0, _compat.getRemoteBridge)(win);
 
-	        if (!bridge) {
-	            throw new Error('No bridge available in window');
-	        }
+	    if (!frame) {
+	        throw new Error('No bridge available in window');
+	    }
 
-	        var sourceDomain = _lib.util.getDomain(window);
-	        var targetDomain = void 0;
+	    if (!(0, _lib.isSameDomain)(frame)) {
+	        throw new Error('Bridge is not on the same domain');
+	    }
 
-	        try {
-	            targetDomain = _lib.util.getDomain(bridge);
-	        } catch (err) {
-	            throw new Error('Can not read bridge window domain: ' + err.message);
-	        }
+	    var sourceDomain = _lib.util.getDomain(window);
+	    var targetDomain = void 0;
 
-	        if (sourceDomain !== targetDomain) {
-	            throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
-	        }
+	    try {
+	        targetDomain = _lib.util.getDomain(frame);
+	    } catch (err) {
+	        throw new Error('Can not read bridge window domain: ' + err.message);
+	    }
 
-	        if (!_lib.util.safeHasProp(bridge, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            throw new Error('post-robot not available on bridge at ' + targetDomain);
-	        }
+	    if (sourceDomain !== targetDomain) {
+	        throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
+	    }
 
-	        message.targetHint = 'window.parent';
+	    if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	        throw new Error('post-robot not available on bridge at ' + targetDomain);
+	    }
 
-	        // If we're messaging our child
+	    message.targetHint = 'window.parent';
 
-	        if (window === (0, _lib.getOpener)(win)) {
-	            message.sourceHint = 'window.opener';
-	        }
+	    // If we're messaging our child
 
-	        bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	            origin: _lib.util.getDomain(window),
-	            source: window,
-	            data: JSON.stringify(message, 0, 2)
-	        });
+	    if (window === (0, _lib.getOpener)(win)) {
+	        message.sourceHint = 'window.opener';
+	    }
+
+	    frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	        origin: _lib.util.getDomain(window),
+	        source: window,
+	        data: JSON.stringify(message, 0, 2)
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
@@ -2901,14 +2915,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
+	    if (!message.target) {
+	        throw new Error('Can not post message down through bridge without target');
+	    }
+
 	    // If we're messaging our parent
 
 	    if (win === (0, _lib.getOpener)(window)) {
 	        message.targetHint = 'window.parent.opener';
-	    }
-
-	    if (!message.target && !message.targetHint) {
-	        throw new Error('Can not post message down through bridge without target or targetHint');
 	    }
 
 	    // If we're messaging our child
@@ -2923,7 +2937,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message.sourceHint = 'window.opener.parent';
 	    }
 
-	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
+	    return (0, _compat.getBridgeByWindow)(win).then(function (bridge) {
 
 	        if (!bridge) {
 	            throw new Error('Bridge not initialized');
@@ -3557,6 +3571,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.autoResize = options.autoResize || false;
 
+	        this.autocloseParentTemplate = options.autocloseParentTemplate === undefined ? true : options.autocloseParentTemplate;
+
 	        // Templates and styles for the parent page and the initial rendering of the component
 
 	        this.parentTemplate = options.parentTemplate || _parent3['default'];
@@ -3594,7 +3610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(Component, [{
 	        key: 'isXComponent',
 	        value: function isXComponent() {
-	            return (0, _window.isXComponentWindow)(window.name);
+	            return (0, _window.isXComponentWindow)();
 	        }
 
 	        /*  Parent
@@ -4791,7 +4807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // will not be generated by xcomponent. In this case we can fail silently, whereas normally we'd want to
 	            // fail hard here.
 
-	            if (!(0, _window.isXComponentWindow)(window.name) && this.standalone) {
+	            if (!(0, _window.isXComponentWindow)() && this.standalone) {
 	                this.component.log('child_standalone');
 	                return;
 	            }
@@ -4879,12 +4895,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error('[' + this.component.tag + '] Can not find parent window');
 	            }
 
-	            var winProps = (0, _window.parseWindowName)(window.name);
+	            var componentMeta = (0, _window.getComponentMeta)();
 
-	            this.component.log('child_win_props', winProps);
-
-	            if (winProps.tag !== this.component.tag) {
-	                throw new Error('[' + this.component.tag + '] Parent is ' + winProps.tag + ' - can not attach ' + this.component.tag);
+	            if (componentMeta.tag !== this.component.tag) {
+	                throw new Error('[' + this.component.tag + '] Parent is ' + componentMeta.tag + ' - can not attach ' + this.component.tag);
 	            }
 
 	            // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
@@ -5031,6 +5045,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'hide',
 	        value: function hide() {
 	            return this.sendToParent(_constants.POST_MESSAGE.HIDE);
+	        }
+	    }, {
+	        key: 'userClose',
+	        value: function userClose() {
+	            return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
 	        }
 
 	        /*  Close
@@ -6260,7 +6279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.getParentComponentWindow = exports.getParentWindow = exports.isXComponentWindow = exports.parseWindowName = undefined;
+	exports.getParentComponentWindow = exports.getParentWindow = exports.isXComponentWindow = exports.getComponentMeta = undefined;
 	exports.buildChildWindowName = buildChildWindowName;
 	exports.getPosition = getPosition;
 
@@ -6281,11 +6300,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function buildChildWindowName(prefix) {
-	    var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 
-	    props.id = (0, _lib.uniqueID)();
-	    var name = (0, _lib.b64encode)(JSON.stringify(props));
+	    options.id = (0, _lib.uniqueID)();
+	    var name = (0, _lib.b64encode)(JSON.stringify(options));
+
 	    return _constants.XCOMPONENT + '_' + prefix.replace(/_/g, '') + '_' + name;
 	}
 
@@ -6296,64 +6316,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	    passed down, including the parent name. Only accepts window names built by xcomponent
 	*/
 
-	var parseWindowName = exports.parseWindowName = (0, _lib.memoize)(function (name) {
-	    var winProps = void 0;
+	var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () {
 
-	    if (!name) {
+	    if (!window.name) {
 	        return;
 	    }
 
-	    var segments = name.split('_');
-	    var props = segments.slice(2).join('_');
+	    var segments = window.name.split('_');
+	    var options = segments.slice(2).join('_');
 
 	    if (segments[0] !== _constants.XCOMPONENT) {
 	        return;
 	    }
 
 	    try {
-	        winProps = JSON.parse((0, _lib.b64decode)(props));
+	        return JSON.parse((0, _lib.b64decode)(options));
 	    } catch (err) {
 	        return;
 	    }
-
-	    if (!winProps) {
-	        return;
-	    }
-
-	    return winProps;
 	});
 
-	var isXComponentWindow = exports.isXComponentWindow = (0, _lib.memoize)(function (name) {
-	    return Boolean(parseWindowName(name));
+	var isXComponentWindow = exports.isXComponentWindow = (0, _lib.memoize)(function () {
+	    return Boolean(getComponentMeta());
 	});
 
 	var getParentWindow = exports.getParentWindow = (0, _lib.memoize)(function () {
 
-	    var win = void 0;
+	    var parentWindow = void 0;
 
 	    if (window.opener) {
-	        win = window.opener;
+	        parentWindow = window.opener;
 	    } else if (window.parent && window.parent !== window) {
-	        win = window.parent;
+	        parentWindow = window.parent;
 	    } else {
 	        throw new Error('Can not find parent window');
 	    }
 
-	    var winProps = parseWindowName(window.name);
+	    var componentMeta = getComponentMeta();
 
-	    if (!winProps) {
-	        throw new Error('Window has not been rendered by xcomponent');
+	    if (!componentMeta) {
+	        return parentWindow;
 	    }
 
-	    if (!win.parent || win.parent === win) {
-	        return win;
+	    if (!parentWindow.parent || parentWindow.parent === parentWindow) {
+	        return parentWindow;
 	    }
 
-	    if (winProps.sibling && win.parent.frames && win.parent.frames[winProps.parent] === win) {
-	        return win.parent;
+	    if (componentMeta.sibling && parentWindow.parent.frames && parentWindow.parent.frames[componentMeta.parent] === parentWindow) {
+	        return parentWindow.parent;
 	    }
 
-	    return win;
+	    return parentWindow;
 	});
 
 	/*  Get Parent Component Window
@@ -6366,10 +6379,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Get properties from the window name, passed down from our parent component
 
-	    var winProps = parseWindowName(window.name);
+	    var componentMeta = getComponentMeta();
 
-	    if (!winProps) {
-	        throw new Error('Window has not been rendered by xcomponent - can not attach here');
+	    if (!componentMeta) {
+	        throw new Error('Can not get parent component window - window not rendered by xcomponent');
 	    }
 
 	    var parentWindow = getParentWindow();
@@ -6379,8 +6392,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // - Our actual parent
 	    // - A sibling which rendered us using renderToParent()
 
-	    if (winProps.sibling) {
-	        return parentWindow.frames[winProps.parent];
+	    if (componentMeta.sibling && parentWindow.frames[componentMeta.parent]) {
+	        return parentWindow.frames[componentMeta.parent];
 	    }
 
 	    return parentWindow;
@@ -6474,7 +6487,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    IFRAME: XCOMPONENT + '-iframe',
 	    LIGHTBOX: XCOMPONENT + '-lightbox',
 	    POPUP: XCOMPONENT + '-popup',
-	    CLOSING: XCOMPONENT + '-closing'
+	    CLOSING: XCOMPONENT + '-closing',
+	    AUTOCLOSE: XCOMPONENT + '-autoclose'
 	};
 
 	var EVENT_NAMES = exports.EVENT_NAMES = {
@@ -6487,6 +6501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    CHILD_CALL: 'child_call',
 	    AUTOCLOSE: 'autoclose',
 	    CLOSE_DETECTED: 'close_detected',
+	    USER_CLOSED: 'user_closed',
 	    PARENT_CLOSE_DETECTED: 'parent_close_detected'
 	};
 
@@ -7035,7 +7050,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this4.preRender(element, context);
 
 	                _this4.listen(_this4.window);
-	                _this4.watchForClose();
 
 	                return _this4.buildUrl().then(function (url) {
 
@@ -7185,7 +7199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function watchForClose() {
 	            var _this6 = this;
 
-	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
+	            this.closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
 	                _this6.component.log('detect_close_child');
 	                _this6.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED)['finally'](function () {
 	                    _this6.destroy();
@@ -7195,7 +7209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
 	            // and close the child manually if that happens.
 
-	            var unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
+	            this.unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
 	                _this6.component.log('navigate_away');
 	                _client2['default'].flush();
 
@@ -7205,8 +7219,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            this.registerForCleanup(function () {
-	                closeWindowListener.cancel();
-	                unloadListener.cancel();
+
+	                if (_this6.closeWindowListener) {
+	                    _this6.closeWindowListener.cancel();
+	                    delete _this6.closeWindowListener;
+	                }
+
+	                if (_this6.unloadListener) {
+	                    _this6.unloadListener.cancel();
+	                    delete _this6.unloadListener;
+	                }
 	            });
 	        }
 
@@ -7467,6 +7489,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _drivers.RENDER_DRIVERS[this.context].hide.call(this);
 	        }
+	    }, {
+	        key: 'userClose',
+	        value: function userClose() {
+	            return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
+	        }
 
 	        /*  Close
 	            -----
@@ -7481,13 +7508,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 
+	            if (this.closePromise) {
+	                return this.closePromise;
+	            }
+
 	            this.component.log('close');
+
+	            if (this.closeWindowListener) {
+	                this.closeWindowListener.cancel();
+	            }
+
+	            if (this.unloadListener) {
+	                this.unloadListener.cancel();
+	            }
 
 	            if (this.parentTemplate) {
 	                this.parentTemplate.className += ' ' + _constants.CLASS_NAMES.CLOSING;
+
+	                if (this.component.autocloseParentTemplate) {
+	                    this.parentTemplate.className += ' ' + _constants.CLASS_NAMES.AUTOCLOSE;
+	                }
 	            }
 
-	            return this.props.onClose(reason).then(function () {
+	            var closePromise = this.props.onClose(reason).then(function () {
 
 	                return new _promise.SyncPromise(function (resolve) {
 
@@ -7505,6 +7548,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this12.destroy();
 	                });
 	            });
+
+	            this.setForCleanup('closePromise', closePromise);
+
+	            return closePromise;
 	        }
 
 	        /*  Focus
@@ -7533,7 +7580,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'createComponentTemplate',
 	        value: function createComponentTemplate() {
 
-	            var html = (0, _lib.template)(this.component.componentTemplate, {
+	            var componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
+
+	            var html = (0, _lib.template)(componentTemplate, {
 	                id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.id,
 	                CLASS: _constants.CLASS_NAMES
 	            });
@@ -7565,9 +7614,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
+	            var parentTemplate = this.component.parentTemplate instanceof Function ? this.component.parentTemplate() : this.component.parentTemplate;
+
 	            this.parentTemplate = (0, _lib.createElement)('div', {
 
-	                html: (0, _lib.template)(this.component.parentTemplate, {
+	                html: (0, _lib.template)(parentTemplate, {
 	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.id,
 	                    CLASS: _constants.CLASS_NAMES
 	                }),
@@ -7592,9 +7643,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            this.registerForCleanup(function () {
-	                document.body.removeChild(_this13.parentTemplate);
-	                delete _this13.parentTemplate;
+	                if (_this13.component.autocloseParentTemplate && _this13.parentTemplate) {
+	                    _this13.closeParentTemplate();
+	                }
 	            });
+	        }
+	    }, {
+	        key: 'closeParentTemplate',
+	        value: function closeParentTemplate() {
+	            if (this.parentTemplate) {
+	                document.body.removeChild(this.parentTemplate);
+	                delete this.parentTemplate;
+	            }
 	        }
 
 	        /*  Destroy
@@ -8155,12 +8215,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (prop.autoClose) {
 	                props[key] = function () {
-	                    var _this = this,
-	                        _arguments = arguments;
-
 	                    instance.component.log('autoclose', { prop: key });
-	                    return instance.close(_constants.CLOSE_REASONS.AUTOCLOSE).then(function () {
-	                        return value.apply(_this, _arguments);
+
+	                    var result = _promise.SyncPromise.resolve(value.apply(this, arguments));
+
+	                    return _promise.SyncPromise.all([result, instance.close(_constants.CLOSE_REASONS.AUTOCLOSE)]).then(function () {
+	                        return result;
 	                    });
 	                };
 	            }
