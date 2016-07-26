@@ -95,9 +95,15 @@ export function normalizeParentProps(component, instance, props) {
             if (prop.autoClose) {
                 props[key] = function() {
                     instance.component.log(`autoclose`, { prop: key });
-                    return instance.close(CLOSE_REASONS.AUTOCLOSE).then(() => {
-                        return value.apply(this, arguments);
-                    });
+
+                    let result = Promise.resolve(value.apply(this, arguments));
+
+                    return Promise.all([
+
+                        result,
+                        instance.close(CLOSE_REASONS.AUTOCLOSE)
+
+                    ]).then(() => result);
                 };
             }
         }

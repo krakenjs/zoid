@@ -289,6 +289,12 @@ export class ChildComponent extends BaseComponent {
     }
 
 
+
+    userClose() {
+        return this.close(CLOSE_REASONS.USER_CLOSED);
+    }
+
+
     /*  Close
         -----
 

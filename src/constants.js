@@ -53,6 +53,7 @@ export const CLOSE_REASONS = {
     CHILD_CALL: 'child_call',
     AUTOCLOSE: 'autoclose',
     CLOSE_DETECTED: 'close_detected',
+    USER_CLOSED: 'user_closed',
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 

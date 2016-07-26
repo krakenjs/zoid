@@ -247,7 +247,6 @@ export class ParentComponent extends BaseComponent {
             this.preRender(element, context);
 
             this.listen(this.window);
-            this.watchForClose();
 
             return this.buildUrl().then(url => {
 
@@ -396,7 +395,7 @@ export class ParentComponent extends BaseComponent {
 
     watchForClose() {
 
-        let closeWindowListener = onCloseWindow(this.window, () => {
+        this.closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
             this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED).finally(() => {
                 this.destroy();
@@ -406,7 +405,7 @@ export class ParentComponent extends BaseComponent {
         // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
 
-        let unloadListener = addEventListener(window, 'beforeunload', () => {
+        this.unloadListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
             $logger.flush();
 
@@ -416,8 +415,16 @@ export class ParentComponent extends BaseComponent {
         });
 
         this.registerForCleanup(() => {
-            closeWindowListener.cancel();
-            unloadListener.cancel();
+
+            if (this.closeWindowListener) {
+                this.closeWindowListener.cancel();
+                delete this.closeWindowListener;
+            }
+
+            if (this.unloadListener) {
+                this.unloadListener.cancel();
+                delete this.unloadListener;
+            }
         });
     }
 
@@ -711,6 +718,12 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    userClose() {
+        return this.close(CLOSE_REASONS.USER_CLOSED);
+    }
+
+
+
     /*  Close
         -----
 
@@ -719,13 +732,25 @@ export class ParentComponent extends BaseComponent {
 
     close(reason = CLOSE_REASONS.PARENT_CALL) {
 
+        if (this.closePromise) {
+            return this.closePromise;
+        }
+
         this.component.log(`close`);
+
+        if (this.closeWindowListener) {
+            this.closeWindowListener.cancel();
+        }
+
+        if (this.unloadListener) {
+            this.unloadListener.cancel();
+        }
 
         if (this.parentTemplate) {
             this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
         }
 
-        return this.props.onClose(reason).then(() => {
+        let closePromise = this.props.onClose(reason).then(() => {
 
             return new Promise(resolve => {
 
@@ -744,6 +769,10 @@ export class ParentComponent extends BaseComponent {
                 this.destroy();
             });
         });
+
+        this.setForCleanup('closePromise', closePromise);
+
+        return closePromise;
     }
 
 
