@@ -4,8 +4,8 @@ import postRobot from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
-import { buildChildWindowName } from '../window';
-import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed } from '../../lib';
+import { buildChildWindowName, isXComponentWindow } from '../window';
+import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -207,14 +207,10 @@ export class ParentComponent extends BaseComponent {
         Ensure there is no reason we can't render
     */
 
-    validateRender(context) {
+    validateRender() {
 
-        if (this.window && !this.preRendered) {
+        if (this.window) {
             throw new Error(`[${this.component.tag}] Can not render: component is already rendered`);
-        }
-
-        if (context && !this.component.contexts[context]) {
-            throw new Error(`Invalid context: ${context}`);
         }
     }
 
@@ -231,30 +227,20 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
         return Promise.resolve().then(() => {
-
-            this.validateRender(context);
-
             context = this.getRenderContext(element, context);
 
             this.component.log(`render_${context}`, { context, element });
 
-            if (RENDER_DRIVERS[context].render) {
-                RENDER_DRIVERS[context].render.call(this, element);
-            }
-
-            this.setForCleanup('context', context);
-
             this.preRender(element, context);
 
-            this.listen(this.window);
+            return this.buildUrl();
 
-            return this.buildUrl().then(url => {
+        }).then(url => {
 
-                this.loadUrl(context, url);
-                this.runTimeout();
+            this.loadUrl(context, url);
+            this.runTimeout();
 
-                return this.onInit;
-            });
+            return this.onInit;
 
         }).catch(err => {
 
@@ -289,22 +275,20 @@ export class ParentComponent extends BaseComponent {
 
     preRender(element, context) {
 
-        if (this.preRendered) {
-            return;
-        }
-
+        this.validateRender();
         context = this.getRenderContext(element, context);
 
-        this.component.log(`preRender_${context}`, { element, windowName: this.childWindowName });
-
+        RENDER_DRIVERS[context].render.call(this, element);
         this.setForCleanup('context', context);
 
         this.createParentTemplate(context);
+
         this.open(element, context);
+
         this.watchForClose();
         this.createComponentTemplate();
 
-        this.setForCleanup('preRendered', true);
+        this.listen(this.window);
     }
 
 
@@ -318,8 +302,7 @@ export class ParentComponent extends BaseComponent {
 
     renderToParent(element, context, options = {}) {
         return Promise.resolve().then(() => {
-
-            this.validateRender(context);
+            this.validateRender();
 
             context = this.getRenderContext(element, context);
 
@@ -329,7 +312,7 @@ export class ParentComponent extends BaseComponent {
                 throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
             }
 
-            if (!window.name) {
+            if (!isXComponentWindow()) {
                 throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
             }
 
@@ -368,12 +351,15 @@ export class ParentComponent extends BaseComponent {
                     renderedToParent: true,
                     childWindowName: this.childWindowName,
                     props: this.props
+                },
+
+                overrides: {
+
                 }
 
             }).then(data => {
 
-                this.childExports = data.childExports;
-                this.close = data.close;
+                extend(this, data.overrides);
 
                 // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
 
@@ -468,16 +454,6 @@ export class ParentComponent extends BaseComponent {
         return new Promise((resolve, reject) => {
 
             hijackButton(button, (event, targetElement) => {
-
-                context = this.getRenderContext(element, context);
-
-                if (this.window && !this.preRendered) {
-                    event.preventDefault();
-                    throw new Error(`[${this.component.tag}] Component is already rendered`);
-                }
-
-                // Open the window to render into
-
                 this.renderHijack(targetElement, element, context).then(resolve, reject);
             });
         });
@@ -492,31 +468,20 @@ export class ParentComponent extends BaseComponent {
 
     renderHijack(targetElement, element, context) {
         return Promise.resolve().then(() => {
-
             context = this.getRenderContext(element, context);
 
             this.component.log(`render_hijack_${context}`);
 
-            this.validateRender(context);
-
-            this.setForCleanup('context', context);
-
-            // Point the element to open in our child window
-
             targetElement.target = this.childWindowName;
-
-            // Immediately open the window, but don't try to set the url -- this will be done by the browser using the form action or link href
-
             this.preRender(element, context);
 
-
-
-            // Do everything else the same way -- listen for events, render the parent template, etc.
-
-            this.listen(this.window);
             this.runTimeout();
-
             return this.onInit;
+
+        }).catch(err => {
+
+            this.destroy();
+            throw err;
         });
     }
 
@@ -616,6 +581,8 @@ export class ParentComponent extends BaseComponent {
                 let component = this.component.getByTag(data.tag);
                 let instance  = component.parent(data.options);
 
+                extend(instance, data.overrides);
+
                 this.registerForCleanup(() => {
                     instance.destroy();
                 });
@@ -640,12 +607,13 @@ export class ParentComponent extends BaseComponent {
 
                         return instance.render(data.element, data.context);
                     }
-
                 }).then(() => {
 
                     return {
-                        childExports: instance.childExports,
-                        close: reason => instance.close(reason)
+                        overrides: {
+                            childExports: instance.childExports,
+                            close: reason => instance.close(reason)
+                        }
                     };
                 });
             },
@@ -793,7 +761,6 @@ export class ParentComponent extends BaseComponent {
         if (this.window) {
             this.window.focus();
         }
-        return this;
     }
 
 

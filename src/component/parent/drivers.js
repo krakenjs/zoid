@@ -100,6 +100,10 @@ export let RENDER_DRIVERS = {
 
         parentTemplate: true,
 
+        render() {
+            // pass
+        },
+
         open() {
 
             let dimensions = this.component.dimensions || {};
@@ -168,6 +172,10 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
         parentTemplate: true,
+
+        render() {
+            // pass
+        },
 
         open() {
 
