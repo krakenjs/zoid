@@ -224,30 +224,29 @@ export class ChildComponent extends BaseComponent {
     }
 
     watchForResize() {
-        let elm = document.body;
+        let body = document.body;
 
-        if (!elm) {
+        if (!body) {
             return;
         }
 
-        let lastWidth = elm.scrollWidth;
+        let lastWidth = body.scrollWidth;
         let newWidth;
-        let lastHeight = elm.scrollHeight;
+        let lastHeight = body.scrollHeight;
         let newHeight;
 
-        setInterval(() => {
-            newWidth = elm.scrollWidth;
-            newHeight = elm.scrollHeight;
+        body.addEventListener('scroll', function() {
+            newWidth = body.scrollWidth;
+            newHeight = body.scrollHeight;
+
             // Dimensions changed if this condition is true
             if (lastHeight !== newHeight || lastWidth !== newWidth) {
                 this.resize(newWidth, newHeight);
             }
             lastWidth = newWidth;
             lastHeight = newHeight;
-        }, 50);
-
+        }, false);
     }
-
 
     exports() {
 
