@@ -140,8 +140,12 @@ export let RENDER_DRIVERS = {
             return this;
         },
 
-        resize() {
-            // pass
+        resize(width, height) {
+
+            width = Math.min(width, window.innerWidth);
+            height = Math.min(height, window.innerHeight);
+
+            return this.window.resizeTo(width, height);
         },
 
         hide() {
@@ -187,6 +191,9 @@ export let RENDER_DRIVERS = {
         },
 
         resize(width, height) {
+
+            width = Math.min(width, window.innerWidth);
+            height = Math.min(height, window.innerHeight);
 
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 

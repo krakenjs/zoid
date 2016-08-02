@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getParentWindow, getComponentMeta, isXComponentWindow } from '../window';
-import { noop, extend, onCloseWindow, addEventListener } from '../../lib';
+import { noop, extend, onCloseWindow, addEventListener, debounce } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
 import { normalizeProps } from '../props';
 import { normalizeChildProps } from './props';
@@ -224,25 +224,30 @@ export class ChildComponent extends BaseComponent {
     }
 
     watchForResize() {
+
+        let resize = debounce((width, height) => {
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
+        }, 100);
+
         let elm = document.body;
 
         if (!elm) {
             return;
         }
 
-        let lastWidth = elm.scrollWidth;
-        let newWidth;
+        // let lastWidth = elm.scrollWidth;
+        // let newWidth;
         let lastHeight = elm.scrollHeight;
         let newHeight;
 
         setInterval(() => {
-            newWidth = elm.scrollWidth;
+            // newWidth = elm.scrollWidth;
             newHeight = elm.scrollHeight;
             // Dimensions changed if this condition is true
-            if (lastHeight !== newHeight || lastWidth !== newWidth) {
-                this.resize(newWidth, newHeight);
+            if (lastHeight !== newHeight /* || lastWidth !== newWidth */) {
+                resize(this.component.dimensions.width, newHeight);
             }
-            lastWidth = newWidth;
+            // lastWidth = newWidth;
             lastHeight = newHeight;
         }, 50);
 
