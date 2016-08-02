@@ -55,3 +55,36 @@ export function memoize(method) {
         return results[args];
     };
 }
+
+
+export function throttle(method, time = 100) {
+
+    let enabled = true;
+
+    return function() {
+
+        if (!enabled) {
+            return;
+        }
+
+        enabled = false;
+        setTimeout(() => {
+            enabled = true;
+        }, time);
+
+        return method.apply(this, arguments);
+    };
+}
+
+export function debounce(method, time = 100) {
+
+    let timeout;
+
+    return function() {
+        clearTimeout(timeout);
+
+        setTimeout(() => {
+            return method.apply(this, arguments);
+        }, time);
+    };
+}

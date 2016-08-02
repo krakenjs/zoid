@@ -1,6 +1,6 @@
 
 import { once, noop } from './fn';
-import { extend, safeGet, get, safeInterval } from './util';
+import { extend, get, safeInterval } from './util';
 
 
 /*  Get Element
@@ -85,7 +85,7 @@ export function iframe(container, url, options) {
 
 export function isWindowClosed(win) {
     try {
-        return !win || win.closed || typeof win.closed === 'undefined' || safeGet(win, 'mockclosed');
+        return !win || win.closed || typeof win.closed === 'undefined';
     } catch (err) {
         return true;
     }

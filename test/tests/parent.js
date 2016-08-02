@@ -99,7 +99,7 @@ describe('xcomponent render to parent', () => {
         postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
     });
 
-    it('should focus an xcomponent renderToParent popup on click of the overlay', done => {
+    it.skip('should focus an xcomponent renderToParent popup on click of the overlay', done => {
 
         let win;
 

@@ -83,10 +83,13 @@ export let RENDER_DRIVERS = {
             this.iframe.style.backgroundColor = 'transparent';
         },
 
-        renderToParent(element) {
+        renderToParent(element, options) {
+
             if (!element) {
                 throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
             }
+
+            return this.renderToParentRemote(element, CONTEXT_TYPES.IFRAME, options);
         },
 
         loadUrl(url) {
@@ -99,6 +102,7 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.POPUP ]: {
 
         parentTemplate: true,
+        focusable: true,
 
         render() {
             // pass
@@ -156,14 +160,9 @@ export let RENDER_DRIVERS = {
             // pass
         },
 
-        renderToParent() {
+        renderToParent(element, options) {
 
-            // Popups are the only case where we need to do anything special to render to parent.
-            // Because we need a click event, we have to open up the popup from the child the moment it's requested,
-            // Then message up and continue the rendering process from the parent as with any other renderToParent.
-
-            this.open(null, CONTEXT_TYPES.POPUP);
-            this.createComponentTemplate();
+            return this.renderToParentLocal(element, CONTEXT_TYPES.POPUP, options);
         },
 
         loadUrl(url) {
@@ -179,6 +178,11 @@ export let RENDER_DRIVERS = {
 
         render() {
             // pass
+        },
+
+        renderToParent(element, options) {
+
+            return this.renderToParentRemote(element, CONTEXT_TYPES.LIGHTBOX, options);
         },
 
         open() {

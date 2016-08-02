@@ -18,6 +18,9 @@ import { XCOMPONENT } from '../constants';
 export function buildChildWindowName(prefix, options = {}) {
 
     options.id = uniqueID();
+    options.parent = window.name;
+    options.parentDomain = `${window.location.protocol}//${window.location.host}`;
+
     let name = b64encode(JSON.stringify(options));
 
     return `${XCOMPONENT}_${prefix.replace(/_/g, '')}_${name}`;
@@ -59,31 +62,13 @@ export let isXComponentWindow = memoize(() => {
 
 export let getParentWindow = memoize(() => {
 
-    let parentWindow;
-
     if (window.opener) {
-        parentWindow = window.opener;
+        return window.opener;
     } else if (window.parent && window.parent !== window) {
-        parentWindow = window.parent;
-    } else {
-        throw new Error(`Can not find parent window`);
+        return window.parent;
     }
 
-    let componentMeta = getComponentMeta();
-
-    if (!componentMeta) {
-        return parentWindow;
-    }
-
-    if (!parentWindow.parent || parentWindow.parent === parentWindow) {
-        return parentWindow;
-    }
-
-    if (componentMeta.sibling && parentWindow.parent.frames && parentWindow.parent.frames[componentMeta.parent] === parentWindow) {
-        return parentWindow.parent;
-    }
-
-    return parentWindow;
+    throw new Error(`Can not find parent window`);
 });
 
 
@@ -111,7 +96,7 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
-    if (componentMeta.sibling && parentWindow.frames[componentMeta.parent]) {
+    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames[componentMeta.parent]) {
         return parentWindow.frames[componentMeta.parent];
     }
 

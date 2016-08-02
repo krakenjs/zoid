@@ -10,7 +10,8 @@ export const POST_MESSAGE = {
     CLOSE: `${XCOMPONENT}_close`,
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
-    RENDER: `${XCOMPONENT}_render`,
+    RENDER_REMOTE: `${XCOMPONENT}_render_remote`,
+    RENDER_LOCAL: `${XCOMPONENT}_render_local`,
     ERROR: `${XCOMPONENT}_error`,
     HIDE: `${XCOMPONENT}_hide`
 };

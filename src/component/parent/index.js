@@ -5,7 +5,8 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
-import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions, capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend } from '../../lib';
+import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
+         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -227,18 +228,15 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
         return Promise.resolve().then(() => {
-            context = this.getRenderContext(element, context);
 
+            context = this.getRenderContext(element, context);
             this.component.log(`render_${context}`, { context, element });
 
             this.preRender(element, context);
 
-            return this.buildUrl();
+            return this.initUrl(context);
 
-        }).then(url => {
-
-            this.loadUrl(context, url);
-            this.runTimeout();
+        }).then(() => {
 
             return this.onInit;
 
@@ -248,6 +246,17 @@ export class ParentComponent extends BaseComponent {
             throw err;
         });
     }
+
+
+
+    initUrl(context) {
+
+        return this.buildUrl().then(url => {
+            this.loadUrl(context, url);
+            this.runTimeout();
+        });
+    }
+
 
 
     /*  Open
@@ -292,6 +301,68 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    renderToParentRemote(element, context, options = {}) {
+
+        return postRobot.sendToParent(POST_MESSAGE.RENDER_REMOTE, {
+
+            ...options,
+
+            tag: this.component.tag,
+            context,
+            element,
+
+            options: {
+                props: this.props,
+                childWindowName: this.childWindowName
+            }
+
+        }).then(data => {
+
+            extend(this, data.overrides);
+
+            this.setForCleanup('window', getParentWindow().frames[data.childWindowName]);
+        });
+    }
+
+
+    renderToParentLocal(element, context, options = {}) {
+
+        let renderPromise = this.render(element, CONTEXT_TYPES.POPUP);
+
+        let renderParentPromise = postRobot.sendToParent(POST_MESSAGE.RENDER_LOCAL, {
+
+            ...options,
+
+            tag: this.component.tag,
+            context,
+            element,
+
+            overrides: {
+                close: (reason) => this.close(reason),
+                focus: () => this.focus()
+            },
+
+            options: {
+                props: this.props
+            }
+
+        }).then(data => {
+
+            this.registerForCleanup(data.destroy);
+            extend(this, data.overrides);
+        });
+
+        return Promise.all([
+            renderPromise,
+            renderParentPromise
+
+        ]).then(() => {
+            return renderPromise;
+        });
+    }
+
+
+
     /*  Render to Parent
         ----------------
 
@@ -318,57 +389,9 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`render_${context}_to_parent`, { element, context });
 
-            // Set a new childWindowName to let it know it's going to be a sibling, not a direct child
-
-            this.childWindowName = buildChildWindowName(this.component.name, {
-                tag: this.component.tag,
-                parent: window.name,
-                sibling: 1
-            });
-
             this.setForCleanup('context', context);
 
-            // Do any specific stuff needed for particular contexts. For example -- for popups, we have no choice but to
-            // open them from the child, since we depend on there being a click event to avoid the popup blocker.
-
-            if (RENDER_DRIVERS[context].renderToParent) {
-                RENDER_DRIVERS[context].renderToParent.call(this, element);
-            }
-
-            // Message the parent to instruct them on what to render and how. Since post-robot supports sending functions
-            // across, we can pretty much just send all of our props over too without any problems
-
-            return postRobot.sendToParent(POST_MESSAGE.RENDER, {
-
-                // <3 ES6
-                ...options,
-
-                tag: this.component.tag,
-                context,
-                element,
-
-                options: {
-                    renderedToParent: true,
-                    childWindowName: this.childWindowName,
-                    props: this.props
-                },
-
-                overrides: {
-
-                }
-
-            }).then(data => {
-
-                extend(this, data.overrides);
-
-                // Luckily we're allowed to access any frames created by our parent window, so we can get a handle on the child component window.
-
-                if (!this.window) {
-                    this.setForCleanup('window', parentWindow.frames[this.childWindowName]);
-                }
-
-                return this;
-            });
+            return RENDER_DRIVERS[context].renderToParent.call(this, element, options);
         });
     }
 
@@ -576,7 +599,7 @@ export class ParentComponent extends BaseComponent {
 
             // We got a request to render from the child (renderToParent)
 
-            [ POST_MESSAGE.RENDER ](source, data) {
+            [ POST_MESSAGE.RENDER_REMOTE ](source, data) {
 
                 let component = this.component.getByTag(data.tag);
                 let instance  = component.parent(data.options);
@@ -610,12 +633,33 @@ export class ParentComponent extends BaseComponent {
                 }).then(() => {
 
                     return {
+                        childWindowName: this.childWindowName,
+
                         overrides: {
                             childExports: instance.childExports,
                             close: reason => instance.close(reason)
                         }
                     };
                 });
+            },
+
+            [ POST_MESSAGE.RENDER_LOCAL ](source, data) {
+
+                let component = this.component.getByTag(data.tag);
+                let instance  = component.parent(data.options);
+
+                instance.setForCleanup('context', data.context);
+
+                extend(instance, data.overrides);
+
+                instance.createParentTemplate(data.context);
+
+                return {
+                    destroy: () => instance.destroy(),
+                    overrides: {
+                        addCloseClasses: () => instance.addCloseClasses()
+                    }
+                };
             },
 
 
@@ -714,6 +758,33 @@ export class ParentComponent extends BaseComponent {
             this.unloadListener.cancel();
         }
 
+        this.addCloseClasses();
+
+        let closePromise = Promise.resolve().then(() => {
+
+            if (this.component.closeDelay && this.context !== CONTEXT_TYPES.POPUP) {
+                return delay(this.component.closeDelay);
+            }
+
+        }).then(() => {
+
+            if (this.childExports && !isWindowClosed(this.window)) {
+                this.childExports.close().catch(noop);
+            }
+
+            this.destroy();
+
+            return this.props.onClose(reason);
+        });
+
+        this.setForCleanup('closePromise', closePromise);
+
+        return closePromise;
+    }
+
+
+
+    addCloseClasses() {
         if (this.parentTemplate) {
             this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
 
@@ -721,30 +792,6 @@ export class ParentComponent extends BaseComponent {
                 this.parentTemplate.className += ` ${CLASS_NAMES.AUTOCLOSE}`;
             }
         }
-
-        let closePromise = this.props.onClose(reason).then(() => {
-
-            return new Promise(resolve => {
-
-                if (this.component.closeDelay && this.context !== CONTEXT_TYPES.POPUP) {
-                    setTimeout(resolve, this.component.closeDelay);
-                } else {
-                    resolve();
-                }
-
-            }).then(() => {
-
-                if (this.childExports && !isWindowClosed(this.window)) {
-                    this.childExports.close().catch(noop);
-                }
-
-                this.destroy();
-            });
-        });
-
-        this.setForCleanup('closePromise', closePromise);
-
-        return closePromise;
     }
 
 
@@ -756,10 +803,14 @@ export class ParentComponent extends BaseComponent {
 
     focus() {
 
-        this.component.log(`focus`);
-
         if (this.window) {
+
+            this.component.log(`focus`);
             this.window.focus();
+
+        } else {
+
+            throw new Error(`No window to focus`);
         }
     }
 
@@ -829,7 +880,10 @@ export class ParentComponent extends BaseComponent {
 
         }, document.body);
 
-        addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
+        if (RENDER_DRIVERS[context].focusable) {
+            addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
+        }
+
         addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close(CLOSE_REASONS.TEMPLATE_BUTTON));
 
         this.registerForCleanup(() => {
