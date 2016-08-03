@@ -125,17 +125,6 @@ export function onCloseWindow(win, callback) {
     interval = safeInterval(checkWindowClosed, 50);
     checkWindowClosed();
 
-    let close = win.close;
-
-    try {
-        win.close = function() {
-            close.apply(this, arguments);
-            checkWindowClosed();
-        };
-    } catch (err) {
-        // pass
-    }
-
     return {
         cancel() {
             interval.cancel();
