@@ -335,15 +335,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _drivers.listeners.response[hash] = options;
 
 	        if ((0, _lib.isWindowClosed)(options.window)) {
-	            console.log(111111111, window.location.pathname);
-	            console.log(JSON.stringify({
-	                hash: hash,
-	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-	                name: options.name,
-	                data: options.data,
-	                fireAndForget: options.fireAndForget
-	            }, 0, 2));
-	            throw new Error('Target window is closed33333');
+	            throw new Error('Target window is closed');
 	        }
 
 	        var hasResult = false;
@@ -430,8 +422,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var win = (0, _lib.getParentWindow)();
 
-	    if (!window) {
-	        throw new Error('Window does not have a parent');
+	    if (!win) {
+	        return new _lib.promise.Promise(function (resolve, reject) {
+	            return reject(new Error('Window does not have a parent'));
+	        });
 	    }
 
 	    return send(win, name, data, options, callback);
@@ -498,7 +492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ALLOW_POSTMESSAGE_POPUP: false,
 
-	    LOG_LEVEL: 'debug',
+	    LOG_LEVEL: 'info',
 
 	    ACK_TIMEOUT: 500,
 
@@ -506,7 +500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    MOCK_MODE: false,
 
-	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
 /***/ },
@@ -1087,7 +1081,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            flush();
 	        });
 	    } catch (error) {
-	        console.log('!!!!', error.message);
 	        return errorHandler(error);
 	    }
 
@@ -1109,15 +1102,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasHandlers) {
-	            promise.handlers.push({
-	                onError: function onError(err) {
-	                    if (!promise.hasHandlers) {
-	                        logError(err);
-	                    }
-	                }
-	            });
-	            promise.dispatch();
+	        if (!promise.hasHandlers && promise.rejected) {
+	            logError(promise.value);
 	        }
 	    }
 	}
@@ -1125,11 +1111,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	function logError(err) {
 	    setTimeout(function () {
 	        throw err;
-	    });
+	    }, 1);
 	}
+
+	var toString = {}.toString;
 
 	function isPromise(item) {
 	    try {
+	        if (!item) {
+	            return false;
+	        }
+
+	        if (window.Window && item instanceof window.Window) {
+	            return false;
+	        }
+
+	        if (window.constructor && item instanceof window.constructor) {
+	            return false;
+	        }
+
+	        if (toString) {
+	            var name = toString.call(item);
+
+	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
+	                return false;
+	            }
+	        }
+
 	        if (item && item.then instanceof Function) {
 	            return true;
 	        }
@@ -1819,6 +1827,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var domainMatches = [];
+	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
 
@@ -1868,6 +1877,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        win: win,
 	        match: match
 	    });
+
+	    if (!domainMatchTimeout) {
+	        domainMatchTimeout = setTimeout(function () {
+	            domainMatches = [];
+	            domainMatchTimeout = null;
+	        }, 1);
+	    }
 
 	    return match;
 	}
@@ -2577,7 +2593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        iframe.setAttribute('name', id);
 	        iframe.setAttribute('id', id);
 
-	        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
+	        iframe.setAttribute('style', 'display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;');
 	        iframe.setAttribute('frameborder', '0');
 	        iframe.setAttribute('border', '0');
 	        iframe.setAttribute('scrolling', 'no');
@@ -2824,8 +2840,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _compat.emulateIERestrictions)(window, win);
 
-	    console.log('???', win.location.pathname);
-
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
 
@@ -2863,51 +2877,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	        source: window,
 	        data: JSON.stringify(message, 0, 2)
 	    });
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, function (win, message, domain) {
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, function (win, message, domain) {
 
 	    if ((0, _lib.isSameTopWindow)(window, win)) {
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    var frame = (0, _compat.getRemoteBridge)(win);
+	    return (0, _compat.getRemoteBridgeForWindow)(win).then(function (bridge) {
 
-	    if (!frame) {
-	        throw new Error('No bridge available in window');
-	    }
+	        if (!bridge) {
+	            throw new Error('No bridge available in window');
+	        }
 
-	    if (!(0, _lib.isSameDomain)(frame)) {
-	        throw new Error('Bridge is not on the same domain');
-	    }
+	        var sourceDomain = _lib.util.getDomain(window);
+	        var targetDomain = void 0;
 
-	    var sourceDomain = _lib.util.getDomain(window);
-	    var targetDomain = void 0;
+	        try {
+	            targetDomain = _lib.util.getDomain(bridge);
+	        } catch (err) {
+	            throw new Error('Can not read bridge window domain: ' + err.message);
+	        }
 
-	    try {
-	        targetDomain = _lib.util.getDomain(frame);
-	    } catch (err) {
-	        throw new Error('Can not read bridge window domain: ' + err.message);
-	    }
+	        if (sourceDomain !== targetDomain) {
+	            throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
+	        }
 
-	    if (sourceDomain !== targetDomain) {
-	        throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
-	    }
+	        if (!_lib.util.safeHasProp(bridge, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	            throw new Error('post-robot not available on bridge at ' + targetDomain);
+	        }
 
-	    if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	        throw new Error('post-robot not available on bridge at ' + targetDomain);
-	    }
+	        message.targetHint = 'window.parent';
 
-	    message.targetHint = 'window.parent';
+	        // If we're messaging our child
 
-	    // If we're messaging our child
+	        if (window === (0, _lib.getOpener)(win)) {
+	            message.sourceHint = 'window.opener';
+	        }
 
-	    if (window === (0, _lib.getOpener)(win)) {
-	        message.sourceHint = 'window.opener';
-	    }
-
-	    frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	        origin: _lib.util.getDomain(window),
-	        source: window,
-	        data: JSON.stringify(message, 0, 2)
+	        bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	            origin: _lib.util.getDomain(window),
+	            source: window,
+	            data: JSON.stringify(message, 0, 2)
+	        });
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
@@ -2915,14 +2926,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    if (!message.target) {
-	        throw new Error('Can not post message down through bridge without target');
-	    }
-
 	    // If we're messaging our parent
 
 	    if (win === (0, _lib.getOpener)(window)) {
 	        message.targetHint = 'window.parent.opener';
+	    }
+
+	    if (!message.target && !message.targetHint) {
+	        throw new Error('Can not post message down through bridge without target or targetHint');
 	    }
 
 	    // If we're messaging our child
@@ -2937,7 +2948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message.sourceHint = 'window.opener.parent';
 	    }
 
-	    return (0, _compat.getBridgeByWindow)(win).then(function (bridge) {
+	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
 
 	        if (!bridge) {
 	            throw new Error('Bridge not initialized');
@@ -3519,7 +3530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // A json based spec describing what kind of props the component accepts. This is used to validate any props before
 	        // they are passed down to the child.
 
-	        this.props = _extends({}, options.props, _props.internalProps);
+	        this.props = _extends({}, _props.internalProps, options.props);
 
 	        // The dimensions of the component, e.g. { width: 500, height: 200 }
 
@@ -5527,17 +5538,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    interval = (0, _util.safeInterval)(checkWindowClosed, 50);
 	    checkWindowClosed();
 
-	    var close = win.close;
-
-	    try {
-	        win.close = function () {
-	            close.apply(this, arguments);
-	            checkWindowClosed();
-	        };
-	    } catch (err) {
-	        // pass
-	    }
-
 	    return {
 	        cancel: function cancel() {
 	            interval.cancel();
@@ -6534,7 +6534,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var CLOSE_REASONS = exports.CLOSE_REASONS = {
-	    TEMPLATE_BUTTON: 'template_button',
 	    PARENT_CALL: 'parent_call',
 	    CHILD_CALL: 'child_call',
 	    AUTOCLOSE: 'autoclose',
@@ -7703,7 +7702,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this16.close(_constants.CLOSE_REASONS.TEMPLATE_BUTTON);
+	                return _this16.userClose();
 	            });
 
 	            this.registerForCleanup(function () {
@@ -8427,8 +8426,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.validate = validate;
 
-	var _props = __webpack_require__(/*! ./props */ 58);
-
 	var _constants = __webpack_require__(/*! ../../constants */ 51);
 
 	function validateProps(options) {
@@ -8453,10 +8450,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var key = _ref;
 
 	            var prop = options.props[key];
-
-	            if (_props.internalProps.hasOwnProperty(key)) {
-	                throw new Error('[' + options.tag + '] Reserved prop name: ' + key);
-	            }
 
 	            if (!prop || !((typeof prop === 'undefined' ? 'undefined' : _typeof(prop)) === 'object')) {
 	                throw new Error('[' + options.tag + '] Expected options.props.' + key + ' to be an object');
