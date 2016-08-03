@@ -50,7 +50,6 @@ export const EVENT_NAMES = {
 };
 
 export const CLOSE_REASONS = {
-    TEMPLATE_BUTTON: 'template_button',
     PARENT_CALL: 'parent_call',
     CHILD_CALL: 'child_call',
     AUTOCLOSE: 'autoclose',

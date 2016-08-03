@@ -884,7 +884,7 @@ export class ParentComponent extends BaseComponent {
             addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
         }
 
-        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.close(CLOSE_REASONS.TEMPLATE_BUTTON));
+        addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose());
 
         this.registerForCleanup(() => {
             if (this.component.autocloseParentTemplate && this.parentTemplate) {
