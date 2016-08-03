@@ -3,7 +3,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getParentWindow, getComponentMeta, isXComponentWindow } from '../window';
-import { noop, extend, onCloseWindow, addEventListener, debounce } from '../../lib';
+import { noop, extend, onCloseWindow, addEventListener, debounce, replaceObject, get } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
 import { normalizeProps } from '../props';
 import { normalizeChildProps } from './props';
@@ -35,11 +35,14 @@ export class ChildComponent extends BaseComponent {
         this.onProps = this.tryCatch(options.onProps || noop, false);
         this.onError = this.tryCatch(options.onError || (err => { throw err; }));
 
+        this.onInit = new Promise();
+
         // The child can specify some default props if none are passed from the parent. This often makes integrations
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
         // has provided them or not, and fall-back to some default behavior.
 
         this.setProps(normalizeProps(this.component, this, options.defaultProps || {}), false);
+        this.setProps(this.getInitialProps());
 
         // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
         // there's an existing full-page implementation which uses redirects. In this case, the user can specify
@@ -96,9 +99,30 @@ export class ChildComponent extends BaseComponent {
             this.context = data.context;
             this.setProps(data.props);
 
+            this.onInit.resolve(this);
+
             this.onEnter.call(this);
 
         }).catch(err => this.onError(err));
+    }
+
+
+    getInitialProps() {
+        let componentMeta = getComponentMeta();
+        let self = this;
+
+        if (componentMeta) {
+            return replaceObject(componentMeta.props, (value, key, fullKey) => {
+                if (value && value.__type__ === '__function__') {
+                    return function() {
+                        return self.onInit.then(() => {
+                            let original = get(self.props, fullKey);
+                            return original.apply(this, arguments);
+                        });
+                    };
+                }
+            });
+        }
     }
 
 

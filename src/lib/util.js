@@ -238,3 +238,50 @@ export function safeTimeout(method, time) {
         }
     }, 100);
 }
+
+
+export function each(item, callback) {
+
+    if (!item) {
+        return;
+    }
+
+    if (item instanceof Array) {
+        let len = item.length;
+        for (let i = 0; i < len; i++) {
+            callback(item[i], i);
+        }
+
+    } else if (typeof item === 'object') {
+        let keys = Object.keys(item);
+        let len = keys.length;
+        for (let i = 0; i < len; i++) {
+            let key = keys[i];
+            callback(item[key], key);
+        }
+    }
+}
+
+
+
+export function replaceObject(obj, callback, parentKey = '') {
+
+    let newobj = obj instanceof Array ? [] : {};
+
+    each(obj, (item, key) => {
+
+        let fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+        let result = callback(item, key, fullKey);
+
+        if (result !== undefined) {
+            newobj[key] = result;
+        } else if (typeof item === 'object' && item !== null) {
+            newobj[key] = replaceObject(item, callback, fullKey);
+        } else {
+            newobj[key] = item;
+        }
+    });
+
+    return newobj;
+}

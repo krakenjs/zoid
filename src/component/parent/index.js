@@ -6,8 +6,8 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
-         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS } from '../../constants';
+         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay, replaceObject } from '../../lib';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS  } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -45,20 +45,16 @@ export class ParentComponent extends BaseComponent {
             activeComponents.splice(activeComponents.indexOf(this), 1);
         });
 
+        this.setProps(options.props || {});
+
 
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
 
-        this.childWindowName = options.childWindowName || buildChildWindowName(this.component.name, {
-            tag: this.component.tag,
-            parent: window.name
-        });
-
-        this.setProps(options.props || {});
+        this.childWindowName = options.childWindowName || this.buildChildWindowName();
 
         this.component.log(`construct_parent`);
     }
-
 
     init() {
 
@@ -73,6 +69,24 @@ export class ParentComponent extends BaseComponent {
         this.onInit.catch(err => {
             this.destroy();
             this.props.onError(err);
+        });
+    }
+
+
+    buildChildWindowName() {
+
+        let props = replaceObject(this.props, (value, key, fullKey) => {
+            if (value instanceof Function) {
+                return {
+                    __type__: '__function__'
+                };
+            }
+        });
+
+        return buildChildWindowName(this.component.name, {
+            tag: this.component.tag,
+            parent: window.name,
+            props
         });
     }
 
