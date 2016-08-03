@@ -1,5 +1,4 @@
 
-import { internalProps } from './props';
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
 
 function validateProps(options) {
@@ -11,10 +10,6 @@ function validateProps(options) {
     if (options.props) {
         for (let key of Object.keys(options.props)) {
             let prop = options.props[key];
-
-            if (internalProps.hasOwnProperty(key)) {
-                throw new Error(`[${options.tag}] Reserved prop name: ${key}`);
-            }
 
             if (!prop || !(typeof prop === 'object')) {
                 throw new Error(`[${options.tag}] Expected options.props.${key} to be an object`);

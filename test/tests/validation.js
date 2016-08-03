@@ -141,22 +141,6 @@ describe('xcomponent validation errors', () => {
                 },
                 url: 'http://zombo.com',
                 props: {
-                    onEnter: {
-                        type: 'function'
-                    }
-                }
-            });
-        });
-
-        expectError(() => {
-            xcomponent.create({
-                tag: 'my-component',
-                dimensions: {
-                    height: 50,
-                    width: 200
-                },
-                url: 'http://zombo.com',
-                props: {
                     onSomething: {
 
                     }

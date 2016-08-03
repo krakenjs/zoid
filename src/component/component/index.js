@@ -54,8 +54,8 @@ export class Component {
         // they are passed down to the child.
 
         this.props = {
-            ...options.props,
-            ...internalProps
+            ...internalProps,
+            ...options.props
         };
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
