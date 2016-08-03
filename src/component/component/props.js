@@ -68,7 +68,6 @@ export const internalProps = {
     onError: {
         type: 'function',
         required: false,
-        autoClose: true,
         promisify: true,
         def(err) {
             console.error(err.message, '\n', err.stack || err.toString());

@@ -62,6 +62,11 @@ export class ParentComponent extends BaseComponent {
         // Set up promise for init
 
         this.onInit = new Promise();
+
+        this.onInit.catch(err => {
+            this.destroy();
+            this.props.onError(err);
+        });
     }
 
 
@@ -236,14 +241,14 @@ export class ParentComponent extends BaseComponent {
 
             return this.initUrl(context);
 
+        }).catch(err => {
+
+            this.onInit.reject(err);
+            throw err;
+
         }).then(() => {
 
             return this.onInit;
-
-        }).catch(err => {
-
-            this.destroy();
-            throw err;
         });
     }
 
@@ -392,6 +397,15 @@ export class ParentComponent extends BaseComponent {
             this.setForCleanup('context', context);
 
             return RENDER_DRIVERS[context].renderToParent.call(this, element, options);
+
+        }).catch(err => {
+
+            this.onInit.reject(err);
+            throw err;
+
+        }).then(() => {
+
+            return this.onInit;
         });
     }
 
@@ -499,12 +513,15 @@ export class ParentComponent extends BaseComponent {
             this.preRender(element, context);
 
             this.runTimeout();
-            return this.onInit;
 
         }).catch(err => {
 
-            this.destroy();
+            this.onInit.reject(err);
             throw err;
+
+        }).then(() => {
+
+            return this.onInit;
         });
     }
 
@@ -925,6 +942,7 @@ export class ParentComponent extends BaseComponent {
     error(err) {
         this.component.logError(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
+        this.destroy();
         return this.props.onError(err);
     }
 }
