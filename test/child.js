@@ -123,7 +123,13 @@ let cases = {
             onEnter() {
                 testComponent2.init({
                     onEnter() {
-                        return comp.props.foo();
+                        if (comp.props.foo) {
+                            return comp.props.foo();
+                        }
+
+                        if (comp.props.childEntered) {
+                            return comp.props.childEntered();
+                        }
                     },
 
                     onClose() {
@@ -142,7 +148,13 @@ let cases = {
 
                 testComponent2.init({
                     onEnter() {
-                        return comp.props.foo();
+                        if (comp.props.foo) {
+                            return comp.props.foo();
+                        }
+
+                        if (comp.props.childEntered) {
+                            return comp.props.childEntered();
+                        }
                     },
 
                     onClose() {

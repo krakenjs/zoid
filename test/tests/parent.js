@@ -69,11 +69,11 @@ describe('xcomponent render to parent', () => {
         postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndClose');
     });
 
-    it('should close an xcomponent renderToParent popup on click of the overlay close button', done => {
+    it('should close an xcomponent renderToParent lightbox on click of the overlay close button', done => {
 
         component = testComponent.init({
             childEntered() {
-                document.querySelector('.xcomponent-close').click();
+                document.querySelectorAll('.xcomponent-close')[1].click();
             },
 
             onClose: () => done()
@@ -88,7 +88,7 @@ describe('xcomponent render to parent', () => {
 
         component = testComponent.init({
             childEntered() {
-                document.querySelector('.xcomponent-close').click();
+                document.querySelectorAll('.xcomponent-close')[1].click();
             },
 
             onClose: () => done()
