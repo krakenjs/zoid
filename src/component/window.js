@@ -1,5 +1,6 @@
 
-import { b64encode, b64decode, memoize, uniqueID } from '../lib';
+import { b32encode, b32decode } from '../lib';
+import { memoize, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -15,15 +16,24 @@ import { XCOMPONENT } from '../constants';
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(prefix, options = {}) {
+export function buildChildWindowName(name, options = {}) {
 
     options.id = uniqueID();
     options.parent = window.name;
     options.parentDomain = `${window.location.protocol}//${window.location.host}`;
 
-    let name = b64encode(JSON.stringify(options));
+    let encodedName = name.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
+    let encodedOptions = b32encode(JSON.stringify(options));
 
-    return `${XCOMPONENT}_${prefix.replace(/_/g, '')}_${name}`;
+    if (!encodedName) {
+        throw new Error(`Invalid name: ${name} - must contain alphanumeric characters`);
+    }
+
+    return [
+        XCOMPONENT,
+        encodedName,
+        encodedOptions
+    ].join('__');
 }
 
 
@@ -40,18 +50,23 @@ export let getComponentMeta = memoize(() => {
         return;
     }
 
-    let segments = window.name.split('_');
-    let options = segments.slice(2).join('_');
+    let [ xcomp, name, encodedOptions ] = window.name.split('__');
 
-    if (segments[0] !== XCOMPONENT) {
+    if (xcomp !== XCOMPONENT) {
         return;
     }
 
+    let componentMeta;
+
     try {
-        return JSON.parse(b64decode(options));
+        componentMeta = JSON.parse(b32decode(encodedOptions));
     } catch (err) {
         return;
     }
+
+    componentMeta.name = name;
+
+    return componentMeta;
 });
 
 

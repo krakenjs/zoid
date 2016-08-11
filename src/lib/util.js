@@ -1,7 +1,4 @@
 
-import base64 from 'Base64';
-
-
 /*  Url Encode
     ----------
 
@@ -93,30 +90,6 @@ export function uniqueID() {
         return chars.charAt(Math.floor(Math.random() * chars.length));
     });
 }
-
-
-/*  Base 64 Encode
-    --------------
-
-    Base 64 encode a string
-*/
-
-export function b64encode(str) {
-    return (window.btoa ? window.btoa(str) : base64.btoa(str)).replace(/[=]/g, '_');
-}
-
-
-/*  Base 64 Decode
-    --------------
-
-    Base 64 decode a string
-*/
-
-export function b64decode(str) {
-    str = str.replace(/[_]/g, '=');
-    return (window.atob ? window.atob(str) : base64.atob(str));
-}
-
 
 /*  Stringify with Functions
     ------------------------
