@@ -162,18 +162,14 @@ My life is even easier. I just need to drop in your component onto my page:
 <script>
     // Create an instance of the component
 
-    var mycomponent = MyLoginComponent.init({
+    MyLoginComponent.render({
 
         prefilledEmail: 'foo@bar.com',
 
         onLogin: function(email) {
             console.log('User logged in with email:', email);
         }
-    });
-
-    // Render the component to the page
-
-    mycomponent.render('#container');
+    }, '#container');
 </script>
 ```
 
@@ -273,7 +269,7 @@ login.updateProps({
 If you set a timeout (in ms), xcomponent will automatically call your `onTimeout` method if the component does not initalize itself in that time. In case no `onTimeout` methhod is defined it will call the `onError` method. 
 
 ```javascript
-var login = MyLoginComponent.init({
+MyLoginComponent.render({
 
     onTimeout: function(err) {
          // Gracefully handle the timeout during rendering the component 
@@ -293,7 +289,7 @@ A lot of the time, it won't make sense to allow people to use your component mul
 To prevent them from doing that, you can set `singleton: true` when rendering:
 
 ```javascript
-var login = MyLoginComponent.init({
+MyLoginComponent.render({
 
     singleton: true
 });
