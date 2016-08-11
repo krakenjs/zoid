@@ -62,6 +62,8 @@ export class Component {
 
         this.dimensions = options.dimensions || {};
 
+        this.version = options.version || 'latest';
+
         // The default environment we should render to if none is specified in the parent
 
         this.defaultEnv = options.defaultEnv;

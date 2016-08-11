@@ -83,7 +83,7 @@ export class ParentComponent extends BaseComponent {
             }
         });
 
-        return buildChildWindowName(this.component.name, {
+        return buildChildWindowName(this.component.name, this.component.version, {
             tag: this.component.tag,
             parent: window.name,
             props
