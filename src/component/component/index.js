@@ -1,6 +1,7 @@
 
 import $logger from 'beaver-logger/client';
 
+import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { internalProps } from './props';
@@ -26,9 +27,10 @@ export let components = {};
     contains all of the configuration needed for them to set themselves up.
 */
 
-export class Component {
+export class Component extends BaseComponent {
 
     constructor(options = {}) {
+        super(options);
 
         this.validate(options);
 
@@ -44,11 +46,11 @@ export class Component {
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
-        this.tag = options.tag;
+        this.addProp(options, 'tag');
 
         // Name of the component, used for logging. Auto-generated from the tag name by default.
 
-        this.name = options.name || options.tag.replace(/-/g, '_');
+        this.addProp(options, 'name', this.tag.replace(/-/g, '_'));
 
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
@@ -60,49 +62,49 @@ export class Component {
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 
-        this.dimensions = options.dimensions || {};
+        this.addProp(options, 'dimensions', {});
 
-        this.version = options.version || 'latest';
+        this.addProp(options, 'version', 'latest');
 
         // The default environment we should render to if none is specified in the parent
 
-        this.defaultEnv = options.defaultEnv;
+        this.addProp(options, 'defaultEnv');
 
         // A mapping of env->url, used to determine which url to load for which env
 
-        this.envUrls = options.envUrls || {};
+        this.addProp(options, 'envUrls', {});
 
         // A url to use by default to render the component, if not using envs
 
-        this.url = options.url     || options.envUrls[options.defaultEnv];
+        this.addProp(options, 'url', this.envUrls[this.defaultEnv]);
 
         // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
 
-        this.contexts = options.contexts || {};
+        this.addProp(options, 'contexts', {});
         for (let context of CONTEXT_TYPES_LIST) {
             this.contexts[context] = (this.contexts[context] === undefined) ? true : Boolean(this.contexts[context]);
         }
 
-        this.closeDelay = options.closeDelay;
+        this.addProp(options, 'closeDelay');
 
         // The default context to render to
 
-        this.defaultContext = options.defaultContext;
+        this.addProp(options, 'defaultContext');
 
         // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
 
-        this.singleton = options.singleton;
+        this.addProp(options, 'singleton');
 
         // Auto Resize option
 
-        this.autoResize = options.autoResize || false;
+        this.addProp(options, 'autoResize', false);
 
-        this.autocloseParentTemplate = options.autocloseParentTemplate === undefined ? true : options.autocloseParentTemplate;
+        this.addProp(options, 'autocloseParentTemplate', true);
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.parentTemplate    = options.parentTemplate    || parentTemplate;
-        this.componentTemplate = options.componentTemplate || componentTemplate;
+        this.addProp(options, 'parentTemplate', parentTemplate);
+        this.addProp(options, 'componentTemplate', componentTemplate);
 
         // A mapping of tag->component so we can reference components by string tag name
 

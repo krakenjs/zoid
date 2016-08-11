@@ -12,6 +12,15 @@ import { once } from '../lib';
 
 export class BaseComponent {
 
+    addProp(options, name, def) {
+
+        if (options.hasOwnProperty(name)) {
+            Object.defineProperty(this, name, { get() { return options[name]; } });
+        } else {
+            this[name] = def;
+        }
+    }
+
 
     /*  Register For Cleanup
         --------------------
