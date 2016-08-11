@@ -1,6 +1,6 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { getUrlParam } from '../../lib';
+import { getQueryParam } from '../../lib';
 import { PROP_DEFER_TO_URL } from '../../constants';
 
 export function normalizeChildProps(component, props) {
@@ -20,7 +20,7 @@ export function normalizeChildProps(component, props) {
                 queryParam = prop.queryParam;
             }
 
-            value = getUrlParam(queryParam);
+            value = getQueryParam(queryParam);
             if (prop.getter) {
                 let val = Promise.resolve(value);
                 value = function()  {

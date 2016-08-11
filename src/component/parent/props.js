@@ -1,7 +1,6 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
-import { urlEncode } from '../../lib';
 import { normalizeProps } from '../props';
 import { PROP_DEFER_TO_URL, CLOSE_REASONS } from '../../constants';
 
@@ -19,7 +18,7 @@ import { PROP_DEFER_TO_URL, CLOSE_REASONS } from '../../constants';
 
 export function propsToQuery(propsDef, props) {
 
-    let params = [];
+    let params = {};
 
     return Promise.all(Object.keys(props).map(key => {
 
@@ -53,6 +52,8 @@ export function propsToQuery(propsDef, props) {
                 });
             }
 
+            return value;
+
         }).then(value => {
 
             if (!value) {
@@ -73,11 +74,11 @@ export function propsToQuery(propsDef, props) {
                 result = value.toString();
             }
 
-            params.push(`${urlEncode(queryParam)}=${urlEncode(result)}`);
+            params[queryParam] = result;
         });
 
     })).then(() => {
-        return params.join('&');
+        return params;
     });
 }
 

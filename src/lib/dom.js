@@ -1,6 +1,6 @@
 
-import { once, noop } from './fn';
-import { extend, get, safeInterval } from './util';
+import { once, noop, memoize } from './fn';
+import { extend, get, safeInterval, urlEncode } from './util';
 
 
 /*  Get Element
@@ -305,9 +305,7 @@ export function template(html, context) {
     });
 }
 
-export function getUrlParams(queryString) {
-
-    queryString = queryString || window.location.search.slice(1);
+export let parseQuery = memoize(queryString => {
 
     let params = {};
 
@@ -324,11 +322,11 @@ export function getUrlParams(queryString) {
     }
 
     return params;
-}
+});
 
 
-export function getUrlParam(name) {
-    return getUrlParams()[name];
+export function getQueryParam(name) {
+    return parseQuery(window.location.search.slice(1))[name];
 }
 
 
@@ -345,4 +343,44 @@ export function getDomain(url) {
     domain = domain.split('/').slice(0, 3).join('/');
 
     return domain;
+}
+
+export function formatQuery(obj = {}) {
+
+    return Object.keys(obj).map(key => {
+        return `${urlEncode(key)}=${urlEncode(obj[key])}`;
+    }).join('&');
+}
+
+export function extendUrl(url, options = {}) {
+
+    let query = options.query || {};
+    let hash = options.hash || {};
+
+    let originalUrl;
+    let originalQuery;
+    let originalHash;
+
+    [ originalUrl, originalHash ]  = url.split('#');
+    [ originalUrl, originalQuery ] = originalUrl.split('?');
+
+    query = formatQuery({
+        ...parseQuery(originalQuery),
+        ...query
+    });
+
+    hash = formatQuery({
+        ...parseQuery(originalHash),
+        ...hash
+    });
+
+    if (query) {
+        originalUrl = `${originalUrl}?${query}`;
+    }
+
+    if (hash) {
+        originalUrl = `${originalUrl}#${hash}`;
+    }
+
+    return originalUrl;
 }

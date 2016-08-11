@@ -6,7 +6,8 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
-         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay, replaceObject } from '../../lib';
+         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay, replaceObject,
+         extendUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS  } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -98,6 +99,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     setProps(props) {
+        props.version = this.component.version;
         validateProps(this.component, props);
         this.props = normalizeParentProps(this.component, this, props);
     }
@@ -111,7 +113,8 @@ export class ParentComponent extends BaseComponent {
     */
 
     buildUrl() {
-        return propsToQuery(this.component.props, this.props).then(queryString => {
+
+        return propsToQuery(this.component.props, this.props).then(queryProps => {
 
             let url;
 
@@ -123,35 +126,7 @@ export class ParentComponent extends BaseComponent {
                 url = this.component.url;
             }
 
-            if (queryString) {
-
-                let base;
-                let query;
-                let hash;
-
-                [ base, hash ]  = url.split('#');
-                [ base, query ] = base.split('?');
-
-                if (query) {
-                    query = `${query}&${queryString}`;
-                } else {
-                    query = queryString;
-                }
-
-                url = base;
-
-                if (query) {
-                    url = `${url}?${query}`;
-                }
-
-                if (hash) {
-                    url = `${url}#${hash}`;
-                }
-
-                return url;
-            }
-
-            return url;
+            return extendUrl(url, { query: queryProps });
         });
     }
 

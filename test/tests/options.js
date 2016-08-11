@@ -21,7 +21,7 @@ describe('xcomponent options', () => {
             url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl(url) {
-                assert.isTrue(url === '/base/test/child.htm?foo=xyztest', 'Expected url to be custom url passed during init');
+                assert.isTrue(url.indexOf('/base/test/child.htm') === 0 && url.indexOf('foo=xyztest') > 0, 'Expected url to be custom url passed during init');
                 done();
             }
         });

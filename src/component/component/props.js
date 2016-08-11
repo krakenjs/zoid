@@ -23,6 +23,11 @@ export const internalProps = {
         required: false
     },
 
+    version: {
+        type: 'string',
+        required: false
+    },
+
     // A millisecond timeout before onTimeout is called
 
     timeout: {
