@@ -8,7 +8,7 @@ import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
          capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay, replaceObject,
          extendUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS  } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -115,6 +115,8 @@ export class ParentComponent extends BaseComponent {
     buildUrl() {
 
         return propsToQuery(this.component.props, this.props).then(queryProps => {
+
+            queryProps[XCOMPONENT] = '1';
 
             let url;
 
