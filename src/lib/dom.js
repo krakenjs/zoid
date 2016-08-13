@@ -313,6 +313,10 @@ export let parseQuery = memoize(queryString => {
         return params;
     }
 
+    if (queryString.indexOf('=') === -1) {
+        throw new Error(`Can not parse query string params: ${queryString}`);
+    }
+
     for (let pair of queryString.split('&')) {
         pair = pair.split('=');
 
@@ -352,6 +356,18 @@ export function formatQuery(obj = {}) {
     }).join('&');
 }
 
+export function extendQuery(originalQuery, props = {}) {
+
+    if (!props || !Object.keys(props).length) {
+        return originalQuery;
+    }
+
+    return formatQuery({
+        ...parseQuery(originalQuery),
+        ...props
+    });
+}
+
 export function extendUrl(url, options = {}) {
 
     let query = options.query || {};
@@ -364,22 +380,15 @@ export function extendUrl(url, options = {}) {
     [ originalUrl, originalHash ]  = url.split('#');
     [ originalUrl, originalQuery ] = originalUrl.split('?');
 
-    query = formatQuery({
-        ...parseQuery(originalQuery),
-        ...query
-    });
-
-    hash = formatQuery({
-        ...parseQuery(originalHash),
-        ...hash
-    });
+    let queryString = extendQuery(originalQuery, query);
+    let hashString  = extendQuery(originalHash, hash);
 
     if (query) {
-        originalUrl = `${originalUrl}?${query}`;
+        originalUrl = `${originalUrl}?${queryString}`;
     }
 
     if (hash) {
-        originalUrl = `${originalUrl}#${hash}`;
+        originalUrl = `${originalUrl}#${hashString}`;
     }
 
     return originalUrl;
