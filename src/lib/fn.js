@@ -43,7 +43,7 @@ export function memoize(method) {
         let args;
 
         try {
-            args = JSON.stringify(arguments);
+            args = JSON.stringify(Array.prototype.slice.call(arguments));
         } catch (err) {
             throw new Error('Arguments not serializable -- can not be used to memoize');
         }

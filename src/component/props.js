@@ -101,12 +101,10 @@ export function normalizeProp(component, instance, props, key) {
         } else {
             let val = value;
 
-            value = function() {
+            value = memoize(() => {
                 return Promise.resolve(val);
-            };
+            });
         }
-
-        value = memoize(value);
     }
 
     return value;
