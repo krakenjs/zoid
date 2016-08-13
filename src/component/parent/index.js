@@ -860,7 +860,7 @@ export class ParentComponent extends BaseComponent {
             this.window.document.close();
         } catch (err) {
             try {
-                this.window.location = `javascript: document.open(); document.write(JSON.stringify(html)); document.close();`;
+                this.window.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
             } catch (err2) {
                 // pass
             }
