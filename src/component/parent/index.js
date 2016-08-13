@@ -1,5 +1,5 @@
 
-import $logger from 'beaver-logger/client';
+import { logger } from '../../lib';
 import postRobot from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
@@ -433,7 +433,7 @@ export class ParentComponent extends BaseComponent {
 
         this.unloadListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
-            $logger.flush();
+            logger.flush();
 
             if (this.context === CONTEXT_TYPES.POPUP) {
                 this.destroy();
@@ -603,6 +603,8 @@ export class ParentComponent extends BaseComponent {
                     this.setForCleanup('initialPropsSent', true);
 
                     // Let the child know what its context is, and what its initial props are.
+
+                    logger.flush();
 
                     return {
                         context: this.context,
@@ -933,6 +935,7 @@ export class ParentComponent extends BaseComponent {
     destroy() {
         if (this.hasCleanupTasks()) {
             this.component.log(`destroy`);
+            logger.flush();
             this.cleanup();
         }
     }

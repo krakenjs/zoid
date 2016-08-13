@@ -1,6 +1,4 @@
 
-import $logger from 'beaver-logger/client';
-
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
@@ -13,6 +11,8 @@ import parentTemplate from './templates/parent.htm';
 import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
+
+import { logger } from '../../lib';
 
 export let components = {};
 
@@ -214,9 +214,7 @@ export class Component extends BaseComponent {
     */
 
     log(event, payload = {}) {
-        payload.host = window.location.host;
-        payload.path = window.location.pathname;
-        $logger.info(`xc_${this.name}_${event}`, payload);
+        logger.info(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -227,7 +225,7 @@ export class Component extends BaseComponent {
     */
 
     logWarning(event, payload) {
-        $logger.warn(`xc_${this.name}_${event}`, payload);
+        logger.warn(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -238,6 +236,6 @@ export class Component extends BaseComponent {
     */
 
     logError(event, payload) {
-        $logger.error(`xc_${this.name}_${event}`, payload);
+        logger.error(`xc_${this.name}_${event}`, payload);
     }
 }

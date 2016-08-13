@@ -7,6 +7,8 @@ export function create(options) {
 
 export * from './error';
 
+export { registerLogger } from './lib';
+
 import * as CONSTANTS from './constants';
 
 module.exports.CONSTANTS = CONSTANTS;

@@ -1,4 +1,6 @@
 
+import { logger } from '../../lib';
+
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
@@ -103,7 +105,11 @@ export class ChildComponent extends BaseComponent {
 
             this.onEnter.call(this);
 
-        }).catch(err => this.onError(err));
+        }).catch(err => {
+
+            this.onInit.reject(err);
+            this.onError(err);
+        });
     }
 
 
@@ -282,7 +288,7 @@ export class ChildComponent extends BaseComponent {
 
         return {
             updateProps: props => this.setProps(props),
-            close: () => window.close()
+            close: () => this.destroy()
         };
     }
 
@@ -345,7 +351,9 @@ export class ChildComponent extends BaseComponent {
 
 
     destroy() {
-        window.close();
+        logger.flush().then(() => {
+            window.close();
+        });
     }
 
 
