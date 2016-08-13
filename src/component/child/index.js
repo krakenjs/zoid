@@ -255,30 +255,33 @@ export class ChildComponent extends BaseComponent {
 
     watchForResize() {
 
-        let resize = debounce((width, height) => {
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
-        }, 100);
-
-        let elm = document.body;
-
-        if (!elm) {
+        if (!this.component.dimensions) {
             return;
         }
 
-        // let lastWidth = elm.scrollWidth;
-        // let newWidth;
-        let lastHeight = elm.scrollHeight;
-        let newHeight;
+        let el = document.documentElement;
+
+        let dimensions = {
+            width: el.scrollWidth,
+            height: el.scrollHeight
+        };
+
+        let resize = debounce((width, height) => {
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
+        }, 200);
 
         setInterval(() => {
-            // newWidth = elm.scrollWidth;
-            newHeight = elm.scrollHeight;
-            // Dimensions changed if this condition is true
-            if (lastHeight !== newHeight /* || lastWidth !== newWidth */) {
-                resize(this.component.dimensions.width, newHeight);
+
+            let newDimensions = {
+                width: el.scrollWidth,
+                height: el.scrollHeight
+            };
+
+            if (Math.abs(newDimensions.width - dimensions.width) > 50 || Math.abs(newDimensions.height - dimensions.height) > 50) {
+                resize(newDimensions.width, newDimensions.height);
             }
-            // lastWidth = newWidth;
-            lastHeight = newHeight;
+
+            dimensions = newDimensions;
         }, 50);
 
     }

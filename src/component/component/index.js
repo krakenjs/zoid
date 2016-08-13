@@ -34,15 +34,6 @@ export class Component extends BaseComponent {
 
         this.validate(options);
 
-        if (options.dimensions) {
-            if (typeof options.dimensions.width !== 'number') {
-                throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
-            }
-
-            if (typeof options.dimensions.height !== 'number') {
-                throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number`);
-            }
-        }
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
@@ -62,7 +53,7 @@ export class Component extends BaseComponent {
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 
-        this.addProp(options, 'dimensions', {});
+        this.addProp(options, 'dimensions');
 
         this.addProp(options, 'version', 'latest');
 

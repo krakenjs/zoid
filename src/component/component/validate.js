@@ -38,6 +38,16 @@ export function validate(options) { // eslint-ignore-line
 
     validateProps(options);
 
+    if (options.dimensions) {
+        if (typeof options.dimensions.width !== 'number') {
+            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
+        }
+
+        if (typeof options.dimensions.height !== 'number') {
+            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number`);
+        }
+    }
+
     if (options.contexts) {
         let anyEnabled = false;
 
@@ -57,7 +67,7 @@ export function validate(options) { // eslint-ignore-line
         }
 
         if (options.contexts.iframe !== false) {
-            if (!options.dimensions || !options.dimensions.width || !options.dimensions.height) {
+            if (!options.dimensions) {
                 throw new Error(`[${options.tag}] dimesions.width and dimensions.height required for rendering to iframe`);
             }
         }
