@@ -15,7 +15,9 @@ export class BaseComponent {
     addProp(options, name, def) {
 
         if (options.hasOwnProperty(name)) {
-            Object.defineProperty(this, name, { get() { return options[name]; } });
+            let descriptor = Object.getOwnPropertyDescriptor(options, name);
+            Object.defineProperty(this, name, descriptor);
+
         } else {
             this[name] = def;
         }
