@@ -196,8 +196,8 @@ export let RENDER_DRIVERS = {
 
         resize(width, height) {
 
-            width = Math.min(width, window.innerWidth);
-            height = Math.min(height, window.innerHeight);
+            width = Math.min(width, window.innerWidth - 20);
+            height = Math.min(height, window.innerHeight - 20);
 
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
