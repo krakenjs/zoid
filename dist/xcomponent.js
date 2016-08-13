@@ -4801,15 +4801,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.validate(options);
 
-	        if (options.dimensions) {
-	            if (typeof options.dimensions.width !== 'number') {
-	                throw new Error('[' + options.tag + '] Expected options.dimensions.width to be a number');
-	            }
-
-	            if (typeof options.dimensions.height !== 'number') {
-	                throw new Error('[' + options.tag + '] Expected options.dimensions.height to be a number');
-	            }
-	        }
 	        // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
 	        // e.g. <my-component>
 
@@ -4826,7 +4817,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // The dimensions of the component, e.g. { width: 500, height: 200 }
 
-	        _this.addProp(options, 'dimensions', {});
+	        _this.addProp(options, 'dimensions');
 
 	        _this.addProp(options, 'version', 'latest');
 
@@ -5080,11 +5071,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function addProp(options, name, def) {
 
 	            if (options.hasOwnProperty(name)) {
-	                Object.defineProperty(this, name, {
-	                    get: function get() {
-	                        return options[name];
-	                    }
-	                });
+	                var descriptor = Object.getOwnPropertyDescriptor(options, name);
+	                Object.defineProperty(this, name, descriptor);
 	            } else {
 	                this[name] = def;
 	            }
@@ -5544,30 +5532,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function watchForResize() {
 	            var _this5 = this;
 
-	            var resize = (0, _lib.debounce)(function (width, height) {
-	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
-	            }, 100);
-
-	            var elm = document.body;
-
-	            if (!elm) {
+	            if (!this.component.dimensions) {
 	                return;
 	            }
 
-	            // let lastWidth = elm.scrollWidth;
-	            // let newWidth;
-	            var lastHeight = elm.scrollHeight;
-	            var newHeight = void 0;
+	            var el = document.documentElement;
+
+	            var dimensions = {
+	                width: el.scrollWidth,
+	                height: el.scrollHeight
+	            };
+
+	            var resize = (0, _lib.debounce)(function (width, height) {
+	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	            }, 200);
 
 	            setInterval(function () {
-	                // newWidth = elm.scrollWidth;
-	                newHeight = elm.scrollHeight;
-	                // Dimensions changed if this condition is true
-	                if (lastHeight !== newHeight /* || lastWidth !== newWidth */) {
-	                        resize(_this5.component.dimensions.width, newHeight);
-	                    }
-	                // lastWidth = newWidth;
-	                lastHeight = newHeight;
+
+	                var newDimensions = {
+	                    width: el.scrollWidth,
+	                    height: el.scrollHeight
+	                };
+
+	                if (Math.abs(newDimensions.width - dimensions.width) > 50 || Math.abs(newDimensions.height - dimensions.height) > 50) {
+	                    resize(newDimensions.width, newDimensions.height);
+	                }
+
+	                dimensions = newDimensions;
 	            }, 50);
 	        }
 	    }, {
@@ -7887,6 +7878,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    validateProps(options);
 
+	    if (options.dimensions) {
+	        if (typeof options.dimensions.width !== 'number') {
+	            throw new Error('[' + options.tag + '] Expected options.dimensions.width to be a number');
+	        }
+
+	        if (typeof options.dimensions.height !== 'number') {
+	            throw new Error('[' + options.tag + '] Expected options.dimensions.height to be a number');
+	        }
+	    }
+
 	    if (options.contexts) {
 	        var anyEnabled = false;
 
@@ -7919,7 +7920,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (options.contexts.iframe !== false) {
-	            if (!options.dimensions || !options.dimensions.width || !options.dimensions.height) {
+	            if (!options.dimensions) {
 	                throw new Error('[' + options.tag + '] dimesions.width and dimensions.height required for rendering to iframe');
 	            }
 	        }
