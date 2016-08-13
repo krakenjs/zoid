@@ -62,6 +62,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.registerLogger = undefined;
 	exports.create = create;
 
 	var _error = __webpack_require__(/*! ./error */ 1);
@@ -76,13 +77,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	var _src = __webpack_require__(/*! post-robot/src */ 2);
+	var _lib = __webpack_require__(/*! ./lib */ 2);
+
+	Object.defineProperty(exports, 'registerLogger', {
+	    enumerable: true,
+	    get: function get() {
+	        return _lib.registerLogger;
+	    }
+	});
+
+	var _src = __webpack_require__(/*! post-robot/src */ 10);
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _component = __webpack_require__(/*! ./component */ 30);
+	var _component = __webpack_require__(/*! ./component */ 37);
 
-	var _constants = __webpack_require__(/*! ./constants */ 51);
+	var _constants = __webpack_require__(/*! ./constants */ 42);
 
 	var CONSTANTS = _interopRequireWildcard(_constants);
 
@@ -127,5195 +137,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/*!***********************************!*\
-  !*** ./~/post-robot/src/index.js ***!
-  \***********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.Promise = undefined;
-
-	var _interface = __webpack_require__(/*! ./interface */ 3);
-
-	Object.keys(_interface).forEach(function (key) {
-	    if (key === "default") return;
-	    Object.defineProperty(exports, key, {
-	        enumerable: true,
-	        get: function get() {
-	            return _interface[key];
-	        }
-	    });
-	});
-
-	var _lib = __webpack_require__(/*! ./lib */ 10);
-
-	Object.defineProperty(exports, 'Promise', {
-	    enumerable: true,
-	    get: function get() {
-	        return _lib.Promise;
-	    }
-	});
-
-	var _drivers = __webpack_require__(/*! ./drivers */ 8);
-
-	var _compat = __webpack_require__(/*! ./compat */ 19);
-
-	function init() {
-
-	    (0, _compat.registerGlobals)();
-
-	    // Listen for all incoming post-messages
-	    _lib.util.listen(window, 'message', _drivers.messageListener);
-
-	    (0, _lib.initOnReady)();
-	}
-
-	init();
-
-	exports['default'] = module.exports;
-
-/***/ },
-/* 3 */
-/*!*********************************************!*\
-  !*** ./~/post-robot/src/interface/index.js ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.linkUrl = exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
-
-	var _client = __webpack_require__(/*! ./client */ 4);
-
-	Object.keys(_client).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _client[key];
-	    }
-	  });
-	});
-
-	var _server = __webpack_require__(/*! ./server */ 27);
-
-	Object.keys(_server).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _server[key];
-	    }
-	  });
-	});
-
-	var _proxy = __webpack_require__(/*! ./proxy */ 28);
-
-	Object.keys(_proxy).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _proxy[key];
-	    }
-	  });
-	});
-
-	var _config = __webpack_require__(/*! ./config */ 29);
-
-	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _config[key];
-	    }
-	  });
-	});
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	Object.defineProperty(exports, 'reset', {
-	  enumerable: true,
-	  get: function get() {
-	    return _drivers.resetListeners;
-	  }
-	});
-
-	var _bridge = __webpack_require__(/*! ../compat/bridge */ 20);
-
-	Object.defineProperty(exports, 'openBridge', {
-	  enumerable: true,
-	  get: function get() {
-	    return _bridge.openBridge;
-	  }
-	});
-
-	var _util = __webpack_require__(/*! ../lib/util */ 14);
-
-	Object.defineProperty(exports, 'util', {
-	  enumerable: true,
-	  get: function get() {
-	    return _util.util;
-	  }
-	});
-
-	var _windows = __webpack_require__(/*! ../lib/windows */ 16);
-
-	Object.defineProperty(exports, 'linkUrl', {
-	  enumerable: true,
-	  get: function get() {
-	    return _windows.linkUrl;
-	  }
-	});
-	var parent = exports.parent = (0, _windows.getParentWindow)();
-
-/***/ },
-/* 4 */
-/*!**********************************************!*\
-  !*** ./~/post-robot/src/interface/client.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.request = request;
-	exports.send = send;
-	exports.sendToParent = sendToParent;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
-	function request(options) {
-
-	    return _lib.promise.nodeify(new _lib.promise.Promise(function (resolve, reject) {
-
-	        if (!options.name) {
-	            throw new Error('Expected options.name');
-	        }
-
-	        if (!options.window) {
-	            throw new Error('Expected options.window');
-	        }
-
-	        if (_conf.CONFIG.MOCK_MODE) {
-	            options.window = window;
-	        } else if (typeof options.window === 'string') {
-	            var el = document.getElementById(options.window);
-
-	            if (!el) {
-	                throw new Error('Expected options.window ' + options.window + ' to be a valid element id');
-	            }
-
-	            if (el.tagName.toLowerCase() !== 'iframe') {
-	                throw new Error('Expected options.window ' + options.window + ' to be an iframe');
-	            }
-
-	            options.window = el.contentWindow;
-
-	            if (!options.window) {
-	                throw new Error('Expected options.window');
-	            }
-	        }
-
-	        var hash = options.name + '_' + _lib.util.uniqueID();
-	        _drivers.listeners.response[hash] = options;
-
-	        if ((0, _lib.isWindowClosed)(options.window)) {
-	            throw new Error('Target window is closed');
-	        }
-
-	        var hasResult = false;
-
-	        options.respond = function (err, result) {
-	            if (!err) {
-	                hasResult = true;
-	            }
-
-	            return err ? reject(err) : resolve(result);
-	        };
-
-	        return _lib.promise.run(function () {
-
-	            if ((0, _lib.getParentWindow)(options.window) === window) {
-	                return (0, _lib.onWindowReady)(options.window);
-	            }
-	        }).then(function () {
-
-	            (0, _drivers.sendMessage)(options.window, {
-	                hash: hash,
-	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-	                name: options.name,
-	                data: options.data,
-	                fireAndForget: options.fireAndForget
-	            }, options.domain || '*')['catch'](reject);
-
-	            if (options.fireAndForget) {
-	                return resolve();
-	            }
-
-	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
-
-	                if (options.ack || (0, _lib.isWindowClosed)(options.window)) {
-	                    return ackTimeout.cancel();
-	                }
-
-	                if (!remaining) {
-	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
-	                }
-	            });
-
-	            if (options.timeout) {
-	                (function () {
-	                    var timeout = _lib.util.intervalTimeout(options.timeout, 100, function (remaining) {
-
-	                        if (hasResult || (0, _lib.isWindowClosed)(options.window)) {
-	                            return timeout.cancel();
-	                        }
-
-	                        if (!remaining) {
-	                            return reject(new Error('Post message response timed out after ' + options.timeout + ' ms'));
-	                        }
-	                    }, options.timeout);
-	                })();
-	            }
-	        })['catch'](reject);
-	    }), options.callback);
-	}
-
-	function send(window, name, data, options, callback) {
-
-	    if (!callback) {
-	        if (!options && data instanceof Function) {
-	            callback = data;
-	            options = {};
-	            data = {};
-	        } else if (options instanceof Function) {
-	            callback = options;
-	            options = {};
-	        }
-	    }
-
-	    options = options || {};
-	    options.window = window;
-	    options.name = name;
-	    options.data = data;
-	    options.callback = callback;
-
-	    return request(options);
-	}
-
-	function sendToParent(name, data, options, callback) {
-
-	    var win = (0, _lib.getParentWindow)();
-
-	    if (!win) {
-	        return new _lib.promise.Promise(function (resolve, reject) {
-	            return reject(new Error('Window does not have a parent'));
-	        });
-	    }
-
-	    return send(win, name, data, options, callback);
-	}
-
-/***/ },
-/* 5 */
-/*!****************************************!*\
-  !*** ./~/post-robot/src/conf/index.js ***!
-  \****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _config = __webpack_require__(/*! ./config */ 6);
-
-	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _config[key];
-	    }
-	  });
-	});
-
-	var _constants = __webpack_require__(/*! ./constants */ 7);
-
-	Object.keys(_constants).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _constants[key];
-	    }
-	  });
-	});
-
-/***/ },
-/* 6 */
-/*!*****************************************!*\
-  !*** ./~/post-robot/src/conf/config.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.CONFIG = undefined;
-
-	var _ALLOWED_POST_MESSAGE;
-
-	var _constants = __webpack_require__(/*! ./constants */ 7);
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	var CONFIG = exports.CONFIG = {
-
-	    ALLOW_POSTMESSAGE_POPUP: false,
-
-	    LOG_LEVEL: 'info',
-
-	    ACK_TIMEOUT: 500,
-
-	    LOG_TO_PAGE: false,
-
-	    MOCK_MODE: false,
-
-	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
-	};
-
-/***/ },
-/* 7 */
-/*!********************************************!*\
-  !*** ./~/post-robot/src/conf/constants.js ***!
-  \********************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var CONSTANTS = exports.CONSTANTS = {
-
-	    POST_MESSAGE_TYPE: {
-	        REQUEST: 'postrobot_message_request',
-	        RESPONSE: 'postrobot_message_response',
-	        ACK: 'postrobot_message_ack'
-	    },
-
-	    POST_MESSAGE_ACK: {
-	        SUCCESS: 'success',
-	        ERROR: 'error'
-	    },
-
-	    POST_MESSAGE_NAMES: {
-	        METHOD: 'postrobot_method',
-	        READY: 'postrobot_ready'
-	    },
-
-	    WINDOW_TYPES: {
-	        FULLPAGE: 'fullpage',
-	        POPUP: 'popup',
-	        IFRAME: 'iframe'
-	    },
-
-	    WINDOW_PROPS: {
-	        POSTROBOT: '__postRobot__'
-	    },
-
-	    SERIALIZATION_TYPES: {
-	        METHOD: 'postrobot_method'
-	    },
-
-	    SEND_STRATEGIES: {
-	        POST_MESSAGE: 'postrobot_post_message',
-	        GLOBAL_METHOD: 'postrobot_global_method',
-	        REMOTE_BRIDGE: 'postrobot_remote_bridge',
-	        LOCAL_BRIDGE: 'postrobot_local_bridge'
-	    }
-	};
-
-	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
-	    return CONSTANTS.POST_MESSAGE_NAMES[key];
-	});
-
-/***/ },
-/* 8 */
-/*!*******************************************!*\
-  !*** ./~/post-robot/src/drivers/index.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _receive = __webpack_require__(/*! ./receive */ 9);
-
-	Object.keys(_receive).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _receive[key];
-	    }
-	  });
-	});
-
-	var _send = __webpack_require__(/*! ./send */ 23);
-
-	Object.keys(_send).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _send[key];
-	    }
-	  });
-	});
-
-	var _listeners = __webpack_require__(/*! ./listeners */ 25);
-
-	Object.keys(_listeners).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _listeners[key];
-	    }
-	  });
-	});
-
-/***/ },
-/* 9 */
-/*!***************************************************!*\
-  !*** ./~/post-robot/src/drivers/receive/index.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.receiveMessage = receiveMessage;
-	exports.messageListener = messageListener;
-
-	var _conf = __webpack_require__(/*! ../../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 10);
-
-	var _compat = __webpack_require__(/*! ../../compat */ 19);
-
-	var _send = __webpack_require__(/*! ../send */ 23);
-
-	var _listeners = __webpack_require__(/*! ../listeners */ 25);
-
-	var _types = __webpack_require__(/*! ./types */ 26);
-
-	var receivedMessages = [];
-
-	function parseMessage(message) {
-
-	    try {
-	        message = JSON.parse(message);
-	    } catch (err) {
-	        return;
-	    }
-
-	    if (!message.type) {
-	        return;
-	    }
-
-	    if (!_types.RECEIVE_MESSAGE_TYPES[message.type]) {
-	        return;
-	    }
-
-	    return message;
-	}
-
-	function getWindow(hint, windowID) {
-
-	    var windowTargets = {
-	        'window.parent': function windowParent(id) {
-	            return window.parent;
-	        },
-	        'window.opener': function windowOpener(id) {
-	            return (0, _lib.getOpener)(window);
-	        },
-	        'window.parent.opener': function windowParentOpener(id) {
-	            return (0, _lib.getOpener)(window.parent);
-	        },
-	        'window.opener.parent': function windowOpenerParent(id) {
-	            return (0, _lib.getOpener)(window).parent;
-	        }
-	    };
-
-	    var win = void 0;
-
-	    try {
-	        win = windowTargets[hint](windowID);
-	    } catch (err) {
-	        throw new Error('Can not get ' + hint + ': ' + err.message);
-	    }
-
-	    if (!win) {
-	        throw new Error('Can not get ' + hint + ': not available');
-	    }
-
-	    return win;
-	}
-
-	function getProxy(source, message) {
-
-	    if (_conf.CONFIG.MOCK_MODE) {
-	        return;
-	    }
-
-	    if (!message) {
-	        return;
-	    }
-
-	    var listener = (0, _listeners.getRequestListener)(message.name, source);
-
-	    if (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
-	        return;
-	    }
-
-	    var isResponseOrAck = (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK) && _listeners.listeners.response[message.hash];
-
-	    if (!isResponseOrAck) {
-	        for (var i = 0; i < _listeners.listeners.proxies.length; i++) {
-	            var proxy = _listeners.listeners.proxies[i];
-
-	            if (source === proxy.from) {
-	                return proxy.to;
-	            }
-	        }
-	    }
-
-	    if (message.targetHint) {
-	        var win = getWindow(message.targetHint, message.target);
-	        delete message.targetHint;
-	        return win;
-	    }
-
-	    if (message.target && message.target !== (0, _lib.getWindowId)(window)) {
-
-	        var _win = (0, _lib.getWindowById)(message.target);
-
-	        if (!_win) {
-	            throw new Error('Unable to find window to proxy message to: ' + message.target);
-	        }
-
-	        return _win;
-	    }
-	}
-
-	function receiveMessage(event) {
-
-	    try {
-	        event.source; // eslint-disable-line
-	    } catch (err) {
-	        return;
-	    }
-
-	    var source = event.source;
-	    var origin = event.origin;
-	    var data = event.data;
-
-
-	    var message = parseMessage(data);
-
-	    if (!message) {
-	        return;
-	    }
-
-	    if (receivedMessages.indexOf(message.id) === -1) {
-	        receivedMessages.push(message.id);
-	    } else {
-	        return;
-	    }
-
-	    (0, _lib.registerWindow)(message.source, source, origin);
-
-	    var proxyWindow = void 0;
-
-	    try {
-	        proxyWindow = getProxy(source, message);
-	    } catch (err) {
-	        return _lib.log.debug(err.message);
-	    }
-
-	    var level = void 0;
-
-	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
-	        level = 'debug';
-	    } else if (message.ack === 'error') {
-	        level = 'error';
-	    } else {
-	        level = 'info';
-	    }
-
-	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
-
-	    if (proxyWindow) {
-
-	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
-	            return _lib.log.debug('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
-	        }
-
-	        delete message.target;
-	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
-	    }
-
-	    var originalSource = source;
-
-	    if (message.originalSource !== message.source) {
-
-	        if (message.sourceHint) {
-	            originalSource = getWindow(message.sourceHint, message.originalSource);
-	            delete message.sourceHint;
-	        } else {
-	            originalSource = (0, _lib.getWindowById)(message.originalSource);
-	            if (!originalSource) {
-	                throw new Error('Can not find original message source: ' + message.originalSource);
-	            }
-	        }
-
-	        (0, _lib.registerWindow)(message.originalSource, originalSource, message.originalSourceDomain);
-	    }
-
-	    if (originalSource !== source) {
-	        (0, _compat.registerBridge)(source, originalSource);
-	    }
-
-	    if ((0, _lib.isWindowClosed)(originalSource)) {
-	        return _lib.log.debug('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
-	    }
-
-	    if (_conf.CONFIG.MOCK_MODE) {
-	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
-	    }
-
-	    if (message.data) {
-	        message.data = (0, _lib.deserializeMethods)(originalSource, message.data);
-	    }
-
-	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
-	}
-
-	function messageListener(event) {
-
-	    try {
-	        event.source; // eslint-disable-line
-	    } catch (err) {
-	        return;
-	    }
-
-	    event = {
-	        source: event.source || event.sourceElement,
-	        origin: event.origin || event.originalEvent.origin,
-	        data: event.data
-	    };
-
-	    try {
-	        (0, _compat.emulateIERestrictions)(event.source, window);
-	    } catch (err) {
-	        return;
-	    }
-
-	    receiveMessage(event);
-	}
-
-/***/ },
-/* 10 */
-/*!***************************************!*\
-  !*** ./~/post-robot/src/lib/index.js ***!
-  \***************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _promise = __webpack_require__(/*! ./promise */ 11);
-
-	Object.keys(_promise).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _promise[key];
-	    }
-	  });
-	});
-
-	var _util = __webpack_require__(/*! ./util */ 14);
-
-	Object.keys(_util).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _util[key];
-	    }
-	  });
-	});
-
-	var _log = __webpack_require__(/*! ./log */ 15);
-
-	Object.keys(_log).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _log[key];
-	    }
-	  });
-	});
-
-	var _windows = __webpack_require__(/*! ./windows */ 16);
-
-	Object.keys(_windows).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _windows[key];
-	    }
-	  });
-	});
-
-	var _methods = __webpack_require__(/*! ./methods */ 17);
-
-	Object.keys(_methods).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _methods[key];
-	    }
-	  });
-	});
-
-	var _tick = __webpack_require__(/*! ./tick */ 13);
-
-	Object.keys(_tick).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _tick[key];
-	    }
-	  });
-	});
-
-	var _ready = __webpack_require__(/*! ./ready */ 18);
-
-	Object.keys(_ready).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _ready[key];
-	    }
-	  });
-	});
-
-/***/ },
-/* 11 */
-/*!*****************************************!*\
-  !*** ./~/post-robot/src/lib/promise.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.promise = exports.Promise = undefined;
-
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
-
-	var _tick = __webpack_require__(/*! ./tick */ 13);
-
-	var Promise = exports.Promise = _promise.SyncPromise;
-
-	var promise = exports.promise = {
-
-	    Promise: Promise,
-
-	    run: function run(method) {
-	        return Promise.resolve().then(method);
-	    },
-	    nextTick: function nextTick(method) {
-	        return new Promise(function (resolve, reject) {
-	            (0, _tick.nextTick)(function () {
-	                return promise.run(method).then(resolve, reject);
-	            });
-	        });
-	    },
-	    method: function method(_method) {
-	        return function promiseWrapper() {
-	            var _this = this,
-	                _arguments = arguments;
-
-	            return Promise.resolve().then(function () {
-	                return _method.apply(_this, _arguments);
-	            });
-	        };
-	    },
-	    nodeify: function nodeify(prom, callback) {
-	        if (!callback) {
-	            return prom;
-	        }
-	        prom.then(function (result) {
-	            callback(null, result);
-	        }, function (err) {
-	            callback(err);
-	        });
-	    },
-	    deNodeify: function deNodeify(method) {
-	        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-	            args[_key - 1] = arguments[_key];
-	        }
-
-	        return new Promise(function (resolve, reject) {
-	            try {
-	                if (args.length < method.length) {
-	                    return method.apply(undefined, args.concat([function (err, result) {
-	                        return err ? reject(err) : resolve(result);
-	                    }]));
-	                }
-
-	                return promise.run(function () {
-	                    return method.apply(undefined, args);
-	                }).then(resolve, reject);
-	            } catch (err) {
-	                return reject(err);
-	            }
-	        });
-	    },
-	    map: function map(items, method) {
-
-	        var results = [];
-
-	        var _loop = function _loop(i) {
-	            results.push(promise.run(function () {
-	                return method(items[i]);
-	            }));
-	        };
-
-	        for (var i = 0; i < items.length; i++) {
-	            _loop(i);
-	        }
-	        return Promise.all(results);
-	    }
-	};
-
-/***/ },
-/* 12 */
-/*!*********************************************!*\
-  !*** ./~/sync-browser-mocks/src/promise.js ***!
-  \*********************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.patchPromise = patchPromise;
-
-	function trycatch(method, successHandler, errorHandler) {
-
-	    var isCalled = false;
-	    var isSuccess = false;
-	    var isError = false;
-	    var err, res;
-
-	    function flush() {
-	        if (isCalled) {
-	            if (isError) {
-	                return errorHandler(err);
-	            } else if (isSuccess) {
-	                return successHandler(res);
-	            }
-	        }
-	    }
-
-	    try {
-	        method(function (result) {
-	            res = result;
-	            isSuccess = true;
-	            flush();
-	        }, function (error) {
-	            err = error;
-	            isError = true;
-	            flush();
-	        });
-	    } catch (error) {
-	        return errorHandler(error);
-	    }
-
-	    isCalled = true;
-	    flush();
-	}
-
-	var possiblyUnhandledPromises = [];
-	var possiblyUnhandledPromiseTimeout;
-
-	function addPossiblyUnhandledPromise(promise) {
-	    possiblyUnhandledPromises.push(promise);
-	    possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
-	}
-
-	function flushPossiblyUnhandledPromises() {
-	    possiblyUnhandledPromiseTimeout = null;
-	    var promises = possiblyUnhandledPromises;
-	    possiblyUnhandledPromises = [];
-	    for (var i = 0; i < promises.length; i++) {
-	        var promise = promises[i];
-	        if (!promise.hasHandlers && promise.rejected) {
-	            logError(promise.value);
-	        }
-	    }
-	}
-
-	function logError(err) {
-	    setTimeout(function () {
-	        throw err;
-	    }, 1);
-	}
-
-	var toString = {}.toString;
-
-	function isPromise(item) {
-	    try {
-	        if (!item) {
-	            return false;
-	        }
-
-	        if (window.Window && item instanceof window.Window) {
-	            return false;
-	        }
-
-	        if (window.constructor && item instanceof window.constructor) {
-	            return false;
-	        }
-
-	        if (toString) {
-	            var name = toString.call(item);
-
-	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
-	                return false;
-	            }
-	        }
-
-	        if (item && item.then instanceof Function) {
-	            return true;
-	        }
-	    } catch (err) {
-	        return false;
-	    }
-
-	    return false;
-	}
-
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
-
-	    this.resolved = false;
-	    this.rejected = false;
-
-	    this.hasHandlers = false;
-
-	    this.handlers = [];
-
-	    addPossiblyUnhandledPromise(this);
-
-	    if (!handler) {
-	        return;
-	    }
-
-	    var self = this;
-
-	    trycatch(handler, function (res) {
-	        return self.resolve(res);
-	    }, function (err) {
-	        return self.reject(err);
-	    });
-	};
-
-	SyncPromise.resolve = function SyncPromiseResolve(value) {
-
-	    if (isPromise(value)) {
-	        return value;
-	    }
-
-	    return new SyncPromise().resolve(value);
-	};
-
-	SyncPromise.reject = function SyncPromiseResolve(error) {
-	    return new SyncPromise().reject(error);
-	};
-
-	SyncPromise.prototype.resolve = function (result) {
-	    if (this.resolved || this.rejected) {
-	        return this;
-	    }
-
-	    if (isPromise(result)) {
-	        throw new Error('Can not resolve promise with another promise');
-	    }
-
-	    this.resolved = true;
-	    this.value = result;
-	    this.dispatch();
-
-	    return this;
-	};
-
-	SyncPromise.prototype.reject = function (error) {
-	    if (this.resolved || this.rejected) {
-	        return this;
-	    }
-
-	    if (isPromise(error)) {
-	        throw new Error('Can not reject promise with another promise');
-	    }
-
-	    this.rejected = true;
-	    this.value = error;
-	    this.dispatch();
-
-	    return this;
-	};
-
-	SyncPromise.prototype.dispatch = function () {
-	    var _this = this;
-
-	    if (!this.resolved && !this.rejected) {
-	        return;
-	    }
-
-	    var _loop = function _loop() {
-
-	        var handler = _this.handlers.shift();
-
-	        try {
-	            if (_this.resolved) {
-	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
-	            } else {
-	                if (handler.onError) {
-	                    result = handler.onError(_this.value);
-	                } else {
-	                    error = _this.value;
-	                }
-	            }
-	        } catch (err) {
-	            error = err;
-	        }
-
-	        if (result === _this) {
-	            throw new Error('Can not return a promise from the the then handler of the same promise');
-	        }
-
-	        if (!handler.promise) {
-	            return 'continue';
-	        }
-
-	        if (error) {
-	            handler.promise.reject(error);
-	        } else if (isPromise(result)) {
-	            result.then(function (res) {
-	                handler.promise.resolve(res);
-	            }, function (err) {
-	                handler.promise.reject(err);
-	            });
-	        } else {
-	            handler.promise.resolve(result);
-	        }
-	    };
-
-	    while (this.handlers.length) {
-	        var result, error;
-
-	        var _ret = _loop();
-
-	        if (_ret === 'continue') continue;
-	    }
-	};
-
-	SyncPromise.prototype.then = function (onSuccess, onError) {
-
-	    var promise = new SyncPromise(null, this);
-
-	    this.handlers.push({
-	        promise: promise,
-	        onSuccess: onSuccess,
-	        onError: onError
-	    });
-
-	    this.hasHandlers = true;
-
-	    this.dispatch();
-
-	    return promise;
-	};
-
-	SyncPromise.prototype['catch'] = function (onError) {
-	    return this.then(null, onError);
-	};
-
-	SyncPromise.prototype['finally'] = function (handler) {
-	    return this.then(function (result) {
-	        handler();
-	        return result;
-	    }, function (error) {
-	        handler();
-	        throw error;
-	    });
-	};
-
-	SyncPromise.all = function (promises) {
-
-	    var promise = new SyncPromise();
-	    var count = promises.length;
-	    var results = [];
-
-	    for (var i = 0; i < promises.length; i++) {
-	        promises[i].then(function (result) {
-	            results[i] = result;
-	            count -= 1;
-	            if (count === 0) {
-	                promise.resolve(results);
-	            }
-	        }, function (err) {
-	            promise.reject(err);
-	        });
-	    }
-
-	    return promise;
-	};
-
-	function patchPromise() {
-	    window.Promise = SyncPromise;
-	}
-
-/***/ },
-/* 13 */
-/*!**************************************!*\
-  !*** ./~/post-robot/src/lib/tick.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.nextTick = nextTick;
-
-	var _util = __webpack_require__(/*! ./util */ 14);
-
-	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
-	var queue = [];
-
-	window.addEventListener('message', function (event) {
-	    if (event.data === tickMessageName) {
-	        var method = queue.shift();
-	        method.call();
-	    }
-	});
-
-	function nextTick(method) {
-
-	    queue.push(method);
-	    window.postMessage(tickMessageName, '*');
-	}
-
-/***/ },
-/* 14 */
-/*!**************************************!*\
-  !*** ./~/post-robot/src/lib/util.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.util = undefined;
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var util = exports.util = {
-	    isPopup: function isPopup() {
-	        return Boolean(window.opener);
-	    },
-	    isIframe: function isIframe() {
-	        return Boolean(window.parent && window !== window.parent);
-	    },
-	    isFullpage: function isFullpage() {
-	        return Boolean(!util.isIframe() && !util.isPopup());
-	    },
-	    getType: function getType() {
-	        if (util.isPopup()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
-	        }
-	        if (util.isIframe()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
-	    },
-	    once: function once(method) {
-	        if (!method) {
-	            return method;
-	        }
-	        var called = false;
-	        return function onceWrapper() {
-	            if (!called) {
-	                called = true;
-	                return method.apply(this, arguments);
-	            }
-	        };
-	    },
-	    noop: function noop() {},
-	    // eslint-disable-line no-empty-function
-
-	    safeHasProp: function safeHasProp(obj, name) {
-	        try {
-	            if (obj[name]) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-	            return false;
-	        }
-	    },
-	    safeGetProp: function safeGetProp(obj, name) {
-	        try {
-	            return obj[name];
-	        } catch (err) {
-	            return;
-	        }
-	    },
-	    listen: function listen(win, event, handler) {
-	        if (win.addEventListener) {
-	            win.addEventListener(event, handler);
-	        } else {
-	            win.attachEvent('on' + event, handler);
-	        }
-
-	        return {
-	            cancel: function cancel() {
-	                if (win.removeEventListener) {
-	                    win.removeEventListener(event, handler);
-	                } else {
-	                    win.detachEvent('on' + event, handler);
-	                }
-	            }
-	        };
-	    },
-	    apply: function apply(method, context, args) {
-	        if (method.apply instanceof Function) {
-	            return method.apply(context, args);
-	        }
-	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-	    },
-	    find: function find(collection, method, def) {
-	        if (!collection) {
-	            return def;
-	        }
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return collection[i];
-	            }
-	        }
-	        return def;
-	    },
-	    map: function map(collection, method) {
-	        var results = [];
-	        for (var i = 0; i < collection.length; i++) {
-	            results.push(method(collection[i]));
-	        }
-	        return results;
-	    },
-	    some: function some(collection, method) {
-	        method = method || Boolean;
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return true;
-	            }
-	        }
-	        return false;
-	    },
-	    keys: function keys(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(key);
-	            }
-	        }
-	        return result;
-	    },
-	    values: function values(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(mapping[key]);
-	            }
-	        }
-	        return result;
-	    },
-	    getByValue: function getByValue(mapping, value) {
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
-	                return key;
-	            }
-	        }
-	    },
-	    uniqueID: function uniqueID() {
-
-	        var chars = '0123456789abcdef';
-
-	        return 'xxxxxxxxxx'.replace(/./g, function () {
-	            return chars.charAt(Math.floor(Math.random() * chars.length));
-	        });
-	    },
-	    memoize: function memoize(method) {
-
-	        var results = {};
-
-	        return function memoized() {
-	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
-	            if (!results.hasOwnProperty(args)) {
-	                results[args] = method.apply(this, arguments);
-	            }
-	            return results[args];
-	        };
-	    },
-	    extend: function extend(obj, source) {
-	        if (!source) {
-	            return obj;
-	        }
-
-	        for (var key in source) {
-	            if (source.hasOwnProperty(key)) {
-	                obj[key] = source[key];
-	            }
-	        }
-
-	        return obj;
-	    },
-	    each: function each(obj, callback) {
-	        if (obj instanceof Array) {
-	            for (var i = 0; i < obj.length; i++) {
-	                callback(obj[i], i);
-	            }
-	        } else if (obj instanceof Object && !(obj instanceof Function)) {
-	            for (var key in obj) {
-	                if (obj.hasOwnProperty(key)) {
-	                    callback(obj[key], key);
-	                }
-	            }
-	        }
-	    },
-	    replaceObject: function replaceObject(obj, callback) {
-
-	        var newobj = obj instanceof Array ? [] : {};
-
-	        util.each(obj, function (item, key) {
-
-	            var result = callback(item, key);
-
-	            if (result !== undefined) {
-	                newobj[key] = result;
-	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
-	                newobj[key] = util.replaceObject(item, callback);
-	            } else {
-	                newobj[key] = item;
-	            }
-	        });
-
-	        return newobj;
-	    },
-	    safeInterval: function safeInterval(method, time) {
-	        var timeout = void 0;
-
-	        function runInterval() {
-	            timeout = setTimeout(runInterval, time);
-	            method.call();
-	        }
-
-	        timeout = setTimeout(runInterval, time);
-
-	        return {
-	            cancel: function cancel() {
-	                clearTimeout(timeout);
-	            }
-	        };
-	    },
-	    intervalTimeout: function intervalTimeout(time, interval, method) {
-
-	        var safeInterval = util.safeInterval(function () {
-	            time -= interval;
-
-	            time = time <= 0 ? 0 : time;
-
-	            if (time === 0) {
-	                safeInterval.cancel();
-	            }
-
-	            method(time);
-	        }, interval);
-
-	        return safeInterval;
-	    },
-	    getDomain: function getDomain(win) {
-	        win = win || window;
-	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
-	    },
-	    getDomainFromUrl: function getDomainFromUrl(url) {
-
-	        var domain = void 0;
-
-	        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-	            domain = url;
-	        } else {
-	            return this.getDomain();
-	        }
-
-	        domain = domain.split('/').slice(0, 3).join('/');
-
-	        return domain;
-	    },
-	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
-
-	        try {
-	            if (frame.parent === win) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-
-	            try {
-	                for (var i = 0; i < win.frames.length; i++) {
-	                    if (win.frames[i] === frame) {
-	                        return true;
-	                    }
-	                }
-	            } catch (err2) {
-	                return false;
-	            }
-	        }
-
-	        return false;
-	    }
-	};
-
-/***/ },
-/* 15 */
-/*!*************************************!*\
-  !*** ./~/post-robot/src/lib/log.js ***!
-  \*************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.log = undefined;
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _util = __webpack_require__(/*! ./util */ 14);
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
-
-	if (Function.prototype.bind && window.console && _typeof(console.log) === 'object') {
-	    ['log', 'info', 'warn', 'error'].forEach(function (method) {
-	        console[method] = this.bind(console[method], console);
-	    }, Function.prototype.call);
-	}
-
-	var log = exports.log = {
-	    clearLogs: function clearLogs() {
-
-	        if (window.console && window.console.clear) {
-	            window.console.clear();
-	        }
-
-	        if (_conf.CONFIG.LOG_TO_PAGE) {
-	            var container = document.getElementById('postRobotLogs');
-
-	            if (container) {
-	                container.parentNode.removeChild(container);
-	            }
-	        }
-	    },
-	    writeToPage: function writeToPage(level, args) {
-	        setTimeout(function () {
-	            var container = document.getElementById('postRobotLogs');
-
-	            if (!container) {
-	                container = document.createElement('div');
-	                container.id = 'postRobotLogs';
-	                container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
-	                document.body.appendChild(container);
-	            }
-
-	            var el = document.createElement('div');
-
-	            var date = new Date().toString().split(' ')[4];
-
-	            var payload = _util.util.map(args, function (item) {
-	                if (typeof item === 'string') {
-	                    return item;
-	                }
-	                if (!item) {
-	                    return toString.call(item);
-	                }
-	                var json = void 0;
-	                try {
-	                    json = JSON.stringify(item, 0, 2);
-	                } catch (e) {
-	                    json = '[object]';
-	                }
-
-	                return '\n\n' + json + '\n\n';
-	            }).join(' ');
-
-	            var msg = date + ' ' + level + ' ' + payload;
-	            el.innerHTML = msg;
-
-	            var color = {
-	                log: '#ddd',
-	                warn: 'orange',
-	                error: 'red',
-	                info: 'blue',
-	                debug: '#aaa'
-	            }[level];
-
-	            el.style.cssText = 'margin-top: 10px; color: ' + color + ';';
-
-	            if (!container.childNodes.length) {
-	                container.appendChild(el);
-	            } else {
-	                container.insertBefore(el, container.childNodes[0]);
-	            }
-	        });
-	    },
-	    logLevel: function logLevel(level, args) {
-
-	        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) {
-	            return;
-	        }
-
-	        args = Array.prototype.slice.call(args);
-
-	        args.unshift(window.location.pathname);
-	        args.unshift(window.location.host);
-	        args.unshift('<' + _util.util.getType().toLowerCase() + '>');
-	        args.unshift('[post-robot]');
-
-	        if (_conf.CONFIG.LOG_TO_PAGE) {
-	            log.writeToPage(level, args);
-	        }
-
-	        if (!window.console) {
-	            return;
-	        }
-
-	        if (!window.console[level]) {
-	            level = 'log';
-	        }
-
-	        if (!window.console[level]) {
-	            return;
-	        }
-
-	        window.console[level].apply(window.console, args);
-	    },
-	    debug: function debug() {
-	        log.logLevel('debug', arguments);
-	    },
-	    info: function info() {
-	        log.logLevel('info', arguments);
-	    },
-	    warn: function warn() {
-	        log.logLevel('warn', arguments);
-	    },
-	    error: function error() {
-	        log.logLevel('error', arguments);
-	    }
-	};
-
-/***/ },
-/* 16 */
-/*!*****************************************!*\
-  !*** ./~/post-robot/src/lib/windows.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.isSameDomain = isSameDomain;
-	exports.isWindowClosed = isWindowClosed;
-	exports.getOpener = getOpener;
-	exports.getParentWindow = getParentWindow;
-	exports.getWindowId = getWindowId;
-	exports.getWindowById = getWindowById;
-	exports.getWindowDomain = getWindowDomain;
-	exports.registerWindow = registerWindow;
-	exports.isWindowEqual = isWindowEqual;
-	exports.isSameTopWindow = isSameTopWindow;
-	exports.linkUrl = linkUrl;
-
-	var _util = __webpack_require__(/*! ./util */ 14);
-
-	function safeGet(obj, prop) {
-
-	    var result = void 0;
-
-	    try {
-	        result = obj[prop];
-	    } catch (err) {
-	        // pass
-	    }
-
-	    return result;
-	}
-
-	var domainMatches = [];
-	var domainMatchTimeout = void 0;
-
-	function isSameDomain(win) {
-
-	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
-	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
-	            _ref = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) break;
-	            _ref = _i.value;
-	        }
-
-	        var _match = _ref;
-
-	        if (_match.win === win) {
-
-	            if (!_match.match) {
-	                return false;
-	            }
-
-	            _match.match = false;
-
-	            try {
-	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
-	            } catch (err) {
-	                return;
-	            }
-
-	            return _match.match;
-	        }
-	    }
-
-	    var match = false;
-
-	    try {
-	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
-	            match = true;
-	        }
-	    } catch (err) {
-	        // pass
-	    }
-
-	    domainMatches.push({
-	        win: win,
-	        match: match
-	    });
-
-	    if (!domainMatchTimeout) {
-	        domainMatchTimeout = setTimeout(function () {
-	            domainMatches = [];
-	            domainMatchTimeout = null;
-	        }, 1);
-	    }
-
-	    return match;
-	}
-
-	function isWindowClosed(win) {
-	    try {
-	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
-	    } catch (err) {
-	        return true;
-	    }
-	}
-
-	function getOpener(win) {
-
-	    if (!win) {
-	        return;
-	    }
-
-	    try {
-	        return win.opener;
-	    } catch (err) {
-	        return;
-	    }
-	}
-
-	function getParentWindow(win) {
-	    win = win || window;
-
-	    var opener = getOpener(win);
-
-	    if (opener) {
-	        return opener;
-	    }
-
-	    if (win.parent !== win) {
-	        return win.parent;
-	    }
-	}
-
-	var windows = [];
-	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
-
-	function getWindowId(win) {
-
-	    if (win === window) {
-	        return windowId;
-	    }
-
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
-
-	        try {
-	            if (map.win === win) {
-	                return map.id;
-	            }
-	        } catch (err) {
-	            continue;
-	        }
-	    }
-	}
-
-	function getWindowById(id) {
-
-	    if (id === window.name || id === windowId) {
-	        return window;
-	    }
-
-	    if (window.frames && window.frames[id]) {
-	        return window.frames[id];
-	    }
-
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
-
-	        try {
-	            if (map.id === id) {
-	                return map.win;
-	            }
-	        } catch (err) {
-	            continue;
-	        }
-	    }
-	}
-
-	function getWindowDomain(win) {
-
-	    if (win === window) {
-	        return _util.util.getDomain(window);
-	    }
-
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
-
-	        try {
-	            if (map.win === win && map.domain) {
-	                return map.domain;
-	            }
-	        } catch (err) {
-	            continue;
-	        }
-	    }
-	}
-
-	function registerWindow(id, win, domain) {
-
-	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var map = _ref2;
-
-	        try {
-	            if (map.id === id && map.win === win) {
-	                map.domain = domain;
-	                return;
-	            }
-	        } catch (err) {
-	            continue;
-	        }
-
-	        if (map.id === id && map.win !== win) {
-	            if (!isWindowClosed(map.win)) {
-	                throw new Error('Can not register a duplicate window with name ' + id);
-	            }
-	        }
-	    }
-
-	    windows.push({
-	        id: id,
-	        win: win,
-	        domain: domain
-	    });
-	}
-
-	function isWindowEqual(win1, win2) {
-
-	    if (win1 === win2) {
-	        return true;
-	    }
-
-	    var id1 = getWindowId(win1);
-	    var id2 = getWindowId(win2);
-
-	    if (id1 && id2 && id1 === id2) {
-	        return true;
-	    }
-
-	    return false;
-	}
-
-	function isSameTopWindow(win1, win2) {
-	    try {
-	        return win1.top === win2.top;
-	    } catch (err) {
-	        return false;
-	    }
-	}
-
-	function linkUrl(name, win, url) {
-
-	    var domain = _util.util.getDomainFromUrl(url);
-
-	    registerWindow(name, win, domain);
-
-	    domainMatches.push({
-	        win: win,
-	        match: _util.util.getDomain() === domain
-	    });
-	}
-
-	var openWindow = window.open;
-
-	window.open = function (url, name, x, y) {
-
-	    if (!name) {
-	        name = _util.util.uniqueID();
-	        arguments[1] = name;
-	    }
-
-	    var win = _util.util.apply(openWindow, this, arguments);
-
-	    if (url) {
-	        linkUrl(name, win, url);
-	    } else {
-	        registerWindow(name, win);
-	    }
-
-	    return win;
-	};
-
-/***/ },
-/* 17 */
-/*!*****************************************!*\
-  !*** ./~/post-robot/src/lib/methods.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.listenForMethods = undefined;
-	exports.serializeMethod = serializeMethod;
-	exports.serializeMethods = serializeMethods;
-	exports.deserializeMethod = deserializeMethod;
-	exports.deserializeMethods = deserializeMethods;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _util = __webpack_require__(/*! ./util */ 14);
-
-	var _interface = __webpack_require__(/*! ../interface */ 3);
-
-	var _log = __webpack_require__(/*! ./log */ 15);
-
-	var _promise = __webpack_require__(/*! ./promise */ 11);
-
-	var methods = {};
-
-	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
-
-	        if (!methods[data.id]) {
-	            throw new Error('Could not find method with id: ' + data.id);
-	        }
-
-	        if (methods[data.id].win !== source) {
-	            throw new Error('Method window does not match');
-	        }
-
-	        var method = methods[data.id].method;
-
-	        _log.log.debug('Call local method', data.name, data.args);
-
-	        return _promise.promise.run(function () {
-	            return method.apply(null, data.args);
-	        }).then(function (result) {
-
-	            return {
-	                result: result,
-	                id: data.id,
-	                name: data.name
-	            };
-	        });
-	    });
-	});
-
-	function isSerializedMethod(item) {
-	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
-	}
-
-	function serializeMethod(destination, method, name) {
-
-	    var id = _util.util.uniqueID();
-
-	    methods[id] = {
-	        win: destination,
-	        method: method
-	    };
-
-	    return {
-	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
-	        __id__: id,
-	        __name__: name
-	    };
-	}
-
-	function serializeMethods(destination, obj) {
-
-	    listenForMethods();
-
-	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
-	        if (item instanceof Function) {
-	            return serializeMethod(destination, item, key);
-	        }
-	    }).obj;
-	}
-
-	function deserializeMethod(source, obj) {
-
-	    function wrapper() {
-	        var args = Array.prototype.slice.call(arguments);
-	        _log.log.debug('Call foreign method', obj.__name__, args);
-	        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-	            id: obj.__id__,
-	            name: obj.__name__,
-	            args: args
-
-	        }).then(function (data) {
-
-	            _log.log.debug('Got foreign method result', obj.__name__, data.result);
-	            return data.result;
-	        });
-	    }
-
-	    wrapper.__name__ = obj.__name__;
-
-	    return wrapper;
-	}
-
-	function deserializeMethods(source, obj) {
-
-	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
-	        if (isSerializedMethod(item)) {
-	            return deserializeMethod(source, item);
-	        }
-	    }).obj;
-	}
-
-/***/ },
-/* 18 */
-/*!***************************************!*\
-  !*** ./~/post-robot/src/lib/ready.js ***!
-  \***************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.initOnReady = initOnReady;
-	exports.onWindowReady = onWindowReady;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _windows = __webpack_require__(/*! ./windows */ 16);
-
-	var _interface = __webpack_require__(/*! ../interface */ 3);
-
-	var _log = __webpack_require__(/*! ./log */ 15);
-
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
-
-	var readyPromises = [];
-
-	function initOnReady() {
-
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (win, data) {
-
-	        for (var _iterator = readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	            var _ref;
-
-	            if (_isArray) {
-	                if (_i >= _iterator.length) break;
-	                _ref = _iterator[_i++];
-	            } else {
-	                _i = _iterator.next();
-	                if (_i.done) break;
-	                _ref = _i.value;
-	            }
-
-	            var item = _ref;
-
-	            if (item.win === win) {
-	                item.promise.resolve(win);
-	                return;
-	            }
-	        }
-
-	        readyPromises.push({
-	            win: win,
-	            promise: new _promise.SyncPromise().resolve(win)
-	        });
-	    });
-
-	    var parent = (0, _windows.getParentWindow)();
-
-	    if (parent) {
-	        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {})['catch'](function (err) {
-	            _log.log.debug(err.stack || err.toString());
-	        });
-	    }
-	}
-
-	function onWindowReady(win) {
-	    var timeout = arguments.length <= 1 || arguments[1] === undefined ? 5000 : arguments[1];
-	    var name = arguments.length <= 2 || arguments[2] === undefined ? 'Window' : arguments[2];
-
-
-	    for (var _iterator2 = readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var item = _ref2;
-
-	        if (item.win === win) {
-	            return item.promise;
-	        }
-	    }
-
-	    var promise = new _promise.SyncPromise();
-
-	    readyPromises.push({
-	        win: win,
-	        promise: promise
-	    });
-
-	    setTimeout(function () {
-	        return promise.reject(new Error(name + ' did not load after ' + timeout + 'ms'));
-	    }, timeout);
-
-	    return promise;
-	}
-
-/***/ },
-/* 19 */
-/*!******************************************!*\
-  !*** ./~/post-robot/src/compat/index.js ***!
-  \******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _bridge = __webpack_require__(/*! ./bridge */ 20);
-
-	Object.keys(_bridge).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _bridge[key];
-	    }
-	  });
-	});
-
-	var _global = __webpack_require__(/*! ./global */ 21);
-
-	Object.keys(_global).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _global[key];
-	    }
-	  });
-	});
-
-	var _ie = __webpack_require__(/*! ./ie */ 22);
-
-	Object.keys(_ie).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _ie[key];
-	    }
-	  });
-	});
-
-/***/ },
-/* 20 */
-/*!*******************************************!*\
-  !*** ./~/post-robot/src/compat/bridge.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.getLocalBridgeForDomain = getLocalBridgeForDomain;
-	exports.getLocalBridgeForWindow = getLocalBridgeForWindow;
-	exports.getRemoteBridgeForDomain = getRemoteBridgeForDomain;
-	exports.getRemoteBridgeForWindow = getRemoteBridgeForWindow;
-	exports.registerBridge = registerBridge;
-	exports.openBridge = openBridge;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
-	var BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
-
-	var pendingBridges = {};
-	var bridges = [];
-
-	var ZONES = {
-	    LOCAL: 'local',
-	    REMOTE: 'remote'
-	};
-
-	function documentReady() {
-	    return new _lib.promise.Promise(function (resolve) {
-	        if (window.document && window.document.body) {
-	            return resolve(window.document);
-	        }
-
-	        window.document.addEventListener('DOMContentLoaded', function (event) {
-	            return resolve(window.document);
-	        });
-	    });
-	}
-
-	function getBridgeForDomain(domain) {
-	    var zone = arguments.length <= 1 || arguments[1] === undefined ? ZONES.LOCAL : arguments[1];
-
-	    return _lib.promise.run(function () {
-
-	        if (zone === ZONES.LOCAL && pendingBridges[domain]) {
-	            return pendingBridges[domain];
-	        }
-
-	        for (var _iterator = bridges, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	            var _ref;
-
-	            if (_isArray) {
-	                if (_i >= _iterator.length) break;
-	                _ref = _iterator[_i++];
-	            } else {
-	                _i = _iterator.next();
-	                if (_i.done) break;
-	                _ref = _i.value;
-	            }
-
-	            var item = _ref;
-
-	            if (item.domain === domain && item.zone === zone) {
-	                return item.bridge;
-	            }
-	        }
-	    }).then(function (bridge) {
-
-	        if (bridge && zone === ZONES.LOCAL) {
-	            return (0, _lib.onWindowReady)(bridge);
-	        }
-
-	        return bridge;
-	    });
-	}
-
-	function getBridgeForWindow(win) {
-	    var zone = arguments.length <= 1 || arguments[1] === undefined ? ZONES.LOCAL : arguments[1];
-
-	    return _lib.promise.run(function () {
-
-	        if ((0, _lib.getOpener)(win) === window) {
-	            return (0, _lib.onWindowReady)(win);
-	        }
-	    }).then(function () {
-
-	        for (var _iterator2 = bridges, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	            var _ref2;
-
-	            if (_isArray2) {
-	                if (_i2 >= _iterator2.length) break;
-	                _ref2 = _iterator2[_i2++];
-	            } else {
-	                _i2 = _iterator2.next();
-	                if (_i2.done) break;
-	                _ref2 = _i2.value;
-	            }
-
-	            var item = _ref2;
-
-	            if (item.win === win && item.zone === zone) {
-	                return item.bridge;
-	            }
-	        }
-
-	        var domain = (0, _lib.getWindowDomain)(win);
-
-	        if (domain) {
-	            return getBridgeForDomain(domain, zone);
-	        }
-	    }).then(function (bridge) {
-
-	        if (bridge && zone === ZONES.LOCAL) {
-	            return (0, _lib.onWindowReady)(bridge);
-	        }
-
-	        return bridge;
-	    });
-	}
-
-	function getLocalBridgeForDomain(domain) {
-	    return getBridgeForDomain(domain, ZONES.LOCAL);
-	}
-
-	function getLocalBridgeForWindow(win) {
-	    return getBridgeForWindow(win, ZONES.LOCAL);
-	}
-
-	function getRemoteBridgeForDomain(domain) {
-	    return getBridgeForDomain(domain, ZONES.REMOTE);
-	}
-
-	function getRemoteBridgeForWindow(win) {
-	    return _lib.promise.run(function () {
-
-	        return getBridgeForWindow(win, ZONES.REMOTE);
-	    }).then(function (bridge) {
-
-	        if (bridge) {
-	            return bridge;
-	        }
-
-	        try {
-	            if (!win || !win.frames || !win.frames.length) {
-	                return;
-	            }
-
-	            for (var i = 0; i < win.frames.length; i++) {
-	                try {
-	                    var frame = win.frames[i];
-
-	                    if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	                        return frame;
-	                    }
-	                } catch (err) {
-	                    continue;
-	                }
-	            }
-	        } catch (err) {
-	            return;
-	        }
-	    });
-	}
-
-	function registerBridge(bridge, win) {
-
-	    var result = void 0;
-
-	    for (var _iterator3 = bridges, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref3;
-
-	        if (_isArray3) {
-	            if (_i3 >= _iterator3.length) break;
-	            _ref3 = _iterator3[_i3++];
-	        } else {
-	            _i3 = _iterator3.next();
-	            if (_i3.done) break;
-	            _ref3 = _i3.value;
-	        }
-
-	        var item = _ref3;
-
-	        if (item.bridge === bridge) {
-	            result = item;
-	            break;
-	        }
-	    }
-
-	    if (!result) {
-	        var zone = _lib.util.isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
-
-	        result = {
-	            bridge: bridge,
-	            domain: (0, _lib.getWindowDomain)(bridge),
-	            windows: [],
-	            zone: zone
-	        };
-
-	        bridges.push(result);
-	    }
-
-	    if (win && result.windows.indexOf(win) === -1) {
-	        result.windows.push(win);
-	    }
-	}
-
-	function openBridge(url, domain) {
-
-	    domain = domain || _lib.util.getDomainFromUrl(url);
-
-	    var bridgePromise = _lib.promise.run(function () {
-
-	        return getLocalBridgeForDomain(domain);
-	    }).then(function (existingBridge) {
-
-	        if (existingBridge) {
-	            return existingBridge;
-	        }
-
-	        if (_lib.util.getDomain() === domain) {
-	            return;
-	        }
-
-	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
-
-	        _lib.log.debug('Opening bridge:', url);
-
-	        var iframe = document.createElement('iframe');
-
-	        iframe.setAttribute('name', id);
-	        iframe.setAttribute('id', id);
-
-	        iframe.setAttribute('style', 'display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;');
-	        iframe.setAttribute('frameborder', '0');
-	        iframe.setAttribute('border', '0');
-	        iframe.setAttribute('scrolling', 'no');
-	        iframe.setAttribute('allowTransparency', 'true');
-
-	        iframe.setAttribute('tabindex', '-1');
-	        iframe.setAttribute('hidden', 'true');
-	        iframe.setAttribute('title', '');
-	        iframe.setAttribute('role', 'presentation');
-
-	        iframe.src = url;
-
-	        return documentReady().then(function (document) {
-	            document.body.appendChild(iframe);
-
-	            var bridge = iframe.contentWindow;
-
-	            (0, _lib.registerWindow)(id, bridge, domain);
-	            registerBridge(bridge);
-
-	            delete pendingBridges[domain];
-
-	            return new _lib.promise.Promise(function (resolve, reject) {
-
-	                iframe.onload = resolve;
-	                iframe.onerror = reject;
-	            }).then(function () {
-
-	                return (0, _lib.onWindowReady)(bridge, 5000, 'Bridge ' + url);
-	            }).then(function () {
-
-	                return bridge;
-	            });
-	        });
-	    });
-
-	    pendingBridges[domain] = bridgePromise;
-
-	    return bridgePromise;
-	}
-
-/***/ },
-/* 21 */
-/*!*******************************************!*\
-  !*** ./~/post-robot/src/compat/global.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.registerGlobals = registerGlobals;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	function registerGlobals() {
-
-	    // Only allow ourselves to be loaded once
-
-	    if (window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	        throw new Error('Attempting to load postRobot twice on the same window');
-	    }
-
-	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
-	        postMessage: function postMessage(event) {
-	            (0, _drivers.receiveMessage)(event);
-	        }
-	    };
-	}
-
-/***/ },
-/* 22 */
-/*!***************************************!*\
-  !*** ./~/post-robot/src/compat/ie.js ***!
-  \***************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.emulateIERestrictions = emulateIERestrictions;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
-	function emulateIERestrictions(sourceWindow, targetWindow) {
-	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
-
-	        if (!(0, _lib.isSameTopWindow)(sourceWindow, targetWindow)) {
-	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
-	        }
-	    }
-	}
-
-/***/ },
-/* 23 */
-/*!************************************************!*\
-  !*** ./~/post-robot/src/drivers/send/index.js ***!
-  \************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	exports.buildMessage = buildMessage;
-	exports.sendMessage = sendMessage;
-
-	var _conf = __webpack_require__(/*! ../../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 10);
-
-	var _strategies = __webpack_require__(/*! ./strategies */ 24);
-
-	function buildMessage(win, message) {
-	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-
-	    var id = _lib.util.uniqueID();
-	    var source = (0, _lib.getWindowId)(window);
-	    var type = _lib.util.getType();
-	    var target = (0, _lib.getWindowId)(win);
-	    var sourceDomain = _lib.util.getDomain(window);
-
-	    return _extends({}, message, options, {
-	        id: message.id || id,
-	        source: source,
-	        originalSource: message.originalSource || source,
-	        sourceDomain: sourceDomain,
-	        originalSourceDomain: message.sourceDomain || sourceDomain,
-	        windowType: type,
-	        originalWindowType: message.originalWindowType || type,
-	        target: message.target || target
-	    });
-	}
-
-	function sendMessage(win, message, domain, isProxy) {
-	    return _lib.promise.run(function () {
-
-	        message = buildMessage(win, message, {
-	            data: (0, _lib.serializeMethods)(win, message.data),
-	            domain: domain
-	        });
-
-	        var level = void 0;
-
-	        if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
-	            level = 'debug';
-	        } else if (message.ack === 'error') {
-	            level = 'error';
-	        } else {
-	            level = 'info';
-	        }
-
-	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
-
-	        if (_conf.CONFIG.MOCK_MODE) {
-	            delete message.target;
-	            return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	                origin: _lib.util.getDomain(window),
-	                source: window,
-	                data: JSON.stringify(message)
-	            });
-	        }
-
-	        if (win === window) {
-	            throw new Error('Attemping to send message to self');
-	        }
-
-	        if ((0, _lib.isWindowClosed)(win)) {
-	            throw new Error('Window is closed');
-	        }
-
-	        _lib.log.debug('Running send message strategies', message);
-
-	        var messages = [];
-
-	        return _lib.promise.map(_lib.util.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
-
-	            return _lib.promise.run(function () {
-
-	                if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
-	                    throw new Error('Strategy disallowed: ' + strategyName);
-	                }
-
-	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
-	            }).then(function () {
-	                messages.push(strategyName + ': success');
-	                return true;
-	            }, function (err) {
-	                messages.push(strategyName + ': ' + err.message);
-	                return false;
-	            });
-	        }).then(function (results) {
-
-	            var success = _lib.util.some(results);
-	            var status = message.type + ' ' + message.name + ' ' + (success ? 'success' : 'error') + ':\n  - ' + messages.join('\n  - ') + '\n';
-
-	            _lib.log.debug(status);
-
-	            if (!success) {
-	                throw new Error(status);
-	            }
-	        });
-	    });
-	}
-
-/***/ },
-/* 24 */
-/*!*****************************************************!*\
-  !*** ./~/post-robot/src/drivers/send/strategies.js ***!
-  \*****************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.SEND_MESSAGE_STRATEGIES = undefined;
-
-	var _SEND_MESSAGE_STRATEG;
-
-	var _conf = __webpack_require__(/*! ../../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 10);
-
-	var _compat = __webpack_require__(/*! ../../compat */ 19);
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function (win, message, domain) {
-
-	    (0, _compat.emulateIERestrictions)(window, win);
-
-	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
-
-	    if (!(0, _lib.isSameDomain)(win)) {
-	        throw new Error('Window is not on the same domain');
-	    }
-
-	    if ((0, _lib.isSameTopWindow)(window, win)) {
-	        throw new Error('Can only use global method to communicate between two different windows, not between frames');
-	    }
-
-	    var sourceDomain = _lib.util.getDomain(window);
-	    var targetDomain = void 0;
-
-	    try {
-	        targetDomain = _lib.util.getDomain(win);
-	    } catch (err) {
-	        throw new Error('Can not read target window domain: ' + err.message);
-	    }
-
-	    if (sourceDomain !== targetDomain) {
-	        throw new Error('Can not send global message - source ' + sourceDomain + ' does not match target ' + targetDomain);
-	    }
-
-	    if (domain !== '*' && targetDomain !== domain) {
-	        throw new Error('Can post post through global method - specified domain ' + domain + ' does not match target domain ' + targetDomain);
-	    }
-
-	    if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	        throw new Error('post-robot not available on target window at ' + targetDomain);
-	    }
-
-	    win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	        origin: _lib.util.getDomain(window),
-	        source: window,
-	        data: JSON.stringify(message, 0, 2)
-	    });
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, function (win, message, domain) {
-
-	    if ((0, _lib.isSameTopWindow)(window, win)) {
-	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
-	    }
-
-	    return (0, _compat.getRemoteBridgeForWindow)(win).then(function (bridge) {
-
-	        if (!bridge) {
-	            throw new Error('No bridge available in window');
-	        }
-
-	        var sourceDomain = _lib.util.getDomain(window);
-	        var targetDomain = void 0;
-
-	        try {
-	            targetDomain = _lib.util.getDomain(bridge);
-	        } catch (err) {
-	            throw new Error('Can not read bridge window domain: ' + err.message);
-	        }
-
-	        if (sourceDomain !== targetDomain) {
-	            throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
-	        }
-
-	        if (!_lib.util.safeHasProp(bridge, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            throw new Error('post-robot not available on bridge at ' + targetDomain);
-	        }
-
-	        message.targetHint = 'window.parent';
-
-	        // If we're messaging our child
-
-	        if (window === (0, _lib.getOpener)(win)) {
-	            message.sourceHint = 'window.opener';
-	        }
-
-	        bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	            origin: _lib.util.getDomain(window),
-	            source: window,
-	            data: JSON.stringify(message, 0, 2)
-	        });
-	    });
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
-
-	    if ((0, _lib.isSameTopWindow)(window, win)) {
-	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
-	    }
-
-	    // If we're messaging our parent
-
-	    if (win === (0, _lib.getOpener)(window)) {
-	        message.targetHint = 'window.parent.opener';
-	    }
-
-	    if (!message.target && !message.targetHint) {
-	        throw new Error('Can not post message down through bridge without target or targetHint');
-	    }
-
-	    // If we're messaging our child
-
-	    var opener = (0, _lib.getOpener)(win);
-
-	    if (opener && window === opener) {
-	        message.sourceHint = 'window.opener';
-	    }
-
-	    if (opener && window === opener.parent) {
-	        message.sourceHint = 'window.opener.parent';
-	    }
-
-	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
-
-	        if (!bridge) {
-	            throw new Error('Bridge not initialized');
-	        }
-
-	        if (win === bridge) {
-	            throw new Error('Message target is bridge');
-	        }
-
-	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
-	    });
-	}), _SEND_MESSAGE_STRATEG);
-
-/***/ },
-/* 25 */
-/*!***********************************************!*\
-  !*** ./~/post-robot/src/drivers/listeners.js ***!
-  \***********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.listeners = undefined;
-	exports.resetListeners = resetListeners;
-	exports.getRequestListener = getRequestListener;
-	exports.removeRequestListener = removeRequestListener;
-	exports.addRequestListener = addRequestListener;
-
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
-	var listeners = exports.listeners = void 0;
-
-	function resetListeners() {
-	    exports.listeners = listeners = {
-	        request: [],
-	        response: {},
-	        proxies: []
-	    };
-	}
-
-	function getRequestListener(name, win) {
-	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
-	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
-	            _ref = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) break;
-	            _ref = _i.value;
-	        }
-
-	        var requestListener = _ref;
-
-
-	        if (requestListener.name !== name) {
-	            continue;
-	        }
-
-	        if (!requestListener.win) {
-	            return requestListener.options;
-	        }
-
-	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
-	            return requestListener.options;
-	        }
-	    }
-	}
-
-	function removeRequestListener(options) {
-
-	    var listener = void 0;
-
-	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var requestListener = _ref2;
-
-	        if (requestListener.options === options) {
-	            listener = requestListener;
-	            break;
-	        }
-	    }
-
-	    if (listener) {
-	        listeners.request.splice(listeners.request.indexOf(listener), 1);
-	    }
-	}
-
-	function addRequestListener(name, win, options, override) {
-
-	    var listener = getRequestListener(name, win);
-
-	    if (listener) {
-	        if (override) {
-	            removeRequestListener(listener);
-	        } else {
-	            throw new Error('Request listener already exists for ' + name);
-	        }
-	    }
-
-	    listeners.request.push({ name: name, win: win, options: options });
-	}
-
-	resetListeners();
-
-/***/ },
-/* 26 */
-/*!***************************************************!*\
-  !*** ./~/post-robot/src/drivers/receive/types.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.RECEIVE_MESSAGE_TYPES = undefined;
-
-	var _RECEIVE_MESSAGE_TYPE;
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	var _conf = __webpack_require__(/*! ../../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 10);
-
-	var _send = __webpack_require__(/*! ../send */ 23);
-
-	var _listeners = __webpack_require__(/*! ../listeners */ 25);
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, message, origin) {
-
-	    var options = _listeners.listeners.response[message.hash];
-
-	    if (!options) {
-	        throw new Error('No handler found for post message ack for message: ' + message.name + ' in ' + window.location.href);
-	    }
-
-	    options.ack = true;
-	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, message, origin) {
-
-	    var options = (0, _listeners.getRequestListener)(message.name, source);
-
-	    function respond(data) {
-
-	        if (message.fireAndForget || (0, _lib.isWindowClosed)(source)) {
-	            return _lib.promise.Promise.resolve();
-	        }
-
-	        return (0, _send.sendMessage)(source, _extends({
-	            target: message.originalSource,
-	            hash: message.hash,
-	            name: message.name
-	        }, data), '*');
-	    }
-
-	    return _lib.promise.Promise.all([respond({
-	        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
-	    }), _lib.promise.run(function () {
-
-	        if (!options) {
-	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
-	        }
-
-	        if (options.domain) {
-	            var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
-
-	            if (!match) {
-	                throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
-	            }
-	        }
-
-	        return _lib.promise.deNodeify(options.handler, source, message.data);
-	    }).then(function (data) {
-
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-	            data: data
-	        });
-	    }, function (err) {
-
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
-	            error: err.stack ? err.message + '\n' + err.stack : err.toString()
-	        });
-	    })])['catch'](function (err) {
-
-	        if (options && options.handleError) {
-	            return options.handleError(err);
-	        } else {
-	            _lib.log.error(err.stack || err.toString());
-	        }
-	    });
-	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
-
-	    var options = _listeners.listeners.response[message.hash];
-
-	    if (!options) {
-	        throw new Error('No response handler found for post message response ' + message.name + ' in ' + window.location.href);
-	    }
-
-	    delete _listeners.listeners.response[message.hash];
-
-	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-	        return options.respond(new Error(message.error));
-	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.data || message.response);
-	    }
-	}), _RECEIVE_MESSAGE_TYPE);
-
-/***/ },
-/* 27 */
-/*!**********************************************!*\
-  !*** ./~/post-robot/src/interface/server.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.listen = listen;
-	exports.on = on;
-	exports.once = once;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	var _lib = __webpack_require__(/*! ../lib */ 10);
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	function listen(options) {
-
-	    if (!options.name) {
-	        throw new Error('Expected options.name');
-	    }
-
-	    options.handler = options.handler || _lib.util.noop;
-
-	    options.errorHandler = options.errorHandler || function (err) {
-	        throw err;
-	    };
-
-	    if (options.once) {
-	        (function () {
-	            var handler = options.handler;
-	            options.handler = _lib.util.once(function () {
-	                (0, _drivers.removeRequestListener)(options);
-	                return handler.apply(this, arguments);
-	            });
-	        })();
-	    }
-
-	    var override = options.override || _conf.CONFIG.MOCK_MODE;
-
-	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
-
-	    options.handleError = function (err) {
-	        // removeRequestListener(options);
-	        options.errorHandler(err);
-	    };
-
-	    if (options.window && options.errorOnClose) {
-	        (function () {
-	            var interval = _lib.util.safeInterval(function () {
-	                if ((0, _lib.isWindowClosed)(options.window)) {
-	                    interval.cancel();
-	                    options.handleError(new Error('Post message target window is closed'));
-	                }
-	            }, 50);
-	        })();
-	    }
-
-	    return {
-	        cancel: function cancel() {
-	            (0, _drivers.removeRequestListener)(options);
-	        }
-	    };
-	}
-
-	function on(name, options, handler, errorHandler) {
-
-	    if (options instanceof Function) {
-	        errorHandler = handler;
-	        handler = options;
-	        options = {};
-	    }
-
-	    options = options || {};
-
-	    options.name = name;
-	    options.handler = handler || options.handler;
-	    options.errorHandler = errorHandler || options.errorHandler;
-
-	    return listen(options);
-	}
-
-	function once(name, options, handler, errorHandler) {
-
-	    if (options instanceof Function) {
-	        errorHandler = handler;
-	        handler = options;
-	        options = {};
-	    }
-
-	    options = options || {};
-
-	    options.name = name;
-	    options.handler = handler || options.handler;
-	    options.errorHandler = errorHandler || options.errorHandler;
-	    options.once = true;
-
-	    var prom = new _lib.promise.Promise(function (resolve, reject) {
-	        options.handler = options.handler || function (source, data) {
-	            return resolve(data);
-	        };
-	        options.errorHandler = options.errorHandler || reject;
-	    });
-
-	    var listener = listen(options);
-
-	    _lib.util.extend(prom, listener);
-
-	    return prom;
-	}
-
-/***/ },
-/* 28 */
-/*!*********************************************!*\
-  !*** ./~/post-robot/src/interface/proxy.js ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.proxy = proxy;
-	exports.unproxy = unproxy;
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	function proxy(window1, window2) {
-
-	    _drivers.listeners.proxies.push({
-	        from: window1,
-	        to: window2
-	    });
-
-	    _drivers.listeners.proxies.push({
-	        from: window2,
-	        to: window1
-	    });
-	}
-
-	function unproxy(window1, window2) {
-
-	    var toRemove = [];
-
-	    for (var i = 0; i < _drivers.listeners.proxies.length; i++) {
-	        var prox = _drivers.listeners.proxies[i];
-	        if (prox.to === window1 && prox.from === window2 || prox.to === window2 && prox.from === window1) {
-	            toRemove.push(prox);
-	        }
-	    }
-
-	    for (var _i = 0; _i < toRemove.length; _i++) {
-	        _drivers.listeners.proxies.splice(_drivers.listeners.proxies.indexOf(toRemove[_i]), 1);
-	    }
-	}
-
-/***/ },
-/* 29 */
-/*!**********************************************!*\
-  !*** ./~/post-robot/src/interface/config.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.CONSTANTS = exports.CONFIG = undefined;
-	exports.enableMockMode = enableMockMode;
-	exports.disableMockMode = disableMockMode;
-
-	var _conf = __webpack_require__(/*! ../conf */ 5);
-
-	Object.defineProperty(exports, 'CONFIG', {
-	    enumerable: true,
-	    get: function get() {
-	        return _conf.CONFIG;
-	    }
-	});
-	Object.defineProperty(exports, 'CONSTANTS', {
-	    enumerable: true,
-	    get: function get() {
-	        return _conf.CONSTANTS;
-	    }
-	});
-	exports.disable = disable;
-
-	var _drivers = __webpack_require__(/*! ../drivers */ 8);
-
-	function enableMockMode() {
-	    _conf.CONFIG.MOCK_MODE = true;
-	}
-
-	function disableMockMode() {
-	    _conf.CONFIG.MOCK_MODE = false;
-	}
-
-	function disable() {
-	    delete window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
-	    window.removeEventListener('message', _drivers.messageListener);
-	}
-
-/***/ },
-/* 30 */
-/*!********************************!*\
-  !*** ./src/component/index.js ***!
-  \********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _component = __webpack_require__(/*! ./component */ 31);
-
-	Object.keys(_component).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _component[key];
-	    }
-	  });
-	});
-
-	var _parent = __webpack_require__(/*! ./parent */ 54);
-
-	Object.keys(_parent).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _parent[key];
-	    }
-	  });
-	});
-
-	var _child = __webpack_require__(/*! ./child */ 42);
-
-	Object.keys(_child).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _child[key];
-	    }
-	  });
-	});
-
-/***/ },
-/* 31 */
-/*!******************************************!*\
-  !*** ./src/component/component/index.js ***!
-  \******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.Component = exports.components = undefined;
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _client = __webpack_require__(/*! beaver-logger/client */ 32);
-
-	var _client2 = _interopRequireDefault(_client);
-
-	var _child = __webpack_require__(/*! ../child */ 42);
-
-	var _parent = __webpack_require__(/*! ../parent */ 54);
-
-	var _props = __webpack_require__(/*! ./props */ 58);
-
-	var _window = __webpack_require__(/*! ../window */ 50);
-
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
-
-	var _validate2 = __webpack_require__(/*! ./validate */ 59);
-
-	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 60);
-
-	var _parent3 = _interopRequireDefault(_parent2);
-
-	var _component = __webpack_require__(/*! ./templates/component.htm */ 61);
-
-	var _component2 = _interopRequireDefault(_component);
-
-	var _drivers = __webpack_require__(/*! ../../drivers */ 62);
-
-	var drivers = _interopRequireWildcard(_drivers);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var components = exports.components = {};
-
-	/*  Component
-	    ---------
-
-	    This is the spec for the component. The idea is, when I call xcomponent.create(), it will create a new instance
-	    of Component with the blueprint needed to set up ParentComponents and ChildComponents.
-
-	    This is the one portion of code which is required by -- and shared to -- both the parent and child windows, and
-	    contains all of the configuration needed for them to set themselves up.
-	*/
-
-	var Component = exports.Component = function () {
-	    function Component() {
-	        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	        _classCallCheck(this, Component);
-
-	        this.validate(options);
-
-	        if (options.dimensions) {
-	            if (typeof options.dimensions.width !== 'number') {
-	                throw new Error('[' + options.tag + '] Expected options.dimensions.width to be a number');
-	            }
-
-	            if (typeof options.dimensions.height !== 'number') {
-	                throw new Error('[' + options.tag + '] Expected options.dimensions.height to be a number');
-	            }
-	        }
-	        // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
-	        // e.g. <my-component>
-
-	        this.tag = options.tag;
-
-	        // Name of the component, used for logging. Auto-generated from the tag name by default.
-
-	        this.name = options.name || options.tag.replace(/-/g, '_');
-
-	        // A json based spec describing what kind of props the component accepts. This is used to validate any props before
-	        // they are passed down to the child.
-
-	        this.props = _extends({}, _props.internalProps, options.props);
-
-	        // The dimensions of the component, e.g. { width: 500, height: 200 }
-
-	        this.dimensions = options.dimensions || {};
-
-	        // The default environment we should render to if none is specified in the parent
-
-	        this.defaultEnv = options.defaultEnv;
-
-	        // A mapping of env->url, used to determine which url to load for which env
-
-	        this.envUrls = options.envUrls || {};
-
-	        // A url to use by default to render the component, if not using envs
-
-	        this.url = options.url || options.envUrls[options.defaultEnv];
-
-	        // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
-
-	        this.contexts = options.contexts || {};
-	        for (var _iterator = _constants.CONTEXT_TYPES_LIST, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	            var _ref;
-
-	            if (_isArray) {
-	                if (_i >= _iterator.length) break;
-	                _ref = _iterator[_i++];
-	            } else {
-	                _i = _iterator.next();
-	                if (_i.done) break;
-	                _ref = _i.value;
-	            }
-
-	            var context = _ref;
-
-	            this.contexts[context] = this.contexts[context] === undefined ? true : Boolean(this.contexts[context]);
-	        }
-
-	        this.closeDelay = options.closeDelay;
-
-	        // The default context to render to
-
-	        this.defaultContext = options.defaultContext;
-
-	        // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
-
-	        this.singleton = options.singleton;
-
-	        // Auto Resize option
-
-	        this.autoResize = options.autoResize || false;
-
-	        this.autocloseParentTemplate = options.autocloseParentTemplate === undefined ? true : options.autocloseParentTemplate;
-
-	        // Templates and styles for the parent page and the initial rendering of the component
-
-	        this.parentTemplate = options.parentTemplate || _parent3['default'];
-	        this.componentTemplate = options.componentTemplate || _component2['default'];
-
-	        // A mapping of tag->component so we can reference components by string tag name
-
-	        components[this.tag] = this;
-
-	        // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
-	        // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
-	        // This makes us a little more pluggable and loosely coupled.
-
-	        for (var _iterator2 = Object.keys(drivers), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	            var _ref2;
-
-	            if (_isArray2) {
-	                if (_i2 >= _iterator2.length) break;
-	                _ref2 = _iterator2[_i2++];
-	            } else {
-	                _i2 = _iterator2.next();
-	                if (_i2.done) break;
-	                _ref2 = _i2.value;
-	            }
-
-	            var driverName = _ref2;
-
-	            var driver = drivers[driverName];
-	            if (driver.isActive()) {
-	                driver.register(this);
-	            }
-	        }
-	    }
-
-	    _createClass(Component, [{
-	        key: 'isXComponent',
-	        value: function isXComponent() {
-	            return (0, _window.isXComponentWindow)();
-	        }
-
-	        /*  Parent
-	            ------
-	             Get an instance of the parent for this component (lives on the parent page which contains the component)
-	        */
-
-	    }, {
-	        key: 'parent',
-	        value: function parent(options) {
-	            return new _parent.ParentComponent(this, options);
-	        }
-
-	        /*  Child
-	            -----
-	             Get an instance of the child for this component (lives on the child component page which lives in the parent)
-	        */
-
-	    }, {
-	        key: 'child',
-	        value: function child(options) {
-	            return new _child.ChildComponent(this, options);
-	        }
-
-	        /*  Attach
-	            ------
-	             Shortcut to instantiate a child in a child component window
-	        */
-
-	    }, {
-	        key: 'attach',
-	        value: function attach(options) {
-	            var component = this.child(options);
-	            component.init();
-	            return component;
-	        }
-
-	        /*  Init
-	            ----
-	             Shortcut to instantiate a component on a parent page, with props
-	        */
-
-	    }, {
-	        key: 'init',
-	        value: function init(props) {
-	            return new _parent.ParentComponent(this, { props: props });
-	        }
-
-	        /*  Render
-	            ------
-	             Shortcut to render a parent component
-	        */
-
-	    }, {
-	        key: 'render',
-	        value: function render(props, element) {
-	            return this.init(props).render(element);
-	        }
-
-	        /*  Get By Tag
-	            ----------
-	             Get a component instance by tag name
-	        */
-
-	    }, {
-	        key: 'getByTag',
-	        value: function getByTag(tag) {
-	            return components[tag];
-	        }
-
-	        /*  Validate
-	            --------
-	             Validate any options passed into Component
-	        */
-
-	    }, {
-	        key: 'validate',
-	        value: function validate(options) {
-	            return (0, _validate2.validate)(options);
-	        }
-
-	        /*  Log
-	            ---
-	             Log an event using the component name
-	        */
-
-	    }, {
-	        key: 'log',
-	        value: function log(event) {
-	            var payload = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	            payload.host = window.location.host;
-	            payload.path = window.location.pathname;
-	            _client2['default'].info('xc_' + this.name + '_' + event, payload);
-	        }
-
-	        /*  Log Warning
-	            -----------
-	             Log a warning
-	        */
-
-	    }, {
-	        key: 'logWarning',
-	        value: function logWarning(event, payload) {
-	            _client2['default'].warn('xc_' + this.name + '_' + event, payload);
-	        }
-
-	        /*  Log Error
-	            ---------
-	             Log an error
-	        */
-
-	    }, {
-	        key: 'logError',
-	        value: function logError(event, payload) {
-	            _client2['default'].error('xc_' + this.name + '_' + event, payload);
-	        }
-	    }]);
-
-	    return Component;
-	}();
-
-/***/ },
-/* 32 */
-/*!*****************************************!*\
-  !*** ./~/beaver-logger/client/index.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _logger = __webpack_require__(/*! ./logger */ 33);
-
-	Object.keys(_logger).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _logger[key];
-	    }
-	  });
-	});
-
-	var _init = __webpack_require__(/*! ./init */ 39);
-
-	Object.keys(_init).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _init[key];
-	    }
-	  });
-	});
-
-	var _transitions = __webpack_require__(/*! ./transitions */ 41);
-
-	Object.keys(_transitions).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _transitions[key];
-	    }
-	  });
-	});
-
-	var _builders = __webpack_require__(/*! ./builders */ 37);
-
-	Object.keys(_builders).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _builders[key];
-	    }
-	  });
-	});
-	exports['default'] = module.exports;
-
-/***/ },
-/* 33 */
-/*!******************************************!*\
-  !*** ./~/beaver-logger/client/logger.js ***!
-  \******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.flush = exports.tracking = exports.buffer = undefined;
-	exports.print = print;
-	exports.immediateFlush = immediateFlush;
-	exports.log = log;
-	exports.debug = debug;
-	exports.info = info;
-	exports.warn = warn;
-	exports.error = error;
-	exports.track = track;
-
-	var _util = __webpack_require__(/*! ./util */ 34);
-
-	var _builders = __webpack_require__(/*! ./builders */ 37);
-
-	var _config = __webpack_require__(/*! ./config */ 38);
-
-	var buffer = exports.buffer = [];
-	var tracking = exports.tracking = {};
-
-	function print(level, event, payload) {
-
-	    if (!window.console || !window.console.log) {
-	        return;
-	    }
-
-	    payload = payload || {};
-
-	    var args = [event];
-
-	    args.push(payload);
-
-	    if (payload.error || payload.warning) {
-	        args.push('\n\n', payload.error || payload.warning);
-	    }
-
-	    (window.console[level] || window.console.log).apply(window.console, args);
-	}
-
-	function immediateFlush() {
-	    var async = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
-
-
-	    if (!_config.config.uri) {
-	        return;
-	    }
-
-	    var hasBuffer = buffer.length;
-	    var hasTracking = Object.keys(tracking).length;
-
-	    if (!hasBuffer && !hasTracking) {
-	        return;
-	    }
-
-	    if (hasTracking) {
-	        print('info', 'tracking', tracking);
-	    }
-
-	    var meta = {};
-
-	    for (var _iterator = _builders.metaBuilders, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
-	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
-	            _ref = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) break;
-	            _ref = _i.value;
-	        }
-
-	        var builder = _ref;
-
-	        try {
-	            (0, _util.extend)(meta, builder(), false);
-	        } catch (err) {
-	            console.error('Error in custom meta builder:', err.stack || err.toString());
-	        }
-	    }
-
-	    for (var _iterator2 = _builders.trackingBuilders, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var _builder = _ref2;
-
-	        try {
-	            (0, _util.extend)(tracking, _builder(), false);
-	        } catch (err) {
-	            console.error('Error in custom tracking builder:', err.stack || err.toString());
-	        }
-	    }
-
-	    var headers = {};
-
-	    for (var _iterator3 = _builders.headerBuilders, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref3;
-
-	        if (_isArray3) {
-	            if (_i3 >= _iterator3.length) break;
-	            _ref3 = _iterator3[_i3++];
-	        } else {
-	            _i3 = _iterator3.next();
-	            if (_i3.done) break;
-	            _ref3 = _i3.value;
-	        }
-
-	        var _builder2 = _ref3;
-
-	        try {
-	            (0, _util.extend)(headers, _builder2(), false);
-	        } catch (err) {
-	            console.error('Error in custom header builder:', err.stack || err.toString());
-	        }
-	    }
-
-	    var events = buffer;
-
-	    var req = (0, _util.ajax)('post', _config.config.uri, headers, {
-	        events: events,
-	        meta: meta,
-	        tracking: tracking
-	    }, async);
-
-	    exports.buffer = buffer = [];
-	    exports.tracking = tracking = {};
-
-	    return req;
-	}
-
-	var flush = exports.flush = (0, _util.promiseDebounce)(immediateFlush, _config.config.debounceInterval);
-
-	function enqueue(level, event, payload) {
-
-	    buffer.push({
-	        level: level,
-	        event: event,
-	        payload: payload
-	    });
-
-	    if (_config.config.autoLog.indexOf(level) > -1) {
-	        flush();
-	    }
-	}
-
-	function log(level, event, payload) {
-
-	    payload = payload || {};
-
-	    if (typeof payload === 'string') {
-	        payload = {
-	            message: payload
-	        };
-	    } else if (payload instanceof Error) {
-	        payload = {
-	            error: payload.stack || payload.toString()
-	        };
-	    }
-
-	    payload.timestamp = Date.now();
-
-	    for (var _iterator4 = _builders.payloadBuilders, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	        var _ref4;
-
-	        if (_isArray4) {
-	            if (_i4 >= _iterator4.length) break;
-	            _ref4 = _iterator4[_i4++];
-	        } else {
-	            _i4 = _iterator4.next();
-	            if (_i4.done) break;
-	            _ref4 = _i4.value;
-	        }
-
-	        var builder = _ref4;
-
-	        try {
-	            (0, _util.extend)(payload, builder(), false);
-	        } catch (err) {
-	            console.error('Error in custom payload builder:', err.stack || err.toString());
-	        }
-	    }
-
-	    print(level, event, payload);
-
-	    if (buffer.length === _config.config.sizeLimit) {
-	        enqueue('info', 'logger_max_buffer_length');
-	    } else if (buffer.length < _config.config.sizeLimit) {
-	        enqueue(level, event, payload);
-	    }
-	}
-
-	function debug(event, payload) {
-	    return log('debug', event, payload);
-	}
-
-	function info(event, payload) {
-	    return log('info', event, payload);
-	}
-
-	function warn(event, payload) {
-	    return log('warn', event, payload);
-	}
-
-	function error(event, payload) {
-	    return log('error', event, payload);
-	}
-
-	function track(payload) {
-	    (0, _util.extend)(tracking, payload || {}, false);
-	}
-
-/***/ },
-/* 34 */
-/*!****************************************!*\
-  !*** ./~/beaver-logger/client/util.js ***!
-  \****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.windowReady = undefined;
-	exports.extend = extend;
-	exports.isSameDomain = isSameDomain;
-	exports.ajax = ajax;
-	exports.promiseDebounce = promiseDebounce;
-	exports.safeInterval = safeInterval;
-	exports.uniqueID = uniqueID;
-
-	var _es6PromiseMin = __webpack_require__(/*! es6-promise-min */ 35);
-
-	function extend(dest, src) {
-	    var over = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-	    dest = dest || {};
-	    src = src || {};
-
-	    for (var i in src) {
-	        if (src.hasOwnProperty(i)) {
-	            if (over || !dest.hasOwnProperty(i)) {
-	                dest[i] = src[i];
-	            }
-	        }
-	    }
-
-	    return dest;
-	}
-
-	function isSameDomain(url) {
-	    var match = url.match(/https?:\/\/[^/]+/);
-
-	    if (!match) {
-	        return true;
-	    }
-
-	    return match[0] === window.location.protocol + '//' + window.location.host;
-	}
-
-	function ajax(method, url) {
-	    var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	    var data = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-	    var async = arguments.length <= 4 || arguments[4] === undefined ? true : arguments[4];
-
-
-	    return new _es6PromiseMin.Promise(function (resolve) {
-	        var XRequest = window.XMLHttpRequest || window.ActiveXObject;
-
-	        if (window.XDomainRequest && !isSameDomain(url)) {
-	            XRequest = window.XDomainRequest;
-	        }
-
-	        var req = new XRequest('MSXML2.XMLHTTP.3.0');
-	        req.open(method.toUpperCase(), url, async);
-
-	        req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-	        req.setRequestHeader('Content-type', 'application/json');
-
-	        for (var headerName in headers) {
-	            if (headers.hasOwnProperty(headerName)) {
-	                req.setRequestHeader(headerName, headers[headerName]);
-	            }
-	        }
-
-	        req.onreadystatechange = function () {
-	            if (req.readyState > 3) {
-	                resolve();
-	            }
-	        };
-	        req.send(JSON.stringify(data).replace(/&/g, '%26'));
-	    });
-	}
-
-	function promiseDebounce(method, interval) {
-
-	    var debounce = {};
-
-	    return function () {
-	        var args = arguments;
-
-	        if (debounce.timeout) {
-	            clearTimeout(debounce.timeout);
-	            delete debounce.timeout;
-	        }
-
-	        debounce.timeout = setTimeout(function () {
-
-	            var resolver = debounce.resolver;
-	            var rejector = debounce.rejector;
-
-	            delete debounce.promise;
-	            delete debounce.resolver;
-	            delete debounce.rejector;
-	            delete debounce.timeout;
-
-	            return _es6PromiseMin.Promise.resolve().then(function () {
-	                return method.apply(null, args);
-	            }).then(resolver, rejector);
-	        }, interval);
-
-	        debounce.promise = debounce.promise || new _es6PromiseMin.Promise(function (resolver, rejector) {
-	            debounce.resolver = resolver;
-	            debounce.rejector = rejector;
-	        });
-
-	        return debounce.promise;
-	    };
-	}
-
-	var windowReady = exports.windowReady = new _es6PromiseMin.Promise(function (resolve) {
-	    if (document.readyState === 'complete') {
-	        resolve();
-	    }
-
-	    window.addEventListener('load', resolve);
-	});
-
-	function safeInterval(method, time) {
-
-	    var timeout = void 0;
-
-	    function loop() {
-	        timeout = setTimeout(function () {
-	            method();
-	            loop();
-	        }, time);
-	    }
-
-	    loop();
-
-	    return {
-	        cancel: function cancel() {
-	            clearTimeout(timeout);
-	        }
-	    };
-	}
-
-	function uniqueID() {
-	    var chars = '0123456789abcdef';
-
-	    return 'xxxxxxxxxx'.replace(/./g, function () {
-	        return chars.charAt(Math.floor(Math.random() * chars.length));
-	    });
-	}
-
-/***/ },
-/* 35 */
-/*!***************************************************!*\
-  !*** ./~/es6-promise-min/dist/es6-promise.min.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global) {/*!
-	 * @overview es6-promise - a tiny implementation of Promises/A+.
-	 * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
-	 * @license   Licensed under MIT license
-	 *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
-	 * @version   2.0.1
-	 */
-
-	(function(){function r(a,b){n[l]=a;n[l+1]=b;l+=2;2===l&&A()}function s(a){return"function"===typeof a}function F(){return function(){process.nextTick(t)}}function G(){var a=0,b=new B(t),c=document.createTextNode("");b.observe(c,{characterData:!0});return function(){c.data=a=++a%2}}function H(){var a=new MessageChannel;a.port1.onmessage=t;return function(){a.port2.postMessage(0)}}function I(){return function(){setTimeout(t,1)}}function t(){for(var a=0;a<l;a+=2)(0,n[a])(n[a+1]),n[a]=void 0,n[a+1]=void 0;
-	l=0}function p(){}function J(a,b,c,d){try{a.call(b,c,d)}catch(e){return e}}function K(a,b,c){r(function(a){var e=!1,f=J(c,b,function(c){e||(e=!0,b!==c?q(a,c):m(a,c))},function(b){e||(e=!0,g(a,b))});!e&&f&&(e=!0,g(a,f))},a)}function L(a,b){1===b.a?m(a,b.b):2===a.a?g(a,b.b):u(b,void 0,function(b){q(a,b)},function(b){g(a,b)})}function q(a,b){if(a===b)g(a,new TypeError("You cannot resolve a promise with itself"));else if("function"===typeof b||"object"===typeof b&&null!==b)if(b.constructor===a.constructor)L(a,
-	b);else{var c;try{c=b.then}catch(d){v.error=d,c=v}c===v?g(a,v.error):void 0===c?m(a,b):s(c)?K(a,b,c):m(a,b)}else m(a,b)}function M(a){a.f&&a.f(a.b);x(a)}function m(a,b){void 0===a.a&&(a.b=b,a.a=1,0!==a.e.length&&r(x,a))}function g(a,b){void 0===a.a&&(a.a=2,a.b=b,r(M,a))}function u(a,b,c,d){var e=a.e,f=e.length;a.f=null;e[f]=b;e[f+1]=c;e[f+2]=d;0===f&&a.a&&r(x,a)}function x(a){var b=a.e,c=a.a;if(0!==b.length){for(var d,e,f=a.b,g=0;g<b.length;g+=3)d=b[g],e=b[g+c],d?C(c,d,e,f):e(f);a.e.length=0}}function D(){this.error=
-	null}function C(a,b,c,d){var e=s(c),f,k,h,l;if(e){try{f=c(d)}catch(n){y.error=n,f=y}f===y?(l=!0,k=f.error,f=null):h=!0;if(b===f){g(b,new TypeError("A promises callback cannot return that same promise."));return}}else f=d,h=!0;void 0===b.a&&(e&&h?q(b,f):l?g(b,k):1===a?m(b,f):2===a&&g(b,f))}function N(a,b){try{b(function(b){q(a,b)},function(b){g(a,b)})}catch(c){g(a,c)}}function k(a,b,c,d){this.n=a;this.c=new a(p,d);this.i=c;this.o(b)?(this.m=b,this.d=this.length=b.length,this.l(),0===this.length?m(this.c,
-	this.b):(this.length=this.length||0,this.k(),0===this.d&&m(this.c,this.b))):g(this.c,this.p())}function h(a){O++;this.b=this.a=void 0;this.e=[];if(p!==a){if(!s(a))throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");if(!(this instanceof h))throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");N(this,a)}}var E=Array.isArray?Array.isArray:function(a){return"[object Array]"===
-	Object.prototype.toString.call(a)},l=0,w="undefined"!==typeof window?window:{},B=w.MutationObserver||w.WebKitMutationObserver,w="undefined"!==typeof Uint8ClampedArray&&"undefined"!==typeof importScripts&&"undefined"!==typeof MessageChannel,n=Array(1E3),A;A="undefined"!==typeof process&&"[object process]"==={}.toString.call(process)?F():B?G():w?H():I();var v=new D,y=new D;k.prototype.o=function(a){return E(a)};k.prototype.p=function(){return Error("Array Methods must be provided an Array")};k.prototype.l=
-	function(){this.b=Array(this.length)};k.prototype.k=function(){for(var a=this.length,b=this.c,c=this.m,d=0;void 0===b.a&&d<a;d++)this.j(c[d],d)};k.prototype.j=function(a,b){var c=this.n;"object"===typeof a&&null!==a?a.constructor===c&&void 0!==a.a?(a.f=null,this.g(a.a,b,a.b)):this.q(c.resolve(a),b):(this.d--,this.b[b]=this.h(a))};k.prototype.g=function(a,b,c){var d=this.c;void 0===d.a&&(this.d--,this.i&&2===a?g(d,c):this.b[b]=this.h(c));0===this.d&&m(d,this.b)};k.prototype.h=function(a){return a};
-	k.prototype.q=function(a,b){var c=this;u(a,void 0,function(a){c.g(1,b,a)},function(a){c.g(2,b,a)})};var O=0;h.all=function(a,b){return(new k(this,a,!0,b)).c};h.race=function(a,b){function c(a){q(e,a)}function d(a){g(e,a)}var e=new this(p,b);if(!E(a))return (g(e,new TypeError("You must pass an array to race.")), e);for(var f=a.length,h=0;void 0===e.a&&h<f;h++)u(this.resolve(a[h]),void 0,c,d);return e};h.resolve=function(a,b){if(a&&"object"===typeof a&&a.constructor===this)return a;var c=new this(p,b);
-	q(c,a);return c};h.reject=function(a,b){var c=new this(p,b);g(c,a);return c};h.prototype={constructor:h,then:function(a,b){var c=this.a;if(1===c&&!a||2===c&&!b)return this;var d=new this.constructor(p),e=this.b;if(c){var f=arguments[c-1];r(function(){C(c,d,f,e)})}else u(this,d,a,b);return d},"catch":function(a){return this.then(null,a)}};var z={Promise:h,polyfill:function(){var a;a="undefined"!==typeof global?global:"undefined"!==typeof window&&window.document?window:self;"Promise"in a&&"resolve"in
-	a.Promise&&"reject"in a.Promise&&"all"in a.Promise&&"race"in a.Promise&&function(){var b;new a.Promise(function(a){b=a});return s(b)}()||(a.Promise=h)}}; true?!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return z}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"undefined"!==typeof module&&module.exports?module.exports=z:"undefined"!==typeof this&&(this.ES6Promise=z)}).call(this);
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 36), (function() { return this; }())))
-
-/***/ },
-/* 36 */
-/*!******************************!*\
-  !*** ./~/process/browser.js ***!
-  \******************************/
-/***/ function(module, exports) {
-
-	'use strict';
-
-	// shim for using process in browser
-
-	var process = module.exports = {};
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    if (!draining || !currentQueue) {
-	        return;
-	    }
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = setTimeout(cleanUpNextTick);
-	    draining = true;
-
-	    var len = queue.length;
-	    while (len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
-	            }
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    clearTimeout(timeout);
-	}
-
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
-	    }
-	};
-
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	process.cwd = function () {
-	    return '/';
-	};
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function () {
-	    return 0;
-	};
-
-/***/ },
-/* 37 */
-/*!********************************************!*\
-  !*** ./~/beaver-logger/client/builders.js ***!
-  \********************************************/
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.addPayloadBuilder = addPayloadBuilder;
-	exports.addMetaBuilder = addMetaBuilder;
-	exports.addTrackingBuilder = addTrackingBuilder;
-	exports.addHeaderBuilder = addHeaderBuilder;
-	var payloadBuilders = exports.payloadBuilders = [];
-	var metaBuilders = exports.metaBuilders = [];
-	var trackingBuilders = exports.trackingBuilders = [];
-	var headerBuilders = exports.headerBuilders = [];
-
-	function addPayloadBuilder(builder) {
-	    payloadBuilders.push(builder);
-	}
-
-	function addMetaBuilder(builder) {
-	    metaBuilders.push(builder);
-	}
-
-	function addTrackingBuilder(builder) {
-	    trackingBuilders.push(builder);
-	}
-
-	function addHeaderBuilder(builder) {
-	    headerBuilders.push(builder);
-	}
-
-/***/ },
-/* 38 */
-/*!******************************************!*\
-  !*** ./~/beaver-logger/client/config.js ***!
-  \******************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var config = exports.config = {
-
-	    uri: '',
-
-	    initial_state_name: 'init',
-
-	    flushInterval: 10 * 60 * 1000,
-	    debounceInterval: 10,
-
-	    sizeLimit: 300,
-
-	    heartbeat: true,
-	    heartbeatConsoleLog: true,
-	    heartbeatInterval: 5000,
-	    hearbeatMaxThreshold: 50,
-	    heartbeatTooBusyThreshold: 10000,
-
-	    autoLog: ['warn', 'error'],
-
-	    logUnload: true,
-	    logUnloadSync: false,
-	    logPerformance: true
-	};
-
-/***/ },
-/* 39 */
-/*!****************************************!*\
-  !*** ./~/beaver-logger/client/init.js ***!
-  \****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.init = init;
-
-	var _config = __webpack_require__(/*! ./config */ 38);
-
-	var _util = __webpack_require__(/*! ./util */ 34);
-
-	var _performance = __webpack_require__(/*! ./performance */ 40);
-
-	var _logger = __webpack_require__(/*! ./logger */ 33);
-
-	var initiated = false;
-
-	function init(conf) {
-	    (0, _util.extend)(_config.config, conf || {});
-
-	    if (initiated) {
-	        return;
-	    }
-
-	    initiated = true;
-
-	    if (_config.config.logPerformance) {
-	        (0, _performance.initPerformance)();
-	    }
-
-	    if (_config.config.heartbeat) {
-	        (0, _performance.initHeartBeat)();
-	    }
-
-	    if (_config.config.logUnload) {
-	        (function () {
-	            var async = !_config.config.logUnloadSync;
-
-	            window.addEventListener('beforeunload', function () {
-	                (0, _logger.info)('window_beforeunload');
-	                (0, _logger.immediateFlush)(async);
-	            });
-
-	            window.addEventListener('unload', function () {
-	                (0, _logger.info)('window_unload');
-	                (0, _logger.immediateFlush)(async);
-	            });
-	        })();
-	    }
-
-	    if (_config.config.flushInterval) {
-	        setInterval(_logger.flush, _config.config.flushInterval);
-	    }
-
-	    if (window.beaverLogQueue) {
-	        window.beaverLogQueue.forEach(function (payload) {
-	            (0, _logger.log)(payload.level, payload.event, payload);
-	        });
-	        delete window.beaverLogQueue;
-	    }
-	}
-
-/***/ },
-/* 40 */
-/*!***********************************************!*\
-  !*** ./~/beaver-logger/client/performance.js ***!
-  \***********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.reqTimer = exports.clientTimer = undefined;
-	exports.now = now;
-	exports.reqStartElapsed = reqStartElapsed;
-	exports.initHeartBeat = initHeartBeat;
-	exports.initPerformance = initPerformance;
-
-	var _config = __webpack_require__(/*! ./config */ 38);
-
-	var _logger = __webpack_require__(/*! ./logger */ 33);
-
-	var _builders = __webpack_require__(/*! ./builders */ 37);
-
-	var _util = __webpack_require__(/*! ./util */ 34);
-
-	var enablePerformance = window && window.performance && performance.now && performance.timing && performance.timing.connectEnd && performance.timing.navigationStart && Math.abs(performance.now() - Date.now()) > 1000 && performance.now() - (performance.timing.connectEnd - performance.timing.navigationStart) > 0;
-
-	function now() {
-	    if (enablePerformance) {
-	        return performance.now();
-	    } else {
-	        return Date.now();
-	    }
-	}
-
-	function timer(startTime) {
-	    startTime = startTime !== undefined ? startTime : now();
-
-	    return {
-	        startTime: startTime,
-
-	        elapsed: function elapsed() {
-	            return parseInt(now() - startTime, 10);
-	        },
-	        reset: function reset() {
-	            startTime = now();
-	        }
-	    };
-	}
-
-	function reqStartElapsed() {
-	    if (enablePerformance) {
-	        var timing = window.performance.timing;
-	        return parseInt(timing.connectEnd - timing.navigationStart, 10);
-	    }
-	}
-
-	var clientTimer = exports.clientTimer = timer();
-	var reqTimer = exports.reqTimer = timer(reqStartElapsed());
-
-	function initHeartBeat() {
-
-	    var heartBeatTimer = timer();
-	    var heartbeatCount = 0;
-
-	    (0, _util.safeInterval)(function () {
-
-	        if (!_logger.buffer.length || _logger.buffer[_logger.buffer.length - 1].event !== 'heartbeat') {
-	            heartbeatCount = 0;
-	        }
-
-	        if (!_logger.buffer.length || heartbeatCount > _config.config.hearbeatMaxThreshold) {
-	            return;
-	        }
-
-	        heartbeatCount += 1;
-
-	        var elapsed = heartBeatTimer.elapsed();
-	        var lag = elapsed - _config.config.heartbeatInterval;
-
-	        if (lag >= _config.config.heartbeatTooBusyThreshold) {
-	            (0, _logger.info)('toobusy', {
-	                count: heartbeatCount,
-	                elapsed: elapsed,
-	                lag: lag
-	            }, {
-	                noConsole: !_config.config.heartbeatConsoleLog
-	            });
-	        }
-
-	        (0, _logger.info)('heartbeat', {
-	            count: heartbeatCount,
-	            elapsed: elapsed,
-	            lag: lag
-	        }, {
-	            noConsole: !_config.config.heartbeatConsoleLog
-	        });
-	    }, _config.config.heartbeatInterval);
-	}
-
-	function initPerformance() {
-
-	    if (!enablePerformance) {
-	        return (0, _logger.info)('no_performance_data');
-	    }
-
-	    (0, _builders.addPayloadBuilder)(function () {
-
-	        var payload = {};
-
-	        payload.client_elapsed = clientTimer.elapsed();
-
-	        if (enablePerformance) {
-	            payload.req_elapsed = reqTimer.elapsed();
-	        }
-
-	        return payload;
-	    });
-
-	    _util.windowReady.then(function () {
-
-	        var keys = ['connectEnd', 'connectStart', 'domComplete', 'domContentLoadedEventEnd', 'domContentLoadedEventStart', 'domInteractive', 'domLoading', 'domainLookupEnd', 'domainLookupStart', 'fetchStart', 'loadEventEnd', 'loadEventStart', 'navigationStart', 'redirectEnd', 'redirectStart', 'requestStart', 'responseEnd', 'responseStart', 'secureConnectionStart', 'unloadEventEnd', 'unloadEventStart'];
-
-	        var timing = {};
-
-	        keys.forEach(function (key) {
-	            timing[key] = parseInt(window.performance.timing[key], 10) || 0;
-	        });
-
-	        var offset = timing.connectEnd - timing.navigationStart;
-
-	        if (timing.connectEnd) {
-	            Object.keys(timing).forEach(function (name) {
-	                var time = timing[name];
-	                if (time) {
-	                    (0, _logger.info)('timing_' + name, {
-	                        client_elapsed: parseInt(time - timing.connectEnd - (clientTimer.startTime - offset), 10),
-	                        req_elapsed: parseInt(time - timing.connectEnd, 10)
-	                    });
-	                }
-	            });
-	        }
-
-	        (0, _logger.info)('timing', timing);
-	        (0, _logger.info)('memory', window.performance.memory);
-	        (0, _logger.info)('navigation', window.performance.navigation);
-
-	        if (window.performance.getEntries) {
-	            window.performance.getEntries().forEach(function (resource) {
-	                if (['link', 'script', 'img', 'css'].indexOf(resource.initiatorType) > -1) {
-	                    (0, _logger.info)(resource.initiatorType, resource);
-	                }
-	            });
-	        }
-	    });
-	}
-
-/***/ },
-/* 41 */
-/*!***********************************************!*\
-  !*** ./~/beaver-logger/client/transitions.js ***!
-  \***********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.startTransition = startTransition;
-	exports.endTransition = endTransition;
-	exports.transition = transition;
-
-	var _performance = __webpack_require__(/*! ./performance */ 40);
-
-	var _logger = __webpack_require__(/*! ./logger */ 33);
-
-	var _builders = __webpack_require__(/*! ./builders */ 37);
-
-	var _util = __webpack_require__(/*! ./util */ 34);
-
-	var _config = __webpack_require__(/*! ./config */ 38);
-
-	var windowID = (0, _util.uniqueID)();
-	var pageID = (0, _util.uniqueID)();
-
-	var currentState = _config.config.initial_state_name;
-	var startTime = void 0;
-
-	function startTransition() {
-	    startTime = (0, _performance.now)();
-	}
-
-	function endTransition(toState) {
-	    startTime = startTime || (0, _performance.reqStartElapsed)();
-
-	    var currentTime = (0, _performance.now)();
-	    var elapsedTime = void 0;
-
-	    if (startTime !== undefined) {
-	        elapsedTime = parseInt(currentTime - startTime, 0);
-	    }
-
-	    var transitionName = 'transition_' + currentState + '_to_' + toState;
-
-	    (0, _logger.info)(transitionName, {
-	        duration: elapsedTime
-	    });
-
-	    (0, _logger.track)({
-	        transition: transitionName,
-	        transition_time: elapsedTime
-	    });
-
-	    (0, _logger.immediateFlush)();
-
-	    startTime = currentTime;
-	    currentState = toState;
-	    pageID = (0, _util.uniqueID)();
-	}
-
-	function transition(toState) {
-	    startTransition();
-	    endTransition(toState);
-	}
-
-	(0, _builders.addPayloadBuilder)(function () {
-	    return {
-	        windowID: windowID,
-	        pageID: pageID
-	    };
-	});
-
-	(0, _builders.addMetaBuilder)(function () {
-	    return {
-	        state: 'ui_' + currentState
-	    };
-	});
-
-/***/ },
-/* 42 */
-/*!**************************************!*\
-  !*** ./src/component/child/index.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.ChildComponent = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _src = __webpack_require__(/*! post-robot/src */ 2);
-
-	var _src2 = _interopRequireDefault(_src);
-
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
-
-	var _base = __webpack_require__(/*! ../base */ 43);
-
-	var _window = __webpack_require__(/*! ../window */ 50);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 44);
-
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
-
-	var _props = __webpack_require__(/*! ../props */ 52);
-
-	var _props2 = __webpack_require__(/*! ./props */ 53);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	/*  Child Component
-	    ---------------
-
-	    This is the portion of code which runs inside the frame or popup window containing the component's implementation.
-
-	    When the component author calls myComponent.attach(), it creates a new instance of ChildComponent, which is then
-	    responsible for managing the state and messaging back up to the parent, and providing props for the component to
-	    utilize.
-	*/
-
-	var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
-	    _inherits(ChildComponent, _BaseComponent);
-
-	    function ChildComponent(component) {
-	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	        _classCallCheck(this, ChildComponent);
-
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ChildComponent).call(this, component, options));
-
-	        _this.component = component;
-
-	        _this.component.log('construct_child');
-
-	        _this.validate(options);
-
-	        // Handlers for various component lifecycle events
-
-	        _this.onEnter = _this.tryCatch(options.onEnter || _lib.noop);
-	        _this.onClose = _this.tryCatch(options.onClose || _lib.noop);
-	        _this.onProps = _this.tryCatch(options.onProps || _lib.noop, false);
-	        _this.onError = _this.tryCatch(options.onError || function (err) {
-	            throw err;
-	        });
-
-	        // The child can specify some default props if none are passed from the parent. This often makes integrations
-	        // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
-	        // has provided them or not, and fall-back to some default behavior.
-
-	        _this.setProps((0, _props.normalizeProps)(_this.component, _this, options.defaultProps || {}), false);
-
-	        // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
-	        // there's an existing full-page implementation which uses redirects. In this case, the user can specify
-	        // standalone: true, and defaultProps, and the child component should continue to function in the same way
-	        // as if it were created by xcomponent, with the exception that no post-messages will ever be sent.
-
-	        _this.standalone = options.standalone;
-	        return _this;
-	    }
-
-	    /*  Init
-	        ----
-	         Message up to the parent to let them know we've rendered successfully, and get some initial data and props
-	    */
-
-	    _createClass(ChildComponent, [{
-	        key: 'init',
-	        value: function init() {
-	            var _this2 = this;
-
-	            this.component.log('init_child');
-
-	            // In standalone mode, we would expect setWindows to fail since there is no parent window and window.name
-	            // will not be generated by xcomponent. In this case we can fail silently, whereas normally we'd want to
-	            // fail hard here.
-
-	            if (!(0, _window.isXComponentWindow)() && this.standalone) {
-	                this.component.log('child_standalone');
-	                return;
-	            }
-
-	            this.setWindows();
-
-	            // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
-
-	            if (this.standalone && !(0, _window.getParentWindow)()) {
-	                return _promise.SyncPromise.resolve();
-	            }
-
-	            if (this.component.autoResize) {
-	                this.watchForResize();
-	            }
-
-	            // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
-	            //
-	            // For example:
-	            //
-	            // - What context are we
-	            // - What props has the parent specified
-
-	            return this.sendToParent(_constants.POST_MESSAGE.INIT, {
-
-	                exports: this.exports()
-
-	            }).then(function (data) {
-
-	                _this2.context = data.context;
-	                _this2.setProps(data.props);
-
-	                _this2.onEnter.call(_this2);
-	            })['catch'](function (err) {
-	                return _this2.onError(err);
-	            });
-	        }
-	    }, {
-	        key: 'setProps',
-	        value: function setProps() {
-	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	            var onProps = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-	            this.props = this.props || {};
-	            (0, _lib.extend)(this.props, (0, _props2.normalizeChildProps)(this.component, props));
-
-	            if (onProps) {
-	                this.onProps.call(this);
-	            }
-	        }
-
-	        /*  Send to Parent
-	            --------------
-	             Send a post message to our parent window.
-	        */
-
-	    }, {
-	        key: 'sendToParent',
-	        value: function sendToParent(name, data) {
-	            this.component.log('send_to_parent_' + name);
-	            return _src2['default'].send((0, _window.getParentWindow)(), name, data);
-	        }
-
-	        /*  Set Windows
-	            -----------
-	             Determine the parent window, and the parent component window. Note -- these may be different, if we were
-	            rendered using renderToParent.
-	        */
-
-	    }, {
-	        key: 'setWindows',
-	        value: function setWindows() {
-
-	            // Ensure we do not try to .attach() multiple times for the same component on the same page
-
-	            if (window.__activeXComponent__) {
-	                throw new Error('[' + this.component.tag + '] Can not attach multiple components to the same window');
-	            }
-
-	            window.__activeXComponent__ = this;
-
-	            // Get the direct parent window
-
-	            if (!(0, _window.getParentWindow)()) {
-	                throw new Error('[' + this.component.tag + '] Can not find parent window');
-	            }
-
-	            var componentMeta = (0, _window.getComponentMeta)();
-
-	            if (componentMeta.tag !== this.component.tag) {
-	                throw new Error('[' + this.component.tag + '] Parent is ' + componentMeta.tag + ' - can not attach ' + this.component.tag);
-	            }
-
-	            // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
-	            // only a few ways of doing it:
-	            //
-	            // - The window is a direct parent, in which case you can use window.parent or window.opener
-	            // - The window is an iframe owned by you or one of your parents, in which case you can use window.frames
-	            // - The window sent you a post-message, in which case you can use event.source
-	            //
-	            // If we didn't rely on winProps.parent here from the window name, we'd have to relay all of our messages through
-	            // our actual parent. Which is no fun at all, and pretty error prone even with the help of post-robot. So this
-	            // is the lesser of two evils until browsers give us something like getWindowByName(...)
-
-	            // If the parent window closes, we need to close ourselves. There's no point continuing to run our component
-	            // if there's no parent to message to.
-
-	            this.watchForClose();
-	        }
-
-	        /*  Watch For Close
-	            ---------------
-	             Watch both the parent window and the parent component window, if they close, close this window too.
-	        */
-
-	    }, {
-	        key: 'watchForClose',
-	        value: function watchForClose() {
-	            var _this3 = this;
-
-	            (0, _lib.onCloseWindow)(_window.getParentWindow, function () {
-
-	                _this3.component.log('parent_window_closed');
-
-	                _this3.onClose(_constants.CLOSE_REASONS.PARENT_CLOSE_DETECTED);
-
-	                // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
-	                // close us, if we're an iframe
-
-	                if (_this3.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    _this3.destroy();
-	                }
-	            });
-
-	            // Only listen for parent component window if it's actually a different window
-
-	            if ((0, _window.getParentComponentWindow)() && (0, _window.getParentComponentWindow)() !== (0, _window.getParentWindow)()) {
-	                (0, _lib.onCloseWindow)((0, _window.getParentComponentWindow)(), function () {
-
-	                    _this3.component.log('parent_component_window_closed');
-
-	                    // We do actually need to close ourselves in this case, even if we're an iframe, because our component
-	                    // window is probably a sibling and we'll remain open by default.
-
-	                    _this3.close(_constants.CLOSE_REASONS.PARENT_CLOSE_DETECTED);
-	                });
-	            }
-
-	            (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                return _this3.onClose();
-	            });
-	        }
-
-	        /*  Validate
-	            --------
-	             Validate any options passed in to ChildComponent
-	        */
-
-	    }, {
-	        key: 'validate',
-	        value: function validate(options) {
-
-	            // TODO: Implement this
-	        }
-	    }, {
-	        key: 'watchForResize',
-	        value: function watchForResize() {
-	            var _this4 = this;
-
-	            var resize = (0, _lib.debounce)(function (width, height) {
-	                return _this4.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
-	            }, 100);
-
-	            var elm = document.body;
-
-	            if (!elm) {
-	                return;
-	            }
-
-	            // let lastWidth = elm.scrollWidth;
-	            // let newWidth;
-	            var lastHeight = elm.scrollHeight;
-	            var newHeight = void 0;
-
-	            setInterval(function () {
-	                // newWidth = elm.scrollWidth;
-	                newHeight = elm.scrollHeight;
-	                // Dimensions changed if this condition is true
-	                if (lastHeight !== newHeight /* || lastWidth !== newWidth */) {
-	                        resize(_this4.component.dimensions.width, newHeight);
-	                    }
-	                // lastWidth = newWidth;
-	                lastHeight = newHeight;
-	            }, 50);
-	        }
-	    }, {
-	        key: 'exports',
-	        value: function exports() {
-	            var _this5 = this;
-
-	            return {
-	                updateProps: function updateProps(props) {
-	                    return _this5.setProps(props);
-	                },
-	                close: function close() {
-	                    return window.close();
-	                }
-	            };
-	        }
-
-	        /*  Resize
-	            ------
-	             Resize the child window. Must be done on a user action like a click if we're in a popup
-	        */
-
-	    }, {
-	        key: 'resize',
-	        value: function resize(width, height) {
-	            var _this6 = this;
-
-	            return _promise.SyncPromise.resolve().then(function () {
-
-	                _this6.component.log('resize', { width: width, height: height });
-
-	                if (_this6.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return window.resizeTo(width, height);
-	                }
-
-	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
-	            });
-	        }
-
-	        /*  Hide
-	            ----
-	             Hide the window and any parent template
-	        */
-
-	    }, {
-	        key: 'hide',
-	        value: function hide() {
-	            return this.sendToParent(_constants.POST_MESSAGE.HIDE);
-	        }
-	    }, {
-	        key: 'userClose',
-	        value: function userClose() {
-	            return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
-	        }
-
-	        /*  Close
-	            -----
-	             Close the child window
-	        */
-
-	    }, {
-	        key: 'close',
-	        value: function close() {
-	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.CHILD_CALL : arguments[0];
-
-
-	            this.component.log('close_child');
-
-	            this.onClose.call(this, reason);
-
-	            // Ask our parent window to close us
-
-	            this.sendToParent(_constants.POST_MESSAGE.CLOSE, { reason: reason }, {
-	                fireAndForget: true
-	            });
-	        }
-	    }, {
-	        key: 'destroy',
-	        value: function destroy() {
-	            window.close();
-	        }
-
-	        /*  Focus
-	            -----
-	             Focus the child window. Must be done on a user action like a click
-	        */
-
-	    }, {
-	        key: 'focus',
-	        value: function focus() {
-	            this.component.log('focus');
-
-	            window.focus();
-	        }
-
-	        /*  Error
-	            -----
-	             Send an error back to the parent
-	        */
-
-	    }, {
-	        key: 'error',
-	        value: function error(err) {
-
-	            this.component.log('error', { error: err.stack || err.toString() });
-
-	            return this.sendToParent(_constants.POST_MESSAGE.ERROR, {
-	                error: err.stack ? err.message + '\n' + err.stack : err.toString()
-	            });
-	        }
-	    }]);
-
-	    return ChildComponent;
-	}(_base.BaseComponent);
-
-/***/ },
-/* 43 */
-/*!*******************************!*\
-  !*** ./src/component/base.js ***!
-  \*******************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.BaseComponent = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _src = __webpack_require__(/*! post-robot/src */ 2);
-
-	var _src2 = _interopRequireDefault(_src);
-
-	var _lib = __webpack_require__(/*! ../lib */ 44);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	/*  Base Component
-	    --------------
-
-	    Methods that are common between child and parent components, but are not generic or uncoupled enough to live in
-	    a separate library.
-	*/
-
-	var BaseComponent = exports.BaseComponent = function () {
-	    function BaseComponent() {
-	        _classCallCheck(this, BaseComponent);
-	    }
-
-	    _createClass(BaseComponent, [{
-	        key: 'registerForCleanup',
-
-
-	        /*  Register For Cleanup
-	            --------------------
-	             Register a method that will be called to do some cleanup whenever this.cleanup() is called
-	        */
-
-	        value: function registerForCleanup(task) {
-	            this.cleanupTasks = this.cleanupTasks || [];
-	            this.cleanupTasks.push(task);
-	            return this;
-	        }
-
-	        /*  Cleanup
-	            -------
-	             Call all of the methods registered with this.registerForCleanup
-	        */
-
-	    }, {
-	        key: 'cleanup',
-	        value: function cleanup() {
-	            while (this.cleanupTasks && this.cleanupTasks.length) {
-	                var task = this.cleanupTasks.pop();
-	                task();
-	            }
-	        }
-
-	        /*  Has Cleanup Tasks
-	            -----------------
-	             Returns whether or not there is any state to be cleaned up
-	        */
-
-	    }, {
-	        key: 'hasCleanupTasks',
-	        value: function hasCleanupTasks() {
-	            return Boolean(this.cleanupTasks.length);
-	        }
-
-	        /*  Set For Cleanup
-	            ---------------
-	             Set a key on this which will be auto-deleted when this.cleanup() is called
-	        */
-
-	    }, {
-	        key: 'setForCleanup',
-	        value: function setForCleanup(key, value) {
-	            var _this = this;
-
-	            this[key] = value;
-	            this.registerForCleanup(function () {
-	                delete _this[key];
-	            });
-	        }
-
-	        /*  Try Catch
-	            ---------
-	             Returns a new method which wraps the original call in a try/catch, otherwise delegates to this.onError
-	        */
-
-	    }, {
-	        key: 'tryCatch',
-	        value: function tryCatch(method, doOnce) {
-
-	            var self = this;
-	            var errored = false;
-
-	            var wrapper = function wrapper() {
-
-	                if (errored) {
-	                    return;
-	                }
-
-	                try {
-	                    return method.apply(this, arguments);
-	                } catch (err) {
-	                    errored = true;
-	                    return self.error(err);
-	                }
-	            };
-
-	            if (doOnce !== false) {
-	                wrapper = (0, _lib.once)(wrapper);
-	            }
-
-	            return wrapper;
-	        }
-
-	        /*  Listen
-	            ------
-	             Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
-	            post-messages, so this sets up an easy way to create a collection of listeners in one go.
-	             All post-messaging is done using post-robot.
-	        */
-
-	    }, {
-	        key: 'listen',
-	        value: function listen(win) {
-	            var _this2 = this;
-
-	            if (!win) {
-	                throw new Error('[' + this.component.tag + '] window to listen to not set');
-	            }
-
-	            if (!this.listeners) {
-	                return;
-	            }
-
-	            var listeners = this.listeners();
-
-	            var _loop = function _loop() {
-	                if (_isArray) {
-	                    if (_i >= _iterator.length) return 'break';
-	                    _ref = _iterator[_i++];
-	                } else {
-	                    _i = _iterator.next();
-	                    if (_i.done) return 'break';
-	                    _ref = _i.value;
-	                }
-
-	                var listenerName = _ref;
-
-
-	                var listener = _src2['default'].on(listenerName, { window: win, errorHandler: function errorHandler(err) {
-	                        return _this2.error(err);
-	                    } }, function (source, data) {
-	                    _this2.component.log('listener_' + listenerName.replace(/^xcomponent_/, ''));
-	                    return listeners[listenerName].call(_this2, source, data);
-	                });
-
-	                _this2.registerForCleanup(function () {
-	                    listener.cancel();
-	                });
-	            };
-
-	            for (var _iterator = Object.keys(listeners), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                var _ref;
-
-	                var _ret = _loop();
-
-	                if (_ret === 'break') break;
-	            }
-	        }
-	    }]);
-
-	    return BaseComponent;
-	}();
-
-/***/ },
-/* 44 */
 /*!**************************!*\
   !*** ./src/lib/index.js ***!
   \**************************/
@@ -5327,7 +148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _dom = __webpack_require__(/*! ./dom */ 45);
+	var _dom = __webpack_require__(/*! ./dom */ 3);
 
 	Object.keys(_dom).forEach(function (key) {
 	  if (key === "default") return;
@@ -5339,7 +160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _fn = __webpack_require__(/*! ./fn */ 46);
+	var _fn = __webpack_require__(/*! ./fn */ 4);
 
 	Object.keys(_fn).forEach(function (key) {
 	  if (key === "default") return;
@@ -5351,7 +172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _promise = __webpack_require__(/*! ./promise */ 49);
+	var _promise = __webpack_require__(/*! ./promise */ 6);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -5363,7 +184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _util = __webpack_require__(/*! ./util */ 47);
+	var _util = __webpack_require__(/*! ./util */ 5);
 
 	Object.keys(_util).forEach(function (key) {
 	  if (key === "default") return;
@@ -5375,8 +196,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
+	var _base = __webpack_require__(/*! ./base32 */ 8);
+
+	Object.keys(_base).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _base[key];
+	    }
+	  });
+	});
+
+	var _logger = __webpack_require__(/*! ./logger */ 9);
+
+	Object.keys(_logger).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _logger[key];
+	    }
+	  });
+	});
+
 /***/ },
-/* 45 */
+/* 3 */
 /*!************************!*\
   !*** ./src/lib/dom.js ***!
   \************************/
@@ -5387,6 +232,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.parseQuery = undefined;
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 	exports.getElement = getElement;
 	exports.popup = popup;
 	exports.iframe = iframe;
@@ -5400,13 +251,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.hijackButton = hijackButton;
 	exports.addEventToClass = addEventToClass;
 	exports.template = template;
-	exports.getUrlParams = getUrlParams;
-	exports.getUrlParam = getUrlParam;
+	exports.getQueryParam = getQueryParam;
 	exports.getDomain = getDomain;
+	exports.formatQuery = formatQuery;
+	exports.extendUrl = extendUrl;
 
-	var _fn = __webpack_require__(/*! ./fn */ 46);
+	var _fn = __webpack_require__(/*! ./fn */ 4);
 
-	var _util = __webpack_require__(/*! ./util */ 47);
+	var _util = __webpack_require__(/*! ./util */ 5);
 
 	/*  Get Element
 	    -----------
@@ -5740,9 +592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	function getUrlParams(queryString) {
-
-	    queryString = queryString || window.location.search.slice(1);
+	var parseQuery = exports.parseQuery = (0, _fn.memoize)(function (queryString) {
 
 	    var params = {};
 
@@ -5772,10 +622,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return params;
-	}
+	});
 
-	function getUrlParam(name) {
-	    return getUrlParams()[name];
+	function getQueryParam(name) {
+	    return parseQuery(window.location.search.slice(1))[name];
 	}
 
 	function getDomain(url) {
@@ -5793,8 +643,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return domain;
 	}
 
+	function formatQuery() {
+	    var obj = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+
+	    return Object.keys(obj).map(function (key) {
+	        return (0, _util.urlEncode)(key) + '=' + (0, _util.urlEncode)(obj[key]);
+	    }).join('&');
+	}
+
+	function extendUrl(url) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+
+	    var query = options.query || {};
+	    var hash = options.hash || {};
+
+	    var originalUrl = void 0;
+	    var originalQuery = void 0;
+	    var originalHash = void 0;
+
+	    var _url$split = url.split('#');
+
+	    var _url$split2 = _slicedToArray(_url$split, 2);
+
+	    originalUrl = _url$split2[0];
+	    originalHash = _url$split2[1];
+
+	    var _originalUrl$split = originalUrl.split('?');
+
+	    var _originalUrl$split2 = _slicedToArray(_originalUrl$split, 2);
+
+	    originalUrl = _originalUrl$split2[0];
+	    originalQuery = _originalUrl$split2[1];
+
+
+	    query = formatQuery(_extends({}, parseQuery(originalQuery), query));
+
+	    hash = formatQuery(_extends({}, parseQuery(originalHash), hash));
+
+	    if (query) {
+	        originalUrl = originalUrl + '?' + query;
+	    }
+
+	    if (hash) {
+	        originalUrl = originalUrl + '#' + hash;
+	    }
+
+	    return originalUrl;
+	}
+
 /***/ },
-/* 46 */
+/* 4 */
 /*!***********************!*\
   !*** ./src/lib/fn.js ***!
   \***********************/
@@ -5906,11 +806,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 47 */
+/* 5 */
 /*!*************************!*\
   !*** ./src/lib/util.js ***!
   \*************************/
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -5926,20 +826,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.extend = extend;
 	exports.values = values;
 	exports.uniqueID = uniqueID;
-	exports.b64encode = b64encode;
-	exports.b64decode = b64decode;
 	exports.stringifyWithFunctions = stringifyWithFunctions;
 	exports.safeGet = safeGet;
 	exports.capitalizeFirstLetter = capitalizeFirstLetter;
 	exports.get = get;
 	exports.safeInterval = safeInterval;
 	exports.safeTimeout = safeTimeout;
-
-	var _Base = __webpack_require__(/*! Base64 */ 48);
-
-	var _Base2 = _interopRequireDefault(_Base);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	exports.each = each;
+	exports.replaceObject = replaceObject;
 
 	/*  Url Encode
 	    ----------
@@ -6026,27 +920,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return 'xxxxxxxxxx'.replace(/./g, function () {
 	        return chars.charAt(Math.floor(Math.random() * chars.length));
 	    });
-	}
-
-	/*  Base 64 Encode
-	    --------------
-
-	    Base 64 encode a string
-	*/
-
-	function b64encode(str) {
-	    return (window.btoa ? window.btoa(str) : _Base2['default'].btoa(str)).replace(/[=]/g, '_');
-	}
-
-	/*  Base 64 Decode
-	    --------------
-
-	    Base 64 decode a string
-	*/
-
-	function b64decode(str) {
-	    str = str.replace(/[_]/g, '=');
-	    return window.atob ? window.atob(str) : _Base2['default'].atob(str);
 	}
 
 	/*  Stringify with Functions
@@ -6166,74 +1039,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, 100);
 	}
 
-/***/ },
-/* 48 */
-/*!****************************!*\
-  !*** ./~/Base64/base64.js ***!
-  \****************************/
-/***/ function(module, exports, __webpack_require__) {
+	function each(item, callback) {
 
-	'use strict';
-
-	;(function () {
-
-	  var object =  true ? exports : self; // #8: web workers
-	  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-	  function InvalidCharacterError(message) {
-	    this.message = message;
-	  }
-	  InvalidCharacterError.prototype = new Error();
-	  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-	  // encoder
-	  // [https://gist.github.com/999166] by [https://github.com/nignag]
-	  object.btoa || (object.btoa = function (input) {
-	    var str = String(input);
-	    for (
-	    // initialize result and counter
-	    var block, charCode, idx = 0, map = chars, output = '';
-	    // if the next str index does not exist:
-	    //   change the mapping table to "="
-	    //   check if d has no fractional digits
-	    str.charAt(idx | 0) || (map = '=', idx % 1);
-	    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-	    output += map.charAt(63 & block >> 8 - idx % 1 * 8)) {
-	      charCode = str.charCodeAt(idx += 3 / 4);
-	      if (charCode > 0xFF) {
-	        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
-	      }
-	      block = block << 8 | charCode;
+	    if (!item) {
+	        return;
 	    }
-	    return output;
-	  });
 
-	  // decoder
-	  // [https://gist.github.com/1020396] by [https://github.com/atk]
-	  object.atob || (object.atob = function (input) {
-	    var str = String(input).replace(/=+$/, '');
-	    if (str.length % 4 == 1) {
-	      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+	    if (item instanceof Array) {
+	        var len = item.length;
+	        for (var i = 0; i < len; i++) {
+	            callback(item[i], i);
+	        }
+	    } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') {
+	        var keys = Object.keys(item);
+	        var _len = keys.length;
+	        for (var _i = 0; _i < _len; _i++) {
+	            var key = keys[_i];
+	            callback(item[key], key);
+	        }
 	    }
-	    for (
-	    // initialize result and counters
-	    var bc = 0, bs, buffer, idx = 0, output = '';
-	    // get next character
-	    buffer = str.charAt(idx++);
-	    // character found in table? initialize bit storage and add its ascii value;
-	    ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
-	    // and if not first of each 4 characters,
-	    // convert the first 8 bits to one ascii character
-	    bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
-	      // try to find character in table (0-63, not found => -1)
-	      buffer = chars.indexOf(buffer);
-	    }
-	    return output;
-	  });
-	})();
+	}
+
+	function replaceObject(obj, callback) {
+	    var parentKey = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+
+
+	    var newobj = obj instanceof Array ? [] : {};
+
+	    each(obj, function (item, key) {
+
+	        var fullKey = parentKey ? parentKey + '.' + key : key;
+
+	        var result = callback(item, key, fullKey);
+
+	        if (result !== undefined) {
+	            newobj[key] = result;
+	        } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
+	            newobj[key] = replaceObject(item, callback, fullKey);
+	        } else {
+	            newobj[key] = item;
+	        }
+	    });
+
+	    return newobj;
+	}
 
 /***/ },
-/* 49 */
+/* 6 */
 /*!****************************!*\
   !*** ./src/lib/promise.js ***!
   \****************************/
@@ -6249,7 +1101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getter = getter;
 	exports.delay = delay;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
 	/*  DeNodeify
 	    ---------
@@ -6320,7 +1172,4521 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 50 */
+/* 7 */
+/*!*********************************************!*\
+  !*** ./~/sync-browser-mocks/src/promise.js ***!
+  \*********************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.patchPromise = patchPromise;
+
+	function trycatch(method, successHandler, errorHandler) {
+
+	    var isCalled = false;
+	    var isSuccess = false;
+	    var isError = false;
+	    var err, res;
+
+	    function flush() {
+	        if (isCalled) {
+	            if (isError) {
+	                return errorHandler(err);
+	            } else if (isSuccess) {
+	                return successHandler(res);
+	            }
+	        }
+	    }
+
+	    try {
+	        method(function (result) {
+	            res = result;
+	            isSuccess = true;
+	            flush();
+	        }, function (error) {
+	            err = error;
+	            isError = true;
+	            flush();
+	        });
+	    } catch (error) {
+	        return errorHandler(error);
+	    }
+
+	    isCalled = true;
+	    flush();
+	}
+
+	var possiblyUnhandledPromises = [];
+	var possiblyUnhandledPromiseTimeout;
+
+	function addPossiblyUnhandledPromise(promise) {
+	    possiblyUnhandledPromises.push(promise);
+	    possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
+	}
+
+	function flushPossiblyUnhandledPromises() {
+	    possiblyUnhandledPromiseTimeout = null;
+	    var promises = possiblyUnhandledPromises;
+	    possiblyUnhandledPromises = [];
+	    for (var i = 0; i < promises.length; i++) {
+	        var promise = promises[i];
+	        if (!promise.hasHandlers && promise.rejected) {
+	            logError(promise.value);
+	        }
+	    }
+	}
+
+	function logError(err) {
+	    setTimeout(function () {
+	        throw err;
+	    }, 1);
+	}
+
+	var toString = {}.toString;
+
+	function isPromise(item) {
+	    try {
+	        if (!item) {
+	            return false;
+	        }
+
+	        if (window.Window && item instanceof window.Window) {
+	            return false;
+	        }
+
+	        if (window.constructor && item instanceof window.constructor) {
+	            return false;
+	        }
+
+	        if (toString) {
+	            var name = toString.call(item);
+
+	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
+	                return false;
+	            }
+	        }
+
+	        if (item && item.then instanceof Function) {
+	            return true;
+	        }
+	    } catch (err) {
+	        return false;
+	    }
+
+	    return false;
+	}
+
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
+
+	    this.parent = parent;
+
+	    this.resolved = false;
+	    this.rejected = false;
+
+	    this.hasHandlers = false;
+
+	    this.handlers = [];
+
+	    addPossiblyUnhandledPromise(this);
+
+	    if (!handler) {
+	        return;
+	    }
+
+	    var self = this;
+
+	    trycatch(handler, function (res) {
+	        return self.resolve(res);
+	    }, function (err) {
+	        return self.reject(err);
+	    });
+	};
+
+	SyncPromise.resolve = function SyncPromiseResolve(value) {
+
+	    if (isPromise(value)) {
+	        return value;
+	    }
+
+	    return new SyncPromise().resolve(value);
+	};
+
+	SyncPromise.reject = function SyncPromiseResolve(error) {
+	    return new SyncPromise().reject(error);
+	};
+
+	SyncPromise.prototype.resolve = function (result) {
+	    if (this.resolved || this.rejected) {
+	        return this;
+	    }
+
+	    if (isPromise(result)) {
+	        throw new Error('Can not resolve promise with another promise');
+	    }
+
+	    this.resolved = true;
+	    this.value = result;
+	    this.dispatch();
+
+	    return this;
+	};
+
+	SyncPromise.prototype.reject = function (error) {
+	    if (this.resolved || this.rejected) {
+	        return this;
+	    }
+
+	    if (isPromise(error)) {
+	        throw new Error('Can not reject promise with another promise');
+	    }
+
+	    this.rejected = true;
+	    this.value = error;
+	    this.dispatch();
+
+	    return this;
+	};
+
+	SyncPromise.prototype.dispatch = function () {
+	    var _this = this;
+
+	    if (!this.resolved && !this.rejected) {
+	        return;
+	    }
+
+	    var _loop = function _loop() {
+
+	        var handler = _this.handlers.shift();
+
+	        try {
+	            if (_this.resolved) {
+	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
+	            } else {
+	                if (handler.onError) {
+	                    result = handler.onError(_this.value);
+	                } else {
+	                    error = _this.value;
+	                }
+	            }
+	        } catch (err) {
+	            error = err;
+	        }
+
+	        if (result === _this) {
+	            throw new Error('Can not return a promise from the the then handler of the same promise');
+	        }
+
+	        if (!handler.promise) {
+	            return 'continue';
+	        }
+
+	        if (error) {
+	            handler.promise.reject(error);
+	        } else if (isPromise(result)) {
+	            result.then(function (res) {
+	                handler.promise.resolve(res);
+	            }, function (err) {
+	                handler.promise.reject(err);
+	            });
+	        } else {
+	            handler.promise.resolve(result);
+	        }
+	    };
+
+	    while (this.handlers.length) {
+	        var result, error;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'continue') continue;
+	    }
+	};
+
+	SyncPromise.prototype.then = function (onSuccess, onError) {
+
+	    var promise = new SyncPromise(null, this);
+
+	    this.handlers.push({
+	        promise: promise,
+	        onSuccess: onSuccess,
+	        onError: onError
+	    });
+
+	    this.hasHandlers = true;
+
+	    this.dispatch();
+
+	    return promise;
+	};
+
+	SyncPromise.prototype['catch'] = function (onError) {
+	    return this.then(null, onError);
+	};
+
+	SyncPromise.prototype['finally'] = function (handler) {
+	    return this.then(function (result) {
+	        handler();
+	        return result;
+	    }, function (error) {
+	        handler();
+	        throw error;
+	    });
+	};
+
+	SyncPromise.all = function (promises) {
+
+	    var promise = new SyncPromise();
+	    var count = promises.length;
+	    var results = [];
+
+	    for (var i = 0; i < promises.length; i++) {
+	        promises[i].then(function (result) {
+	            results[i] = result;
+	            count -= 1;
+	            if (count === 0) {
+	                promise.resolve(results);
+	            }
+	        }, function (err) {
+	            promise.reject(err);
+	        });
+	    }
+
+	    return promise;
+	};
+
+	function patchPromise() {
+	    window.Promise = SyncPromise;
+	}
+
+/***/ },
+/* 8 */
+/*!***************************!*\
+  !*** ./src/lib/base32.js ***!
+  \***************************/
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.b32encode = b32encode;
+	exports.b32decode = b32decode;
+	/* eslint-disable */
+
+	// This would be the place to edit if you want a different
+	// Base32 implementation
+
+	var alphabet = '0123456789abcdefghjkmnpqrtuvwxyz';
+	var alias = { o: 0, i: 1, l: 1, s: 5 };
+
+	/**
+	 * Build a lookup table and memoize it
+	 *
+	 * Return an object that maps a character to its
+	 * byte value.
+	 */
+
+	var _lookup = function lookup() {
+	    var table = {};
+	    // Invert 'alphabet'
+	    for (var i = 0; i < alphabet.length; i++) {
+	        table[alphabet[i]] = i;
+	    }
+	    // Splice in 'alias'
+	    for (var key in alias) {
+	        if (!alias.hasOwnProperty(key)) continue;
+	        table[key] = table['' + alias[key]];
+	    }
+	    _lookup = function lookup() {
+	        return table;
+	    };
+	    return table;
+	};
+
+	/**
+	 * A streaming encoder
+	 *
+	 *     var encoder = new base32.Encoder()
+	 *     var output1 = encoder.update(input1)
+	 *     var output2 = encoder.update(input2)
+	 *     var lastoutput = encode.update(lastinput, true)
+	 */
+
+	function Encoder() {
+	    var skip = 0; // how many bits we will skip from the first byte
+	    var bits = 0; // 5 high bits, carry from one byte to the next
+
+	    this.output = '';
+
+	    // Read one byte of input
+	    // Should not really be used except by "update"
+	    this.readByte = function (byte) {
+	        // coerce the byte to an int
+	        if (typeof byte == 'string') byte = byte.charCodeAt(0);
+
+	        if (skip < 0) {
+	            // we have a carry from the previous byte
+	            bits |= byte >> -skip;
+	        } else {
+	            // no carry
+	            bits = byte << skip & 248;
+	        }
+
+	        if (skip > 3) {
+	            // not enough data to produce a character, get us another one
+	            skip -= 8;
+	            return 1;
+	        }
+
+	        if (skip < 4) {
+	            // produce a character
+	            this.output += alphabet[bits >> 3];
+	            skip += 5;
+	        }
+
+	        return 0;
+	    };
+
+	    // Flush any remaining bits left in the stream
+	    this.finish = function (check) {
+	        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '');
+	        this.output = '';
+	        return output;
+	    };
+	}
+
+	/**
+	 * Process additional input
+	 *
+	 * input: string of bytes to convert
+	 * flush: boolean, should we flush any trailing bits left
+	 *        in the stream
+	 * returns: a string of characters representing 'input' in base32
+	 */
+
+	Encoder.prototype.update = function (input, flush) {
+	    for (var i = 0; i < input.length;) {
+	        i += this.readByte(input[i]);
+	    }
+	    // consume all output
+	    var output = this.output;
+	    this.output = '';
+	    if (flush) {
+	        output += this.finish();
+	    }
+	    return output;
+	};
+
+	// Functions analogously to Encoder
+
+	function Decoder() {
+	    var skip = 0; // how many bits we have from the previous character
+	    var byte = 0; // current byte we're producing
+
+	    this.output = '';
+
+	    // Consume a character from the stream, store
+	    // the output in this.output. As before, better
+	    // to use update().
+	    this.readChar = function (char) {
+	        if (typeof char != 'string') {
+	            if (typeof char == 'number') {
+	                char = String.fromCharCode(char);
+	            }
+	        }
+	        char = char.toLowerCase();
+	        var val = _lookup()[char];
+	        if (typeof val == 'undefined') {
+	            // character does not exist in our lookup table
+	            return; // skip silently. An alternative would be:
+	            // throw Error('Could not find character "' + char + '" in lookup table.')
+	        }
+	        val <<= 3; // move to the high bits
+	        byte |= val >>> skip;
+	        skip += 5;
+	        if (skip >= 8) {
+	            // we have enough to preduce output
+	            this.output += String.fromCharCode(byte);
+	            skip -= 8;
+	            if (skip > 0) byte = val << 5 - skip & 255;else byte = 0;
+	        }
+	    };
+
+	    this.finish = function (check) {
+	        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '');
+	        this.output = '';
+	        return output;
+	    };
+	}
+
+	Decoder.prototype.update = function (input, flush) {
+	    for (var i = 0; i < input.length; i++) {
+	        this.readChar(input[i]);
+	    }
+	    var output = this.output;
+	    this.output = '';
+	    if (flush) {
+	        output += this.finish();
+	    }
+	    return output;
+	};
+
+	/** Convenience functions
+	 *
+	 * These are the ones to use if you just have a string and
+	 * want to convert it without dealing with streams and whatnot.
+	 */
+
+	// String of data goes in, Base32-encoded string comes out.
+	function b32encode(input) {
+	    var encoder = new Encoder();
+	    var output = encoder.update(input, true);
+	    return output;
+	}
+
+	// Base32-encoded string goes in, decoded data comes out.
+	function b32decode(input) {
+	    var decoder = new Decoder();
+	    var output = decoder.update(input, true);
+	    return output;
+	}
+
+/***/ },
+/* 9 */
+/*!***************************!*\
+  !*** ./src/lib/logger.js ***!
+  \***************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.logger = undefined;
+	exports.registerLogger = registerLogger;
+
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
+
+	var customLogger = void 0;
+
+	function registerLogger(newLogger) {
+	    customLogger = newLogger;
+	}
+
+	var logger = exports.logger = {
+	    debug: function debug(event, payload) {
+	        return customLogger ? customLogger.debug(event, payload) : window.console && window.console.debug && window.console.debug(event, payload);
+	    },
+	    info: function info(event, payload) {
+	        return customLogger ? customLogger.info(event, payload) : window.console && window.console.info && window.console.info(event, payload);
+	    },
+	    warn: function warn(event, payload) {
+	        return customLogger ? customLogger.warn(event, payload) : window.console && window.console.warn && window.console.warn(event, payload);
+	    },
+	    error: function error(event, payload) {
+	        return customLogger ? customLogger.error(event, payload) : window.console && window.console.error && window.console.error(event, payload);
+	    },
+	    flush: function flush() {
+	        if (customLogger && customLogger.flush) {
+	            return customLogger.flush();
+	        }
+	        return _promise.SyncPromise.resolve();
+	    }
+	};
+
+/***/ },
+/* 10 */
+/*!***********************************!*\
+  !*** ./~/post-robot/src/index.js ***!
+  \***********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.Promise = undefined;
+
+	var _interface = __webpack_require__(/*! ./interface */ 11);
+
+	Object.keys(_interface).forEach(function (key) {
+	    if (key === "default") return;
+	    Object.defineProperty(exports, key, {
+	        enumerable: true,
+	        get: function get() {
+	            return _interface[key];
+	        }
+	    });
+	});
+
+	var _lib = __webpack_require__(/*! ./lib */ 18);
+
+	Object.defineProperty(exports, 'Promise', {
+	    enumerable: true,
+	    get: function get() {
+	        return _lib.Promise;
+	    }
+	});
+
+	var _drivers = __webpack_require__(/*! ./drivers */ 16);
+
+	var _compat = __webpack_require__(/*! ./compat */ 26);
+
+	function init() {
+
+	    (0, _compat.registerGlobals)();
+
+	    // Listen for all incoming post-messages
+	    _lib.util.listen(window, 'message', _drivers.messageListener);
+
+	    (0, _lib.initOnReady)();
+	}
+
+	init();
+
+	exports['default'] = module.exports;
+
+/***/ },
+/* 11 */
+/*!*********************************************!*\
+  !*** ./~/post-robot/src/interface/index.js ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.linkUrl = exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
+
+	var _client = __webpack_require__(/*! ./client */ 12);
+
+	Object.keys(_client).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _client[key];
+	    }
+	  });
+	});
+
+	var _server = __webpack_require__(/*! ./server */ 34);
+
+	Object.keys(_server).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _server[key];
+	    }
+	  });
+	});
+
+	var _proxy = __webpack_require__(/*! ./proxy */ 35);
+
+	Object.keys(_proxy).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _proxy[key];
+	    }
+	  });
+	});
+
+	var _config = __webpack_require__(/*! ./config */ 36);
+
+	Object.keys(_config).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _config[key];
+	    }
+	  });
+	});
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	Object.defineProperty(exports, 'reset', {
+	  enumerable: true,
+	  get: function get() {
+	    return _drivers.resetListeners;
+	  }
+	});
+
+	var _bridge = __webpack_require__(/*! ../compat/bridge */ 27);
+
+	Object.defineProperty(exports, 'openBridge', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.openBridge;
+	  }
+	});
+
+	var _util = __webpack_require__(/*! ../lib/util */ 21);
+
+	Object.defineProperty(exports, 'util', {
+	  enumerable: true,
+	  get: function get() {
+	    return _util.util;
+	  }
+	});
+
+	var _windows = __webpack_require__(/*! ../lib/windows */ 23);
+
+	Object.defineProperty(exports, 'linkUrl', {
+	  enumerable: true,
+	  get: function get() {
+	    return _windows.linkUrl;
+	  }
+	});
+	var parent = exports.parent = (0, _windows.getParentWindow)();
+
+/***/ },
+/* 12 */
+/*!**********************************************!*\
+  !*** ./~/post-robot/src/interface/client.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.request = request;
+	exports.send = send;
+	exports.sendToParent = sendToParent;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	var _lib = __webpack_require__(/*! ../lib */ 18);
+
+	function request(options) {
+
+	    return _lib.promise.nodeify(new _lib.promise.Promise(function (resolve, reject) {
+
+	        if (!options.name) {
+	            throw new Error('Expected options.name');
+	        }
+
+	        if (!options.window) {
+	            throw new Error('Expected options.window');
+	        }
+
+	        if (_conf.CONFIG.MOCK_MODE) {
+	            options.window = window;
+	        } else if (typeof options.window === 'string') {
+	            var el = document.getElementById(options.window);
+
+	            if (!el) {
+	                throw new Error('Expected options.window ' + options.window + ' to be a valid element id');
+	            }
+
+	            if (el.tagName.toLowerCase() !== 'iframe') {
+	                throw new Error('Expected options.window ' + options.window + ' to be an iframe');
+	            }
+
+	            options.window = el.contentWindow;
+
+	            if (!options.window) {
+	                throw new Error('Expected options.window');
+	            }
+	        }
+
+	        var hash = options.name + '_' + _lib.util.uniqueID();
+	        _drivers.listeners.response[hash] = options;
+
+	        if ((0, _lib.isWindowClosed)(options.window)) {
+	            throw new Error('Target window is closed');
+	        }
+
+	        var hasResult = false;
+
+	        options.respond = function (err, result) {
+	            if (!err) {
+	                hasResult = true;
+	            }
+
+	            return err ? reject(err) : resolve(result);
+	        };
+
+	        return _lib.promise.run(function () {
+
+	            if ((0, _lib.getParentWindow)(options.window) === window) {
+	                return (0, _lib.onWindowReady)(options.window);
+	            }
+	        }).then(function () {
+
+	            (0, _drivers.sendMessage)(options.window, {
+	                hash: hash,
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+	                name: options.name,
+	                data: options.data,
+	                fireAndForget: options.fireAndForget
+	            }, options.domain || '*')['catch'](reject);
+
+	            if (options.fireAndForget) {
+	                return resolve();
+	            }
+
+	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
+
+	                if (options.ack || (0, _lib.isWindowClosed)(options.window)) {
+	                    return ackTimeout.cancel();
+	                }
+
+	                if (!remaining) {
+	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
+	                }
+	            });
+
+	            if (options.timeout) {
+	                (function () {
+	                    var timeout = _lib.util.intervalTimeout(options.timeout, 100, function (remaining) {
+
+	                        if (hasResult || (0, _lib.isWindowClosed)(options.window)) {
+	                            return timeout.cancel();
+	                        }
+
+	                        if (!remaining) {
+	                            return reject(new Error('Post message response timed out after ' + options.timeout + ' ms'));
+	                        }
+	                    }, options.timeout);
+	                })();
+	            }
+	        })['catch'](reject);
+	    }), options.callback);
+	}
+
+	function send(window, name, data, options, callback) {
+
+	    if (!callback) {
+	        if (!options && data instanceof Function) {
+	            callback = data;
+	            options = {};
+	            data = {};
+	        } else if (options instanceof Function) {
+	            callback = options;
+	            options = {};
+	        }
+	    }
+
+	    options = options || {};
+	    options.window = window;
+	    options.name = name;
+	    options.data = data;
+	    options.callback = callback;
+
+	    return request(options);
+	}
+
+	function sendToParent(name, data, options, callback) {
+
+	    var win = (0, _lib.getParentWindow)();
+
+	    if (!win) {
+	        return new _lib.promise.Promise(function (resolve, reject) {
+	            return reject(new Error('Window does not have a parent'));
+	        });
+	    }
+
+	    return send(win, name, data, options, callback);
+	}
+
+/***/ },
+/* 13 */
+/*!****************************************!*\
+  !*** ./~/post-robot/src/conf/index.js ***!
+  \****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _config = __webpack_require__(/*! ./config */ 14);
+
+	Object.keys(_config).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _config[key];
+	    }
+	  });
+	});
+
+	var _constants = __webpack_require__(/*! ./constants */ 15);
+
+	Object.keys(_constants).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _constants[key];
+	    }
+	  });
+	});
+
+/***/ },
+/* 14 */
+/*!*****************************************!*\
+  !*** ./~/post-robot/src/conf/config.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.CONFIG = undefined;
+
+	var _ALLOWED_POST_MESSAGE;
+
+	var _constants = __webpack_require__(/*! ./constants */ 15);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var CONFIG = exports.CONFIG = {
+
+	    ALLOW_POSTMESSAGE_POPUP: false,
+
+	    LOG_LEVEL: 'info',
+
+	    ACK_TIMEOUT: 500,
+
+	    LOG_TO_PAGE: false,
+
+	    MOCK_MODE: false,
+
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
+	};
+
+/***/ },
+/* 15 */
+/*!********************************************!*\
+  !*** ./~/post-robot/src/conf/constants.js ***!
+  \********************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var CONSTANTS = exports.CONSTANTS = {
+
+	    POST_MESSAGE_TYPE: {
+	        REQUEST: 'postrobot_message_request',
+	        RESPONSE: 'postrobot_message_response',
+	        ACK: 'postrobot_message_ack'
+	    },
+
+	    POST_MESSAGE_ACK: {
+	        SUCCESS: 'success',
+	        ERROR: 'error'
+	    },
+
+	    POST_MESSAGE_NAMES: {
+	        METHOD: 'postrobot_method',
+	        READY: 'postrobot_ready'
+	    },
+
+	    WINDOW_TYPES: {
+	        FULLPAGE: 'fullpage',
+	        POPUP: 'popup',
+	        IFRAME: 'iframe'
+	    },
+
+	    WINDOW_PROPS: {
+	        POSTROBOT: '__postRobot__'
+	    },
+
+	    SERIALIZATION_TYPES: {
+	        METHOD: 'postrobot_method'
+	    },
+
+	    SEND_STRATEGIES: {
+	        POST_MESSAGE: 'postrobot_post_message',
+	        GLOBAL_METHOD: 'postrobot_global_method',
+	        REMOTE_BRIDGE: 'postrobot_remote_bridge',
+	        LOCAL_BRIDGE: 'postrobot_local_bridge'
+	    }
+	};
+
+	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
+	    return CONSTANTS.POST_MESSAGE_NAMES[key];
+	});
+
+/***/ },
+/* 16 */
+/*!*******************************************!*\
+  !*** ./~/post-robot/src/drivers/index.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _receive = __webpack_require__(/*! ./receive */ 17);
+
+	Object.keys(_receive).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _receive[key];
+	    }
+	  });
+	});
+
+	var _send = __webpack_require__(/*! ./send */ 30);
+
+	Object.keys(_send).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _send[key];
+	    }
+	  });
+	});
+
+	var _listeners = __webpack_require__(/*! ./listeners */ 32);
+
+	Object.keys(_listeners).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _listeners[key];
+	    }
+	  });
+	});
+
+/***/ },
+/* 17 */
+/*!***************************************************!*\
+  !*** ./~/post-robot/src/drivers/receive/index.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.receiveMessage = receiveMessage;
+	exports.messageListener = messageListener;
+
+	var _conf = __webpack_require__(/*! ../../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../../lib */ 18);
+
+	var _compat = __webpack_require__(/*! ../../compat */ 26);
+
+	var _send = __webpack_require__(/*! ../send */ 30);
+
+	var _listeners = __webpack_require__(/*! ../listeners */ 32);
+
+	var _types = __webpack_require__(/*! ./types */ 33);
+
+	var receivedMessages = [];
+
+	function parseMessage(message) {
+
+	    try {
+	        message = JSON.parse(message);
+	    } catch (err) {
+	        return;
+	    }
+
+	    if (!message.type) {
+	        return;
+	    }
+
+	    if (!_types.RECEIVE_MESSAGE_TYPES[message.type]) {
+	        return;
+	    }
+
+	    return message;
+	}
+
+	function getWindow(hint, windowID) {
+
+	    var windowTargets = {
+	        'window.parent': function windowParent(id) {
+	            return window.parent;
+	        },
+	        'window.opener': function windowOpener(id) {
+	            return (0, _lib.getOpener)(window);
+	        },
+	        'window.parent.opener': function windowParentOpener(id) {
+	            return (0, _lib.getOpener)(window.parent);
+	        },
+	        'window.opener.parent': function windowOpenerParent(id) {
+	            return (0, _lib.getOpener)(window).parent;
+	        }
+	    };
+
+	    var win = void 0;
+
+	    try {
+	        win = windowTargets[hint](windowID);
+	    } catch (err) {
+	        throw new Error('Can not get ' + hint + ': ' + err.message);
+	    }
+
+	    if (!win) {
+	        throw new Error('Can not get ' + hint + ': not available');
+	    }
+
+	    return win;
+	}
+
+	function getProxy(source, message) {
+
+	    if (_conf.CONFIG.MOCK_MODE) {
+	        return;
+	    }
+
+	    if (!message) {
+	        return;
+	    }
+
+	    var listener = (0, _listeners.getRequestListener)(message.name, source);
+
+	    if (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
+	        return;
+	    }
+
+	    var isResponseOrAck = (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK) && _listeners.listeners.response[message.hash];
+
+	    if (!isResponseOrAck) {
+	        for (var i = 0; i < _listeners.listeners.proxies.length; i++) {
+	            var proxy = _listeners.listeners.proxies[i];
+
+	            if (source === proxy.from) {
+	                return proxy.to;
+	            }
+	        }
+	    }
+
+	    if (message.targetHint) {
+	        var win = getWindow(message.targetHint, message.target);
+	        delete message.targetHint;
+	        return win;
+	    }
+
+	    if (message.target && message.target !== (0, _lib.getWindowId)(window)) {
+
+	        var _win = (0, _lib.getWindowById)(message.target);
+
+	        if (!_win) {
+	            throw new Error('Unable to find window to proxy message to: ' + message.target);
+	        }
+
+	        return _win;
+	    }
+	}
+
+	function receiveMessage(event) {
+
+	    try {
+	        event.source; // eslint-disable-line
+	    } catch (err) {
+	        return;
+	    }
+
+	    var source = event.source;
+	    var origin = event.origin;
+	    var data = event.data;
+
+
+	    var message = parseMessage(data);
+
+	    if (!message) {
+	        return;
+	    }
+
+	    if (receivedMessages.indexOf(message.id) === -1) {
+	        receivedMessages.push(message.id);
+	    } else {
+	        return;
+	    }
+
+	    (0, _lib.registerWindow)(message.source, source, origin);
+
+	    var proxyWindow = void 0;
+
+	    try {
+	        proxyWindow = getProxy(source, message);
+	    } catch (err) {
+	        return _lib.log.debug(err.message);
+	    }
+
+	    var level = void 0;
+
+	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
+	        level = 'debug';
+	    } else if (message.ack === 'error') {
+	        level = 'error';
+	    } else {
+	        level = 'info';
+	    }
+
+	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
+
+	    if (proxyWindow) {
+
+	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
+	            return _lib.log.debug('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
+	        }
+
+	        delete message.target;
+	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
+	    }
+
+	    var originalSource = source;
+
+	    if (message.originalSource !== message.source) {
+
+	        if (message.sourceHint) {
+	            originalSource = getWindow(message.sourceHint, message.originalSource);
+	            delete message.sourceHint;
+	        } else {
+	            originalSource = (0, _lib.getWindowById)(message.originalSource);
+	            if (!originalSource) {
+	                throw new Error('Can not find original message source: ' + message.originalSource);
+	            }
+	        }
+
+	        (0, _lib.registerWindow)(message.originalSource, originalSource, message.originalSourceDomain);
+	    }
+
+	    if (originalSource !== source) {
+	        (0, _compat.registerBridge)(source, originalSource);
+	    }
+
+	    if ((0, _lib.isWindowClosed)(originalSource)) {
+	        return _lib.log.debug('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
+	    }
+
+	    if (_conf.CONFIG.MOCK_MODE) {
+	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	    }
+
+	    if (message.data) {
+	        message.data = (0, _lib.deserializeMethods)(originalSource, message.data);
+	    }
+
+	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	}
+
+	function messageListener(event) {
+
+	    try {
+	        event.source; // eslint-disable-line
+	    } catch (err) {
+	        return;
+	    }
+
+	    event = {
+	        source: event.source || event.sourceElement,
+	        origin: event.origin || event.originalEvent.origin,
+	        data: event.data
+	    };
+
+	    try {
+	        (0, _compat.emulateIERestrictions)(event.source, window);
+	    } catch (err) {
+	        return;
+	    }
+
+	    receiveMessage(event);
+	}
+
+/***/ },
+/* 18 */
+/*!***************************************!*\
+  !*** ./~/post-robot/src/lib/index.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _promise = __webpack_require__(/*! ./promise */ 19);
+
+	Object.keys(_promise).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _promise[key];
+	    }
+	  });
+	});
+
+	var _util = __webpack_require__(/*! ./util */ 21);
+
+	Object.keys(_util).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _util[key];
+	    }
+	  });
+	});
+
+	var _log = __webpack_require__(/*! ./log */ 22);
+
+	Object.keys(_log).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _log[key];
+	    }
+	  });
+	});
+
+	var _windows = __webpack_require__(/*! ./windows */ 23);
+
+	Object.keys(_windows).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _windows[key];
+	    }
+	  });
+	});
+
+	var _methods = __webpack_require__(/*! ./methods */ 24);
+
+	Object.keys(_methods).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _methods[key];
+	    }
+	  });
+	});
+
+	var _tick = __webpack_require__(/*! ./tick */ 20);
+
+	Object.keys(_tick).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _tick[key];
+	    }
+	  });
+	});
+
+	var _ready = __webpack_require__(/*! ./ready */ 25);
+
+	Object.keys(_ready).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _ready[key];
+	    }
+	  });
+	});
+
+/***/ },
+/* 19 */
+/*!*****************************************!*\
+  !*** ./~/post-robot/src/lib/promise.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.promise = exports.Promise = undefined;
+
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
+
+	var _tick = __webpack_require__(/*! ./tick */ 20);
+
+	var Promise = exports.Promise = _promise.SyncPromise;
+
+	var promise = exports.promise = {
+
+	    Promise: Promise,
+
+	    run: function run(method) {
+	        return Promise.resolve().then(method);
+	    },
+	    nextTick: function nextTick(method) {
+	        return new Promise(function (resolve, reject) {
+	            (0, _tick.nextTick)(function () {
+	                return promise.run(method).then(resolve, reject);
+	            });
+	        });
+	    },
+	    method: function method(_method) {
+	        return function promiseWrapper() {
+	            var _this = this,
+	                _arguments = arguments;
+
+	            return Promise.resolve().then(function () {
+	                return _method.apply(_this, _arguments);
+	            });
+	        };
+	    },
+	    nodeify: function nodeify(prom, callback) {
+	        if (!callback) {
+	            return prom;
+	        }
+	        prom.then(function (result) {
+	            callback(null, result);
+	        }, function (err) {
+	            callback(err);
+	        });
+	    },
+	    deNodeify: function deNodeify(method) {
+	        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	            args[_key - 1] = arguments[_key];
+	        }
+
+	        return new Promise(function (resolve, reject) {
+	            try {
+	                if (args.length < method.length) {
+	                    return method.apply(undefined, args.concat([function (err, result) {
+	                        return err ? reject(err) : resolve(result);
+	                    }]));
+	                }
+
+	                return promise.run(function () {
+	                    return method.apply(undefined, args);
+	                }).then(resolve, reject);
+	            } catch (err) {
+	                return reject(err);
+	            }
+	        });
+	    },
+	    map: function map(items, method) {
+
+	        var results = [];
+
+	        var _loop = function _loop(i) {
+	            results.push(promise.run(function () {
+	                return method(items[i]);
+	            }));
+	        };
+
+	        for (var i = 0; i < items.length; i++) {
+	            _loop(i);
+	        }
+	        return Promise.all(results);
+	    }
+	};
+
+/***/ },
+/* 20 */
+/*!**************************************!*\
+  !*** ./~/post-robot/src/lib/tick.js ***!
+  \**************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.nextTick = nextTick;
+
+	var _util = __webpack_require__(/*! ./util */ 21);
+
+	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
+	var queue = [];
+
+	window.addEventListener('message', function (event) {
+	    if (event.data === tickMessageName) {
+	        var method = queue.shift();
+	        method.call();
+	    }
+	});
+
+	function nextTick(method) {
+
+	    queue.push(method);
+	    window.postMessage(tickMessageName, '*');
+	}
+
+/***/ },
+/* 21 */
+/*!**************************************!*\
+  !*** ./~/post-robot/src/lib/util.js ***!
+  \**************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.util = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var util = exports.util = {
+	    isPopup: function isPopup() {
+	        return Boolean(window.opener);
+	    },
+	    isIframe: function isIframe() {
+	        return Boolean(window.parent && window !== window.parent);
+	    },
+	    isFullpage: function isFullpage() {
+	        return Boolean(!util.isIframe() && !util.isPopup());
+	    },
+	    getType: function getType() {
+	        if (util.isPopup()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
+	        }
+	        if (util.isIframe()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
+	        }
+	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+	    },
+	    once: function once(method) {
+	        if (!method) {
+	            return method;
+	        }
+	        var called = false;
+	        return function onceWrapper() {
+	            if (!called) {
+	                called = true;
+	                return method.apply(this, arguments);
+	            }
+	        };
+	    },
+	    noop: function noop() {},
+	    // eslint-disable-line no-empty-function
+
+	    safeHasProp: function safeHasProp(obj, name) {
+	        try {
+	            if (obj[name]) {
+	                return true;
+	            } else {
+	                return false;
+	            }
+	        } catch (err) {
+	            return false;
+	        }
+	    },
+	    safeGetProp: function safeGetProp(obj, name) {
+	        try {
+	            return obj[name];
+	        } catch (err) {
+	            return;
+	        }
+	    },
+	    listen: function listen(win, event, handler) {
+	        if (win.addEventListener) {
+	            win.addEventListener(event, handler);
+	        } else {
+	            win.attachEvent('on' + event, handler);
+	        }
+
+	        return {
+	            cancel: function cancel() {
+	                if (win.removeEventListener) {
+	                    win.removeEventListener(event, handler);
+	                } else {
+	                    win.detachEvent('on' + event, handler);
+	                }
+	            }
+	        };
+	    },
+	    apply: function apply(method, context, args) {
+	        if (method.apply instanceof Function) {
+	            return method.apply(context, args);
+	        }
+	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+	    },
+	    find: function find(collection, method, def) {
+	        if (!collection) {
+	            return def;
+	        }
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return collection[i];
+	            }
+	        }
+	        return def;
+	    },
+	    map: function map(collection, method) {
+	        var results = [];
+	        for (var i = 0; i < collection.length; i++) {
+	            results.push(method(collection[i]));
+	        }
+	        return results;
+	    },
+	    some: function some(collection, method) {
+	        method = method || Boolean;
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    },
+	    keys: function keys(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(key);
+	            }
+	        }
+	        return result;
+	    },
+	    values: function values(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(mapping[key]);
+	            }
+	        }
+	        return result;
+	    },
+	    getByValue: function getByValue(mapping, value) {
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
+	                return key;
+	            }
+	        }
+	    },
+	    uniqueID: function uniqueID() {
+
+	        var chars = '0123456789abcdef';
+
+	        return 'xxxxxxxxxx'.replace(/./g, function () {
+	            return chars.charAt(Math.floor(Math.random() * chars.length));
+	        });
+	    },
+	    memoize: function memoize(method) {
+
+	        var results = {};
+
+	        return function memoized() {
+	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
+	            if (!results.hasOwnProperty(args)) {
+	                results[args] = method.apply(this, arguments);
+	            }
+	            return results[args];
+	        };
+	    },
+	    extend: function extend(obj, source) {
+	        if (!source) {
+	            return obj;
+	        }
+
+	        for (var key in source) {
+	            if (source.hasOwnProperty(key)) {
+	                obj[key] = source[key];
+	            }
+	        }
+
+	        return obj;
+	    },
+	    each: function each(obj, callback) {
+	        if (obj instanceof Array) {
+	            for (var i = 0; i < obj.length; i++) {
+	                callback(obj[i], i);
+	            }
+	        } else if (obj instanceof Object && !(obj instanceof Function)) {
+	            for (var key in obj) {
+	                if (obj.hasOwnProperty(key)) {
+	                    callback(obj[key], key);
+	                }
+	            }
+	        }
+	    },
+	    replaceObject: function replaceObject(obj, callback) {
+
+	        var newobj = obj instanceof Array ? [] : {};
+
+	        util.each(obj, function (item, key) {
+
+	            var result = callback(item, key);
+
+	            if (result !== undefined) {
+	                newobj[key] = result;
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
+	                newobj[key] = util.replaceObject(item, callback);
+	            } else {
+	                newobj[key] = item;
+	            }
+	        });
+
+	        return newobj;
+	    },
+	    safeInterval: function safeInterval(method, time) {
+	        var timeout = void 0;
+
+	        function runInterval() {
+	            timeout = setTimeout(runInterval, time);
+	            method.call();
+	        }
+
+	        timeout = setTimeout(runInterval, time);
+
+	        return {
+	            cancel: function cancel() {
+	                clearTimeout(timeout);
+	            }
+	        };
+	    },
+	    intervalTimeout: function intervalTimeout(time, interval, method) {
+
+	        var safeInterval = util.safeInterval(function () {
+	            time -= interval;
+
+	            time = time <= 0 ? 0 : time;
+
+	            if (time === 0) {
+	                safeInterval.cancel();
+	            }
+
+	            method(time);
+	        }, interval);
+
+	        return safeInterval;
+	    },
+	    getDomain: function getDomain(win) {
+	        win = win || window;
+	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
+	    },
+	    getDomainFromUrl: function getDomainFromUrl(url) {
+
+	        var domain = void 0;
+
+	        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+	            domain = url;
+	        } else {
+	            return this.getDomain();
+	        }
+
+	        domain = domain.split('/').slice(0, 3).join('/');
+
+	        return domain;
+	    },
+	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
+
+	        try {
+	            if (frame.parent === win) {
+	                return true;
+	            } else {
+	                return false;
+	            }
+	        } catch (err) {
+
+	            try {
+	                for (var i = 0; i < win.frames.length; i++) {
+	                    if (win.frames[i] === frame) {
+	                        return true;
+	                    }
+	                }
+	            } catch (err2) {
+	                return false;
+	            }
+	        }
+
+	        return false;
+	    }
+	};
+
+/***/ },
+/* 22 */
+/*!*************************************!*\
+  !*** ./~/post-robot/src/lib/log.js ***!
+  \*************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.log = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _util = __webpack_require__(/*! ./util */ 21);
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+
+	if (Function.prototype.bind && window.console && _typeof(console.log) === 'object') {
+	    ['log', 'info', 'warn', 'error'].forEach(function (method) {
+	        console[method] = this.bind(console[method], console);
+	    }, Function.prototype.call);
+	}
+
+	var log = exports.log = {
+	    clearLogs: function clearLogs() {
+
+	        if (window.console && window.console.clear) {
+	            window.console.clear();
+	        }
+
+	        if (_conf.CONFIG.LOG_TO_PAGE) {
+	            var container = document.getElementById('postRobotLogs');
+
+	            if (container) {
+	                container.parentNode.removeChild(container);
+	            }
+	        }
+	    },
+	    writeToPage: function writeToPage(level, args) {
+	        setTimeout(function () {
+	            var container = document.getElementById('postRobotLogs');
+
+	            if (!container) {
+	                container = document.createElement('div');
+	                container.id = 'postRobotLogs';
+	                container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
+	                document.body.appendChild(container);
+	            }
+
+	            var el = document.createElement('div');
+
+	            var date = new Date().toString().split(' ')[4];
+
+	            var payload = _util.util.map(args, function (item) {
+	                if (typeof item === 'string') {
+	                    return item;
+	                }
+	                if (!item) {
+	                    return toString.call(item);
+	                }
+	                var json = void 0;
+	                try {
+	                    json = JSON.stringify(item, 0, 2);
+	                } catch (e) {
+	                    json = '[object]';
+	                }
+
+	                return '\n\n' + json + '\n\n';
+	            }).join(' ');
+
+	            var msg = date + ' ' + level + ' ' + payload;
+	            el.innerHTML = msg;
+
+	            var color = {
+	                log: '#ddd',
+	                warn: 'orange',
+	                error: 'red',
+	                info: 'blue',
+	                debug: '#aaa'
+	            }[level];
+
+	            el.style.cssText = 'margin-top: 10px; color: ' + color + ';';
+
+	            if (!container.childNodes.length) {
+	                container.appendChild(el);
+	            } else {
+	                container.insertBefore(el, container.childNodes[0]);
+	            }
+	        });
+	    },
+	    logLevel: function logLevel(level, args) {
+
+	        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) {
+	            return;
+	        }
+
+	        args = Array.prototype.slice.call(args);
+
+	        args.unshift(window.location.pathname);
+	        args.unshift(window.location.host);
+	        args.unshift('<' + _util.util.getType().toLowerCase() + '>');
+	        args.unshift('[post-robot]');
+
+	        if (_conf.CONFIG.LOG_TO_PAGE) {
+	            log.writeToPage(level, args);
+	        }
+
+	        if (!window.console) {
+	            return;
+	        }
+
+	        if (!window.console[level]) {
+	            level = 'log';
+	        }
+
+	        if (!window.console[level]) {
+	            return;
+	        }
+
+	        window.console[level].apply(window.console, args);
+	    },
+	    debug: function debug() {
+	        log.logLevel('debug', arguments);
+	    },
+	    info: function info() {
+	        log.logLevel('info', arguments);
+	    },
+	    warn: function warn() {
+	        log.logLevel('warn', arguments);
+	    },
+	    error: function error() {
+	        log.logLevel('error', arguments);
+	    }
+	};
+
+/***/ },
+/* 23 */
+/*!*****************************************!*\
+  !*** ./~/post-robot/src/lib/windows.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.isSameDomain = isSameDomain;
+	exports.isWindowClosed = isWindowClosed;
+	exports.getOpener = getOpener;
+	exports.getParentWindow = getParentWindow;
+	exports.getWindowId = getWindowId;
+	exports.getWindowById = getWindowById;
+	exports.getWindowDomain = getWindowDomain;
+	exports.registerWindow = registerWindow;
+	exports.isWindowEqual = isWindowEqual;
+	exports.isSameTopWindow = isSameTopWindow;
+	exports.linkUrl = linkUrl;
+
+	var _util = __webpack_require__(/*! ./util */ 21);
+
+	function safeGet(obj, prop) {
+
+	    var result = void 0;
+
+	    try {
+	        result = obj[prop];
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return result;
+	}
+
+	var domainMatches = [];
+	var domainMatchTimeout = void 0;
+
+	function isSameDomain(win) {
+
+	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
+	        }
+
+	        var _match = _ref;
+
+	        if (_match.win === win) {
+
+	            if (!_match.match) {
+	                return false;
+	            }
+
+	            _match.match = false;
+
+	            try {
+	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
+	            } catch (err) {
+	                return;
+	            }
+
+	            return _match.match;
+	        }
+	    }
+
+	    var match = false;
+
+	    try {
+	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
+	            match = true;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    domainMatches.push({
+	        win: win,
+	        match: match
+	    });
+
+	    if (!domainMatchTimeout) {
+	        domainMatchTimeout = setTimeout(function () {
+	            domainMatches = [];
+	            domainMatchTimeout = null;
+	        }, 1);
+	    }
+
+	    return match;
+	}
+
+	function isWindowClosed(win) {
+	    try {
+	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
+	    } catch (err) {
+	        return true;
+	    }
+	}
+
+	function getOpener(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        return win.opener;
+	    } catch (err) {
+	        return;
+	    }
+	}
+
+	function getParentWindow(win) {
+	    win = win || window;
+
+	    var opener = getOpener(win);
+
+	    if (opener) {
+	        return opener;
+	    }
+
+	    if (win.parent !== win) {
+	        return win.parent;
+	    }
+	}
+
+	var windows = [];
+	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
+
+	function getWindowId(win) {
+
+	    if (win === window) {
+	        return windowId;
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+
+	        try {
+	            if (map.win === win) {
+	                return map.id;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+	    }
+	}
+
+	function getWindowById(id) {
+
+	    if (id === window.name || id === windowId) {
+	        return window;
+	    }
+
+	    if (window.frames && window.frames[id]) {
+	        return window.frames[id];
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+
+	        try {
+	            if (map.id === id) {
+	                return map.win;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+	    }
+	}
+
+	function getWindowDomain(win) {
+
+	    if (win === window) {
+	        return _util.util.getDomain(window);
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+
+	        try {
+	            if (map.win === win && map.domain) {
+	                return map.domain;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+	    }
+	}
+
+	function registerWindow(id, win, domain) {
+
+	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
+
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
+	        }
+
+	        var map = _ref2;
+
+	        try {
+	            if (map.id === id && map.win === win) {
+	                map.domain = domain;
+	                return;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+
+	        if (map.id === id && map.win !== win) {
+	            if (!isWindowClosed(map.win)) {
+	                throw new Error('Can not register a duplicate window with name ' + id);
+	            }
+	        }
+	    }
+
+	    windows.push({
+	        id: id,
+	        win: win,
+	        domain: domain
+	    });
+	}
+
+	function isWindowEqual(win1, win2) {
+
+	    if (win1 === win2) {
+	        return true;
+	    }
+
+	    var id1 = getWindowId(win1);
+	    var id2 = getWindowId(win2);
+
+	    if (id1 && id2 && id1 === id2) {
+	        return true;
+	    }
+
+	    return false;
+	}
+
+	function isSameTopWindow(win1, win2) {
+	    try {
+	        return win1.top === win2.top;
+	    } catch (err) {
+	        return false;
+	    }
+	}
+
+	function linkUrl(name, win, url) {
+
+	    var domain = _util.util.getDomainFromUrl(url);
+
+	    registerWindow(name, win, domain);
+
+	    domainMatches.push({
+	        win: win,
+	        match: _util.util.getDomain() === domain
+	    });
+	}
+
+	var openWindow = window.open;
+
+	window.open = function (url, name, x, y) {
+
+	    if (!name) {
+	        name = _util.util.uniqueID();
+	        arguments[1] = name;
+	    }
+
+	    var win = _util.util.apply(openWindow, this, arguments);
+
+	    if (url) {
+	        linkUrl(name, win, url);
+	    } else {
+	        registerWindow(name, win);
+	    }
+
+	    return win;
+	};
+
+/***/ },
+/* 24 */
+/*!*****************************************!*\
+  !*** ./~/post-robot/src/lib/methods.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.listenForMethods = undefined;
+	exports.serializeMethod = serializeMethod;
+	exports.serializeMethods = serializeMethods;
+	exports.deserializeMethod = deserializeMethod;
+	exports.deserializeMethods = deserializeMethods;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _util = __webpack_require__(/*! ./util */ 21);
+
+	var _interface = __webpack_require__(/*! ../interface */ 11);
+
+	var _log = __webpack_require__(/*! ./log */ 22);
+
+	var _promise = __webpack_require__(/*! ./promise */ 19);
+
+	var methods = {};
+
+	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
+
+	        if (!methods[data.id]) {
+	            throw new Error('Could not find method with id: ' + data.id);
+	        }
+
+	        if (methods[data.id].win !== source) {
+	            throw new Error('Method window does not match');
+	        }
+
+	        var method = methods[data.id].method;
+
+	        _log.log.debug('Call local method', data.name, data.args);
+
+	        return _promise.promise.run(function () {
+	            return method.apply(null, data.args);
+	        }).then(function (result) {
+
+	            return {
+	                result: result,
+	                id: data.id,
+	                name: data.name
+	            };
+	        });
+	    });
+	});
+
+	function isSerializedMethod(item) {
+	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
+	}
+
+	function serializeMethod(destination, method, name) {
+
+	    var id = _util.util.uniqueID();
+
+	    methods[id] = {
+	        win: destination,
+	        method: method
+	    };
+
+	    return {
+	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
+	        __id__: id,
+	        __name__: name
+	    };
+	}
+
+	function serializeMethods(destination, obj) {
+
+	    listenForMethods();
+
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
+	        if (item instanceof Function) {
+	            return serializeMethod(destination, item, key);
+	        }
+	    }).obj;
+	}
+
+	function deserializeMethod(source, obj) {
+
+	    function wrapper() {
+	        var args = Array.prototype.slice.call(arguments);
+	        _log.log.debug('Call foreign method', obj.__name__, args);
+	        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
+	            id: obj.__id__,
+	            name: obj.__name__,
+	            args: args
+
+	        }).then(function (data) {
+
+	            _log.log.debug('Got foreign method result', obj.__name__, data.result);
+	            return data.result;
+	        });
+	    }
+
+	    wrapper.__name__ = obj.__name__;
+
+	    return wrapper;
+	}
+
+	function deserializeMethods(source, obj) {
+
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
+	        if (isSerializedMethod(item)) {
+	            return deserializeMethod(source, item);
+	        }
+	    }).obj;
+	}
+
+/***/ },
+/* 25 */
+/*!***************************************!*\
+  !*** ./~/post-robot/src/lib/ready.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.initOnReady = initOnReady;
+	exports.onWindowReady = onWindowReady;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _windows = __webpack_require__(/*! ./windows */ 23);
+
+	var _interface = __webpack_require__(/*! ../interface */ 11);
+
+	var _log = __webpack_require__(/*! ./log */ 22);
+
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
+
+	var readyPromises = [];
+
+	function initOnReady() {
+
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (win, data) {
+
+	        for (var _iterator = readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	            var _ref;
+
+	            if (_isArray) {
+	                if (_i >= _iterator.length) break;
+	                _ref = _iterator[_i++];
+	            } else {
+	                _i = _iterator.next();
+	                if (_i.done) break;
+	                _ref = _i.value;
+	            }
+
+	            var item = _ref;
+
+	            if (item.win === win) {
+	                item.promise.resolve(win);
+	                return;
+	            }
+	        }
+
+	        readyPromises.push({
+	            win: win,
+	            promise: new _promise.SyncPromise().resolve(win)
+	        });
+	    });
+
+	    var parent = (0, _windows.getParentWindow)();
+
+	    if (parent) {
+	        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {})['catch'](function (err) {
+	            _log.log.debug(err.stack || err.toString());
+	        });
+	    }
+	}
+
+	function onWindowReady(win) {
+	    var timeout = arguments.length <= 1 || arguments[1] === undefined ? 5000 : arguments[1];
+	    var name = arguments.length <= 2 || arguments[2] === undefined ? 'Window' : arguments[2];
+
+
+	    for (var _iterator2 = readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
+
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
+	        }
+
+	        var item = _ref2;
+
+	        if (item.win === win) {
+	            return item.promise;
+	        }
+	    }
+
+	    var promise = new _promise.SyncPromise();
+
+	    readyPromises.push({
+	        win: win,
+	        promise: promise
+	    });
+
+	    setTimeout(function () {
+	        return promise.reject(new Error(name + ' did not load after ' + timeout + 'ms'));
+	    }, timeout);
+
+	    return promise;
+	}
+
+/***/ },
+/* 26 */
+/*!******************************************!*\
+  !*** ./~/post-robot/src/compat/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _bridge = __webpack_require__(/*! ./bridge */ 27);
+
+	Object.keys(_bridge).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _bridge[key];
+	    }
+	  });
+	});
+
+	var _global = __webpack_require__(/*! ./global */ 28);
+
+	Object.keys(_global).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _global[key];
+	    }
+	  });
+	});
+
+	var _ie = __webpack_require__(/*! ./ie */ 29);
+
+	Object.keys(_ie).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _ie[key];
+	    }
+	  });
+	});
+
+/***/ },
+/* 27 */
+/*!*******************************************!*\
+  !*** ./~/post-robot/src/compat/bridge.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.getLocalBridgeForDomain = getLocalBridgeForDomain;
+	exports.getLocalBridgeForWindow = getLocalBridgeForWindow;
+	exports.getRemoteBridgeForDomain = getRemoteBridgeForDomain;
+	exports.getRemoteBridgeForWindow = getRemoteBridgeForWindow;
+	exports.registerBridge = registerBridge;
+	exports.openBridge = openBridge;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../lib */ 18);
+
+	var BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
+
+	var pendingBridges = {};
+	var bridges = [];
+
+	var ZONES = {
+	    LOCAL: 'local',
+	    REMOTE: 'remote'
+	};
+
+	function documentReady() {
+	    return new _lib.promise.Promise(function (resolve) {
+	        if (window.document && window.document.body) {
+	            return resolve(window.document);
+	        }
+
+	        window.document.addEventListener('DOMContentLoaded', function (event) {
+	            return resolve(window.document);
+	        });
+	    });
+	}
+
+	function getBridgeForDomain(domain) {
+	    var zone = arguments.length <= 1 || arguments[1] === undefined ? ZONES.LOCAL : arguments[1];
+
+	    return _lib.promise.run(function () {
+
+	        if (zone === ZONES.LOCAL && pendingBridges[domain]) {
+	            return pendingBridges[domain];
+	        }
+
+	        for (var _iterator = bridges, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	            var _ref;
+
+	            if (_isArray) {
+	                if (_i >= _iterator.length) break;
+	                _ref = _iterator[_i++];
+	            } else {
+	                _i = _iterator.next();
+	                if (_i.done) break;
+	                _ref = _i.value;
+	            }
+
+	            var item = _ref;
+
+	            if (item.domain === domain && item.zone === zone) {
+	                return item.bridge;
+	            }
+	        }
+	    }).then(function (bridge) {
+
+	        if (bridge && zone === ZONES.LOCAL) {
+	            return (0, _lib.onWindowReady)(bridge);
+	        }
+
+	        return bridge;
+	    });
+	}
+
+	function getBridgeForWindow(win) {
+	    var zone = arguments.length <= 1 || arguments[1] === undefined ? ZONES.LOCAL : arguments[1];
+
+	    return _lib.promise.run(function () {
+
+	        if ((0, _lib.getOpener)(win) === window) {
+	            return (0, _lib.onWindowReady)(win);
+	        }
+	    }).then(function () {
+
+	        for (var _iterator2 = bridges, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	            var _ref2;
+
+	            if (_isArray2) {
+	                if (_i2 >= _iterator2.length) break;
+	                _ref2 = _iterator2[_i2++];
+	            } else {
+	                _i2 = _iterator2.next();
+	                if (_i2.done) break;
+	                _ref2 = _i2.value;
+	            }
+
+	            var item = _ref2;
+
+	            if (item.win === win && item.zone === zone) {
+	                return item.bridge;
+	            }
+	        }
+
+	        var domain = (0, _lib.getWindowDomain)(win);
+
+	        if (domain) {
+	            return getBridgeForDomain(domain, zone);
+	        }
+	    }).then(function (bridge) {
+
+	        if (bridge && zone === ZONES.LOCAL) {
+	            return (0, _lib.onWindowReady)(bridge);
+	        }
+
+	        return bridge;
+	    });
+	}
+
+	function getLocalBridgeForDomain(domain) {
+	    return getBridgeForDomain(domain, ZONES.LOCAL);
+	}
+
+	function getLocalBridgeForWindow(win) {
+	    return getBridgeForWindow(win, ZONES.LOCAL);
+	}
+
+	function getRemoteBridgeForDomain(domain) {
+	    return getBridgeForDomain(domain, ZONES.REMOTE);
+	}
+
+	function getRemoteBridgeForWindow(win) {
+	    return _lib.promise.run(function () {
+
+	        return getBridgeForWindow(win, ZONES.REMOTE);
+	    }).then(function (bridge) {
+
+	        if (bridge) {
+	            return bridge;
+	        }
+
+	        try {
+	            if (!win || !win.frames || !win.frames.length) {
+	                return;
+	            }
+
+	            for (var i = 0; i < win.frames.length; i++) {
+	                try {
+	                    var frame = win.frames[i];
+
+	                    if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                        return frame;
+	                    }
+	                } catch (err) {
+	                    continue;
+	                }
+	            }
+	        } catch (err) {
+	            return;
+	        }
+	    });
+	}
+
+	function registerBridge(bridge, win) {
+
+	    var result = void 0;
+
+	    for (var _iterator3 = bridges, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
+	        }
+
+	        var item = _ref3;
+
+	        if (item.bridge === bridge) {
+	            result = item;
+	            break;
+	        }
+	    }
+
+	    if (!result) {
+	        var zone = _lib.util.isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
+
+	        result = {
+	            bridge: bridge,
+	            domain: (0, _lib.getWindowDomain)(bridge),
+	            windows: [],
+	            zone: zone
+	        };
+
+	        bridges.push(result);
+	    }
+
+	    if (win && result.windows.indexOf(win) === -1) {
+	        result.windows.push(win);
+	    }
+	}
+
+	function openBridge(url, domain) {
+
+	    domain = domain || _lib.util.getDomainFromUrl(url);
+
+	    var bridgePromise = _lib.promise.run(function () {
+
+	        return getLocalBridgeForDomain(domain);
+	    }).then(function (existingBridge) {
+
+	        if (existingBridge) {
+	            return existingBridge;
+	        }
+
+	        if (_lib.util.getDomain() === domain) {
+	            return;
+	        }
+
+	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
+
+	        _lib.log.debug('Opening bridge:', url);
+
+	        var iframe = document.createElement('iframe');
+
+	        iframe.setAttribute('name', id);
+	        iframe.setAttribute('id', id);
+
+	        iframe.setAttribute('style', 'display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;');
+	        iframe.setAttribute('frameborder', '0');
+	        iframe.setAttribute('border', '0');
+	        iframe.setAttribute('scrolling', 'no');
+	        iframe.setAttribute('allowTransparency', 'true');
+
+	        iframe.setAttribute('tabindex', '-1');
+	        iframe.setAttribute('hidden', 'true');
+	        iframe.setAttribute('title', '');
+	        iframe.setAttribute('role', 'presentation');
+
+	        iframe.src = url;
+
+	        return documentReady().then(function (document) {
+	            document.body.appendChild(iframe);
+
+	            var bridge = iframe.contentWindow;
+
+	            (0, _lib.registerWindow)(id, bridge, domain);
+	            registerBridge(bridge);
+
+	            delete pendingBridges[domain];
+
+	            return new _lib.promise.Promise(function (resolve, reject) {
+
+	                iframe.onload = resolve;
+	                iframe.onerror = reject;
+	            }).then(function () {
+
+	                return (0, _lib.onWindowReady)(bridge, 5000, 'Bridge ' + url);
+	            }).then(function () {
+
+	                return bridge;
+	            });
+	        });
+	    });
+
+	    pendingBridges[domain] = bridgePromise;
+
+	    return bridgePromise;
+	}
+
+/***/ },
+/* 28 */
+/*!*******************************************!*\
+  !*** ./~/post-robot/src/compat/global.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.registerGlobals = registerGlobals;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	function registerGlobals() {
+
+	    // Only allow ourselves to be loaded once
+
+	    if (window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	        throw new Error('Attempting to load postRobot twice on the same window');
+	    }
+
+	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
+	        postMessage: function postMessage(event) {
+	            (0, _drivers.receiveMessage)(event);
+	        }
+	    };
+	}
+
+/***/ },
+/* 29 */
+/*!***************************************!*\
+  !*** ./~/post-robot/src/compat/ie.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.emulateIERestrictions = emulateIERestrictions;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../lib */ 18);
+
+	function emulateIERestrictions(sourceWindow, targetWindow) {
+	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+
+	        if (!(0, _lib.isSameTopWindow)(sourceWindow, targetWindow)) {
+	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
+	        }
+	    }
+	}
+
+/***/ },
+/* 30 */
+/*!************************************************!*\
+  !*** ./~/post-robot/src/drivers/send/index.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	exports.buildMessage = buildMessage;
+	exports.sendMessage = sendMessage;
+
+	var _conf = __webpack_require__(/*! ../../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../../lib */ 18);
+
+	var _strategies = __webpack_require__(/*! ./strategies */ 31);
+
+	function buildMessage(win, message) {
+	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+
+	    var id = _lib.util.uniqueID();
+	    var source = (0, _lib.getWindowId)(window);
+	    var type = _lib.util.getType();
+	    var target = (0, _lib.getWindowId)(win);
+	    var sourceDomain = _lib.util.getDomain(window);
+
+	    return _extends({}, message, options, {
+	        id: message.id || id,
+	        source: source,
+	        originalSource: message.originalSource || source,
+	        sourceDomain: sourceDomain,
+	        originalSourceDomain: message.sourceDomain || sourceDomain,
+	        windowType: type,
+	        originalWindowType: message.originalWindowType || type,
+	        target: message.target || target
+	    });
+	}
+
+	function sendMessage(win, message, domain, isProxy) {
+	    return _lib.promise.run(function () {
+
+	        message = buildMessage(win, message, {
+	            data: (0, _lib.serializeMethods)(win, message.data),
+	            domain: domain
+	        });
+
+	        var level = void 0;
+
+	        if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
+	            level = 'debug';
+	        } else if (message.ack === 'error') {
+	            level = 'error';
+	        } else {
+	            level = 'info';
+	        }
+
+	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
+
+	        if (_conf.CONFIG.MOCK_MODE) {
+	            delete message.target;
+	            return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	                origin: _lib.util.getDomain(window),
+	                source: window,
+	                data: JSON.stringify(message)
+	            });
+	        }
+
+	        if (win === window) {
+	            throw new Error('Attemping to send message to self');
+	        }
+
+	        if ((0, _lib.isWindowClosed)(win)) {
+	            throw new Error('Window is closed');
+	        }
+
+	        _lib.log.debug('Running send message strategies', message);
+
+	        var messages = [];
+
+	        return _lib.promise.map(_lib.util.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
+
+	            return _lib.promise.run(function () {
+
+	                if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
+	                    throw new Error('Strategy disallowed: ' + strategyName);
+	                }
+
+	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
+	            }).then(function () {
+	                messages.push(strategyName + ': success');
+	                return true;
+	            }, function (err) {
+	                messages.push(strategyName + ': ' + err.message);
+	                return false;
+	            });
+	        }).then(function (results) {
+
+	            var success = _lib.util.some(results);
+	            var status = message.type + ' ' + message.name + ' ' + (success ? 'success' : 'error') + ':\n  - ' + messages.join('\n  - ') + '\n';
+
+	            _lib.log.debug(status);
+
+	            if (!success) {
+	                throw new Error(status);
+	            }
+	        });
+	    });
+	}
+
+/***/ },
+/* 31 */
+/*!*****************************************************!*\
+  !*** ./~/post-robot/src/drivers/send/strategies.js ***!
+  \*****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.SEND_MESSAGE_STRATEGIES = undefined;
+
+	var _SEND_MESSAGE_STRATEG;
+
+	var _conf = __webpack_require__(/*! ../../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../../lib */ 18);
+
+	var _compat = __webpack_require__(/*! ../../compat */ 26);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function (win, message, domain) {
+
+	    (0, _compat.emulateIERestrictions)(window, win);
+
+	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
+
+	    if (!(0, _lib.isSameDomain)(win)) {
+	        throw new Error('Window is not on the same domain');
+	    }
+
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use global method to communicate between two different windows, not between frames');
+	    }
+
+	    var sourceDomain = _lib.util.getDomain(window);
+	    var targetDomain = void 0;
+
+	    try {
+	        targetDomain = _lib.util.getDomain(win);
+	    } catch (err) {
+	        throw new Error('Can not read target window domain: ' + err.message);
+	    }
+
+	    if (sourceDomain !== targetDomain) {
+	        throw new Error('Can not send global message - source ' + sourceDomain + ' does not match target ' + targetDomain);
+	    }
+
+	    if (domain !== '*' && targetDomain !== domain) {
+	        throw new Error('Can post post through global method - specified domain ' + domain + ' does not match target domain ' + targetDomain);
+	    }
+
+	    if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	        throw new Error('post-robot not available on target window at ' + targetDomain);
+	    }
+
+	    win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	        origin: _lib.util.getDomain(window),
+	        source: window,
+	        data: JSON.stringify(message, 0, 2)
+	    });
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, function (win, message, domain) {
+
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
+	    }
+
+	    return (0, _compat.getRemoteBridgeForWindow)(win).then(function (bridge) {
+
+	        if (!bridge) {
+	            throw new Error('No bridge available in window');
+	        }
+
+	        var sourceDomain = _lib.util.getDomain(window);
+	        var targetDomain = void 0;
+
+	        try {
+	            targetDomain = _lib.util.getDomain(bridge);
+	        } catch (err) {
+	            throw new Error('Can not read bridge window domain: ' + err.message);
+	        }
+
+	        if (sourceDomain !== targetDomain) {
+	            throw new Error('Can not accept global message through bridge - source ' + sourceDomain + ' does not match bridge ' + targetDomain);
+	        }
+
+	        if (!_lib.util.safeHasProp(bridge, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	            throw new Error('post-robot not available on bridge at ' + targetDomain);
+	        }
+
+	        message.targetHint = 'window.parent';
+
+	        // If we're messaging our child
+
+	        if (window === (0, _lib.getOpener)(win)) {
+	            message.sourceHint = 'window.opener';
+	        }
+
+	        bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	            origin: _lib.util.getDomain(window),
+	            source: window,
+	            data: JSON.stringify(message, 0, 2)
+	        });
+	    });
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
+
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
+	    }
+
+	    // If we're messaging our parent
+
+	    if (win === (0, _lib.getOpener)(window)) {
+	        message.targetHint = 'window.parent.opener';
+	    }
+
+	    if (!message.target && !message.targetHint) {
+	        throw new Error('Can not post message down through bridge without target or targetHint');
+	    }
+
+	    // If we're messaging our child
+
+	    var opener = (0, _lib.getOpener)(win);
+
+	    if (opener && window === opener) {
+	        message.sourceHint = 'window.opener';
+	    }
+
+	    if (opener && window === opener.parent) {
+	        message.sourceHint = 'window.opener.parent';
+	    }
+
+	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
+
+	        if (!bridge) {
+	            throw new Error('Bridge not initialized');
+	        }
+
+	        if (win === bridge) {
+	            throw new Error('Message target is bridge');
+	        }
+
+	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
+	    });
+	}), _SEND_MESSAGE_STRATEG);
+
+/***/ },
+/* 32 */
+/*!***********************************************!*\
+  !*** ./~/post-robot/src/drivers/listeners.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.listeners = undefined;
+	exports.resetListeners = resetListeners;
+	exports.getRequestListener = getRequestListener;
+	exports.removeRequestListener = removeRequestListener;
+	exports.addRequestListener = addRequestListener;
+
+	var _lib = __webpack_require__(/*! ../lib */ 18);
+
+	var listeners = exports.listeners = void 0;
+
+	function resetListeners() {
+	    exports.listeners = listeners = {
+	        request: [],
+	        response: {},
+	        proxies: []
+	    };
+	}
+
+	function getRequestListener(name, win) {
+	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
+	        }
+
+	        var requestListener = _ref;
+
+
+	        if (requestListener.name !== name) {
+	            continue;
+	        }
+
+	        if (!requestListener.win) {
+	            return requestListener.options;
+	        }
+
+	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
+	            return requestListener.options;
+	        }
+	    }
+	}
+
+	function removeRequestListener(options) {
+
+	    var listener = void 0;
+
+	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
+
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
+	        }
+
+	        var requestListener = _ref2;
+
+	        if (requestListener.options === options) {
+	            listener = requestListener;
+	            break;
+	        }
+	    }
+
+	    if (listener) {
+	        listeners.request.splice(listeners.request.indexOf(listener), 1);
+	    }
+	}
+
+	function addRequestListener(name, win, options, override) {
+
+	    var listener = getRequestListener(name, win);
+
+	    if (listener) {
+	        if (override) {
+	            removeRequestListener(listener);
+	        } else {
+	            throw new Error('Request listener already exists for ' + name);
+	        }
+	    }
+
+	    listeners.request.push({ name: name, win: win, options: options });
+	}
+
+	resetListeners();
+
+/***/ },
+/* 33 */
+/*!***************************************************!*\
+  !*** ./~/post-robot/src/drivers/receive/types.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.RECEIVE_MESSAGE_TYPES = undefined;
+
+	var _RECEIVE_MESSAGE_TYPE;
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _conf = __webpack_require__(/*! ../../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../../lib */ 18);
+
+	var _send = __webpack_require__(/*! ../send */ 30);
+
+	var _listeners = __webpack_require__(/*! ../listeners */ 32);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, message, origin) {
+
+	    var options = _listeners.listeners.response[message.hash];
+
+	    if (!options) {
+	        throw new Error('No handler found for post message ack for message: ' + message.name + ' in ' + window.location.href);
+	    }
+
+	    options.ack = true;
+	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, message, origin) {
+
+	    var options = (0, _listeners.getRequestListener)(message.name, source);
+
+	    function respond(data) {
+
+	        if (message.fireAndForget || (0, _lib.isWindowClosed)(source)) {
+	            return _lib.promise.Promise.resolve();
+	        }
+
+	        return (0, _send.sendMessage)(source, _extends({
+	            target: message.originalSource,
+	            hash: message.hash,
+	            name: message.name
+	        }, data), '*');
+	    }
+
+	    return _lib.promise.Promise.all([respond({
+	        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
+	    }), _lib.promise.run(function () {
+
+	        if (!options) {
+	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
+	        }
+
+	        if (options.domain) {
+	            var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
+
+	            if (!match) {
+	                throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
+	            }
+	        }
+
+	        return _lib.promise.deNodeify(options.handler, source, message.data);
+	    }).then(function (data) {
+
+	        return respond({
+	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+	            data: data
+	        });
+	    }, function (err) {
+
+	        return respond({
+	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
+	            error: err.stack ? err.message + '\n' + err.stack : err.toString()
+	        });
+	    })])['catch'](function (err) {
+
+	        if (options && options.handleError) {
+	            return options.handleError(err);
+	        } else {
+	            _lib.log.error(err.stack || err.toString());
+	        }
+	    });
+	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
+
+	    var options = _listeners.listeners.response[message.hash];
+
+	    if (!options) {
+	        throw new Error('No response handler found for post message response ' + message.name + ' in ' + window.location.href);
+	    }
+
+	    delete _listeners.listeners.response[message.hash];
+
+	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
+	        return options.respond(new Error(message.error));
+	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
+	        return options.respond(null, message.data || message.response);
+	    }
+	}), _RECEIVE_MESSAGE_TYPE);
+
+/***/ },
+/* 34 */
+/*!**********************************************!*\
+  !*** ./~/post-robot/src/interface/server.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.listen = listen;
+	exports.on = on;
+	exports.once = once;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	var _lib = __webpack_require__(/*! ../lib */ 18);
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	function listen(options) {
+
+	    if (!options.name) {
+	        throw new Error('Expected options.name');
+	    }
+
+	    options.handler = options.handler || _lib.util.noop;
+
+	    options.errorHandler = options.errorHandler || function (err) {
+	        throw err;
+	    };
+
+	    if (options.once) {
+	        (function () {
+	            var handler = options.handler;
+	            options.handler = _lib.util.once(function () {
+	                (0, _drivers.removeRequestListener)(options);
+	                return handler.apply(this, arguments);
+	            });
+	        })();
+	    }
+
+	    var override = options.override || _conf.CONFIG.MOCK_MODE;
+
+	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
+
+	    options.handleError = function (err) {
+	        // removeRequestListener(options);
+	        options.errorHandler(err);
+	    };
+
+	    if (options.window && options.errorOnClose) {
+	        (function () {
+	            var interval = _lib.util.safeInterval(function () {
+	                if ((0, _lib.isWindowClosed)(options.window)) {
+	                    interval.cancel();
+	                    options.handleError(new Error('Post message target window is closed'));
+	                }
+	            }, 50);
+	        })();
+	    }
+
+	    return {
+	        cancel: function cancel() {
+	            (0, _drivers.removeRequestListener)(options);
+	        }
+	    };
+	}
+
+	function on(name, options, handler, errorHandler) {
+
+	    if (options instanceof Function) {
+	        errorHandler = handler;
+	        handler = options;
+	        options = {};
+	    }
+
+	    options = options || {};
+
+	    options.name = name;
+	    options.handler = handler || options.handler;
+	    options.errorHandler = errorHandler || options.errorHandler;
+
+	    return listen(options);
+	}
+
+	function once(name, options, handler, errorHandler) {
+
+	    if (options instanceof Function) {
+	        errorHandler = handler;
+	        handler = options;
+	        options = {};
+	    }
+
+	    options = options || {};
+
+	    options.name = name;
+	    options.handler = handler || options.handler;
+	    options.errorHandler = errorHandler || options.errorHandler;
+	    options.once = true;
+
+	    var prom = new _lib.promise.Promise(function (resolve, reject) {
+	        options.handler = options.handler || function (source, data) {
+	            return resolve(data);
+	        };
+	        options.errorHandler = options.errorHandler || reject;
+	    });
+
+	    var listener = listen(options);
+
+	    _lib.util.extend(prom, listener);
+
+	    return prom;
+	}
+
+/***/ },
+/* 35 */
+/*!*********************************************!*\
+  !*** ./~/post-robot/src/interface/proxy.js ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.proxy = proxy;
+	exports.unproxy = unproxy;
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	function proxy(window1, window2) {
+
+	    _drivers.listeners.proxies.push({
+	        from: window1,
+	        to: window2
+	    });
+
+	    _drivers.listeners.proxies.push({
+	        from: window2,
+	        to: window1
+	    });
+	}
+
+	function unproxy(window1, window2) {
+
+	    var toRemove = [];
+
+	    for (var i = 0; i < _drivers.listeners.proxies.length; i++) {
+	        var prox = _drivers.listeners.proxies[i];
+	        if (prox.to === window1 && prox.from === window2 || prox.to === window2 && prox.from === window1) {
+	            toRemove.push(prox);
+	        }
+	    }
+
+	    for (var _i = 0; _i < toRemove.length; _i++) {
+	        _drivers.listeners.proxies.splice(_drivers.listeners.proxies.indexOf(toRemove[_i]), 1);
+	    }
+	}
+
+/***/ },
+/* 36 */
+/*!**********************************************!*\
+  !*** ./~/post-robot/src/interface/config.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.CONSTANTS = exports.CONFIG = undefined;
+	exports.enableMockMode = enableMockMode;
+	exports.disableMockMode = disableMockMode;
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
+
+	Object.defineProperty(exports, 'CONFIG', {
+	    enumerable: true,
+	    get: function get() {
+	        return _conf.CONFIG;
+	    }
+	});
+	Object.defineProperty(exports, 'CONSTANTS', {
+	    enumerable: true,
+	    get: function get() {
+	        return _conf.CONSTANTS;
+	    }
+	});
+	exports.disable = disable;
+
+	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+
+	function enableMockMode() {
+	    _conf.CONFIG.MOCK_MODE = true;
+	}
+
+	function disableMockMode() {
+	    _conf.CONFIG.MOCK_MODE = false;
+	}
+
+	function disable() {
+	    delete window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+	    window.removeEventListener('message', _drivers.messageListener);
+	}
+
+/***/ },
+/* 37 */
+/*!********************************!*\
+  !*** ./src/component/index.js ***!
+  \********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _component = __webpack_require__(/*! ./component */ 38);
+
+	Object.keys(_component).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _component[key];
+	    }
+	  });
+	});
+
+	var _parent = __webpack_require__(/*! ./parent */ 45);
+
+	Object.keys(_parent).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _parent[key];
+	    }
+	  });
+	});
+
+	var _child = __webpack_require__(/*! ./child */ 40);
+
+	Object.keys(_child).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _child[key];
+	    }
+	  });
+	});
+
+/***/ },
+/* 38 */
+/*!******************************************!*\
+  !*** ./src/component/component/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.Component = exports.components = undefined;
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _base = __webpack_require__(/*! ../base */ 39);
+
+	var _child = __webpack_require__(/*! ../child */ 40);
+
+	var _parent = __webpack_require__(/*! ../parent */ 45);
+
+	var _props = __webpack_require__(/*! ./props */ 49);
+
+	var _window = __webpack_require__(/*! ../window */ 41);
+
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
+
+	var _validate2 = __webpack_require__(/*! ./validate */ 50);
+
+	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 51);
+
+	var _parent3 = _interopRequireDefault(_parent2);
+
+	var _component = __webpack_require__(/*! ./templates/component.htm */ 52);
+
+	var _component2 = _interopRequireDefault(_component);
+
+	var _drivers = __webpack_require__(/*! ../../drivers */ 53);
+
+	var drivers = _interopRequireWildcard(_drivers);
+
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var components = exports.components = {};
+
+	/*  Component
+	    ---------
+
+	    This is the spec for the component. The idea is, when I call xcomponent.create(), it will create a new instance
+	    of Component with the blueprint needed to set up ParentComponents and ChildComponents.
+
+	    This is the one portion of code which is required by -- and shared to -- both the parent and child windows, and
+	    contains all of the configuration needed for them to set themselves up.
+	*/
+
+	var Component = exports.Component = function (_BaseComponent) {
+	    _inherits(Component, _BaseComponent);
+
+	    function Component() {
+	        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	        _classCallCheck(this, Component);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Component).call(this, options));
+
+	        _this.validate(options);
+
+	        if (options.dimensions) {
+	            if (typeof options.dimensions.width !== 'number') {
+	                throw new Error('[' + options.tag + '] Expected options.dimensions.width to be a number');
+	            }
+
+	            if (typeof options.dimensions.height !== 'number') {
+	                throw new Error('[' + options.tag + '] Expected options.dimensions.height to be a number');
+	            }
+	        }
+	        // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
+	        // e.g. <my-component>
+
+	        _this.addProp(options, 'tag');
+
+	        // Name of the component, used for logging. Auto-generated from the tag name by default.
+
+	        _this.addProp(options, 'name', _this.tag.replace(/-/g, '_'));
+
+	        // A json based spec describing what kind of props the component accepts. This is used to validate any props before
+	        // they are passed down to the child.
+
+	        _this.props = _extends({}, _props.internalProps, options.props);
+
+	        // The dimensions of the component, e.g. { width: 500, height: 200 }
+
+	        _this.addProp(options, 'dimensions', {});
+
+	        _this.addProp(options, 'version', 'latest');
+
+	        // The default environment we should render to if none is specified in the parent
+
+	        _this.addProp(options, 'defaultEnv');
+
+	        // A mapping of env->url, used to determine which url to load for which env
+
+	        _this.addProp(options, 'envUrls', {});
+
+	        // A url to use by default to render the component, if not using envs
+
+	        _this.addProp(options, 'url', _this.envUrls[_this.defaultEnv]);
+
+	        // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
+
+	        _this.addProp(options, 'contexts', {});
+	        for (var _iterator = _constants.CONTEXT_TYPES_LIST, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	            var _ref;
+
+	            if (_isArray) {
+	                if (_i >= _iterator.length) break;
+	                _ref = _iterator[_i++];
+	            } else {
+	                _i = _iterator.next();
+	                if (_i.done) break;
+	                _ref = _i.value;
+	            }
+
+	            var context = _ref;
+
+	            _this.contexts[context] = _this.contexts[context] === undefined ? true : Boolean(_this.contexts[context]);
+	        }
+
+	        _this.addProp(options, 'closeDelay');
+
+	        // The default context to render to
+
+	        _this.addProp(options, 'defaultContext');
+
+	        // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
+
+	        _this.addProp(options, 'singleton');
+
+	        // Auto Resize option
+
+	        _this.addProp(options, 'autoResize', false);
+
+	        _this.addProp(options, 'autocloseParentTemplate', true);
+
+	        // Templates and styles for the parent page and the initial rendering of the component
+
+	        _this.addProp(options, 'parentTemplate', _parent3['default']);
+	        _this.addProp(options, 'componentTemplate', _component2['default']);
+
+	        // A mapping of tag->component so we can reference components by string tag name
+
+	        components[_this.tag] = _this;
+
+	        // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
+	        // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
+	        // This makes us a little more pluggable and loosely coupled.
+
+	        for (var _iterator2 = Object.keys(drivers), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	            var _ref2;
+
+	            if (_isArray2) {
+	                if (_i2 >= _iterator2.length) break;
+	                _ref2 = _iterator2[_i2++];
+	            } else {
+	                _i2 = _iterator2.next();
+	                if (_i2.done) break;
+	                _ref2 = _i2.value;
+	            }
+
+	            var driverName = _ref2;
+
+	            var driver = drivers[driverName];
+	            if (driver.isActive()) {
+	                driver.register(_this);
+	            }
+	        }
+	        return _this;
+	    }
+
+	    _createClass(Component, [{
+	        key: 'isXComponent',
+	        value: function isXComponent() {
+	            return (0, _window.isXComponentWindow)();
+	        }
+
+	        /*  Parent
+	            ------
+	             Get an instance of the parent for this component (lives on the parent page which contains the component)
+	        */
+
+	    }, {
+	        key: 'parent',
+	        value: function parent(options) {
+	            return new _parent.ParentComponent(this, options);
+	        }
+
+	        /*  Child
+	            -----
+	             Get an instance of the child for this component (lives on the child component page which lives in the parent)
+	        */
+
+	    }, {
+	        key: 'child',
+	        value: function child(options) {
+	            return new _child.ChildComponent(this, options);
+	        }
+
+	        /*  Attach
+	            ------
+	             Shortcut to instantiate a child in a child component window
+	        */
+
+	    }, {
+	        key: 'attach',
+	        value: function attach(options) {
+	            var component = this.child(options);
+	            component.init();
+	            return component;
+	        }
+
+	        /*  Init
+	            ----
+	             Shortcut to instantiate a component on a parent page, with props
+	        */
+
+	    }, {
+	        key: 'init',
+	        value: function init(props) {
+	            return new _parent.ParentComponent(this, { props: props });
+	        }
+
+	        /*  Render
+	            ------
+	             Shortcut to render a parent component
+	        */
+
+	    }, {
+	        key: 'render',
+	        value: function render(props, element) {
+	            return this.init(props).render(element);
+	        }
+
+	        /*  Get By Tag
+	            ----------
+	             Get a component instance by tag name
+	        */
+
+	    }, {
+	        key: 'getByTag',
+	        value: function getByTag(tag) {
+	            return components[tag];
+	        }
+
+	        /*  Validate
+	            --------
+	             Validate any options passed into Component
+	        */
+
+	    }, {
+	        key: 'validate',
+	        value: function validate(options) {
+	            return (0, _validate2.validate)(options);
+	        }
+
+	        /*  Log
+	            ---
+	             Log an event using the component name
+	        */
+
+	    }, {
+	        key: 'log',
+	        value: function log(event) {
+	            var payload = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	            _lib.logger.info('xc_' + this.name + '_' + event, payload);
+	        }
+
+	        /*  Log Warning
+	            -----------
+	             Log a warning
+	        */
+
+	    }, {
+	        key: 'logWarning',
+	        value: function logWarning(event, payload) {
+	            _lib.logger.warn('xc_' + this.name + '_' + event, payload);
+	        }
+
+	        /*  Log Error
+	            ---------
+	             Log an error
+	        */
+
+	    }, {
+	        key: 'logError',
+	        value: function logError(event, payload) {
+	            _lib.logger.error('xc_' + this.name + '_' + event, payload);
+	        }
+	    }]);
+
+	    return Component;
+	}(_base.BaseComponent);
+
+/***/ },
+/* 39 */
+/*!*******************************!*\
+  !*** ./src/component/base.js ***!
+  \*******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.BaseComponent = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _src = __webpack_require__(/*! post-robot/src */ 10);
+
+	var _src2 = _interopRequireDefault(_src);
+
+	var _lib = __webpack_require__(/*! ../lib */ 2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/*  Base Component
+	    --------------
+
+	    Methods that are common between child and parent components, but are not generic or uncoupled enough to live in
+	    a separate library.
+	*/
+
+	var BaseComponent = exports.BaseComponent = function () {
+	    function BaseComponent() {
+	        _classCallCheck(this, BaseComponent);
+	    }
+
+	    _createClass(BaseComponent, [{
+	        key: 'addProp',
+	        value: function addProp(options, name, def) {
+
+	            if (options.hasOwnProperty(name)) {
+	                Object.defineProperty(this, name, {
+	                    get: function get() {
+	                        return options[name];
+	                    }
+	                });
+	            } else {
+	                this[name] = def;
+	            }
+	        }
+
+	        /*  Register For Cleanup
+	            --------------------
+	             Register a method that will be called to do some cleanup whenever this.cleanup() is called
+	        */
+
+	    }, {
+	        key: 'registerForCleanup',
+	        value: function registerForCleanup(task) {
+	            this.cleanupTasks = this.cleanupTasks || [];
+	            this.cleanupTasks.push(task);
+	            return this;
+	        }
+
+	        /*  Cleanup
+	            -------
+	             Call all of the methods registered with this.registerForCleanup
+	        */
+
+	    }, {
+	        key: 'cleanup',
+	        value: function cleanup() {
+	            while (this.cleanupTasks && this.cleanupTasks.length) {
+	                var task = this.cleanupTasks.pop();
+	                task();
+	            }
+	        }
+
+	        /*  Has Cleanup Tasks
+	            -----------------
+	             Returns whether or not there is any state to be cleaned up
+	        */
+
+	    }, {
+	        key: 'hasCleanupTasks',
+	        value: function hasCleanupTasks() {
+	            return Boolean(this.cleanupTasks.length);
+	        }
+
+	        /*  Set For Cleanup
+	            ---------------
+	             Set a key on this which will be auto-deleted when this.cleanup() is called
+	        */
+
+	    }, {
+	        key: 'setForCleanup',
+	        value: function setForCleanup(key, value) {
+	            var _this = this;
+
+	            this[key] = value;
+	            this.registerForCleanup(function () {
+	                delete _this[key];
+	            });
+	        }
+
+	        /*  Try Catch
+	            ---------
+	             Returns a new method which wraps the original call in a try/catch, otherwise delegates to this.onError
+	        */
+
+	    }, {
+	        key: 'tryCatch',
+	        value: function tryCatch(method, doOnce) {
+
+	            var self = this;
+	            var errored = false;
+
+	            var wrapper = function wrapper() {
+
+	                if (errored) {
+	                    return;
+	                }
+
+	                try {
+	                    return method.apply(this, arguments);
+	                } catch (err) {
+	                    errored = true;
+	                    return self.error(err);
+	                }
+	            };
+
+	            if (doOnce !== false) {
+	                wrapper = (0, _lib.once)(wrapper);
+	            }
+
+	            return wrapper;
+	        }
+
+	        /*  Listen
+	            ------
+	             Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
+	            post-messages, so this sets up an easy way to create a collection of listeners in one go.
+	             All post-messaging is done using post-robot.
+	        */
+
+	    }, {
+	        key: 'listen',
+	        value: function listen(win) {
+	            var _this2 = this;
+
+	            if (!win) {
+	                throw new Error('[' + this.component.tag + '] window to listen to not set');
+	            }
+
+	            if (!this.listeners) {
+	                return;
+	            }
+
+	            var listeners = this.listeners();
+
+	            var _loop = function _loop() {
+	                if (_isArray) {
+	                    if (_i >= _iterator.length) return 'break';
+	                    _ref = _iterator[_i++];
+	                } else {
+	                    _i = _iterator.next();
+	                    if (_i.done) return 'break';
+	                    _ref = _i.value;
+	                }
+
+	                var listenerName = _ref;
+
+
+	                var listener = _src2['default'].on(listenerName, { window: win, errorHandler: function errorHandler(err) {
+	                        return _this2.error(err);
+	                    } }, function (source, data) {
+	                    _this2.component.log('listener_' + listenerName.replace(/^xcomponent_/, ''));
+	                    return listeners[listenerName].call(_this2, source, data);
+	                });
+
+	                _this2.registerForCleanup(function () {
+	                    listener.cancel();
+	                });
+	            };
+
+	            for (var _iterator = Object.keys(listeners), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	                var _ref;
+
+	                var _ret = _loop();
+
+	                if (_ret === 'break') break;
+	            }
+	        }
+	    }]);
+
+	    return BaseComponent;
+	}();
+
+/***/ },
+/* 40 */
+/*!**************************************!*\
+  !*** ./src/component/child/index.js ***!
+  \**************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.ChildComponent = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
+
+	var _src = __webpack_require__(/*! post-robot/src */ 10);
+
+	var _src2 = _interopRequireDefault(_src);
+
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
+
+	var _base = __webpack_require__(/*! ../base */ 39);
+
+	var _window = __webpack_require__(/*! ../window */ 41);
+
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
+
+	var _props = __webpack_require__(/*! ../props */ 43);
+
+	var _props2 = __webpack_require__(/*! ./props */ 44);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*  Child Component
+	    ---------------
+
+	    This is the portion of code which runs inside the frame or popup window containing the component's implementation.
+
+	    When the component author calls myComponent.attach(), it creates a new instance of ChildComponent, which is then
+	    responsible for managing the state and messaging back up to the parent, and providing props for the component to
+	    utilize.
+	*/
+
+	var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
+	    _inherits(ChildComponent, _BaseComponent);
+
+	    function ChildComponent(component) {
+	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	        _classCallCheck(this, ChildComponent);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ChildComponent).call(this, component, options));
+
+	        _this.component = component;
+
+	        _this.component.log('construct_child');
+
+	        _this.validate(options);
+
+	        // Handlers for various component lifecycle events
+
+	        _this.onEnter = _this.tryCatch(options.onEnter || _lib.noop);
+	        _this.onClose = _this.tryCatch(options.onClose || _lib.noop);
+	        _this.onProps = _this.tryCatch(options.onProps || _lib.noop, false);
+	        _this.onError = _this.tryCatch(options.onError || function (err) {
+	            throw err;
+	        });
+
+	        _this.onInit = new _promise.SyncPromise();
+
+	        // The child can specify some default props if none are passed from the parent. This often makes integrations
+	        // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
+	        // has provided them or not, and fall-back to some default behavior.
+
+	        _this.setProps((0, _props.normalizeProps)(_this.component, _this, options.defaultProps || {}), false);
+	        _this.setProps(_this.getInitialProps());
+
+	        // We support a 'standalone' mode where the child isn't actually created by xcomponent. This may be because
+	        // there's an existing full-page implementation which uses redirects. In this case, the user can specify
+	        // standalone: true, and defaultProps, and the child component should continue to function in the same way
+	        // as if it were created by xcomponent, with the exception that no post-messages will ever be sent.
+
+	        _this.standalone = options.standalone;
+	        return _this;
+	    }
+
+	    /*  Init
+	        ----
+	         Message up to the parent to let them know we've rendered successfully, and get some initial data and props
+	    */
+
+	    _createClass(ChildComponent, [{
+	        key: 'init',
+	        value: function init() {
+	            var _this2 = this;
+
+	            this.component.log('init_child');
+
+	            // In standalone mode, we would expect setWindows to fail since there is no parent window and window.name
+	            // will not be generated by xcomponent. In this case we can fail silently, whereas normally we'd want to
+	            // fail hard here.
+
+	            if (!(0, _window.isXComponentWindow)() && this.standalone) {
+	                this.component.log('child_standalone');
+	                return;
+	            }
+
+	            this.setWindows();
+
+	            // In standalone mode, there's no point messaging back up to our parent -- because we have none. :'(
+
+	            if (this.standalone && !(0, _window.getParentWindow)()) {
+	                return _promise.SyncPromise.resolve();
+	            }
+
+	            if (this.component.autoResize) {
+	                this.watchForResize();
+	            }
+
+	            // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
+	            //
+	            // For example:
+	            //
+	            // - What context are we
+	            // - What props has the parent specified
+
+	            return this.sendToParent(_constants.POST_MESSAGE.INIT, {
+
+	                exports: this.exports()
+
+	            }).then(function (data) {
+
+	                _this2.context = data.context;
+	                _this2.setProps(data.props);
+
+	                _this2.onInit.resolve(_this2);
+
+	                _this2.onEnter.call(_this2);
+	            })['catch'](function (err) {
+
+	                _this2.onInit.reject(err);
+	                _this2.onError(err);
+	            });
+	        }
+	    }, {
+	        key: 'getInitialProps',
+	        value: function getInitialProps() {
+	            var componentMeta = (0, _window.getComponentMeta)();
+	            var self = this;
+
+	            if (componentMeta) {
+	                return (0, _lib.replaceObject)(componentMeta.props, function (value, key, fullKey) {
+	                    if (value && value.__type__ === '__function__') {
+	                        return function () {
+	                            var _this3 = this,
+	                                _arguments = arguments;
+
+	                            return self.onInit.then(function () {
+	                                var original = (0, _lib.get)(self.props, fullKey);
+	                                return original.apply(_this3, _arguments);
+	                            });
+	                        };
+	                    }
+	                });
+	            }
+	        }
+	    }, {
+	        key: 'setProps',
+	        value: function setProps() {
+	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var onProps = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+	            this.props = this.props || {};
+	            (0, _lib.extend)(this.props, (0, _props2.normalizeChildProps)(this.component, props));
+
+	            if (onProps) {
+	                this.onProps.call(this);
+	            }
+	        }
+
+	        /*  Send to Parent
+	            --------------
+	             Send a post message to our parent window.
+	        */
+
+	    }, {
+	        key: 'sendToParent',
+	        value: function sendToParent(name, data) {
+	            this.component.log('send_to_parent_' + name);
+	            return _src2['default'].send((0, _window.getParentWindow)(), name, data);
+	        }
+
+	        /*  Set Windows
+	            -----------
+	             Determine the parent window, and the parent component window. Note -- these may be different, if we were
+	            rendered using renderToParent.
+	        */
+
+	    }, {
+	        key: 'setWindows',
+	        value: function setWindows() {
+
+	            // Ensure we do not try to .attach() multiple times for the same component on the same page
+
+	            if (window.__activeXComponent__) {
+	                throw new Error('[' + this.component.tag + '] Can not attach multiple components to the same window');
+	            }
+
+	            window.__activeXComponent__ = this;
+
+	            // Get the direct parent window
+
+	            if (!(0, _window.getParentWindow)()) {
+	                throw new Error('[' + this.component.tag + '] Can not find parent window');
+	            }
+
+	            var componentMeta = (0, _window.getComponentMeta)();
+
+	            if (componentMeta.tag !== this.component.tag) {
+	                throw new Error('[' + this.component.tag + '] Parent is ' + componentMeta.tag + ' - can not attach ' + this.component.tag);
+	            }
+
+	            // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
+	            // only a few ways of doing it:
+	            //
+	            // - The window is a direct parent, in which case you can use window.parent or window.opener
+	            // - The window is an iframe owned by you or one of your parents, in which case you can use window.frames
+	            // - The window sent you a post-message, in which case you can use event.source
+	            //
+	            // If we didn't rely on winProps.parent here from the window name, we'd have to relay all of our messages through
+	            // our actual parent. Which is no fun at all, and pretty error prone even with the help of post-robot. So this
+	            // is the lesser of two evils until browsers give us something like getWindowByName(...)
+
+	            // If the parent window closes, we need to close ourselves. There's no point continuing to run our component
+	            // if there's no parent to message to.
+
+	            this.watchForClose();
+	        }
+
+	        /*  Watch For Close
+	            ---------------
+	             Watch both the parent window and the parent component window, if they close, close this window too.
+	        */
+
+	    }, {
+	        key: 'watchForClose',
+	        value: function watchForClose() {
+	            var _this4 = this;
+
+	            (0, _lib.onCloseWindow)(_window.getParentWindow, function () {
+
+	                _this4.component.log('parent_window_closed');
+
+	                _this4.onClose(_constants.CLOSE_REASONS.PARENT_CLOSE_DETECTED);
+
+	                // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
+	                // close us, if we're an iframe
+
+	                if (_this4.context === _constants.CONTEXT_TYPES.POPUP) {
+	                    _this4.destroy();
+	                }
+	            });
+
+	            // Only listen for parent component window if it's actually a different window
+
+	            if ((0, _window.getParentComponentWindow)() && (0, _window.getParentComponentWindow)() !== (0, _window.getParentWindow)()) {
+	                (0, _lib.onCloseWindow)((0, _window.getParentComponentWindow)(), function () {
+
+	                    _this4.component.log('parent_component_window_closed');
+
+	                    // We do actually need to close ourselves in this case, even if we're an iframe, because our component
+	                    // window is probably a sibling and we'll remain open by default.
+
+	                    _this4.close(_constants.CLOSE_REASONS.PARENT_CLOSE_DETECTED);
+	                });
+	            }
+
+	            (0, _lib.addEventListener)(window, 'beforeunload', function () {
+	                return _this4.onClose();
+	            });
+	        }
+
+	        /*  Validate
+	            --------
+	             Validate any options passed in to ChildComponent
+	        */
+
+	    }, {
+	        key: 'validate',
+	        value: function validate(options) {
+
+	            // TODO: Implement this
+	        }
+	    }, {
+	        key: 'watchForResize',
+	        value: function watchForResize() {
+	            var _this5 = this;
+
+	            var resize = (0, _lib.debounce)(function (width, height) {
+	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	            }, 100);
+
+	            var elm = document.body;
+
+	            if (!elm) {
+	                return;
+	            }
+
+	            // let lastWidth = elm.scrollWidth;
+	            // let newWidth;
+	            var lastHeight = elm.scrollHeight;
+	            var newHeight = void 0;
+
+	            setInterval(function () {
+	                // newWidth = elm.scrollWidth;
+	                newHeight = elm.scrollHeight;
+	                // Dimensions changed if this condition is true
+	                if (lastHeight !== newHeight /* || lastWidth !== newWidth */) {
+	                        resize(_this5.component.dimensions.width, newHeight);
+	                    }
+	                // lastWidth = newWidth;
+	                lastHeight = newHeight;
+	            }, 50);
+	        }
+	    }, {
+	        key: 'exports',
+	        value: function exports() {
+	            var _this6 = this;
+
+	            return {
+	                updateProps: function updateProps(props) {
+	                    return _this6.setProps(props);
+	                },
+	                close: function close() {
+	                    return _this6.destroy();
+	                }
+	            };
+	        }
+
+	        /*  Resize
+	            ------
+	             Resize the child window. Must be done on a user action like a click if we're in a popup
+	        */
+
+	    }, {
+	        key: 'resize',
+	        value: function resize(width, height) {
+	            var _this7 = this;
+
+	            return _promise.SyncPromise.resolve().then(function () {
+
+	                _this7.component.log('resize', { width: width, height: height });
+
+	                if (_this7.context === _constants.CONTEXT_TYPES.POPUP) {
+	                    return window.resizeTo(width, height);
+	                }
+
+	                return _this7.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	            });
+	        }
+
+	        /*  Hide
+	            ----
+	             Hide the window and any parent template
+	        */
+
+	    }, {
+	        key: 'hide',
+	        value: function hide() {
+	            return this.sendToParent(_constants.POST_MESSAGE.HIDE);
+	        }
+	    }, {
+	        key: 'userClose',
+	        value: function userClose() {
+	            return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
+	        }
+
+	        /*  Close
+	            -----
+	             Close the child window
+	        */
+
+	    }, {
+	        key: 'close',
+	        value: function close() {
+	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.CHILD_CALL : arguments[0];
+
+
+	            this.component.log('close_child');
+
+	            this.onClose.call(this, reason);
+
+	            // Ask our parent window to close us
+
+	            this.sendToParent(_constants.POST_MESSAGE.CLOSE, { reason: reason }, {
+	                fireAndForget: true
+	            });
+	        }
+	    }, {
+	        key: 'destroy',
+	        value: function destroy() {
+	            _lib.logger.flush().then(function () {
+	                window.close();
+	            });
+	        }
+
+	        /*  Focus
+	            -----
+	             Focus the child window. Must be done on a user action like a click
+	        */
+
+	    }, {
+	        key: 'focus',
+	        value: function focus() {
+	            this.component.log('focus');
+
+	            window.focus();
+	        }
+
+	        /*  Error
+	            -----
+	             Send an error back to the parent
+	        */
+
+	    }, {
+	        key: 'error',
+	        value: function error(err) {
+
+	            this.component.log('error', { error: err.stack || err.toString() });
+
+	            return this.sendToParent(_constants.POST_MESSAGE.ERROR, {
+	                error: err.stack ? err.message + '\n' + err.stack : err.toString()
+	            });
+	        }
+	    }]);
+
+	    return ChildComponent;
+	}(_base.BaseComponent);
+
+/***/ },
+/* 41 */
 /*!*********************************!*\
   !*** ./src/component/window.js ***!
   \*********************************/
@@ -6332,12 +5698,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.getParentComponentWindow = exports.getParentWindow = exports.isXComponentWindow = exports.getComponentMeta = undefined;
+
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 	exports.buildChildWindowName = buildChildWindowName;
 	exports.getPosition = getPosition;
 
-	var _lib = __webpack_require__(/*! ../lib */ 44);
+	var _lib = __webpack_require__(/*! ../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../constants */ 51);
+	var _constants = __webpack_require__(/*! ../constants */ 42);
+
+	function normalize(str) {
+	    return str && str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
+	}
 
 	/*  Build Child Window Name
 	    -----------------------
@@ -6351,17 +5724,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 	*/
 
-	function buildChildWindowName(prefix) {
-	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	function buildChildWindowName(name, version) {
+	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 
 	    options.id = (0, _lib.uniqueID)();
 	    options.parent = window.name;
 	    options.parentDomain = window.location.protocol + '//' + window.location.host;
 
-	    var name = (0, _lib.b64encode)(JSON.stringify(options));
+	    var encodedName = normalize(name);
+	    var encodedVersion = normalize(version);
+	    var encodedOptions = (0, _lib.b32encode)(JSON.stringify(options));
 
-	    return _constants.XCOMPONENT + '_' + prefix.replace(/_/g, '') + '_' + name;
+	    if (!encodedName) {
+	        throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
+	    }
+
+	    if (!encodedVersion) {
+	        throw new Error('Invalid version: ' + version + ' - must contain alphanumeric characters');
+	    }
+
+	    return [_constants.XCOMPONENT, encodedName, encodedVersion, encodedOptions].join('__');
 	}
 
 	/*  Parse Window Name
@@ -6377,18 +5760,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    var segments = window.name.split('_');
-	    var options = segments.slice(2).join('_');
+	    var _window$name$split = window.name.split('__');
 
-	    if (segments[0] !== _constants.XCOMPONENT) {
+	    var _window$name$split2 = _slicedToArray(_window$name$split, 4);
+
+	    var xcomp = _window$name$split2[0];
+	    var name = _window$name$split2[1];
+	    var version = _window$name$split2[2];
+	    var encodedOptions = _window$name$split2[3];
+
+
+	    if (xcomp !== _constants.XCOMPONENT) {
 	        return;
 	    }
 
+	    var componentMeta = void 0;
+
 	    try {
-	        return JSON.parse((0, _lib.b64decode)(options));
+	        componentMeta = JSON.parse((0, _lib.b32decode)(encodedOptions));
 	    } catch (err) {
 	        return;
 	    }
+
+	    componentMeta.name = name;
+	    componentMeta.version = version.replace(/_/g, '.');
+
+	    return componentMeta;
 	});
 
 	var isXComponentWindow = exports.isXComponentWindow = (0, _lib.memoize)(function () {
@@ -6470,7 +5867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 51 */
+/* 42 */
 /*!**************************!*\
   !*** ./src/constants.js ***!
   \**************************/
@@ -6483,7 +5880,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.PROP_DEFER_TO_URL = exports.MAX_Z_INDEX = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
-	var _lib = __webpack_require__(/*! ./lib */ 44);
+	var _lib = __webpack_require__(/*! ./lib */ 2);
 
 	var XCOMPONENT = exports.XCOMPONENT = 'xcomponent';
 
@@ -6549,7 +5946,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PROP_DEFER_TO_URL = exports.PROP_DEFER_TO_URL = 'xcomponent_prop_defer_to_url';
 
 /***/ },
-/* 52 */
+/* 43 */
 /*!********************************!*\
   !*** ./src/component/props.js ***!
   \********************************/
@@ -6563,11 +5960,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.normalizeProp = normalizeProp;
 	exports.normalizeProps = normalizeProps;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _lib = __webpack_require__(/*! ../lib */ 44);
+	var _lib = __webpack_require__(/*! ../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../constants */ 51);
+	var _constants = __webpack_require__(/*! ../constants */ 42);
 
 	/*  Normalize Prop
 	    --------------
@@ -6709,7 +6106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 53 */
+/* 44 */
 /*!**************************************!*\
   !*** ./src/component/child/props.js ***!
   \**************************************/
@@ -6722,11 +6119,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.normalizeChildProps = normalizeChildProps;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 44);
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function normalizeChildProps(component, props) {
 
@@ -6758,7 +6155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queryParam = prop.queryParam;
 	            }
 
-	            value = (0, _lib.getUrlParam)(queryParam);
+	            value = (0, _lib.getQueryParam)(queryParam);
 	            if (prop.getter) {
 	                (function () {
 	                    var val = _promise.SyncPromise.resolve(value);
@@ -6776,7 +6173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 54 */
+/* 45 */
 /*!***************************************!*\
   !*** ./src/component/parent/index.js ***!
   \***************************************/
@@ -6791,33 +6188,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _client = __webpack_require__(/*! beaver-logger/client */ 32);
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _client2 = _interopRequireDefault(_client);
-
-	var _src = __webpack_require__(/*! post-robot/src */ 2);
+	var _src = __webpack_require__(/*! post-robot/src */ 10);
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _base = __webpack_require__(/*! ../base */ 43);
+	var _base = __webpack_require__(/*! ../base */ 39);
 
-	var _window = __webpack_require__(/*! ../window */ 50);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 44);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _drivers = __webpack_require__(/*! ./drivers */ 46);
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 55);
+	var _validate = __webpack_require__(/*! ./validate */ 47);
 
-	var _validate = __webpack_require__(/*! ./validate */ 56);
-
-	var _props = __webpack_require__(/*! ./props */ 57);
+	var _props = __webpack_require__(/*! ./props */ 48);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -6869,15 +6260,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            activeComponents.splice(activeComponents.indexOf(_this), 1);
 	        });
 
+	        _this.setProps(options.props || {});
+
 	        // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
 	        // them only when we're trying to render from a sibling to a sibling
 
-	        _this.childWindowName = options.childWindowName || (0, _window.buildChildWindowName)(_this.component.name, {
-	            tag: _this.component.tag,
-	            parent: window.name
-	        });
-
-	        _this.setProps(options.props || {});
+	        _this.childWindowName = options.childWindowName || _this.buildChildWindowName();
 
 	        _this.component.log('construct_parent');
 	        return _this;
@@ -6901,6 +6289,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this2.props.onError(err);
 	            });
 	        }
+	    }, {
+	        key: 'buildChildWindowName',
+	        value: function buildChildWindowName() {
+
+	            var props = (0, _lib.replaceObject)(this.props, function (value, key, fullKey) {
+	                if (value instanceof Function) {
+	                    return {
+	                        __type__: '__function__'
+	                    };
+	                }
+	            });
+
+	            return (0, _window.buildChildWindowName)(this.component.name, this.component.version, {
+	                tag: this.component.tag,
+	                parent: window.name,
+	                props: props
+	            });
+	        }
 
 	        /*  Set Props
 	            ---------
@@ -6910,6 +6316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'setProps',
 	        value: function setProps(props) {
+	            props.version = this.component.version;
 	            (0, _validate.validateProps)(this.component, props);
 	            this.props = (0, _props.normalizeParentProps)(this.component, this, props);
 	        }
@@ -6925,7 +6332,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function buildUrl() {
 	            var _this3 = this;
 
-	            return (0, _props.propsToQuery)(this.component.props, this.props).then(function (queryString) {
+	            return (0, _props.propsToQuery)(this.component.props, this.props).then(function (queryProps) {
+
+	                queryProps[_constants.XCOMPONENT] = '1';
 
 	                var url = void 0;
 
@@ -6937,47 +6346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    url = _this3.component.url;
 	                }
 
-	                if (queryString) {
-
-	                    var base = void 0;
-	                    var query = void 0;
-	                    var hash = void 0;
-
-	                    var _url$split = url.split('#');
-
-	                    var _url$split2 = _slicedToArray(_url$split, 2);
-
-	                    base = _url$split2[0];
-	                    hash = _url$split2[1];
-
-	                    var _base$split = base.split('?');
-
-	                    var _base$split2 = _slicedToArray(_base$split, 2);
-
-	                    base = _base$split2[0];
-	                    query = _base$split2[1];
-
-
-	                    if (query) {
-	                        query = query + '&' + queryString;
-	                    } else {
-	                        query = queryString;
-	                    }
-
-	                    url = base;
-
-	                    if (query) {
-	                        url = url + '?' + query;
-	                    }
-
-	                    if (hash) {
-	                        url = url + '#' + hash;
-	                    }
-
-	                    return url;
-	                }
-
-	                return url;
+	                return (0, _lib.extendUrl)(url, { query: queryProps });
 	            });
 	        }
 
@@ -7287,7 +6656,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
 	                _this10.component.log('navigate_away');
-	                _client2['default'].flush();
+	                _lib.logger.flush();
 
 	                if (_this10.context === _constants.CONTEXT_TYPES.POPUP) {
 	                    _this10.destroy();
@@ -7451,6 +6820,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this14.setForCleanup('initialPropsSent', true);
 
 	                    // Let the child know what its context is, and what its initial props are.
+
+	                    _lib.logger.flush();
 
 	                    return {
 	                        context: _this14.context,
@@ -7761,6 +7132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function destroy() {
 	            if (this.hasCleanupTasks()) {
 	                this.component.log('destroy');
+	                _lib.logger.flush();
 	                this.cleanup();
 	            }
 	        }
@@ -7826,7 +7198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 55 */
+/* 46 */
 /*!*****************************************!*\
   !*** ./src/component/parent/drivers.js ***!
   \*****************************************/
@@ -7843,11 +7215,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _error = __webpack_require__(/*! ../../error */ 1);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 44);
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _window = __webpack_require__(/*! ../window */ 50);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -8066,7 +7438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RENDER_DRIVERS);
 
 /***/ },
-/* 56 */
+/* 47 */
 /*!******************************************!*\
   !*** ./src/component/parent/validate.js ***!
   \******************************************/
@@ -8081,7 +7453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.validateProps = validateProps;
 	exports.validate = validate;
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function validateProp(prop, key, value) {
 
@@ -8204,7 +7576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 57 */
+/* 48 */
 /*!***************************************!*\
   !*** ./src/component/parent/props.js ***!
   \***************************************/
@@ -8221,15 +7593,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.propsToQuery = propsToQuery;
 	exports.normalizeParentProps = normalizeParentProps;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 12);
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _validate = __webpack_require__(/*! ./validate */ 56);
+	var _validate = __webpack_require__(/*! ./validate */ 47);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 44);
+	var _props = __webpack_require__(/*! ../props */ 43);
 
-	var _props = __webpack_require__(/*! ../props */ 52);
-
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	/*  Props to Query
 	    --------------
@@ -8244,7 +7614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function propsToQuery(propsDef, props) {
 
-	    var params = [];
+	    var params = {};
 
 	    return _promise.SyncPromise.all(Object.keys(props).map(function (key) {
 
@@ -8277,6 +7647,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return result;
 	                });
 	            }
+
+	            return value;
 	        }).then(function (value) {
 
 	            if (!value) {
@@ -8297,10 +7669,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                result = value.toString();
 	            }
 
-	            params.push((0, _lib.urlEncode)(queryParam) + '=' + (0, _lib.urlEncode)(result));
+	            params[queryParam] = result;
 	        });
 	    })).then(function () {
-	        return params.join('&');
+	        return params;
 	    });
 	}
 
@@ -8350,7 +7722,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 58 */
+/* 49 */
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
@@ -8382,6 +7754,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
 
 	    env: {
+	        type: 'string',
+	        required: false
+	    },
+
+	    version: {
 	        type: 'string',
 	        required: false
 	    },
@@ -8441,7 +7818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 59 */
+/* 50 */
 /*!*********************************************!*\
   !*** ./src/component/component/validate.js ***!
   \*********************************************/
@@ -8457,7 +7834,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.validate = validate;
 
-	var _constants = __webpack_require__(/*! ../../constants */ 51);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function validateProps(options) {
 
@@ -8599,7 +7976,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 60 */
+/* 51 */
 /*!******************************************************!*\
   !*** ./src/component/component/templates/parent.htm ***!
   \******************************************************/
@@ -8608,7 +7985,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
-/* 61 */
+/* 52 */
 /*!*********************************************************!*\
   !*** ./src/component/component/templates/component.htm ***!
   \*********************************************************/
@@ -8617,7 +7994,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ""
 
 /***/ },
-/* 62 */
+/* 53 */
 /*!******************************!*\
   !*** ./src/drivers/index.js ***!
   \******************************/
@@ -8629,7 +8006,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _script = __webpack_require__(/*! ./script */ 63);
+	var _script = __webpack_require__(/*! ./script */ 54);
 
 	Object.keys(_script).forEach(function (key) {
 	  if (key === "default") return;
@@ -8641,7 +8018,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _react = __webpack_require__(/*! ./react */ 64);
+	var _react = __webpack_require__(/*! ./react */ 55);
 
 	Object.keys(_react).forEach(function (key) {
 	  if (key === "default") return;
@@ -8653,7 +8030,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _angular = __webpack_require__(/*! ./angular */ 65);
+	var _angular = __webpack_require__(/*! ./angular */ 56);
 
 	Object.keys(_angular).forEach(function (key) {
 	  if (key === "default") return;
@@ -8665,7 +8042,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ember = __webpack_require__(/*! ./ember */ 66);
+	var _ember = __webpack_require__(/*! ./ember */ 57);
 
 	Object.keys(_ember).forEach(function (key) {
 	  if (key === "default") return;
@@ -8678,7 +8055,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 63 */
+/* 54 */
 /*!*******************************!*\
   !*** ./src/drivers/script.js ***!
   \*******************************/
@@ -8753,7 +8130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 64 */
+/* 55 */
 /*!******************************!*\
   !*** ./src/drivers/react.js ***!
   \******************************/
@@ -8766,7 +8143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.react = undefined;
 
-	var _lib = __webpack_require__(/*! ../lib */ 44);
+	var _lib = __webpack_require__(/*! ../lib */ 2);
 
 	var react = exports.react = {
 	    isActive: function isActive() {
@@ -8798,7 +8175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 65 */
+/* 56 */
 /*!********************************!*\
   !*** ./src/drivers/angular.js ***!
   \********************************/
@@ -8811,7 +8188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.angular = undefined;
 
-	var _lib = __webpack_require__(/*! ../lib */ 44);
+	var _lib = __webpack_require__(/*! ../lib */ 2);
 
 	var angular = exports.angular = {
 	    isActive: function isActive() {
@@ -8907,7 +8284,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 66 */
+/* 57 */
 /*!******************************!*\
   !*** ./src/drivers/ember.js ***!
   \******************************/
