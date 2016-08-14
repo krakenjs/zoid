@@ -383,11 +383,11 @@ export function extendUrl(url, options = {}) {
     let queryString = extendQuery(originalQuery, query);
     let hashString  = extendQuery(originalHash, hash);
 
-    if (query) {
+    if (queryString) {
         originalUrl = `${originalUrl}?${queryString}`;
     }
 
-    if (hash) {
+    if (hashString) {
         originalUrl = `${originalUrl}#${hashString}`;
     }
 
