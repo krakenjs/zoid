@@ -681,6 +681,10 @@ export class ParentComponent extends BaseComponent {
                 let component = this.component.getByTag(data.tag);
                 let instance  = component.parent(data.options);
 
+                this.registerForCleanup(() => {
+                    instance.destroy();
+                });
+
                 instance.setForCleanup('context', data.context);
 
                 extend(instance, data.overrides);

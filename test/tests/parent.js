@@ -73,7 +73,7 @@ describe('xcomponent render to parent', () => {
 
         component = testComponent.init({
             childEntered() {
-                document.querySelectorAll('.xcomponent-close')[1].click();
+                document.querySelector('.xcomponent-close').click();
             },
 
             onClose: () => done()
@@ -88,7 +88,7 @@ describe('xcomponent render to parent', () => {
 
         component = testComponent.init({
             childEntered() {
-                document.querySelectorAll('.xcomponent-close')[1].click();
+                document.querySelector('.xcomponent-close').click();
             },
 
             onClose: () => done()
