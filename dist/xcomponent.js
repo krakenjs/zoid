@@ -6630,6 +6630,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'loadUrl',
 	        value: function loadUrl(context, url) {
 	            this.component.log('load_url');
+
+	            if (window.location.href.split('#')[0] === url.split('#')[0]) {
+	                url = (0, _lib.extendUrl)(url, {
+	                    query: _defineProperty({}, (0, _lib.uniqueID)(), '1')
+	                });
+	            }
+
 	            _src2['default'].linkUrl(this.childWindowName, this.window, url);
 	            return _drivers.RENDER_DRIVERS[context].loadUrl.call(this, url);
 	        }
@@ -6821,6 +6828,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
+
+	                this.registerForCleanup(function () {
+	                    instance.destroy();
+	                });
 
 	                instance.setForCleanup('context', data.context);
 
