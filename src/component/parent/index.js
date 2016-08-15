@@ -464,6 +464,15 @@ export class ParentComponent extends BaseComponent {
 
     loadUrl(context, url) {
         this.component.log(`load_url`);
+
+        if (window.location.href.split('#')[0] === url.split('#')[0]) {
+            url = extendUrl(url, {
+                query: {
+                    [ uniqueID() ]: '1'
+                }
+            });
+        }
+
         postRobot.linkUrl(this.childWindowName, this.window, url);
         return RENDER_DRIVERS[context].loadUrl.call(this, url);
     }
