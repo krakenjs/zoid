@@ -250,32 +250,6 @@ export function createElement(tag = 'div', options = {}, container = null) {
     return element;
 }
 
-
-/*  Hijack Button
-    -------------
-
-    Hijack a button's click event to set a
-*/
-
-export function hijackButton(element, callback) {
-    let el = getElement(element);
-
-    if (!el) {
-        throw new Error(`Can not find element: ${element}`);
-    }
-
-    // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
-
-    let targetElement = el.form ? el.form : el;
-
-    // Then we wait for the click event
-
-    el.addEventListener('click', event => {
-        callback(event, targetElement);
-    });
-}
-
-
 /*  Add Event To Class
     ------------------
 

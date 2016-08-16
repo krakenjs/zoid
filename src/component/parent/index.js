@@ -6,8 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
-         capitalizeFirstLetter, hijackButton, addEventToClass, template, isWindowClosed, extend, delay, replaceObject,
-         extendUrl } from '../../lib';
+         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -478,37 +477,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Hijack Button
-        -------------
-
-        In this case, we don't actually know the final url for the component. The parent page might have a link or a form
-        which points directly to our component url, or indirectly via a 302.
-
-        So here, we listen for a click on the button or link, and hijack the target window. That way, we can be responsible
-        for opening the window, listening for messages, etc. while the parent page is responsible only for generating the url
-        to redirect to.
-
-        This is necessary because in these cases, there's no way to accurately ascertain the url we're going to before
-        we're redirected there -- so we let the parent redirect, but handle everything else involving the lifecycle of
-        the component.
-
-        This is a pretty esoteric case -- so if you need it, cool, otherwise you don't need to spend too much time
-        worrying about it.
-    */
-
-    hijackButton(button, element, context) {
-
-        this.component.log(`hijack_button`, { element });
-
-        return new Promise((resolve, reject) => {
-
-            hijackButton(button, (event, targetElement) => {
-                this.renderHijack(targetElement, element, context).then(resolve, reject);
-            });
-        });
-    }
-
-
     /*  Render Hijack
         -------------
 
@@ -972,7 +940,7 @@ export class ParentComponent extends BaseComponent {
 /*  Generate Render Methods
     -----------------------
 
-    Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
+    Autogenerate methods like renderIframe, renderPopupToParent
 */
 
 for (let context of CONTEXT_TYPES_LIST) {
@@ -985,9 +953,5 @@ for (let context of CONTEXT_TYPES_LIST) {
 
     ParentComponent.prototype[`render${contextName}ToParent`] = function(element) {
         return this.renderToParent(element, context);
-    };
-
-    ParentComponent.prototype[`hijackButtonTo${contextName}`] = function(button, element) {
-        return this.hijackButton(button, element, context);
     };
 }

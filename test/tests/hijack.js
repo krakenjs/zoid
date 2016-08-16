@@ -1,4 +1,5 @@
 
+import xcomponent from 'src/index';
 import postRobot from 'post-robot/src';
 
 import { testComponent } from '../component';
@@ -34,7 +35,10 @@ describe('xcomponent hijack', () => {
             }
         });
 
-        component.hijackButtonToLightbox('#hijackButton');
+        document.getElementById('hijackButton').addEventListener('click', event => {
+            let target = event.target.form ? event.target.form : event.target;
+            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        });
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -61,7 +65,10 @@ describe('xcomponent hijack', () => {
             }
         });
 
-        component.hijackButtonToPopup('#hijackButton');
+        document.getElementById('hijackButton').addEventListener('click', event => {
+            let target = event.target.form ? event.target.form : event.target;
+            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
+        });
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -84,7 +91,10 @@ describe('xcomponent hijack', () => {
             }
         });
 
-        component.hijackButtonToLightbox('hijackLink');
+        document.getElementById('hijackLink').addEventListener('click', event => {
+            let target = event.target.form ? event.target.form : event.target;
+            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        });
 
         postRobot.once('init', () => 'attachTestComponent');
 
@@ -107,7 +117,10 @@ describe('xcomponent hijack', () => {
             }
         });
 
-        component.hijackButtonToPopup('#hijackLink');
+        document.getElementById('hijackLink').addEventListener('click', event => {
+            let target = event.target.form ? event.target.form : event.target;
+            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        });
 
         postRobot.once('init', () => 'attachTestComponent');
 
