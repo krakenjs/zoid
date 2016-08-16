@@ -248,7 +248,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getParentNode = getParentNode;
 	exports.scanForJavascript = scanForJavascript;
 	exports.createElement = createElement;
-	exports.hijackButton = hijackButton;
 	exports.addEventToClass = addEventToClass;
 	exports.template = template;
 	exports.getQueryParam = getQueryParam;
@@ -526,30 +525,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return element;
-	}
-
-	/*  Hijack Button
-	    -------------
-
-	    Hijack a button's click event to set a
-	*/
-
-	function hijackButton(element, callback) {
-	    var el = getElement(element);
-
-	    if (!el) {
-	        throw new Error('Can not find element: ' + element);
-	    }
-
-	    // For links, we can set the target directly on the link. But for form buttons, we need to set the target on the form itself.
-
-	    var targetElement = el.form ? el.form : el;
-
-	    // Then we wait for the click event
-
-	    el.addEventListener('click', function (event) {
-	        callback(event, targetElement);
-	    });
 	}
 
 	/*  Add Event To Class
@@ -6641,35 +6616,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return _drivers.RENDER_DRIVERS[context].loadUrl.call(this, url);
 	        }
 
-	        /*  Hijack Button
-	            -------------
-	             In this case, we don't actually know the final url for the component. The parent page might have a link or a form
-	            which points directly to our component url, or indirectly via a 302.
-	             So here, we listen for a click on the button or link, and hijack the target window. That way, we can be responsible
-	            for opening the window, listening for messages, etc. while the parent page is responsible only for generating the url
-	            to redirect to.
-	             This is necessary because in these cases, there's no way to accurately ascertain the url we're going to before
-	            we're redirected there -- so we let the parent redirect, but handle everything else involving the lifecycle of
-	            the component.
-	             This is a pretty esoteric case -- so if you need it, cool, otherwise you don't need to spend too much time
-	            worrying about it.
-	        */
-
-	    }, {
-	        key: 'hijackButton',
-	        value: function hijackButton(button, element, context) {
-	            var _this11 = this;
-
-	            this.component.log('hijack_button', { element: element });
-
-	            return new _promise.SyncPromise(function (resolve, reject) {
-
-	                (0, _lib.hijackButton)(button, function (event, targetElement) {
-	                    _this11.renderHijack(targetElement, element, context).then(resolve, reject);
-	                });
-	            });
-	        }
-
 	        /*  Render Hijack
 	            -------------
 	             Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
@@ -6678,26 +6624,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this12 = this;
+	            var _this11 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this12.init();
+	                _this11.init();
 
-	                context = _this12.getRenderContext(element, context);
+	                context = _this11.getRenderContext(element, context);
 
-	                _this12.component.log('render_hijack_' + context);
+	                _this11.component.log('render_hijack_' + context);
 
-	                targetElement.target = _this12.childWindowName;
-	                _this12.preRender(element, context);
+	                targetElement.target = _this11.childWindowName;
+	                _this11.preRender(element, context);
 
-	                _this12.runTimeout();
+	                _this11.runTimeout();
 	            })['catch'](function (err) {
 
-	                _this12.onInit.reject(err);
+	                _this11.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this12.onInit;
+	                return _this11.onInit;
 	            });
 	        }
 
@@ -6731,18 +6677,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this13 = this;
+	            var _this12 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this13.component.tag + '] Loading component ' + _this13.component.tag + ' timed out after ' + _this13.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this12.component.tag + '] Loading component ' + _this12.component.tag + ' timed out after ' + _this12.props.timeout + ' milliseconds');
 
-	                    _this13.onInit.reject(error)['catch'](function (err) {
-	                        return _this13.props.onTimeout(err)['finally'](function () {
-	                            _this13.component.log('timed_out', { timeout: _this13.props.timeout });
+	                    _this12.onInit.reject(error)['catch'](function (err) {
+	                        return _this12.props.onTimeout(err)['finally'](function () {
+	                            _this12.component.log('timed_out', { timeout: _this12.props.timeout });
 	                        });
 	                    });
 	                }, this.props.timeout);
@@ -6760,28 +6706,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ref;
 
 	            return _ref = {}, _defineProperty(_ref, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                var _this14 = this;
+	                var _this13 = this;
 
 	                this.childExports = data.exports;
 
 	                this.onInit.resolve(this);
 	                return this.props.onEnter().then(function () {
 
-	                    _this14.setForCleanup('initialPropsSent', true);
+	                    _this13.setForCleanup('initialPropsSent', true);
 
 	                    // Let the child know what its context is, and what its initial props are.
 
 	                    _lib.logger.flush();
 
 	                    return {
-	                        context: _this14.context,
-	                        props: _this14.props
+	                        context: _this13.context,
+	                        props: _this13.props
 	                    };
 	                });
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER_REMOTE, function (source, data) {
-	                var _this15 = this;
+	                var _this14 = this;
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
@@ -6796,7 +6742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    if (data.hijackSubmitParentForm) {
 
-	                        var form = (0, _lib.getParentNode)(_this15.iframe, 'form');
+	                        var form = (0, _lib.getParentNode)(_this14.iframe, 'form');
 
 	                        // Open the window and do everything except load the url
 
@@ -6814,7 +6760,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }).then(function () {
 
 	                    return {
-	                        childWindowName: _this15.childWindowName,
+	                        childWindowName: _this14.childWindowName,
 
 	                        overrides: {
 	                            childExports: instance.childExports,
@@ -6915,7 +6861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this16 = this;
+	            var _this15 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
@@ -6938,18 +6884,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var closePromise = _promise.SyncPromise.resolve().then(function () {
 
-	                if (_this16.component.closeDelay && _this16.context !== _constants.CONTEXT_TYPES.POPUP) {
-	                    return (0, _lib.delay)(_this16.component.closeDelay);
+	                if (_this15.component.closeDelay && _this15.context !== _constants.CONTEXT_TYPES.POPUP) {
+	                    return (0, _lib.delay)(_this15.component.closeDelay);
 	                }
 	            }).then(function () {
 
-	                if (_this16.childExports && !(0, _lib.isWindowClosed)(_this16.window)) {
-	                    _this16.childExports.close()['catch'](_lib.noop);
+	                if (_this15.childExports && !(0, _lib.isWindowClosed)(_this15.window)) {
+	                    _this15.childExports.close()['catch'](_lib.noop);
 	                }
 
-	                _this16.destroy();
+	                _this15.destroy();
 
-	                return _this16.props.onClose(reason);
+	                return _this15.props.onClose(reason);
 	            });
 
 	            this.setForCleanup('closePromise', closePromise);
@@ -7024,7 +6970,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this17 = this;
+	            var _this16 = this;
 
 	            if (!_drivers.RENDER_DRIVERS[context].parentTemplate) {
 	                return;
@@ -7053,17 +6999,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (_drivers.RENDER_DRIVERS[context].focusable) {
 	                (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this17.focus();
+	                    return _this16.focus();
 	                });
 	            }
 
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this17.userClose();
+	                return _this16.userClose();
 	            });
 
 	            this.registerForCleanup(function () {
-	                if (_this17.component.autocloseParentTemplate && _this17.parentTemplate) {
-	                    _this17.closeParentTemplate();
+	                if (_this16.component.autocloseParentTemplate && _this16.parentTemplate) {
+	                    _this16.closeParentTemplate();
 	                }
 	            });
 	        }
@@ -7112,7 +7058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*  Generate Render Methods
 	    -----------------------
 
-	    Autogenerate methods like renderIframe, renderPopupToParent, hijackButtonToLightbox
+	    Autogenerate methods like renderIframe, renderPopupToParent
 	*/
 
 	var _loop = function _loop() {
@@ -7136,10 +7082,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ParentComponent.prototype['render' + contextName + 'ToParent'] = function (element) {
 	        return this.renderToParent(element, context);
-	    };
-
-	    ParentComponent.prototype['hijackButtonTo' + contextName] = function (button, element) {
-	        return this.hijackButton(button, element, context);
 	    };
 	};
 
