@@ -31,8 +31,6 @@ export class ParentComponent extends BaseComponent {
 
         this.component = component;
 
-        this.id = uniqueID();
-
         // Ensure the component is not loaded twice on the same page, if it is a singleton
 
         if (component.singleton && activeComponents.some(comp => comp.component === component)) {
@@ -831,7 +829,7 @@ export class ParentComponent extends BaseComponent {
         let componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
 
         let html = template(componentTemplate, {
-            id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
+            id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
             CLASS: CLASS_NAMES
         });
 
@@ -866,12 +864,12 @@ export class ParentComponent extends BaseComponent {
         this.parentTemplate = createElement('div', {
 
             html: template(parentTemplate, {
-                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`,
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
                 CLASS: CLASS_NAMES
             }),
 
             attributes: {
-                id: `${CLASS_NAMES.XCOMPONENT}-${this.id}`
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`
             },
 
             class: [

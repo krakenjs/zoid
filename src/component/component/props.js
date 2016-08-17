@@ -1,4 +1,6 @@
 
+import { uniqueID } from '../../lib';
+
 /*  Internal Props
     --------------
 
@@ -7,6 +9,13 @@
 */
 
 export const internalProps = {
+
+    uid: {
+        type: 'string',
+        def() {
+            return uniqueID();
+        }
+    },
 
     // A custom url to use to render the component
 
