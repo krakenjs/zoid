@@ -5485,8 +5485,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                if (Math.abs(newDimensions.width - dimensions.width) >= 10 || Math.abs(newDimensions.height - dimensions.height) >= 10) {
 	                    resize(newDimensions.width, newDimensions.height);
-	                    dimensions = newDimensions;
 	                }
+
+	                dimensions = newDimensions;
 	            }, 50);
 	        }
 	    }, {
@@ -6160,8 +6161,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        (0, _validate.validate)(component, options);
 
 	        _this.component = component;
-
-	        _this.id = (0, _lib.uniqueID)();
 
 	        // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -6944,7 +6943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
 
 	            var html = (0, _lib.template)(componentTemplate, {
-	                id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.id,
+	                id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.props.uid,
 	                CLASS: _constants.CLASS_NAMES
 	            });
 
@@ -6980,12 +6979,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.parentTemplate = (0, _lib.createElement)('div', {
 
 	                html: (0, _lib.template)(parentTemplate, {
-	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.id,
+	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.props.uid,
 	                    CLASS: _constants.CLASS_NAMES
 	                }),
 
 	                attributes: {
-	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.id
+	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.props.uid
 	                },
 
 	                'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + this.context],
@@ -7621,13 +7620,16 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.internalProps = undefined;
+
+	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
 	/*  Internal Props
 	    --------------
@@ -7637,6 +7639,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	var internalProps = exports.internalProps = {
+
+	    uid: {
+	        type: 'string',
+	        def: function def() {
+	            return (0, _lib.uniqueID)();
+	        }
+	    },
 
 	    // A custom url to use to render the component
 
