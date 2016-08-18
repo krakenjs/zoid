@@ -277,8 +277,8 @@ export class ChildComponent extends BaseComponent {
                 height: el.scrollHeight
             };
 
-            if (Math.abs(newDimensions.width - dimensions.width) >= 10 || Math.abs(newDimensions.height - dimensions.height) >= 10) {
-                resize(newDimensions.width, newDimensions.height);
+            if (Math.abs(newDimensions.height - dimensions.height) >= 10) {
+                resize(this.component.dimensions.width, newDimensions.height);
             }
 
             dimensions = newDimensions;
