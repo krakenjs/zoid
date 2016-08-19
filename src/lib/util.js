@@ -6,7 +6,7 @@
 */
 
 export function urlEncode(str) {
-    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
+    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23');
 }
 
 
