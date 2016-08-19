@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, MAX_Z_INDEX, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -875,11 +875,7 @@ export class ParentComponent extends BaseComponent {
             class: [
                 CLASS_NAMES.XCOMPONENT,
                 `${CLASS_NAMES.XCOMPONENT}-${this.context}`
-            ],
-
-            style: {
-                zIndex: MAX_Z_INDEX - 1
-            }
+            ]
 
         }, document.body);
 
