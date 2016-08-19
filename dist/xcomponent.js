@@ -90,9 +90,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _component = __webpack_require__(/*! ./component */ 36);
+	var _component = __webpack_require__(/*! ./component */ 37);
 
-	var _constants = __webpack_require__(/*! ./constants */ 41);
+	var _constants = __webpack_require__(/*! ./constants */ 42);
 
 	var CONSTANTS = _interopRequireWildcard(_constants);
 
@@ -832,7 +832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function urlEncode(str) {
-	    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26');
+	    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23');
 	}
 
 	/*  Camel To Dasherize
@@ -1731,16 +1731,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(/*! ./drivers */ 16);
 
-	var _compat = __webpack_require__(/*! ./compat */ 26);
+	var _global = __webpack_require__(/*! ./global */ 24);
 
 	function init() {
 
-	    (0, _compat.registerGlobals)();
+	    if (!_global.global.initialized) {
 
-	    // Listen for all incoming post-messages
-	    _lib.util.listen(window, 'message', _drivers.messageListener);
+	        _lib.util.listen(window, 'message', _drivers.messageListener);
 
-	    (0, _lib.initOnReady)();
+	        (0, _lib.initOnReady)();
+	        (0, _lib.listenForMethods)();
+	    }
+
+	    _global.global.initialized = true;
 	}
 
 	init();
@@ -1773,7 +1776,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(/*! ./server */ 34);
+	var _server = __webpack_require__(/*! ./server */ 35);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -1785,7 +1788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(/*! ./config */ 35);
+	var _config = __webpack_require__(/*! ./config */ 36);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -1806,7 +1809,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(/*! ../compat/bridge */ 27);
+	var _bridge = __webpack_require__(/*! ../compat/bridge */ 28);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -2141,7 +2144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(/*! ./send */ 30);
+	var _send = __webpack_require__(/*! ./send */ 31);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -2153,7 +2156,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(/*! ./listeners */ 33);
+	var _listeners = __webpack_require__(/*! ./listeners */ 34);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -2184,13 +2187,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 18);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 26);
+	var _compat = __webpack_require__(/*! ../../compat */ 27);
 
-	var _send = __webpack_require__(/*! ../send */ 30);
+	var _global = __webpack_require__(/*! ../../global */ 24);
 
-	var _types = __webpack_require__(/*! ./types */ 32);
+	var _send = __webpack_require__(/*! ../send */ 31);
 
-	var receivedMessages = [];
+	var _types = __webpack_require__(/*! ./types */ 33);
+
+	_global.global.receivedMessages = _global.global.receivedMessages || [];
 
 	function parseMessage(message) {
 
@@ -2276,14 +2281,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = event.data;
 
 
+	    if ((0, _lib.isSameDomain)(source, false)) {
+	        origin = _lib.util.getDomain(source);
+	    }
+
 	    var message = parseMessage(data);
 
 	    if (!message) {
 	        return;
 	    }
 
-	    if (receivedMessages.indexOf(message.id) === -1) {
-	        receivedMessages.push(message.id);
+	    if (message.sourceDomain.indexOf('mock://') === 0) {
+	        origin = message.sourceDomain;
+	    }
+
+	    if (_global.global.receivedMessages.indexOf(message.id) === -1) {
+	        _global.global.receivedMessages.push(message.id);
 	    } else {
 	        return;
 	    }
@@ -2452,7 +2465,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(/*! ./methods */ 24);
+	var _methods = __webpack_require__(/*! ./methods */ 25);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -2476,7 +2489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ready = __webpack_require__(/*! ./ready */ 25);
+	var _ready = __webpack_require__(/*! ./ready */ 26);
 
 	Object.keys(_ready).forEach(function (key) {
 	  if (key === "default") return;
@@ -2855,8 +2868,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return safeInterval;
 	    },
 	    getDomain: function getDomain(win) {
+	        var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+
 	        win = win || window;
-	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
+
+	        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	            return win.mockDomain;
+	        }
+
+	        return win.location.protocol + '//' + win.location.host;
 	    },
 	    getDomainFromUrl: function getDomainFromUrl(url) {
 
@@ -3063,6 +3084,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _util = __webpack_require__(/*! ./util */ 21);
 
+	var _global = __webpack_require__(/*! ../global */ 24);
+
 	function safeGet(obj, prop) {
 
 	    var result = void 0;
@@ -3076,12 +3099,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	}
 
-	var domainMatches = [];
+	_global.global.domainMatches = _global.global.domainMatches || [];
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
+	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+
+	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        if (_isArray) {
@@ -3096,46 +3121,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
-
-	            if (!_match.match) {
-	                return false;
-	            }
-
-	            _match.match = false;
-
-	            try {
-	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
-	            } catch (err) {
-	                return;
-	            }
-
-	            return _match.match;
+	            return allowMockDomain ? _match.match : _match.actualMatch;
 	        }
 	    }
 
 	    var match = false;
+	    var actualMatch = false;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
 	        }
+
+	        if (_util.util.getDomain(window, false) === _util.util.getDomain(win, false)) {
+	            actualMatch = true;
+	        }
 	    } catch (err) {
 	        // pass
 	    }
 
-	    domainMatches.push({
+	    _global.global.domainMatches.push({
 	        win: win,
-	        match: match
+	        match: match,
+	        actualMatch: actualMatch
 	    });
 
 	    if (!domainMatchTimeout) {
 	        domainMatchTimeout = setTimeout(function () {
-	            domainMatches = [];
+	            _global.global.domainMatches = [];
 	            domainMatchTimeout = null;
 	        }, 1);
 	    }
 
-	    return match;
+	    return allowMockDomain ? match : actualMatch;
 	}
 
 	function isWindowClosed(win) {
@@ -3173,7 +3191,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	var windows = [];
+	_global.global.windows = _global.global.windows || [];
 	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
 
 	function getWindowId(win) {
@@ -3182,8 +3200,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return windowId;
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.win === win) {
@@ -3205,8 +3223,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window.frames[id];
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.id === id) {
@@ -3224,8 +3242,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _util.util.getDomain(window);
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.win === win && map.domain) {
@@ -3239,7 +3257,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win, domain) {
 
-	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -3269,7 +3287,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    windows.push({
+	    _global.global.windows.push({
 	        id: id,
 	        win: win,
 	        domain: domain
@@ -3306,7 +3324,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    registerWindow(name, win, domain);
 
-	    domainMatches.push({
+	    _global.global.domainMatches.push({
 	        win: win,
 	        match: _util.util.getDomain() === domain
 	    });
@@ -3334,6 +3352,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 24 */
+/*!************************************!*\
+  !*** ./~/post-robot/src/global.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.global = undefined;
+
+	var _conf = __webpack_require__(/*! ./conf */ 13);
+
+	var global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+
+/***/ },
+/* 25 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/methods.js ***!
   \*****************************************/
@@ -3360,20 +3396,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! ./promise */ 19);
 
-	var methods = {};
+	var _global = __webpack_require__(/*! ../global */ 24);
+
+	_global.global.methods = _global.global.methods || {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
 
-	        if (!methods[data.id]) {
+	        if (!_global.global.methods[data.id]) {
 	            throw new Error('Could not find method with id: ' + data.id);
 	        }
 
-	        if (methods[data.id].win !== source) {
+	        if (_global.global.methods[data.id].win !== source) {
 	            throw new Error('Method window does not match');
 	        }
 
-	        var method = methods[data.id].method;
+	        var method = _global.global.methods[data.id].method;
 
 	        _log.log.debug('Call local method', data.name, data.args);
 
@@ -3398,7 +3436,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var id = _util.util.uniqueID();
 
-	    methods[id] = {
+	    _global.global.methods[id] = {
 	        win: destination,
 	        method: method
 	    };
@@ -3411,8 +3449,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function serializeMethods(destination, obj) {
-
-	    listenForMethods();
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (item instanceof Function) {
@@ -3453,7 +3489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/lib/ready.js ***!
   \***************************************/
@@ -3477,13 +3513,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var readyPromises = [];
+	var _global = __webpack_require__(/*! ../global */ 24);
+
+	_global.global.readyPromises = _global.global.readyPromises || [];
 
 	function initOnReady() {
 
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (win, data) {
 
-	        for (var _iterator = readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	            var _ref;
 
 	            if (_isArray) {
@@ -3503,7 +3541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        readyPromises.push({
+	        _global.global.readyPromises.push({
 	            win: win,
 	            promise: new _promise.SyncPromise().resolve(win)
 	        });
@@ -3523,7 +3561,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var name = arguments.length <= 2 || arguments[2] === undefined ? 'Window' : arguments[2];
 
 
-	    for (var _iterator2 = readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -3544,7 +3582,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var promise = new _promise.SyncPromise();
 
-	    readyPromises.push({
+	    _global.global.readyPromises.push({
 	        win: win,
 	        promise: promise
 	    });
@@ -3557,7 +3595,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 27 */
 /*!******************************************!*\
   !*** ./~/post-robot/src/compat/index.js ***!
   \******************************************/
@@ -3569,7 +3607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(/*! ./bridge */ 27);
+	var _bridge = __webpack_require__(/*! ./bridge */ 28);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -3581,19 +3619,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(/*! ./global */ 28);
+	var _post = __webpack_require__(/*! ./post */ 29);
 
-	Object.keys(_global).forEach(function (key) {
+	Object.keys(_post).forEach(function (key) {
 	  if (key === "default") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
-	      return _global[key];
+	      return _post[key];
 	    }
 	  });
 	});
 
-	var _ie = __webpack_require__(/*! ./ie */ 29);
+	var _ie = __webpack_require__(/*! ./ie */ 30);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -3606,7 +3644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 27 */
+/* 28 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/compat/bridge.js ***!
   \*******************************************/
@@ -3892,40 +3930,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
-/*!*******************************************!*\
-  !*** ./~/post-robot/src/compat/global.js ***!
-  \*******************************************/
+/* 29 */
+/*!*****************************************!*\
+  !*** ./~/post-robot/src/compat/post.js ***!
+  \*****************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.registerGlobals = registerGlobals;
-
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _global = __webpack_require__(/*! ../global */ 24);
 
 	var _drivers = __webpack_require__(/*! ../drivers */ 16);
 
-	function registerGlobals() {
-
-	    // Only allow ourselves to be loaded once
-
-	    if (window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	        throw new Error('Attempting to load postRobot twice on the same window');
-	    }
-
-	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
-	        postMessage: function postMessage(event) {
-	            (0, _drivers.receiveMessage)(event);
-	        }
-	    };
-	}
+	_global.global.postMessage = _global.global.postMessage || function postMessage(event) {
+	    (0, _drivers.receiveMessage)(event);
+	};
 
 /***/ },
-/* 29 */
+/* 30 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/compat/ie.js ***!
   \***************************************/
@@ -3956,7 +3978,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 31 */
 /*!************************************************!*\
   !*** ./~/post-robot/src/drivers/send/index.js ***!
   \************************************************/
@@ -3977,7 +3999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 18);
 
-	var _strategies = __webpack_require__(/*! ./strategies */ 31);
+	var _strategies = __webpack_require__(/*! ./strategies */ 32);
 
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -4073,7 +4095,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 32 */
 /*!*****************************************************!*\
   !*** ./~/post-robot/src/drivers/send/strategies.js ***!
   \*****************************************************/
@@ -4092,7 +4114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 18);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 26);
+	var _compat = __webpack_require__(/*! ../../compat */ 27);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -4223,7 +4245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 32 */
+/* 33 */
 /*!***************************************************!*\
   !*** ./~/post-robot/src/drivers/receive/types.js ***!
   \***************************************************/
@@ -4244,9 +4266,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 18);
 
-	var _send = __webpack_require__(/*! ../send */ 30);
+	var _send = __webpack_require__(/*! ../send */ 31);
 
-	var _listeners = __webpack_require__(/*! ../listeners */ 33);
+	var _listeners = __webpack_require__(/*! ../listeners */ 34);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -4333,7 +4355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 33 */
+/* 34 */
 /*!***********************************************!*\
   !*** ./~/post-robot/src/drivers/listeners.js ***!
   \***********************************************/
@@ -4352,17 +4374,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../lib */ 18);
 
-	var listeners = exports.listeners = void 0;
+	var _global = __webpack_require__(/*! ../global */ 24);
+
+	_global.global.listeners = _global.global.listeners || {
+	    request: [],
+	    response: []
+	};
+
+	var listeners = exports.listeners = _global.global.listeners;
 
 	function resetListeners() {
-	    exports.listeners = listeners = {
-	        request: [],
-	        response: {}
-	    };
+	    _global.global.listeners.request = [];
+	    _global.global.listeners.response = [];
 	}
 
 	function getRequestListener(name, win) {
-	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    for (var _iterator = _global.global.listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        if (_isArray) {
@@ -4395,7 +4422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var listener = void 0;
 
-	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -4416,7 +4443,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (listener) {
-	        listeners.request.splice(listeners.request.indexOf(listener), 1);
+	        _global.global.listeners.request.splice(_global.global.listeners.request.indexOf(listener), 1);
 	    }
 	}
 
@@ -4435,10 +4462,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    listeners.request.push({ name: name, win: win, options: options });
 	}
 
-	resetListeners();
-
 /***/ },
-/* 34 */
+/* 35 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/server.js ***!
   \**********************************************/
@@ -4555,7 +4580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 36 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/config.js ***!
   \**********************************************/
@@ -4602,7 +4627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 37 */
 /*!********************************!*\
   !*** ./src/component/index.js ***!
   \********************************/
@@ -4614,7 +4639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _component = __webpack_require__(/*! ./component */ 37);
+	var _component = __webpack_require__(/*! ./component */ 38);
 
 	Object.keys(_component).forEach(function (key) {
 	  if (key === "default") return;
@@ -4626,7 +4651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _parent = __webpack_require__(/*! ./parent */ 44);
+	var _parent = __webpack_require__(/*! ./parent */ 45);
 
 	Object.keys(_parent).forEach(function (key) {
 	  if (key === "default") return;
@@ -4638,7 +4663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _child = __webpack_require__(/*! ./child */ 39);
+	var _child = __webpack_require__(/*! ./child */ 40);
 
 	Object.keys(_child).forEach(function (key) {
 	  if (key === "default") return;
@@ -4651,7 +4676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 37 */
+/* 38 */
 /*!******************************************!*\
   !*** ./src/component/component/index.js ***!
   \******************************************/
@@ -4668,29 +4693,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _base = __webpack_require__(/*! ../base */ 38);
+	var _base = __webpack_require__(/*! ../base */ 39);
 
-	var _child = __webpack_require__(/*! ../child */ 39);
+	var _child = __webpack_require__(/*! ../child */ 40);
 
-	var _parent = __webpack_require__(/*! ../parent */ 44);
+	var _parent = __webpack_require__(/*! ../parent */ 45);
 
-	var _props = __webpack_require__(/*! ./props */ 48);
+	var _props = __webpack_require__(/*! ./props */ 49);
 
-	var _window = __webpack_require__(/*! ../window */ 40);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _validate2 = __webpack_require__(/*! ./validate */ 49);
+	var _validate2 = __webpack_require__(/*! ./validate */ 50);
 
-	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 50);
+	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 51);
 
 	var _parent3 = _interopRequireDefault(_parent2);
 
-	var _component = __webpack_require__(/*! ./templates/component.htm */ 51);
+	var _component = __webpack_require__(/*! ./templates/component.htm */ 52);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _drivers = __webpack_require__(/*! ../../drivers */ 52);
+	var _drivers = __webpack_require__(/*! ../../drivers */ 53);
 
 	var drivers = _interopRequireWildcard(_drivers);
 
@@ -4958,7 +4983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 38 */
+/* 39 */
 /*!*******************************!*\
   !*** ./src/component/base.js ***!
   \*******************************/
@@ -5155,7 +5180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 /***/ },
-/* 39 */
+/* 40 */
 /*!**************************************!*\
   !*** ./src/component/child/index.js ***!
   \**************************************/
@@ -5178,15 +5203,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _base = __webpack_require__(/*! ../base */ 38);
+	var _base = __webpack_require__(/*! ../base */ 39);
 
-	var _window = __webpack_require__(/*! ../window */ 40);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _props = __webpack_require__(/*! ../props */ 42);
+	var _props = __webpack_require__(/*! ../props */ 43);
 
-	var _props2 = __webpack_require__(/*! ./props */ 43);
+	var _props2 = __webpack_require__(/*! ./props */ 44);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -5606,7 +5631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 40 */
+/* 41 */
 /*!*********************************!*\
   !*** ./src/component/window.js ***!
   \*********************************/
@@ -5626,7 +5651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../constants */ 41);
+	var _constants = __webpack_require__(/*! ../constants */ 42);
 
 	function normalize(str) {
 	    return str && str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
@@ -5746,8 +5771,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // - Our actual parent
 	    // - A sibling which rendered us using renderToParent()
 
-	    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames[componentMeta.parent]) {
-	        return parentWindow.frames[componentMeta.parent];
+	    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames.length) {
+
+	        // Make sure we don't error out by trying to access a property of the parent window that is not a frame
+
+	        try {
+	            if (parentWindow.frames[componentMeta.parent]) {
+	                return parentWindow.frames[componentMeta.parent];
+	            }
+	        } catch (err) {
+	            // pass
+	        }
 	    }
 
 	    return parentWindow;
@@ -5787,7 +5821,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 42 */
 /*!**************************!*\
   !*** ./src/constants.js ***!
   \**************************/
@@ -5866,7 +5900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PROP_DEFER_TO_URL = exports.PROP_DEFER_TO_URL = 'xcomponent_prop_defer_to_url';
 
 /***/ },
-/* 42 */
+/* 43 */
 /*!********************************!*\
   !*** ./src/component/props.js ***!
   \********************************/
@@ -5884,7 +5918,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../constants */ 41);
+	var _constants = __webpack_require__(/*! ../constants */ 42);
 
 	/*  Normalize Prop
 	    --------------
@@ -6024,7 +6058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 44 */
 /*!**************************************!*\
   !*** ./src/component/child/props.js ***!
   \**************************************/
@@ -6041,7 +6075,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function normalizeChildProps(component, props) {
 
@@ -6091,7 +6125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 44 */
+/* 45 */
 /*!***************************************!*\
   !*** ./src/component/parent/index.js ***!
   \***************************************/
@@ -6116,17 +6150,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _base = __webpack_require__(/*! ../base */ 38);
+	var _base = __webpack_require__(/*! ../base */ 39);
 
-	var _window = __webpack_require__(/*! ../window */ 40);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 45);
+	var _drivers = __webpack_require__(/*! ./drivers */ 46);
 
-	var _validate = __webpack_require__(/*! ./validate */ 46);
+	var _validate = __webpack_require__(/*! ./validate */ 47);
 
-	var _props = __webpack_require__(/*! ./props */ 47);
+	var _props = __webpack_require__(/*! ./props */ 48);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -7092,7 +7126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 45 */
+/* 46 */
 /*!*****************************************!*\
   !*** ./src/component/parent/drivers.js ***!
   \*****************************************/
@@ -7111,9 +7145,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _window = __webpack_require__(/*! ../window */ 40);
+	var _window = __webpack_require__(/*! ../window */ 41);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -7332,7 +7366,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RENDER_DRIVERS);
 
 /***/ },
-/* 46 */
+/* 47 */
 /*!******************************************!*\
   !*** ./src/component/parent/validate.js ***!
   \******************************************/
@@ -7347,7 +7381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.validateProps = validateProps;
 	exports.validate = validate;
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function validateProp(prop, key, value) {
 
@@ -7470,7 +7504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 47 */
+/* 48 */
 /*!***************************************!*\
   !*** ./src/component/parent/props.js ***!
   \***************************************/
@@ -7489,11 +7523,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _validate = __webpack_require__(/*! ./validate */ 46);
+	var _validate = __webpack_require__(/*! ./validate */ 47);
 
-	var _props = __webpack_require__(/*! ../props */ 42);
+	var _props = __webpack_require__(/*! ../props */ 43);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	/*  Props to Query
 	    --------------
@@ -7616,7 +7650,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 48 */
+/* 49 */
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
@@ -7722,7 +7756,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 49 */
+/* 50 */
 /*!*********************************************!*\
   !*** ./src/component/component/validate.js ***!
   \*********************************************/
@@ -7738,7 +7772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.validate = validate;
 
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
+	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function validateProps(options) {
 
@@ -7890,7 +7924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 50 */
+/* 51 */
 /*!******************************************************!*\
   !*** ./src/component/component/templates/parent.htm ***!
   \******************************************************/
@@ -7899,7 +7933,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
-/* 51 */
+/* 52 */
 /*!*********************************************************!*\
   !*** ./src/component/component/templates/component.htm ***!
   \*********************************************************/
@@ -7908,7 +7942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ""
 
 /***/ },
-/* 52 */
+/* 53 */
 /*!******************************!*\
   !*** ./src/drivers/index.js ***!
   \******************************/
@@ -7920,7 +7954,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _script = __webpack_require__(/*! ./script */ 53);
+	var _script = __webpack_require__(/*! ./script */ 54);
 
 	Object.keys(_script).forEach(function (key) {
 	  if (key === "default") return;
@@ -7932,7 +7966,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _react = __webpack_require__(/*! ./react */ 54);
+	var _react = __webpack_require__(/*! ./react */ 55);
 
 	Object.keys(_react).forEach(function (key) {
 	  if (key === "default") return;
@@ -7944,7 +7978,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _angular = __webpack_require__(/*! ./angular */ 55);
+	var _angular = __webpack_require__(/*! ./angular */ 56);
 
 	Object.keys(_angular).forEach(function (key) {
 	  if (key === "default") return;
@@ -7956,7 +7990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ember = __webpack_require__(/*! ./ember */ 56);
+	var _ember = __webpack_require__(/*! ./ember */ 57);
 
 	Object.keys(_ember).forEach(function (key) {
 	  if (key === "default") return;
@@ -7969,7 +8003,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 53 */
+/* 54 */
 /*!*******************************!*\
   !*** ./src/drivers/script.js ***!
   \*******************************/
@@ -8044,7 +8078,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 54 */
+/* 55 */
 /*!******************************!*\
   !*** ./src/drivers/react.js ***!
   \******************************/
@@ -8089,7 +8123,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 55 */
+/* 56 */
 /*!********************************!*\
   !*** ./src/drivers/angular.js ***!
   \********************************/
@@ -8198,7 +8232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 56 */
+/* 57 */
 /*!******************************!*\
   !*** ./src/drivers/ember.js ***!
   \******************************/
