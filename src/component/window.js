@@ -123,8 +123,17 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
-    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames[componentMeta.parent]) {
-        return parentWindow.frames[componentMeta.parent];
+    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames.length) {
+
+        // Make sure we don't error out by trying to access a property of the parent window that is not a frame
+
+        try {
+            if (parentWindow.frames[componentMeta.parent]) {
+                return parentWindow.frames[componentMeta.parent];
+            }
+        } catch (err) {
+            // pass
+        }
     }
 
     return parentWindow;
