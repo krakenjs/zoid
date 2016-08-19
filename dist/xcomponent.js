@@ -5832,7 +5832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.PROP_DEFER_TO_URL = exports.MAX_Z_INDEX = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
+	exports.PROP_DEFER_TO_URL = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
 	var _lib = __webpack_require__(/*! ./lib */ 2);
 
@@ -5894,8 +5894,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var CONTEXT_TYPES_LIST = exports.CONTEXT_TYPES_LIST = (0, _lib.values)(CONTEXT_TYPES);
-
-	var MAX_Z_INDEX = exports.MAX_Z_INDEX = 2147483647;
 
 	var PROP_DEFER_TO_URL = exports.PROP_DEFER_TO_URL = 'xcomponent_prop_defer_to_url';
 
@@ -7021,11 +7019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.props.uid
 	                },
 
-	                'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + this.context],
-
-	                style: {
-	                    zIndex: _constants.MAX_Z_INDEX - 1
-	                }
+	                'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + this.context]
 
 	            }, document.body);
 
@@ -7320,9 +7314,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        height = Math.min(height, window.innerHeight - 20);
 
 	        var container = this.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0] || this.iframe;
-
-	        container.style.zIndex = _constants.MAX_Z_INDEX;
-	        container.style.position = 'fixed';
 
 	        if (width) {
 	            this.parentTemplate.className += ' set-width';
