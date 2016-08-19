@@ -1,7 +1,7 @@
 
 import { PopupOpenError } from '../../error';
 import { iframe, popup, isWindowClosed } from '../../lib';
-import { CONTEXT_TYPES, CLASS_NAMES } from '../../constants';
+import { CONTEXT_TYPES, CLASS_NAMES, MAX_Z_INDEX } from '../../constants';
 import { getPosition } from '../window';
 
 
@@ -141,15 +141,26 @@ export let RENDER_DRIVERS = {
                 throw err;
             }
 
+            this.resize(dimensions.width, dimensions.height);
+
             return this;
         },
 
         resize(width, height) {
 
-            width = Math.min(width, window.innerWidth);
-            height = Math.min(height, window.innerHeight);
+            this.parentTemplate.style.position = 'fixed';
+            this.parentTemplate.style.zIndex   = MAX_Z_INDEX;
+            this.parentTemplate.style.top      = 0;
+            this.parentTemplate.style.left     = 0;
+            this.parentTemplate.style.width    = '100%';
+            this.parentTemplate.style.height   = '100%';
 
-            return this.window.resizeTo(width, height);
+            if (width && height) {
+                width = Math.min(width, window.innerWidth);
+                height = Math.min(height, window.innerHeight);
+
+                this.window.resizeTo(width, height);
+            }
         },
 
         hide() {
@@ -201,33 +212,41 @@ export let RENDER_DRIVERS = {
 
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
+            this.parentTemplate.style.position = 'fixed';
+            this.parentTemplate.style.zIndex   = MAX_Z_INDEX;
+            this.parentTemplate.style.top      = 0;
+            this.parentTemplate.style.left     = 0;
+            this.parentTemplate.style.width    = '100%';
+            this.parentTemplate.style.height   = '100%';
+
+            container.style.position = 'fixed';
+
+            this.iframe.style.width  = '100%';
+            this.iframe.style.height = '100%';
+
             if (width) {
                 this.parentTemplate.className += ' set-width';
-                this.iframe.style.width    = `100%`;
                 container.style.width      = `${width}px`;
                 container.style.left       = '50%';
                 container.style.marginLeft = `-${Math.floor(width / 2)}px`;
             } else {
                 this.parentTemplate.className += ' max-width';
-                this.iframe.style.width    = '100%';
                 container.style.width      = '100%';
                 container.style.left       = 0;
-                container.style.marginLeft = '0px';
+                container.style.marginLeft = 0;
                 container.width            = '100%';
             }
 
             if (height) {
                 this.parentTemplate.className += ' set-height';
-                this.iframe.style.height  = `100%`;
                 container.style.height    = `${height}px`;
                 container.style.top       = '50%';
                 container.style.marginTop = `-${Math.floor(height / 2)}px`;
             } else {
                 this.parentTemplate.className += ' max-height';
-                this.iframe.style.height  = '100%';
                 container.style.height    = '100%';
                 container.style.top       = 0;
-                container.style.marginTop = '0px';
+                container.style.marginTop = 0;
                 container.height          = '100%';
             }
         },
