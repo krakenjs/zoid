@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
 import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
-         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl } from '../../lib';
+         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getFrame } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -323,7 +323,13 @@ export class ParentComponent extends BaseComponent {
 
             extend(this, data.overrides);
 
-            this.setForCleanup('window', getParentWindow().frames[data.childWindowName]);
+            let win = getFrame(getParentWindow(), data.childWindowName);
+
+            if (!win) {
+                throw new Error(`Unable to find parent component iframe window`);
+            }
+
+            this.setForCleanup('window', win);
         });
     }
 

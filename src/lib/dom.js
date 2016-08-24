@@ -150,26 +150,6 @@ export function addEventListener(obj, event, handler) {
 }
 
 
-/*  Get Parent Window
-    -----------------
-
-    Get the parent window depending on whether we are in an iframe or a popup
-*/
-
-export function getParentWindow(win) {
-
-    win = win || window;
-
-    if (win.opener) {
-        return win.opener;
-    }
-
-    if (win.parent && win.parent !== win) {
-        return win.parent;
-    }
-}
-
-
 /*  Get Parent Node
     ---------------
 
@@ -366,4 +346,79 @@ export function extendUrl(url, options = {}) {
     }
 
     return originalUrl;
+}
+
+
+
+export function getOpener(win) {
+
+    if (!win) {
+        return;
+    }
+
+    try {
+        return win.opener;
+    } catch (err) {
+        return;
+    }
+}
+
+export function getParent(win) {
+
+    if (!win) {
+        return;
+    }
+
+    try {
+        return win.parent;
+    } catch (err) {
+        return;
+    }
+}
+
+export function getParentWindow(win) {
+    win = win || window;
+
+    let opener = getOpener(win);
+
+    if (opener) {
+        return opener;
+    }
+
+    let parent = getParent(win);
+
+    if (parent && parent !== win) {
+        return parent;
+    }
+}
+
+export function getFrames(win) {
+
+    if (!win) {
+        return;
+    }
+
+    try {
+        if (win.frames && typeof win.frames === 'number') {
+            return win.frames;
+        }
+    } catch (err) {
+        // pass
+    }
+
+    if (win.length && typeof win.length === 'number') {
+        return win;
+    }
+}
+
+export function getFrame(win, name) {
+    let frames = getFrames(win);
+
+    if (frames) {
+        try {
+            return frames[name];
+        } catch (err) {
+            return;
+        }
+    }
 }

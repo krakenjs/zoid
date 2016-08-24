@@ -1,6 +1,5 @@
 
-import { b32encode, b32decode } from '../lib';
-import { memoize, uniqueID } from '../lib';
+import { b32encode, b32decode, getFrame, memoize, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -123,16 +122,12 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
-    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames.length) {
 
-        // Make sure we don't error out by trying to access a property of the parent window that is not a frame
+    if (parentWindow && componentMeta.parent) {
+        let parentFrame = getFrame(parentWindow, componentMeta.parent);
 
-        try {
-            if (parentWindow.frames[componentMeta.parent]) {
-                return parentWindow.frames[componentMeta.parent];
-            }
-        } catch (err) {
-            // pass
+        if (parentFrame) {
+            return parentFrame;
         }
     }
 
