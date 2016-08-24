@@ -244,7 +244,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isWindowClosed = isWindowClosed;
 	exports.onCloseWindow = onCloseWindow;
 	exports.addEventListener = addEventListener;
-	exports.getParentWindow = getParentWindow;
 	exports.getParentNode = getParentNode;
 	exports.scanForJavascript = scanForJavascript;
 	exports.createElement = createElement;
@@ -255,6 +254,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.formatQuery = formatQuery;
 	exports.extendQuery = extendQuery;
 	exports.extendUrl = extendUrl;
+	exports.getOpener = getOpener;
+	exports.getParent = getParent;
+	exports.getParentWindow = getParentWindow;
+	exports.getFrames = getFrames;
+	exports.getFrame = getFrame;
 
 	var _fn = __webpack_require__(/*! ./fn */ 4);
 
@@ -411,25 +415,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            obj.removeEventListener(event, handler);
 	        }
 	    };
-	}
-
-	/*  Get Parent Window
-	    -----------------
-
-	    Get the parent window depending on whether we are in an iframe or a popup
-	*/
-
-	function getParentWindow(win) {
-
-	    win = win || window;
-
-	    if (win.opener) {
-	        return win.opener;
-	    }
-
-	    if (win.parent && win.parent !== win) {
-	        return win.parent;
-	    }
 	}
 
 	/*  Get Parent Node
@@ -681,6 +666,79 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return originalUrl;
+	}
+
+	function getOpener(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        return win.opener;
+	    } catch (err) {
+	        return;
+	    }
+	}
+
+	function getParent(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        return win.parent;
+	    } catch (err) {
+	        return;
+	    }
+	}
+
+	function getParentWindow(win) {
+	    win = win || window;
+
+	    var opener = getOpener(win);
+
+	    if (opener) {
+	        return opener;
+	    }
+
+	    var parent = getParent(win);
+
+	    if (parent && parent !== win) {
+	        return parent;
+	    }
+	}
+
+	function getFrames(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        if (win.frames && typeof win.frames === 'number') {
+	            return win.frames;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    if (win.length && typeof win.length === 'number') {
+	        return win;
+	    }
+	}
+
+	function getFrame(win, name) {
+	    var frames = getFrames(win);
+
+	    if (frames) {
+	        try {
+	            return frames[name];
+	        } catch (err) {
+	            return;
+	        }
+	    }
 	}
 
 /***/ },
@@ -1910,7 +1968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return _lib.promise.run(function () {
 
-	            if ((0, _lib.getParentWindow)(options.window) === window) {
+	            if ((0, _lib.isParentWindow)(options.window, window)) {
 	                return (0, _lib.onWindowReady)(options.window);
 	            }
 	        }).then(function () {
@@ -2220,16 +2278,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var windowTargets = {
 	        'window.parent': function windowParent(id) {
-	            return window.parent;
+	            return (0, _lib.getParent)(window);
 	        },
 	        'window.opener': function windowOpener(id) {
 	            return (0, _lib.getOpener)(window);
 	        },
 	        'window.parent.opener': function windowParentOpener(id) {
-	            return (0, _lib.getOpener)(window.parent);
+	            return (0, _lib.getOpener)((0, _lib.getParent)(window));
 	        },
 	        'window.opener.parent': function windowOpenerParent(id) {
-	            return (0, _lib.getOpener)(window).parent;
+	            return (0, _lib.getParent)((0, _lib.getOpener)(window));
 	        }
 	    };
 
@@ -2630,38 +2688,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!**************************************!*\
   !*** ./~/post-robot/src/lib/util.js ***!
   \**************************************/
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.util = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
-
 	var util = exports.util = {
-	    isPopup: function isPopup() {
-	        return Boolean(window.opener);
-	    },
-	    isIframe: function isIframe() {
-	        return Boolean(window.parent && window !== window.parent);
-	    },
-	    isFullpage: function isFullpage() {
-	        return Boolean(!util.isIframe() && !util.isPopup());
-	    },
-	    getType: function getType() {
-	        if (util.isPopup()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
-	        }
-	        if (util.isIframe()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
-	    },
 	    once: function once(method) {
 	        if (!method) {
 	            return method;
@@ -2892,29 +2929,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        domain = domain.split('/').slice(0, 3).join('/');
 
 	        return domain;
-	    },
-	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
-
-	        try {
-	            if (frame.parent === win) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-
-	            try {
-	                for (var i = 0; i < win.frames.length; i++) {
-	                    if (win.frames[i] === frame) {
-	                        return true;
-	                    }
-	                }
-	            } catch (err2) {
-	                return false;
-	            }
-	        }
-
-	        return false;
 	    }
 	};
 
@@ -2935,6 +2949,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	var _util = __webpack_require__(/*! ./util */ 21);
+
+	var _windows = __webpack_require__(/*! ./windows */ 23);
 
 	var _conf = __webpack_require__(/*! ../conf */ 13);
 
@@ -3023,7 +3039,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        args.unshift(window.location.pathname);
 	        args.unshift(window.location.host);
-	        args.unshift('<' + _util.util.getType().toLowerCase() + '>');
+	        args.unshift('<' + (0, _windows.getWindowType)().toLowerCase() + '>');
 	        args.unshift('[post-robot]');
 
 	        if (_conf.CONFIG.LOG_TO_PAGE) {
@@ -3073,7 +3089,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isSameDomain = isSameDomain;
 	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
+	exports.getParent = getParent;
+	exports.getTop = getTop;
+	exports.getFrames = getFrames;
+	exports.isFrameOwnedBy = isFrameOwnedBy;
 	exports.getParentWindow = getParentWindow;
+	exports.isParentWindow = isParentWindow;
+	exports.isPopup = isPopup;
+	exports.isIframe = isIframe;
+	exports.isFullpage = isFullpage;
+	exports.getWindowType = getWindowType;
 	exports.getWindowId = getWindowId;
 	exports.getWindowById = getWindowById;
 	exports.getWindowDomain = getWindowDomain;
@@ -3085,6 +3110,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _util = __webpack_require__(/*! ./util */ 21);
 
 	var _global = __webpack_require__(/*! ../global */ 24);
+
+	var _conf = __webpack_require__(/*! ../conf */ 13);
 
 	function safeGet(obj, prop) {
 
@@ -3177,6 +3204,82 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	function getParent(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        return win.parent;
+	    } catch (err) {
+	        return;
+	    }
+	}
+
+	function getTop(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        return win.top;
+	    } catch (err) {
+	        return;
+	    }
+	}
+
+	function getFrames(win) {
+
+	    if (!win) {
+	        return;
+	    }
+
+	    try {
+	        if (win.frames && typeof win.frames === 'number') {
+	            return win.frames;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    if (win.length && typeof win.length === 'number') {
+	        return win;
+	    }
+	}
+
+	function isFrameOwnedBy(win, frame) {
+
+	    try {
+	        var frameParent = getParent(frame);
+
+	        if (frameParent) {
+	            return frameParent === win;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    try {
+	        var frames = getFrames(win);
+
+	        if (!frames || !frames.length) {
+	            return false;
+	        }
+
+	        for (var i = 0; i < frames.length; i++) {
+	            if (frames[i] === frame) {
+	                return true;
+	            }
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return false;
+	}
+
 	function getParentWindow(win) {
 	    win = win || window;
 
@@ -3186,13 +3289,71 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return opener;
 	    }
 
-	    if (win.parent !== win) {
-	        return win.parent;
+	    var parent = getParent(win);
+
+	    if (parent && parent !== win) {
+	        return parent;
 	    }
 	}
 
+	function isParentWindow(child, parent) {
+	    parent = parent || window;
+
+	    var parentWindow = getParentWindow(child);
+
+	    if (parentWindow) {
+	        return parentWindow === parent;
+	    }
+
+	    if (child === window) {
+	        return getParentWindow(child) === parent;
+	    }
+
+	    if (child === parent) {
+	        return false;
+	    }
+
+	    if (getTop(child) === child) {
+	        return false;
+	    }
+
+	    var frames = getFrames(parent);
+
+	    if (frames && frames.length) {
+	        for (var i = 0; i < frames.length; i++) {
+	            if (frames[i] === child) {
+	                return true;
+	            }
+	        }
+	    }
+
+	    return false;
+	}
+
+	function isPopup() {
+	    return Boolean(getOpener(window));
+	}
+
+	function isIframe() {
+	    return Boolean(getParent(window));
+	}
+
+	function isFullpage() {
+	    return Boolean(!isIframe() && !isPopup());
+	}
+
+	function getWindowType() {
+	    if (isPopup()) {
+	        return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
+	    }
+	    if (isIframe()) {
+	        return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
+	    }
+	    return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+	}
+
 	_global.global.windows = _global.global.windows || [];
-	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
+	var windowId = window.name || getWindowType() + '_' + _util.util.uniqueID();
 
 	function getWindowId(win) {
 
@@ -3311,8 +3472,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function isSameTopWindow(win1, win2) {
+	    var top1 = getTop(win1);
+	    var top2 = getTop(win2);
+
 	    try {
-	        return win1.top === win2.top;
+	        return top1 && top2 && top1 === top2;
 	    } catch (err) {
 	        return false;
 	    }
@@ -3792,13 +3956,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        try {
-	            if (!win || !win.frames || !win.frames.length) {
+	            var frames = (0, _lib.getFrames)(win);
+
+	            if (!frames || !frames.length) {
 	                return;
 	            }
 
-	            for (var i = 0; i < win.frames.length; i++) {
+	            for (var i = 0; i < frames.length; i++) {
 	                try {
-	                    var frame = win.frames[i];
+	                    var frame = frames[i];
 
 	                    if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	                        return frame;
@@ -3838,7 +4004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (!result) {
-	        var zone = _lib.util.isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
+	        var zone = (0, _lib.isFrameOwnedBy)(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
 
 	        result = {
 	            bridge: bridge,
@@ -3876,8 +4042,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
 
-	        if (window.frames[id]) {
-	            return (0, _lib.onWindowReady)(window.frames[id], 5000, 'Bridge ' + url);
+	        var frames = (0, _lib.getFrames)(window);
+
+	        if (frames && frames[id]) {
+	            return (0, _lib.onWindowReady)(frames[id], 5000, 'Bridge ' + url);
 	        }
 
 	        _lib.log.debug('Opening bridge:', url);
@@ -4007,7 +4175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var id = _lib.util.uniqueID();
 	    var source = (0, _lib.getWindowId)(window);
-	    var type = _lib.util.getType();
+	    var type = (0, _lib.getWindowType)();
 	    var target = (0, _lib.getWindowId)(win);
 	    var sourceDomain = _lib.util.getDomain(window);
 
@@ -4226,7 +4394,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message.sourceHint = 'window.opener';
 	    }
 
-	    if (opener && window === opener.parent) {
+	    var openerParent = opener && (0, _lib.getParent)(opener);
+
+	    if (openerParent && window === openerParent) {
 	        message.sourceHint = 'window.opener.parent';
 	    }
 
@@ -5771,16 +5941,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // - Our actual parent
 	    // - A sibling which rendered us using renderToParent()
 
-	    if (parentWindow && componentMeta.parent && parentWindow.frames && parentWindow.frames.length) {
+	    if (parentWindow && componentMeta.parent) {
+	        var parentFrame = (0, _lib.getFrame)(parentWindow, componentMeta.parent);
 
-	        // Make sure we don't error out by trying to access a property of the parent window that is not a frame
-
-	        try {
-	            if (parentWindow.frames[componentMeta.parent]) {
-	                return parentWindow.frames[componentMeta.parent];
-	            }
-	        } catch (err) {
-	            // pass
+	        if (parentFrame) {
+	            return parentFrame;
 	        }
 	    }
 
@@ -6494,7 +6659,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                (0, _lib.extend)(_this7, data.overrides);
 
-	                _this7.setForCleanup('window', (0, _lib.getParentWindow)().frames[data.childWindowName]);
+	                var win = (0, _lib.getFrame)((0, _lib.getParentWindow)(), data.childWindowName);
+
+	                if (!win) {
+	                    throw new Error('Unable to find parent component iframe window');
+	                }
+
+	                _this7.setForCleanup('window', win);
 	            });
 	        }
 	    }, {
