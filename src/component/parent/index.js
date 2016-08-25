@@ -65,8 +65,7 @@ export class ParentComponent extends BaseComponent {
         this.setForCleanup('onInit', new Promise());
 
         this.onInit.catch(err => {
-            this.destroy();
-            this.props.onError(err);
+            this.error(err);
         });
     }
 
