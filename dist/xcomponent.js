@@ -6400,8 +6400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.setForCleanup('onInit', new _promise.SyncPromise());
 
 	            this.onInit['catch'](function (err) {
-	                _this2.destroy();
-	                _this2.props.onError(err);
+	                _this2.error(err);
 	            });
 	        }
 	    }, {
