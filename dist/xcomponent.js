@@ -5720,7 +5720,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this7.component.log('resize', { width: width, height: height });
 
 	                if (_this7.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return window.resizeTo(width, height);
+	                    return; // window.resizeTo(width, height);
 	                }
 
 	                return _this7.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
@@ -6269,9 +6269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (value === _constants.PROP_DEFER_TO_URL) {
 	            value = (0, _lib.getQueryParam)(queryParam);
-	        }
-
-	        if (prop.getter && value) {
+	        } else if (prop.getter && value) {
 	            (function () {
 	                var val = value;
 	                value = function value() {
@@ -6393,27 +6391,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.childWindowName = options.childWindowName || _this.buildChildWindowName();
 
 	        _this.component.log('construct_parent');
+
+	        _this.onInit = new _promise.SyncPromise();
+
+	        _this.registerForCleanup(function () {
+	            _this.onInit = new _promise.SyncPromise();
+	        });
+
+	        _this.onInit['catch'](function (err) {
+	            _this.error(err);
+	        });
 	        return _this;
 	    }
 
 	    _createClass(ParentComponent, [{
-	        key: 'init',
-	        value: function init() {
-	            var _this2 = this;
-
-	            if (this.onInit) {
-	                return;
-	            }
-
-	            // Set up promise for init
-
-	            this.setForCleanup('onInit', new _promise.SyncPromise());
-
-	            this.onInit['catch'](function (err) {
-	                _this2.error(err);
-	            });
-	        }
-	    }, {
 	        key: 'buildChildWindowName',
 	        value: function buildChildWindowName() {
 
@@ -6454,7 +6445,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'buildUrl',
 	        value: function buildUrl() {
-	            var _this3 = this;
+	            var _this2 = this;
 
 	            return (0, _props.propsToQuery)(this.component.props, this.props).then(function (queryProps) {
 
@@ -6462,12 +6453,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var url = void 0;
 
-	                if (_this3.props.url) {
-	                    url = _this3.props.url;
-	                } else if (_this3.props.env) {
-	                    url = _this3.component.envUrls[_this3.props.env];
+	                if (_this2.props.url) {
+	                    url = _this2.props.url;
+	                } else if (_this2.props.env) {
+	                    url = _this2.component.envUrls[_this2.props.env];
 	                } else {
-	                    url = _this3.component.url;
+	                    url = _this2.component.url;
 	                }
 
 	                return (0, _lib.extendUrl)(url, { query: queryProps });
@@ -6482,27 +6473,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps(props) {
-	            var _this4 = this;
+	            var _this3 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this4.init();
 
-	                var oldProps = (0, _lib.stringifyWithFunctions)(_this4.props);
+	                var oldProps = (0, _lib.stringifyWithFunctions)(_this3.props);
 
-	                _this4.setProps(_extends({}, _this4.props, props));
+	                _this3.setProps(_extends({}, _this3.props, props));
 
-	                if (!_this4.initialPropsSent) {
+	                if (!_this3.initialPropsSent) {
 	                    return;
 	                }
 
-	                return _this4.onInit.then(function () {
+	                return _this3.onInit.then(function () {
 
 	                    // Only send down the new props if they do not match the old, and if we have already sent down initial props
 
-	                    if (oldProps !== (0, _lib.stringifyWithFunctions)(_this4.props)) {
-	                        _this4.component.log('parent_update_props');
+	                    if (oldProps !== (0, _lib.stringifyWithFunctions)(_this3.props)) {
+	                        _this3.component.log('parent_update_props');
 
-	                        return _this4.childExports.updateProps(_this4.props);
+	                        return _this3.childExports.updateProps(_this3.props);
 	                    }
 	                });
 	            });
@@ -6573,35 +6563,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render(element, context) {
-	            var _this5 = this;
+	            var _this4 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this5.init();
+	                context = _this4.getRenderContext(element, context);
+	                _this4.component.log('render_' + context, { context: context, element: element });
 
-	                context = _this5.getRenderContext(element, context);
-	                _this5.component.log('render_' + context, { context: context, element: element });
+	                _this4.preRender(element, context);
 
-	                _this5.preRender(element, context);
-
-	                return _this5.initUrl(context);
+	                return _this4.initUrl(context);
 	            })['catch'](function (err) {
 
-	                _this5.onInit.reject(err);
+	                _this4.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this5.onInit;
+	                return _this4.onInit;
 	            });
 	        }
 	    }, {
 	        key: 'initUrl',
 	        value: function initUrl(context) {
-	            var _this6 = this;
+	            var _this5 = this;
 
 	            return this.buildUrl().then(function (url) {
-	                _this6.loadUrl(context, url);
-	                _this6.runTimeout();
+	                _this5.loadUrl(context, url);
+	                _this5.runTimeout();
 	            });
 	        }
 
@@ -6648,7 +6636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParentRemote',
 	        value: function renderToParentRemote(element, context) {
-	            var _this7 = this;
+	            var _this6 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
@@ -6666,7 +6654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            })).then(function (data) {
 
-	                (0, _lib.extend)(_this7, data.overrides);
+	                (0, _lib.extend)(_this6, data.overrides);
 
 	                var win = (0, _lib.getFrame)((0, _lib.getParentWindow)(), data.childWindowName);
 
@@ -6674,13 +6662,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Unable to find parent component iframe window');
 	                }
 
-	                _this7.setForCleanup('window', win);
+	                _this6.setForCleanup('window', win);
 	            });
 	        }
 	    }, {
 	        key: 'renderToParentLocal',
 	        value: function renderToParentLocal(element, context) {
-	            var _this8 = this;
+	            var _this7 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
@@ -6695,10 +6683,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                overrides: {
 	                    close: function close(reason) {
-	                        return _this8.close(reason);
+	                        return _this7.close(reason);
 	                    },
 	                    focus: function focus() {
-	                        return _this8.focus();
+	                        return _this7.focus();
 	                    }
 	                },
 
@@ -6708,8 +6696,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            })).then(function (data) {
 
-	                _this8.registerForCleanup(data.destroy);
-	                (0, _lib.extend)(_this8, data.overrides);
+	                _this7.registerForCleanup(data.destroy);
+	                (0, _lib.extend)(_this7, data.overrides);
 	            });
 
 	            return _promise.SyncPromise.all([renderPromise, renderParentPromise]).then(function () {
@@ -6727,39 +6715,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
-	            var _this9 = this;
+	            var _this8 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this9.init();
 
-	                _this9.validateRender();
+	                _this8.validateRender();
 
-	                context = _this9.getRenderContext(element, context);
+	                context = _this8.getRenderContext(element, context);
 
 	                var parentWindow = (0, _lib.getParentWindow)();
 
 	                if (!parentWindow) {
-	                    throw new Error('[' + _this9.component.tag + '] Can not render to parent - no parent exists');
+	                    throw new Error('[' + _this8.component.tag + '] Can not render to parent - no parent exists');
 	                }
 
 	                if (!(0, _window.isXComponentWindow)()) {
-	                    throw new Error('[' + _this9.component.tag + '] Can not render to parent - not in a child component window');
+	                    throw new Error('[' + _this8.component.tag + '] Can not render to parent - not in a child component window');
 	                }
 
-	                _this9.component.log('render_' + context + '_to_parent', { element: element, context: context });
+	                _this8.component.log('render_' + context + '_to_parent', { element: element, context: context });
 
-	                _this9.setForCleanup('context', context);
+	                _this8.setForCleanup('context', context);
 
-	                return _drivers.RENDER_DRIVERS[context].renderToParent.call(_this9, element, options);
+	                return _drivers.RENDER_DRIVERS[context].renderToParent.call(_this8, element, options);
 	            })['catch'](function (err) {
 
-	                _this9.onInit.reject(err);
+	                _this8.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this9.onInit;
+	                return _this8.onInit;
 	            });
 	        }
 
@@ -6772,12 +6759,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this10 = this;
+	            var _this9 = this;
 
 	            this.closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this10.component.log('detect_close_child');
-	                _this10.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED)['finally'](function () {
-	                    _this10.destroy();
+	                _this9.component.log('detect_close_child');
+	                _this9.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED)['finally'](function () {
+	                    _this9.destroy();
 	                });
 	            });
 
@@ -6785,24 +6772,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // and close the child manually if that happens.
 
 	            this.unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this10.component.log('navigate_away');
+	                _this9.component.log('navigate_away');
 	                _lib.logger.flush();
 
-	                if (_this10.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    _this10.destroy();
+	                if (_this9.context === _constants.CONTEXT_TYPES.POPUP) {
+	                    _this9.destroy();
 	                }
 	            });
 
 	            this.registerForCleanup(function () {
 
-	                if (_this10.closeWindowListener) {
-	                    _this10.closeWindowListener.cancel();
-	                    delete _this10.closeWindowListener;
+	                if (_this9.closeWindowListener) {
+	                    _this9.closeWindowListener.cancel();
+	                    delete _this9.closeWindowListener;
 	                }
 
-	                if (_this10.unloadListener) {
-	                    _this10.unloadListener.cancel();
-	                    delete _this10.unloadListener;
+	                if (_this9.unloadListener) {
+	                    _this9.unloadListener.cancel();
+	                    delete _this9.unloadListener;
 	                }
 	            });
 	        }
@@ -6836,26 +6823,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this11 = this;
+	            var _this10 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this11.init();
 
-	                context = _this11.getRenderContext(element, context);
+	                context = _this10.getRenderContext(element, context);
 
-	                _this11.component.log('render_hijack_' + context);
+	                _this10.component.log('render_hijack_' + context);
 
-	                targetElement.target = _this11.childWindowName;
-	                _this11.preRender(element, context);
+	                targetElement.target = _this10.childWindowName;
+	                _this10.preRender(element, context);
 
-	                _this11.runTimeout();
+	                _this10.runTimeout();
 	            })['catch'](function (err) {
 
-	                _this11.onInit.reject(err);
+	                _this10.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this11.onInit;
+	                return _this10.onInit;
 	            });
 	        }
 
@@ -6889,18 +6875,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this12 = this;
+	            var _this11 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this12.component.tag + '] Loading component ' + _this12.component.tag + ' timed out after ' + _this12.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this11.component.tag + '] Loading component ' + _this11.component.tag + ' timed out after ' + _this11.props.timeout + ' milliseconds');
 
-	                    _this12.onInit.reject(error)['catch'](function (err) {
-	                        return _this12.props.onTimeout(err)['finally'](function () {
-	                            _this12.component.log('timed_out', { timeout: _this12.props.timeout });
+	                    _this11.onInit.reject(error)['catch'](function (err) {
+	                        return _this11.props.onTimeout(err)['finally'](function () {
+	                            _this11.component.log('timed_out', { timeout: _this11.props.timeout });
 	                        });
 	                    });
 	                }, this.props.timeout);
@@ -6918,28 +6904,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ref;
 
 	            return _ref = {}, _defineProperty(_ref, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                var _this13 = this;
+	                var _this12 = this;
 
 	                this.childExports = data.exports;
 
 	                this.onInit.resolve(this);
 	                return this.props.onEnter().then(function () {
 
-	                    _this13.setForCleanup('initialPropsSent', true);
+	                    _this12.setForCleanup('initialPropsSent', true);
 
 	                    // Let the child know what its context is, and what its initial props are.
 
 	                    _lib.logger.flush();
 
 	                    return {
-	                        context: _this13.context,
-	                        props: _this13.props
+	                        context: _this12.context,
+	                        props: _this12.props
 	                    };
 	                });
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
 	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER_REMOTE, function (source, data) {
-	                var _this14 = this;
+	                var _this13 = this;
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
@@ -6954,7 +6940,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    if (data.hijackSubmitParentForm) {
 
-	                        var form = (0, _lib.getParentNode)(_this14.iframe, 'form');
+	                        var form = (0, _lib.getParentNode)(_this13.iframe, 'form');
 
 	                        // Open the window and do everything except load the url
 
@@ -6972,7 +6958,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }).then(function () {
 
 	                    return {
-	                        childWindowName: _this14.childWindowName,
+	                        childWindowName: _this13.childWindowName,
 
 	                        overrides: {
 	                            childExports: instance.childExports,
@@ -7073,7 +7059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this15 = this;
+	            var _this14 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
@@ -7096,18 +7082,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var closePromise = _promise.SyncPromise.resolve().then(function () {
 
-	                if (_this15.component.closeDelay && _this15.context !== _constants.CONTEXT_TYPES.POPUP) {
-	                    return (0, _lib.delay)(_this15.component.closeDelay);
+	                if (_this14.component.closeDelay && _this14.context !== _constants.CONTEXT_TYPES.POPUP) {
+	                    return (0, _lib.delay)(_this14.component.closeDelay);
 	                }
 	            }).then(function () {
 
-	                if (_this15.childExports && !(0, _lib.isWindowClosed)(_this15.window)) {
-	                    _this15.childExports.close()['catch'](_lib.noop);
+	                if (_this14.childExports && !(0, _lib.isWindowClosed)(_this14.window)) {
+	                    _this14.childExports.close()['catch'](_lib.noop);
 	                }
 
-	                _this15.destroy();
+	                _this14.destroy();
 
-	                return _this15.props.onClose(reason);
+	                return _this14.props.onClose(reason);
 	            });
 
 	            this.setForCleanup('closePromise', closePromise);
@@ -7182,7 +7168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this16 = this;
+	            var _this15 = this;
 
 	            if (!_drivers.RENDER_DRIVERS[context].parentTemplate) {
 	                return;
@@ -7207,17 +7193,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (_drivers.RENDER_DRIVERS[context].focusable) {
 	                (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this16.focus();
+	                    return _this15.focus();
 	                });
 	            }
 
 	            (0, _lib.addEventToClass)(this.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                return _this16.userClose();
+	                return _this15.userClose();
 	            });
 
 	            this.registerForCleanup(function () {
-	                if (_this16.component.autocloseParentTemplate && _this16.parentTemplate) {
-	                    _this16.closeParentTemplate();
+	                if (_this15.component.autocloseParentTemplate && _this15.parentTemplate) {
+	                    _this15.closeParentTemplate();
 	                }
 	            });
 	        }
@@ -7463,7 +7449,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.parentTemplate.style.height = '100%';
 
 	        if (width && height) {
-	            this.window.resizeTo(width, height);
+	            // this.window.resizeTo(width, height);
 	        }
 	    },
 	    hide: function hide() {
