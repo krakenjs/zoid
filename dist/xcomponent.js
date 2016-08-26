@@ -688,7 +688,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        return win.parent;
+	        if (win.parent && win.parent !== win) {
+	            return win.parent;
+	        }
 	    } catch (err) {
 	        return;
 	    }
@@ -705,7 +707,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var parent = getParent(win);
 
-	    if (parent && parent !== win) {
+	    if (parent) {
 	        return parent;
 	    }
 	}
@@ -3211,7 +3213,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        return win.parent;
+	        if (win.parent && win.parent !== win) {
+	            return win.parent;
+	        }
 	    } catch (err) {
 	        return;
 	    }
@@ -3291,7 +3295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var parent = getParent(win);
 
-	    if (parent && parent !== win) {
+	    if (parent) {
 	        return parent;
 	    }
 	}
@@ -4392,12 +4396,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (opener && window === opener) {
 	        message.sourceHint = 'window.opener';
-	    }
+	    } else {
 
-	    var openerParent = opener && (0, _lib.getParent)(opener);
+	        var openerParent = opener && (0, _lib.getParent)(opener);
 
-	    if (openerParent && window === openerParent) {
-	        message.sourceHint = 'window.opener.parent';
+	        if (openerParent && window === openerParent) {
+	            message.sourceHint = 'window.opener.parent';
+	        }
 	    }
 
 	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
@@ -6236,8 +6241,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.normalizeChildProps = normalizeChildProps;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
-
 	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
@@ -6246,15 +6249,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var result = {};
 
-	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
+	    var _loop = function _loop() {
 	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
+	            if (_i >= _iterator.length) return 'break';
 	            _ref = _iterator[_i++];
 	        } else {
 	            _i = _iterator.next();
-	            if (_i.done) break;
+	            if (_i.done) return 'break';
 	            _ref = _i.value;
 	        }
 
@@ -6264,26 +6265,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var prop = component.props[key];
 	        var value = props[key];
 
+	        var queryParam = typeof prop.queryParam === 'string' ? prop.queryParam : key;
+
 	        if (value === _constants.PROP_DEFER_TO_URL) {
-
-	            var queryParam = key;
-
-	            if (typeof prop.queryParam === 'string') {
-	                queryParam = prop.queryParam;
-	            }
-
 	            value = (0, _lib.getQueryParam)(queryParam);
-	            if (prop.getter) {
-	                (function () {
-	                    var val = _promise.SyncPromise.resolve(value);
-	                    value = function value() {
-	                        return val;
-	                    };
-	                })();
-	            }
+	        }
+
+	        if (prop.getter && value) {
+	            (function () {
+	                var val = value;
+	                value = function value() {
+	                    return val().then(function (res) {
+	                        if (res === _constants.PROP_DEFER_TO_URL) {
+	                            return (0, _lib.getQueryParam)(queryParam);
+	                        }
+	                        return result;
+	                    });
+	                };
+	            })();
 	        }
 
 	        result[key] = value;
+	    };
+
+	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'break') break;
 	    }
 
 	    return result;
@@ -7453,9 +7463,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.parentTemplate.style.height = '100%';
 
 	        if (width && height) {
-	            width = Math.min(width, window.innerWidth);
-	            height = Math.min(height, window.innerHeight);
-
 	            this.window.resizeTo(width, height);
 	        }
 	    },
