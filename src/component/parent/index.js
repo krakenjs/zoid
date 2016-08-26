@@ -52,17 +52,12 @@ export class ParentComponent extends BaseComponent {
         this.childWindowName = options.childWindowName || this.buildChildWindowName();
 
         this.component.log(`construct_parent`);
-    }
 
-    init() {
+        this.onInit = new Promise();
 
-        if (this.onInit) {
-            return;
-        }
-
-        // Set up promise for init
-
-        this.setForCleanup('onInit', new Promise());
+        this.registerForCleanup(() => {
+            this.onInit = new Promise();
+        });
 
         this.onInit.catch(err => {
             this.error(err);
@@ -137,7 +132,6 @@ export class ParentComponent extends BaseComponent {
 
     updateProps(props) {
         return Promise.resolve().then(() => {
-            this.init();
 
             let oldProps = stringifyWithFunctions(this.props);
 
@@ -228,8 +222,6 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
         return Promise.resolve().then(() => {
-
-            this.init();
 
             context = this.getRenderContext(element, context);
             this.component.log(`render_${context}`, { context, element });
@@ -381,7 +373,6 @@ export class ParentComponent extends BaseComponent {
 
     renderToParent(element, context, options = {}) {
         return Promise.resolve().then(() => {
-            this.init();
 
             this.validateRender();
 
@@ -488,7 +479,6 @@ export class ParentComponent extends BaseComponent {
 
     renderHijack(targetElement, element, context) {
         return Promise.resolve().then(() => {
-            this.init();
 
             context = this.getRenderContext(element, context);
 
