@@ -309,7 +309,7 @@ export class ChildComponent extends BaseComponent {
             this.component.log(`resize`, { width, height });
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                return window.resizeTo(width, height);
+                return; // window.resizeTo(width, height);
             }
 
             return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });

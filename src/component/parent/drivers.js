@@ -156,7 +156,7 @@ export let RENDER_DRIVERS = {
             this.parentTemplate.style.height   = '100%';
 
             if (width && height) {
-                this.window.resizeTo(width, height);
+                // this.window.resizeTo(width, height);
             }
         },
 
