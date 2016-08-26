@@ -15,9 +15,7 @@ export function normalizeChildProps(component, props) {
 
         if (value === PROP_DEFER_TO_URL) {
             value = getQueryParam(queryParam);
-        }
-
-        if (prop.getter && value) {
+        } else if (prop.getter && value) {
             let val = value;
             value = function() {
                 return val().then(res => {
