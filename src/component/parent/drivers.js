@@ -156,9 +156,6 @@ export let RENDER_DRIVERS = {
             this.parentTemplate.style.height   = '100%';
 
             if (width && height) {
-                width = Math.min(width, window.innerWidth);
-                height = Math.min(height, window.innerHeight);
-
                 this.window.resizeTo(width, height);
             }
         },
