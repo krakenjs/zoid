@@ -1,7 +1,7 @@
 
 import { PopupOpenError } from '../../error';
 import { iframe, popup, isWindowClosed } from '../../lib';
-import { CONTEXT_TYPES, CLASS_NAMES, MAX_Z_INDEX } from '../../constants';
+import { CONTEXT_TYPES, CLASS_NAMES } from '../../constants';
 import { getPosition } from '../window';
 
 
@@ -148,13 +148,6 @@ export let RENDER_DRIVERS = {
 
         resize(width, height) {
 
-            this.parentTemplate.style.position = 'fixed';
-            this.parentTemplate.style.zIndex   = MAX_Z_INDEX;
-            this.parentTemplate.style.top      = 0;
-            this.parentTemplate.style.left     = 0;
-            this.parentTemplate.style.width    = '100%';
-            this.parentTemplate.style.height   = '100%';
-
             if (width && height) {
                 // this.window.resizeTo(width, height);
             }
@@ -208,13 +201,6 @@ export let RENDER_DRIVERS = {
             height = Math.min(height, window.innerHeight - 20);
 
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
-
-            this.parentTemplate.style.position = 'fixed';
-            this.parentTemplate.style.zIndex   = MAX_Z_INDEX;
-            this.parentTemplate.style.top      = 0;
-            this.parentTemplate.style.left     = 0;
-            this.parentTemplate.style.width    = '100%';
-            this.parentTemplate.style.height   = '100%';
 
             container.style.position = 'fixed';
 
