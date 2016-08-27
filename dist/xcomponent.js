@@ -6002,7 +6002,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.PROP_DEFER_TO_URL = exports.MAX_Z_INDEX = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
+	exports.PROP_DEFER_TO_URL = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
 	var _lib = __webpack_require__(/*! ./lib */ 2);
 
@@ -6064,8 +6064,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var CONTEXT_TYPES_LIST = exports.CONTEXT_TYPES_LIST = (0, _lib.values)(CONTEXT_TYPES);
-
-	var MAX_Z_INDEX = exports.MAX_Z_INDEX = 2147483647;
 
 	var PROP_DEFER_TO_URL = exports.PROP_DEFER_TO_URL = 'xcomponent_prop_defer_to_url';
 
@@ -7441,13 +7439,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    resize: function resize(width, height) {
 
-	        this.parentTemplate.style.position = 'fixed';
-	        this.parentTemplate.style.zIndex = _constants.MAX_Z_INDEX;
-	        this.parentTemplate.style.top = 0;
-	        this.parentTemplate.style.left = 0;
-	        this.parentTemplate.style.width = '100%';
-	        this.parentTemplate.style.height = '100%';
-
 	        if (width && height) {
 	            // this.window.resizeTo(width, height);
 	        }
@@ -7490,13 +7481,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        height = Math.min(height, window.innerHeight - 20);
 
 	        var container = this.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0] || this.iframe;
-
-	        this.parentTemplate.style.position = 'fixed';
-	        this.parentTemplate.style.zIndex = _constants.MAX_Z_INDEX;
-	        this.parentTemplate.style.top = 0;
-	        this.parentTemplate.style.left = 0;
-	        this.parentTemplate.style.width = '100%';
-	        this.parentTemplate.style.height = '100%';
 
 	        container.style.position = 'fixed';
 
