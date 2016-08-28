@@ -6201,6 +6201,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function normalizeProps(component, instance, props) {
+	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 
 	    props = props || {};
 	    var result = {};
@@ -6219,7 +6221,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var key = _ref;
 
-	        result[key] = normalizeProp(component, instance, props, key);
+	        if (required || props.hasOwnProperty(key)) {
+	            result[key] = normalizeProp(component, instance, props, key);
+	        }
 	    }
 
 	    return result;
@@ -6428,10 +6432,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'setProps',
-	        value: function setProps(props) {
+	        value: function setProps() {
+	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var required = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+	            this.props = this.props || {};
 	            props.version = this.component.version;
-	            (0, _validate.validateProps)(this.component, props);
-	            this.props = (0, _props.normalizeParentProps)(this.component, this, props);
+	            (0, _validate.validateProps)(this.component, props, required);
+	            (0, _lib.extend)(this.props, (0, _props.normalizeParentProps)(this.component, this, props, required));
 	        }
 
 	        /*  Build Url
@@ -6477,7 +6485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var oldProps = (0, _lib.stringifyWithFunctions)(_this3.props);
 
-	                _this3.setProps(_extends({}, _this3.props, props));
+	                _this3.setProps(props, false);
 
 	                if (!_this3.initialPropsSent) {
 	                    return;
@@ -7543,14 +7551,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
 	function validateProp(prop, key, value) {
+	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 
 	    var hasProp = value !== null && value !== undefined && value !== '';
 
 	    if (!hasProp) {
-
-	        // Props can either be optional, or specify a default value
-
-	        if (prop.required !== false && !prop.hasOwnProperty('def')) {
+	        if (required && prop.required !== false && !prop.hasOwnProperty('def')) {
 	            throw new Error('Prop is required: ' + key);
 	        }
 
@@ -7599,6 +7606,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function validateProps(component, props) {
+	    var required = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
 
 	    props = props || {};
 
@@ -7643,7 +7652,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var prop = component.props[_key];
 	        var value = props[_key];
 
-	        validateProp(prop, _key, value);
+	        validateProp(prop, _key, value, required);
 	    }
 	}
 
@@ -7764,7 +7773,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function normalizeParentProps(component, instance, props) {
-	    props = (0, _props.normalizeProps)(component, instance, props);
+	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
+	    props = (0, _props.normalizeProps)(component, instance, props, required);
 
 	    var _loop = function _loop() {
 	        if (_isArray) {
