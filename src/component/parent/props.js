@@ -84,8 +84,8 @@ export function propsToQuery(propsDef, props) {
 
 
 
-export function normalizeParentProps(component, instance, props) {
-    props = normalizeProps(component, instance, props);
+export function normalizeParentProps(component, instance, props, required = true) {
+    props = normalizeProps(component, instance, props, required);
 
     for (let key of Object.keys(props)) {
         let value = props[key];

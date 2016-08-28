@@ -89,10 +89,11 @@ export class ParentComponent extends BaseComponent {
         Normalize props and generate the url we'll use to render the component
     */
 
-    setProps(props) {
+    setProps(props = {}, required = true) {
+        this.props = this.props || {};
         props.version = this.component.version;
-        validateProps(this.component, props);
-        this.props = normalizeParentProps(this.component, this, props);
+        validateProps(this.component, props, required);
+        extend(this.props, normalizeParentProps(this.component, this, props, required));
     }
 
 
@@ -135,10 +136,7 @@ export class ParentComponent extends BaseComponent {
 
             let oldProps = stringifyWithFunctions(this.props);
 
-            this.setProps({
-                ...this.props,
-                ...props
-            });
+            this.setProps(props, false);
 
             if (!this.initialPropsSent) {
                 return;

@@ -1,20 +1,18 @@
 
 import { PROP_DEFER_TO_URL } from '../../constants';
 
-export function validateProp(prop, key, value) {
+export function validateProp(prop, key, value, required = true) {
 
     let hasProp = value !== null && value !== undefined && value !== '';
 
     if (!hasProp) {
-
-        // Props can either be optional, or specify a default value
-
-        if (prop.required !== false && !prop.hasOwnProperty('def')) {
+        if (required && prop.required !== false && !prop.hasOwnProperty('def')) {
             throw new Error(`Prop is required: ${key}`);
         }
 
         return;
     }
+
 
     if (value === PROP_DEFER_TO_URL) {
         return;
@@ -61,7 +59,7 @@ export function validateProp(prop, key, value) {
     double check the values are what we expect, based on the props spec defined in the original component.
 */
 
-export function validateProps(component, props) {
+export function validateProps(component, props, required = true) {
 
     props = props || {};
 
@@ -80,7 +78,7 @@ export function validateProps(component, props) {
         let prop = component.props[key];
         let value = props[key];
 
-        validateProp(prop, key, value);
+        validateProp(prop, key, value, required);
     }
 }
 

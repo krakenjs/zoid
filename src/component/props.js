@@ -117,13 +117,15 @@ export function normalizeProp(component, instance, props, key) {
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function normalizeProps(component, instance, props) {
+export function normalizeProps(component, instance, props, required = true) {
 
     props = props || {};
     let result = {};
 
     for (let key of Object.keys(component.props)) {
-        result[key] = normalizeProp(component, instance, props, key);
+        if (required || props.hasOwnProperty(key)) {
+            result[key] = normalizeProp(component, instance, props, key);
+        }
     }
 
     return result;
