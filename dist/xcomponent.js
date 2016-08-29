@@ -86,11 +86,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	var _src = __webpack_require__(/*! post-robot/src */ 10);
+	var _src = __webpack_require__(/*! post-robot/src */ 9);
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _component = __webpack_require__(/*! ./component */ 37);
+	var _component = __webpack_require__(/*! ./component */ 36);
 
 	var _constants = __webpack_require__(/*! ./constants */ 42);
 
@@ -196,19 +196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _base = __webpack_require__(/*! ./base32 */ 8);
-
-	Object.keys(_base).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _base[key];
-	    }
-	  });
-	});
-
-	var _logger = __webpack_require__(/*! ./logger */ 9);
+	var _logger = __webpack_require__(/*! ./logger */ 8);
 
 	Object.keys(_logger).forEach(function (key) {
 	  if (key === "default") return;
@@ -1519,200 +1507,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ },
 /* 8 */
 /*!***************************!*\
-  !*** ./src/lib/base32.js ***!
-  \***************************/
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.b32encode = b32encode;
-	exports.b32decode = b32decode;
-	/* eslint-disable */
-
-	// This would be the place to edit if you want a different
-	// Base32 implementation
-
-	var alphabet = '0123456789abcdefghjkmnpqrtuvwxyz';
-	var alias = { o: 0, i: 1, l: 1, s: 5 };
-
-	/**
-	 * Build a lookup table and memoize it
-	 *
-	 * Return an object that maps a character to its
-	 * byte value.
-	 */
-
-	var _lookup = function lookup() {
-	    var table = {};
-	    // Invert 'alphabet'
-	    for (var i = 0; i < alphabet.length; i++) {
-	        table[alphabet[i]] = i;
-	    }
-	    // Splice in 'alias'
-	    for (var key in alias) {
-	        if (!alias.hasOwnProperty(key)) continue;
-	        table[key] = table['' + alias[key]];
-	    }
-	    _lookup = function lookup() {
-	        return table;
-	    };
-	    return table;
-	};
-
-	/**
-	 * A streaming encoder
-	 *
-	 *     var encoder = new base32.Encoder()
-	 *     var output1 = encoder.update(input1)
-	 *     var output2 = encoder.update(input2)
-	 *     var lastoutput = encode.update(lastinput, true)
-	 */
-
-	function Encoder() {
-	    var skip = 0; // how many bits we will skip from the first byte
-	    var bits = 0; // 5 high bits, carry from one byte to the next
-
-	    this.output = '';
-
-	    // Read one byte of input
-	    // Should not really be used except by "update"
-	    this.readByte = function (byte) {
-	        // coerce the byte to an int
-	        if (typeof byte == 'string') byte = byte.charCodeAt(0);
-
-	        if (skip < 0) {
-	            // we have a carry from the previous byte
-	            bits |= byte >> -skip;
-	        } else {
-	            // no carry
-	            bits = byte << skip & 248;
-	        }
-
-	        if (skip > 3) {
-	            // not enough data to produce a character, get us another one
-	            skip -= 8;
-	            return 1;
-	        }
-
-	        if (skip < 4) {
-	            // produce a character
-	            this.output += alphabet[bits >> 3];
-	            skip += 5;
-	        }
-
-	        return 0;
-	    };
-
-	    // Flush any remaining bits left in the stream
-	    this.finish = function (check) {
-	        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '');
-	        this.output = '';
-	        return output;
-	    };
-	}
-
-	/**
-	 * Process additional input
-	 *
-	 * input: string of bytes to convert
-	 * flush: boolean, should we flush any trailing bits left
-	 *        in the stream
-	 * returns: a string of characters representing 'input' in base32
-	 */
-
-	Encoder.prototype.update = function (input, flush) {
-	    for (var i = 0; i < input.length;) {
-	        i += this.readByte(input[i]);
-	    }
-	    // consume all output
-	    var output = this.output;
-	    this.output = '';
-	    if (flush) {
-	        output += this.finish();
-	    }
-	    return output;
-	};
-
-	// Functions analogously to Encoder
-
-	function Decoder() {
-	    var skip = 0; // how many bits we have from the previous character
-	    var byte = 0; // current byte we're producing
-
-	    this.output = '';
-
-	    // Consume a character from the stream, store
-	    // the output in this.output. As before, better
-	    // to use update().
-	    this.readChar = function (char) {
-	        if (typeof char != 'string') {
-	            if (typeof char == 'number') {
-	                char = String.fromCharCode(char);
-	            }
-	        }
-	        char = char.toLowerCase();
-	        var val = _lookup()[char];
-	        if (typeof val == 'undefined') {
-	            // character does not exist in our lookup table
-	            return; // skip silently. An alternative would be:
-	            // throw Error('Could not find character "' + char + '" in lookup table.')
-	        }
-	        val <<= 3; // move to the high bits
-	        byte |= val >>> skip;
-	        skip += 5;
-	        if (skip >= 8) {
-	            // we have enough to preduce output
-	            this.output += String.fromCharCode(byte);
-	            skip -= 8;
-	            if (skip > 0) byte = val << 5 - skip & 255;else byte = 0;
-	        }
-	    };
-
-	    this.finish = function (check) {
-	        var output = this.output + (skip < 0 ? alphabet[bits >> 3] : '') + (check ? '$' : '');
-	        this.output = '';
-	        return output;
-	    };
-	}
-
-	Decoder.prototype.update = function (input, flush) {
-	    for (var i = 0; i < input.length; i++) {
-	        this.readChar(input[i]);
-	    }
-	    var output = this.output;
-	    this.output = '';
-	    if (flush) {
-	        output += this.finish();
-	    }
-	    return output;
-	};
-
-	/** Convenience functions
-	 *
-	 * These are the ones to use if you just have a string and
-	 * want to convert it without dealing with streams and whatnot.
-	 */
-
-	// String of data goes in, Base32-encoded string comes out.
-	function b32encode(input) {
-	    var encoder = new Encoder();
-	    var output = encoder.update(input, true);
-	    return output;
-	}
-
-	// Base32-encoded string goes in, decoded data comes out.
-	function b32decode(input) {
-	    var decoder = new Decoder();
-	    var output = decoder.update(input, true);
-	    return output;
-	}
-
-/***/ },
-/* 9 */
-/*!***************************!*\
   !*** ./src/lib/logger.js ***!
   \***************************/
 /***/ function(module, exports, __webpack_require__) {
@@ -1755,7 +1549,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 10 */
+/* 9 */
 /*!***********************************!*\
   !*** ./~/post-robot/src/index.js ***!
   \***********************************/
@@ -1768,7 +1562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Promise = undefined;
 
-	var _interface = __webpack_require__(/*! ./interface */ 11);
+	var _interface = __webpack_require__(/*! ./interface */ 10);
 
 	Object.keys(_interface).forEach(function (key) {
 	    if (key === "default") return;
@@ -1780,7 +1574,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	var _lib = __webpack_require__(/*! ./lib */ 18);
+	var _lib = __webpack_require__(/*! ./lib */ 17);
 
 	Object.defineProperty(exports, 'Promise', {
 	    enumerable: true,
@@ -1789,9 +1583,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 16);
+	var _drivers = __webpack_require__(/*! ./drivers */ 15);
 
-	var _global = __webpack_require__(/*! ./global */ 24);
+	var _global = __webpack_require__(/*! ./global */ 23);
 
 	function init() {
 
@@ -1811,7 +1605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports['default'] = module.exports;
 
 /***/ },
-/* 11 */
+/* 10 */
 /*!*********************************************!*\
   !*** ./~/post-robot/src/interface/index.js ***!
   \*********************************************/
@@ -1824,7 +1618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.linkUrl = exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
 
-	var _client = __webpack_require__(/*! ./client */ 12);
+	var _client = __webpack_require__(/*! ./client */ 11);
 
 	Object.keys(_client).forEach(function (key) {
 	  if (key === "default") return;
@@ -1836,7 +1630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(/*! ./server */ 35);
+	var _server = __webpack_require__(/*! ./server */ 34);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -1848,7 +1642,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(/*! ./config */ 36);
+	var _config = __webpack_require__(/*! ./config */ 35);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -1860,7 +1654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+	var _drivers = __webpack_require__(/*! ../drivers */ 15);
 
 	Object.defineProperty(exports, 'reset', {
 	  enumerable: true,
@@ -1869,7 +1663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(/*! ../compat/bridge */ 28);
+	var _bridge = __webpack_require__(/*! ../compat/bridge */ 27);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -1878,7 +1672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _util = __webpack_require__(/*! ../lib/util */ 21);
+	var _util = __webpack_require__(/*! ../lib/util */ 20);
 
 	Object.defineProperty(exports, 'util', {
 	  enumerable: true,
@@ -1887,7 +1681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _windows = __webpack_require__(/*! ../lib/windows */ 23);
+	var _windows = __webpack_require__(/*! ../lib/windows */ 22);
 
 	Object.defineProperty(exports, 'linkUrl', {
 	  enumerable: true,
@@ -1898,7 +1692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var parent = exports.parent = (0, _windows.getParentWindow)();
 
 /***/ },
-/* 12 */
+/* 11 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/client.js ***!
   \**********************************************/
@@ -1913,11 +1707,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.send = send;
 	exports.sendToParent = sendToParent;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+	var _drivers = __webpack_require__(/*! ../drivers */ 15);
 
-	var _lib = __webpack_require__(/*! ../lib */ 18);
+	var _lib = __webpack_require__(/*! ../lib */ 17);
 
 	function request(options) {
 
@@ -2052,7 +1846,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 13 */
+/* 12 */
 /*!****************************************!*\
   !*** ./~/post-robot/src/conf/index.js ***!
   \****************************************/
@@ -2064,7 +1858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _config = __webpack_require__(/*! ./config */ 14);
+	var _config = __webpack_require__(/*! ./config */ 13);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -2076,7 +1870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _constants = __webpack_require__(/*! ./constants */ 15);
+	var _constants = __webpack_require__(/*! ./constants */ 14);
 
 	Object.keys(_constants).forEach(function (key) {
 	  if (key === "default") return;
@@ -2089,7 +1883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 14 */
+/* 13 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/conf/config.js ***!
   \*****************************************/
@@ -2104,7 +1898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ALLOWED_POST_MESSAGE;
 
-	var _constants = __webpack_require__(/*! ./constants */ 15);
+	var _constants = __webpack_require__(/*! ./constants */ 14);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2124,7 +1918,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 15 */
+/* 14 */
 /*!********************************************!*\
   !*** ./~/post-robot/src/conf/constants.js ***!
   \********************************************/
@@ -2180,7 +1974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 15 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/drivers/index.js ***!
   \*******************************************/
@@ -2192,7 +1986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _receive = __webpack_require__(/*! ./receive */ 17);
+	var _receive = __webpack_require__(/*! ./receive */ 16);
 
 	Object.keys(_receive).forEach(function (key) {
 	  if (key === "default") return;
@@ -2204,7 +1998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(/*! ./send */ 31);
+	var _send = __webpack_require__(/*! ./send */ 30);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -2216,7 +2010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(/*! ./listeners */ 34);
+	var _listeners = __webpack_require__(/*! ./listeners */ 33);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -2229,7 +2023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 17 */
+/* 16 */
 /*!***************************************************!*\
   !*** ./~/post-robot/src/drivers/receive/index.js ***!
   \***************************************************/
@@ -2243,17 +2037,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.receiveMessage = receiveMessage;
 	exports.messageListener = messageListener;
 
-	var _conf = __webpack_require__(/*! ../../conf */ 13);
+	var _conf = __webpack_require__(/*! ../../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 18);
+	var _lib = __webpack_require__(/*! ../../lib */ 17);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 27);
+	var _compat = __webpack_require__(/*! ../../compat */ 26);
 
-	var _global = __webpack_require__(/*! ../../global */ 24);
+	var _global = __webpack_require__(/*! ../../global */ 23);
 
-	var _send = __webpack_require__(/*! ../send */ 31);
+	var _send = __webpack_require__(/*! ../send */ 30);
 
-	var _types = __webpack_require__(/*! ./types */ 33);
+	var _types = __webpack_require__(/*! ./types */ 32);
 
 	_global.global.receivedMessages = _global.global.receivedMessages || [];
 
@@ -2465,7 +2259,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 17 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/lib/index.js ***!
   \***************************************/
@@ -2477,7 +2271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _promise = __webpack_require__(/*! ./promise */ 19);
+	var _promise = __webpack_require__(/*! ./promise */ 18);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -2489,7 +2283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _util = __webpack_require__(/*! ./util */ 21);
+	var _util = __webpack_require__(/*! ./util */ 20);
 
 	Object.keys(_util).forEach(function (key) {
 	  if (key === "default") return;
@@ -2501,7 +2295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _log = __webpack_require__(/*! ./log */ 22);
+	var _log = __webpack_require__(/*! ./log */ 21);
 
 	Object.keys(_log).forEach(function (key) {
 	  if (key === "default") return;
@@ -2513,7 +2307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _windows = __webpack_require__(/*! ./windows */ 23);
+	var _windows = __webpack_require__(/*! ./windows */ 22);
 
 	Object.keys(_windows).forEach(function (key) {
 	  if (key === "default") return;
@@ -2525,7 +2319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(/*! ./methods */ 25);
+	var _methods = __webpack_require__(/*! ./methods */ 24);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -2537,7 +2331,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _tick = __webpack_require__(/*! ./tick */ 20);
+	var _tick = __webpack_require__(/*! ./tick */ 19);
 
 	Object.keys(_tick).forEach(function (key) {
 	  if (key === "default") return;
@@ -2549,7 +2343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ready = __webpack_require__(/*! ./ready */ 26);
+	var _ready = __webpack_require__(/*! ./ready */ 25);
 
 	Object.keys(_ready).forEach(function (key) {
 	  if (key === "default") return;
@@ -2562,7 +2356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 19 */
+/* 18 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/promise.js ***!
   \*****************************************/
@@ -2577,7 +2371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _tick = __webpack_require__(/*! ./tick */ 20);
+	var _tick = __webpack_require__(/*! ./tick */ 19);
 
 	var Promise = exports.Promise = _promise.SyncPromise;
 
@@ -2654,7 +2448,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 20 */
+/* 19 */
 /*!**************************************!*\
   !*** ./~/post-robot/src/lib/tick.js ***!
   \**************************************/
@@ -2667,7 +2461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.nextTick = nextTick;
 
-	var _util = __webpack_require__(/*! ./util */ 21);
+	var _util = __webpack_require__(/*! ./util */ 20);
 
 	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
 	var queue = [];
@@ -2686,7 +2480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 20 */
 /*!**************************************!*\
   !*** ./~/post-robot/src/lib/util.js ***!
   \**************************************/
@@ -2935,7 +2729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 22 */
+/* 21 */
 /*!*************************************!*\
   !*** ./~/post-robot/src/lib/log.js ***!
   \*************************************/
@@ -2950,11 +2744,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	var _util = __webpack_require__(/*! ./util */ 21);
+	var _util = __webpack_require__(/*! ./util */ 20);
 
-	var _windows = __webpack_require__(/*! ./windows */ 23);
+	var _windows = __webpack_require__(/*! ./windows */ 22);
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
 	var LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
@@ -3077,7 +2871,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 23 */
+/* 22 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/windows.js ***!
   \*****************************************/
@@ -3109,11 +2903,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isSameTopWindow = isSameTopWindow;
 	exports.linkUrl = linkUrl;
 
-	var _util = __webpack_require__(/*! ./util */ 21);
+	var _util = __webpack_require__(/*! ./util */ 20);
 
-	var _global = __webpack_require__(/*! ../global */ 24);
+	var _global = __webpack_require__(/*! ../global */ 23);
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
 	function safeGet(obj, prop) {
 
@@ -3519,7 +3313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 24 */
+/* 23 */
 /*!************************************!*\
   !*** ./~/post-robot/src/global.js ***!
   \************************************/
@@ -3532,12 +3326,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.global = undefined;
 
-	var _conf = __webpack_require__(/*! ./conf */ 13);
+	var _conf = __webpack_require__(/*! ./conf */ 12);
 
 	var global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
 
 /***/ },
-/* 25 */
+/* 24 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/lib/methods.js ***!
   \*****************************************/
@@ -3554,17 +3348,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.deserializeMethod = deserializeMethod;
 	exports.deserializeMethods = deserializeMethods;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _util = __webpack_require__(/*! ./util */ 21);
+	var _util = __webpack_require__(/*! ./util */ 20);
 
-	var _interface = __webpack_require__(/*! ../interface */ 11);
+	var _interface = __webpack_require__(/*! ../interface */ 10);
 
-	var _log = __webpack_require__(/*! ./log */ 22);
+	var _log = __webpack_require__(/*! ./log */ 21);
 
-	var _promise = __webpack_require__(/*! ./promise */ 19);
+	var _promise = __webpack_require__(/*! ./promise */ 18);
 
-	var _global = __webpack_require__(/*! ../global */ 24);
+	var _global = __webpack_require__(/*! ../global */ 23);
 
 	_global.global.methods = _global.global.methods || {};
 
@@ -3657,7 +3451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 25 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/lib/ready.js ***!
   \***************************************/
@@ -3671,17 +3465,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.initOnReady = initOnReady;
 	exports.onWindowReady = onWindowReady;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _windows = __webpack_require__(/*! ./windows */ 23);
+	var _windows = __webpack_require__(/*! ./windows */ 22);
 
-	var _interface = __webpack_require__(/*! ../interface */ 11);
+	var _interface = __webpack_require__(/*! ../interface */ 10);
 
-	var _log = __webpack_require__(/*! ./log */ 22);
+	var _log = __webpack_require__(/*! ./log */ 21);
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _global = __webpack_require__(/*! ../global */ 24);
+	var _global = __webpack_require__(/*! ../global */ 23);
 
 	_global.global.readyPromises = _global.global.readyPromises || [];
 
@@ -3763,7 +3557,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 26 */
 /*!******************************************!*\
   !*** ./~/post-robot/src/compat/index.js ***!
   \******************************************/
@@ -3775,7 +3569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(/*! ./bridge */ 28);
+	var _bridge = __webpack_require__(/*! ./bridge */ 27);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -3787,7 +3581,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _post = __webpack_require__(/*! ./post */ 29);
+	var _post = __webpack_require__(/*! ./post */ 28);
 
 	Object.keys(_post).forEach(function (key) {
 	  if (key === "default") return;
@@ -3799,7 +3593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(/*! ./ie */ 30);
+	var _ie = __webpack_require__(/*! ./ie */ 29);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -3812,7 +3606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 28 */
+/* 27 */
 /*!*******************************************!*\
   !*** ./~/post-robot/src/compat/bridge.js ***!
   \*******************************************/
@@ -3830,9 +3624,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.registerBridge = registerBridge;
 	exports.openBridge = openBridge;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../lib */ 18);
+	var _lib = __webpack_require__(/*! ../lib */ 17);
 
 	var BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 
@@ -4102,7 +3896,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 28 */
 /*!*****************************************!*\
   !*** ./~/post-robot/src/compat/post.js ***!
   \*****************************************/
@@ -4110,16 +3904,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _global = __webpack_require__(/*! ../global */ 24);
+	var _global = __webpack_require__(/*! ../global */ 23);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+	var _drivers = __webpack_require__(/*! ../drivers */ 15);
 
 	_global.global.postMessage = _global.global.postMessage || function postMessage(event) {
 	    (0, _drivers.receiveMessage)(event);
 	};
 
 /***/ },
-/* 30 */
+/* 29 */
 /*!***************************************!*\
   !*** ./~/post-robot/src/compat/ie.js ***!
   \***************************************/
@@ -4132,9 +3926,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.emulateIERestrictions = emulateIERestrictions;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../lib */ 18);
+	var _lib = __webpack_require__(/*! ../lib */ 17);
 
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
@@ -4150,7 +3944,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 30 */
 /*!************************************************!*\
   !*** ./~/post-robot/src/drivers/send/index.js ***!
   \************************************************/
@@ -4167,11 +3961,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildMessage = buildMessage;
 	exports.sendMessage = sendMessage;
 
-	var _conf = __webpack_require__(/*! ../../conf */ 13);
+	var _conf = __webpack_require__(/*! ../../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 18);
+	var _lib = __webpack_require__(/*! ../../lib */ 17);
 
-	var _strategies = __webpack_require__(/*! ./strategies */ 32);
+	var _strategies = __webpack_require__(/*! ./strategies */ 31);
 
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -4267,7 +4061,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 31 */
 /*!*****************************************************!*\
   !*** ./~/post-robot/src/drivers/send/strategies.js ***!
   \*****************************************************/
@@ -4282,11 +4076,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _SEND_MESSAGE_STRATEG;
 
-	var _conf = __webpack_require__(/*! ../../conf */ 13);
+	var _conf = __webpack_require__(/*! ../../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 18);
+	var _lib = __webpack_require__(/*! ../../lib */ 17);
 
-	var _compat = __webpack_require__(/*! ../../compat */ 27);
+	var _compat = __webpack_require__(/*! ../../compat */ 26);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -4420,7 +4214,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 33 */
+/* 32 */
 /*!***************************************************!*\
   !*** ./~/post-robot/src/drivers/receive/types.js ***!
   \***************************************************/
@@ -4437,13 +4231,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _conf = __webpack_require__(/*! ../../conf */ 13);
+	var _conf = __webpack_require__(/*! ../../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../../lib */ 18);
+	var _lib = __webpack_require__(/*! ../../lib */ 17);
 
-	var _send = __webpack_require__(/*! ../send */ 31);
+	var _send = __webpack_require__(/*! ../send */ 30);
 
-	var _listeners = __webpack_require__(/*! ../listeners */ 34);
+	var _listeners = __webpack_require__(/*! ../listeners */ 33);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -4530,7 +4324,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 34 */
+/* 33 */
 /*!***********************************************!*\
   !*** ./~/post-robot/src/drivers/listeners.js ***!
   \***********************************************/
@@ -4547,9 +4341,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.removeRequestListener = removeRequestListener;
 	exports.addRequestListener = addRequestListener;
 
-	var _lib = __webpack_require__(/*! ../lib */ 18);
+	var _lib = __webpack_require__(/*! ../lib */ 17);
 
-	var _global = __webpack_require__(/*! ../global */ 24);
+	var _global = __webpack_require__(/*! ../global */ 23);
 
 	_global.global.listeners = _global.global.listeners || {
 	    request: [],
@@ -4638,7 +4432,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 34 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/server.js ***!
   \**********************************************/
@@ -4653,11 +4447,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.on = on;
 	exports.once = once;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
-	var _lib = __webpack_require__(/*! ../lib */ 18);
+	var _lib = __webpack_require__(/*! ../lib */ 17);
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+	var _drivers = __webpack_require__(/*! ../drivers */ 15);
 
 	function listen(options) {
 
@@ -4755,7 +4549,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 35 */
 /*!**********************************************!*\
   !*** ./~/post-robot/src/interface/config.js ***!
   \**********************************************/
@@ -4770,7 +4564,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.enableMockMode = enableMockMode;
 	exports.disableMockMode = disableMockMode;
 
-	var _conf = __webpack_require__(/*! ../conf */ 13);
+	var _conf = __webpack_require__(/*! ../conf */ 12);
 
 	Object.defineProperty(exports, 'CONFIG', {
 	    enumerable: true,
@@ -4786,7 +4580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.disable = disable;
 
-	var _drivers = __webpack_require__(/*! ../drivers */ 16);
+	var _drivers = __webpack_require__(/*! ../drivers */ 15);
 
 	function enableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = true;
@@ -4802,7 +4596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 36 */
 /*!********************************!*\
   !*** ./src/component/index.js ***!
   \********************************/
@@ -4814,7 +4608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _component = __webpack_require__(/*! ./component */ 38);
+	var _component = __webpack_require__(/*! ./component */ 37);
 
 	Object.keys(_component).forEach(function (key) {
 	  if (key === "default") return;
@@ -4838,7 +4632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _child = __webpack_require__(/*! ./child */ 40);
+	var _child = __webpack_require__(/*! ./child */ 39);
 
 	Object.keys(_child).forEach(function (key) {
 	  if (key === "default") return;
@@ -4851,7 +4645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 38 */
+/* 37 */
 /*!******************************************!*\
   !*** ./src/component/component/index.js ***!
   \******************************************/
@@ -4868,15 +4662,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _base = __webpack_require__(/*! ../base */ 39);
+	var _base = __webpack_require__(/*! ../base */ 38);
 
-	var _child = __webpack_require__(/*! ../child */ 40);
+	var _child = __webpack_require__(/*! ../child */ 39);
 
 	var _parent = __webpack_require__(/*! ../parent */ 45);
 
 	var _props = __webpack_require__(/*! ./props */ 49);
 
-	var _window = __webpack_require__(/*! ../window */ 41);
+	var _window = __webpack_require__(/*! ../window */ 40);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
@@ -5158,7 +4952,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 39 */
+/* 38 */
 /*!*******************************!*\
   !*** ./src/component/base.js ***!
   \*******************************/
@@ -5173,7 +4967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _src = __webpack_require__(/*! post-robot/src */ 10);
+	var _src = __webpack_require__(/*! post-robot/src */ 9);
 
 	var _src2 = _interopRequireDefault(_src);
 
@@ -5355,7 +5149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 /***/ },
-/* 40 */
+/* 39 */
 /*!**************************************!*\
   !*** ./src/component/child/index.js ***!
   \**************************************/
@@ -5372,15 +5166,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _src = __webpack_require__(/*! post-robot/src */ 10);
+	var _src = __webpack_require__(/*! post-robot/src */ 9);
 
 	var _src2 = _interopRequireDefault(_src);
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _base = __webpack_require__(/*! ../base */ 39);
+	var _base = __webpack_require__(/*! ../base */ 38);
 
-	var _window = __webpack_require__(/*! ../window */ 41);
+	var _window = __webpack_require__(/*! ../window */ 40);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
@@ -5806,7 +5600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 41 */
+/* 40 */
 /*!*********************************!*\
   !*** ./src/component/window.js ***!
   \*********************************/
@@ -5824,9 +5618,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildChildWindowName = buildChildWindowName;
 	exports.getPosition = getPosition;
 
+	var _hiBase = __webpack_require__(/*! hi-base32 */ 41);
+
+	var _hiBase2 = _interopRequireDefault(_hiBase);
+
 	var _lib = __webpack_require__(/*! ../lib */ 2);
 
 	var _constants = __webpack_require__(/*! ../constants */ 42);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	function normalize(str) {
 	    return str && str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
@@ -5849,12 +5649,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    options.id = (0, _lib.uniqueID)();
-	    options.parent = window.name;
-	    options.parentDomain = window.location.protocol + '//' + window.location.host;
 
 	    var encodedName = normalize(name);
 	    var encodedVersion = normalize(version);
-	    var encodedOptions = (0, _lib.b32encode)(JSON.stringify(options));
+	    var encodedOptions = _hiBase2['default'].encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase();
 
 	    if (!encodedName) {
 	        throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
@@ -5897,7 +5695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var componentMeta = void 0;
 
 	    try {
-	        componentMeta = JSON.parse((0, _lib.b32decode)(encodedOptions));
+	        componentMeta = JSON.parse(_hiBase2['default'].decode(encodedOptions.toUpperCase()));
 	    } catch (err) {
 	        return;
 	    }
@@ -5989,6 +5787,409 @@ return /******/ (function(modules) { // webpackBootstrap
 	        y: top
 	    };
 	}
+
+/***/ },
+/* 41 */
+/*!***********************************!*\
+  !*** ./~/hi-base32/src/base32.js ***!
+  \***********************************/
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	/*
+	 * hi-base32 v0.1.1
+	 * https://github.com/emn178/hi-base32
+	 *
+	 * Copyright 2015, emn178@gmail.com
+	 *
+	 * Licensed under the MIT license:
+	 * http://www.opensource.org/licenses/MIT
+	 */
+	;(function (root, undefined) {
+	  'use strict';
+
+	  var NODE_JS = typeof module != 'undefined';
+	  if (NODE_JS) {
+	    root = global;
+	  }
+
+	  var BASE32_ENCODE_CHAR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.split('');
+	  var BASE32_DECODE_CHAR = {
+	    'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8,
+	    'J': 9, 'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16,
+	    'R': 17, 'S': 18, 'T': 19, 'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24,
+	    'Z': 25, '2': 26, '3': 27, '4': 28, '5': 29, '6': 30, '7': 31
+	  };
+
+	  var blocks = [0, 0, 0, 0, 0, 0, 0, 0];
+
+	  var toUtf8String = function toUtf8String(bytes) {
+	    var str = '',
+	        length = bytes.length,
+	        i = 0,
+	        followingChars = 0,
+	        b,
+	        c;
+	    while (i < length) {
+	      b = bytes[i++];
+	      if (b <= 0x7F) {
+	        str += String.fromCharCode(b);
+	        continue;
+	      } else if (b > 0xBF && b <= 0xDF) {
+	        c = b & 0x1F;
+	        followingChars = 1;
+	      } else if (b <= 0xEF) {
+	        c = b & 0x0F;
+	        followingChars = 2;
+	      } else if (b <= 0xF7) {
+	        c = b & 0x07;
+	        followingChars = 3;
+	      } else {
+	        throw 'not a UTF-8 string';
+	      }
+
+	      for (var j = 0; j < followingChars; ++j) {
+	        b = bytes[i++];
+	        if (b < 0x80 || b > 0xBF) {
+	          throw 'not a UTF-8 string';
+	        }
+	        c <<= 6;
+	        c += b & 0x3F;
+	      }
+	      if (c >= 0xD800 && c <= 0xDFFF) {
+	        throw 'not a UTF-8 string';
+	      }
+	      if (c > 0x10FFFF) {
+	        throw 'not a UTF-8 string';
+	      }
+
+	      if (c <= 0xFFFF) {
+	        str += String.fromCharCode(c);
+	      } else {
+	        c -= 0x10000;
+	        str += String.fromCharCode((c >> 10) + 0xD800);
+	        str += String.fromCharCode((c & 0x3FF) + 0xDC00);
+	      }
+	    }
+	    return str;
+	  };
+
+	  var decodeAsBytes = function decodeAsBytes(base32Str) {
+	    base32Str = base32Str.replace(/=/g, '');
+	    var v1,
+	        v2,
+	        v3,
+	        v4,
+	        v5,
+	        v6,
+	        v7,
+	        v8,
+	        bytes = [],
+	        index = 0,
+	        length = base32Str.length;
+
+	    // 4 char to 3 bytes
+	    for (var i = 0, count = length >> 3 << 3; i < count;) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v6 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v7 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v8 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      bytes[index++] = (v1 << 3 | v2 >>> 2) & 255;
+	      bytes[index++] = (v2 << 6 | v3 << 1 | v4 >>> 4) & 255;
+	      bytes[index++] = (v4 << 4 | v5 >>> 1) & 255;
+	      bytes[index++] = (v5 << 7 | v6 << 2 | v7 >>> 3) & 255;
+	      bytes[index++] = (v7 << 5 | v8) & 255;
+	    }
+
+	    // remain bytes
+	    var remain = length - count;
+	    if (remain == 2) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      bytes[index++] = (v1 << 3 | v2 >>> 2) & 255;
+	    } else if (remain == 4) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      bytes[index++] = (v1 << 3 | v2 >>> 2) & 255;
+	      bytes[index++] = (v2 << 6 | v3 << 1 | v4 >>> 4) & 255;
+	    } else if (remain == 5) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      bytes[index++] = (v1 << 3 | v2 >>> 2) & 255;
+	      bytes[index++] = (v2 << 6 | v3 << 1 | v4 >>> 4) & 255;
+	      bytes[index++] = (v4 << 4 | v5 >>> 1) & 255;
+	    } else if (remain == 7) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v6 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v7 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      bytes[index++] = (v1 << 3 | v2 >>> 2) & 255;
+	      bytes[index++] = (v2 << 6 | v3 << 1 | v4 >>> 4) & 255;
+	      bytes[index++] = (v4 << 4 | v5 >>> 1) & 255;
+	      bytes[index++] = (v5 << 7 | v6 << 2 | v7 >>> 3) & 255;
+	    }
+	    return bytes;
+	  };
+
+	  var encodeAscii = function encodeAscii(str) {
+	    var v1,
+	        v2,
+	        v3,
+	        v4,
+	        v5,
+	        base32Str = '',
+	        length = str.length;
+	    for (var i = 0, count = parseInt(length / 5) * 5; i < count;) {
+	      v1 = str.charCodeAt(i++);
+	      v2 = str.charCodeAt(i++);
+	      v3 = str.charCodeAt(i++);
+	      v4 = str.charCodeAt(i++);
+	      v5 = str.charCodeAt(i++);
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] + BASE32_ENCODE_CHAR[v5 & 31];
+	    }
+
+	    // remain char
+	    var remain = length - count;
+	    if (remain == 1) {
+	      v1 = str.charCodeAt(i);
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[v1 << 2 & 31] + '======';
+	    } else if (remain == 2) {
+	      v1 = str.charCodeAt(i++);
+	      v2 = str.charCodeAt(i);
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[v2 << 4 & 31] + '====';
+	    } else if (remain == 3) {
+	      v1 = str.charCodeAt(i++);
+	      v2 = str.charCodeAt(i++);
+	      v3 = str.charCodeAt(i);
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[v3 << 1 & 31] + '===';
+	    } else if (remain == 4) {
+	      v1 = str.charCodeAt(i++);
+	      v2 = str.charCodeAt(i++);
+	      v3 = str.charCodeAt(i++);
+	      v4 = str.charCodeAt(i);
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[v4 << 3 & 31] + '=';
+	    }
+	    return base32Str;
+	  };
+
+	  var encodeUtf8 = function encodeUtf8(str) {
+	    var v1,
+	        v2,
+	        v3,
+	        v4,
+	        v5,
+	        code,
+	        end = false,
+	        base32Str = '',
+	        index = 0,
+	        i,
+	        start = 0,
+	        bytes = 0,
+	        length = str.length;
+	    do {
+	      blocks[0] = blocks[5];
+	      blocks[1] = blocks[6];
+	      blocks[2] = blocks[7];
+	      for (i = start; index < length && i < 5; ++index) {
+	        code = str.charCodeAt(index);
+	        if (code < 0x80) {
+	          blocks[i++] = code;
+	        } else if (code < 0x800) {
+	          blocks[i++] = 0xc0 | code >> 6;
+	          blocks[i++] = 0x80 | code & 0x3f;
+	        } else if (code < 0xd800 || code >= 0xe000) {
+	          blocks[i++] = 0xe0 | code >> 12;
+	          blocks[i++] = 0x80 | code >> 6 & 0x3f;
+	          blocks[i++] = 0x80 | code & 0x3f;
+	        } else {
+	          code = 0x10000 + ((code & 0x3ff) << 10 | str.charCodeAt(++index) & 0x3ff);
+	          blocks[i++] = 0xf0 | code >> 18;
+	          blocks[i++] = 0x80 | code >> 12 & 0x3f;
+	          blocks[i++] = 0x80 | code >> 6 & 0x3f;
+	          blocks[i++] = 0x80 | code & 0x3f;
+	        }
+	      }
+	      bytes += i - start;
+	      start = i - 5;
+	      if (index == length) {
+	        ++index;
+	      }
+	      if (index > length && i < 6) {
+	        end = true;
+	      }
+	      v1 = blocks[0];
+	      if (i > 4) {
+	        v2 = blocks[1];
+	        v3 = blocks[2];
+	        v4 = blocks[3];
+	        v5 = blocks[4];
+	        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] + BASE32_ENCODE_CHAR[v5 & 31];
+	      } else if (i == 1) {
+	        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[v1 << 2 & 31] + '======';
+	      } else if (i == 2) {
+	        v2 = blocks[1];
+	        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[v2 << 4 & 31] + '====';
+	      } else if (i == 3) {
+	        v2 = blocks[1];
+	        v3 = blocks[2];
+	        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[v3 << 1 & 31] + '===';
+	      } else if (i == 4) {
+	        v2 = blocks[1];
+	        v3 = blocks[2];
+	        v4 = blocks[3];
+	        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[v4 << 3 & 31] + '=';
+	      }
+	    } while (!end);
+	    return base32Str;
+	  };
+
+	  var encodeBytes = function encodeBytes(bytes) {
+	    var v1,
+	        v2,
+	        v3,
+	        v4,
+	        v5,
+	        base32Str = '',
+	        length = bytes.length;
+	    for (var i = 0, count = parseInt(length / 5) * 5; i < count;) {
+	      v1 = bytes[i++];
+	      v2 = bytes[i++];
+	      v3 = bytes[i++];
+	      v4 = bytes[i++];
+	      v5 = bytes[i++];
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] + BASE32_ENCODE_CHAR[v5 & 31];
+	    }
+
+	    // remain char
+	    var remain = length - count;
+	    if (remain == 1) {
+	      v1 = bytes[i];
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[v1 << 2 & 31] + '======';
+	    } else if (remain == 2) {
+	      v1 = bytes[i++];
+	      v2 = bytes[i];
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[v2 << 4 & 31] + '====';
+	    } else if (remain == 3) {
+	      v1 = bytes[i++];
+	      v2 = bytes[i++];
+	      v3 = bytes[i];
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[v3 << 1 & 31] + '===';
+	    } else if (remain == 4) {
+	      v1 = bytes[i++];
+	      v2 = bytes[i++];
+	      v3 = bytes[i++];
+	      v4 = bytes[i];
+	      base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] + BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] + BASE32_ENCODE_CHAR[v2 >>> 1 & 31] + BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] + BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] + BASE32_ENCODE_CHAR[v4 >>> 2 & 31] + BASE32_ENCODE_CHAR[v4 << 3 & 31] + '=';
+	    }
+	    return base32Str;
+	  };
+
+	  var encode = function encode(input, asciiOnly) {
+	    var notString = typeof input != 'string';
+	    if (notString && input.constructor == ArrayBuffer) {
+	      input = new Uint8Array(input);
+	    }
+	    if (notString) {
+	      return encodeBytes(input);
+	    } else if (asciiOnly) {
+	      return encodeAscii(input);
+	    } else {
+	      return encodeUtf8(input);
+	    }
+	  };
+
+	  var decode = function decode(base32Str, asciiOnly) {
+	    if (!asciiOnly) {
+	      return toUtf8String(decodeAsBytes(base32Str));
+	    }
+	    var v1,
+	        v2,
+	        v3,
+	        v4,
+	        v5,
+	        v6,
+	        v7,
+	        v8,
+	        str = '',
+	        length = base32Str.indexOf('=');
+	    if (length == -1) {
+	      length = base32Str.length;
+	    }
+
+	    // 8 char to 5 bytes
+	    for (var i = 0, count = length >> 3 << 3; i < count;) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v6 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v7 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v8 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) + String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) + String.fromCharCode((v4 << 4 | v5 >>> 1) & 255) + String.fromCharCode((v5 << 7 | v6 << 2 | v7 >>> 3) & 255) + String.fromCharCode((v7 << 5 | v8) & 255);
+	    }
+
+	    // remain bytes
+	    var remain = length - count;
+	    if (remain == 2) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255);
+	    } else if (remain == 4) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) + String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255);
+	    } else if (remain == 5) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) + String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) + String.fromCharCode((v4 << 4 | v5 >>> 1) & 255);
+	    } else if (remain == 7) {
+	      v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v6 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      v7 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
+	      str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) + String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) + String.fromCharCode((v4 << 4 | v5 >>> 1) & 255) + String.fromCharCode((v5 << 7 | v6 << 2 | v7 >>> 3) & 255);
+	    }
+	    return str;
+	  };
+
+	  decode.asBytes = decodeAsBytes;
+	  var exports = {
+	    encode: encode,
+	    decode: decode
+	  };
+	  if (root.HI_BASE32_TEST) {
+	    exports.toUtf8String = toUtf8String;
+	  }
+
+	  if (!root.HI_BASE32_TEST && NODE_JS) {
+	    module.exports = exports;
+	  } else if (root) {
+	    root.base32 = exports;
+	  }
+	})(undefined);
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 42 */
@@ -6319,15 +6520,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(/*! ../../lib */ 2);
 
-	var _src = __webpack_require__(/*! post-robot/src */ 10);
+	var _src = __webpack_require__(/*! post-robot/src */ 9);
 
 	var _src2 = _interopRequireDefault(_src);
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 7);
 
-	var _base = __webpack_require__(/*! ../base */ 39);
+	var _base = __webpack_require__(/*! ../base */ 38);
 
-	var _window = __webpack_require__(/*! ../window */ 41);
+	var _window = __webpack_require__(/*! ../window */ 40);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
@@ -7315,7 +7516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _constants = __webpack_require__(/*! ../../constants */ 42);
 
-	var _window = __webpack_require__(/*! ../window */ 41);
+	var _window = __webpack_require__(/*! ../window */ 40);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
