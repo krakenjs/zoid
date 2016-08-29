@@ -72,6 +72,7 @@
     "beaver-logger": "^1.0.7",
     "es6-promise": "^3.1.2",
     "es6-promise-min": "^2.0.1",
+    "hi-base32": "^0.1.1",
     "post-robot": "^2.0.6",
     "sync-browser-mocks": "^1.0.4"
   }

@@ -1,5 +1,6 @@
 
-import { b32encode, b32decode, getFrame, memoize, uniqueID } from '../lib';
+import base32 from 'hi-base32';
+import { getFrame, memoize, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -23,12 +24,10 @@ function normalize(str) {
 export function buildChildWindowName(name, version, options = {}) {
 
     options.id = uniqueID();
-    options.parent = window.name;
-    options.parentDomain = `${window.location.protocol}//${window.location.host}`;
 
     let encodedName = normalize(name);
     let encodedVersion = normalize(version);
-    let encodedOptions = b32encode(JSON.stringify(options));
+    let encodedOptions = base32.encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase();
 
     if (!encodedName) {
         throw new Error(`Invalid name: ${name} - must contain alphanumeric characters`);
@@ -69,7 +68,7 @@ export let getComponentMeta = memoize(() => {
     let componentMeta;
 
     try {
-        componentMeta = JSON.parse(b32decode(encodedOptions));
+        componentMeta = JSON.parse(base32.decode(encodedOptions.toUpperCase()));
     } catch (err) {
         return;
     }

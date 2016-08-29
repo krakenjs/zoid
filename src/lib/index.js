@@ -2,5 +2,4 @@ export * from './dom';
 export * from './fn';
 export * from './promise';
 export * from './util';
-export * from './base32';
 export * from './logger';
