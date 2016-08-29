@@ -22,7 +22,7 @@ export function normalizeChildProps(component, props) {
                     if (res === PROP_DEFER_TO_URL) {
                         return getQueryParam(queryParam);
                     }
-                    return result;
+                    return res;
                 });
             };
         }
