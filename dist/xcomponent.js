@@ -6480,7 +6480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        if (res === _constants.PROP_DEFER_TO_URL) {
 	                            return (0, _lib.getQueryParam)(queryParam);
 	                        }
-	                        return result;
+	                        return res;
 	                    });
 	                };
 	            })();
