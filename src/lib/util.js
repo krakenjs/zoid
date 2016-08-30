@@ -258,3 +258,15 @@ export function replaceObject(obj, callback, parentKey = '') {
 
     return newobj;
 }
+
+
+
+export function copyProp(source, target, name, def) {
+    if (source.hasOwnProperty(name)) {
+        let descriptor = Object.getOwnPropertyDescriptor(source, name);
+        Object.defineProperty(target, name, descriptor);
+
+    } else {
+        target[name] = def;
+    }
+}

@@ -1,6 +1,6 @@
 import postRobot from 'post-robot/src';
 
-import { once } from '../lib';
+import { once, copyProp } from '../lib';
 
 
 /*  Base Component
@@ -13,14 +13,7 @@ import { once } from '../lib';
 export class BaseComponent {
 
     addProp(options, name, def) {
-
-        if (options.hasOwnProperty(name)) {
-            let descriptor = Object.getOwnPropertyDescriptor(options, name);
-            Object.defineProperty(this, name, descriptor);
-
-        } else {
-            this[name] = def;
-        }
+        copyProp(options, this, name, def);
     }
 
 
