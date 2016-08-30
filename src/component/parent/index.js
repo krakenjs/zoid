@@ -857,7 +857,11 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
-        let parentTemplate = this.component.parentTemplate instanceof Function ? this.component.parentTemplate() : this.component.parentTemplate;
+        let parentTemplate = this.component.parentTemplate;
+
+        if (!parentTemplate) {
+            return;
+        }
 
         this.parentTemplate = createElement('div', {
 
