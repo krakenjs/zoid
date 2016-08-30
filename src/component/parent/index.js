@@ -93,6 +93,9 @@ export class ParentComponent extends BaseComponent {
         this.props = this.props || {};
         props.version = this.component.version;
         validateProps(this.component, props, required);
+        if (this.component.validateProps) {
+            this.component.validateProps(this.component, props, required);
+        }
         extend(this.props, normalizeParentProps(this.component, this, props, required));
     }
 

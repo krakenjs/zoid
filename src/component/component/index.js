@@ -97,6 +97,8 @@ export class Component extends BaseComponent {
         this.addProp(options, 'parentTemplate', parentTemplate);
         this.addProp(options, 'componentTemplate', componentTemplate);
 
+        this.addProp(options, 'validateProps');
+
         // A mapping of tag->component so we can reference components by string tag name
 
         components[this.tag] = this;
