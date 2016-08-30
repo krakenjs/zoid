@@ -872,6 +872,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.safeTimeout = safeTimeout;
 	exports.each = each;
 	exports.replaceObject = replaceObject;
+	exports.copyProp = copyProp;
 
 	/*  Url Encode
 	    ----------
@@ -1120,6 +1121,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return newobj;
+	}
+
+	function copyProp(source, target, name, def) {
+	    if (source.hasOwnProperty(name)) {
+	        var descriptor = Object.getOwnPropertyDescriptor(source, name);
+	        Object.defineProperty(target, name, descriptor);
+	    } else {
+	        target[name] = def;
+	    }
 	}
 
 /***/ },
@@ -4754,7 +4764,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // A url to use by default to render the component, if not using envs
 
-	        _this.addProp(options, 'url', _this.envUrls[_this.defaultEnv]);
+	        _this.addProp(options, 'url');
 
 	        // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
 
@@ -4796,6 +4806,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.addProp(options, 'parentTemplate', _parent3['default']);
 	        _this.addProp(options, 'componentTemplate', _component2['default']);
+
+	        _this.addProp(options, 'validateProps');
 
 	        // A mapping of tag->component so we can reference components by string tag name
 
@@ -4992,13 +5004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(BaseComponent, [{
 	        key: 'addProp',
 	        value: function addProp(options, name, def) {
-
-	            if (options.hasOwnProperty(name)) {
-	                var descriptor = Object.getOwnPropertyDescriptor(options, name);
-	                Object.defineProperty(this, name, descriptor);
-	            } else {
-	                this[name] = def;
-	            }
+	            (0, _lib.copyProp)(options, this, name, def);
 	        }
 
 	        /*  Register For Cleanup
@@ -6305,7 +6311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
 	    if (!hasProp && prop.def) {
-	        value = prop.def instanceof Function && prop.type !== 'function' ? prop.def() : prop.def;
+	        value = prop.def instanceof Function && prop.type !== 'function' ? prop.def.call(component) : prop.def;
 	    }
 
 	    if (value === _constants.PROP_DEFER_TO_URL) {
@@ -6640,6 +6646,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.props = this.props || {};
 	            props.version = this.component.version;
 	            (0, _validate.validateProps)(this.component, props, required);
+	            if (this.component.validateProps) {
+	                this.component.validateProps(this.component, props, required);
+	            }
 	            (0, _lib.extend)(this.props, (0, _props.normalizeParentProps)(this.component, this, props, required));
 	        }
 
@@ -6664,6 +6673,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    url = _this2.props.url;
 	                } else if (_this2.props.env) {
 	                    url = _this2.component.envUrls[_this2.props.env];
+	                } else if (_this2.component.defaultEnv) {
+	                    url = _this2.component.envUrls[_this2.component.defaultEnv];
 	                } else {
 	                    url = _this2.component.url;
 	                }
@@ -7381,7 +7392,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
-	            var parentTemplate = this.component.parentTemplate instanceof Function ? this.component.parentTemplate() : this.component.parentTemplate;
+	            var parentTemplate = this.component.parentTemplate;
+
+	            if (!parentTemplate) {
+	                return;
+	            }
 
 	            this.parentTemplate = (0, _lib.createElement)('div', {
 
