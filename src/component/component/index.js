@@ -67,7 +67,7 @@ export class Component extends BaseComponent {
 
         // A url to use by default to render the component, if not using envs
 
-        this.addProp(options, 'url', this.envUrls[this.defaultEnv]);
+        this.addProp(options, 'url');
 
         // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
 

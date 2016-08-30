@@ -116,6 +116,8 @@ export class ParentComponent extends BaseComponent {
                 url = this.props.url;
             } else if (this.props.env) {
                 url = this.component.envUrls[this.props.env];
+            } else if (this.component.defaultEnv) {
+                url = this.component.envUrls[this.component.defaultEnv];
             } else {
                 url = this.component.url;
             }
