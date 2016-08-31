@@ -67,7 +67,7 @@ export class ParentComponent extends BaseComponent {
 
     buildChildWindowName() {
 
-        let props = replaceObject(this.props, (value, key, fullKey) => {
+        let props = replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
             if (value instanceof Function) {
                 return {
                     __type__: '__function__'
@@ -130,6 +130,19 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    getPropsForChild() {
+        let result = {};
+
+        for (let key of Object.keys(this.props)) {
+            if (this.component.props[key].sendToChild !== false) {
+                result[key] = this.props[key];
+            }
+        }
+
+        return result;
+    }
+
+
     /*  Update Props
         ------------
 
@@ -154,7 +167,7 @@ export class ParentComponent extends BaseComponent {
                 if (oldProps !== stringifyWithFunctions(this.props)) {
                     this.component.log('parent_update_props');
 
-                    return this.childExports.updateProps(this.props);
+                    return this.childExports.updateProps(this.getPropsForChild());
                 }
             });
         });
@@ -581,7 +594,7 @@ export class ParentComponent extends BaseComponent {
 
                     return {
                         context: this.context,
-                        props: this.props
+                        props: this.getPropsForChild()
                     };
                 });
             },
