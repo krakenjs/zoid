@@ -6617,7 +6617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'buildChildWindowName',
 	        value: function buildChildWindowName() {
 
-	            var props = (0, _lib.replaceObject)(this.props, function (value, key, fullKey) {
+	            var props = (0, _lib.replaceObject)(this.getPropsForChild(), function (value, key, fullKey) {
 	                if (value instanceof Function) {
 	                    return {
 	                        __type__: '__function__'
@@ -6682,6 +6682,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return (0, _lib.extendUrl)(url, { query: queryProps });
 	            });
 	        }
+	    }, {
+	        key: 'getPropsForChild',
+	        value: function getPropsForChild() {
+	            var result = {};
+
+	            for (var _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	                var _ref;
+
+	                if (_isArray) {
+	                    if (_i >= _iterator.length) break;
+	                    _ref = _iterator[_i++];
+	                } else {
+	                    _i = _iterator.next();
+	                    if (_i.done) break;
+	                    _ref = _i.value;
+	                }
+
+	                var key = _ref;
+
+	                if (this.component.props[key].sendToChild !== false) {
+	                    result[key] = this.props[key];
+	                }
+	            }
+
+	            return result;
+	        }
 
 	        /*  Update Props
 	            ------------
@@ -6710,7 +6736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (oldProps !== (0, _lib.stringifyWithFunctions)(_this3.props)) {
 	                        _this3.component.log('parent_update_props');
 
-	                        return _this3.childExports.updateProps(_this3.props);
+	                        return _this3.childExports.updateProps(_this3.getPropsForChild());
 	                    }
 	                });
 	            });
@@ -6746,8 +6772,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            var _arr = [_constants.CONTEXT_TYPES.LIGHTBOX, _constants.CONTEXT_TYPES.POPUP];
-	            for (var _i = 0; _i < _arr.length; _i++) {
-	                var renderContext = _arr[_i];
+	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
+	                var renderContext = _arr[_i2];
 	                if (this.component.contexts[renderContext]) {
 	                    return renderContext;
 	                }
@@ -7119,9 +7145,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
-	            var _ref;
+	            var _ref2;
 
-	            return _ref = {}, _defineProperty(_ref, _constants.POST_MESSAGE.INIT, function (source, data) {
+	            return _ref2 = {}, _defineProperty(_ref2, _constants.POST_MESSAGE.INIT, function (source, data) {
 	                var _this12 = this;
 
 	                this.childExports = data.exports;
@@ -7137,12 +7163,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    return {
 	                        context: _this12.context,
-	                        props: _this12.props
+	                        props: _this12.getPropsForChild()
 	                    };
 	                });
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.CLOSE, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER_REMOTE, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.RENDER_REMOTE, function (source, data) {
 	                var _this13 = this;
 
 	                var component = this.component.getByTag(data.tag);
@@ -7186,7 +7212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }
 	                    };
 	                });
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RENDER_LOCAL, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.RENDER_LOCAL, function (source, data) {
 
 	                var component = this.component.getByTag(data.tag);
 	                var instance = component.parent(data.options);
@@ -7211,18 +7237,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }
 	                    }
 	                };
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.RESIZE, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.RESIZE, function (source, data) {
 
 	                if (this.context === _constants.CONTEXT_TYPES.POPUP) {
 	                    return;
 	                }
 
 	                return this.resize(data.width, data.height);
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.HIDE, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.HIDE, function (source, data) {
 	                this.hide();
-	            }), _defineProperty(_ref, _constants.POST_MESSAGE.ERROR, function (source, data) {
+	            }), _defineProperty(_ref2, _constants.POST_MESSAGE.ERROR, function (source, data) {
 	                this.error(new Error(data.error));
-	            }), _ref;
+	            }), _ref2;
 	        }
 
 	        /*  Resize
@@ -7478,16 +7504,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	var _loop = function _loop() {
-	    if (_isArray) {
-	        if (_i2 >= _iterator.length) return 'break';
-	        _ref2 = _iterator[_i2++];
+	    if (_isArray2) {
+	        if (_i3 >= _iterator2.length) return 'break';
+	        _ref3 = _iterator2[_i3++];
 	    } else {
-	        _i2 = _iterator.next();
-	        if (_i2.done) return 'break';
-	        _ref2 = _i2.value;
+	        _i3 = _iterator2.next();
+	        if (_i3.done) return 'break';
+	        _ref3 = _i3.value;
 	    }
 
-	    var context = _ref2;
+	    var context = _ref3;
 
 
 	    var contextName = (0, _lib.capitalizeFirstLetter)(context);
@@ -7501,8 +7527,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	};
 
-	for (var _iterator = _constants.CONTEXT_TYPES_LIST, _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	    var _ref2;
+	for (var _iterator2 = _constants.CONTEXT_TYPES_LIST, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    var _ref3;
 
 	    var _ret = _loop();
 
