@@ -153,7 +153,7 @@ export class Component extends BaseComponent {
         }
 
         if (window.xchild.component !== this) {
-            throw new Error(`Child instantiated from a different component: ${window.xchild.tag}`);
+            // throw new Error(`Child instantiated from a different component: ${window.xchild.tag}`);
         }
 
         if (options && options.onEnter) {
