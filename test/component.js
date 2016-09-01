@@ -1,6 +1,8 @@
 
 import xcomponent from 'src/index';
 
+window.xcomponent = xcomponent;
+
 export let testComponent = xcomponent.create({
 
     tag: 'test-component',
@@ -79,6 +81,11 @@ export let testComponent = xcomponent.create({
         numberProp: {
             type: 'number',
             required: false
+        },
+
+        run: {
+            type: 'string',
+            required: false
         }
     }
 });
@@ -105,6 +112,11 @@ export let testComponent2 = xcomponent.create({
 
         sendUrl: {
             type: 'function',
+            required: false
+        },
+
+        run: {
+            type: 'string',
             required: false
         }
     }

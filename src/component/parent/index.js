@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
-import { getParentWindow, noop, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, stringifyWithFunctions,
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getFrame } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -130,12 +130,15 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    getPropsForChild() {
+    getPropsForChild(props) {
+
+        props = props || this.props;
+
         let result = {};
 
-        for (let key of Object.keys(this.props)) {
+        for (let key of Object.keys(props)) {
             if (this.component.props[key].sendToChild !== false) {
-                result[key] = this.props[key];
+                result[key] = props[key];
             }
         }
 
@@ -149,26 +152,26 @@ export class ParentComponent extends BaseComponent {
         Send new props down to the child
     */
 
-    updateProps(props) {
+    updateProps(props = {}) {
         return Promise.resolve().then(() => {
 
-            let oldProps = stringifyWithFunctions(this.props);
+            let changed = false;
 
-            this.setProps(props, false);
+            for (let key of Object.keys(props)) {
+                if (props[key] !== this.props[key]) {
+                    changed = true;
+                    break;
+                }
+            }
 
-            if (!this.initialPropsSent) {
+            if (!changed) {
                 return;
             }
 
+            this.setProps(props, false);
+
             return this.onInit.then(() => {
-
-                // Only send down the new props if they do not match the old, and if we have already sent down initial props
-
-                if (oldProps !== stringifyWithFunctions(this.props)) {
-                    this.component.log('parent_update_props');
-
-                    return this.childExports.updateProps(this.getPropsForChild());
-                }
+                return this.childExports.updateProps(this.getPropsForChild(props));
             });
         });
     }
@@ -343,37 +346,36 @@ export class ParentComponent extends BaseComponent {
 
     renderToParentLocal(element, context, options = {}) {
 
-        let renderPromise = this.render(element, CONTEXT_TYPES.POPUP);
-
-        let renderParentPromise = postRobot.sendToParent(POST_MESSAGE.RENDER_LOCAL, {
-
-            ...options,
-
-            tag: this.component.tag,
-            context,
-            element,
-
-            overrides: {
-                close: (reason) => this.close(reason),
-                focus: () => this.focus()
-            },
-
-            options: {
-                props: this.props
-            }
-
-        }).then(data => {
-
-            this.registerForCleanup(data.destroy);
-            extend(this, data.overrides);
-        });
-
         return Promise.all([
-            renderPromise,
-            renderParentPromise
+
+            this.render(element, CONTEXT_TYPES.POPUP),
+
+            postRobot.sendToParent(POST_MESSAGE.RENDER_LOCAL, {
+
+                ...options,
+
+                tag: this.component.tag,
+                context,
+                element,
+
+                overrides: {
+                    close: (reason) => this.close(reason),
+                    focus: () => this.focus()
+                },
+
+                options: {
+                    props: this.props
+                }
+
+            }).then(data => {
+
+                this.registerForCleanup(data.destroy);
+                extend(this, data.overrides);
+            })
 
         ]).then(() => {
-            return renderPromise;
+
+            return this.onInit;
         });
     }
 
@@ -586,15 +588,13 @@ export class ParentComponent extends BaseComponent {
                 this.onInit.resolve(this);
                 return this.props.onEnter().then(() => {
 
-                    this.setForCleanup('initialPropsSent', true);
-
                     // Let the child know what its context is, and what its initial props are.
 
                     logger.flush();
 
                     return {
-                        context: this.context,
-                        props: this.getPropsForChild()
+                        props: this.getPropsForChild(),
+                        context: this.context
                     };
                 });
             },
@@ -783,7 +783,7 @@ export class ParentComponent extends BaseComponent {
         }).then(() => {
 
             if (this.childExports && !isWindowClosed(this.window)) {
-                this.childExports.close().catch(noop);
+                // this.childExports.close().catch(noop);
             }
 
             this.destroy();
@@ -892,7 +892,9 @@ export class ParentComponent extends BaseComponent {
                 `${CLASS_NAMES.XCOMPONENT}-${this.context}`
             ]
 
-        }, document.body);
+        });
+
+        document.body.appendChild(this.parentTemplate);
 
         if (RENDER_DRIVERS[context].focusable) {
             addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
@@ -963,4 +965,10 @@ for (let context of CONTEXT_TYPES_LIST) {
     ParentComponent.prototype[`render${contextName}ToParent`] = function(element) {
         return this.renderToParent(element, context);
     };
+}
+
+export function destroyAll() {
+    while (activeComponents.length) {
+        activeComponents[0].destroy();
+    }
 }

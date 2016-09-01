@@ -1,134 +1,203 @@
 
-import postRobot from 'post-robot/src';
-
 import { testComponent } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 describe('xcomponent render to parent', () => {
 
     it('should render a component to the parent as a lightbox', done => {
 
-        component = testComponent.init({
-            foo: done
-        });
+        testComponent.init({
+            foo: done,
 
-        component.renderIframe(document.body);
-
-        postRobot.once('init', () => 'renderTestComponent2ToParentLightbox');
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    onEnter: function() {
+                        return window.xchild.props.foo();
+                    }
+                }).renderLightboxToParent();
+            `
+        }).renderIframe(document.body);
     });
 
     it('should render a component to the parent as a popup', done => {
 
-        component = testComponent.init({
-            foo: done
-        });
+        testComponent.init({
+            foo: done,
 
-        component.renderIframe(document.body);
-
-        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    onEnter: function() {
+                        return window.xchild.props.foo();
+                    }
+                }).renderPopupToParent();
+            `
+        }).renderIframe(document.body);
     });
 
     it('should render a component to the parent as an iframe', done => {
 
-        component = testComponent.init({
-            foo: done
-        });
+        testComponent.init({
+            foo: done,
 
-        component.renderIframe(document.body);
-
-        postRobot.once('init', () => 'renderTestComponent2ToParentIframe');
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    onEnter: function() {
+                        return window.xchild.props.foo();
+                    }
+                }).renderIframeToParent('body');
+            `
+        }).renderIframe(document.body);
     });
 
-    it('should render a component to the parent and call a prop', done => {
+    it('should render a component to the parent as a lightbox and call a prop', done => {
 
-        component = testComponent.init({
-            foo: done
-        });
+        testComponent.init({
+            foo: done,
 
-        component.renderIframe(document.body);
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    foo: function() {
+                        window.xchild.props.foo();
+                    },
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndPassFoo');
+                    run: 'window.xchild.props.foo();'
+
+                }).renderLightboxToParent();
+            `
+        }).renderIframe(document.body);
+    });
+
+    it('should render a component to the parent as an iframe and call a prop', done => {
+
+        testComponent.init({
+            foo: done,
+
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    foo: function() {
+                        window.xchild.props.foo();
+                    },
+
+                    run: 'window.xchild.props.foo();'
+
+                }).renderIframeToParent('body');
+            `
+        }).renderIframe(document.body);
+    });
+
+
+    it('should render a component to the parent as a popup and call a prop', done => {
+
+        testComponent.init({
+            foo: done,
+
+            run: `
+                xcomponent.getByTag('test-component2').init({
+                    foo: function() {
+                        window.xchild.props.foo();
+                    },
+
+                    run: 'window.xchild.props.foo();'
+
+                }).renderPopupToParent();
+            `
+        }).renderIframe(document.body);
     });
 
     it('should render a component to the parent as a lightbox and close on enter', done => {
 
-        component = testComponent.init({
-            onClose: () => done()
-        });
+        testComponent.init({
+            onClose: () => done(),
 
-        component.renderIframe(document.body);
+            run: `
+                var comp2 = xcomponent.getByTag('test-component2').init({
+                    onEnter: function() {
+                        comp2.close();
+                    },
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentLightboxAndClose');
+                    onClose: function() {
+                        window.xchild.close();
+                    }
+                });
+
+                comp2.renderLightboxToParent();
+            `
+        }).renderIframe(document.body);
     });
 
     it('should close an xcomponent renderToParent lightbox on click of the overlay close button', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             childEntered() {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            onClose: () => done()
-        });
+            foo: () => done(),
 
-        component.renderIframe(document.body);
+            run: `
+                xcomponent.getByTag('test-component2').init({
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentLightbox');
+                    onEnter: function() {
+                        return window.xchild.props.childEntered();
+                    },
+
+                    onClose: function() {
+                        return window.xchild.props.foo();
+                    }
+
+                }).renderLightboxToParent();
+            `
+        }).renderIframe(document.body);
     });
 
     it('should close an xcomponent renderToParent popup on click of the overlay close button', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             childEntered() {
                 document.querySelector('.xcomponent-close').click();
             },
 
-            onClose: () => done()
-        });
+            foo: () => done(),
 
-        component.renderIframe(document.body);
+            run: `
+                xcomponent.getByTag('test-component2').init({
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
+                    onEnter: function() {
+                        return window.xchild.props.childEntered();
+                    },
+
+                    onClose: function() {
+                        return window.xchild.props.foo();
+                    }
+
+                }).renderPopupToParent();
+            `
+        }).renderIframe(document.body);
     });
 
-    it.skip('should focus an xcomponent renderToParent popup on click of the overlay', done => {
+    it('should focus an xcomponent renderToParent popup on click of the overlay', done => {
 
-        let win;
+        testComponent.init({
 
-        component = testComponent.init({
-
-            onEnter() {
-
-                let open = window.open;
-
-                window.open = function() {
-                    win = open.apply(this, arguments);
-                    return win;
-                };
+            childEntered() {
+                document.querySelector('.xcomponent-focus').click();
             },
 
-            foo() {
+            foo: () => done(),
 
-                let focus = win.focus;
-                win.focus = function() {
-                    focus.apply(this, arguments);
-                    done();
-                };
+            run: `
+                xcomponent.getByTag('test-component2').init({
 
-                document.querySelector('.xcomponent-overlay').click();
-            }
-        });
+                    onEnter: function() {
 
-        component.renderIframe(document.body);
+                        this.window.focus = function() {
+                            return window.xchild.props.foo();
+                        };
 
-        postRobot.once('init', () => 'renderTestComponent2ToParentPopup');
+                        return window.xchild.props.childEntered();
+                    }
+
+                }).renderPopupToParent();
+            `
+        }).renderIframe(document.body);
     });
 });

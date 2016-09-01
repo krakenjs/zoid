@@ -1,57 +1,47 @@
 
-import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { testComponent } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 describe('xcomponent options', () => {
 
     it('should enter a component with a custom url', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl(url) {
                 assert.isTrue(url.indexOf('/base/test/child.htm') === 0 && url.indexOf('foo=xyztest') > 0, 'Expected url to be custom url passed during init');
                 done();
-            }
-        });
+            },
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent');
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component with a custom env', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             env: 'dev',
 
             sendUrl(url) {
                 assert.isTrue(url.indexOf('devenv') !== -1, 'Expected url to be custom env url');
                 done();
-            }
-        });
+            },
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent');
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call a memoized function', done => {
 
         let x = 0;
 
-        component = testComponent.init({
+        testComponent.init({
 
             memoizedFunction() {
                 x += 1;
@@ -61,21 +51,24 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, 1, 'Expected result to have only been incremented once then memoized');
                 done();
-            }
+            },
 
-        });
+            run: `
 
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallMemoizedFunction');
+                return window.xchild.props.memoizedFunction().then(function() {
+                    return window.xchild.props.memoizedFunction().then(function(result) {
+                        return window.xchild.props.complete(result);
+                    });
+                });
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call a once function', done => {
 
         let x = 0;
 
-        component = testComponent.init({
+        testComponent.init({
 
             onceFunction() {
                 x += 1;
@@ -85,19 +78,22 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, undefined, 'Expected result to have only been returned once');
                 done();
-            }
+            },
 
-        });
+            run: `
 
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallOnceFunction');
+                return window.xchild.props.onceFunction().then(function() {
+                    return window.xchild.props.onceFunction().then(function(result) {
+                        return window.xchild.props.complete(result);
+                    });
+                });
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call a denodeify function', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -108,19 +104,19 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, 'foobar', 'Expected result to have nodeified');
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
+            run: `
+                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
+                    return window.xchild.props.complete(result);
+                });
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call a denodeify function returning a promise', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             denodeifyFunction(val) {
                 return Promise.resolve(`${val}bar`);
@@ -129,18 +125,20 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, 'foobar', 'Expected result to have nodeified');
                 done();
-            }
+            },
 
-        });
+            run: `
+                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
+                    return window.xchild.props.complete(result);
+                });
+            `
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
+        }).renderLightbox();
     });
 
     it('should enter a component and call a denodeify function with an error', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -151,18 +149,20 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, 'foobar', 'Expected result to have nodeified');
                 done();
-            }
+            },
 
-        });
+            run: `
+                return window.xchild.props.denodeifyFunction('foo').catch(function() {
+                    return window.xchild.props.complete('foobar');
+                });
+            `
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunctionWithError');
+        }).renderLightbox();
     });
 
     it('should enter a component and call a denodeify function incorrectly', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -177,13 +177,14 @@ describe('xcomponent options', () => {
             complete(result) {
                 assert.equal(result, 'foobar', 'Expected result to have nodeified');
                 done();
-            }
+            },
 
-        });
+            run: `
+                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
+                    return window.xchild.props.complete(result);
+                });
+            `
 
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallDenodeifyFunction');
+        }).renderLightbox();
     });
 });

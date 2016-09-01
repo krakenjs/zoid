@@ -5,6 +5,8 @@ export function create(options) {
     return new Component(options);
 }
 
+export { getByTag, destroyAll } from './component';
+
 export * from './error';
 
 export { registerLogger } from './lib';

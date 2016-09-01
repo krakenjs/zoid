@@ -1,33 +1,18 @@
 
-import postRobot from 'post-robot/src';
-
 import { testComponent, testComponent4 } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 describe('xcomponent happy cases', () => {
 
     it('should enter a component rendered as a lightbox', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter: done
-        });
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderLightbox();
     });
 
-    it('should enter a component rendered as a lightbox with the correct dimensions', done => {
+    it.skip('should enter a component rendered as a lightbox with the correct dimensions', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
@@ -35,14 +20,10 @@ describe('xcomponent happy cases', () => {
                     done();
                 }
             }
-        });
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderLightbox();
     });
 
-    it('should enter a component rendered as a popup with the correct dimensions', done => {
+    it.skip('should enter a component rendered as a popup with the correct dimensions', done => {
 
         let open = window.open;
         window.open = function(url, name, options) {
@@ -51,7 +32,7 @@ describe('xcomponent happy cases', () => {
             return open.apply(this, arguments);
         };
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 done();
 
@@ -65,18 +46,14 @@ describe('xcomponent happy cases', () => {
 
                 */
             }
-        });
-
-        component.renderPopup();
+        }).renderPopup();
 
         window.open = open;
-
-        postRobot.once('init', () => 'attachTestComponent');
     });
 
-    it('should enter a component rendered as a lightbox with no dimensions', done => {
+    it.skip('should enter a component rendered as a lightbox with no dimensions', done => {
 
-        component = testComponent4.init({
+        testComponent4.init({
             onEnter() {
                 if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
@@ -84,11 +61,7 @@ describe('xcomponent happy cases', () => {
                     done();
                 }
             }
-        });
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent4');
+        }).renderLightbox();
     });
 
     it('should enter a component rendered as a popup with no dimensions', done => {
@@ -100,7 +73,7 @@ describe('xcomponent happy cases', () => {
             return open.apply(this, arguments);
         };
 
-        component = testComponent4.init({
+        testComponent4.init({
             onEnter() {
                 done();
 
@@ -114,85 +87,76 @@ describe('xcomponent happy cases', () => {
 
                 */
             }
-        });
-
-        component.renderPopup();
+        }).renderPopup();
 
         window.open = open;
-
-        postRobot.once('init', () => 'attachTestComponent4');
     });
 
     it('should enter a component rendered as a lightbox and call a prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
+
             foo(bar) {
                 assert.equal(bar, 'bar');
                 done();
-            }
-        });
+            },
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
+            run: `
+                window.xchild.props.foo('bar');
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component rendered as an iframe', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter: done
-        });
-
-        component.renderIframe(document.body);
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderIframe(document.body);
     });
 
     it('should enter a component rendered as an iframe and call a prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
+
             foo(bar) {
                 assert.equal(bar, 'bar');
                 done();
-            }
-        });
+            },
 
-        component.renderIframe(document.body);
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
+            run: `
+                window.xchild.props.foo('bar');
+            `
+        }).renderIframe(document.body);
     });
 
     it('should enter a component rendered as a popup', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter: done
-        });
-
-        component.renderPopup();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderPopup();
     });
 
     it('should enter a component rendered as a popup and call a prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
+
             foo(bar) {
                 assert.equal(bar, 'bar');
                 done();
-            }
-        });
+            },
 
-        component.renderPopup();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
+            run: `
+                window.xchild.props.foo('bar');
+            `
+        }).renderPopup();
     });
 
     it('should enter a component, update a prop, and call a prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
-            onEnter() {
-                component.updateProps({
+            foo() {
+                return this.updateProps({
                     foo(bar) {
                         assert.equal(bar, 'bar');
                         done();
@@ -200,25 +164,21 @@ describe('xcomponent happy cases', () => {
                 });
             },
 
-            foo(bar) {
-                throw new Error('Expected foo to not be called yet');
-            }
-        });
+            run: `
+                window.xchild.props.foo();
 
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooOnProps');
+                window.xchild.onProps(function() {
+                    window.xchild.props.foo('bar');
+                });
+            `
+        }).renderLightbox();
     });
 
     it('should try to render by passing in an element', done => {
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter: done
-        });
-
-        component.render(document.body);
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).render(document.body);
     });
 
     it('should try to render to defaultContext lightbox', done => {
@@ -226,16 +186,12 @@ describe('xcomponent happy cases', () => {
         let originalDefaultContext = testComponent.defaultContext;
         testComponent.defaultContext = 'lightbox';
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        });
-
-        component.render();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).render();
     });
 
     it('should try to render to defaultContext popup', done => {
@@ -243,16 +199,12 @@ describe('xcomponent happy cases', () => {
         let originalDefaultContext = testComponent.defaultContext;
         testComponent.defaultContext = 'popup';
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        });
-
-        component.render();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).render();
     });
 
     it('should try to render to when popup is the only available option', done => {
@@ -267,17 +219,13 @@ describe('xcomponent happy cases', () => {
             iframe: false
         };
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
             }
-        });
-
-        component.render();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).render();
     });
 
     it('should try to render to when lightbox is the only available option', done => {
@@ -292,136 +240,120 @@ describe('xcomponent happy cases', () => {
             iframe: false
         };
 
-        component = testComponent.init({
+        testComponent.init({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
             }
-        });
-
-        component.render();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).render();
     });
 
     it('should enter a component and call back with a string prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             stringProp: 'bar',
 
             foo(result) {
                 assert.equal(result, 'bar');
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithStringProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.stringProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a number prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             numberProp: 123,
 
             foo(result) {
                 assert.equal(result, 123);
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.numberProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a parseInted number prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             numberProp: '123',
 
             foo(result) {
                 assert.equal(result, 123);
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithNumberProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.numberProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a boolean prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             booleanProp: true,
 
             foo(result) {
                 assert.equal(result, true);
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.booleanProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a truthy boolean prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             booleanProp: 1,
 
             foo(result) {
                 assert.equal(result, true);
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.booleanProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a falsy boolean prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             booleanProp: 0,
 
             foo(result) {
                 assert.equal(result, false);
                 done();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithBooleanProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.booleanProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with an object prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             objectProp: { foo: 'bar', x: 12345, fn() { done(); }, obj: { bar: 'baz' } },
 
@@ -431,32 +363,28 @@ describe('xcomponent happy cases', () => {
                 assert.equal(result.x, 12345);
                 assert.isTrue(result.fn instanceof Function);
                 result.fn();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithObjectProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.objectProp);
+            `
+        }).renderLightbox();
     });
 
     it('should enter a component and call back with a function prop', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             functionProp: done,
 
             foo(result) {
                 assert.isTrue(result instanceof Function);
                 result();
-            }
+            },
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFooWithFunctionProp');
+            run: `
+                window.xchild.props.foo(window.xchild.props.functionProp);
+            `
+        }).renderLightbox();
     });
 });

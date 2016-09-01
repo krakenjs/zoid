@@ -3,7 +3,7 @@ import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { internalProps } from './props';
-import { isXComponentWindow } from '../window';
+import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES_LIST } from '../../constants';
 import { validate } from './validate';
 
@@ -113,6 +113,14 @@ export class Component extends BaseComponent {
                 driver.register(this);
             }
         }
+
+        if (isXComponentWindow()) {
+            let componentMeta = getComponentMeta();
+
+            if (componentMeta.tag === this.tag) {
+                window.xchild = new ChildComponent(this);
+            }
+        }
     }
 
 
@@ -139,7 +147,20 @@ export class Component extends BaseComponent {
     */
 
     child(options) {
-        return new ChildComponent(this, options);
+
+        if (!window.xchild) {
+            throw new Error(`Child not instantiated`);
+        }
+
+        if (window.xchild.component !== this) {
+            throw new Error(`Child instantiated from a different component: ${window.xchild.tag}`);
+        }
+
+        if (options && options.onEnter) {
+            options.onEnter.call(window.xchild);
+        }
+
+        return window.xchild;
     }
 
 
@@ -150,9 +171,7 @@ export class Component extends BaseComponent {
     */
 
     attach(options) {
-        let component = this.child(options);
-        component.init();
-        return component;
+        return this.child(options);
     }
 
 
@@ -231,4 +250,9 @@ export class Component extends BaseComponent {
     logError(event, payload) {
         logger.error(`xc_${this.name}_${event}`, payload);
     }
+}
+
+
+export function getByTag(tag) {
+    return components[tag];
 }

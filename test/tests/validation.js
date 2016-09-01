@@ -3,15 +3,6 @@ import xcomponent from 'src/index';
 
 import { testComponent, testComponent5 } from '../component';
 
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
-
 describe('xcomponent validation errors', () => {
 
     function expectError(method) {

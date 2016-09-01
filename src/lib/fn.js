@@ -56,26 +56,6 @@ export function memoize(method) {
     };
 }
 
-
-export function throttle(method, time = 100) {
-
-    let enabled = true;
-
-    return function() {
-
-        if (!enabled) {
-            return;
-        }
-
-        enabled = false;
-        setTimeout(() => {
-            enabled = true;
-        }, time);
-
-        return method.apply(this, arguments);
-    };
-}
-
 export function debounce(method, time = 100) {
 
     let timeout;

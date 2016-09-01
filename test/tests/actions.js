@@ -1,78 +1,53 @@
 
-import postRobot from 'post-robot/src';
-
 import { testComponent } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 describe('xcomponent actions', () => {
 
     it('should close an xcomponent popup', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             onEnter() {
-                let close = component.window.close;
+                let close = this.window.close;
 
-                component.window.close = function() {
+                this.window.close = function() {
                     close.apply(this, arguments);
                     done();
                 };
 
-                component.close();
+                this.close();
             }
 
-        });
-
-        component.renderPopup();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderPopup();
     });
 
     it('should close an xcomponent lightbox', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             onEnter() {
-                let close = component.window.close;
+                let close = this.window.close;
 
-                component.window.close = function() {
+                this.window.close = function() {
                     close.apply(this, arguments);
                     done();
                 };
 
-                component.close();
+                this.close();
             }
 
-        });
-
-
-        component.renderLightbox();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderLightbox();
     });
 
     it('should focus an xcomponent popup', done => {
 
-        component = testComponent.init({
+        testComponent.init({
 
             onEnter() {
-                component.window.focus = done;
-                component.focus();
+                this.window.focus = done;
+                this.focus();
             }
 
-        });
-
-
-        component.renderPopup();
-
-        postRobot.once('init', () => 'attachTestComponent');
+        }).renderPopup();
     });
 });

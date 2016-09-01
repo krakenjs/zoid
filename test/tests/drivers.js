@@ -1,16 +1,6 @@
 
-import postRobot from 'post-robot/src';
 import { once } from 'src/lib';
 import { testComponent } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 angular.bootstrap = once(angular.bootstrap);
 
@@ -38,8 +28,6 @@ describe('xcomponent drivers', () => {
         document.body.appendChild(container);
 
         ReactDOM.render(React.createElement(Main, null), container);
-
-        postRobot.once('init', () => 'attachTestComponent');
     });
 
     it('should enter a component rendered with react and call a prop', done => {
@@ -48,15 +36,20 @@ describe('xcomponent drivers', () => {
 
             render() {
 
-                function foo(bar) {
-                    assert.equal(bar, 'bar');
-                    this.close().then(done);
-                }
-
                 return window.React.createElement(
                     'div',
                     null,
-                    React.createElement(testComponent.react, { foo })
+                    React.createElement(testComponent.react, {
+
+                        foo(bar) {
+                            assert.equal(bar, 'bar');
+                            this.close().then(done);
+                        },
+
+                        run: `
+                            window.xchild.props.foo('bar');
+                        `
+                    })
                 );
             }
         });
@@ -65,8 +58,6 @@ describe('xcomponent drivers', () => {
         document.body.appendChild(container);
 
         ReactDOM.render(React.createElement(Main, null), container);
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
 
     it('should enter a component rendered with angular and call onEnter', done => {
@@ -79,6 +70,7 @@ describe('xcomponent drivers', () => {
         let $rootScope = injector.get('$rootScope');
 
         let $scope = $rootScope.$new();
+
         $scope.onEnter = function() {
             this.close().then(done);
         };
@@ -88,8 +80,6 @@ describe('xcomponent drivers', () => {
         `)($scope, element => {
             document.body.appendChild(element[0]);
         });
-
-        postRobot.once('init', () => 'attachTestComponent');
     });
 
     it('should enter a component rendered with angular and call a prop', done => {
@@ -102,17 +92,21 @@ describe('xcomponent drivers', () => {
         let $rootScope = injector.get('$rootScope');
 
         let $scope = $rootScope.$new();
-        $scope.foo = function() {
+
+        $scope.foo = function(bar) {
+            assert.equal(bar, 'bar');
             this.close().then(done);
         };
 
+        $scope.run = `
+            window.xchild.props.foo('bar');
+        `;
+
         $compile(`
-            <test-component foo="foo"></test-component>
+            <test-component foo="foo" run="{{run}}"></test-component>
         `)($scope, element => {
             document.body.appendChild(element[0]);
         });
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
 
     it('should enter a component rendered with a script tag and call onEnter', done => {
@@ -131,8 +125,6 @@ describe('xcomponent drivers', () => {
                 }
             </script>
         `;
-
-        postRobot.once('init', () => 'attachTestComponent');
     });
 
     it('should enter a component rendered with a script tag and call a prop', done => {
@@ -140,18 +132,22 @@ describe('xcomponent drivers', () => {
         let container = document.createElement('div');
         document.body.appendChild(container);
 
-        window.done = function() {
+        window.foo = function(bar) {
+            assert.equal(bar, 'bar');
             this.close().then(done);
         };
+
+        window.run = `
+            window.xchild.props.foo('bar');
+        `;
 
         container.innerHTML = `
             <script type="application/x-component" data-component="test-component">
                 {
-                    foo: window.done
+                    foo: window.foo,
+                    run: window.run
                 }
             </script>
         `;
-
-        postRobot.once('init', () => 'attachTestComponentAndCallFoo');
     });
 });

@@ -223,10 +223,6 @@ export function createElement(tag = 'div', options = {}, container = null) {
         }
     }
 
-    if (container) {
-        container.appendChild(element);
-    }
-
     return element;
 }
 

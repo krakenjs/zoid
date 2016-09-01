@@ -1,17 +1,7 @@
 
 import xcomponent from 'src/index';
-import postRobot from 'post-robot/src';
 
 import { testComponent } from '../component';
-
-let component;
-
-afterEach(() => {
-    if (component) {
-        component.destroy();
-        component = null;
-    }
-});
 
 describe('xcomponent hijack', () => {
 
@@ -27,20 +17,22 @@ describe('xcomponent hijack', () => {
         form.appendChild(button);
         document.body.appendChild(form);
 
-        component = testComponent.init({
+        let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
                 document.body.removeChild(form);
                 done();
-            }
+            },
+
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
         });
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
         });
-
-        postRobot.once('init', () => 'attachTestComponent');
 
         button.click();
     });
@@ -57,20 +49,22 @@ describe('xcomponent hijack', () => {
         form.appendChild(button);
         document.body.appendChild(form);
 
-        component = testComponent.init({
+        let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
                 document.body.removeChild(form);
                 done();
-            }
+            },
+
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
         });
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
         });
-
-        postRobot.once('init', () => 'attachTestComponent');
 
         button.click();
     });
@@ -83,20 +77,22 @@ describe('xcomponent hijack', () => {
 
         document.body.appendChild(link);
 
-        component = testComponent.init({
+        let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
                 document.body.removeChild(link);
                 done();
-            }
+            },
+
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
         });
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
         });
-
-        postRobot.once('init', () => 'attachTestComponent');
 
         link.click();
     });
@@ -109,20 +105,22 @@ describe('xcomponent hijack', () => {
 
         document.body.appendChild(link);
 
-        component = testComponent.init({
+        let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
                 document.body.removeChild(link);
                 done();
-            }
+            },
+
+            run: `
+                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+            `
         });
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
         });
-
-        postRobot.once('init', () => 'attachTestComponent');
 
         link.click();
     });
@@ -136,16 +134,22 @@ describe('xcomponent hijack', () => {
 
         document.body.appendChild(form);
 
-        component = testComponent.init({
+        testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
                 document.body.removeChild(form);
                 done();
-            }
-        });
+            },
 
-        component.renderIframe('#hijackForm');
+            run: `
 
-        postRobot.once('init', () => 'attachTestComponentAndSubmitParentButton');
+                var component = xcomponent.getByTag('test-component2').init({
+                    sendUrl: window.xchild.props.sendUrl,
+                    run: 'window.xchild.props.sendUrl(window.location.pathname + window.location.search);'
+                });
+
+                component.hijackSubmitParentForm();
+            `
+        }).renderIframe('#hijackForm');
     });
 });
