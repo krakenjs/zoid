@@ -5405,6 +5405,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var el = document.documentElement;
 
+	            var defaultDimensions = this.props.dimensions || this.component.dimensions;
+
 	            var dimensions = {
 	                width: el.scrollWidth,
 	                height: el.scrollHeight
@@ -5422,7 +5424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                };
 
 	                if (Math.abs(newDimensions.height - dimensions.height) >= 10) {
-	                    resize(_this4.component.dimensions.width, newDimensions.height);
+	                    resize(defaultDimensions.width, newDimensions.height);
 	                }
 
 	                dimensions = newDimensions;
@@ -7399,7 +7401,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            scrolling: this.component.scrolling === false ? 'no' : 'yes'
 	        });
 
-	        var dimensions = this.component.dimensions || {};
+	        var dimensions = this.props.dimensions || this.component.dimensions || {};
 	        this.resize(dimensions.width, dimensions.height);
 	        this.restyle();
 
@@ -7454,7 +7456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    open: function open() {
 	        var _this2 = this;
 
-	        var dimensions = this.component.dimensions || {};
+	        var dimensions = this.props.dimensions || this.component.dimensions || {};
 
 	        var pos = (0, _window.getPosition)({
 	            x: dimensions.x,
@@ -8104,6 +8106,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    version: {
 	        type: 'string',
+	        required: false
+	    },
+
+	    dimensions: {
+	        type: 'object',
 	        required: false
 	    },
 
