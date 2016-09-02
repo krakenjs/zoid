@@ -54,6 +54,7 @@ export class Component extends BaseComponent {
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 
         this.addProp(options, 'dimensions');
+        this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');
 
@@ -64,6 +65,8 @@ export class Component extends BaseComponent {
         // A mapping of env->url, used to determine which url to load for which env
 
         this.addProp(options, 'envUrls', {});
+
+        this.addProp(options, 'buildUrl');
 
         // A url to use by default to render the component, if not using envs
 

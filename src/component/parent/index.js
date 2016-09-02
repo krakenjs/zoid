@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID,
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, noop,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getFrame } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -121,6 +121,8 @@ export class ParentComponent extends BaseComponent {
                 url = this.component.envUrls[this.props.env];
             } else if (this.component.defaultEnv) {
                 url = this.component.envUrls[this.component.defaultEnv];
+            } else if (this.component.buildUrl) {
+                url = this.component.buildUrl(this);
             } else {
                 url = this.component.url;
             }
@@ -345,6 +347,8 @@ export class ParentComponent extends BaseComponent {
 
 
     renderToParentLocal(element, context, options = {}) {
+
+        this.createParentTemplate = noop;
 
         return Promise.all([
 

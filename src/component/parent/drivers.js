@@ -43,7 +43,8 @@ export let RENDER_DRIVERS = {
             }
 
             this.iframe = iframe(element, null, {
-                name: this.childWindowName
+                name: this.childWindowName,
+                scrolling: this.component.scrolling === false ? 'no' : 'yes'
             });
 
             let dimensions = this.component.dimensions || {};

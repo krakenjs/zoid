@@ -99,7 +99,7 @@ export function validate(options) { // eslint-ignore-line
         throw new Error(`[${options.tag}] Invalid default env: ${options.defaultEnv}`);
     }
 
-    if (!options.url || !(typeof options.url === 'string')) {
+    if ((!options.url || !(typeof options.url === 'string')) && !options.buildUrl) {
         if (!options.defaultEnv || typeof options.defaultEnv !== 'string') {
             if (options.envUrls) {
                 throw new Error(`[${options.tag}] Expected options.defaultEnv to be a string`);

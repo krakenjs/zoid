@@ -19,7 +19,7 @@ export function normalizeProp(component, instance, props, key) {
     // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
     if (!hasProp && prop.def) {
-        value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def.call(component) : prop.def;
+        value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def.call(component, props) : prop.def;
     }
 
     if (value === PROP_DEFER_TO_URL) {
@@ -98,7 +98,7 @@ export function normalizeProp(component, instance, props, key) {
         if (value instanceof Function) {
             value = getter(value.bind(instance));
 
-        } else {
+        } else if (value) {
             let val = value;
 
             value = memoize(() => {
