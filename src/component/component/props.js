@@ -37,6 +37,11 @@ export const internalProps = {
         required: false
     },
 
+    dimensions: {
+        type: 'object',
+        required: false
+    },
+
     // A millisecond timeout before onTimeout is called
 
     timeout: {

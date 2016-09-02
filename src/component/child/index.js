@@ -206,6 +206,8 @@ export class ChildComponent extends BaseComponent {
 
         let el = document.documentElement;
 
+        let defaultDimensions = this.props.dimensions || this.component.dimensions;
+
         let dimensions = {
             width: el.scrollWidth,
             height: el.scrollHeight
@@ -223,7 +225,7 @@ export class ChildComponent extends BaseComponent {
             };
 
             if (Math.abs(newDimensions.height - dimensions.height) >= 10) {
-                resize(this.component.dimensions.width, newDimensions.height);
+                resize(defaultDimensions.width, newDimensions.height);
             }
 
             dimensions = newDimensions;

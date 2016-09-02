@@ -47,7 +47,7 @@ export let RENDER_DRIVERS = {
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
             });
 
-            let dimensions = this.component.dimensions || {};
+            let dimensions = this.props.dimensions || this.component.dimensions || {};
             this.resize(dimensions.width, dimensions.height);
             this.restyle();
 
@@ -111,7 +111,7 @@ export let RENDER_DRIVERS = {
 
         open() {
 
-            let dimensions = this.component.dimensions || {};
+            let dimensions = this.props.dimensions || this.component.dimensions || {};
 
             let pos = getPosition({
                 x:            dimensions.x,
