@@ -107,6 +107,10 @@ export function normalizeProp(component, instance, props, key) {
         }
     }
 
+    if (prop.decorate) {
+        value = prop.decorate(value);
+    }
+
     return value;
 }
 
