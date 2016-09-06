@@ -84,13 +84,15 @@ export function normalizeProp(component, instance, props, key) {
         }
 
     } else if (prop.type === 'string') {
-        value = value || '';
+        // pass
 
     } else if (prop.type === 'object') {
         // pass
 
     } else if (prop.type === 'number') {
-        value = parseInt(value || 0, 10);
+        if (value !== undefined) {
+            value = parseInt(value, 10);
+        }
     }
 
     if (prop.getter && value !== PROP_DEFER_TO_URL) {
