@@ -64,7 +64,7 @@ export class Component extends BaseComponent {
 
         // A mapping of env->url, used to determine which url to load for which env
 
-        this.addProp(options, 'envUrls', {});
+        this.addProp(options, 'envUrls');
 
         this.addProp(options, 'buildUrl');
 

@@ -93,7 +93,7 @@ export function validate(component, options) {
 
     let props = options.props || {};
 
-    if (props.env && !component.envUrls[props.env]) {
+    if (props.env && component.envUrls && !component.envUrls[props.env]) {
         throw new Error(`Invalid env: ${props.env}`);
     }
 }
