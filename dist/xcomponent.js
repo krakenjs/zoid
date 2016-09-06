@@ -280,7 +280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // A mapping of env->url, used to determine which url to load for which env
 
-	        _this.addProp(options, 'envUrls', {});
+	        _this.addProp(options, 'envUrls');
 
 	        _this.addProp(options, 'buildUrl');
 
@@ -6449,9 +6449,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                if (_this2.props.url) {
 	                    url = _this2.props.url;
-	                } else if (_this2.props.env) {
+	                } else if (_this2.props.env && _this2.component.envUrls) {
 	                    url = _this2.component.envUrls[_this2.props.env];
-	                } else if (_this2.component.defaultEnv) {
+	                } else if (_this2.component.defaultEnv && _this2.component.envUrls) {
 	                    url = _this2.component.envUrls[_this2.component.defaultEnv];
 	                } else if (_this2.component.buildUrl) {
 	                    url = _this2.component.buildUrl(_this2);
@@ -7738,7 +7738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var props = options.props || {};
 
-	    if (props.env && !component.envUrls[props.env]) {
+	    if (props.env && component.envUrls && !component.envUrls[props.env]) {
 	        throw new Error('Invalid env: ' + props.env);
 	    }
 	}
@@ -7992,13 +7992,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                })();
 	            }
 	        } else if (prop.type === 'string') {
-	            value = value || '';
-	        } else if (prop.type === 'object') {
 	            // pass
 
-	        } else if (prop.type === 'number') {
-	                value = parseInt(value || 0, 10);
-	            }
+	        } else if (prop.type === 'object') {
+	                // pass
+
+	            } else if (prop.type === 'number') {
+	                    if (value !== undefined) {
+	                        value = parseInt(value, 10);
+	                    }
+	                }
 
 	    if (prop.getter && value !== _constants.PROP_DEFER_TO_URL) {
 
