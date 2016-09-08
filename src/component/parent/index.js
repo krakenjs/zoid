@@ -717,7 +717,11 @@ export class ParentComponent extends BaseComponent {
 
     resize(width, height) {
         this.component.log(`resize`, { height, width });
-        return RENDER_DRIVERS[this.context].resize.call(this, width, height);
+        RENDER_DRIVERS[this.context].resize.call(this, width, height);
+
+        if (this.component.resizeDelay) {
+            return delay(this.component.resizeDelay);
+        }
     }
 
 

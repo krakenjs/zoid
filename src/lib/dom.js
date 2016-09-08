@@ -1,4 +1,5 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { once, noop, memoize } from './fn';
 import { extend, get, safeInterval, urlEncode } from './util';
 
@@ -419,4 +420,71 @@ export function getFrame(win, name) {
             return;
         }
     }
+}
+
+export function getCurrentDimensions(el) {
+    return {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+    };
+}
+
+export function changeStyle(el, name, value) {
+    return new Promise(resolve => {
+        el.style[name] = value;
+        setTimeout(resolve, 1);
+    });
+}
+
+export function setOverflow(el, overflow = 'auto') {
+
+    if (window.innerHeight < el.offsetHeight) {
+        el.style.overflowY = overflow;
+    } else {
+        el.style.overflowY = 'hidden';
+    }
+
+    if (window.innerWidth < el.offsetWidth) {
+        el.style.overflowX = overflow;
+    } else {
+        el.style.overflowX = 'hidden';
+    }
+}
+
+export function onDimensionsChange(el, delay = 200, threshold = 0) {
+
+    let dimensionsChanged = (one, two) => {
+        return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+    };
+
+    return new Promise(resolve => {
+        let currentDimensions = getCurrentDimensions(el);
+
+        let interval = setInterval(() => {
+            let newDimensions = getCurrentDimensions(el);
+
+            if (dimensionsChanged(currentDimensions, newDimensions)) {
+
+                let overflow = el.style.overflow;
+
+                if (overflow === 'hidden') {
+                    clearInterval(interval);
+                    return resolve(newDimensions);
+                }
+
+                return changeStyle(el, 'overflow', 'hidden').then(() => {
+                    let noOverflowDimensions = getCurrentDimensions(el);
+
+                    return changeStyle(el, 'overflow', overflow).then(() => {
+
+                        if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
+                            clearInterval(interval);
+                            return resolve(noOverflowDimensions);
+                        }
+                    });
+                });
+            }
+
+        }, delay);
+    });
 }

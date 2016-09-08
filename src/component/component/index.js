@@ -80,6 +80,7 @@ export class Component extends BaseComponent {
         }
 
         this.addProp(options, 'closeDelay');
+        this.addProp(options, 'resizeDelay');
 
         // The default context to render to
 

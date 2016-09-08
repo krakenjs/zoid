@@ -5,9 +5,10 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getParentWindow, getComponentMeta } from '../window';
-import { extend, onCloseWindow, debounce, replaceObject, get } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
 import { normalizeChildProps } from './props';
+
 
 /*  Child Component
     ---------------
@@ -204,34 +205,27 @@ export class ChildComponent extends BaseComponent {
             return;
         }
 
+        if (this.context === CONTEXT_TYPES.POPUP) {
+            return;
+        }
+
         let el = document.documentElement;
 
-        let defaultDimensions = this.props.dimensions || this.component.dimensions;
+        setOverflow(el);
 
-        let dimensions = {
-            width: el.scrollWidth,
-            height: el.scrollHeight
+        let watcher = () => {
+            onDimensionsChange(el).then(dimensions => {
+
+                return this.resize(dimensions.width, dimensions.height);
+
+            }).then(() => {
+
+                setOverflow(el);
+                watcher();
+            });
         };
 
-        let resize = debounce((width, height) => {
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
-        }, 200);
-
-        setInterval(() => {
-
-            let newDimensions = {
-                width: el.scrollWidth,
-                height: el.scrollHeight
-            };
-
-            if (Math.abs(newDimensions.height - dimensions.height) >= 10) {
-                resize(defaultDimensions.width, newDimensions.height);
-            }
-
-            dimensions = newDimensions;
-
-        }, 50);
-
+        watcher();
     }
 
 
