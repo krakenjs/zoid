@@ -309,6 +309,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        _this.addProp(options, 'closeDelay');
+	        _this.addProp(options, 'resizeDelay');
 
 	        // The default context to render to
 
@@ -4124,6 +4125,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.parseQuery = undefined;
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -4149,6 +4152,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getParentWindow = getParentWindow;
 	exports.getFrames = getFrames;
 	exports.getFrame = getFrame;
+	exports.getCurrentDimensions = getCurrentDimensions;
+	exports.changeStyle = changeStyle;
+	exports.setOverflow = setOverflow;
+	exports.onDimensionsChange = onDimensionsChange;
+
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
 
 	var _fn = __webpack_require__(/*! ./fn */ 34);
 
@@ -4627,6 +4636,85 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 	    }
+	}
+
+	function getCurrentDimensions(el) {
+	    return {
+	        width: el.offsetWidth,
+	        height: el.offsetHeight
+	    };
+	}
+
+	function changeStyle(el, name, value) {
+	    return new _promise.SyncPromise(function (resolve) {
+	        el.style[name] = value;
+	        setTimeout(resolve, 1);
+	    });
+	}
+
+	function setOverflow(el) {
+	    var overflow = arguments.length <= 1 || arguments[1] === undefined ? 'auto' : arguments[1];
+
+
+	    if (window.innerHeight < el.offsetHeight) {
+	        el.style.overflowY = overflow;
+	    } else {
+	        el.style.overflowY = 'hidden';
+	    }
+
+	    if (window.innerWidth < el.offsetWidth) {
+	        el.style.overflowX = overflow;
+	    } else {
+	        el.style.overflowX = 'hidden';
+	    }
+	}
+
+	function onDimensionsChange(el) {
+	    var delay = arguments.length <= 1 || arguments[1] === undefined ? 200 : arguments[1];
+	    var threshold = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+
+
+	    var dimensionsChanged = function dimensionsChanged(one, two) {
+	        return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+	    };
+
+	    return new _promise.SyncPromise(function (resolve) {
+	        var currentDimensions = getCurrentDimensions(el);
+
+	        var interval = setInterval(function () {
+	            var newDimensions = getCurrentDimensions(el);
+
+	            if (dimensionsChanged(currentDimensions, newDimensions)) {
+	                var _ret = function () {
+
+	                    var overflow = el.style.overflow;
+
+	                    if (overflow === 'hidden') {
+	                        clearInterval(interval);
+	                        return {
+	                            v: resolve(newDimensions)
+	                        };
+	                    }
+
+	                    return {
+	                        v: changeStyle(el, 'overflow', 'hidden').then(function () {
+	                            var noOverflowDimensions = getCurrentDimensions(el);
+
+	                            return changeStyle(el, 'overflow', overflow).then(function () {
+
+	                                if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
+	                                    clearInterval(interval);
+	                                    return resolve(noOverflowDimensions);
+	                                }
+	                            });
+	                        })
+	                    };
+	                }();
+
+	                if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	            }
+	        }, delay);
+	    });
 	}
 
 /***/ },
@@ -5403,32 +5491,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
+	            if (this.context === _constants.CONTEXT_TYPES.POPUP) {
+	                return;
+	            }
+
 	            var el = document.documentElement;
 
-	            var defaultDimensions = this.props.dimensions || this.component.dimensions;
+	            (0, _lib.setOverflow)(el);
 
-	            var dimensions = {
-	                width: el.scrollWidth,
-	                height: el.scrollHeight
+	            var watcher = function watcher() {
+	                (0, _lib.onDimensionsChange)(el).then(function (dimensions) {
+
+	                    return _this4.resize(dimensions.width, dimensions.height);
+	                }).then(function () {
+
+	                    (0, _lib.setOverflow)(el);
+	                    watcher();
+	                });
 	            };
 
-	            var resize = (0, _lib.debounce)(function (width, height) {
-	                return _this4.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
-	            }, 200);
-
-	            setInterval(function () {
-
-	                var newDimensions = {
-	                    width: el.scrollWidth,
-	                    height: el.scrollHeight
-	                };
-
-	                if (Math.abs(newDimensions.height - dimensions.height) >= 10) {
-	                    resize(defaultDimensions.width, newDimensions.height);
-	                }
-
-	                dimensions = newDimensions;
-	            }, 50);
+	            watcher();
 	        }
 	    }, {
 	        key: 'exports',
@@ -7055,7 +7137,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'resize',
 	        value: function resize(width, height) {
 	            this.component.log('resize', { height: height, width: width });
-	            return _drivers.RENDER_DRIVERS[this.context].resize.call(this, width, height);
+	            _drivers.RENDER_DRIVERS[this.context].resize.call(this, width, height);
+
+	            if (this.component.resizeDelay) {
+	                return (0, _lib.delay)(this.component.resizeDelay);
+	            }
 	        }
 
 	        /*  Restyle
