@@ -19,7 +19,11 @@ export function normalizeProp(component, instance, props, key) {
     // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
     if (!hasProp && prop.def) {
-        value = (prop.def instanceof Function && prop.type !== 'function') ? prop.def.call(component, props) : prop.def;
+        value = (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
+    }
+
+    if (prop.decorate) {
+        value = prop.decorate(value);
     }
 
     if (value === PROP_DEFER_TO_URL) {
@@ -107,10 +111,6 @@ export function normalizeProp(component, instance, props, key) {
                 return Promise.resolve(val);
             });
         }
-    }
-
-    if (prop.decorate) {
-        value = prop.decorate(value);
     }
 
     return value;

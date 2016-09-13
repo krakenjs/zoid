@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, noop,
+import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, noop, getElement,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getFrame } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -243,6 +243,10 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
         return Promise.resolve().then(() => {
+
+            if (element && !getElement(element)) {
+                throw new Error(`Can not find element: ${element}`);
+            }
 
             context = this.getRenderContext(element, context);
             this.component.log(`render_${context}`, { context, element });

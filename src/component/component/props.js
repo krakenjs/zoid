@@ -77,8 +77,10 @@ export const internalProps = {
         memoize: true,
         autoClose: true,
         promisify: true,
-        def(err) {
-            return this.props.onError(err);
+        def() {
+            return function(err) {
+                return this.props.onError(err);
+            };
         }
     },
 
@@ -88,8 +90,10 @@ export const internalProps = {
         type: 'function',
         required: false,
         promisify: true,
-        def(err) {
-            console.error(err.message, '\n', err.stack || err.toString());
+        def() {
+            return function(err) {
+                console.error(err.message, '\n', err.stack || err.toString());
+            };
         },
         once: true
     }
