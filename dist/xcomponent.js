@@ -6691,6 +6691,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
+	                if (element && !(0, _lib.getElement)(element)) {
+	                    throw new Error('Can not find element: ' + element);
+	                }
+
 	                context = _this4.getRenderContext(element, context);
 	                _this4.component.log('render_' + context, { context: context, element: element });
 
@@ -8014,7 +8018,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
 	    if (!hasProp && prop.def) {
-	        value = prop.def instanceof Function && prop.type !== 'function' ? prop.def.call(component, props) : prop.def;
+	        value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def;
+	    }
+
+	    if (prop.decorate) {
+	        value = prop.decorate(value);
 	    }
 
 	    if (value === _constants.PROP_DEFER_TO_URL) {
@@ -8102,10 +8110,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            })();
 	        }
-	    }
-
-	    if (prop.decorate) {
-	        value = prop.decorate(value);
 	    }
 
 	    return value;
@@ -8238,8 +8242,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        memoize: true,
 	        autoClose: true,
 	        promisify: true,
-	        def: function def(err) {
-	            return this.props.onError(err);
+	        def: function def() {
+	            return function (err) {
+	                return this.props.onError(err);
+	            };
 	        }
 	    },
 
@@ -8249,8 +8255,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'function',
 	        required: false,
 	        promisify: true,
-	        def: function def(err) {
-	            console.error(err.message, '\n', err.stack || err.toString());
+	        def: function def() {
+	            return function (err) {
+	                console.error(err.message, '\n', err.stack || err.toString());
+	            };
 	        },
 
 	        once: true
