@@ -40,10 +40,6 @@ export class ChildComponent extends BaseComponent {
 
         this.setWindows();
 
-        if (this.component.autoResize) {
-            this.watchForResize();
-        }
-
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -59,6 +55,10 @@ export class ChildComponent extends BaseComponent {
 
             this.context = data.context;
             this.setProps(data.props);
+
+            if (this.component.autoResize) {
+                this.watchForResize();
+            }
 
             return this;
 
