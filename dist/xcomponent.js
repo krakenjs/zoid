@@ -573,10 +573,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'cleanup',
-	        value: function cleanup() {
+	        value: function cleanup(err) {
 	            while (this.cleanupTasks && this.cleanupTasks.length) {
 	                var task = this.cleanupTasks.pop();
-	                task();
+	                task(err);
 	            }
 	        }
 
@@ -4645,9 +4645,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	function changeStyle(el, name, value) {
+	function changeStyle(el, styles) {
 	    return new _promise.SyncPromise(function (resolve) {
-	        el.style[name] = value;
+
+	        for (var _iterator5 = Object.keys(styles), _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	            var _ref5;
+
+	            if (_isArray5) {
+	                if (_i5 >= _iterator5.length) break;
+	                _ref5 = _iterator5[_i5++];
+	            } else {
+	                _i5 = _iterator5.next();
+	                if (_i5.done) break;
+	                _ref5 = _i5.value;
+	            }
+
+	            var key = _ref5;
+
+	            el.style[key] = styles[key];
+	        }
+
 	        setTimeout(resolve, 1);
 	    });
 	}
@@ -4656,13 +4673,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var overflow = arguments.length <= 1 || arguments[1] === undefined ? 'auto' : arguments[1];
 
 
-	    if (window.innerHeight < el.offsetHeight) {
+	    var dimensions = getCurrentDimensions(el);
+
+	    if (window.innerHeight < dimensions.height) {
 	        el.style.overflowY = overflow;
 	    } else {
 	        el.style.overflowY = 'hidden';
 	    }
 
-	    if (window.innerWidth < el.offsetWidth) {
+	    if (window.innerWidth < dimensions.width) {
 	        el.style.overflowX = overflow;
 	    } else {
 	        el.style.overflowX = 'hidden';
@@ -4686,10 +4705,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (dimensionsChanged(currentDimensions, newDimensions)) {
 	                var _ret = function () {
+	                    var _el$style = el.style;
+	                    var overflow = _el$style.overflow;
+	                    var overflowX = _el$style.overflowX;
+	                    var overflowY = _el$style.overflowY;
 
-	                    var overflow = el.style.overflow;
 
-	                    if (overflow === 'hidden') {
+	                    if (overflow === 'hidden' || overflowX === overflowY === 'hidden') {
 	                        clearInterval(interval);
 	                        return {
 	                            v: resolve(newDimensions)
@@ -4697,10 +4719,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    return {
-	                        v: changeStyle(el, 'overflow', 'hidden').then(function () {
+	                        v: changeStyle(el, { overflow: 'hidden', overflowX: 'hidden', overflowY: 'hidden' }).then(function () {
 	                            var noOverflowDimensions = getCurrentDimensions(el);
 
-	                            return changeStyle(el, 'overflow', overflow).then(function () {
+	                            return changeStyle(el, { overflow: overflow, overflowX: overflowX, overflowY: overflowY }).then(function () {
 
 	                                if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
 	                                    clearInterval(interval);
@@ -5172,7 +5194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return result.then(resolve, reject);
 	            }
 
-	            if (result !== undefined) {
+	            if (method.length === 0 || result !== undefined) {
 	                return resolve(result);
 	            }
 	        });
@@ -5305,10 +5327,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.setWindows();
 
-	        if (_this.component.autoResize) {
-	            _this.watchForResize();
-	        }
-
 	        // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
 	        //
 	        // For example:
@@ -5324,6 +5342,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            _this.context = data.context;
 	            _this.setProps(data.props);
+
+	            if (_this.component.autoResize) {
+	                _this.watchForResize();
+	            }
 
 	            return _this;
 	        });
@@ -5495,7 +5517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
-	            var el = document.documentElement;
+	            var el = document.body;
 
 	            (0, _lib.setOverflow)(el);
 
@@ -6527,21 +6549,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                queryProps[_constants.XCOMPONENT] = '1';
 
-	                var url = void 0;
+	                return _promise.SyncPromise.resolve().then(function () {
 
-	                if (_this2.props.url) {
-	                    url = _this2.props.url;
-	                } else if (_this2.props.env && _this2.component.envUrls) {
-	                    url = _this2.component.envUrls[_this2.props.env];
-	                } else if (_this2.component.defaultEnv && _this2.component.envUrls) {
-	                    url = _this2.component.envUrls[_this2.component.defaultEnv];
-	                } else if (_this2.component.buildUrl) {
-	                    url = _this2.component.buildUrl(_this2);
-	                } else {
-	                    url = _this2.component.url;
-	                }
+	                    if (_this2.props.url) {
+	                        return _this2.props.url;
+	                    }
+	                }).then(function (url) {
 
-	                return (0, _lib.extendUrl)(url, { query: queryProps });
+	                    if (!url) {
+	                        if (_this2.props.env && _this2.component.envUrls) {
+	                            url = _this2.component.envUrls[_this2.props.env];
+	                        } else if (_this2.component.defaultEnv && _this2.component.envUrls) {
+	                            url = _this2.component.envUrls[_this2.component.defaultEnv];
+	                        } else if (_this2.component.buildUrl) {
+	                            url = _this2.component.buildUrl(_this2);
+	                        } else {
+	                            url = _this2.component.url;
+	                        }
+	                    }
+
+	                    return (0, _lib.extendUrl)(url, { query: queryProps });
+	                });
 	            });
 	        }
 	    }, {
@@ -7336,8 +7364,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _this15.userClose();
 	            });
 
-	            this.registerForCleanup(function () {
-	                if (_this15.component.autocloseParentTemplate && _this15.parentTemplate) {
+	            this.registerForCleanup(function (err) {
+	                if (err || _this15.component.autocloseParentTemplate && _this15.parentTemplate) {
 	                    _this15.closeParentTemplate();
 	                }
 	            });
@@ -7358,11 +7386,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'destroy',
-	        value: function destroy() {
+	        value: function destroy(err) {
 	            if (this.hasCleanupTasks()) {
 	                this.component.log('destroy');
 	                _lib.logger.flush();
-	                this.cleanup();
+	                this.cleanup(err);
 	            }
 	        }
 
@@ -7376,7 +7404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function error(err) {
 	            this.component.logError('error', { error: err.stack || err.toString() });
 	            this.onInit.reject(err);
-	            this.destroy();
+	            this.destroy(err);
 	            return this.props.onError(err);
 	        }
 	    }]);
@@ -7560,7 +7588,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            width: dimensions.width,
 	            height: dimensions.height,
 	            top: pos.y,
-	            left: pos.x
+	            left: pos.x,
+	            location: 1,
+	            status: 1,
+	            toolbar: 0,
+	            menubar: 0,
+	            resizable: 1,
+	            scrollbars: 1
 	        });
 
 	        this.registerForCleanup(function () {
@@ -7730,6 +7764,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
+	    if (value.then && prop.promise) {
+	        return;
+	    }
+
 	    if (prop.type === 'function') {
 
 	        if (!(value instanceof Function)) {
@@ -7739,7 +7777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (typeof value !== 'string') {
 
-	            if (!(prop.getter && value instanceof Function)) {
+	            if (!(prop.getter && (value instanceof Function || value && value.then))) {
 	                throw new Error('Prop is not of type string: ' + key);
 	            }
 	        }
@@ -7996,8 +8034,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.normalizeProp = normalizeProp;
 	exports.normalizeProps = normalizeProps;
 
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
-
 	var _lib = __webpack_require__(/*! ../lib */ 32);
 
 	var _constants = __webpack_require__(/*! ../constants */ 41);
@@ -8008,14 +8044,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Turn prop into normalized value, using defaults, function options, etc.
 	*/
 
-	function normalizeProp(component, instance, props, key) {
+	function normalizeProp(component, instance, props, key, value) {
 
 	    var prop = component.props[key];
-	    var value = props[key];
 
 	    var hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-	    // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
 	    if (!hasProp && prop.def) {
 	        value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def;
@@ -8026,91 +8059,82 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (value === _constants.PROP_DEFER_TO_URL) {
+	        return value;
+	    }
 
-	        // pass
+	    if (prop.getter) {
+	        return (0, _lib.getter)((value instanceof Function ? value : function () {
+	            return value;
+	        }).bind(instance));
+	    }
 
-	    } else if (prop.type === 'boolean') {
+	    if (prop.type === 'boolean') {
 
-	            value = Boolean(value);
-	        } else if (prop.type === 'function') {
+	        value = Boolean(value);
+	    } else if (prop.type === 'function') {
 
-	            if (!value) {
+	        if (!value) {
 
-	                // If prop.noop is set, make the function a noop
+	            // If prop.noop is set, make the function a noop
 
-	                if (!value && prop.noop) {
-	                    value = _lib.noop;
+	            if (!value && prop.noop) {
+	                value = _lib.noop;
 
-	                    if (prop.denodeify) {
-	                        value = (0, _lib.denodeify)(value);
-	                    }
-
-	                    if (prop.promisify) {
-	                        value = (0, _lib.promisify)(value);
-	                    }
+	                if (prop.denodeify) {
+	                    value = (0, _lib.denodeify)(value);
 	                }
-	            } else {
-	                (function () {
 
-	                    value = value.bind(instance);
-
-	                    // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
-
-	                    if (prop.denodeify) {
-	                        value = (0, _lib.denodeify)(value);
-	                    }
-
-	                    if (prop.promisify) {
-	                        value = (0, _lib.promisify)(value);
-	                    }
-
-	                    // Wrap the function in order to log when it is called
-
-	                    var original = value;
-	                    value = function value() {
-	                        component.log('call_prop_' + key);
-	                        return original.apply(this, arguments);
-	                    };
-
-	                    // If prop.once is set, ensure the function can only be called once
-
-	                    if (prop.once) {
-	                        value = (0, _lib.once)(value);
-	                    }
-
-	                    // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
-
-	                    if (prop.memoize) {
-	                        value = (0, _lib.memoize)(value);
-	                    }
-	                })();
+	                if (prop.promisify) {
+	                    value = (0, _lib.promisify)(value);
+	                }
 	            }
-	        } else if (prop.type === 'string') {
-	            // pass
+	        } else {
+	            (function () {
 
-	        } else if (prop.type === 'object') {
-	                // pass
+	                value = value.bind(instance);
 
-	            } else if (prop.type === 'number') {
-	                    if (value !== undefined) {
-	                        value = parseInt(value, 10);
-	                    }
+	                // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
+
+	                if (prop.denodeify) {
+	                    value = (0, _lib.denodeify)(value);
 	                }
 
-	    if (prop.getter && value !== _constants.PROP_DEFER_TO_URL) {
+	                if (prop.promisify) {
+	                    value = (0, _lib.promisify)(value);
+	                }
 
-	        if (value instanceof Function) {
-	            value = (0, _lib.getter)(value.bind(instance));
-	        } else if (value) {
-	            (function () {
-	                var val = value;
+	                // Wrap the function in order to log when it is called
 
-	                value = (0, _lib.memoize)(function () {
-	                    return _promise.SyncPromise.resolve(val);
-	                });
+	                var original = value;
+	                value = function value() {
+	                    component.log('call_prop_' + key);
+	                    return original.apply(this, arguments);
+	                };
+
+	                // If prop.once is set, ensure the function can only be called once
+
+	                if (prop.once) {
+	                    value = (0, _lib.once)(value);
+	                }
+
+	                // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
+
+	                if (prop.memoize) {
+	                    value = (0, _lib.memoize)(value);
+	                }
 	            })();
 	        }
-	    }
+	    } else if (prop.type === 'string') {
+	        // pass
+
+	    } else if (prop.type === 'object') {
+	            // pass
+
+	        } else if (prop.type === 'number') {
+	                if (value !== undefined) {
+	                    value = parseInt(value, 10);
+	                }
+	            }
 
 	    return value;
 	}
@@ -8143,7 +8167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var key = _ref;
 
 	        if (required || props.hasOwnProperty(key)) {
-	            result[key] = normalizeProp(component, instance, props, key);
+	            result[key] = normalizeProp(component, instance, props, key, props[key]);
 	        }
 	    }
 
@@ -8187,7 +8211,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    url: {
 	        type: 'string',
 	        required: false,
-	        queryParam: false
+	        queryParam: false,
+	        promise: true,
+	        sendToChild: false
 	    },
 
 	    // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
