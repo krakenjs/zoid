@@ -914,8 +914,8 @@ export class ParentComponent extends BaseComponent {
 
         addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose());
 
-        this.registerForCleanup(() => {
-            if (this.component.autocloseParentTemplate && this.parentTemplate) {
+        this.registerForCleanup(err => {
+            if (err || (this.component.autocloseParentTemplate && this.parentTemplate)) {
                 this.closeParentTemplate();
             }
         });
@@ -936,11 +936,11 @@ export class ParentComponent extends BaseComponent {
         Close the component and clean up any listeners and state
     */
 
-    destroy() {
+    destroy(err) {
         if (this.hasCleanupTasks()) {
             this.component.log(`destroy`);
             logger.flush();
-            this.cleanup();
+            this.cleanup(err);
         }
     }
 
@@ -954,7 +954,7 @@ export class ParentComponent extends BaseComponent {
     error(err) {
         this.component.logError(`error`, { error: err.stack || err.toString() });
         this.onInit.reject(err);
-        this.destroy();
+        this.destroy(err);
         return this.props.onError(err);
     }
 }

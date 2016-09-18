@@ -36,10 +36,10 @@ export class BaseComponent {
         Call all of the methods registered with this.registerForCleanup
     */
 
-    cleanup() {
+    cleanup(err) {
         while (this.cleanupTasks && this.cleanupTasks.length) {
             let task = this.cleanupTasks.pop();
-            task();
+            task(err);
         }
     }
 
