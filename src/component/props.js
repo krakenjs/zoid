@@ -1,5 +1,4 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { noop, denodeify, once, memoize, promisify, getter } from '../lib';
 import { PROP_DEFER_TO_URL } from '../constants';
 
@@ -9,14 +8,11 @@ import { PROP_DEFER_TO_URL } from '../constants';
     Turn prop into normalized value, using defaults, function options, etc.
 */
 
-export function normalizeProp(component, instance, props, key) {
+export function normalizeProp(component, instance, props, key, value) {
 
     let prop = component.props[key];
-    let value = props[key];
 
     let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-    // Substitute in provided default. If prop.def is a function, we call it to get the default.
 
     if (!hasProp && prop.def) {
         value = (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
@@ -27,10 +23,14 @@ export function normalizeProp(component, instance, props, key) {
     }
 
     if (value === PROP_DEFER_TO_URL) {
+        return value;
+    }
 
-        // pass
+    if (prop.getter) {
+        return getter((value instanceof Function ? value : () => value).bind(instance));
+    }
 
-    } else if (prop.type === 'boolean') {
+    if (prop.type === 'boolean') {
 
         value = Boolean(value);
 
@@ -99,20 +99,6 @@ export function normalizeProp(component, instance, props, key) {
         }
     }
 
-    if (prop.getter && value !== PROP_DEFER_TO_URL) {
-
-        if (value instanceof Function) {
-            value = getter(value.bind(instance));
-
-        } else if (value) {
-            let val = value;
-
-            value = memoize(() => {
-                return Promise.resolve(val);
-            });
-        }
-    }
-
     return value;
 }
 
@@ -130,7 +116,7 @@ export function normalizeProps(component, instance, props, required = true) {
 
     for (let key of Object.keys(component.props)) {
         if (required || props.hasOwnProperty(key)) {
-            result[key] = normalizeProp(component, instance, props, key);
+            result[key] = normalizeProp(component, instance, props, key, props[key]);
         }
     }
 

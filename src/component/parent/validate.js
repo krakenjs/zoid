@@ -18,6 +18,10 @@ export function validateProp(prop, key, value, required = true) {
         return;
     }
 
+    if (value.then && prop.promise) {
+        return;
+    }
+
     if (prop.type === 'function') {
 
         if (!(value instanceof Function)) {
@@ -28,7 +32,7 @@ export function validateProp(prop, key, value, required = true) {
 
         if (typeof value !== 'string') {
 
-            if (!(prop.getter && value instanceof Function)) {
+            if (!(prop.getter && (value instanceof Function || (value && value.then)))) {
                 throw new Error(`Prop is not of type string: ${key}`);
             }
         }

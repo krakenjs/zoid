@@ -54,7 +54,7 @@ export function getter(method) {
                 return result.then(resolve, reject);
             }
 
-            if (result !== undefined) {
+            if (method.length === 0 || result !== undefined) {
                 return resolve(result);
             }
         });
