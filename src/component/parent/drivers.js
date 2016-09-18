@@ -125,7 +125,13 @@ export let RENDER_DRIVERS = {
                 width: dimensions.width,
                 height: dimensions.height,
                 top: pos.y,
-                left: pos.x
+                left: pos.x,
+                location: 1,
+                status: 1,
+                toolbar: 0,
+                menubar: 0,
+                resizable: 1,
+                scrollbars: 1
             });
 
             this.registerForCleanup(() => {
