@@ -22,7 +22,9 @@ export const internalProps = {
     url: {
         type: 'string',
         required: false,
-        queryParam: false
+        queryParam: false,
+        promise: true,
+        sendToChild: false
     },
 
     // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
