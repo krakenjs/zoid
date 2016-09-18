@@ -209,7 +209,7 @@ export class ChildComponent extends BaseComponent {
             return;
         }
 
-        let el = document.documentElement;
+        let el = document.body;
 
         setOverflow(el);
 

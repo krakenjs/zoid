@@ -429,22 +429,28 @@ export function getCurrentDimensions(el) {
     };
 }
 
-export function changeStyle(el, name, value) {
+export function changeStyle(el, styles) {
     return new Promise(resolve => {
-        el.style[name] = value;
+
+        for (let key of Object.keys(styles)) {
+            el.style[key] = styles[key];
+        }
+
         setTimeout(resolve, 1);
     });
 }
 
 export function setOverflow(el, overflow = 'auto') {
 
-    if (window.innerHeight < el.offsetHeight) {
+    let dimensions = getCurrentDimensions(el);
+
+    if (window.innerHeight < dimensions.height) {
         el.style.overflowY = overflow;
     } else {
         el.style.overflowY = 'hidden';
     }
 
-    if (window.innerWidth < el.offsetWidth) {
+    if (window.innerWidth < dimensions.width) {
         el.style.overflowX = overflow;
     } else {
         el.style.overflowX = 'hidden';
@@ -465,17 +471,17 @@ export function onDimensionsChange(el, delay = 200, threshold = 0) {
 
             if (dimensionsChanged(currentDimensions, newDimensions)) {
 
-                let overflow = el.style.overflow;
+                let { overflow, overflowX, overflowY }  = el.style;
 
-                if (overflow === 'hidden') {
+                if (overflow === 'hidden' || overflowX === overflowY === 'hidden') {
                     clearInterval(interval);
                     return resolve(newDimensions);
                 }
 
-                return changeStyle(el, 'overflow', 'hidden').then(() => {
+                return changeStyle(el, { overflow: 'hidden', overflowX: 'hidden', overflowY: 'hidden' }).then(() => {
                     let noOverflowDimensions = getCurrentDimensions(el);
 
-                    return changeStyle(el, 'overflow', overflow).then(() => {
+                    return changeStyle(el, { overflow, overflowX, overflowY }).then(() => {
 
                         if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
                             clearInterval(interval);
