@@ -30,6 +30,8 @@ export let angular = {
                 return {
                     scope,
 
+                    restrict: 'E',
+
                     controller: ($scope, $element) => {
 
                         component.log(`instantiate_angular_component`);
