@@ -284,6 +284,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.addProp(options, 'buildUrl');
 
+	        _this.addProp(options, 'bridgeUrl');
+	        _this.addProp(options, 'bridgeUrls');
+
 	        // A url to use by default to render the component, if not using envs
 
 	        _this.addProp(options, 'url');
@@ -1060,7 +1063,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    LOG_LEVEL: 'info',
 
-	    ACK_TIMEOUT: 500,
+	    ACK_TIMEOUT: 1000,
 
 	    LOG_TO_PAGE: false,
 
@@ -1277,7 +1280,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function receiveMessage(event) {
 
 	    try {
-	        event.source; // eslint-disable-line
+	        if (!event.source) {
+	            return;
+	        }
 	    } catch (err) {
 	        return;
 	    }
@@ -1648,6 +1653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flush();
 	}
 
+	var possiblyUnhandledPromiseHandlers = [];
 	var possiblyUnhandledPromises = [];
 	var possiblyUnhandledPromiseTimeout;
 
@@ -1662,8 +1668,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasHandlers && promise.rejected) {
-	            logError(promise.value);
+
+	        if (!promise.hasHandlers) {
+	            promise.handlers.push({
+	                onError: function onError(err) {
+	                    if (!promise.hasHandlers) {
+	                        logError(err);
+
+	                        for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+	                            possiblyUnhandledPromiseHandlers[j](promise.value);
+	                        }
+	                    }
+	                }
+	            });
+
+	            promise.dispatch();
 	        }
 	    }
 	}
@@ -1872,7 +1891,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var results = [];
 
 	    for (var i = 0; i < promises.length; i++) {
-	        promises[i].then(function (result) {
+
+	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
+
+	        prom.then(function (result) {
 	            results[i] = result;
 	            count -= 1;
 	            if (count === 0) {
@@ -1884,6 +1906,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return promise;
+	};
+
+	SyncPromise.onPossiblyUnhandledException = function (handler) {
+	    possiblyUnhandledPromiseHandlers.push(handler);
 	};
 
 	function patchPromise() {
@@ -6739,6 +6765,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
+	        key: 'openBridge',
+	        value: function openBridge(context) {
+	            return _drivers.RENDER_DRIVERS[context].openBridge.call(this);
+	        }
+	    }, {
 	        key: 'initUrl',
 	        value: function initUrl(context) {
 	            var _this5 = this;
@@ -7472,6 +7503,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _RENDER_DRIVERS;
 
+	var _src = __webpack_require__(/*! post-robot/src */ 4);
+
+	var _src2 = _interopRequireDefault(_src);
+
 	var _error = __webpack_require__(/*! ../../error */ 45);
 
 	var _lib = __webpack_require__(/*! ../../lib */ 32);
@@ -7479,6 +7514,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _constants = __webpack_require__(/*! ../../constants */ 41);
 
 	var _window = __webpack_require__(/*! ../window */ 39);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -7542,6 +7579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return this;
 	    },
+	    openBridge: function openBridge() {},
 	    resize: function resize(width, height) {
 	        this.iframe.style.width = width + 'px';
 	        this.iframe.style.height = height + 'px';
@@ -7615,6 +7653,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return this;
 	    },
+	    openBridge: function openBridge() {
+
+	        var bridgeUrl = this.component.bridgeUrl;
+
+	        if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
+	            bridgeUrl = this.component.bridgeUrls[this.props.env];
+	        }
+
+	        if (bridgeUrl) {
+	            return _src2['default'].openBridge(bridgeUrl);
+	        }
+	    },
 	    resize: function resize(width, height) {
 
 	        if (width && height) {
@@ -7653,6 +7703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return this;
 	    },
+	    openBridge: function openBridge() {},
 	    resize: function resize(width, height) {
 
 	        width = Math.min(width, window.innerWidth - 20);
@@ -8063,6 +8114,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (prop.getter) {
+	        if (!value) {
+	            return;
+	        }
+
 	        return (0, _lib.getter)((value instanceof Function ? value : function () {
 	            return value;
 	        }).bind(instance));
@@ -8220,7 +8275,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    env: {
 	        type: 'string',
-	        required: false
+	        required: false,
+	        def: function def() {
+	            return this.defaultEnv;
+	        }
 	    },
 
 	    version: {
