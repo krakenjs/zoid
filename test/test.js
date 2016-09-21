@@ -2,6 +2,10 @@
 import xcomponent from 'src/index';
 import './tests';
 
+beforeEach(() => {
+    window.onerror = () => {};
+});
+
 window.name = '__xcomponent_test_parent_window__';
 
 document.body.style.width = '1000px';
