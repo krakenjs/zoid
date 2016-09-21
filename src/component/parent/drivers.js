@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, isWindowClosed } from '../../lib';
+import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES } from '../../constants';
 import { getPosition } from '../window';
 
@@ -168,6 +168,13 @@ export let RENDER_DRIVERS = {
             }
 
             if (bridgeUrl) {
+
+                // No point loading a bridge if we're on the same domain. Maybe should move this logic to post-robot though?
+
+                if (getDomainFromUrl(bridgeUrl) === getDomain(window)) {
+                    return;
+                }
+
                 return postRobot.openBridge(bridgeUrl);
             }
         },

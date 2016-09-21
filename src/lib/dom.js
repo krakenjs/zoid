@@ -285,14 +285,25 @@ export function getQueryParam(name) {
 }
 
 
-export function getDomain(url) {
+export function getDomain(win, allowMockDomain = true) {
+
+    win = win || window;
+
+    if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+        return win.mockDomain;
+    }
+
+    return `${win.location.protocol}//${win.location.host}`;
+}
+
+export function getDomainFromUrl(url) {
 
     let domain;
 
     if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
         domain = url;
     } else {
-        domain = window.location.href;
+        return getDomain();
     }
 
     domain = domain.split('/').slice(0, 3).join('/');
