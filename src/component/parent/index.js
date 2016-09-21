@@ -260,7 +260,16 @@ export class ParentComponent extends BaseComponent {
 
             this.preRender(element, context);
 
-            return this.initUrl(context);
+            return Promise.all([
+
+                this.openBridge(context),
+                this.buildUrl()
+
+            ]).then(([bridge, url]) => {
+
+                this.loadUrl(context, url);
+                this.runTimeout();
+            });
 
         }).catch(err => {
 
@@ -276,15 +285,6 @@ export class ParentComponent extends BaseComponent {
 
     openBridge(context) {
         return RENDER_DRIVERS[context].openBridge.call(this);
-    }
-
-
-    initUrl(context) {
-
-        return this.buildUrl().then(url => {
-            this.loadUrl(context, url);
-            this.runTimeout();
-        });
     }
 
 
