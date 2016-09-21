@@ -4170,6 +4170,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.template = template;
 	exports.getQueryParam = getQueryParam;
 	exports.getDomain = getDomain;
+	exports.getDomainFromUrl = getDomainFromUrl;
 	exports.formatQuery = formatQuery;
 	exports.extendQuery = extendQuery;
 	exports.extendUrl = extendUrl;
@@ -4514,14 +4515,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return parseQuery(window.location.search.slice(1))[name];
 	}
 
-	function getDomain(url) {
+	function getDomain(win) {
+	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+
+	    win = win || window;
+
+	    if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	        return win.mockDomain;
+	    }
+
+	    return win.location.protocol + '//' + win.location.host;
+	}
+
+	function getDomainFromUrl(url) {
 
 	    var domain = void 0;
 
 	    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
 	        domain = url;
 	    } else {
-	        domain = window.location.href;
+	        return getDomain();
 	    }
 
 	    domain = domain.split('/').slice(0, 3).join('/');
@@ -7663,6 +7677,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (bridgeUrl) {
+
+	            // No point loading a bridge if we're on the same domain. Maybe should move this logic to post-robot though?
+
+	            if ((0, _lib.getDomainFromUrl)(bridgeUrl) === (0, _lib.getDomain)(window)) {
+	                return;
+	            }
+
 	            return _src2['default'].openBridge(bridgeUrl);
 	        }
 	    },
