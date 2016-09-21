@@ -274,6 +274,10 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    openBridge(context) {
+        return RENDER_DRIVERS[context].openBridge.call(this);
+    }
+
 
     initUrl(context) {
 

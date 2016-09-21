@@ -31,7 +31,10 @@ export const internalProps = {
 
     env: {
         type: 'string',
-        required: false
+        required: false,
+        def() {
+            return this.defaultEnv;
+        }
     },
 
     version: {

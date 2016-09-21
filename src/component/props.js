@@ -27,6 +27,10 @@ export function normalizeProp(component, instance, props, key, value) {
     }
 
     if (prop.getter) {
+        if (!value) {
+            return;
+        }
+
         return getter((value instanceof Function ? value : () => value).bind(instance));
     }
 

@@ -1,4 +1,6 @@
 
+import postRobot from 'post-robot/src';
+
 import { PopupOpenError } from '../../error';
 import { iframe, popup, isWindowClosed } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES } from '../../constants';
@@ -69,6 +71,10 @@ export let RENDER_DRIVERS = {
             });
 
             return this;
+        },
+
+        openBridge() {
+
         },
 
         resize(width, height) {
@@ -153,6 +159,19 @@ export let RENDER_DRIVERS = {
             return this;
         },
 
+        openBridge() {
+
+            let bridgeUrl = this.component.bridgeUrl;
+
+            if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
+                bridgeUrl = this.component.bridgeUrls[this.props.env];
+            }
+
+            if (bridgeUrl) {
+                return postRobot.openBridge(bridgeUrl);
+            }
+        },
+
         resize(width, height) {
 
             if (width && height) {
@@ -200,6 +219,10 @@ export let RENDER_DRIVERS = {
             RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
 
             return this;
+        },
+
+        openBridge() {
+
         },
 
         resize(width, height) {
