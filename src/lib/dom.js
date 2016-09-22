@@ -402,34 +402,18 @@ export function getParentWindow(win) {
     }
 }
 
-export function getFrames(win) {
-
-    if (!win) {
-        return;
-    }
+export function getFrame(win, name) {
 
     try {
-        if (win.frames && typeof win.frames === 'number') {
-            return win.frames;
-        }
+        return win.frames[name];
     } catch (err) {
         // pass
     }
 
-    if (win.length && typeof win.length === 'number') {
-        return win;
-    }
-}
-
-export function getFrame(win, name) {
-    let frames = getFrames(win);
-
-    if (frames) {
-        try {
-            return frames[name];
-        } catch (err) {
-            return;
-        }
+    try {
+        return win[name];
+    } catch (err) {
+        // pass
     }
 }
 
