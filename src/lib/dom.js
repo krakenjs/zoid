@@ -86,7 +86,7 @@ export function iframe(container, url, options) {
 
 export function isWindowClosed(win) {
     try {
-        return !win || win.closed || typeof win.closed === 'undefined';
+        return !win || win.closed;
     } catch (err) {
         return true;
     }
