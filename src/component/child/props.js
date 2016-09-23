@@ -1,4 +1,5 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { getQueryParam } from '../../lib';
 import { PROP_DEFER_TO_URL } from '../../constants';
 
@@ -14,7 +15,14 @@ export function normalizeChildProps(component, props) {
         let queryParam = (typeof prop.queryParam === 'string') ? prop.queryParam : key;
 
         if (value === PROP_DEFER_TO_URL) {
-            value = getQueryParam(queryParam);
+            let actualValue = getQueryParam(queryParam);
+            if (prop.getter) {
+                value = function() {
+                    return Promise.resolve(actualValue);
+                };
+            } else {
+                value = actualValue;
+            }
         } else if (prop.getter && value) {
             let val = value;
             value = function() {
