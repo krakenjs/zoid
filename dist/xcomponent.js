@@ -1292,10 +1292,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = event.data;
 
 
-	    if ((0, _lib.isSameDomain)(source, false)) {
-	        origin = _lib.util.getDomain(source);
-	    }
-
 	    var message = parseMessage(data);
 
 	    if (!message) {
@@ -1312,19 +1308,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
+	    // Do not allow self-certifying sourceDomain when it's different to origin
+
 	    if (message.sourceDomain !== origin) {
 	        throw new Error('Message source domain ' + message.sourceDomain + ' does not match message origin ' + origin);
 	    }
 
-	    (0, _lib.registerWindow)(message.source, source, origin);
+	    // Do not allow self-certifying originalSourceDomain when it's different to origin -- unless the message is coming from a same domain window
 
-	    // Only allow self-certifying original domain when proxying through same domain
-
-	    if (message.originalSourceDomain !== origin) {
-	        if (!(0, _lib.isSameDomain)(source)) {
-	            throw new Error('Message original source domain ' + message.originalSourceDomain + ' does not match message origin ' + origin);
-	        }
+	    if (message.originalSourceDomain !== origin && !(0, _lib.isSameDomain)(source)) {
+	        throw new Error('Message original source domain ' + message.originalSourceDomain + ' does not match message origin ' + origin);
 	    }
+
+	    (0, _lib.registerWindow)(message.source, source, origin);
 
 	    var targetWindow = void 0;
 
@@ -2170,12 +2166,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return safeInterval;
 	    },
 	    getDomain: function getDomain(win) {
-	        var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
 
 	        win = win || window;
 
-	        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	        if (win.mockDomain && win.mockDomain.indexOf('mock://') === 0) {
 	            return win.mockDomain;
 	        }
 
@@ -2356,6 +2350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
 	exports.getTop = getTop;
+	exports.getFrameByName = getFrameByName;
 	exports.getFrames = getFrames;
 	exports.isFrameOwnedBy = isFrameOwnedBy;
 	exports.getParentWindow = getParentWindow;
@@ -2395,8 +2390,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
-	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
 
 	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
@@ -2413,20 +2406,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
-	            return allowMockDomain ? _match.match : _match.actualMatch;
+	            return _match.match;
 	        }
 	    }
 
 	    var match = false;
-	    var actualMatch = false;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
-	        }
-
-	        if (_util.util.getDomain(window, false) === _util.util.getDomain(win, false)) {
-	            actualMatch = true;
 	        }
 	    } catch (err) {
 	        // pass
@@ -2434,8 +2422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _global.global.domainMatches.push({
 	        win: win,
-	        match: match,
-	        actualMatch: actualMatch
+	        match: match
 	    });
 
 	    if (!domainMatchTimeout) {
@@ -2445,7 +2432,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, 1);
 	    }
 
-	    return allowMockDomain ? match : actualMatch;
+	    return match;
 	}
 
 	function isWindowClosed(win) {
@@ -2497,23 +2484,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function getFrames(win) {
-
-	    if (!win) {
-	        return;
-	    }
+	function getFrameByName(win, name) {
 
 	    try {
-	        if (win.frames && typeof win.frames === 'number') {
-	            return win.frames;
-	        }
+	        return win.frames[name];
 	    } catch (err) {
 	        // pass
 	    }
 
-	    if (win.length && typeof win.length === 'number') {
-	        return win;
+	    try {
+	        return win[name];
+	    } catch (err) {
+	        // pass
 	    }
+	}
+
+	function getFrames(win) {
+
+	    var result = [];
+
+	    var frames = void 0;
+
+	    try {
+	        frames = win.frames;
+	    } catch (err) {
+	        frames = win;
+	    }
+
+	    var len = void 0;
+
+	    try {
+	        len = frames.length;
+	    } catch (err) {
+	        // pass
+	    }
+
+	    if (len === 0) {
+	        return result;
+	    }
+
+	    if (len) {
+	        for (var i = 0; i < len; i++) {
+
+	            var frame = void 0;
+
+	            try {
+	                frame = frames[i];
+	            } catch (err) {
+	                continue;
+	            }
+
+	            result.push(frame);
+	        }
+	    } else {
+
+	        var _i2 = 0;
+
+	        while (true) {
+	            var _frame = void 0;
+
+	            try {
+	                _frame = frames[_i2];
+	            } catch (err) {
+	                return result;
+	            }
+
+	            if (!_frame) {
+	                return result;
+	            }
+
+	            result.push(_frame);
+
+	            _i2 += 1;
+
+	            if (_i2 > 20) {
+	                return result;
+	            }
+	        }
+	    }
+
+	    return result;
 	}
 
 	function isFrameOwnedBy(win, frame) {
@@ -2685,16 +2735,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win, domain) {
 
-	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
+	            if (_i3 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i3++];
 	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
+	            _i3 = _iterator2.next();
+	            if (_i3.done) break;
+	            _ref2 = _i3.value;
 	        }
 
 	        var map = _ref2;
@@ -3107,6 +3157,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    REMOTE: 'remote'
 	};
 
+	function getBridgeName(domain) {
+
+	    domain = domain || _lib.util.getDomainFromUrl(domain || window.location.href);
+
+	    var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+
+	    var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+
+	    return id;
+	}
+
 	function documentReady() {
 	    return new _lib.promise.Promise(function (resolve) {
 	        if (window.document && window.document.body) {
@@ -3222,6 +3283,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return bridge;
 	        }
 
+	        var id = getBridgeName(window.location.href);
+
+	        try {
+
+	            if (win[id]) {
+	                return win[id];
+	            }
+	        } catch (err) {
+	            // pass
+	        }
+
 	        try {
 	            var frames = (0, _lib.getFrames)(win);
 
@@ -3241,7 +3313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        } catch (err) {
-	            return;
+	            // pass
 	        }
 	    });
 	}
@@ -3305,14 +3377,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+	        var id = getBridgeName(domain);
 
-	        var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+	        var frame = (0, _lib.getFrameByName)(window, id);
 
-	        var frames = (0, _lib.getFrames)(window);
-
-	        if (frames && frames[id]) {
-	            return (0, _lib.onWindowReady)(frames[id], 5000, 'Bridge ' + url);
+	        if (frame) {
+	            return (0, _lib.onWindowReady)(frame, 5000, 'Bridge ' + url);
 	        }
 
 	        _lib.log.debug('Opening bridge:', url);
@@ -4177,7 +4247,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
 	exports.getParentWindow = getParentWindow;
-	exports.getFrames = getFrames;
 	exports.getFrame = getFrame;
 	exports.getCurrentDimensions = getCurrentDimensions;
 	exports.changeStyle = changeStyle;
@@ -4281,7 +4350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function isWindowClosed(win) {
 	    try {
-	        return !win || win.closed || typeof win.closed === 'undefined';
+	        return !win || win.closed;
 	    } catch (err) {
 	        return true;
 	    }
@@ -4647,34 +4716,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function getFrames(win) {
-
-	    if (!win) {
-	        return;
-	    }
+	function getFrame(win, name) {
 
 	    try {
-	        if (win.frames && typeof win.frames === 'number') {
-	            return win.frames;
-	        }
+	        return win.frames[name];
 	    } catch (err) {
 	        // pass
 	    }
 
-	    if (win.length && typeof win.length === 'number') {
-	        return win;
-	    }
-	}
-
-	function getFrame(win, name) {
-	    var frames = getFrames(win);
-
-	    if (frames) {
-	        try {
-	            return frames[name];
-	        } catch (err) {
-	            return;
-	        }
+	    try {
+	        return win[name];
+	    } catch (err) {
+	        // pass
 	    }
 	}
 
