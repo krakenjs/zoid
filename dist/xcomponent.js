@@ -6423,6 +6423,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.normalizeChildProps = normalizeChildProps;
 
+	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 14);
+
 	var _lib = __webpack_require__(/*! ../../lib */ 32);
 
 	var _constants = __webpack_require__(/*! ../../constants */ 41);
@@ -6450,7 +6452,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var queryParam = typeof prop.queryParam === 'string' ? prop.queryParam : key;
 
 	        if (value === _constants.PROP_DEFER_TO_URL) {
-	            value = (0, _lib.getQueryParam)(queryParam);
+	            (function () {
+	                var actualValue = (0, _lib.getQueryParam)(queryParam);
+	                if (prop.getter) {
+	                    value = function value() {
+	                        return _promise.SyncPromise.resolve(actualValue);
+	                    };
+	                } else {
+	                    value = actualValue;
+	                }
+	            })();
 	        } else if (prop.getter && value) {
 	            (function () {
 	                var val = value;
