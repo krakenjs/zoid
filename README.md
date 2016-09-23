@@ -3,7 +3,7 @@ xcomponent
 
 A cross-domain component toolkit. Useful if you want to build a component which can be rendered into an inline iframe, a
 lightboxed iframe, or a popup, and take advantage of the sandboxing provided by iframes alongside the flexibility of passing
-props and callbacks instead of post message listeners.
+props and callbacks instead of url params and post message listeners.
 
 Xcomponent will handle rendering your component, passing down props (including data and callbacks) and transmitting the
 callbacks back up to the parent page.
