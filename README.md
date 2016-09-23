@@ -117,18 +117,11 @@ Let's do that in our example above.
 <button id="login">Log In</button>
 
 <script>
-    // Attach the component definition to our page, which will handle the business logic of the component and call the interface we defined before
+    // When we enter the component, we'll pre-populate the email field if we were passed an email
 
-    var loginComponent = MyLoginComponent.attach({
-
-        // When we enter the component, we'll pre-populate the email field if we were passed an email
-
-        onEnter: function() {
-            if (this.props.prefilledEmail) {
-                $('#email').val(this.props.prefilledEmail);
-            }
-        }
-    });
+    if (window.xchild.props.prefilledEmail) {
+        $('#email').val(window.xchild.props.prefilledEmail);
+    }
 
     $('#login').on('click', function() {
 
@@ -139,7 +132,7 @@ Let's do that in our example above.
 
             // Since we had a successful login, let's call our parent with the callback they provided
 
-            loginComponent.props.onLogin(email);
+            window.xchild.props.onLogin(email);
         });
     });
 </script>
@@ -236,12 +229,9 @@ Our component can listen for any property updates like so:
 </div>
 
 <script>
-    MyLoginComponent.attach({
-
-        onProps: function() {
-            if (this.props.email) {
-                document.getElementById('email').value = this.props.email;
-            }
+    window.xchild.onProps(function(props) {;
+        if (props.email) {
+            document.getElementById('email').value = props.email;
         }
     });
 <script>
@@ -279,18 +269,5 @@ MyLoginComponent.render({
     },
 
     timeout: 5000
-});
-```
-
-
-### Making your component a singleton
-
-A lot of the time, it won't make sense to allow people to use your component multiple times in the same page.
-To prevent them from doing that, you can set `singleton: true` when rendering:
-
-```javascript
-MyLoginComponent.render({
-
-    singleton: true
 });
 ```
