@@ -72,41 +72,12 @@ var MyLoginComponent = xcomponent.create({
 
 This spec is the part that's going to be shared between my frame (or popup) and the parent page. It describes how to render the component on the page, what kind of data needs to be passed down, and what kind of callbacks I should expect.
 
-Now I'm ready to set up my component page. Let's start with a simple log-in form.  It's written using jQuery, but you can use whatever technology you want - `xcomponent` is framework agnostic:
+Now I'm ready to set up my component page. Let's start with a simple log-in form.  It's written using jQuery, but you can use whatever technology you want - `xcomponent` is framework agnostic.
 
-```html
-<input id="email" type="text" />
-<input id="password" type="password" />
-<button id="login">Log In</button>
-
-<script>
-    // Wait for the user to log in
-
-    $('#login').on('click', function() {
-
-        // Capture their credentials
-
-        var email = $('#email').val();
-        var password = $('#password').val();
-
-        // Log them in on the server side
-
-        $.post('/api/login', { email: email, password: password }, function() {
-
-            console.log('Successfully logged in!');
-        });
-    });
-</script>
-```
-
-This is great, but at this point it's totally isolated from the parent. If I was to drop this in an iframe, it would function perfectly, but the parent would have no way to interact with it.
-
-Now let's think about how this component is going to be integrated with the parent page. We've already defined the component contract, so we just need to plug it in:
+I just need to use `window.xchild` to get the props that are passed down by whoever uses the component.
 
 - We need to pre-populate the `#email` element with a `prefilledEmail` param, if we're passed one.
 - We need to call an `onLogin` success callback when we do a successful login, so the parent knows the user has logged in.
-
-Let's do that in our example above.
 
 ```html
 <!-- We should pull in the login component we defined above -->
@@ -138,7 +109,7 @@ Let's do that in our example above.
 </script>
 ```
 
-As the owner of the component, that's all we needed to do! Now anyone can use the component we defined.
+Now anyone can use the component we defined!
 
 
 #### As the component user
