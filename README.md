@@ -56,14 +56,14 @@ xcomponent aims to solve all of these problems, by providing a clean way to buil
 that work seamlessly with both iframes and popups. The primary focus of this is to allow you to define your interface,
 and then do the heavy lifting in the background, and do all of the things you shouldn't need to think about:
 
-It will even automatically generate React, Angular and Ember bindings so using the components feels even more native.
+It will even automatically generate React, Angular and Ember bindings so using the component feels even more native.
 
 ## Example
 
 Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
 that the user has logged in, without exposing any of the users credentials to the parent window.
 
-#### As the component creator
+### As the component creator
 
 First I'd create a spec for the component's interface:
 
@@ -148,7 +148,7 @@ I just need to use `window.xchild` to get the props that are passed down.
 Now anyone can render the component we defined onto their page!
 
 
-#### As the component user
+### As the component user
 
 My life is even easier. I just need to drop in your component onto my page:
 
