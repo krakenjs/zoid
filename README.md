@@ -1,59 +1,90 @@
 xcomponent
 ----------
 
-A cross-domain component toolkit. Useful if you want to build a cross-domain component, which lives in an iframe or popup.
+A cross-domain component toolkit. Useful if you want to build a cross-domain component, which can be rendered into an inline iframe, a lightboxed iframe, or a popup.
 
------
+You set up a simple component definition, and xcomponent will handle rendering your component, passing down props, including
+data and callbacks, and transmitting the callbacks back up to the parent page.
+
+It's 'data-down, actions up', but 100% cross-domain!
+
+```javascript
+MyComponent.render({
+
+    someData: {
+        foo: 'bar'
+    },
+
+    onComplete: function(result) {
+        console.log('The component called back with a result:', result);
+    }
+
+}, '#container');
+```
+
+And on the child page:
+
+```javascript
+console.log('We were passed some data from the parent page:', window.xchild.props.someData);
+
+window.xchild.props.onComplete({ hello: 'world' });
+```
+
+## Rationale
 
 Writing cross domain components is really hard.
 
 Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put within your page.
-I could just give you a javascript component to drop in your page. Javascript components are pretty much a
-solved problem at this point! React, Ember, Angular and other frameworks all provide great ways to build reusable and shareable components.
-But:
 
-- What if I write a component in React and you're using Ember?
+I could just give you some javascript to drop in your page. But then:
+
+- What if I write a component in React, and you're using Ember or Angular on your page, or no framework at all?
 - What if I have secure data like login credentials that I don't want you to have access to?
-- What if I need to make calls to apis that I don't want to expose to third party domains?
+- What if I need to make secure calls to apis from my component that I don't want to expose using CORS?
 
-So the obvious choice is an iframe, or a popup. Iframes are great ways to sandbox off little bits of cross-domain functionality,
-where I want to put a component on your page, but I want it to be a black box and not let you have any access to it. But iframes aren't all that easy to use:
+The obvious choice would be to embed the component in an iframe, or a popup window, rather than dropping it straight
+onto the parent page. But:
 
-- How should people pass down data? Should they programatically create an iframe and pass params down in the url?
-- How should people get events back up? Should I send fire-and-forget post messages, and have them add listeners?
+- How should people pass down data? Should they pass everything in the url?
+- How should people get events back up? Should I set up a global post message listener, and send fire-and-forget post messages from the child?
 - How do I deal with error cases when my component fails, or when messaging fails?
 - How do I create a nice, simple interface for my component that people can easily reason about?
 
-xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components that work seamlessly with both iframes and popups.
-The primary focus of this is to allow you to define your interface, and then do the heavy lifting in the background, and do all of the things you shouldn't need to think about:
+xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components
+that work seamlessly with both iframes and popups. The primary focus of this is to allow you to define your interface,
+and then do the heavy lifting in the background, and do all of the things you shouldn't need to think about:
 
-- Passing data down
-- Getting messages back up
-- Creating the iframe or popup and generating the correct url
-- Bubbling errors back up to the parent
+It will even automatically generate React, Angular and Ember bindings so using the components feels even more native.
 
-### Example
+## Example
+
+Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
+that the user has logged in, without exposing any of the users credentials to the parent window.
 
 #### As the component creator
 
-Let's say I'm creating a component. First I'd create a spec for the component's interface:
+First I'd create a spec for the component's interface:
 
 ```javascript
 var MyLoginComponent = xcomponent.create({
 
     // The html tag used to render my component
+
     tag: 'my-login-component',
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
+
     url: 'http://www.my-site.com/my-login-component',
 
     // The size of the component on their page
+
     dimensions: {
         width: 400,
         height: 200
     }
 
     // The properties they can (or must) pass down to my component
+
     props: {
 
         prefilledEmail: {
@@ -66,42 +97,45 @@ var MyLoginComponent = xcomponent.create({
             required: true
         }
     }
-
 });
 ```
 
-This spec is the part that's going to be shared between my frame (or popup) and the parent page. It describes how to render the component on the page, what kind of data needs to be passed down, and what kind of callbacks I should expect.
+This spec describes everything needed to render the component on the parent page, including the props the component expects.
 
-Now I'm ready to set up my component page. Let's start with a simple log-in form.  It's written using jQuery, but you can use whatever technology you want - `xcomponent` is framework agnostic.
+Now we need to actually implement the business logic of the component -- the code that will run inside the iframe.
 
-I just need to use `window.xchild` to get the props that are passed down by whoever uses the component.
-
-- We need to pre-populate the `#email` element with a `prefilledEmail` param, if we're passed one.
-- We need to call an `onLogin` success callback when we do a successful login, so the parent knows the user has logged in.
+I just need to use `window.xchild` to get the props that are passed down.
 
 ```html
-<!-- We should pull in the login component we defined above -->
+<!-- Pull in the login component we defined above -->
+
 <script src="./my-login-component.js"></script>
 
-<input id="email" type="text" />
-<input id="password" type="password" />
-<button id="login">Log In</button>
+<!-- Set up a login form -->
+
+<form>
+    <input id="email" type="text" />
+    <input id="password" type="password" />
+    <button id="login">Log In</button>
+</form>
 
 <script>
-    // When we enter the component, we'll pre-populate the email field if we were passed an email
+    // Pre-polulate the email field, if we're passed an email
 
     if (window.xchild.props.prefilledEmail) {
         $('#email').val(window.xchild.props.prefilledEmail);
     }
 
+    // Handle the button click to log the user in
+
     $('#login').on('click', function() {
 
-        var email = $('#email').val();
+        var email    = $('#email').val();
         var password = $('#password').val();
 
         $.post('/api/login', { email: email, password: password }, function() {
 
-            // Since we had a successful login, let's call our parent with the callback they provided
+            // Since we had a successful login, call-back the parent page to let them know which user logged in:
 
             window.xchild.props.onLogin(email);
         });
@@ -109,7 +143,7 @@ I just need to use `window.xchild` to get the props that are passed down by whoe
 </script>
 ```
 
-Now anyone can use the component we defined!
+Now anyone can render the component we defined onto their page!
 
 
 #### As the component user
@@ -117,14 +151,16 @@ Now anyone can use the component we defined!
 My life is even easier. I just need to drop in your component onto my page:
 
 ```html
-<!-- We should pull in the login component that was defined above -->
-<script src="http://www.my-site.com/components/my-login-component.js"></script>
+<!-- Pull in the login component we defined above -->
 
-<!-- Set up a container for the iframe component to live in -->
+<script src="./my-login-component.js"></script>
+
+<!-- Set up a container for the iframe to be rendered into -->
+
 <div id="container"></div>
 
 <script>
-    // Create an instance of the component
+    // Render the component
 
     MyLoginComponent.render({
 
@@ -133,11 +169,13 @@ My life is even easier. I just need to drop in your component onto my page:
         onLogin: function(email) {
             console.log('User logged in with email:', email);
         }
+
     }, '#container');
 </script>
 ```
 
-This is even easier if you're using a supported framework like React, Ember or Angular:
+This is even easier if you're using a supported framework like React, Ember or Angular -- xcomponent will automatically
+set up bindings for these frameworks, so you can simply do:
 
 React:
 
@@ -156,7 +194,6 @@ Angular:
 And we're done! Notice how I never had to write any code to create an iframe, or send post messages? That's all taken care of for you.
 When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
 turning that callback into a post-message and relaying it to the parent for you.
-
 
 
 ### Updating props and passing them down to the child
@@ -191,7 +228,7 @@ ReactDOM.render(<Main />, document.getElementById('example'));
 
 This code updates `this.state.email` every time the user types into the input field.
 
-Our component can listen for any property updates like so:
+Our component's page can listen for any property updates like so:
 
 ```html
 
@@ -209,36 +246,3 @@ Our component can listen for any property updates like so:
 ```
 
 Note that `onProps` will be called every time the parent props update, including on first render.
-
-If I wanted to update the props from my parent manually, using javascript, I can do this too:
-
-```javascript
-var login = MyLoginComponent.init({
-    email: 'foo@bar.com'
-});
-
-// At some point in the future
-
-login.updateProps({
-    email: 'baz@bar.com'
-});
-```
-
-
-### Setting a timeout for rendering my component
-
-If you set a timeout (in ms), xcomponent will automatically call your `onTimeout` method if the component does not initalize itself in that time. In case no `onTimeout` methhod is defined it will call the `onError` method. 
-
-```javascript
-MyLoginComponent.render({
-
-    onTimeout: function(err) {
-         // Gracefully handle the timeout during rendering the component 
-    },
-    onError: function(err) {
-        // Gracefully handle the error from rendering the component
-    },
-
-    timeout: 5000
-});
-```
