@@ -17,9 +17,9 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'demo/frameworks/react_v15.1.0.js',
-            'demo/frameworks/react-dom_v15.1.0.js',
-            'demo/frameworks/angular.min.js',
+            'test/lib/react_v15.1.0.js',
+            'test/lib/react-dom_v15.1.0.js',
+            'test/lib/angular.min.js',
             
             { pattern: 'test/test.js', included: true, served: true },
             { pattern: 'test/*.js', included: false, served: true },

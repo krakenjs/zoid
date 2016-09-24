@@ -203,6 +203,10 @@ export class Component extends BaseComponent {
         return this.init(props).render(element);
     }
 
+    renderPopup(props) {
+        return this.init(props).renderPopup();
+    }
+
 
     /*  Get By Tag
         ----------

@@ -63,6 +63,8 @@ It will even automatically generate React, Angular and Ember bindings so using t
 Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
 that the user has logged in, without exposing any of the users credentials to the parent window.
 
+Take a look at [demo/basic/iframe.htm](./demo/basic/iframe.htm) to see this example in action.
+
 ### As the component creator
 
 First I'd create a spec for the component's interface:
@@ -83,7 +85,7 @@ var MyLoginComponent = xcomponent.create({
     dimensions: {
         width: 400,
         height: 200
-    }
+    },
 
     // The properties they can (or must) pass down to my component
 
@@ -125,17 +127,18 @@ I just need to use `window.xchild` to get the props that are passed down.
     // Pre-polulate the email field, if we're passed an email
 
     if (window.xchild.props.prefilledEmail) {
-        $('#email').val(window.xchild.props.prefilledEmail);
+        document.querySelector('#email').value = window.xchild.props.prefilledEmail;
     }
 
     // Handle the button click to log the user in
 
-    $('#login').on('click', function() {
+    document.querySelector('#login').addEventListener('click', function(event) {
+        event.preventDefault();
 
-        var email    = $('#email').val();
-        var password = $('#password').val();
+        var email    = document.querySelector('#email').value;
+        var password = document.querySelector('#password').value;
 
-        $.post('/api/login', { email: email, password: password }, function() {
+        jQuery.post('/api/login', { email: email, password: password }, function() {
 
             // Since we had a successful login, call-back the parent page to let them know which user logged in:
 
@@ -177,17 +180,31 @@ My life is even easier. I just need to drop in your component onto my page:
 ```
 
 This is even easier if you're using a supported framework like React, Ember or Angular -- xcomponent will automatically
-set up bindings for these frameworks, so you can simply do:
+set up bindings for these frameworks:
 
-React:
+### React / JSX
+
+Drop the component in any `render()` method:
 
 ```javascript
-<MyLoginComponent.react prefilledEmail='foo@bar.com' onLogin={this.onLogin} />
+render: function() {
+    return (
+        <MyLoginComponent.react prefilledEmail='foo@bar.com' onLogin={onLogin} />
+    );
+}
 ```
 
-Angular:
+### Angular
+
+Specify the component name as a dependency to your angular app:
 
 ```javascript
+angular.module('myapp', ['my-login-component'])
+```
+
+Include the tag in one of your templates (don't forget to use dasherized prop names):
+
+```html
 <my-login-component prefilled-email="foo@bar.com" on-login="onLogin" />
 ```
 
@@ -196,55 +213,3 @@ Angular:
 And we're done! Notice how I never had to write any code to create an iframe, or send post messages? That's all taken care of for you.
 When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
 turning that callback into a post-message and relaying it to the parent for you.
-
-
-### Updating props and passing them down to the child
-
-xcomponent will automatically pass down new properties to the child, depending on the framework you're integrating with.
-
-For example, I might have the following react code:
-
-```javascript
-var Main = window.React.createClass({
-
-    componentWillMount: function() {
-        this.setState({ email: 'foo@bar.com' });
-    },
-
-    emailChange: function(event) {
-        this.setState({ email: event.target.value });
-    },
-
-    render: function() {
-        return (
-            <div>
-                <MyLoginComponent.react prefilledEmail={this.state.email} />
-                <input onChange={this.emailChange} placeholder="email" value={this.state.email} />
-            </div>
-        );
-    }
-});
-
-ReactDOM.render(<Main />, document.getElementById('example'));
-```
-
-This code updates `this.state.email` every time the user types into the input field.
-
-Our component's page can listen for any property updates like so:
-
-```html
-
-<div>
-    Welcome <span id="email"></span>!
-</div>
-
-<script>
-    window.xchild.onProps(function(props) {;
-        if (props.email) {
-            document.getElementById('email').value = props.email;
-        }
-    });
-<script>
-```
-
-Note that `onProps` will be called every time the parent props update, including on first render.

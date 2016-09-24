@@ -1,5 +1,5 @@
 
-import { dasherizeToCamel, once } from '../lib';
+import { dasherizeToCamel } from '../lib';
 
 export let angular = {
 
@@ -9,66 +9,55 @@ export let angular = {
 
     register(component) {
 
-        let register = once((moduleName) => {
+        window.angular.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
 
-            window.angular.module(moduleName).directive(dasherizeToCamel(component.tag), () => {
+            let scope = {};
 
-                let scope = {};
+            for (let key of Object.keys(component.props)) {
+                let prop = component.props[key];
 
-                for (let key of Object.keys(component.props)) {
-                    let prop = component.props[key];
-
-                    if (prop.type === 'function' || prop.type === 'object') {
-                        scope[key] = '=';
-                    } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
-                        scope[key] = '@';
-                    } else {
-                        throw new Error(`Unrecognized prop type: ${prop.type}`);
-                    }
+                if (prop.type === 'function' || prop.type === 'object') {
+                    scope[key] = '=';
+                } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
+                    scope[key] = '@';
+                } else {
+                    throw new Error(`Unrecognized prop type: ${prop.type}`);
                 }
+            }
 
-                return {
-                    scope,
+            return {
+                scope,
 
-                    restrict: 'E',
+                restrict: 'E',
 
-                    controller: ($scope, $element) => {
+                controller: ($scope, $element) => {
 
-                        component.log(`instantiate_angular_component`);
+                    component.log(`instantiate_angular_component`);
 
-                        function getProps() {
-                            let instanceProps = {};
-                            for (let key of Object.keys(scope)) {
-                                instanceProps[key] = $scope[key];
-                            }
-                            return instanceProps;
+                    function getProps() {
+                        let instanceProps = {};
+                        for (let key of Object.keys(scope)) {
+                            let prop = component.props[key];
+
+                            let value = prop.type === 'function' ? $scope[key] && function() {
+                                let result = $scope[key].apply(this, arguments);
+                                $scope.$apply();
+                                return result;
+                            } : $scope[key];
+
+                            instanceProps[key] = value;
                         }
-
-                        let parent = component.init(getProps());
-                        parent.render($element[0]);
-
-                        $scope.$watch(() => {
-                            parent.updateProps(getProps());
-                        });
+                        return instanceProps;
                     }
-                };
-            });
+
+                    let parent = component.init(getProps());
+                    parent.render($element[0]);
+
+                    $scope.$watch(() => {
+                        parent.updateProps(getProps());
+                    });
+                }
+            };
         });
-
-
-        let bootstrap = window.angular.bootstrap;
-
-        window.angular.bootstrap = function(el, modules) {
-            register(modules[0]);
-            return bootstrap.apply(this, arguments);
-        };
-
-        let module = window.angular.module;
-
-        window.angular.module = function(moduleName) {
-            let result = module.apply(this, arguments);
-            register(moduleName);
-            return result;
-        };
     }
 };

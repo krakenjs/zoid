@@ -1,0 +1,37 @@
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
+
+    <script src="../../dist/xcomponent.js"></script>
+    <script src="../component/component.js"></script>
+</head>
+
+<body ng-app="app" ng-controller="appController">
+
+    <h3>Log in on xyz.com</h3>
+
+    <div id="container">
+        <my-login-component prefilled-email="{{email}}" on-login="onLogin"></my-login-component>
+    </div>
+
+    <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>
+
+    <script>
+        angular.module('app', ['my-login-component']).controller('appController', function($scope) {
+
+            $scope.userLoggedIn = false;
+            $scope.email = 'foo@bar.com';
+
+            $scope.onLogin = function onLogin(email) {
+                console.log('User logged in with email:', email);
+
+                $scope.userLoggedIn = true;
+                $scope.email = email;
+            }
+        });
+    </script>
+
+</body>

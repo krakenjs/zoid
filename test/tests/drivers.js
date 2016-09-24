@@ -1,8 +1,8 @@
 
-import { once } from 'src/lib';
 import { testComponent } from '../component';
 
-angular.bootstrap = once(angular.bootstrap);
+angular.module('app', ['test-component']);
+angular.bootstrap(document.body, ['app']);
 
 describe('xcomponent drivers', () => {
 
@@ -62,9 +62,6 @@ describe('xcomponent drivers', () => {
 
     it('should enter a component rendered with angular and call onEnter', done => {
 
-        angular.module('app', []);
-        angular.bootstrap(document.body, ['app']);
-
         let injector = angular.element(document.body).injector();
         let $compile = injector.get('$compile');
         let $rootScope = injector.get('$rootScope');
@@ -83,9 +80,6 @@ describe('xcomponent drivers', () => {
     });
 
     it('should enter a component rendered with angular and call a prop', done => {
-
-        angular.module('app', []);
-        angular.bootstrap(document.body, ['app']);
 
         let injector = angular.element(document.body).injector();
         let $compile = injector.get('$compile');
