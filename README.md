@@ -63,7 +63,7 @@ It will even automatically generate React, Angular and Ember bindings so using t
 Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
 that the user has logged in, without exposing any of the users credentials to the parent window.
 
-Take a look at [demo/basic/iframe.htm](./demo/basic/iframe.htm) to see this example in action.
+Take a look at the [demos](./demo/index.md) to see this example in action.
 
 ### As the component creator
 
