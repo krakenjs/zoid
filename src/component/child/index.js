@@ -51,7 +51,7 @@ export class ChildComponent extends BaseComponent {
 
             exports: this.exports()
 
-        }).then(data => {
+        }).then(({ data }) => {
 
             this.context = data.context;
             this.setProps(data.props);

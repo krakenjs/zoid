@@ -346,7 +346,7 @@ export class ParentComponent extends BaseComponent {
                 childWindowName: this.childWindowName
             }
 
-        }).then(data => {
+        }).then(({ data }) => {
 
             extend(this, data.overrides);
 
@@ -386,7 +386,7 @@ export class ParentComponent extends BaseComponent {
                     props: this.props
                 }
 
-            }).then(data => {
+            }).then(({ data }) => {
 
                 this.registerForCleanup(data.destroy);
                 extend(this, data.overrides);
