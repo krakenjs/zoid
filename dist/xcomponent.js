@@ -446,6 +446,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function render(props, element) {
 	            return this.init(props).render(element);
 	        }
+	    }, {
+	        key: 'renderPopup',
+	        value: function renderPopup(props) {
+	            return this.init(props).renderPopup();
+	        }
 
 	        /*  Get By Tag
 	            ----------
@@ -1072,6 +1077,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
+	if (window.location.href.indexOf('file://') === 0) {
+	    CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+	}
+
 /***/ },
 /* 9 */
 /*!********************************************!*\
@@ -1121,7 +1130,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        GLOBAL_METHOD: 'postrobot_global_method',
 	        REMOTE_BRIDGE: 'postrobot_remote_bridge',
 	        LOCAL_BRIDGE: 'postrobot_local_bridge'
-	    }
+	    },
+
+	    MOCK_PROTOCOL: 'mock://',
+	    FILE_PROTOCOL: 'file://'
 	};
 
 	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
@@ -1298,7 +1310,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    if (message.sourceDomain.indexOf('mock://') === 0) {
+	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	        origin = message.sourceDomain;
+	    }
+
+	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
 	        origin = message.sourceDomain;
 	    }
 
@@ -1378,14 +1394,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
-	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
 	    }
 
 	    if (message.data) {
 	        message.data = (0, _lib.deserializeMethods)(originalSource, message.data);
 	    }
 
-	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
 	}
 
 	function messageListener(event) {
@@ -1723,9 +1739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -1886,7 +1900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    for (var i = 0; i < promises.length; i++) {
+	    var _loop2 = function _loop2(i) {
 
 	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
@@ -1899,6 +1913,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, function (err) {
 	            promise.reject(err);
 	        });
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop2(i);
 	    }
 
 	    return promise;
@@ -1949,15 +1967,18 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!**************************************!*\
   !*** ./~/post-robot/src/lib/util.js ***!
   \**************************************/
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.util = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _conf = __webpack_require__(/*! ../conf */ 7);
 
 	var util = exports.util = {
 	    once: function once(method) {
@@ -2169,7 +2190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        win = win || window;
 
-	        if (win.mockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	        if (win.mockDomain && win.mockDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
 	            return win.mockDomain;
 	        }
 
@@ -3627,6 +3648,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _compat.emulateIERestrictions)(window, win);
 
+	    if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	        domain = win.location.protocol + '//' + win.location.host;
+	    }
+
+	    if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	        domain = '*';
+	    }
+
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
 
@@ -3705,7 +3734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            origin: _lib.util.getDomain(window),
 	            source: window,
 	            data: JSON.stringify(message, 0, 2)
-	        });
+	        }, domain);
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
@@ -3746,6 +3775,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (win === bridge) {
 	            throw new Error('Message target is bridge');
+	        }
+
+	        if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	            domain = bridge.location.protocol + '//' + bridge.location.host;
+	        }
+
+	        if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	            domain = '*';
 	        }
 
 	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
@@ -3803,7 +3840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            target: message.originalSource,
 	            hash: message.hash,
 	            name: message.name
-	        }, data), '*');
+	        }, data), origin);
 	    }
 
 	    return _lib.promise.Promise.all([respond({
@@ -8824,92 +8861,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    register: function register(component) {
 
-	        var register = (0, _lib.once)(function (moduleName) {
+	        window.angular.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function () {
 
-	            window.angular.module(moduleName).directive((0, _lib.dasherizeToCamel)(component.tag), function () {
+	            var scope = {};
 
-	                var scope = {};
+	            for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	                var _ref;
 
-	                for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                    var _ref;
-
-	                    if (_isArray) {
-	                        if (_i >= _iterator.length) break;
-	                        _ref = _iterator[_i++];
-	                    } else {
-	                        _i = _iterator.next();
-	                        if (_i.done) break;
-	                        _ref = _i.value;
-	                    }
-
-	                    var key = _ref;
-
-	                    var prop = component.props[key];
-
-	                    if (prop.type === 'function' || prop.type === 'object') {
-	                        scope[key] = '=';
-	                    } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
-	                        scope[key] = '@';
-	                    } else {
-	                        throw new Error('Unrecognized prop type: ' + prop.type);
-	                    }
+	                if (_isArray) {
+	                    if (_i >= _iterator.length) break;
+	                    _ref = _iterator[_i++];
+	                } else {
+	                    _i = _iterator.next();
+	                    if (_i.done) break;
+	                    _ref = _i.value;
 	                }
 
-	                return {
-	                    scope: scope,
+	                var _key = _ref;
 
-	                    restrict: 'E',
+	                var prop = component.props[_key];
 
-	                    controller: function controller($scope, $element) {
+	                if (prop.type === 'function' || prop.type === 'object') {
+	                    scope[_key] = '=';
+	                } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
+	                    scope[_key] = '@';
+	                } else {
+	                    throw new Error('Unrecognized prop type: ' + prop.type);
+	                }
+	            }
 
-	                        component.log('instantiate_angular_component');
+	            return {
+	                scope: scope,
 
-	                        function getProps() {
-	                            var instanceProps = {};
-	                            for (var _iterator2 = Object.keys(scope), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	                                var _ref2;
+	                restrict: 'E',
 
-	                                if (_isArray2) {
-	                                    if (_i2 >= _iterator2.length) break;
-	                                    _ref2 = _iterator2[_i2++];
-	                                } else {
-	                                    _i2 = _iterator2.next();
-	                                    if (_i2.done) break;
-	                                    _ref2 = _i2.value;
-	                                }
+	                controller: function controller($scope, $element) {
 
-	                                var key = _ref2;
+	                    component.log('instantiate_angular_component');
 
-	                                instanceProps[key] = $scope[key];
+	                    function getProps() {
+	                        var instanceProps = {};
+
+	                        var _loop = function _loop() {
+	                            if (_isArray2) {
+	                                if (_i2 >= _iterator2.length) return 'break';
+	                                _ref2 = _iterator2[_i2++];
+	                            } else {
+	                                _i2 = _iterator2.next();
+	                                if (_i2.done) return 'break';
+	                                _ref2 = _i2.value;
 	                            }
-	                            return instanceProps;
+
+	                            var key = _ref2;
+
+	                            var prop = component.props[key];
+
+	                            var value = prop.type === 'function' ? $scope[key] && function () {
+	                                var result = $scope[key].apply(this, arguments);
+	                                $scope.$apply();
+	                                return result;
+	                            } : $scope[key];
+
+	                            instanceProps[key] = value;
+	                        };
+
+	                        for (var _iterator2 = Object.keys(scope), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                            var _ref2;
+
+	                            var _ret = _loop();
+
+	                            if (_ret === 'break') break;
 	                        }
-
-	                        var parent = component.init(getProps());
-	                        parent.render($element[0]);
-
-	                        $scope.$watch(function () {
-	                            parent.updateProps(getProps());
-	                        });
+	                        return instanceProps;
 	                    }
-	                };
-	            });
+
+	                    var parent = component.init(getProps());
+	                    parent.render($element[0]);
+
+	                    $scope.$watch(function () {
+	                        parent.updateProps(getProps());
+	                    });
+	                }
+	            };
 	        });
-
-	        var bootstrap = window.angular.bootstrap;
-
-	        window.angular.bootstrap = function (el, modules) {
-	            register(modules[0]);
-	            return bootstrap.apply(this, arguments);
-	        };
-
-	        var module = window.angular.module;
-
-	        window.angular.module = function (moduleName) {
-	            var result = module.apply(this, arguments);
-	            register(moduleName);
-	            return result;
-	        };
 	    }
 	};
 
