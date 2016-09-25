@@ -5,28 +5,24 @@
 
     <script src="../../dist/xcomponent.js"></script>
     <script src="../component/component.js"></script>
+    <script src="./component/component.js"></script>
 </head>
 
 <body>
 
-    <h3></h3>
+    <h3>Log in on xyz.com</h3>
 
-    <div id="result"></div>
+    <div id="container"></div>
 
     <script>
 
         // Render the component
 
-        MyLoginComponent.renderLightbox({
+        MyLoginButtonComponent.render({
 
-            prefilledEmail: 'foo@bar.com',
+            context: 'lightbox'
 
-            onLogin: function(email) {
-                console.log('User logged in with email:', email);
-                document.querySelector('#result').innerText = email + ' logged in!';
-            }
-
-        });
+        }, '#container');
 
     </script>
 

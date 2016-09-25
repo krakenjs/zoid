@@ -1,9 +1,9 @@
 
-window.MyLoginComponent = xcomponent.create({
+window.MyLoginButtonComponent = xcomponent.create({
 
     // The html tag used to render my component
 
-    tag: 'my-login-component',
+    tag: 'my-login-button-component',
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
@@ -20,13 +20,13 @@ window.MyLoginComponent = xcomponent.create({
 
     props: {
 
-        prefilledEmail: {
-            type: 'string',
-            required: false
+        context: {
+            type: 'string'
         },
 
-        onLogin: {
-            type: 'function'
+        element: {
+            type: 'string',
+            required: false
         }
     }
 });
