@@ -12,7 +12,7 @@ import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
 
-import { logger } from '../../lib';
+import { logger, capitalizeFirstLetter } from '../../lib';
 
 export let components = {};
 
@@ -199,12 +199,19 @@ export class Component extends BaseComponent {
         Shortcut to render a parent component
     */
 
-    render(props, element) {
-        return this.init(props).render(element);
+    render(props, element, context) {
+        return this.init(props).render(element, context);
     }
 
-    renderPopup(props) {
-        return this.init(props).renderPopup();
+
+    /*  Render To Parent
+        ----------------
+
+        Shortcut to render a parent component
+    */
+
+    renderToParent(props, element, context) {
+        return this.init(props).renderToParent(element, context);
     }
 
 
@@ -266,4 +273,23 @@ export class Component extends BaseComponent {
 
 export function getByTag(tag) {
     return components[tag];
+}
+
+/*  Generate Render Methods
+ -----------------------
+
+ Autogenerate methods like renderIframe, renderPopupToParent
+ */
+
+for (let context of CONTEXT_TYPES_LIST) {
+
+    let contextName = capitalizeFirstLetter(context);
+
+    Component.prototype[`render${contextName}`] = function(props, element) {
+        return this.init(props).render(element, context);
+    };
+
+    Component.prototype[`render${contextName}ToParent`] = function(props, element) {
+        return this.init(props).renderToParent(element, context);
+    };
 }
