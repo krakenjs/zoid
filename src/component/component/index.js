@@ -2,6 +2,7 @@
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
+import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES_LIST } from '../../constants';
@@ -190,6 +191,11 @@ export class Component extends BaseComponent {
 
     init(props) {
         return new ParentComponent(this, { props });
+    }
+
+
+    delegate(options = {}) {
+        return new DelegateComponent(this, options);
     }
 
 

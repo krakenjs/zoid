@@ -19,3 +19,9 @@
 - [script tag component](./frameworks/script.htm)
 - [react component](./frameworks/react.htm)
 - [angular component](./angular/popup.htm)
+
+## render to parent demos
+
+- [render iframe to parent](./renderToParent/iframe.htm)
+- [render lightbox to parent](./renderToParent/lightbox.htm)
+- [render popup to parent](./renderToParent/popup.htm)

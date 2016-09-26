@@ -22,6 +22,8 @@
 
 		document.querySelector('#openLoginButton').addEventListener('click', function() {
 
+			document.querySelector('#openLoginButton').style.display = 'none';
+
 			MyLoginComponent.renderToParent({
 
 				prefilledEmail: 'foo@bar.com',

@@ -10,6 +10,7 @@ export const POST_MESSAGE = {
     CLOSE: `${XCOMPONENT}_close`,
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
+    RENDER: `${XCOMPONENT}_render`,
     RENDER_REMOTE: `${XCOMPONENT}_render_remote`,
     RENDER_LOCAL: `${XCOMPONENT}_render_local`,
     ERROR: `${XCOMPONENT}_error`,
@@ -61,3 +62,8 @@ export const CLOSE_REASONS = {
 export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
 export const PROP_DEFER_TO_URL = `xcomponent_prop_defer_to_url`;
+
+export const DELEGATE = {
+    CALL_ORIGINAL: 'call_original',
+    CALL_DELEGATE: 'call_delegate'
+};

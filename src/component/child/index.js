@@ -112,7 +112,7 @@ export class ChildComponent extends BaseComponent {
 
     sendToParent(name, data) {
         this.component.log(`send_to_parent_${name}`);
-        return postRobot.send(getParentWindow(), name, data);
+        return postRobot.send(getParentComponentWindow(), name, data);
     }
 
 

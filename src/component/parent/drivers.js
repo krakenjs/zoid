@@ -2,10 +2,9 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain } from '../../lib';
-import { CONTEXT_TYPES, CLASS_NAMES } from '../../constants';
-import { getPosition } from '../window';
-
+import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getFrame, getElement } from '../../lib';
+import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
+import { getPosition, getParentWindow } from '../window';
 
 /*  Render Drivers
     --------------
@@ -31,17 +30,16 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.IFRAME ]: {
 
         parentTemplate: false,
-
-        render(element) {
-            if (!element) {
-                throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
-            }
-        },
+        requiresElement: true,
 
         open(element) {
 
             if (!element) {
                 throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
+            }
+
+            if (!getElement(element)) {
+                throw new Error(`[${this.component.tag}] Can not find element ${element}`);
             }
 
             this.iframe = iframe(element, null, {
@@ -75,6 +73,30 @@ export let RENDER_DRIVERS = {
 
         openBridge() {
 
+        },
+        
+        renderToParentOverrides: {
+
+            createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            closeParentTemplate:     DELEGATE.CALL_DELEGATE,
+            createComponentTemplate: DELEGATE.CALL_DELEGATE,
+            addCloseClasses:         DELEGATE.CALL_DELEGATE,
+            hide:                    DELEGATE.CALL_DELEGATE,
+            resize:                  DELEGATE.CALL_DELEGATE,
+            restyle:                 DELEGATE.CALL_DELEGATE,
+            loadUrl:                 DELEGATE.CALL_DELEGATE,
+
+            open(original, override) {
+                return function() {
+                    return override.apply(this, arguments).then(() => {
+                        this.window = getFrame(getParentWindow(), this.childWindowName);
+
+                        if (!this.window) {
+                            throw new Error(`Unable to find parent component iframe window`);
+                        }
+                    });
+                };
+            }
         },
 
         resize(width, height) {
@@ -110,10 +132,7 @@ export let RENDER_DRIVERS = {
 
         parentTemplate: true,
         focusable: true,
-
-        render() {
-            // pass
-        },
+        requiresElement: false,
 
         open() {
 
@@ -194,9 +213,18 @@ export let RENDER_DRIVERS = {
             // pass
         },
 
-        renderToParent(element, options) {
+        renderToParentOverrides: {
 
-            return this.renderToParentLocal(element, CONTEXT_TYPES.POPUP, options);
+            createParentTemplate: DELEGATE.CALL_DELEGATE,
+            closeParentTemplate:  DELEGATE.CALL_DELEGATE,
+            addCloseClasses:      DELEGATE.CALL_DELEGATE,
+            hide:                 DELEGATE.CALL_DELEGATE,
+
+            open:                    DELEGATE.CALL_ORIGINAL,
+            loadUrl:                 DELEGATE.CALL_ORIGINAL,
+            createComponentTemplate: DELEGATE.CALL_ORIGINAL,
+            resize:                  DELEGATE.CALL_ORIGINAL,
+            restyle:                 DELEGATE.CALL_ORIGINAL
         },
 
         loadUrl(url) {
@@ -209,14 +237,30 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
         parentTemplate: true,
+        requiresElement: false,
 
-        render() {
-            // pass
-        },
+        renderToParentOverrides: {
 
-        renderToParent(element, options) {
+            createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            closeParentTemplate:     DELEGATE.CALL_DELEGATE,
+            createComponentTemplate: DELEGATE.CALL_DELEGATE,
+            addCloseClasses:         DELEGATE.CALL_DELEGATE,
+            hide:                    DELEGATE.CALL_DELEGATE,
+            resize:                  DELEGATE.CALL_DELEGATE,
+            restyle:                 DELEGATE.CALL_DELEGATE,
+            loadUrl:                 DELEGATE.CALL_DELEGATE,
 
-            return this.renderToParentRemote(element, CONTEXT_TYPES.LIGHTBOX, options);
+            open(original, override) {
+                return function() {
+                    return override.apply(this, arguments).then(() => {
+                        this.window = getFrame(getParentWindow(), this.childWindowName);
+
+                        if (!this.window) {
+                            throw new Error(`Unable to find parent component iframe window`);
+                        }
+                    });
+                };
+            }
         },
 
         open() {
