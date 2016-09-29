@@ -31,6 +31,7 @@ export let RENDER_DRIVERS = {
 
         parentTemplate: false,
         requiresElement: true,
+        renderedIntoParentTemplate: false,
 
         open(element) {
 
@@ -67,8 +68,6 @@ export let RENDER_DRIVERS = {
                     delete this.iframe;
                 }
             });
-
-            return this;
         },
 
         openBridge() {
@@ -85,6 +84,7 @@ export let RENDER_DRIVERS = {
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
+            hijackSubmit:            DELEGATE.CALL_DELEGATE,
 
             open(original, override) {
                 return function() {
@@ -133,6 +133,7 @@ export let RENDER_DRIVERS = {
         parentTemplate: true,
         focusable: true,
         requiresElement: false,
+        renderedIntoParentTemplate: false,
 
         open() {
 
@@ -174,8 +175,6 @@ export let RENDER_DRIVERS = {
             }
 
             this.resize(dimensions.width, dimensions.height);
-
-            return this;
         },
 
         openBridge() {
@@ -238,6 +237,7 @@ export let RENDER_DRIVERS = {
 
         parentTemplate: true,
         requiresElement: false,
+        renderedIntoParentTemplate: true,
 
         renderToParentOverrides: {
 
@@ -267,9 +267,7 @@ export let RENDER_DRIVERS = {
 
             let element = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
 
-            RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
-
-            return this;
+            return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
         },
 
         openBridge() {

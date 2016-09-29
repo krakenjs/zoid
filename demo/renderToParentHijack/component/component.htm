@@ -1,0 +1,41 @@
+
+<head>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+	<link rel="stylesheet" href="./component.css" />
+
+	<!-- Pull in xcomponent and the component we defined -->
+
+	<script src="../../../dist/xcomponent.js"></script>
+	<script src="./component.js"></script>
+	<script src="../../component/component.js"></script>
+
+</head>
+
+<body>
+
+	<button id="openLoginButton" class="btn btn-primary">Open Log In</button>
+
+	<div id="result"></div>
+
+	<script>
+
+		document.querySelector('#openLoginButton').addEventListener('click', function() {
+
+			document.querySelector('#openLoginButton').style.display = 'none';
+
+			MyLoginComponent.init({
+
+				prefilledEmail: 'foo@bar.com',
+
+				onLogin: function(email) {
+					console.log('User logged in with email:', email);
+					document.querySelector('#result').innerText = email + ' logged in!';
+				}
+
+			}).hijackSubmitParentForm(window.xchild.props.element, window.xchild.props.context);
+		});
+
+	</script>
+
+</body>

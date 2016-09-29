@@ -183,20 +183,6 @@ export class ChildComponent extends BaseComponent {
                 this.destroy();
             }
         });
-
-        // Only listen for parent component window if it's actually a different window
-
-        if (getParentComponentWindow() && getParentComponentWindow() !== getParentWindow()) {
-            onCloseWindow(getParentComponentWindow(), () => {
-
-                this.component.log(`parent_component_window_closed`);
-
-                // We do actually need to close ourselves in this case, even if we're an iframe, because our component
-                // window is probably a sibling and we'll remain open by default.
-
-                this.close(CLOSE_REASONS.PARENT_CLOSE_DETECTED);
-            });
-        }
     }
 
     watchForResize() {

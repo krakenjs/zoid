@@ -137,11 +137,14 @@ describe('xcomponent render to parent', () => {
                 xcomponent.getByTag('test-component2').init({
 
                     onEnter: function() {
-                        return window.xchild.props.childEntered();
-                    },
 
-                    onClose: function() {
-                        return window.xchild.props.foo();
+                        var winClose = this.window.close;
+                        this.window.close = function() {
+                            winClose.apply(this, arguments);
+                            window.xchild.props.foo();
+                        };
+
+                        return window.xchild.props.childEntered();
                     }
 
                 }).renderLightboxToParent();
@@ -162,11 +165,14 @@ describe('xcomponent render to parent', () => {
                 xcomponent.getByTag('test-component2').init({
 
                     onEnter: function() {
-                        return window.xchild.props.childEntered();
-                    },
 
-                    onClose: function() {
-                        return window.xchild.props.foo();
+                        var winClose = this.window.close;
+                        this.window.close = function() {
+                            winClose.apply(this, arguments);
+                            window.xchild.props.foo();
+                        };
+
+                        return window.xchild.props.childEntered();
                     }
 
                 }).renderPopupToParent();
@@ -190,7 +196,7 @@ describe('xcomponent render to parent', () => {
                     onEnter: function() {
 
                         this.window.focus = function() {
-                            return window.xchild.props.foo();
+                            window.xchild.props.foo();
                         };
 
                         return window.xchild.props.childEntered();

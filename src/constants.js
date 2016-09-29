@@ -10,11 +10,10 @@ export const POST_MESSAGE = {
     CLOSE: `${XCOMPONENT}_close`,
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
-    RENDER: `${XCOMPONENT}_render`,
-    RENDER_REMOTE: `${XCOMPONENT}_render_remote`,
-    RENDER_LOCAL: `${XCOMPONENT}_render_local`,
+    DELEGATE: `${XCOMPONENT}_delegate`,
     ERROR: `${XCOMPONENT}_error`,
-    HIDE: `${XCOMPONENT}_hide`
+    HIDE: `${XCOMPONENT}_hide`,
+    SUBMIT_CONTAINER_FORM: `${XCOMPONENT}_submit_container_form`
 };
 
 export const PROP_TYPES = {

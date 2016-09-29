@@ -37,11 +37,7 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
         }
 
-        activeComponents.push(this);
-
-        this.registerForCleanup(() => {
-            activeComponents.splice(activeComponents.indexOf(this), 1);
-        });
+        this.registerActiveComponent();
 
         this.setProps(options.props || {});
 
@@ -61,6 +57,15 @@ export class ParentComponent extends BaseComponent {
 
         this.onInit.catch(err => {
             this.error(err);
+        });
+    }
+
+
+    registerActiveComponent() {
+        activeComponents.push(this);
+
+        this.registerForCleanup(() => {
+            activeComponents.splice(activeComponents.indexOf(this), 1);
         });
     }
 
@@ -302,10 +307,14 @@ export class ParentComponent extends BaseComponent {
 
             this.setForCleanup('context', context);
 
+            if (RENDER_DRIVERS[context].renderedIntoParentTemplate) {
+                return this.createParentTemplate(context).then(() => {
+                    return this.open(element, context);
+                });
+            }
+
             return Promise.all([
-
                 this.open(element, context),
-
                 this.createParentTemplate(context)
             ]);
 
@@ -351,6 +360,69 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    delegateToParent(element, context) {
+
+        this.component.log(`delegate_${context}_to_parent`, { element, context });
+
+        let delegate = postRobot.sendToParent(POST_MESSAGE.DELEGATE, {
+
+            context,
+
+            tag: this.component.tag,
+
+            options: {
+
+                context,
+
+                childWindowName: this.childWindowName,
+
+                props: {
+                    uid:        this.props.uid,
+                    dimensions: this.props.dimensions
+                },
+
+                overrides: {
+                    focus:     () => this.focus(),
+                    userClose: () => this.userClose()
+                }
+            }
+
+        }).then(({ data }) => {
+
+            this.registerForCleanup(data.destroy);
+            return data;
+        });
+
+        let overrides = RENDER_DRIVERS[context].renderToParentOverrides;
+
+        for (let key of Object.keys(overrides)) {
+            let val = overrides[key];
+
+            if (val === DELEGATE.CALL_ORIGINAL) {
+                continue;
+            }
+
+            let original = this[key];
+
+            this[key] = function() {
+                return delegate.then(data => {
+
+                    let override = data.overrides[key];
+
+                    if (val === DELEGATE.CALL_DELEGATE) {
+                        return override.apply(this, arguments);
+                    }
+
+                    if (val instanceof Function) {
+                        return val(original, override).apply(this, arguments);
+                    }
+
+                    throw new Error(`Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
+                });
+            };
+        }
+    }
+
 
     /*  Render to Parent
         ----------------
@@ -366,63 +438,7 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`render_${context}_to_parent`, { element, context });
 
-            let renderToParent = postRobot.sendToParent(POST_MESSAGE.RENDER, {
-
-                context,
-
-                tag: this.component.tag,
-
-                options: {
-
-                    context,
-
-                    childWindowName: this.childWindowName,
-
-                    props: {
-                        uid:        this.props.uid,
-                        dimensions: this.props.dimensions
-                    },
-
-                    overrides: {
-                        focus:     () => this.focus(),
-                        userClose: () => this.userClose()
-                    }
-                }
-
-            }).then(({ data }) => {
-
-                this.registerForCleanup(data.destroy);
-                return data;
-            });
-            
-            let renderToParentOverrides = RENDER_DRIVERS[context].renderToParentOverrides;
-
-            for (let key of Object.keys(renderToParentOverrides)) {
-                let val = renderToParentOverrides[key];
-
-                if (val === DELEGATE.CALL_ORIGINAL) {
-                    continue;
-                }
-
-                let original = this[key];
-
-                this[key] = function() {
-                    return renderToParent.then(data => {
-
-                        let override = data.overrides[key];
-
-                        if (val === DELEGATE.CALL_DELEGATE) {
-                            return override.apply(this, arguments);
-                        }
-
-                        if (val instanceof Function) {
-                            return val(original, override).apply(this, arguments);
-                        }
-
-                        throw new Error(`Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
-                    });
-                };
-            }
+            this.delegateToParent(element, context);
 
             return this.render(element, context);
         });
@@ -527,14 +543,47 @@ export class ParentComponent extends BaseComponent {
     */
 
     hijackSubmitParentForm(element, context) {
+        return this.tryInit(() => {
+            context = this.validateRenderToParent(element, context);
 
-        context = this.getRenderContext(element, context);
+            this.component.log(`hijack_submit_parent_form_${context}`);
 
-        this.component.log(`hijack_submit_parent_form_${context}`);
+            this.delegateToParent(element, context);
 
-        return this.renderToParent(element, context, {
-            hijackSubmitParentForm: true
+            return this.preRender(element, context).then(() => {
+                this.runTimeout();
+
+                return this.submitParentContainerForm(this.childWindowName);
+            });
         });
+    }
+
+    getContainerForm() {
+
+        if (!this.iframe) {
+            throw new Error(`Can not do hijack submit without iframe based component`);
+        }
+
+        let form = getParentNode(this.iframe, 'form');
+
+        if (!form) {
+            throw new Error(`Can not find form as a parent of iframe`);
+        }
+
+        return form;
+    }
+
+    submitContainerForm(target) {
+
+        let form = this.getContainerForm();
+
+        form.setAttribute(`target`, target);
+        form.submit();
+    }
+
+    submitParentContainerForm(target) {
+
+        return postRobot.sendToParent(POST_MESSAGE.SUBMIT_CONTAINER_FORM, { target });
     }
 
 
@@ -603,9 +652,10 @@ export class ParentComponent extends BaseComponent {
                 this.close(data.reason);
             },
 
-            [ POST_MESSAGE.RENDER ](source, data) {
+            [ POST_MESSAGE.DELEGATE ](source, data) {
 
                 let component = this.component.getByTag(data.tag);
+
                 let delegate  = component.delegate(data.options);
 
                 return {
@@ -613,76 +663,6 @@ export class ParentComponent extends BaseComponent {
                     destroy:   () => delegate.cleanup()
                 };
             },
-
-            // We got a request to render from the child (renderToParent)
-
-            [ POST_MESSAGE.RENDER_REMOTE ](source, data) {
-
-                let component = this.component.getByTag(data.tag);
-                let instance  = component.parent(data.options);
-
-                extend(instance, data.overrides);
-
-                this.registerForCleanup(() => {
-                    instance.destroy();
-                });
-
-                return Promise.resolve().then(() => {
-
-                    if (data.hijackSubmitParentForm) {
-
-                        let form = getParentNode(this.iframe, 'form');
-
-                        // Open the window and do everything except load the url
-
-                        let promise = instance.renderHijack(form, data.element, data.context);
-
-                        // Submit the form to load the url into the new window
-
-                        form.submit();
-
-                        return promise;
-
-                    } else {
-
-                        return instance.render(data.element, data.context);
-                    }
-                }).then(() => {
-
-                    return {
-                        childWindowName: this.childWindowName,
-
-                        overrides: {
-                            childExports: instance.childExports,
-                            close: reason => instance.close(reason)
-                        }
-                    };
-                });
-            },
-
-            [ POST_MESSAGE.RENDER_LOCAL ](source, data) {
-
-                let component = this.component.getByTag(data.tag);
-                let instance  = component.parent(data.options);
-
-                this.registerForCleanup(() => {
-                    instance.destroy();
-                });
-
-                instance.setForCleanup('context', data.context);
-
-                extend(instance, data.overrides);
-
-                instance.createParentTemplate(data.context);
-
-                return {
-                    destroy: () => instance.destroy(),
-                    overrides: {
-                        addCloseClasses: () => instance.addCloseClasses()
-                    }
-                };
-            },
-
 
             // Iframes can't resize themselves, so they need the parent to take care of it for them.
 
@@ -707,6 +687,12 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.ERROR ](source, data) {
                 this.error(new Error(data.error));
+            },
+
+
+            [ POST_MESSAGE.SUBMIT_CONTAINER_FORM ](source, data) {
+
+                this.submitContainerForm(data.target);
             }
         };
     }
@@ -768,7 +754,6 @@ export class ParentComponent extends BaseComponent {
     */
 
     close(reason = CLOSE_REASONS.PARENT_CALL) {
-
         if (this.closePromise) {
             return this.closePromise;
         }

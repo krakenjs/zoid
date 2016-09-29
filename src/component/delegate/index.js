@@ -24,6 +24,8 @@ export class DelegateComponent extends BaseComponent {
         }
 
         this.childWindowName = options.childWindowName;
+
+        ParentComponent.prototype.registerActiveComponent.call(this);
     }
 
     getOverrides(context) {
@@ -41,5 +43,9 @@ export class DelegateComponent extends BaseComponent {
         }
 
         return overrides;
+    }
+
+    destroy() {
+        this.cleanup();
     }
 }
