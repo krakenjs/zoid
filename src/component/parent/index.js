@@ -505,7 +505,7 @@ export class ParentComponent extends BaseComponent {
             });
         }
 
-        postRobot.linkUrl(this.childWindowName, this.window, url);
+        postRobot.linkUrl(this.window, url);
         return RENDER_DRIVERS[context].loadUrl.call(this, url);
     }
 

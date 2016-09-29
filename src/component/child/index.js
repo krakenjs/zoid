@@ -54,6 +54,8 @@ export class ChildComponent extends BaseComponent {
         }).then(({ data }) => {
 
             this.context = data.context;
+
+            this.props = {};
             this.setProps(data.props);
 
             if (this.component.autoResize) {
