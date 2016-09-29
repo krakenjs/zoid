@@ -835,7 +835,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.util = exports.linkUrl = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.util = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(/*! ./client */ 6);
 
@@ -888,6 +888,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.openBridge;
+	  }
+	});
+	Object.defineProperty(exports, 'bridgeRequired', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.bridgeRequired;
 	  }
 	});
 	Object.defineProperty(exports, 'linkUrl', {
@@ -3506,7 +3512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    return (0, _bridge.sendBridgeMessage)(win, message, domain);
+	    return (0, _bridge.sendBridgeMessage)(win, JSON.stringify(message, 0, 2), domain);
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
@@ -3527,6 +3533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.sendBridgeMessage = sendBridgeMessage;
 	exports.linkUrl = linkUrl;
 	exports.openTunnelToOpener = openTunnelToOpener;
+	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
 
 	var _conf = __webpack_require__(/*! ../conf */ 7);
@@ -3796,12 +3803,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            sendMessage: function sendMessage(message) {
 
 	                if (!window || window.closed) {
-	                    throw new Error('Function orphaned in closed window');
+	                    return;
 	                }
 
 	                (0, _drivers.receiveMessage)({
-	                    data: JSON.stringify(message),
-	                    domain: winDetails.domain,
+	                    data: message,
+	                    origin: winDetails.domain,
 	                    source: winDetails.win
 	                });
 	            }
@@ -3853,12 +3860,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        sendMessage: function sendMessage(message) {
 
 	            if (!window || window.closed) {
-	                throw new Error('Function orphaned in closed window');
+	                return;
 	            }
 
 	            (0, _drivers.receiveMessage)({
-	                data: JSON.stringify(message),
-	                domain: this.domain,
+	                data: message,
+	                origin: this.domain,
 	                source: this.source
 	            });
 	        }
@@ -3903,6 +3910,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    iframe.src = url;
 
 	    return iframe;
+	}
+
+	function bridgeRequired(url, domain) {
+
+	    domain = domain || _lib.util.getDomainFromUrl(url);
+
+	    if (_lib.util.getDomain() === domain) {
+	        return false;
+	    }
+
+	    return true;
 	}
 
 	_global.global.bridges = _global.global.bridges || {};
@@ -5530,6 +5548,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	            _this.context = data.context;
+
+	            _this.props = {};
 	            _this.setProps(data.props);
 
 	            if (_this.component.autoResize) {
@@ -7205,7 +7225,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 
-	            _src2['default'].linkUrl(this.childWindowName, this.window, url);
+	            _src2['default'].linkUrl(this.window, url);
 	            return _drivers.RENDER_DRIVERS[context].loadUrl.call(this, url);
 	        }
 
