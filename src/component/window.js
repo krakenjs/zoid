@@ -1,6 +1,7 @@
 
+import postRobot from 'post-robot/src';
 import base32 from 'hi-base32';
-import { getFrame, memoize, uniqueID } from '../lib';
+import { memoize, uniqueID } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -121,9 +122,8 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
-
     if (parentWindow && componentMeta.parent) {
-        let parentFrame = getFrame(parentWindow, componentMeta.parent);
+        let parentFrame = postRobot.winutil.getFrameByName(parentWindow, componentMeta.parent);
 
         if (parentFrame) {
             return parentFrame;

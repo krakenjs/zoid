@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getFrame, getElement } from '../../lib';
+import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getElement } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
 import { getPosition, getParentWindow } from '../window';
 
@@ -89,7 +89,7 @@ export let RENDER_DRIVERS = {
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
-                        this.window = getFrame(getParentWindow(), this.childWindowName);
+                        this.window = postRobot.winutil.getFrameByName(getParentWindow(), this.childWindowName);
 
                         if (!this.window) {
                             throw new Error(`Unable to find parent component iframe window`);
@@ -253,7 +253,7 @@ export let RENDER_DRIVERS = {
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
-                        this.window = getFrame(getParentWindow(), this.childWindowName);
+                        this.window = postRobot.winutil.getFrameByName(getParentWindow(), this.childWindowName);
 
                         if (!this.window) {
                             throw new Error(`Unable to find parent component iframe window`);

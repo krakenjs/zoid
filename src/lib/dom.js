@@ -402,21 +402,6 @@ export function getParentWindow(win) {
     }
 }
 
-export function getFrame(win, name) {
-
-    try {
-        return win.frames[name];
-    } catch (err) {
-        // pass
-    }
-
-    try {
-        return win[name];
-    } catch (err) {
-        // pass
-    }
-}
-
 export function getCurrentDimensions(el) {
     return {
         width: el.offsetWidth,
