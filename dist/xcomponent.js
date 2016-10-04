@@ -7169,7 +7169,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this6.component.log('open_' + context, { element: element, windowName: _this6.childWindowName });
 
 	                _drivers.RENDER_DRIVERS[context].open.call(_this6, element);
-	                _src2['default'].linkUrl(_this6.window, _this6.getDomain());
 	            });
 	        }
 
@@ -7198,10 +7197,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _promise.SyncPromise.all([_this7.open(element, context), _this7.createParentTemplate(context)]);
 	            }).then(function () {
 
+	                return _this7.getDomain();
+	            }).then(function (domain) {
+
 	                _this7.watchForClose();
 	                _this7.createComponentTemplate();
 
-	                _this7.listen(_this7.window, _this7.getDomain());
+	                _src2['default'].linkUrl(_this7.window, domain);
+	                _this7.listen(_this7.window, domain);
 	            });
 	        }
 	    }, {
@@ -7267,6 +7270,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        },
 	                        userClose: function userClose() {
 	                            return _this9.userClose();
+	                        },
+	                        getDomain: function getDomain() {
+	                            return _this9.getDomain();
 	                        }
 	                    }
 	                }
@@ -8755,6 +8761,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.focus = options.overrides.focus;
 	        _this.userClose = options.overrides.userClose;
+	        _this.getDomain = options.overrides.getDomain;
 
 	        var renderToParentOverrides = _drivers.RENDER_DRIVERS[options.context].renderToParentOverrides;
 
