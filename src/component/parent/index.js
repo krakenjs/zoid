@@ -339,7 +339,7 @@ export class ParentComponent extends BaseComponent {
         return Promise.resolve().then(() => {
             this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
 
-            return RENDER_DRIVERS[context].open.call(this, element);
+            RENDER_DRIVERS[context].open.call(this, element);
         });
     }
 
@@ -369,10 +369,15 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
+            return this.getDomain();
+
+        }).then(domain => {
+
             this.watchForClose();
             this.createComponentTemplate();
 
-            this.listen(this.window, this.getDomain());
+            postRobot.linkUrl(this.window, domain);
+            this.listen(this.window, domain);
         });
     }
 
@@ -432,7 +437,8 @@ export class ParentComponent extends BaseComponent {
 
                 overrides: {
                     focus:     () => this.focus(),
-                    userClose: () => this.userClose()
+                    userClose: () => this.userClose(),
+                    getDomain: () => this.getDomain()
                 }
             }
 
@@ -554,7 +560,6 @@ export class ParentComponent extends BaseComponent {
             });
         }
 
-        postRobot.linkUrl(this.window, url);
         return RENDER_DRIVERS[context].loadUrl.call(this, url);
     }
 

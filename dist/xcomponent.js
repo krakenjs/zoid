@@ -7168,7 +7168,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return _promise.SyncPromise.resolve().then(function () {
 	                _this6.component.log('open_' + context, { element: element, windowName: _this6.childWindowName });
 
-	                return _drivers.RENDER_DRIVERS[context].open.call(_this6, element);
+	                _drivers.RENDER_DRIVERS[context].open.call(_this6, element);
+	                _src2['default'].linkUrl(_this6.window, _this6.getDomain());
 	            });
 	        }
 
@@ -7421,7 +7422,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 
-	            _src2['default'].linkUrl(this.window, url);
 	            return _drivers.RENDER_DRIVERS[context].loadUrl.call(this, url);
 	        }
 
