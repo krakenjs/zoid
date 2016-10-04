@@ -4,9 +4,9 @@ import postRobot from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
-import { buildChildWindowName, isXComponentWindow } from '../window';
-import { getParentWindow, onCloseWindow, addEventListener, getParentNode, createElement, uniqueID,
-         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl } from '../../lib';
+import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
+import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID,
+         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -88,6 +88,25 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    /*  Send to Parent
+        --------------
+
+        Send a post message to our parent window.
+    */
+
+    sendToParent(name, data) {
+        let parentWindow = getParentComponentWindow();
+
+        if (!parentWindow) {
+            throw new Error(`Can not find parent component window to message`);
+        }
+
+        this.component.log(`send_to_parent_${name}`);
+
+        return postRobot.send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
+    }
+
+
     /*  Set Props
         ---------
 
@@ -141,6 +160,36 @@ export class ParentComponent extends BaseComponent {
                 return extendUrl(url, { query: queryProps });
             });
         });
+    }
+
+
+    getDomain() {
+
+        if (this.component.domain) {
+            return this.component.domain;
+        }
+
+        if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
+            return this.component.domains[this.props.env];
+        }
+
+        if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
+            return getDomainFromUrl(this.component.envUrls[this.props.env]);
+        }
+
+        if (this.component.envUrls && this.component.defaultEnv && this.component.envUrls[this.component.defaultEnv]) {
+            return getDomainFromUrl(this.component.envUrls[this.component.defaultEnv]);
+        }
+
+        if (this.component.buildUrl) {
+            return getDomainFromUrl(this.component.buildUrl(this));
+        }
+
+        if (this.component.url) {
+            return getDomainFromUrl(this.component.url);
+        }
+
+        throw new Error(`Can not determine domain for component`);
     }
 
 
@@ -323,7 +372,7 @@ export class ParentComponent extends BaseComponent {
             this.watchForClose();
             this.createComponentTemplate();
 
-            this.listen(this.window);
+            this.listen(this.window, this.getDomain());
         });
     }
 
@@ -346,7 +395,7 @@ export class ParentComponent extends BaseComponent {
     validateRenderToParent(element, context) {
         context = this.getRenderContext(element, context);
 
-        let parentWindow = getParentWindow();
+        let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
             throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
@@ -364,7 +413,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`delegate_${context}_to_parent`, { element, context });
 
-        let delegate = postRobot.sendToParent(POST_MESSAGE.DELEGATE, {
+        let delegate = this.sendToParent(POST_MESSAGE.DELEGATE, {
 
             context,
 
@@ -583,7 +632,7 @@ export class ParentComponent extends BaseComponent {
 
     submitParentContainerForm(target) {
 
-        return postRobot.sendToParent(POST_MESSAGE.SUBMIT_CONTAINER_FORM, { target });
+        return this.sendToParent(POST_MESSAGE.SUBMIT_CONTAINER_FORM, { target });
     }
 
 

@@ -63,7 +63,7 @@ export function debounce(method, time = 100) {
     return function() {
         clearTimeout(timeout);
 
-        setTimeout(() => {
+        timeout = setTimeout(() => {
             return method.apply(this, arguments);
         }, time);
     };

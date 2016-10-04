@@ -111,10 +111,14 @@ export class BaseComponent {
         All post-messaging is done using post-robot.
     */
 
-    listen(win) {
+    listen(win, domain) {
 
         if (!win) {
             throw new Error(`[${this.component.tag}] window to listen to not set`);
+        }
+
+        if (!domain) {
+            throw new Error(`Must pass domain to listen to`);
         }
 
         if (!this.listeners) {
@@ -125,7 +129,7 @@ export class BaseComponent {
 
         for (let listenerName of Object.keys(listeners)) {
 
-            let listener = postRobot.on(listenerName, { window: win, errorHandler: err => this.error(err) }, ({ source, data }) => {
+            let listener = postRobot.on(listenerName, { window: win, domain, errorHandler: err => this.error(err) }, ({ source, data }) => {
                 this.component.log(`listener_${listenerName.replace(/^xcomponent_/, '')}`);
                 return listeners[listenerName].call(this, source, data);
             });

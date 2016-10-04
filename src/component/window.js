@@ -1,7 +1,7 @@
 
 import postRobot from 'post-robot/src';
 import base32 from 'hi-base32';
-import { memoize, uniqueID } from '../lib';
+import { memoize, uniqueID, getDomain } from '../lib';
 import { XCOMPONENT } from '../constants';
 
 
@@ -25,6 +25,7 @@ function normalize(str) {
 export function buildChildWindowName(name, version, options = {}) {
 
     options.id = uniqueID();
+    options.domain = getDomain(window);
 
     let encodedName = normalize(name);
     let encodedVersion = normalize(version);
@@ -79,6 +80,10 @@ export let getComponentMeta = memoize(() => {
 
     return componentMeta;
 });
+
+export function getParentDomain() {
+    return getComponentMeta().domain; // How does this work for renderToParent..?
+}
 
 
 export let isXComponentWindow = memoize(() => {

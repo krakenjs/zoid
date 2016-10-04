@@ -4,7 +4,7 @@ import { logger } from '../../lib';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
-import { getParentComponentWindow, getParentWindow, getComponentMeta } from '../window';
+import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
 import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
 import { normalizeChildProps } from './props';
@@ -113,8 +113,15 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParent(name, data) {
+        let parentWindow = getParentComponentWindow();
+
+        if (!parentWindow) {
+            throw new Error(`Can not find parent component window to message`);
+        }
+
         this.component.log(`send_to_parent_${name}`);
-        return postRobot.send(getParentComponentWindow(), name, data);
+
+        return postRobot.send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
     }
 
 
@@ -138,7 +145,7 @@ export class ChildComponent extends BaseComponent {
 
         // Get the direct parent window
 
-        if (!getParentWindow()) {
+        if (!getParentComponentWindow()) {
             throw new Error(`[${this.component.tag}] Can not find parent window`);
         }
 
@@ -174,7 +181,7 @@ export class ChildComponent extends BaseComponent {
 
     watchForClose() {
 
-        onCloseWindow(getParentWindow, () => {
+        onCloseWindow(getParentComponentWindow, () => {
 
             this.component.log(`parent_window_closed`);
 

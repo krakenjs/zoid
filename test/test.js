@@ -2,6 +2,8 @@
 import xcomponent from 'src/index';
 import './tests';
 
+xcomponent.postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+
 beforeEach(() => {
     window.onerror = () => {};
 });
