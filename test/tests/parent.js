@@ -11,7 +11,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     onEnter: function() {
-                        return window.xchild.props.foo();
+                        return window.xprops.foo();
                     }
                 }).renderLightboxToParent();
             `
@@ -26,7 +26,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     onEnter: function() {
-                        return window.xchild.props.foo();
+                        return window.xprops.foo();
                     }
                 }).renderPopupToParent();
             `
@@ -41,7 +41,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     onEnter: function() {
-                        return window.xchild.props.foo();
+                        return window.xprops.foo();
                     }
                 }).renderIframeToParent('body');
             `
@@ -56,10 +56,10 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     foo: function() {
-                        window.xchild.props.foo();
+                        window.xprops.foo();
                     },
 
-                    run: 'window.xchild.props.foo();'
+                    run: 'window.xprops.foo();'
 
                 }).renderLightboxToParent();
             `
@@ -74,10 +74,10 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     foo: function() {
-                        window.xchild.props.foo();
+                        window.xprops.foo();
                     },
 
-                    run: 'window.xchild.props.foo();'
+                    run: 'window.xprops.foo();'
 
                 }).renderIframeToParent('body');
             `
@@ -93,10 +93,10 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').init({
                     foo: function() {
-                        window.xchild.props.foo();
+                        window.xprops.foo();
                     },
 
-                    run: 'window.xchild.props.foo();'
+                    run: 'window.xprops.foo();'
 
                 }).renderPopupToParent();
             `
@@ -141,10 +141,10 @@ describe('xcomponent render to parent', () => {
                         var winClose = this.window.close;
                         this.window.close = function() {
                             winClose.apply(this, arguments);
-                            window.xchild.props.foo();
+                            window.xprops.foo();
                         };
 
-                        return window.xchild.props.childEntered();
+                        return window.xprops.childEntered();
                     }
 
                 }).renderLightboxToParent();
@@ -169,10 +169,10 @@ describe('xcomponent render to parent', () => {
                         var winClose = this.window.close;
                         this.window.close = function() {
                             winClose.apply(this, arguments);
-                            window.xchild.props.foo();
+                            window.xprops.foo();
                         };
 
-                        return window.xchild.props.childEntered();
+                        return window.xprops.childEntered();
                     }
 
                 }).renderPopupToParent();
@@ -196,10 +196,10 @@ describe('xcomponent render to parent', () => {
                     onEnter: function() {
 
                         this.window.focus = function() {
-                            window.xchild.props.foo();
+                            window.xprops.foo();
                         };
 
-                        return window.xchild.props.childEntered();
+                        return window.xprops.childEntered();
                     }
 
                 }).renderPopupToParent();

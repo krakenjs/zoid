@@ -1,6 +1,6 @@
 
 import './component';
 
-if (window.xchild.props.run) {
-    eval(`(function() { ${window.xchild.props.run} }).call(this);`); // eslint-disable-line
+if (window.xprops.run) {
+    eval(`(function() { ${window.xprops.run} }).call(this);`); // eslint-disable-line
 }

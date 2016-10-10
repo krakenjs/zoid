@@ -127,6 +127,7 @@ export class Component extends BaseComponent {
 
             if (componentMeta.tag === this.tag) {
                 window.xchild = new ChildComponent(this);
+                window.xprops = window.xchild.props;
             }
         }
     }

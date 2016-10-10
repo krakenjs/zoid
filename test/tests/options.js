@@ -16,7 +16,7 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         }).renderLightbox();
     });
@@ -32,7 +32,7 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         }).renderLightbox();
     });
@@ -55,9 +55,9 @@ describe('xcomponent options', () => {
 
             run: `
 
-                return window.xchild.props.memoizedFunction().then(function() {
-                    return window.xchild.props.memoizedFunction().then(function(result) {
-                        return window.xchild.props.complete(result);
+                return window.xprops.memoizedFunction().then(function() {
+                    return window.xprops.memoizedFunction().then(function(result) {
+                        return window.xprops.complete(result);
                     });
                 });
             `
@@ -82,9 +82,9 @@ describe('xcomponent options', () => {
 
             run: `
 
-                return window.xchild.props.onceFunction().then(function() {
-                    return window.xchild.props.onceFunction().then(function(result) {
-                        return window.xchild.props.complete(result);
+                return window.xprops.onceFunction().then(function() {
+                    return window.xprops.onceFunction().then(function(result) {
+                        return window.xprops.complete(result);
                     });
                 });
             `
@@ -107,8 +107,8 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
-                    return window.xchild.props.complete(result);
+                return window.xprops.denodeifyFunction('foo').then(function(result) {
+                    return window.xprops.complete(result);
                 });
             `
         }).renderLightbox();
@@ -128,8 +128,8 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
-                    return window.xchild.props.complete(result);
+                return window.xprops.denodeifyFunction('foo').then(function(result) {
+                    return window.xprops.complete(result);
                 });
             `
 
@@ -152,8 +152,8 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                return window.xchild.props.denodeifyFunction('foo').catch(function() {
-                    return window.xchild.props.complete('foobar');
+                return window.xprops.denodeifyFunction('foo').catch(function() {
+                    return window.xprops.complete('foobar');
                 });
             `
 
@@ -180,8 +180,8 @@ describe('xcomponent options', () => {
             },
 
             run: `
-                return window.xchild.props.denodeifyFunction('foo').then(function(result) {
-                    return window.xchild.props.complete(result);
+                return window.xprops.denodeifyFunction('foo').then(function(result) {
+                    return window.xprops.complete(result);
                 });
             `
 

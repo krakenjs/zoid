@@ -102,7 +102,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo('bar');
+                window.xprops.foo('bar');
             `
         }).renderLightbox();
     });
@@ -124,7 +124,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo('bar');
+                window.xprops.foo('bar');
             `
         }).renderIframe(document.body);
     });
@@ -146,7 +146,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo('bar');
+                window.xprops.foo('bar');
             `
         }).renderPopup();
     });
@@ -165,10 +165,10 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo();
+                window.xprops.foo();
 
                 window.xchild.onProps(function() {
-                    window.xchild.props.foo('bar');
+                    window.xprops.foo('bar');
                 });
             `
         }).renderLightbox();
@@ -261,7 +261,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.stringProp);
+                window.xprops.foo(window.xprops.stringProp);
             `
         }).renderLightbox();
     });
@@ -278,7 +278,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.numberProp);
+                window.xprops.foo(window.xprops.numberProp);
             `
         }).renderLightbox();
     });
@@ -295,7 +295,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.numberProp);
+                window.xprops.foo(window.xprops.numberProp);
             `
         }).renderLightbox();
     });
@@ -312,7 +312,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.booleanProp);
+                window.xprops.foo(window.xprops.booleanProp);
             `
         }).renderLightbox();
     });
@@ -329,7 +329,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.booleanProp);
+                window.xprops.foo(window.xprops.booleanProp);
             `
         }).renderLightbox();
     });
@@ -346,7 +346,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.booleanProp);
+                window.xprops.foo(window.xprops.booleanProp);
             `
         }).renderLightbox();
     });
@@ -366,7 +366,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.objectProp);
+                window.xprops.foo(window.xprops.objectProp);
             `
         }).renderLightbox();
     });
@@ -383,7 +383,7 @@ describe('xcomponent happy cases', () => {
             },
 
             run: `
-                window.xchild.props.foo(window.xchild.props.functionProp);
+                window.xprops.foo(window.xprops.functionProp);
             `
         }).renderLightbox();
     });

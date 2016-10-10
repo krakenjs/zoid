@@ -55,7 +55,7 @@ export class ChildComponent extends BaseComponent {
 
             this.context = data.context;
 
-            this.props = {};
+            window.xprops = this.props = {};
             this.setProps(data.props);
 
             if (this.component.autoResize) {
@@ -112,7 +112,7 @@ export class ChildComponent extends BaseComponent {
 
 
     setProps(props = {}) {
-        this.props = this.props || {};
+        window.xprops = this.props = this.props || {};
         extend(this.props, normalizeChildProps(this.component, props));
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);

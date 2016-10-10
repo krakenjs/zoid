@@ -25,7 +25,7 @@ describe('xcomponent hijack', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         });
 
@@ -57,7 +57,7 @@ describe('xcomponent hijack', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         });
 
@@ -85,7 +85,7 @@ describe('xcomponent hijack', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         });
 
@@ -113,7 +113,7 @@ describe('xcomponent hijack', () => {
             },
 
             run: `
-                window.xchild.props.sendUrl(window.location.pathname + window.location.search);
+                window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
         });
 
@@ -144,8 +144,8 @@ describe('xcomponent hijack', () => {
             run: `
 
                 var component = xcomponent.getByTag('test-component2').init({
-                    sendUrl: window.xchild.props.sendUrl,
-                    run: 'window.xchild.props.sendUrl(window.location.pathname + window.location.search);'
+                    sendUrl: window.xprops.sendUrl,
+                    run: 'window.xprops.sendUrl(window.location.pathname + window.location.search);'
                 });
 
                 component.hijackSubmitParentForm();

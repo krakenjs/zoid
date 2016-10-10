@@ -47,7 +47,7 @@ describe('xcomponent drivers', () => {
                         },
 
                         run: `
-                            window.xchild.props.foo('bar');
+                            window.xprops.foo('bar');
                         `
                     })
                 );
@@ -93,7 +93,7 @@ describe('xcomponent drivers', () => {
         };
 
         $scope.run = `
-            window.xchild.props.foo('bar');
+            window.xprops.foo('bar');
         `;
 
         $compile(`
@@ -132,7 +132,7 @@ describe('xcomponent drivers', () => {
         };
 
         window.run = `
-            window.xchild.props.foo('bar');
+            window.xprops.foo('bar');
         `;
 
         container.innerHTML = `
