@@ -24,6 +24,11 @@ export const PROP_TYPES = {
     NUMBER: `number`
 };
 
+export const INITIAL_PROPS = {
+    RAW: 'raw',
+    UID: 'uid'
+};
+
 export const PROP_TYPES_LIST = values(PROP_TYPES);
 
 export const CONTEXT_TYPES = {

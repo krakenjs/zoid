@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -70,7 +70,10 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    buildChildWindowName() {
+    buildChildWindowName(options = {}) {
+
+        let tag = this.component.tag;
+        let parent = window.name;
 
         let props = replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
             if (value instanceof Function) {
@@ -80,11 +83,29 @@ export class ParentComponent extends BaseComponent {
             }
         });
 
-        return buildChildWindowName(this.component.name, this.component.version, {
-            tag: this.component.tag,
-            parent: window.name,
-            props
-        });
+        if (options.secureProps) {
+
+            window.__xcomponent__ = window.__xcomponent__ || {};
+            window.__xcomponent__.props = window.__xcomponent__.props || {};
+
+            let uid = uniqueID();
+
+            window.__xcomponent__.props[uid] = props;
+
+            props = {
+                type: INITIAL_PROPS.UID,
+                value: uid
+            };
+
+        } else {
+
+            props = {
+                type: INITIAL_PROPS.RAW,
+                value: props
+            };
+        }
+
+        return buildChildWindowName(this.component.name, this.component.version, { tag, parent, props });
     }
 
 
@@ -417,6 +438,8 @@ export class ParentComponent extends BaseComponent {
     delegateToParent(element, context) {
 
         this.component.log(`delegate_${context}_to_parent`, { element, context });
+
+        this.childWindowName = this.buildChildWindowName({ secureProps: true });
 
         let delegate = this.sendToParent(POST_MESSAGE.DELEGATE, {
 

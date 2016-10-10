@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
 import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
 
@@ -83,7 +83,21 @@ export class ChildComponent extends BaseComponent {
         let self = this;
 
         if (componentMeta) {
-            return replaceObject(componentMeta.props, (value, key, fullKey) => {
+            let props = componentMeta.props;
+
+            if (props.type === INITIAL_PROPS.RAW) {
+                props = props.value;
+            } else if (props.type === INITIAL_PROPS.UID) {
+                props = getParentComponentWindow().__xcomponent__.props[props.value];
+            } else {
+                throw new Error(`Unrecognized props type: ${props.type}`);
+            }
+
+            if (!props) {
+                throw new Error(`Initial props not found`);
+            }
+
+            return replaceObject(props, (value, key, fullKey) => {
                 if (value && value.__type__ === '__function__') {
                     return function() {
                         return self.onInit.then(() => {
