@@ -12,6 +12,10 @@ export function normalizeChildProps(component, props) {
         let prop = component.props[key];
         let value = props[key];
 
+        if (!prop) {
+            continue;
+        }
+
         let queryParam = (typeof prop.queryParam === 'string') ? prop.queryParam : key;
 
         if (value === PROP_DEFER_TO_URL) {
