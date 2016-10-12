@@ -370,6 +370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (componentMeta.tag === _this.tag) {
 	                window.xchild = new _child.ChildComponent(_this);
+	                window.xprops = window.xchild.props;
 	            }
 	        }
 	        return _this;
@@ -1316,7 +1317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function parseMessage(message) {
 
 	    try {
-	        message = JSON.parse(message);
+	        message = (0, _lib.jsonParse)(message);
 	    } catch (err) {
 	        return;
 	    }
@@ -2295,7 +2296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                var json = void 0;
 	                try {
-	                    json = JSON.stringify(item, 0, 2);
+	                    json = (0, _windows.jsonStringify)(item, 0, 2);
 	                } catch (e) {
 	                    json = '[object]';
 	                }
@@ -2405,6 +2406,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isFullpage = isFullpage;
 	exports.getWindowType = getWindowType;
 	exports.isSameTopWindow = isSameTopWindow;
+	exports.jsonStringify = jsonStringify;
+	exports.jsonParse = jsonParse;
 
 	var _util = __webpack_require__(/*! ./util */ 16);
 
@@ -2437,14 +2440,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    var match = false;
+	    var match = void 0;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
 	        }
 	    } catch (err) {
-	        // pass
+	        match = false;
 	    }
 
 	    _global.global.domainMatches.push({
@@ -2468,24 +2471,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    try {
-	        var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
+	    if (isSameDomain(item) !== false) {
+	        try {
+	            var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
 
 
-	        for (var _i2 = 0; _i2 < _arr.length; _i2++) {
-	            var key = _arr[_i2];
-	            if (typeof item[key] !== 'function') {
+	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
+	                var key = _arr[_i2];
+	                if (typeof item[key] !== 'function') {
+	                    return false;
+	                }
+	            }
+
+	            if (!item.document || !item.location) {
 	                return false;
 	            }
-	        }
 
-	        if (!item.document || !item.location) {
-	            return false;
+	            return true;
+	        } catch (err) {
+	            // pass
 	        }
-
-	        return true;
-	    } catch (err) {
-	        // pass
 	    }
 
 	    try {
@@ -2507,7 +2512,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    try {
 
-	        if (!win || win.closed || isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
+	        if (!win || win.closed) {
+	            return true;
+	        }
+
+	        if (isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
 	            return true;
 	        }
 
@@ -2620,31 +2629,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            result.push(frame);
 	        }
-	    } else {
 
-	        var _i3 = 0;
+	        return result;
+	    }
 
-	        while (true) {
-	            var _frame = void 0;
+	    for (var _i3 = 0; _i3 < 100; _i3++) {
+	        var _frame = void 0;
 
-	            try {
-	                _frame = frames[_i3];
-	            } catch (err) {
-	                return result;
-	            }
-
-	            if (!_frame) {
-	                return result;
-	            }
-
-	            result.push(_frame);
-
-	            _i3 += 1;
-
-	            if (_i3 > 20) {
-	                return result;
-	            }
+	        try {
+	            _frame = frames[_i3];
+	        } catch (err) {
+	            return result;
 	        }
+
+	        if (!_frame) {
+	            return result;
+	        }
+
+	        result.push(_frame);
 	    }
 
 	    return result;
@@ -2817,7 +2819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var childFrame = _ref7;
 
 	        try {
-	            if (childFrame.name === name && isWindow(childFrame)) {
+	            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
 	                return childFrame;
 	            }
 	        } catch (err) {
@@ -3028,6 +3030,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1)) {
 	        return false;
 	    }
+	}
+
+	function jsonStringify() {
+
+	    var objectToJSON = void 0;
+	    var arrayToJSON = void 0;
+
+	    try {
+	        if (JSON.stringify({}) !== '{}') {
+	            objectToJSON = Object.prototype.toJSON;
+	            delete Object.prototype.toJSON;
+	        }
+
+	        if (JSON.stringify({}) !== '{}') {
+	            throw new Error('Can not correctly serialize JSON objects');
+	        }
+
+	        if (JSON.stringify([]) !== '[]') {
+	            arrayToJSON = Array.prototype.toJSON;
+	            delete Array.prototype.toJSON;
+	        }
+
+	        if (JSON.stringify([]) !== '[]') {
+	            throw new Error('Can not correctly serialize JSON objects');
+	        }
+	    } catch (err) {
+	        throw new Error('Can not repair JSON.stringify: ' + err.message);
+	    }
+
+	    var result = JSON.stringify.apply(this, arguments);
+
+	    try {
+	        if (objectToJSON) {
+	            Object.prototype.toJSON = objectToJSON; // eslint-disable-line
+	        }
+
+	        if (arrayToJSON) {
+	            Array.prototype.toJSON = arrayToJSON; // eslint-disable-line
+	        }
+	    } catch (err) {
+	        throw new Error('Can not repair JSON.stringify: ' + err.message);
+	    }
+
+	    return result;
+	}
+
+	function jsonParse() {
+	    return JSON.parse.apply(this, arguments);
 	}
 
 /***/ },
@@ -3548,7 +3598,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
 	                origin: _lib.util.getDomain(window),
 	                source: window,
-	                data: JSON.stringify(message)
+	                data: (0, _lib.jsonStringify)(message, 0, 2)
 	            });
 	        }
 
@@ -3564,7 +3614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var messages = [];
 
-	        var serializedMessage = JSON.stringify(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
+	        var serializedMessage = (0, _lib.jsonStringify)(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
 
 	        return _lib.promise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
@@ -3579,7 +3629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                messages.push(strategyName + ': success');
 	                return true;
 	            }, function (err) {
-	                messages.push(strategyName + ': ' + err.message);
+	                messages.push(strategyName + ': ' + (err.stack || err.toString()) + '\n');
 	                return false;
 	            });
 	        }).then(function (results) {
@@ -3622,7 +3672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function (win, message, domain) {
+	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function (win, serializedMessage, domain) {
 
 	    (0, _compat.emulateIERestrictions)(window, win);
 
@@ -3634,8 +3684,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        domain = '*';
 	    }
 
-	    return win.postMessage(message, domain);
-	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.BRIDGE, function (win, message, domain) {
+	    return win.postMessage(serializedMessage, domain);
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.BRIDGE, function (win, serializedMessage, domain) {
 
 	    if ((0, _lib.isSameDomain)(win)) {
 	        throw new Error('Post message through bridge disabled between same domain windows');
@@ -3645,7 +3695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    return (0, _bridge.sendBridgeMessage)(win, message, domain);
+	    return (0, _bridge.sendBridgeMessage)(win, serializedMessage, domain);
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
@@ -3949,19 +3999,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	_global.global.openTunnel = function openTunnel(remoteWindow, _ref6) {
+	_global.global.openTunnelToParent = function openTunnelToParent(_ref6) {
 	    var name = _ref6.name;
+	    var source = _ref6.source;
+	    var canary = _ref6.canary;
 	    var _sendMessage = _ref6.sendMessage;
 
 
+	    var remoteWindow = (0, _lib.getParent)(window);
+
 	    if (!remoteWindow) {
-	        throw new Error('No window found to open tunnel to');
+	        throw new Error('No parent window found to open tunnel to');
 	    }
 
 	    return (0, _interface.send)(remoteWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
 	        name: name,
 	        sendMessage: function sendMessage() {
-	            return _sendMessage.apply(this, arguments);
+
+	            if ((0, _lib.isWindowClosed)(source)) {
+	                return;
+	            }
+
+	            try {
+	                canary();
+	            } catch (err) {
+	                return;
+	            }
+
+	            _sendMessage.apply(this, arguments);
 	        }
 	    }, { domain: '*' });
 	};
@@ -3986,10 +4051,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
 	    }
 
-	    bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnel(opener, {
+	    return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
 	        name: window.name,
 
+	        source: window,
+
+	        canary: function canary() {
+	            // pass
+	        },
 	        sendMessage: function sendMessage(message) {
 
 	            if (!window || window.closed) {
@@ -5679,7 +5749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            _this.context = data.context;
 
-	            _this.props = {};
+	            window.xprops = _this.props = {};
 	            _this.setProps(data.props);
 
 	            if (_this.component.autoResize) {
@@ -5708,7 +5778,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var self = this;
 
 	            if (componentMeta) {
-	                return (0, _lib.replaceObject)(componentMeta.props, function (value, key, fullKey) {
+	                var props = componentMeta.props;
+
+	                if (props.type === _constants.INITIAL_PROPS.RAW) {
+	                    props = props.value;
+	                } else if (props.type === _constants.INITIAL_PROPS.UID) {
+	                    props = (0, _window.getParentComponentWindow)().__xcomponent__.props[props.value];
+	                } else {
+	                    throw new Error('Unrecognized props type: ' + props.type);
+	                }
+
+	                if (!props) {
+	                    throw new Error('Initial props not found');
+	                }
+
+	                return (0, _lib.replaceObject)(props, function (value, key, fullKey) {
 	                    if (value && value.__type__ === '__function__') {
 	                        return function () {
 	                            var _this2 = this,
@@ -5728,7 +5812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setProps() {
 	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-	            this.props = this.props || {};
+	            window.xprops = this.props = this.props || {};
 	            (0, _lib.extend)(this.props, (0, _props.normalizeChildProps)(this.component, props));
 	            for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	                var _ref2;
@@ -6593,7 +6677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.DELEGATE = exports.PROP_DEFER_TO_URL = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
+	exports.DELEGATE = exports.PROP_DEFER_TO_URL = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.INITIAL_PROPS = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
 	var _lib = __webpack_require__(/*! ./lib */ 31);
 
@@ -6618,6 +6702,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    FUNCTION: 'function',
 	    BOOLEAN: 'boolean',
 	    NUMBER: 'number'
+	};
+
+	var INITIAL_PROPS = exports.INITIAL_PROPS = {
+	    RAW: 'raw',
+	    UID: 'uid'
 	};
 
 	var PROP_TYPES_LIST = exports.PROP_TYPES_LIST = (0, _lib.values)(PROP_TYPES);
@@ -6703,6 +6792,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var prop = component.props[key];
 	        var value = props[key];
 
+	        if (!prop) {
+	            return 'continue';
+	        }
+
 	        var queryParam = typeof prop.queryParam === 'string' ? prop.queryParam : key;
 
 	        if (value === _constants.PROP_DEFER_TO_URL) {
@@ -6733,12 +6826,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        result[key] = value;
 	    };
 
-	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    _loop2: for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        var _ret = _loop();
 
-	        if (_ret === 'break') break;
+	        switch (_ret) {
+	            case 'break':
+	                break _loop2;
+
+	            case 'continue':
+	                continue;}
 	    }
 
 	    return result;
@@ -6863,6 +6961,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'buildChildWindowName',
 	        value: function buildChildWindowName() {
+	            var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+
+	            var tag = this.component.tag;
+	            var parent = window.name;
 
 	            var props = (0, _lib.replaceObject)(this.getPropsForChild(), function (value, key, fullKey) {
 	                if (value instanceof Function) {
@@ -6872,11 +6975,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 
-	            return (0, _window.buildChildWindowName)(this.component.name, this.component.version, {
-	                tag: this.component.tag,
-	                parent: window.name,
-	                props: props
-	            });
+	            if (options.secureProps) {
+
+	                window.__xcomponent__ = window.__xcomponent__ || {};
+	                window.__xcomponent__.props = window.__xcomponent__.props || {};
+
+	                var uid = (0, _lib.uniqueID)();
+
+	                window.__xcomponent__.props[uid] = props;
+
+	                props = {
+	                    type: _constants.INITIAL_PROPS.UID,
+	                    value: uid
+	                };
+	            } else {
+
+	                props = {
+	                    type: _constants.INITIAL_PROPS.RAW,
+	                    value: props
+	                };
+	            }
+
+	            return (0, _window.buildChildWindowName)(this.component.name, this.component.version, { tag: tag, parent: parent, props: props });
 	        }
 
 	        /*  Send to Parent
@@ -7246,6 +7366,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _this9 = this;
 
 	            this.component.log('delegate_' + context + '_to_parent', { element: element, context: context });
+
+	            this.childWindowName = this.buildChildWindowName({ secureProps: true });
 
 	            var delegate = this.sendToParent(_constants.POST_MESSAGE.DELEGATE, {
 
