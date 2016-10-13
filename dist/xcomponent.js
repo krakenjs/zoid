@@ -6824,6 +6824,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        result[key] = value;
+
+	        if (prop.alias && !result[prop.alias]) {
+	            result[prop.alias] = value;
+	        }
 	    };
 
 	    _loop2: for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
@@ -8588,7 +8592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
-	            if (prop.queryParam === false) {
+	            if (!prop.queryParam) {
 	                return;
 	            }
 
@@ -8986,7 +8990,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'string',
 	        def: function def() {
 	            return (0, _lib.uniqueID)();
-	        }
+	        },
+
+	        queryParam: true
 	    },
 
 	    // A custom url to use to render the component
@@ -8994,7 +9000,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    url: {
 	        type: 'string',
 	        required: false,
-	        queryParam: false,
 	        promise: true,
 	        sendToChild: false
 	    },
@@ -9004,6 +9009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    env: {
 	        type: 'string',
 	        required: false,
+	        queryParam: true,
 	        def: function def() {
 	            return this.defaultEnv;
 	        }
@@ -9011,7 +9017,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    version: {
 	        type: 'string',
-	        required: false
+	        required: false,
+	        queryParam: true
 	    },
 
 	    dimensions: {
@@ -9023,8 +9030,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    timeout: {
 	        type: 'number',
-	        required: false,
-	        queryParam: false
+	        required: false
 	    },
 
 	    // When we get an INIT message from the child
