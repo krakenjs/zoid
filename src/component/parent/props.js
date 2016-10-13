@@ -37,7 +37,7 @@ export function propsToQuery(propsDef, props) {
                 return;
             }
 
-            if (prop.queryParam === false) {
+            if (!prop.queryParam) {
                 return;
             }
 

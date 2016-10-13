@@ -40,6 +40,10 @@ export function normalizeChildProps(component, props) {
         }
 
         result[key] = value;
+
+        if (prop.alias && !result[prop.alias]) {
+            result[prop.alias] = value;
+        }
     }
 
     return result;

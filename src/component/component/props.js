@@ -14,7 +14,8 @@ export const internalProps = {
         type: 'string',
         def() {
             return uniqueID();
-        }
+        },
+        queryParam: true
     },
 
     // A custom url to use to render the component
@@ -22,7 +23,6 @@ export const internalProps = {
     url: {
         type: 'string',
         required: false,
-        queryParam: false,
         promise: true,
         sendToChild: false
     },
@@ -32,6 +32,7 @@ export const internalProps = {
     env: {
         type: 'string',
         required: false,
+        queryParam: true,
         def() {
             return this.defaultEnv;
         }
@@ -39,7 +40,8 @@ export const internalProps = {
 
     version: {
         type: 'string',
-        required: false
+        required: false,
+        queryParam: true
     },
 
     dimensions: {
@@ -51,8 +53,7 @@ export const internalProps = {
 
     timeout: {
         type: 'number',
-        required: false,
-        queryParam: false
+        required: false
     },
 
     // When we get an INIT message from the child
