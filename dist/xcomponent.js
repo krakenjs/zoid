@@ -1170,7 +1170,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    MOCK_MODE: false,
 
-	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, true), _ALLOWED_POST_MESSAGE)
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL, true), _ALLOWED_POST_MESSAGE)
 	};
 
 	if (window.location.href.indexOf(_constants.CONSTANTS.FILE_PROTOCOL) === 0) {
@@ -1224,7 +1224,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    SEND_STRATEGIES: {
 	        POST_MESSAGE: 'postrobot_post_message',
-	        BRIDGE: 'postrobot_bridge'
+	        BRIDGE: 'postrobot_bridge',
+	        GLOBAL: 'postrobot_global'
 	    },
 
 	    MOCK_PROTOCOL: 'mock://',
@@ -3387,10 +3388,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-	        if ((0, _lib.isSameDomain)(sourceWindow) && (0, _lib.isSameDomain)(targetWindow)) {
-	            return;
-	        }
-
 	        if ((0, _lib.isSameTopWindow)(sourceWindow, targetWindow) === false) {
 	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
 	        }
@@ -3696,6 +3693,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return (0, _bridge.sendBridgeMessage)(win, serializedMessage, domain);
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL, function (win, serializedMessage, domain) {
+
+	    if (!(0, _lib.isSameDomain)(win)) {
+	        throw new Error('Post message through global disabled between different domain windows');
+	    }
+
+	    if ((0, _lib.isSameTopWindow)(window, win) !== false) {
+	        throw new Error('Can only use global to communicate between two different windows, not between frames');
+	    }
+
+	    var foreignGlobal = win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+
+	    if (!foreignGlobal) {
+	        throw new Error('Can not find postRobot global on foreign window');
+	    }
+
+	    return foreignGlobal.receiveMessage({
+	        source: window,
+	        origin: domain,
+	        data: serializedMessage
+	    });
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
@@ -3740,17 +3758,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return id;
 	}
 
-	function documentReady() {
-	    return new _lib.promise.Promise(function (resolve) {
-	        if (window.document && window.document.body) {
-	            return resolve(window.document);
-	        }
+	var documentBodyReady = new _lib.promise.Promise(function (resolve) {
 
-	        window.document.addEventListener('DOMContentLoaded', function (event) {
-	            return resolve(window.document);
-	        });
-	    });
-	}
+	    if (window.document && window.document.body) {
+	        return resolve(window.document.body);
+	    }
+
+	    var interval = setInterval(function () {
+	        if (window.document && window.document.body) {
+	            clearInterval(interval);
+	            return resolve(window.document.body);
+	        }
+	    }, 10);
+	});
 
 	function getRemoteBridgeForWindow(win) {
 	    try {
@@ -4039,6 +4059,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
+	    if ((0, _lib.isSameDomain)(opener)) {
+	        return;
+	    }
+
 	    registerRemoteWindow(opener);
 
 	    var bridge = getRemoteBridgeForWindow(opener);
@@ -4089,6 +4113,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw err;
 	    });
 	}
+
+	_global.global.receiveMessage = function (event) {
+	    return (0, _drivers.receiveMessage)(event);
+	};
 
 	function openBridgeFrame(name, url) {
 
@@ -4151,23 +4179,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var iframe = openBridgeFrame(name, url);
 
-	        return documentReady().then(function (document) {
-	            document.body.appendChild(iframe);
-
-	            var bridge = iframe.contentWindow;
-
-	            listenForRegister(bridge, domain);
+	        return documentBodyReady.then(function (body) {
 
 	            return new _lib.promise.Promise(function (resolve, reject) {
 
-	                iframe.onload = resolve;
-	                iframe.onerror = reject;
+	                setTimeout(resolve, 1);
 	            }).then(function () {
 
-	                return (0, _lib.onWindowReady)(bridge, _conf.CONFIG.BRIDGE_TIMEOUT, 'Bridge ' + url);
-	            }).then(function () {
+	                body.appendChild(iframe);
 
-	                return bridge;
+	                var bridge = iframe.contentWindow;
+
+	                listenForRegister(bridge, domain);
+
+	                return new _lib.promise.Promise(function (resolve, reject) {
+
+	                    iframe.onload = resolve;
+	                    iframe.onerror = reject;
+	                }).then(function () {
+
+	                    return (0, _lib.onWindowReady)(bridge, _conf.CONFIG.BRIDGE_TIMEOUT, 'Bridge ' + url);
+	                }).then(function () {
+
+	                    return bridge;
+	                });
 	            });
 	        });
 	    });
@@ -4549,7 +4584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.parseQuery = undefined;
+	exports.parseQuery = exports.documentReady = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -4558,6 +4593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	exports.getElement = getElement;
+	exports.elementReady = elementReady;
 	exports.popup = popup;
 	exports.iframe = iframe;
 	exports.isWindowClosed = isWindowClosed;
@@ -4613,6 +4649,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return document.querySelector(id);
 	        }
 	    }
+	}
+
+	var documentReady = exports.documentReady = new _promise.SyncPromise(function (resolve) {
+
+	    if (window.document.readyState === 'complete') {
+	        return resolve(window.document);
+	    }
+
+	    var interval = setInterval(function () {
+	        if (window.document.readyState === 'complete') {
+	            clearInterval(interval);
+	            return resolve(window.document);
+	        }
+	    }, 10);
+	});
+
+	function elementReady(id) {
+	    return new _promise.SyncPromise(function (resolve, reject) {
+
+	        var el = getElement(id);
+
+	        if (el) {
+	            return resolve(el);
+	        }
+
+	        if (window.document.readyState === 'complete') {
+	            return reject(new Error('Document is ready and element ' + id + ' does not exist'));
+	        }
+
+	        var interval = setInterval(function () {
+
+	            el = getElement(id);
+
+	            if (el) {
+	                clearInterval(interval);
+	                return resolve(el);
+	            }
+
+	            if (window.document.readyState === 'complete') {
+	                clearInterval(interval);
+	                return reject(new Error('Document is ready and element ' + id + ' does not exist'));
+	            }
+	        }, 10);
+	    });
 	}
 
 	/*  Popup
@@ -7311,6 +7391,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                context = _this7.getRenderContext(element, context);
 
 	                _this7.setForCleanup('context', context);
+
+	                if (element) {
+	                    return (0, _lib.elementReady)(element);
+	                }
+	            }).then(function () {
 
 	                if (_drivers.RENDER_DRIVERS[context].renderedIntoParentTemplate) {
 	                    return _this7.createParentTemplate(context).then(function () {
