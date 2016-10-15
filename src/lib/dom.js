@@ -32,6 +32,51 @@ export function getElement(id) {
 }
 
 
+export let documentReady = new Promise(resolve => {
+
+    if (window.document.readyState === 'complete') {
+        return resolve(window.document);
+    }
+
+    let interval = setInterval(() => {
+        if (window.document.readyState === 'complete') {
+            clearInterval(interval);
+            return resolve(window.document);
+        }
+    }, 10);
+});
+
+export function elementReady(id) {
+    return new Promise((resolve, reject) => {
+
+        let el = getElement(id);
+
+        if (el) {
+            return resolve(el);
+        }
+
+        if (window.document.readyState === 'complete') {
+            return reject(new Error(`Document is ready and element ${id} does not exist`));
+        }
+
+        let interval = setInterval(() => {
+
+            el = getElement(id);
+
+            if (el) {
+                clearInterval(interval);
+                return resolve(el);
+            }
+
+            if (window.document.readyState === 'complete') {
+                clearInterval(interval);
+                return reject(new Error(`Document is ready and element ${id} does not exist`));
+            }
+        }, 10);
+    });
+}
+
+
 /*  Popup
     -----
 
