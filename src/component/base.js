@@ -3,6 +3,67 @@ import postRobot from 'post-robot/src';
 import { once, copyProp } from '../lib';
 
 
+function cleanup(obj) {
+
+    let tasks = [];
+
+    return {
+
+        set(name, item) {
+            obj[name] = item;
+            this.register(() => {
+                delete obj[name];
+            });
+            return item;
+        },
+
+        register(name, method) {
+
+            if (!method) {
+                method = name;
+                name = undefined;
+            }
+
+            tasks.push({
+                complete: false,
+
+                name,
+
+                run(err) {
+
+                    if (this.complete) {
+                        return;
+                    }
+
+                    method(err);
+
+                    this.complete = true;
+                }
+            });
+        },
+
+        hasTasks() {
+            return Boolean(tasks.filter(item => !item.complete).length);
+        },
+
+        all(err) {
+            while (tasks.length) {
+                tasks.pop().run(err);
+            }
+        },
+
+        run(name, err) {
+            for (let item of tasks) {
+                if (item.name === name) {
+                    item.run(err);
+                }
+            }
+        }
+    };
+}
+
+
+
 /*  Base Component
     --------------
 
@@ -12,60 +73,12 @@ import { once, copyProp } from '../lib';
 
 export class BaseComponent {
 
+    constructor() {
+        this.clean = cleanup(this);
+    }
+
     addProp(options, name, def) {
         copyProp(options, this, name, def);
-    }
-
-
-    /*  Register For Cleanup
-        --------------------
-
-        Register a method that will be called to do some cleanup whenever this.cleanup() is called
-    */
-
-    registerForCleanup(task) {
-        this.cleanupTasks = this.cleanupTasks || [];
-        this.cleanupTasks.push(task);
-        return this;
-    }
-
-
-    /*  Cleanup
-        -------
-
-        Call all of the methods registered with this.registerForCleanup
-    */
-
-    cleanup(err) {
-        while (this.cleanupTasks && this.cleanupTasks.length) {
-            let task = this.cleanupTasks.pop();
-            task(err);
-        }
-    }
-
-
-    /*  Has Cleanup Tasks
-        -----------------
-
-        Returns whether or not there is any state to be cleaned up
-    */
-
-    hasCleanupTasks() {
-        return Boolean(this.cleanupTasks.length);
-    }
-
-
-    /*  Set For Cleanup
-        ---------------
-
-        Set a key on this which will be auto-deleted when this.cleanup() is called
-    */
-
-    setForCleanup(key, value) {
-        this[key] = value;
-        this.registerForCleanup(() => {
-            delete this[key];
-        });
     }
 
 
@@ -134,7 +147,7 @@ export class BaseComponent {
                 return listeners[listenerName].call(this, source, data);
             });
 
-            this.registerForCleanup(() => {
+            this.clean.register(() => {
                 listener.cancel();
             });
         }

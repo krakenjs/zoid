@@ -72,6 +72,7 @@ module.exports = function(config) {
                                 'transform-es3-property-literals',
                                 'transform-es3-member-expression-literals',
                                 ['transform-es2015-for-of', {loose: true}],
+                                'transform-decorators-legacy',
                                 [ '__coverage__', { only: `${__dirname}/src` } ]
                             ]
                         }

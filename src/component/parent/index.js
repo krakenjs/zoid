@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, elementReady,
+import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, elementReady, noop,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -14,6 +14,36 @@ import { propsToQuery } from './props';
 import { normalizeParentProps } from './props';
 
 let activeComponents = [];
+
+function memoize(target, name, descriptor) {
+    let method = descriptor.value;
+
+    descriptor.value = function() {
+
+        this.__memoized__ = this.__memoized__ || {};
+
+        if (!this.__memoized__.hasOwnProperty(name)) {
+            this.__memoized__[name] = method.apply(this, arguments);
+        }
+
+        return this.__memoized__[name];
+    };
+}
+
+/*
+
+function promise(target, name, descriptor) {
+    let method = descriptor.value;
+
+    descriptor.value = function() {
+        return Promise.try(() => {
+            return method.apply(this, arguments);
+        });
+    };
+}
+
+*/
+
 
 /*  Parent Component
     ----------------
@@ -51,7 +81,7 @@ export class ParentComponent extends BaseComponent {
 
         this.onInit = new Promise();
 
-        this.registerForCleanup(() => {
+        this.clean.register(() => {
             this.onInit = new Promise();
         });
 
@@ -64,7 +94,7 @@ export class ParentComponent extends BaseComponent {
     registerActiveComponent() {
         activeComponents.push(this);
 
-        this.registerForCleanup(() => {
+        this.clean.register(() => {
             activeComponents.splice(activeComponents.indexOf(this), 1);
         });
     }
@@ -375,7 +405,7 @@ export class ParentComponent extends BaseComponent {
 
             context = this.getRenderContext(element, context);
 
-            this.setForCleanup('context', context);
+            this.clean.set('context', context);
 
             if (element) {
                 return elementReady(element);
@@ -473,7 +503,7 @@ export class ParentComponent extends BaseComponent {
 
         }).then(({ data }) => {
 
-            this.registerForCleanup(data.destroy);
+            this.clean.register(data.destroy);
             return data;
         });
 
@@ -556,7 +586,7 @@ export class ParentComponent extends BaseComponent {
             }
         });
 
-        this.registerForCleanup(() => {
+        this.clean.register(() => {
 
             if (this.closeWindowListener) {
                 this.closeWindowListener.cancel();
@@ -743,7 +773,7 @@ export class ParentComponent extends BaseComponent {
 
                 return {
                     overrides: delegate.getOverrides(data.context),
-                    destroy:   () => delegate.cleanup()
+                    destroy:   () => delegate.clean.all()
                 };
             },
 
@@ -836,12 +866,49 @@ export class ParentComponent extends BaseComponent {
         Close the child component
     */
 
+    @memoize
     close(reason = CLOSE_REASONS.PARENT_CALL) {
-        if (this.closePromise) {
-            return this.closePromise;
-        }
+        return Promise.try(() => {
 
-        this.component.log(`close`, { reason });
+            this.component.log(`close`, { reason });
+
+            this.props.onClose(reason);
+
+            return Promise.all([
+                this.closeComponent(),
+                this.closeParentTemplate()
+            ]);
+
+        }).then(() => {
+
+            this.destroy();
+        });
+    }
+
+
+    @memoize
+    closeParentTemplate() {
+        return Promise.try(() => {
+
+            this.addCloseContainerClass();
+
+            if (this.component.closeDelay) {
+                return delay(this.component.closeDelay);
+            }
+
+        }).then(() => {
+
+            return this.closeComponent();
+
+        }).then(() => {
+
+            this.clean.run('closeParentTemplate');
+        });
+    }
+
+
+    @memoize
+    closeComponent() {
 
         if (this.closeWindowListener) {
             this.closeWindowListener.cancel();
@@ -851,39 +918,42 @@ export class ParentComponent extends BaseComponent {
             this.unloadListener.cancel();
         }
 
-        this.addCloseClasses();
+        return Promise.try(() => {
 
-        let closePromise = Promise.resolve().then(() => {
+            this.addCloseComponentClass();
 
-            if (this.component.closeDelay && this.context !== CONTEXT_TYPES.POPUP) {
-                return delay(this.component.closeDelay);
+            if (this.component.closeComponentDelay && this.context !== CONTEXT_TYPES.POPUP) {
+                return delay(this.component.closeComponentDelay);
             }
 
         }).then(() => {
 
-            if (this.childExports && !isWindowClosed(this.window)) {
-                // this.childExports.close().catch(noop);
+            let win = this.window;
+
+            this.clean.run('closeWindow');
+
+            // IE in metro mode -- child window needs to close itself, or close will hang
+
+            if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
+                this.childExports.close().catch(noop);
             }
 
-            this.destroy();
-
-            return this.props.onClose(reason);
         });
-
-        this.setForCleanup('closePromise', closePromise);
-
-        return closePromise;
     }
 
 
-
-    addCloseClasses() {
+    addCloseContainerClass() {
         if (this.parentTemplate) {
-            this.parentTemplate.className += ` ${CLASS_NAMES.CLOSING}`;
+            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+            this.parentTemplate.classList.add(CLASS_NAMES.CLOSE_CONTAINER);
+        }
+    }
 
-            if (this.component.autocloseParentTemplate) {
-                this.parentTemplate.className += ` ${CLASS_NAMES.AUTOCLOSE}`;
-            }
+
+    addCloseComponentClass() {
+        if (this.parentTemplate) {
+            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+            this.parentTemplate.classList.add(CLASS_NAMES.CLOSE_COMPONENT);
         }
     }
 
@@ -982,20 +1052,11 @@ export class ParentComponent extends BaseComponent {
 
             addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose());
 
-            this.registerForCleanup(err => {
-                if (err || (this.component.autocloseParentTemplate && this.parentTemplate)) {
-                    this.closeParentTemplate();
-                }
+            this.clean.register('closeParentTemplate', () => {
+                document.body.removeChild(this.parentTemplate);
+                delete this.parentTemplate;
             });
         });
-    }
-
-
-    closeParentTemplate() {
-        if (this.parentTemplate) {
-            document.body.removeChild(this.parentTemplate);
-            delete this.parentTemplate;
-        }
     }
 
 
@@ -1006,10 +1067,10 @@ export class ParentComponent extends BaseComponent {
     */
 
     destroy(err) {
-        if (this.hasCleanupTasks()) {
+        if (this.clean.hasTasks()) {
             this.component.log(`destroy`);
             logger.flush();
-            this.cleanup(err);
+            this.clean.all(err);
         }
     }
 

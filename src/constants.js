@@ -46,8 +46,9 @@ export const CLASS_NAMES = {
     IFRAME: `${XCOMPONENT}-iframe`,
     LIGHTBOX: `${XCOMPONENT}-lightbox`,
     POPUP: `${XCOMPONENT}-popup`,
-    CLOSING: `${XCOMPONENT}-closing`,
-    AUTOCLOSE: `${XCOMPONENT}-autoclose`
+    LOADING: `${XCOMPONENT}-LOADING`,
+    CLOSE_CONTAINER: `${XCOMPONENT}-close-container`,
+    CLOSE_COMPONENT: `${XCOMPONENT}-close-component`
 };
 
 export const EVENT_NAMES = {

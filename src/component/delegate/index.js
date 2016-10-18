@@ -47,6 +47,6 @@ export class DelegateComponent extends BaseComponent {
     }
 
     destroy() {
-        this.cleanup();
+        this.clean.all();
     }
 }

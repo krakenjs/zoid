@@ -54,7 +54,7 @@ export let RENDER_DRIVERS = {
 
             this.window = this.iframe.contentWindow;
 
-            this.registerForCleanup(() => {
+            this.clean.register('closeWindow', () => {
 
                 this.window.close();
                 delete this.window;
@@ -77,9 +77,11 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            closeComponent:          DELEGATE.CALL_DELEGATE,
             closeParentTemplate:     DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
-            addCloseClasses:         DELEGATE.CALL_DELEGATE,
+            addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
+            addCloseComponentClass:  DELEGATE.CALL_DELEGATE,
             hide:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
@@ -160,7 +162,7 @@ export let RENDER_DRIVERS = {
                 scrollbars: 1
             });
 
-            this.registerForCleanup(() => {
+            this.clean.register('closeWindow', () => {
                 if (this.window) {
                     this.window.close();
                     delete this.window;
@@ -214,14 +216,16 @@ export let RENDER_DRIVERS = {
 
         renderToParentOverrides: {
 
-            createParentTemplate: DELEGATE.CALL_DELEGATE,
-            closeParentTemplate:  DELEGATE.CALL_DELEGATE,
-            addCloseClasses:      DELEGATE.CALL_DELEGATE,
-            hide:                 DELEGATE.CALL_DELEGATE,
+            createParentTemplate:   DELEGATE.CALL_DELEGATE,
+            closeParentTemplate:    DELEGATE.CALL_DELEGATE,
+            addCloseContainerClass: DELEGATE.CALL_DELEGATE,
+            addCloseComponentClass: DELEGATE.CALL_DELEGATE,
+            hide:                   DELEGATE.CALL_DELEGATE,
 
             open:                    DELEGATE.CALL_ORIGINAL,
             loadUrl:                 DELEGATE.CALL_ORIGINAL,
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
+            closeComponent:          DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
             restyle:                 DELEGATE.CALL_ORIGINAL
         },
@@ -242,9 +246,11 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            closeComponent:          DELEGATE.CALL_DELEGATE,
             closeParentTemplate:     DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
-            addCloseClasses:         DELEGATE.CALL_DELEGATE,
+            addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
+            addCloseComponentClass:  DELEGATE.CALL_DELEGATE,
             hide:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
