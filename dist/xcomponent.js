@@ -314,6 +314,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        _this.addProp(options, 'closeDelay');
+	        _this.addProp(options, 'closeComponentDelay');
+
 	        _this.addProp(options, 'resizeDelay');
 
 	        // The default context to render to
@@ -597,6 +599,75 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	function cleanup(obj) {
+
+	    var tasks = [];
+
+	    return {
+	        set: function set(name, item) {
+	            obj[name] = item;
+	            this.register(function () {
+	                delete obj[name];
+	            });
+	            return item;
+	        },
+	        register: function register(name, method) {
+
+	            if (!method) {
+	                method = name;
+	                name = undefined;
+	            }
+
+	            tasks.push({
+	                complete: false,
+
+	                name: name,
+
+	                run: function run(err) {
+
+	                    if (this.complete) {
+	                        return;
+	                    }
+
+	                    method(err);
+
+	                    this.complete = true;
+	                }
+	            });
+	        },
+	        hasTasks: function hasTasks() {
+	            return Boolean(tasks.filter(function (item) {
+	                return !item.complete;
+	            }).length);
+	        },
+	        all: function all(err) {
+	            while (tasks.length) {
+	                tasks.pop().run(err);
+	            }
+	        },
+	        run: function run(name, err) {
+	            for (var _iterator = tasks, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	                var _ref;
+
+	                if (_isArray) {
+	                    if (_i >= _iterator.length) break;
+	                    _ref = _iterator[_i++];
+	                } else {
+	                    _i = _iterator.next();
+	                    if (_i.done) break;
+	                    _ref = _i.value;
+	                }
+
+	                var item = _ref;
+
+	                if (item.name === name) {
+	                    item.run(err);
+	                }
+	            }
+	        }
+	    };
+	}
+
 	/*  Base Component
 	    --------------
 
@@ -607,66 +678,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var BaseComponent = exports.BaseComponent = function () {
 	    function BaseComponent() {
 	        _classCallCheck(this, BaseComponent);
+
+	        this.clean = cleanup(this);
 	    }
 
 	    _createClass(BaseComponent, [{
 	        key: 'addProp',
 	        value: function addProp(options, name, def) {
 	            (0, _lib.copyProp)(options, this, name, def);
-	        }
-
-	        /*  Register For Cleanup
-	            --------------------
-	             Register a method that will be called to do some cleanup whenever this.cleanup() is called
-	        */
-
-	    }, {
-	        key: 'registerForCleanup',
-	        value: function registerForCleanup(task) {
-	            this.cleanupTasks = this.cleanupTasks || [];
-	            this.cleanupTasks.push(task);
-	            return this;
-	        }
-
-	        /*  Cleanup
-	            -------
-	             Call all of the methods registered with this.registerForCleanup
-	        */
-
-	    }, {
-	        key: 'cleanup',
-	        value: function cleanup(err) {
-	            while (this.cleanupTasks && this.cleanupTasks.length) {
-	                var task = this.cleanupTasks.pop();
-	                task(err);
-	            }
-	        }
-
-	        /*  Has Cleanup Tasks
-	            -----------------
-	             Returns whether or not there is any state to be cleaned up
-	        */
-
-	    }, {
-	        key: 'hasCleanupTasks',
-	        value: function hasCleanupTasks() {
-	            return Boolean(this.cleanupTasks.length);
-	        }
-
-	        /*  Set For Cleanup
-	            ---------------
-	             Set a key on this which will be auto-deleted when this.cleanup() is called
-	        */
-
-	    }, {
-	        key: 'setForCleanup',
-	        value: function setForCleanup(key, value) {
-	            var _this = this;
-
-	            this[key] = value;
-	            this.registerForCleanup(function () {
-	                delete _this[key];
-	            });
 	        }
 
 	        /*  Try Catch
@@ -712,7 +731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'listen',
 	        value: function listen(win, domain) {
-	            var _this2 = this;
+	            var _this = this;
 
 	            if (!win) {
 	                throw new Error('[' + this.component.tag + '] window to listen to not set');
@@ -729,35 +748,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var listeners = this.listeners();
 
 	            var _loop = function _loop() {
-	                if (_isArray) {
-	                    if (_i >= _iterator.length) return 'break';
-	                    _ref = _iterator[_i++];
+	                if (_isArray2) {
+	                    if (_i2 >= _iterator2.length) return 'break';
+	                    _ref2 = _iterator2[_i2++];
 	                } else {
-	                    _i = _iterator.next();
-	                    if (_i.done) return 'break';
-	                    _ref = _i.value;
+	                    _i2 = _iterator2.next();
+	                    if (_i2.done) return 'break';
+	                    _ref2 = _i2.value;
 	                }
 
-	                var listenerName = _ref;
+	                var listenerName = _ref2;
 
 
 	                var listener = _src2['default'].on(listenerName, { window: win, domain: domain, errorHandler: function errorHandler(err) {
-	                        return _this2.error(err);
-	                    } }, function (_ref2) {
-	                    var source = _ref2.source;
-	                    var data = _ref2.data;
+	                        return _this.error(err);
+	                    } }, function (_ref3) {
+	                    var source = _ref3.source;
+	                    var data = _ref3.data;
 
-	                    _this2.component.log('listener_' + listenerName.replace(/^xcomponent_/, ''));
-	                    return listeners[listenerName].call(_this2, source, data);
+	                    _this.component.log('listener_' + listenerName.replace(/^xcomponent_/, ''));
+	                    return listeners[listenerName].call(_this, source, data);
 	                });
 
-	                _this2.registerForCleanup(function () {
+	                _this.clean.register(function () {
 	                    listener.cancel();
 	                });
 	            };
 
-	            for (var _iterator = Object.keys(listeners), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                var _ref;
+	            for (var _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                var _ref2;
 
 	                var _ret = _loop();
 
@@ -1697,7 +1716,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	var loggedErrors = [];
+
 	function logError(err) {
+
+	    if (loggedErrors.indexOf(err) !== -1) {
+	        return;
+	    }
+
+	    loggedErrors.push(err);
+
 	    setTimeout(function () {
 	        throw err;
 	    }, 1);
@@ -1922,6 +1950,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.onPossiblyUnhandledException = function (handler) {
 	    possiblyUnhandledPromiseHandlers.push(handler);
+	};
+
+	SyncPromise['try'] = function (method) {
+	    return SyncPromise.resolve().then(method);
 	};
 
 	function patchPromise() {
@@ -2198,6 +2230,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return win.mockDomain;
 	        }
 
+	        if (!win.location.protocol) {
+	            throw new Error('Can not read window protocol');
+	        }
+
+	        if (!win.location.host) {
+	            throw new Error('Can not read window host');
+	        }
+
 	        return win.location.protocol + '//' + win.location.host;
 	    },
 	    getDomainFromUrl: function getDomainFromUrl(url) {
@@ -2387,7 +2427,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.isSameDomain = isSameDomain;
-	exports.isWindow = isWindow;
 	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
@@ -2421,6 +2460,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
 
 	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
@@ -2446,6 +2487,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
+	        } else {
+	            match = false;
 	        }
 	    } catch (err) {
 	        match = false;
@@ -2464,49 +2507,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return match;
-	}
-
-	function isWindow(item) {
-
-	    if (!item) {
-	        return false;
-	    }
-
-	    if (isSameDomain(item) !== false) {
-	        try {
-	            var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
-
-
-	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
-	                var key = _arr[_i2];
-	                if (typeof item[key] !== 'function') {
-	                    return false;
-	                }
-	            }
-
-	            if (!item.document || !item.location) {
-	                return false;
-	            }
-
-	            return true;
-	        } catch (err) {
-	            // pass
-	        }
-	    }
-
-	    try {
-
-	        for (var i = 0; i < 5; i++) {
-	            if (item) {
-	                item = item[Math.random().toString()];
-	            }
-	        }
-
-	        return false;
-	    } catch (err) {
-
-	        return true;
-	    }
 	}
 
 	function isWindowClosed(win) {
@@ -2634,11 +2634,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return result;
 	    }
 
-	    for (var _i3 = 0; _i3 < 100; _i3++) {
+	    for (var _i2 = 0; _i2 < 100; _i2++) {
 	        var _frame = void 0;
 
 	        try {
-	            _frame = frames[_i3];
+	            _frame = frames[_i2];
 	        } catch (err) {
 	            return result;
 	        }
@@ -2657,32 +2657,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var result = [];
 
-	    for (var _iterator2 = getFrames(win), _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = getFrames(win), _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
-	            if (_i4 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i4++];
+	            if (_i3 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i3++];
 	        } else {
-	            _i4 = _iterator2.next();
-	            if (_i4.done) break;
-	            _ref2 = _i4.value;
+	            _i3 = _iterator2.next();
+	            if (_i3.done) break;
+	            _ref2 = _i3.value;
 	        }
 
 	        var frame = _ref2;
 
 	        result.push(frame);
 
-	        for (var _iterator3 = getAllChildFrames(frame), _isArray3 = Array.isArray(_iterator3), _i5 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        for (var _iterator3 = getAllChildFrames(frame), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
 	            var _ref3;
 
 	            if (_isArray3) {
-	                if (_i5 >= _iterator3.length) break;
-	                _ref3 = _iterator3[_i5++];
+	                if (_i4 >= _iterator3.length) break;
+	                _ref3 = _iterator3[_i4++];
 	            } else {
-	                _i5 = _iterator3.next();
-	                if (_i5.done) break;
-	                _ref3 = _i5.value;
+	                _i4 = _iterator3.next();
+	                if (_i4.done) break;
+	                _ref3 = _i4.value;
 	            }
 
 	            var childFrame = _ref3;
@@ -2700,16 +2700,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    result.push(win);
 
-	    for (var _iterator4 = getParents(win), _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	    for (var _iterator4 = getParents(win), _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	        var _ref4;
 
 	        if (_isArray4) {
-	            if (_i6 >= _iterator4.length) break;
-	            _ref4 = _iterator4[_i6++];
+	            if (_i5 >= _iterator4.length) break;
+	            _ref4 = _iterator4[_i5++];
 	        } else {
-	            _i6 = _iterator4.next();
-	            if (_i6.done) break;
-	            _ref4 = _i6.value;
+	            _i5 = _iterator4.next();
+	            if (_i5.done) break;
+	            _ref4 = _i5.value;
 	        }
 
 	        var parent = _ref4;
@@ -2717,16 +2717,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        result.push(parent);
 
-	        for (var _iterator5 = getFrames(parent), _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	        for (var _iterator5 = getFrames(parent), _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
 	            var _ref5;
 
 	            if (_isArray5) {
-	                if (_i7 >= _iterator5.length) break;
-	                _ref5 = _iterator5[_i7++];
+	                if (_i6 >= _iterator5.length) break;
+	                _ref5 = _iterator5[_i6++];
 	            } else {
-	                _i7 = _iterator5.next();
-	                if (_i7.done) break;
-	                _ref5 = _i7.value;
+	                _i6 = _iterator5.next();
+	                if (_i6.done) break;
+	                _ref5 = _i6.value;
 	            }
 
 	            var frame = _ref5;
@@ -2775,16 +2775,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // pass
 	    }
 
-	    for (var _iterator6 = getAllChildFrames(win), _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
+	    for (var _iterator6 = getAllChildFrames(win), _isArray6 = Array.isArray(_iterator6), _i7 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
 	        var _ref6;
 
 	        if (_isArray6) {
-	            if (_i8 >= _iterator6.length) break;
-	            _ref6 = _iterator6[_i8++];
+	            if (_i7 >= _iterator6.length) break;
+	            _ref6 = _iterator6[_i7++];
 	        } else {
-	            _i8 = _iterator6.next();
-	            if (_i8.done) break;
-	            _ref6 = _i8.value;
+	            _i7 = _iterator6.next();
+	            if (_i7.done) break;
+	            _ref6 = _i7.value;
 	        }
 
 	        var frame = _ref6;
@@ -2805,22 +2805,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function getFrameByName(win, name) {
 
-	    for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
+	    var winFrames = getFrames(win);
+
+	    for (var _iterator7 = winFrames, _isArray7 = Array.isArray(_iterator7), _i8 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
 	        var _ref7;
 
 	        if (_isArray7) {
-	            if (_i9 >= _iterator7.length) break;
-	            _ref7 = _iterator7[_i9++];
+	            if (_i8 >= _iterator7.length) break;
+	            _ref7 = _iterator7[_i8++];
 	        } else {
-	            _i9 = _iterator7.next();
-	            if (_i9.done) break;
-	            _ref7 = _i9.value;
+	            _i8 = _iterator7.next();
+	            if (_i8.done) break;
+	            _ref7 = _i8.value;
 	        }
 
 	        var childFrame = _ref7;
 
 	        try {
-	            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
+	            if (isSameDomain(childFrame) && childFrame.name === name) {
 	                return childFrame;
 	            }
 	        } catch (err) {
@@ -2829,7 +2831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        if (isWindow(win.frames[name])) {
+	        if (winFrames.indexOf(win.frames[name]) !== 0) {
 	            return win.frames[name];
 	        }
 	    } catch (err) {
@@ -2837,7 +2839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        if (isWindow(win[name])) {
+	        if (winFrames.indexOf(win[name]) !== 0) {
 	            return win[name];
 	        }
 	    } catch (err) {
@@ -2853,16 +2855,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return frameParent === win;
 	    }
 
-	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray8) {
-	            if (_i10 >= _iterator8.length) break;
-	            _ref8 = _iterator8[_i10++];
+	            if (_i9 >= _iterator8.length) break;
+	            _ref8 = _iterator8[_i9++];
 	        } else {
-	            _i10 = _iterator8.next();
-	            if (_i10.done) break;
-	            _ref8 = _i10.value;
+	            _i9 = _iterator8.next();
+	            if (_i9.done) break;
+	            _ref8 = _i9.value;
 	        }
 
 	        var childFrame = _ref8;
@@ -2916,16 +2918,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+	    for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
 	        var _ref9;
 
 	        if (_isArray9) {
-	            if (_i11 >= _iterator9.length) break;
-	            _ref9 = _iterator9[_i11++];
+	            if (_i10 >= _iterator9.length) break;
+	            _ref9 = _iterator9[_i10++];
 	        } else {
-	            _i11 = _iterator9.next();
-	            if (_i11.done) break;
-	            _ref9 = _i11.value;
+	            _i10 = _iterator9.next();
+	            if (_i10.done) break;
+	            _ref9 = _i10.value;
 	        }
 
 	        var frame = _ref9;
@@ -2962,30 +2964,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function anyMatch(collection1, collection2) {
 
-	    for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i12 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+	    for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
 	        var _ref10;
 
 	        if (_isArray10) {
-	            if (_i12 >= _iterator10.length) break;
-	            _ref10 = _iterator10[_i12++];
+	            if (_i11 >= _iterator10.length) break;
+	            _ref10 = _iterator10[_i11++];
 	        } else {
-	            _i12 = _iterator10.next();
-	            if (_i12.done) break;
-	            _ref10 = _i12.value;
+	            _i11 = _iterator10.next();
+	            if (_i11.done) break;
+	            _ref10 = _i11.value;
 	        }
 
 	        var item1 = _ref10;
 
-	        for (var _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i13 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
+	        for (var _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
 	            var _ref11;
 
 	            if (_isArray11) {
-	                if (_i13 >= _iterator11.length) break;
-	                _ref11 = _iterator11[_i13++];
+	                if (_i12 >= _iterator11.length) break;
+	                _ref11 = _iterator11[_i12++];
 	            } else {
-	                _i13 = _iterator11.next();
-	                if (_i13.done) break;
-	                _ref11 = _i13.value;
+	                _i12 = _iterator11.next();
+	                if (_i12.done) break;
+	                _ref11 = _i12.value;
 	            }
 
 	            var item2 = _ref11;
@@ -6806,8 +6808,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    IFRAME: XCOMPONENT + '-iframe',
 	    LIGHTBOX: XCOMPONENT + '-lightbox',
 	    POPUP: XCOMPONENT + '-popup',
-	    CLOSING: XCOMPONENT + '-closing',
-	    AUTOCLOSE: XCOMPONENT + '-autoclose'
+	    LOADING: XCOMPONENT + '-LOADING',
+	    CLOSE_CONTAINER: XCOMPONENT + '-close-container',
+	    CLOSE_COMPONENT: XCOMPONENT + '-close-component'
 	};
 
 	var EVENT_NAMES = exports.EVENT_NAMES = {
@@ -6944,6 +6947,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _desc, _value, _class;
+
 	exports.destroyAll = destroyAll;
 
 	var _lib = __webpack_require__(/*! ../../lib */ 31);
@@ -6976,7 +6981,65 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+	    var desc = {};
+	    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+	        desc[key] = descriptor[key];
+	    });
+	    desc.enumerable = !!desc.enumerable;
+	    desc.configurable = !!desc.configurable;
+
+	    if ('value' in desc || desc.initializer) {
+	        desc.writable = true;
+	    }
+
+	    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+	        return decorator(target, property, desc) || desc;
+	    }, desc);
+
+	    if (context && desc.initializer !== void 0) {
+	        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+	        desc.initializer = undefined;
+	    }
+
+	    if (desc.initializer === void 0) {
+	        Object['define' + 'Property'](target, property, desc);
+	        desc = null;
+	    }
+
+	    return desc;
+	}
+
 	var activeComponents = [];
+
+	function memoize(target, name, descriptor) {
+	    var method = descriptor.value;
+
+	    descriptor.value = function () {
+
+	        this.__memoized__ = this.__memoized__ || {};
+
+	        if (!this.__memoized__.hasOwnProperty(name)) {
+	            this.__memoized__[name] = method.apply(this, arguments);
+	        }
+
+	        return this.__memoized__[name];
+	    };
+	}
+
+	/*
+
+	function promise(target, name, descriptor) {
+	    let method = descriptor.value;
+
+	    descriptor.value = function() {
+	        return Promise.try(() => {
+	            return method.apply(this, arguments);
+	        });
+	    };
+	}
+
+	*/
 
 	/*  Parent Component
 	    ----------------
@@ -6986,7 +7049,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    It handles opening the necessary windows/iframes, launching the component's url, and listening for messages back from the component.
 	*/
 
-	var ParentComponent = exports.ParentComponent = function (_BaseComponent) {
+	var ParentComponent = exports.ParentComponent = (_class = function (_BaseComponent) {
 	    _inherits(ParentComponent, _BaseComponent);
 
 	    function ParentComponent(component) {
@@ -7021,7 +7084,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.onInit = new _promise.SyncPromise();
 
-	        _this.registerForCleanup(function () {
+	        _this.clean.register(function () {
 	            _this.onInit = new _promise.SyncPromise();
 	        });
 
@@ -7038,7 +7101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            activeComponents.push(this);
 
-	            this.registerForCleanup(function () {
+	            this.clean.register(function () {
 	                activeComponents.splice(activeComponents.indexOf(_this2), 1);
 	            });
 	        }
@@ -7390,7 +7453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                context = _this7.getRenderContext(element, context);
 
-	                _this7.setForCleanup('context', context);
+	                _this7.clean.set('context', context);
 
 	                if (element) {
 	                    return (0, _lib.elementReady)(element);
@@ -7492,7 +7555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var data = _ref5.data;
 
 
-	                _this9.registerForCleanup(data.destroy);
+	                _this9.clean.register(data.destroy);
 	                return data;
 	            });
 
@@ -7608,7 +7671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 
-	            this.registerForCleanup(function () {
+	            this.clean.register(function () {
 
 	                if (_this12.closeWindowListener) {
 	                    _this12.closeWindowListener.cancel();
@@ -7789,7 +7852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return {
 	                    overrides: delegate.getOverrides(data.context),
 	                    destroy: function destroy() {
-	                        return delegate.cleanup();
+	                        return delegate.clean.all();
 	                    }
 	                };
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.RESIZE, function (source, data) {
@@ -7869,11 +7932,42 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
-	            if (this.closePromise) {
-	                return this.closePromise;
-	            }
+	            return _promise.SyncPromise['try'](function () {
 
-	            this.component.log('close', { reason: reason });
+	                _this17.component.log('close', { reason: reason });
+
+	                _this17.props.onClose(reason);
+
+	                return _promise.SyncPromise.all([_this17.closeComponent(), _this17.closeParentTemplate()]);
+	            }).then(function () {
+
+	                _this17.destroy();
+	            });
+	        }
+	    }, {
+	        key: 'closeParentTemplate',
+	        value: function closeParentTemplate() {
+	            var _this18 = this;
+
+	            return _promise.SyncPromise['try'](function () {
+
+	                _this18.addCloseContainerClass();
+
+	                if (_this18.component.closeDelay) {
+	                    return (0, _lib.delay)(_this18.component.closeDelay);
+	                }
+	            }).then(function () {
+
+	                return _this18.closeComponent();
+	            }).then(function () {
+
+	                _this18.clean.run('closeParentTemplate');
+	            });
+	        }
+	    }, {
+	        key: 'closeComponent',
+	        value: function closeComponent() {
+	            var _this19 = this;
 
 	            if (this.closeWindowListener) {
 	                this.closeWindowListener.cancel();
@@ -7883,37 +7977,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.unloadListener.cancel();
 	            }
 
-	            this.addCloseClasses();
+	            return _promise.SyncPromise['try'](function () {
 
-	            var closePromise = _promise.SyncPromise.resolve().then(function () {
+	                _this19.addCloseComponentClass();
 
-	                if (_this17.component.closeDelay && _this17.context !== _constants.CONTEXT_TYPES.POPUP) {
-	                    return (0, _lib.delay)(_this17.component.closeDelay);
+	                if (_this19.component.closeComponentDelay && _this19.context !== _constants.CONTEXT_TYPES.POPUP) {
+	                    return (0, _lib.delay)(_this19.component.closeComponentDelay);
 	                }
 	            }).then(function () {
 
-	                if (_this17.childExports && !(0, _lib.isWindowClosed)(_this17.window)) {
-	                    // this.childExports.close().catch(noop);
+	                var win = _this19.window;
+
+	                _this19.clean.run('closeWindow');
+
+	                // IE in metro mode -- child window needs to close itself, or close will hang
+
+	                if (_this19.childExports && _this19.context === _constants.CONTEXT_TYPES.POPUP && !(0, _lib.isWindowClosed)(win)) {
+	                    _this19.childExports.close()['catch'](_lib.noop);
 	                }
-
-	                _this17.destroy();
-
-	                return _this17.props.onClose(reason);
 	            });
-
-	            this.setForCleanup('closePromise', closePromise);
-
-	            return closePromise;
 	        }
 	    }, {
-	        key: 'addCloseClasses',
-	        value: function addCloseClasses() {
+	        key: 'addCloseContainerClass',
+	        value: function addCloseContainerClass() {
 	            if (this.parentTemplate) {
-	                this.parentTemplate.className += ' ' + _constants.CLASS_NAMES.CLOSING;
-
-	                if (this.component.autocloseParentTemplate) {
-	                    this.parentTemplate.className += ' ' + _constants.CLASS_NAMES.AUTOCLOSE;
-	                }
+	                this.parentTemplate.classList.add(_constants.CLASS_NAMES.LOADING);
+	                this.parentTemplate.classList.add(_constants.CLASS_NAMES.CLOSE_CONTAINER);
+	            }
+	        }
+	    }, {
+	        key: 'addCloseComponentClass',
+	        value: function addCloseComponentClass() {
+	            if (this.parentTemplate) {
+	                this.parentTemplate.classList.add(_constants.CLASS_NAMES.LOADING);
+	                this.parentTemplate.classList.add(_constants.CLASS_NAMES.CLOSE_COMPONENT);
 	            }
 	        }
 
@@ -7973,7 +8070,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this18 = this;
+	            var _this20 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
@@ -7981,53 +8078,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 
-	                var parentTemplate = _this18.component.parentTemplate;
+	                var parentTemplate = _this20.component.parentTemplate;
 
 	                if (!parentTemplate) {
 	                    return;
 	                }
 
-	                _this18.parentTemplate = (0, _lib.createElement)('div', {
+	                _this20.parentTemplate = (0, _lib.createElement)('div', {
 
 	                    html: (0, _lib.template)(parentTemplate, {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.props.uid,
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid,
 	                        CLASS: _constants.CLASS_NAMES
 	                    }),
 
 	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.props.uid
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid
 	                    },
 
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.context]
+	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.context]
 
 	                });
 
-	                document.body.appendChild(_this18.parentTemplate);
+	                document.body.appendChild(_this20.parentTemplate);
 
 	                if (_drivers.RENDER_DRIVERS[context].focusable) {
-	                    (0, _lib.addEventToClass)(_this18.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this18.focus();
+	                    (0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this20.focus();
 	                    });
 	                }
 
-	                (0, _lib.addEventToClass)(_this18.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this18.userClose();
+	                (0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    return _this20.userClose();
 	                });
 
-	                _this18.registerForCleanup(function (err) {
-	                    if (err || _this18.component.autocloseParentTemplate && _this18.parentTemplate) {
-	                        _this18.closeParentTemplate();
-	                    }
+	                _this20.clean.register('closeParentTemplate', function () {
+	                    document.body.removeChild(_this20.parentTemplate);
+	                    delete _this20.parentTemplate;
 	                });
 	            });
-	        }
-	    }, {
-	        key: 'closeParentTemplate',
-	        value: function closeParentTemplate() {
-	            if (this.parentTemplate) {
-	                document.body.removeChild(this.parentTemplate);
-	                delete this.parentTemplate;
-	            }
 	        }
 
 	        /*  Destroy
@@ -8038,24 +8126,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy(err) {
-	            if (this.hasCleanupTasks()) {
+	            if (this.clean.hasTasks()) {
 	                this.component.log('destroy');
 	                _lib.logger.flush();
-	                this.cleanup(err);
+	                this.clean.all(err);
 	            }
 	        }
 	    }, {
 	        key: 'tryInit',
 	        value: function tryInit(method) {
-	            var _this19 = this;
+	            var _this21 = this;
 
 	            return _promise.SyncPromise.resolve().then(method)['catch'](function (err) {
 
-	                _this19.onInit.reject(err);
+	                _this21.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this19.onInit;
+	                return _this21.onInit;
 	            });
 	        }
 
@@ -8075,7 +8163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return ParentComponent;
-	}(_base.BaseComponent);
+	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeParentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype)), _class);
 
 	/*  Generate Render Methods
 	    -----------------------
@@ -8197,7 +8285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.window = this.iframe.contentWindow;
 
-	        this.registerForCleanup(function () {
+	        this.clean.register('closeWindow', function () {
 
 	            _this.window.close();
 	            delete _this.window;
@@ -8218,9 +8306,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        closeComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        addCloseClasses: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
 	        resize: _constants.DELEGATE.CALL_DELEGATE,
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
@@ -8296,7 +8386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            scrollbars: 1
 	        });
 
-	        this.registerForCleanup(function () {
+	        this.clean.register('closeWindow', function () {
 	            if (_this3.window) {
 	                _this3.window.close();
 	                delete _this3.window;
@@ -8349,12 +8439,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        addCloseClasses: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
 
 	        open: _constants.DELEGATE.CALL_ORIGINAL,
 	        loadUrl: _constants.DELEGATE.CALL_ORIGINAL,
 	        createComponentTemplate: _constants.DELEGATE.CALL_ORIGINAL,
+	        closeComponent: _constants.DELEGATE.CALL_ORIGINAL,
 	        resize: _constants.DELEGATE.CALL_ORIGINAL,
 	        restyle: _constants.DELEGATE.CALL_ORIGINAL
 	    },
@@ -8371,9 +8463,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        closeComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        addCloseClasses: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
+	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
 	        resize: _constants.DELEGATE.CALL_DELEGATE,
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
@@ -9039,7 +9133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            this.cleanup();
+	            this.clean.all();
 	        }
 	    }]);
 
