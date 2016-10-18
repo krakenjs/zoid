@@ -100,8 +100,6 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'autoResize', false);
 
-        this.addProp(options, 'autocloseParentTemplate', true);
-
         // Templates and styles for the parent page and the initial rendering of the component
 
         this.addProp(options, 'parentTemplate', parentTemplate);
