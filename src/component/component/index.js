@@ -1,11 +1,13 @@
 
+import postRobot from 'post-robot/src';
+
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
-import { CONTEXT_TYPES_LIST } from '../../constants';
+import { CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants';
 import { validate } from './validate';
 
 import parentTemplate from './templates/parent.htm';
@@ -13,7 +15,7 @@ import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
 
-import { logger, capitalizeFirstLetter } from '../../lib';
+import { logger, capitalizeFirstLetter, onCloseWindow } from '../../lib';
 
 export let components = {};
 
@@ -107,6 +109,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'validateProps');
 
+        this.addProp(options, 'remoteRenderDomain');
+
         // A mapping of tag->component so we can reference components by string tag name
 
         components[this.tag] = this;
@@ -115,13 +119,21 @@ export class Component extends BaseComponent {
         // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
         // This makes us a little more pluggable and loosely coupled.
 
+        this.registerDrivers();
+        this.registerChild();
+        this.listenDelegate();
+    }
+
+    registerDrivers() {
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
             if (driver.isActive()) {
                 driver.register(this);
             }
         }
+    }
 
+    registerChild() {
         if (isXComponentWindow()) {
             let componentMeta = getComponentMeta();
 
@@ -129,6 +141,22 @@ export class Component extends BaseComponent {
                 window.xchild = new ChildComponent(this);
                 window.xprops = window.xchild.props;
             }
+        }
+    }
+
+    listenDelegate() {
+        if (this.remoteRenderDomain) {
+            postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, { domain: this.remoteRenderDomain }, ({ source, data}) => {
+
+                let delegate = this.delegate(data.options);
+
+                onCloseWindow(source, () => delegate.destroy());
+
+                return {
+                    overrides: delegate.getOverrides(data.context),
+                    destroy:   () => delegate.destroy()
+                };
+            });
         }
     }
 
@@ -221,6 +249,10 @@ export class Component extends BaseComponent {
         return this.init(props).renderToParent(element, context);
     }
 
+    renderTo(win, props, element, context) {
+        return this.init(props).renderTo(win, element, context);
+    }
+
 
     /*  Get By Tag
         ----------
@@ -298,5 +330,9 @@ for (let context of CONTEXT_TYPES_LIST) {
 
     Component.prototype[`render${contextName}ToParent`] = function(props, element) {
         return this.init(props).renderToParent(element, context);
+    };
+
+    Component.prototype[`render${contextName}To`] = function(win, props, element) {
+        return this.init(props).renderTo(win, element, context);
     };
 }

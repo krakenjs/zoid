@@ -54,7 +54,7 @@ export let RENDER_DRIVERS = {
 
             this.window = this.iframe.contentWindow;
 
-            this.clean.register('closeWindow', () => {
+            this.clean.register('destroyWindow', () => {
 
                 this.window.close();
                 delete this.window;
@@ -162,7 +162,7 @@ export let RENDER_DRIVERS = {
                 scrollbars: 1
             });
 
-            this.clean.register('closeWindow', () => {
+            this.clean.register('destroyWindow', () => {
                 if (this.window) {
                     this.window.close();
                     delete this.window;
@@ -259,7 +259,7 @@ export let RENDER_DRIVERS = {
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
-                        this.window = postRobot.winutil.getFrameByName(getParentWindow(), this.childWindowName);
+                        this.window = postRobot.winutil.getFrameByName(this.delegateWindow, this.childWindowName);
 
                         if (!this.window) {
                             throw new Error(`Unable to find parent component iframe window`);

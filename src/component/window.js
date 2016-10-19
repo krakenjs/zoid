@@ -127,8 +127,10 @@ export let getParentComponentWindow = memoize(() => {
     // - Our actual parent
     // - A sibling which rendered us using renderToParent()
 
+    // TODO: add flag for delegate AND check parent window is xcomponent
+
     if (parentWindow && componentMeta.parent) {
-        let parentFrame = postRobot.winutil.getFrameByName(parentWindow, componentMeta.parent);
+        let parentFrame = postRobot.winutil.findFrameByName(parentWindow, componentMeta.parent);
 
         if (parentFrame) {
             return parentFrame;

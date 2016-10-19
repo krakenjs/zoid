@@ -1,3 +1,5 @@
+
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import postRobot from 'post-robot/src';
 
 import { once, copyProp } from '../lib';
@@ -29,15 +31,15 @@ function cleanup(obj) {
 
                 name,
 
-                run(err) {
+                run() {
 
                     if (this.complete) {
                         return;
                     }
 
-                    method(err);
-
                     this.complete = true;
+
+                    return method();
                 }
             });
         },
@@ -46,18 +48,30 @@ function cleanup(obj) {
             return Boolean(tasks.filter(item => !item.complete).length);
         },
 
-        all(err) {
+        all() {
+            let results = [];
+
             while (tasks.length) {
-                tasks.pop().run(err);
+                results.push(tasks.pop().run());
             }
+
+            return Promise.all(results).then(() => {
+                return;
+            });
         },
 
-        run(name, err) {
+        run(name) {
+            let results = [];
+
             for (let item of tasks) {
                 if (item.name === name) {
-                    item.run(err);
+                    results.push(item.run());
                 }
             }
+
+            return Promise.all(results).then(() => {
+                return;
+            });
         }
     };
 }

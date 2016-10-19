@@ -97,6 +97,8 @@ export let testComponent2 = xcomponent.create({
     tag: 'test-component2',
     url: '/base/test/child.htm',
 
+    remoteRenderDomain: '*',
+
     envUrls: {
         dev: '/base/test/child.htm?devenv=true'
     },

@@ -13,7 +13,14 @@ export class DelegateComponent extends BaseComponent {
         this.context = options.context;
 
         this.props = options.props;
-        
+
+        this.props = {
+            uid:        options.props.uid,
+            dimensions: options.props.dimensions,
+            onClose:    options.props.onClose
+        };
+
+
         this.focus     = options.overrides.focus;
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;
@@ -47,6 +54,6 @@ export class DelegateComponent extends BaseComponent {
     }
 
     destroy() {
-        this.clean.all();
+        return this.clean.all();
     }
 }

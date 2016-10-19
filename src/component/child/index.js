@@ -203,7 +203,7 @@ export class ChildComponent extends BaseComponent {
             // close us, if we're an iframe
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                this.destroy();
+                return this.destroy();
             }
         });
     }

@@ -1,8 +1,8 @@
 
 import { logger } from '../../lib';
 import postRobot from 'post-robot/src';
-
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, elementReady, noop,
@@ -86,7 +86,7 @@ export class ParentComponent extends BaseComponent {
         });
 
         this.onInit.catch(err => {
-            this.error(err);
+            return this.error(err);
         });
     }
 
@@ -471,17 +471,17 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    delegateToParent(element, context) {
+    delegate(win, context) {
 
-        this.component.log(`delegate_${context}_to_parent`, { element, context });
+        this.delegateWindow = win;
+
+        this.component.log(`delegate_${context}`);
 
         this.childWindowName = this.buildChildWindowName({ secureProps: true });
 
-        let delegate = this.sendToParent(POST_MESSAGE.DELEGATE, {
+        let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
             context,
-
-            tag: this.component.tag,
 
             options: {
 
@@ -491,7 +491,8 @@ export class ParentComponent extends BaseComponent {
 
                 props: {
                     uid:        this.props.uid,
-                    dimensions: this.props.dimensions
+                    dimensions: this.props.dimensions,
+                    onClose:    this.props.onClose
                 },
 
                 overrides: {
@@ -505,6 +506,10 @@ export class ParentComponent extends BaseComponent {
 
             this.clean.register(data.destroy);
             return data;
+
+        }).catch(err => {
+
+            throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${err.stack}`);
         });
 
         let overrides = RENDER_DRIVERS[context].renderToParentOverrides;
@@ -552,7 +557,20 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`render_${context}_to_parent`, { element, context });
 
-            this.delegateToParent(element, context);
+            this.delegate(getParentComponentWindow(), context);
+
+            return this.render(element, context);
+        });
+    }
+
+
+    renderTo(win, element, context, options = {}) {
+        return this.tryInit(() => {
+            context = this.validateRenderToParent(element, context);
+
+            this.component.log(`render_${context}_to_win`, { element, context });
+
+            this.delegate(win, context);
 
             return this.render(element, context);
         });
@@ -569,8 +587,11 @@ export class ParentComponent extends BaseComponent {
 
         this.closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
-            this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED).finally(() => {
-                this.destroy();
+
+            return Promise.try(() => {
+                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+            }).finally(() => {
+                return this.destroy();
             });
         });
 
@@ -582,7 +603,7 @@ export class ParentComponent extends BaseComponent {
             logger.flush();
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                this.destroy();
+                return this.destroy();
             }
         });
 
@@ -661,7 +682,7 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`hijack_submit_parent_form_${context}`);
 
-            this.delegateToParent(element, context);
+            this.delegate(getParentComponentWindow(), context);
 
             return this.preRender(element, context).then(() => {
                 this.runTimeout();
@@ -765,18 +786,6 @@ export class ParentComponent extends BaseComponent {
                 this.close(data.reason);
             },
 
-            [ POST_MESSAGE.DELEGATE ](source, data) {
-
-                let component = this.component.getByTag(data.tag);
-
-                let delegate  = component.delegate(data.options);
-
-                return {
-                    overrides: delegate.getOverrides(data.context),
-                    destroy:   () => delegate.clean.all()
-                };
-            },
-
             // Iframes can't resize themselves, so they need the parent to take care of it for them.
 
             [ POST_MESSAGE.RESIZE ](source, data) {
@@ -872,7 +881,9 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`close`, { reason });
 
-            this.props.onClose(reason);
+            return this.props.onClose(reason);
+
+        }).then(() => {
 
             return Promise.all([
                 this.closeComponent(),
@@ -881,14 +892,18 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            this.destroy();
+            return this.destroy();
         });
     }
 
 
     @memoize
-    closeParentTemplate() {
+    closeParentTemplate(reason = CLOSE_REASONS.PARENT_CALL) {
         return Promise.try(() => {
+
+            return this.props.onClose(reason);
+
+        }).then(() => {
 
             this.addCloseContainerClass();
 
@@ -898,17 +913,17 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            return this.closeComponent();
+            return this.closeComponent(reason);
 
         }).then(() => {
 
-            this.clean.run('closeParentTemplate');
+            return this.clean.run('destroyParentTemplate');
         });
     }
 
 
     @memoize
-    closeComponent() {
+    closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
 
         if (this.closeWindowListener) {
             this.closeWindowListener.cancel();
@@ -918,7 +933,13 @@ export class ParentComponent extends BaseComponent {
             this.unloadListener.cancel();
         }
 
+        let win = this.window;
+
         return Promise.try(() => {
+
+            return this.props.onClose(reason);
+
+        }).then(() => {
 
             this.addCloseComponentClass();
 
@@ -928,9 +949,9 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            let win = this.window;
+            return this.clean.run('destroyWindow');
 
-            this.clean.run('closeWindow');
+        }).then(() => {
 
             // IE in metro mode -- child window needs to close itself, or close will hang
 
@@ -1026,6 +1047,10 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
+            if (window.top !== window) {
+                // throw new Error(`Can only render parent template to top level window`);
+            }
+
             this.parentTemplate = createElement('div', {
 
                 html: template(parentTemplate, {
@@ -1052,7 +1077,7 @@ export class ParentComponent extends BaseComponent {
 
             addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose());
 
-            this.clean.register('closeParentTemplate', () => {
+            this.clean.register('destroyParentTemplate', () => {
                 document.body.removeChild(this.parentTemplate);
                 delete this.parentTemplate;
             });
@@ -1066,12 +1091,14 @@ export class ParentComponent extends BaseComponent {
         Close the component and clean up any listeners and state
     */
 
-    destroy(err) {
-        if (this.clean.hasTasks()) {
-            this.component.log(`destroy`);
-            logger.flush();
-            this.clean.all(err);
-        }
+    destroy() {
+        return Promise.try(() => {
+            if (this.clean.hasTasks()) {
+                this.component.log(`destroy`);
+                logger.flush();
+                return this.clean.all();
+            }
+        });
     }
 
 
@@ -1095,10 +1122,28 @@ export class ParentComponent extends BaseComponent {
     */
 
     error(err) {
-        this.component.logError(`error`, { error: err.stack || err.toString() });
-        this.onInit.reject(err);
-        this.destroy(err);
-        return this.props.onError(err);
+        return Promise.try(() => {
+
+            this.component.logError(`error`, { error: err.stack || err.toString() });
+            this.onInit.reject(err);
+            return this.props.onError(err);
+
+        }).then(() => {
+
+            return this.props.onError(err);
+
+        }).then(() => {
+
+            return this.destroy();
+
+        }).catch(err2 => {
+
+            throw new Error(`An error was encountered while handling error:\n\n ${err.stack}\n\n${err2.stack}`);
+
+        }).then(() => {
+
+            throw err;
+        });
     }
 }
 
@@ -1123,7 +1168,11 @@ for (let context of CONTEXT_TYPES_LIST) {
 }
 
 export function destroyAll() {
+    let results = [];
+
     while (activeComponents.length) {
-        activeComponents[0].destroy();
+        results.push(activeComponents[0].destroy());
     }
+
+    return Promise.all(results);
 }

@@ -18,6 +18,10 @@ export function normalizeProp(component, instance, props, key, value) {
         value = (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
     }
 
+    if (!value && prop.alias && props[prop.alias]) {
+        value = props[prop.alias];
+    }
+
     if (prop.decorate) {
         value = prop.decorate(value);
     }
@@ -31,7 +35,13 @@ export function normalizeProp(component, instance, props, key, value) {
             return;
         }
 
-        return getter((value instanceof Function ? value : () => value).bind(instance));
+        let result = getter((value instanceof Function ? value : () => value).bind(instance));
+
+        if (prop.memoize) {
+            result = memoize(result);
+        }
+
+        return result;
     }
 
     if (prop.type === 'boolean') {

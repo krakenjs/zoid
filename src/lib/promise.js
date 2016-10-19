@@ -44,10 +44,9 @@ export function promisify(method) {
 }
 
 export function getter(method) {
-    let prom;
 
     return function() {
-        prom = prom || new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let result = method.call(this, resolve, reject);
 
             if (result && result.then instanceof Function) {
@@ -58,8 +57,6 @@ export function getter(method) {
                 return resolve(result);
             }
         });
-
-        return prom;
     };
 }
 

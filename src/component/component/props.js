@@ -71,7 +71,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         noop: true,
-        memoize: true,
+        once: true,
         promisify: true
     },
 
@@ -97,8 +97,8 @@ export const internalProps = {
         required: false,
         promisify: true,
         def() {
-            return function(err) {
-                console.error(err.message, '\n', err.stack || err.toString());
+            return function() {
+                // pass
             };
         },
         once: true
