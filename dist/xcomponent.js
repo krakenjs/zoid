@@ -7860,7 +7860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _lib.logger.flush();
 
 	                if (_this13.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return _this13.destroy();
+	                    return _this13.destroyComponent();
 	                }
 	            });
 
@@ -8152,6 +8152,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
+	        key: 'destroyParentTemplate',
+	        value: function destroyParentTemplate() {
+
+	            return this.clean.run('destroyParentTemplate');
+	        }
+	    }, {
 	        key: 'closeComponent',
 	        value: function closeComponent() {
 	            var _this20 = this;
@@ -8181,7 +8187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }).then(function () {
 
-	                return _this20.clean.run('destroyWindow');
+	                return _this20.destroyComponent();
 	            }).then(function () {
 
 	                // IE in metro mode -- child window needs to close itself, or close will hang
@@ -8190,6 +8196,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this20.childExports.close()['catch'](_lib.noop);
 	                }
 	            });
+	        }
+	    }, {
+	        key: 'destroyComponent',
+	        value: function destroyComponent() {
+
+	            return this.clean.run('destroyWindow');
 	        }
 	    }, {
 	        key: 'addCloseContainerClass',
@@ -8528,8 +8540,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        closeComponent: _constants.DELEGATE.CALL_DELEGATE,
-	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        destroyComponent: _constants.DELEGATE.CALL_DELEGATE,
+	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
@@ -8660,7 +8672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
@@ -8668,7 +8680,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        open: _constants.DELEGATE.CALL_ORIGINAL,
 	        loadUrl: _constants.DELEGATE.CALL_ORIGINAL,
 	        createComponentTemplate: _constants.DELEGATE.CALL_ORIGINAL,
-	        closeComponent: _constants.DELEGATE.CALL_ORIGINAL,
+	        destroyComponent: _constants.DELEGATE.CALL_ORIGINAL,
 	        resize: _constants.DELEGATE.CALL_ORIGINAL,
 	        restyle: _constants.DELEGATE.CALL_ORIGINAL
 	    },
@@ -8685,8 +8697,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
-	        closeComponent: _constants.DELEGATE.CALL_DELEGATE,
-	        closeParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        destroyComponent: _constants.DELEGATE.CALL_DELEGATE,
+	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
