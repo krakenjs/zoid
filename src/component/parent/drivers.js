@@ -77,8 +77,8 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
-            closeComponent:          DELEGATE.CALL_DELEGATE,
-            closeParentTemplate:     DELEGATE.CALL_DELEGATE,
+            destroyComponent:        DELEGATE.CALL_DELEGATE,
+            destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
             addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
             addCloseComponentClass:  DELEGATE.CALL_DELEGATE,
@@ -217,7 +217,7 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:   DELEGATE.CALL_DELEGATE,
-            closeParentTemplate:    DELEGATE.CALL_DELEGATE,
+            destroyParentTemplate:  DELEGATE.CALL_DELEGATE,
             addCloseContainerClass: DELEGATE.CALL_DELEGATE,
             addCloseComponentClass: DELEGATE.CALL_DELEGATE,
             hide:                   DELEGATE.CALL_DELEGATE,
@@ -225,7 +225,7 @@ export let RENDER_DRIVERS = {
             open:                    DELEGATE.CALL_ORIGINAL,
             loadUrl:                 DELEGATE.CALL_ORIGINAL,
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
-            closeComponent:          DELEGATE.CALL_ORIGINAL,
+            destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
             restyle:                 DELEGATE.CALL_ORIGINAL
         },
@@ -246,8 +246,8 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
-            closeComponent:          DELEGATE.CALL_DELEGATE,
-            closeParentTemplate:     DELEGATE.CALL_DELEGATE,
+            destroyComponent:        DELEGATE.CALL_DELEGATE,
+            destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
             addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
             addCloseComponentClass:  DELEGATE.CALL_DELEGATE,

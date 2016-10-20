@@ -603,7 +603,7 @@ export class ParentComponent extends BaseComponent {
             logger.flush();
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                return this.destroy();
+                return this.destroyComponent();
             }
         });
 
@@ -921,6 +921,11 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    destroyParentTemplate() {
+
+        return this.clean.run('destroyParentTemplate');
+    }
+
 
     @memoize
     closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
@@ -949,7 +954,7 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            return this.clean.run('destroyWindow');
+            return this.destroyComponent();
 
         }).then(() => {
 
@@ -960,6 +965,11 @@ export class ParentComponent extends BaseComponent {
             }
 
         });
+    }
+
+    destroyComponent() {
+
+        return this.clean.run('destroyWindow');
     }
 
 
