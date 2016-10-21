@@ -421,6 +421,10 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
+            return this.showParentTemplate();
+
+        }).then(() => {
+
             return this.getDomain();
 
         }).then(domain => {
@@ -1025,6 +1029,8 @@ export class ParentComponent extends BaseComponent {
 
             });
 
+            this.parentTemplate.style.display = 'none';
+
             document.body.appendChild(this.parentTemplate);
 
             let eventHandlers = [];
@@ -1046,6 +1052,12 @@ export class ParentComponent extends BaseComponent {
                 delete this.parentTemplate;
             });
         });
+    }
+
+    showParentTemplate() {
+        if (this.parentTemplate) {
+            this.parentTemplate.style.display = 'block';
+        }
     }
 
     destroyParentTemplateEventHandlers() {

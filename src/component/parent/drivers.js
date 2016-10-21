@@ -43,10 +43,10 @@ export let RENDER_DRIVERS = {
                 throw new Error(`[${this.component.tag}] Can not find element ${element}`);
             }
 
-            this.iframe = iframe(element, null, {
+            this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            });
+            }, element);
 
             let dimensions = this.props.dimensions || this.component.dimensions || {};
             this.resize(dimensions.width, dimensions.height);
@@ -77,6 +77,7 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            showParentTemplate:      DELEGATE.CALL_DELEGATE,
             destroyComponent:        DELEGATE.CALL_DELEGATE,
             destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
@@ -219,6 +220,7 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:   DELEGATE.CALL_DELEGATE,
+            showParentTemplate:     DELEGATE.CALL_DELEGATE,
             destroyParentTemplate:  DELEGATE.CALL_DELEGATE,
             addCloseContainerClass: DELEGATE.CALL_DELEGATE,
             addCloseComponentClass: DELEGATE.CALL_DELEGATE,
@@ -250,6 +252,7 @@ export let RENDER_DRIVERS = {
         renderToParentOverrides: {
 
             createParentTemplate:    DELEGATE.CALL_DELEGATE,
+            showParentTemplate:      DELEGATE.CALL_DELEGATE,
             destroyComponent:        DELEGATE.CALL_DELEGATE,
             destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,

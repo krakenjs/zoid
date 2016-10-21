@@ -104,7 +104,7 @@ export function popup(url, options) {
     Open an iframe with the specified container, url, and option property map
 */
 
-export function iframe(container, url, options) {
+export function iframe(url, options, container) {
 
     container = getElement(container);
 
@@ -117,7 +117,9 @@ export function iframe(container, url, options) {
     frame.frameBorder = '0';
     frame.allowTransparency = 'true';
 
-    container.appendChild(frame);
+    if (container) {
+        container.appendChild(frame);
+    }
 
     return frame;
 }
