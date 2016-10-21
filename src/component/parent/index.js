@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -75,7 +75,7 @@ export class ParentComponent extends BaseComponent {
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
 
-        this.childWindowName = options.childWindowName || this.buildChildWindowName();
+        this.childWindowName = this.buildChildWindowName(WINDOW_REFERENCES.DIRECT_PARENT);
 
         this.component.log(`construct_parent`);
 
@@ -100,10 +100,9 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    buildChildWindowName(options = {}) {
+    buildChildWindowName(parent, options = {}) {
 
         let tag = this.component.tag;
-        let parent = window.name;
 
         let props = replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
             if (value instanceof Function) {
@@ -477,7 +476,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`delegate_${context}`);
 
-        this.childWindowName = this.buildChildWindowName({ secureProps: true });
+        this.childWindowName = this.buildChildWindowName(window.name, { secureProps: true });
 
         let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 

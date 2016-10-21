@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
-import { XCOMPONENT } from '../constants';
+import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 
 
 function normalize(str) {
@@ -112,8 +112,6 @@ export let getParentWindow = memoize(() => {
 
 export let getParentComponentWindow = memoize(() => {
 
-    // Get properties from the window name, passed down from our parent component
-
     let componentMeta = getComponentMeta();
 
     if (!componentMeta) {
@@ -122,22 +120,21 @@ export let getParentComponentWindow = memoize(() => {
 
     let parentWindow = getParentWindow();
 
-    // Use this to infer which window is our true 'parent component'. This can either be:
-    //
-    // - Our actual parent
-    // - A sibling which rendered us using renderToParent()
-
-    // TODO: add flag for delegate AND check parent window is xcomponent
-
-    if (parentWindow && componentMeta.parent) {
-        let parentFrame = postRobot.winutil.findFrameByName(parentWindow, componentMeta.parent);
-
-        if (parentFrame) {
-            return parentFrame;
-        }
+    if (!parentWindow) {
+        throw new Error(`Can not find parent window`);
     }
 
-    return parentWindow;
+    if (componentMeta.parent === WINDOW_REFERENCES.DIRECT_PARENT) {
+        return parentWindow;
+    }
+
+    let parentFrame = postRobot.winutil.findFrameByName(parentWindow, componentMeta.parent);
+
+    if (!parentFrame) {
+        throw new Error(`Can not find frame with name: ${componentMeta.parent}`);
+    }
+
+    return parentFrame;
 });
 
 
