@@ -7934,9 +7934,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                targetElement.target = _this15.childWindowName;
 
-	                return _this15.preRender(element, context).then(function () {
+	                return _promise.SyncPromise.all([_this15.preRender(element, context).then(function () {
 	                    _this15.runTimeout();
-	                });
+	                }), _this15.openBridge(context)]);
 	            });
 	        }
 
