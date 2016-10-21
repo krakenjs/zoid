@@ -279,13 +279,29 @@ export function createElement(tag = 'div', options = {}, container = null) {
 */
 
 export function addEventToClass(element, className, eventName, handler) {
+
+    let handlers = [];
+
     for (let el of Array.prototype.slice.call(element.getElementsByClassName(className))) {
-        el.addEventListener(eventName, event => {
+
+        let eventHandler = (event) => {
             event.preventDefault();
             event.stopPropagation();
             handler();
-        });
+        };
+
+        handlers.push({ el, eventHandler });
+
+        el.addEventListener(eventName, eventHandler);
     }
+
+    return {
+        cancel() {
+            for (let { el, eventHandler} of handlers) {
+                el.removeEventListener(eventName, eventHandler);
+            }
+        }
+    };
 }
 
 

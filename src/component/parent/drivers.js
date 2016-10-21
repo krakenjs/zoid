@@ -88,6 +88,8 @@ export let RENDER_DRIVERS = {
             loadUrl:                 DELEGATE.CALL_DELEGATE,
             hijackSubmit:            DELEGATE.CALL_DELEGATE,
 
+            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
+
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
@@ -222,6 +224,8 @@ export let RENDER_DRIVERS = {
             addCloseComponentClass: DELEGATE.CALL_DELEGATE,
             hide:                   DELEGATE.CALL_DELEGATE,
 
+            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
+
             open:                    DELEGATE.CALL_ORIGINAL,
             loadUrl:                 DELEGATE.CALL_ORIGINAL,
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
@@ -255,6 +259,8 @@ export let RENDER_DRIVERS = {
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
+
+            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
 
             open(original, override) {
                 return function() {

@@ -922,8 +922,8 @@ export class ParentComponent extends BaseComponent {
     }
 
     destroyParentTemplate() {
-
-        return this.clean.run('destroyParentTemplate');
+        this.clean.run('destroyParentTemplateEventHandlers');
+        this.clean.run('destroyParentTemplate');
     }
 
 
@@ -941,6 +941,10 @@ export class ParentComponent extends BaseComponent {
         let win = this.window;
 
         return Promise.try(() => {
+
+            return this.destroyParentTemplateEventHandlers();
+
+        }).then(() => {
 
             return this.props.onClose(reason);
 
@@ -968,8 +972,8 @@ export class ParentComponent extends BaseComponent {
     }
 
     destroyComponent() {
-
-        return this.clean.run('destroyWindow');
+        this.clean.run('destroyParentTemplateEventHandlers');
+        this.clean.run('destroyWindow');
     }
 
 
@@ -1081,17 +1085,29 @@ export class ParentComponent extends BaseComponent {
 
             document.body.appendChild(this.parentTemplate);
 
+            let eventHandlers = [];
+
             if (RENDER_DRIVERS[context].focusable) {
-                addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus());
+                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus()));
             }
 
-            addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose());
+            eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
+
+            this.clean.register('destroyParentTemplateEventHandlers', () => {
+                for (let eventHandler of eventHandlers) {
+                    eventHandler.cancel();
+                }
+            });
 
             this.clean.register('destroyParentTemplate', () => {
                 document.body.removeChild(this.parentTemplate);
                 delete this.parentTemplate;
             });
         });
+    }
+
+    destroyParentTemplateEventHandlers() {
+        this.clean.run('destroyParentTemplateEventHandlers');
     }
 
 
