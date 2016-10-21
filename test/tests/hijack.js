@@ -124,32 +124,4 @@ describe('xcomponent hijack', () => {
 
         link.click();
     });
-
-    it('should render a component by submitting a button from a child component', done => {
-
-        let form = document.createElement('form');
-        form.id = 'hijackForm';
-        form.method = 'POST';
-        form.action = '/base/test/child.htm?foo=xyzhijacktest';
-
-        document.body.appendChild(form);
-
-        testComponent.init({
-            sendUrl(url) {
-                assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
-                document.body.removeChild(form);
-                done();
-            },
-
-            run: `
-
-                var component = xcomponent.getByTag('test-component2').init({
-                    sendUrl: window.xprops.sendUrl,
-                    run: 'window.xprops.sendUrl(window.location.pathname + window.location.search);'
-                });
-
-                component.hijackSubmitParentForm();
-            `
-        }).renderIframe('#hijackForm');
-    });
 });

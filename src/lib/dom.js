@@ -195,25 +195,6 @@ export function addEventListener(obj, event, handler) {
     };
 }
 
-
-/*  Get Parent Node
-    ---------------
-
-    Get the parent element with the specified tag name
-*/
-
-export function getParentNode(el, tag) {
-    tag = tag.toLowerCase();
-
-    while (el.parentNode) {
-        el = el.parentNode;
-        if (el.tagName.toLowerCase() === tag) {
-            return el;
-        }
-    }
-}
-
-
 /*  Scan For Javascript
     -------------------
 

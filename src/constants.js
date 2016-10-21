@@ -12,8 +12,7 @@ export const POST_MESSAGE = {
     RESIZE: `${XCOMPONENT}_resize`,
     DELEGATE: `${XCOMPONENT}_delegate`,
     ERROR: `${XCOMPONENT}_error`,
-    HIDE: `${XCOMPONENT}_hide`,
-    SUBMIT_CONTAINER_FORM: `${XCOMPONENT}_submit_container_form`
+    HIDE: `${XCOMPONENT}_hide`
 };
 
 export const PROP_TYPES = {
@@ -27,6 +26,10 @@ export const PROP_TYPES = {
 export const INITIAL_PROPS = {
     RAW: 'raw',
     UID: 'uid'
+};
+
+export const WINDOW_REFERENCES = {
+    DIRECT_PARENT: `__direct_parent__`
 };
 
 export const PROP_TYPES_LIST = values(PROP_TYPES);

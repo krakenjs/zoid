@@ -5,7 +5,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, getParentNode, createElement, uniqueID, elementReady, noop,
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -665,62 +665,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Hijack Submit Parent Form
-        -------------------------
-
-        This takes the 'hijack' case a little further, and allows hijacking to work even when the button is actually
-        in a child component. So if the parent window has a form, and inside that form is a component, and inside that
-        component is a button, this can be used to submit the parent form using the child button and hijack the resulting
-        url into an xcomponent.
-
-        This is, again, an esoteric case within an esoteric case -- so probably only consider using it if you're sure you want to.
-    */
-
-    hijackSubmitParentForm(element, context) {
-        return this.tryInit(() => {
-            context = this.validateRenderToParent(element, context);
-
-            this.component.log(`hijack_submit_parent_form_${context}`);
-
-            this.delegate(getParentComponentWindow(), context);
-
-            return this.preRender(element, context).then(() => {
-                this.runTimeout();
-
-                return this.submitParentContainerForm(this.childWindowName);
-            });
-        });
-    }
-
-    getContainerForm() {
-
-        if (!this.iframe) {
-            throw new Error(`Can not do hijack submit without iframe based component`);
-        }
-
-        let form = getParentNode(this.iframe, 'form');
-
-        if (!form) {
-            throw new Error(`Can not find form as a parent of iframe`);
-        }
-
-        return form;
-    }
-
-    submitContainerForm(target) {
-
-        let form = this.getContainerForm();
-
-        form.setAttribute(`target`, target);
-        form.submit();
-    }
-
-    submitParentContainerForm(target) {
-
-        return this.sendToParent(POST_MESSAGE.SUBMIT_CONTAINER_FORM, { target });
-    }
-
-
     /*  Run Timeout
         -----------
 
@@ -809,12 +753,6 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.ERROR ](source, data) {
                 this.error(new Error(data.error));
-            },
-
-
-            [ POST_MESSAGE.SUBMIT_CONTAINER_FORM ](source, data) {
-
-                this.submitContainerForm(data.target);
             }
         };
     }
