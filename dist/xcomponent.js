@@ -5091,6 +5091,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function addEventToClass(element, className, eventName, handler) {
+
+	    var handlers = [];
+
 	    for (var _iterator3 = Array.prototype.slice.call(element.getElementsByClassName(className)), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
 	        var _ref3;
 
@@ -5105,12 +5108,40 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var el = _ref3;
 
-	        el.addEventListener(eventName, function (event) {
+
+	        var eventHandler = function eventHandler(event) {
 	            event.preventDefault();
 	            event.stopPropagation();
 	            handler();
-	        });
+	        };
+
+	        handlers.push({ el: el, eventHandler: eventHandler });
+
+	        el.addEventListener(eventName, eventHandler);
 	    }
+
+	    return {
+	        cancel: function cancel() {
+	            for (var _iterator4 = handlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	                var _ref4;
+
+	                if (_isArray4) {
+	                    if (_i4 >= _iterator4.length) break;
+	                    _ref4 = _iterator4[_i4++];
+	                } else {
+	                    _i4 = _iterator4.next();
+	                    if (_i4.done) break;
+	                    _ref4 = _i4.value;
+	                }
+
+	                var _ref5 = _ref4;
+	                var el = _ref5.el;
+	                var eventHandler = _ref5.eventHandler;
+
+	                el.removeEventListener(eventName, eventHandler);
+	            }
+	        }
+	    };
 	}
 
 	/*  Template
@@ -5137,19 +5168,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can not parse query string params: ' + queryString);
 	    }
 
-	    for (var _iterator4 = queryString.split('&'), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	        var _ref4;
+	    for (var _iterator5 = queryString.split('&'), _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	        var _ref6;
 
-	        if (_isArray4) {
-	            if (_i4 >= _iterator4.length) break;
-	            _ref4 = _iterator4[_i4++];
+	        if (_isArray5) {
+	            if (_i5 >= _iterator5.length) break;
+	            _ref6 = _iterator5[_i5++];
 	        } else {
-	            _i4 = _iterator4.next();
-	            if (_i4.done) break;
-	            _ref4 = _i4.value;
+	            _i5 = _iterator5.next();
+	            if (_i5.done) break;
+	            _ref6 = _i5.value;
 	        }
 
-	        var pair = _ref4;
+	        var pair = _ref6;
 
 	        pair = pair.split('=');
 
@@ -5305,19 +5336,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	function changeStyle(el, styles) {
 	    return new _promise.SyncPromise(function (resolve) {
 
-	        for (var _iterator5 = Object.keys(styles), _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
-	            var _ref5;
+	        for (var _iterator6 = Object.keys(styles), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
+	            var _ref7;
 
-	            if (_isArray5) {
-	                if (_i5 >= _iterator5.length) break;
-	                _ref5 = _iterator5[_i5++];
+	            if (_isArray6) {
+	                if (_i6 >= _iterator6.length) break;
+	                _ref7 = _iterator6[_i6++];
 	            } else {
-	                _i5 = _iterator5.next();
-	                if (_i5.done) break;
-	                _ref5 = _i5.value;
+	                _i6 = _iterator6.next();
+	                if (_i6.done) break;
+	                _ref7 = _i6.value;
 	            }
 
-	            var key = _ref5;
+	            var key = _ref7;
 
 	            el.style[key] = styles[key];
 	        }
@@ -8154,8 +8185,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroyParentTemplate',
 	        value: function destroyParentTemplate() {
-
-	            return this.clean.run('destroyParentTemplate');
+	            this.clean.run('destroyParentTemplateEventHandlers');
+	            this.clean.run('destroyParentTemplate');
 	        }
 	    }, {
 	        key: 'closeComponent',
@@ -8176,6 +8207,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var win = this.window;
 
 	            return _promise.SyncPromise['try'](function () {
+
+	                return _this20.destroyParentTemplateEventHandlers();
+	            }).then(function () {
 
 	                return _this20.props.onClose(reason);
 	            }).then(function () {
@@ -8200,8 +8234,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroyComponent',
 	        value: function destroyComponent() {
-
-	            return this.clean.run('destroyWindow');
+	            this.clean.run('destroyParentTemplateEventHandlers');
+	            this.clean.run('destroyWindow');
 	        }
 	    }, {
 	        key: 'addCloseContainerClass',
@@ -8311,14 +8345,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                document.body.appendChild(_this21.parentTemplate);
 
+	                var eventHandlers = [];
+
 	                if (_drivers.RENDER_DRIVERS[context].focusable) {
-	                    (0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
 	                        return _this21.focus();
-	                    });
+	                    }));
 	                }
 
-	                (0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
 	                    return _this21.userClose();
+	                }));
+
+	                _this21.clean.register('destroyParentTemplateEventHandlers', function () {
+	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	                        var _ref8;
+
+	                        if (_isArray4) {
+	                            if (_i5 >= _iterator4.length) break;
+	                            _ref8 = _iterator4[_i5++];
+	                        } else {
+	                            _i5 = _iterator4.next();
+	                            if (_i5.done) break;
+	                            _ref8 = _i5.value;
+	                        }
+
+	                        var eventHandler = _ref8;
+
+	                        eventHandler.cancel();
+	                    }
 	                });
 
 	                _this21.clean.register('destroyParentTemplate', function () {
@@ -8326,6 +8381,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    delete _this21.parentTemplate;
 	                });
 	            });
+	        }
+	    }, {
+	        key: 'destroyParentTemplateEventHandlers',
+	        value: function destroyParentTemplateEventHandlers() {
+	            this.clean.run('destroyParentTemplateEventHandlers');
 	        }
 
 	        /*  Destroy
@@ -8402,16 +8462,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	var _loop3 = function _loop3() {
-	    if (_isArray4) {
-	        if (_i5 >= _iterator4.length) return 'break';
-	        _ref8 = _iterator4[_i5++];
+	    if (_isArray5) {
+	        if (_i6 >= _iterator5.length) return 'break';
+	        _ref9 = _iterator5[_i6++];
 	    } else {
-	        _i5 = _iterator4.next();
-	        if (_i5.done) return 'break';
-	        _ref8 = _i5.value;
+	        _i6 = _iterator5.next();
+	        if (_i6.done) return 'break';
+	        _ref9 = _i6.value;
 	    }
 
-	    var context = _ref8;
+	    var context = _ref9;
 
 
 	    var contextName = (0, _lib.capitalizeFirstLetter)(context);
@@ -8425,8 +8485,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	};
 
-	for (var _iterator4 = _constants.CONTEXT_TYPES_LIST, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	    var _ref8;
+	for (var _iterator5 = _constants.CONTEXT_TYPES_LIST, _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	    var _ref9;
 
 	    var _ret2 = _loop3();
 
@@ -8550,6 +8610,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
 	        loadUrl: _constants.DELEGATE.CALL_DELEGATE,
 	        hijackSubmit: _constants.DELEGATE.CALL_DELEGATE,
+
+	        destroyParentTemplateEventHandlers: _constants.DELEGATE.CALL_DELEGATE,
 
 	        open: function open(original, override) {
 	            return function () {
@@ -8677,6 +8739,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
 
+	        destroyParentTemplateEventHandlers: _constants.DELEGATE.CALL_DELEGATE,
+
 	        open: _constants.DELEGATE.CALL_ORIGINAL,
 	        loadUrl: _constants.DELEGATE.CALL_ORIGINAL,
 	        createComponentTemplate: _constants.DELEGATE.CALL_ORIGINAL,
@@ -8706,6 +8770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        resize: _constants.DELEGATE.CALL_DELEGATE,
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
 	        loadUrl: _constants.DELEGATE.CALL_DELEGATE,
+
+	        destroyParentTemplateEventHandlers: _constants.DELEGATE.CALL_DELEGATE,
 
 	        open: function open(original, override) {
 	            return function () {
