@@ -299,7 +299,7 @@ export class ParentComponent extends BaseComponent {
     getRenderContext(el, context) {
 
         if (el) {
-            if (context && context !== CONTEXT_TYPES.IFRAME) {
+            if (context && !RENDER_DRIVERS[context].requiresElement) {
                 throw new Error(`[${this.component.tag}] ${context} context can not be rendered into element`);
             }
 
@@ -606,7 +606,7 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`navigate_away`);
             logger.flush();
 
-            if (this.context === CONTEXT_TYPES.POPUP) {
+            if (RENDER_DRIVERS[this.context].destroyOnUnload) {
                 return this.destroyComponent();
             }
         });
@@ -745,11 +745,9 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.RESIZE ](source, data) {
 
-                if (this.context === CONTEXT_TYPES.POPUP) {
-                    return;
+                if (RENDER_DRIVERS[this.context].allowResize) {
+                    return this.resize(data.width, data.height);
                 }
-
-                return this.resize(data.width, data.height);
             },
 
 
@@ -901,7 +899,7 @@ export class ParentComponent extends BaseComponent {
 
             this.addCloseComponentClass();
 
-            if (this.component.closeComponentDelay && this.context !== CONTEXT_TYPES.POPUP) {
+            if (this.component.closeComponentDelay && RENDER_DRIVERS[this.context].allowCloseDelay) {
                 return delay(this.component.closeComponentDelay);
             }
 

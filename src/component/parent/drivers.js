@@ -32,6 +32,9 @@ export let RENDER_DRIVERS = {
         parentTemplate: false,
         requiresElement: true,
         renderedIntoParentTemplate: false,
+        destroyOnUnload: false,
+        allowResize: true,
+        allowCloseDelay: true,
 
         open(element) {
 
@@ -139,6 +142,9 @@ export let RENDER_DRIVERS = {
         focusable: true,
         requiresElement: false,
         renderedIntoParentTemplate: false,
+        destroyOnUnload: true,
+        allowResize: false,
+        allowCloseDelay: false,
 
         open() {
 
@@ -248,6 +254,9 @@ export let RENDER_DRIVERS = {
         parentTemplate: true,
         requiresElement: false,
         renderedIntoParentTemplate: true,
+        destroyOnUnload: false,
+        allowResize: true,
+        allowCloseDelay: true,
 
         renderToParentOverrides: {
 
