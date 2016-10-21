@@ -20,10 +20,10 @@ export class DelegateComponent extends BaseComponent {
             onClose:    options.props.onClose
         };
 
-
         this.focus     = options.overrides.focus;
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;
+        this.getParentTemplate = options.overrides.getParentTemplate;
 
         let renderToParentOverrides = RENDER_DRIVERS[options.context].renderToParentOverrides;
 

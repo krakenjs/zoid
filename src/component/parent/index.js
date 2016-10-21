@@ -30,8 +30,6 @@ function memoize(target, name, descriptor) {
     };
 }
 
-/*
-
 function promise(target, name, descriptor) {
     let method = descriptor.value;
 
@@ -41,8 +39,6 @@ function promise(target, name, descriptor) {
         });
     };
 }
-
-*/
 
 
 /*  Parent Component
@@ -495,9 +491,10 @@ export class ParentComponent extends BaseComponent {
                 },
 
                 overrides: {
-                    focus:     () => this.focus(),
-                    userClose: () => this.userClose(),
-                    getDomain: () => this.getDomain()
+                    focus:             () => this.focus(),
+                    userClose:         () => this.userClose(),
+                    getDomain:         () => this.getDomain(),
+                    getParentTemplate: () => this.getParentTemplate()
                 }
             }
 
@@ -979,6 +976,12 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    @promise
+    getParentTemplate() {
+        return this.component.parentTemplate;
+    }
+
+
     /*  Create Parent Template
         ----------------------
 
@@ -992,7 +995,9 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
-            let parentTemplate = this.component.parentTemplate;
+            return this.getParentTemplate();
+
+        }).then(parentTemplate => {
 
             if (!parentTemplate) {
                 return;
