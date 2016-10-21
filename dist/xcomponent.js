@@ -4891,7 +4891,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Open an iframe with the specified container, url, and option property map
 	*/
 
-	function iframe(container, url, options) {
+	function iframe(url, options, container) {
 
 	    container = getElement(container);
 
@@ -4917,7 +4917,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    frame.frameBorder = '0';
 	    frame.allowTransparency = 'true';
 
-	    container.appendChild(frame);
+	    if (container) {
+	        container.appendChild(frame);
+	    }
 
 	    return frame;
 	}
@@ -7649,6 +7651,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _promise.SyncPromise.all([_this8.open(element, context), _this8.createParentTemplate(context)]);
 	            }).then(function () {
 
+	                return _this8.showParentTemplate();
+	            }).then(function () {
+
 	                return _this8.getDomain();
 	            }).then(function (domain) {
 
@@ -8269,6 +8274,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                });
 
+	                _this21.parentTemplate.style.display = 'none';
+
 	                document.body.appendChild(_this21.parentTemplate);
 
 	                var eventHandlers = [];
@@ -8307,6 +8314,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    delete _this21.parentTemplate;
 	                });
 	            });
+	        }
+	    }, {
+	        key: 'showParentTemplate',
+	        value: function showParentTemplate() {
+	            if (this.parentTemplate) {
+	                this.parentTemplate.style.display = 'block';
+	            }
 	        }
 	    }, {
 	        key: 'destroyParentTemplateEventHandlers',
@@ -8494,10 +8508,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('[' + this.component.tag + '] Can not find element ' + element);
 	        }
 
-	        this.iframe = (0, _lib.iframe)(element, null, {
+	        this.iframe = (0, _lib.iframe)(null, {
 	            name: this.childWindowName,
 	            scrolling: this.component.scrolling === false ? 'no' : 'yes'
-	        });
+	        }, element);
 
 	        var dimensions = this.props.dimensions || this.component.dimensions || {};
 	        this.resize(dimensions.width, dimensions.height);
@@ -8526,6 +8540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        showParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
@@ -8660,6 +8675,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        showParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseContainerClass: _constants.DELEGATE.CALL_DELEGATE,
 	        addCloseComponentClass: _constants.DELEGATE.CALL_DELEGATE,
@@ -8687,6 +8703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderToParentOverrides: {
 
 	        createParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        showParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyParentTemplate: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
