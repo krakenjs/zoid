@@ -658,9 +658,16 @@ export class ParentComponent extends BaseComponent {
 
             targetElement.target = this.childWindowName;
 
-            return this.preRender(element, context).then(() => {
-                this.runTimeout();
-            });
+            return Promise.all([
+
+                this.preRender(element, context).then(() => {
+                    this.runTimeout();
+                }),
+
+                this.openBridge(context)
+            ]);
+
+
         });
     }
 
