@@ -219,6 +219,10 @@ export class ParentComponent extends BaseComponent {
             return this.component.domains[this.props.env];
         }
 
+        if (this.props.url) {
+            return getDomainFromUrl(this.props.url);
+        }
+
         if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
             return getDomainFromUrl(this.component.envUrls[this.props.env]);
         }
