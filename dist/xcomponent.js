@@ -7209,19 +7209,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	/*
-
 	function promise(target, name, descriptor) {
-	    let method = descriptor.value;
+	    var method = descriptor.value;
 
-	    descriptor.value = function() {
-	        return Promise.try(() => {
-	            return method.apply(this, arguments);
+	    descriptor.value = function () {
+	        var _this = this,
+	            _arguments = arguments;
+
+	        return _promise.SyncPromise['try'](function () {
+	            return method.apply(_this, _arguments);
 	        });
 	    };
 	}
-
-	*/
 
 	/*  Parent Component
 	    ----------------
@@ -7239,11 +7238,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _classCallCheck(this, ParentComponent);
 
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ParentComponent).call(this, component, options));
+	        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(ParentComponent).call(this, component, options));
 
 	        (0, _validate.validate)(component, options);
 
-	        _this.component = component;
+	        _this2.component = component;
 
 	        // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -7253,38 +7252,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error(component.tag + ' is a singleton, and an only be instantiated once');
 	        }
 
-	        _this.registerActiveComponent();
+	        _this2.registerActiveComponent();
 
-	        _this.setProps(options.props || {});
+	        _this2.setProps(options.props || {});
 
 	        // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
 	        // them only when we're trying to render from a sibling to a sibling
 
-	        _this.childWindowName = _this.buildChildWindowName(_constants.WINDOW_REFERENCES.DIRECT_PARENT);
+	        _this2.childWindowName = _this2.buildChildWindowName(_constants.WINDOW_REFERENCES.DIRECT_PARENT);
 
-	        _this.component.log('construct_parent');
+	        _this2.component.log('construct_parent');
 
-	        _this.onInit = new _promise.SyncPromise();
+	        _this2.onInit = new _promise.SyncPromise();
 
-	        _this.clean.register(function () {
-	            _this.onInit = new _promise.SyncPromise();
+	        _this2.clean.register(function () {
+	            _this2.onInit = new _promise.SyncPromise();
 	        });
 
-	        _this.onInit['catch'](function (err) {
-	            return _this.error(err);
+	        _this2.onInit['catch'](function (err) {
+	            return _this2.error(err);
 	        });
-	        return _this;
+	        return _this2;
 	    }
 
 	    _createClass(ParentComponent, [{
 	        key: 'registerActiveComponent',
 	        value: function registerActiveComponent() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            activeComponents.push(this);
 
 	            this.clean.register(function () {
-	                activeComponents.splice(activeComponents.indexOf(_this2), 1);
+	                activeComponents.splice(activeComponents.indexOf(_this3), 1);
 	            });
 	        }
 	    }, {
@@ -7375,7 +7374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'buildUrl',
 	        value: function buildUrl() {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            return (0, _props.propsToQuery)(this.component.props, this.props).then(function (queryProps) {
 
@@ -7383,20 +7382,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _promise.SyncPromise.resolve().then(function () {
 
-	                    if (_this3.props.url) {
-	                        return _this3.props.url;
+	                    if (_this4.props.url) {
+	                        return _this4.props.url;
 	                    }
 	                }).then(function (url) {
 
 	                    if (!url) {
-	                        if (_this3.props.env && _this3.component.envUrls) {
-	                            url = _this3.component.envUrls[_this3.props.env];
-	                        } else if (_this3.component.defaultEnv && _this3.component.envUrls) {
-	                            url = _this3.component.envUrls[_this3.component.defaultEnv];
-	                        } else if (_this3.component.buildUrl) {
-	                            url = _this3.component.buildUrl(_this3);
+	                        if (_this4.props.env && _this4.component.envUrls) {
+	                            url = _this4.component.envUrls[_this4.props.env];
+	                        } else if (_this4.component.defaultEnv && _this4.component.envUrls) {
+	                            url = _this4.component.envUrls[_this4.component.defaultEnv];
+	                        } else if (_this4.component.buildUrl) {
+	                            url = _this4.component.buildUrl(_this4);
 	                        } else {
-	                            url = _this3.component.url;
+	                            url = _this4.component.url;
 	                        }
 	                    }
 
@@ -7472,7 +7471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps() {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7494,7 +7493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    var key = _ref2;
 
-	                    if (props[key] !== _this4.props[key]) {
+	                    if (props[key] !== _this5.props[key]) {
 	                        changed = true;
 	                        break;
 	                    }
@@ -7504,10 +7503,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 
-	                _this4.setProps(props, false);
+	                _this5.setProps(props, false);
 
-	                return _this4.onInit.then(function () {
-	                    return _this4.childExports.updateProps(_this4.getPropsForChild(props));
+	                return _this5.onInit.then(function () {
+	                    return _this5.childExports.updateProps(_this5.getPropsForChild(props));
 	                });
 	            });
 	        }
@@ -7585,15 +7584,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render(element, context) {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            return this.tryInit(function () {
-	                context = _this5.validateRender(element, context);
+	                context = _this6.validateRender(element, context);
 
-	                _this5.component.log('render_' + context, { context: context, element: element });
+	                _this6.component.log('render_' + context, { context: context, element: element });
 
-	                return _this5.preRender(element, context).then(function () {
-	                    return _this5.postRender(element, context);
+	                return _this6.preRender(element, context).then(function () {
+	                    return _this6.postRender(element, context);
 	                });
 	            });
 	        }
@@ -7611,12 +7610,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'open',
 	        value: function open(element, context) {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this6.component.log('open_' + context, { element: element, windowName: _this6.childWindowName });
+	                _this7.component.log('open_' + context, { element: element, windowName: _this7.childWindowName });
 
-	                _drivers.RENDER_DRIVERS[context].open.call(_this6, element);
+	                _drivers.RENDER_DRIVERS[context].open.call(_this7, element);
 	            });
 	        }
 
@@ -7628,13 +7627,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'preRender',
 	        value: function preRender(element, context) {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                context = _this7.getRenderContext(element, context);
+	                context = _this8.getRenderContext(element, context);
 
-	                _this7.clean.set('context', context);
+	                _this8.clean.set('context', context);
 
 	                if (element) {
 	                    return (0, _lib.elementReady)(element);
@@ -7642,28 +7641,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }).then(function () {
 
 	                if (_drivers.RENDER_DRIVERS[context].renderedIntoParentTemplate) {
-	                    return _this7.createParentTemplate(context).then(function () {
-	                        return _this7.open(element, context);
+	                    return _this8.createParentTemplate(context).then(function () {
+	                        return _this8.open(element, context);
 	                    });
 	                }
 
-	                return _promise.SyncPromise.all([_this7.open(element, context), _this7.createParentTemplate(context)]);
+	                return _promise.SyncPromise.all([_this8.open(element, context), _this8.createParentTemplate(context)]);
 	            }).then(function () {
 
-	                return _this7.getDomain();
+	                return _this8.getDomain();
 	            }).then(function (domain) {
 
-	                _this7.watchForClose();
-	                _this7.createComponentTemplate();
+	                _this8.watchForClose();
+	                _this8.createComponentTemplate();
 
-	                _src2['default'].linkUrl(_this7.window, domain);
-	                _this7.listen(_this7.window, domain);
+	                _src2['default'].linkUrl(_this8.window, domain);
+	                _this8.listen(_this8.window, domain);
 	            });
 	        }
 	    }, {
 	        key: 'postRender',
 	        value: function postRender(element, context) {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return _promise.SyncPromise.all([this.openBridge(context), this.buildUrl()]).then(function (_ref3) {
 	                var _ref4 = _slicedToArray(_ref3, 2);
@@ -7672,8 +7671,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var url = _ref4[1];
 
 
-	                _this8.loadUrl(context, url);
-	                _this8.runTimeout();
+	                _this9.loadUrl(context, url);
+	                _this9.runTimeout();
 	            });
 	        }
 	    }, {
@@ -7696,7 +7695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'delegate',
 	        value: function delegate(win, context) {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            this.delegateWindow = win;
 
@@ -7722,13 +7721,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    overrides: {
 	                        focus: function focus() {
-	                            return _this9.focus();
+	                            return _this10.focus();
 	                        },
 	                        userClose: function userClose() {
-	                            return _this9.userClose();
+	                            return _this10.userClose();
 	                        },
 	                        getDomain: function getDomain() {
-	                            return _this9.getDomain();
+	                            return _this10.getDomain();
+	                        },
+	                        getParentTemplate: function getParentTemplate() {
+	                            return _this10.getParentTemplate();
 	                        }
 	                    }
 	                }
@@ -7737,7 +7739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var data = _ref5.data;
 
 
-	                _this9.clean.register(data.destroy);
+	                _this10.clean.register(data.destroy);
 	                return data;
 	            })['catch'](function (err) {
 
@@ -7764,22 +7766,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return 'continue';
 	                }
 
-	                var original = _this9[key];
+	                var original = _this10[key];
 
-	                _this9[key] = function () {
-	                    var _this10 = this,
-	                        _arguments = arguments;
+	                _this10[key] = function () {
+	                    var _this11 = this,
+	                        _arguments2 = arguments;
 
 	                    return delegate.then(function (data) {
 
 	                        var override = data.overrides[key];
 
 	                        if (val === _constants.DELEGATE.CALL_DELEGATE) {
-	                            return override.apply(_this10, _arguments);
+	                            return override.apply(_this11, _arguments2);
 	                        }
 
 	                        if (val instanceof Function) {
-	                            return val(original, override).apply(_this10, _arguments);
+	                            return val(original, override).apply(_this11, _arguments2);
 	                        }
 
 	                        throw new Error('Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method');
@@ -7811,35 +7813,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            return this.tryInit(function () {
-	                context = _this11.validateRenderToParent(element, context);
+	                context = _this12.validateRenderToParent(element, context);
 
-	                _this11.component.log('render_' + context + '_to_parent', { element: element, context: context });
+	                _this12.component.log('render_' + context + '_to_parent', { element: element, context: context });
 
-	                _this11.delegate((0, _window.getParentComponentWindow)(), context);
+	                _this12.delegate((0, _window.getParentComponentWindow)(), context);
 
-	                return _this11.render(element, context);
+	                return _this12.render(element, context);
 	            });
 	        }
 	    }, {
 	        key: 'renderTo',
 	        value: function renderTo(win, element, context) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
 	            return this.tryInit(function () {
-	                context = _this12.validateRenderToParent(element, context);
+	                context = _this13.validateRenderToParent(element, context);
 
-	                _this12.component.log('render_' + context + '_to_win', { element: element, context: context });
+	                _this13.component.log('render_' + context + '_to_win', { element: element, context: context });
 
-	                _this12.delegate(win, context);
+	                _this13.delegate(win, context);
 
-	                return _this12.render(element, context);
+	                return _this13.render(element, context);
 	            });
 	        }
 
@@ -7852,15 +7854,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            this.closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this13.component.log('detect_close_child');
+	                _this14.component.log('detect_close_child');
 
 	                return _promise.SyncPromise['try'](function () {
-	                    return _this13.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
+	                    return _this14.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
 	                })['finally'](function () {
-	                    return _this13.destroy();
+	                    return _this14.destroy();
 	                });
 	            });
 
@@ -7868,24 +7870,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // and close the child manually if that happens.
 
 	            this.unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this13.component.log('navigate_away');
+	                _this14.component.log('navigate_away');
 	                _lib.logger.flush();
 
-	                if (_this13.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return _this13.destroyComponent();
+	                if (_this14.context === _constants.CONTEXT_TYPES.POPUP) {
+	                    return _this14.destroyComponent();
 	                }
 	            });
 
 	            this.clean.register(function () {
 
-	                if (_this13.closeWindowListener) {
-	                    _this13.closeWindowListener.cancel();
-	                    delete _this13.closeWindowListener;
+	                if (_this14.closeWindowListener) {
+	                    _this14.closeWindowListener.cancel();
+	                    delete _this14.closeWindowListener;
 	                }
 
-	                if (_this13.unloadListener) {
-	                    _this13.unloadListener.cancel();
-	                    delete _this13.unloadListener;
+	                if (_this14.unloadListener) {
+	                    _this14.unloadListener.cancel();
+	                    delete _this14.unloadListener;
 	                }
 	            });
 	        }
@@ -7918,17 +7920,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return this.tryInit(function () {
-	                context = _this14.validateRender(element, context);
+	                context = _this15.validateRender(element, context);
 
-	                _this14.component.log('render_hijack_' + context);
+	                _this15.component.log('render_hijack_' + context);
 
-	                targetElement.target = _this14.childWindowName;
+	                targetElement.target = _this15.childWindowName;
 
-	                return _this14.preRender(element, context).then(function () {
-	                    _this14.runTimeout();
+	                return _this15.preRender(element, context).then(function () {
+	                    _this15.runTimeout();
 	                });
 	            });
 	        }
@@ -7941,18 +7943,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this15.component.tag + '] Loading component ' + _this15.component.tag + ' timed out after ' + _this15.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this16.component.tag + '] Loading component ' + _this16.component.tag + ' timed out after ' + _this16.props.timeout + ' milliseconds');
 
-	                    _this15.onInit.reject(error)['catch'](function (err) {
-	                        return _this15.props.onTimeout(err)['finally'](function () {
-	                            _this15.component.log('timed_out', { timeout: _this15.props.timeout });
+	                    _this16.onInit.reject(error)['catch'](function (err) {
+	                        return _this16.props.onTimeout(err)['finally'](function () {
+	                            _this16.component.log('timed_out', { timeout: _this16.props.timeout });
 	                        });
 	                    });
 	                }, this.props.timeout);
@@ -7970,7 +7972,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ref7;
 
 	            return _ref7 = {}, _defineProperty(_ref7, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                var _this16 = this;
+	                var _this17 = this;
 
 	                this.childExports = data.exports;
 
@@ -7982,8 +7984,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _lib.logger.flush();
 
 	                    return {
-	                        props: _this16.getPropsForChild(),
-	                        context: _this16.context
+	                        props: _this17.getPropsForChild(),
+	                        context: _this17.context
 	                    };
 	                });
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.CLOSE, function (source, data) {
@@ -8058,46 +8060,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this17 = this;
-
-	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
-
-	            return _promise.SyncPromise['try'](function () {
-
-	                _this17.component.log('close', { reason: reason });
-
-	                return _this17.props.onClose(reason);
-	            }).then(function () {
-
-	                return _promise.SyncPromise.all([_this17.closeComponent(), _this17.closeParentTemplate()]);
-	            }).then(function () {
-
-	                return _this17.destroy();
-	            });
-	        }
-	    }, {
-	        key: 'closeParentTemplate',
-	        value: function closeParentTemplate() {
 	            var _this18 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 	            return _promise.SyncPromise['try'](function () {
 
+	                _this18.component.log('close', { reason: reason });
+
 	                return _this18.props.onClose(reason);
 	            }).then(function () {
 
-	                _this18.addCloseContainerClass();
+	                return _promise.SyncPromise.all([_this18.closeComponent(), _this18.closeParentTemplate()]);
+	            }).then(function () {
 
-	                if (_this18.component.closeDelay) {
-	                    return (0, _lib.delay)(_this18.component.closeDelay);
+	                return _this18.destroy();
+	            });
+	        }
+	    }, {
+	        key: 'closeParentTemplate',
+	        value: function closeParentTemplate() {
+	            var _this19 = this;
+
+	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
+
+	            return _promise.SyncPromise['try'](function () {
+
+	                return _this19.props.onClose(reason);
+	            }).then(function () {
+
+	                _this19.addCloseContainerClass();
+
+	                if (_this19.component.closeDelay) {
+	                    return (0, _lib.delay)(_this19.component.closeDelay);
 	                }
 	            }).then(function () {
 
-	                return _this18.closeComponent(reason);
+	                return _this19.closeComponent(reason);
 	            }).then(function () {
 
-	                return _this18.clean.run('destroyParentTemplate');
+	                return _this19.clean.run('destroyParentTemplate');
 	            });
 	        }
 	    }, {
@@ -8109,7 +8111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'closeComponent',
 	        value: function closeComponent() {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
@@ -8126,26 +8128,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                return _this19.destroyParentTemplateEventHandlers();
+	                return _this20.destroyParentTemplateEventHandlers();
 	            }).then(function () {
 
-	                return _this19.props.onClose(reason);
+	                return _this20.props.onClose(reason);
 	            }).then(function () {
 
-	                _this19.addCloseComponentClass();
+	                _this20.addCloseComponentClass();
 
-	                if (_this19.component.closeComponentDelay && _this19.context !== _constants.CONTEXT_TYPES.POPUP) {
-	                    return (0, _lib.delay)(_this19.component.closeComponentDelay);
+	                if (_this20.component.closeComponentDelay && _this20.context !== _constants.CONTEXT_TYPES.POPUP) {
+	                    return (0, _lib.delay)(_this20.component.closeComponentDelay);
 	                }
 	            }).then(function () {
 
-	                return _this19.destroyComponent();
+	                return _this20.destroyComponent();
 	            }).then(function () {
 
 	                // IE in metro mode -- child window needs to close itself, or close will hang
 
-	                if (_this19.childExports && _this19.context === _constants.CONTEXT_TYPES.POPUP && !(0, _lib.isWindowClosed)(win)) {
-	                    _this19.childExports.close()['catch'](_lib.noop);
+	                if (_this20.childExports && _this20.context === _constants.CONTEXT_TYPES.POPUP && !(0, _lib.isWindowClosed)(win)) {
+	                    _this20.childExports.close()['catch'](_lib.noop);
 	                }
 	            });
 	        }
@@ -8219,6 +8221,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
+	    }, {
+	        key: 'getParentTemplate',
+	        value: function getParentTemplate() {
+	            return this.component.parentTemplate;
+	        }
 
 	        /*  Create Parent Template
 	            ----------------------
@@ -8228,7 +8235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
@@ -8236,7 +8243,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 
-	                var parentTemplate = _this20.component.parentTemplate;
+	                return _this21.getParentTemplate();
+	            }).then(function (parentTemplate) {
 
 	                if (!parentTemplate) {
 	                    return;
@@ -8246,36 +8254,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // throw new Error(`Can only render parent template to top level window`);
 	                }
 
-	                _this20.parentTemplate = (0, _lib.createElement)('div', {
+	                _this21.parentTemplate = (0, _lib.createElement)('div', {
 
 	                    html: (0, _lib.template)(parentTemplate, {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid,
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid,
 	                        CLASS: _constants.CLASS_NAMES
 	                    }),
 
 	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid
 	                    },
 
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.context]
+	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.context]
 
 	                });
 
-	                document.body.appendChild(_this20.parentTemplate);
+	                document.body.appendChild(_this21.parentTemplate);
 
 	                var eventHandlers = [];
 
 	                if (_drivers.RENDER_DRIVERS[context].focusable) {
-	                    eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this20.focus();
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this21.focus();
 	                    }));
 	                }
 
-	                eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this20.userClose();
+	                eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    return _this21.userClose();
 	                }));
 
-	                _this20.clean.register('destroyParentTemplateEventHandlers', function () {
+	                _this21.clean.register('destroyParentTemplateEventHandlers', function () {
 	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	                        var _ref8;
 
@@ -8294,9 +8302,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 
-	                _this20.clean.register('destroyParentTemplate', function () {
-	                    document.body.removeChild(_this20.parentTemplate);
-	                    delete _this20.parentTemplate;
+	                _this21.clean.register('destroyParentTemplate', function () {
+	                    document.body.removeChild(_this21.parentTemplate);
+	                    delete _this21.parentTemplate;
 	                });
 	            });
 	        }
@@ -8314,28 +8322,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return _promise.SyncPromise['try'](function () {
-	                if (_this21.clean.hasTasks()) {
-	                    _this21.component.log('destroy');
+	                if (_this22.clean.hasTasks()) {
+	                    _this22.component.log('destroy');
 	                    _lib.logger.flush();
-	                    return _this21.clean.all();
+	                    return _this22.clean.all();
 	                }
 	            });
 	        }
 	    }, {
 	        key: 'tryInit',
 	        value: function tryInit(method) {
-	            var _this22 = this;
+	            var _this23 = this;
 
 	            return _promise.SyncPromise.resolve().then(method)['catch'](function (err) {
 
-	                _this22.onInit.reject(err);
+	                _this23.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this22.onInit;
+	                return _this23.onInit;
 	            });
 	        }
 
@@ -8347,19 +8355,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'error',
 	        value: function error(err) {
-	            var _this23 = this;
+	            var _this24 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                _this23.component.logError('error', { error: err.stack || err.toString() });
-	                _this23.onInit.reject(err);
-	                return _this23.props.onError(err);
+	                _this24.component.logError('error', { error: err.stack || err.toString() });
+	                _this24.onInit.reject(err);
+	                return _this24.props.onError(err);
 	            }).then(function () {
 
-	                return _this23.props.onError(err);
+	                return _this24.props.onError(err);
 	            }).then(function () {
 
-	                return _this23.destroy();
+	                return _this24.destroy();
 	            })['catch'](function (err2) {
 
 	                throw new Error('An error was encountered while handling error:\n\n ' + err.stack + '\n\n' + err2.stack);
@@ -8371,7 +8379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return ParentComponent;
-	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeParentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype)), _class);
+	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeParentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype)), _class);
 
 	/*  Generate Render Methods
 	    -----------------------
@@ -9301,6 +9309,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.focus = options.overrides.focus;
 	        _this.userClose = options.overrides.userClose;
 	        _this.getDomain = options.overrides.getDomain;
+	        _this.getParentTemplate = options.overrides.getParentTemplate;
 
 	        var renderToParentOverrides = _drivers.RENDER_DRIVERS[options.context].renderToParentOverrides;
 
