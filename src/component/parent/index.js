@@ -911,6 +911,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     destroyComponent() {
+        this.clean.run('destroyCloseWindowListener');
         this.clean.run('destroyParentTemplateEventHandlers');
         this.clean.run('destroyWindow');
     }

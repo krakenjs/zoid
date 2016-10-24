@@ -132,11 +132,33 @@ export function iframe(url, options, container) {
 */
 
 export function isWindowClosed(win) {
+
     try {
-        return !win || win.closed;
+        if (!win) {
+            return false;
+        }
+
     } catch (err) {
         return true;
     }
+
+    try {
+        if (win.closed) {
+            return true;
+        }
+
+    } catch (err) {
+
+        // I love you so much IE
+
+        if (err && err.message === 'Call was rejected by callee.\r\n') {
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 
