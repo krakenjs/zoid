@@ -2,13 +2,15 @@
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS } from '../parent/drivers';
+import { onCloseWindow, addEventListener } from '../../lib';
 
 export class DelegateComponent extends BaseComponent {
 
-    constructor(component, options = {}) {
+    constructor(component, source, options = {}) {
         super(component, options);
 
         this.component = component;
+        this.source = source;
 
         this.context = options.context;
 
@@ -34,6 +36,14 @@ export class DelegateComponent extends BaseComponent {
         this.childWindowName = options.childWindowName;
 
         ParentComponent.prototype.registerActiveComponent.call(this);
+
+        this.watchForClose();
+    }
+
+    watchForClose() {
+        let closeListener = onCloseWindow(this.source, () => this.destroy());
+
+        addEventListener(window, 'beforeunload', closeListener.cancel);
     }
 
     getOverrides(context) {

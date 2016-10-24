@@ -220,7 +220,11 @@ export class ParentComponent extends BaseComponent {
         }
 
         if (this.props.url) {
-            return getDomainFromUrl(this.props.url);
+            return Promise.try(() => {
+                return this.props.url;
+            }).then(url => {
+                return getDomainFromUrl(url);
+            });
         }
 
         if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
@@ -589,7 +593,7 @@ export class ParentComponent extends BaseComponent {
 
     watchForClose() {
 
-        this.closeWindowListener = onCloseWindow(this.window, () => {
+        let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
 
             return Promise.try(() => {
@@ -599,30 +603,23 @@ export class ParentComponent extends BaseComponent {
             });
         });
 
+        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+
         // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
 
-        this.unloadListener = addEventListener(window, 'beforeunload', () => {
+        let unloadWindowListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
             logger.flush();
+
+            closeWindowListener.cancel();
 
             if (RENDER_DRIVERS[this.context].destroyOnUnload) {
                 return this.destroyComponent();
             }
         });
 
-        this.clean.register(() => {
-
-            if (this.closeWindowListener) {
-                this.closeWindowListener.cancel();
-                delete this.closeWindowListener;
-            }
-
-            if (this.unloadListener) {
-                this.unloadListener.cancel();
-                delete this.unloadListener;
-            }
-        });
+        this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
 
 
@@ -877,13 +874,8 @@ export class ParentComponent extends BaseComponent {
     @memoize
     closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
 
-        if (this.closeWindowListener) {
-            this.closeWindowListener.cancel();
-        }
-
-        if (this.unloadListener) {
-            this.unloadListener.cancel();
-        }
+        this.clean.run('destroyCloseWindowListener');
+        this.clean.run('destroyUnloadWindowListener');
 
         let win = this.window;
 

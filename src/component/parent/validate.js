@@ -67,6 +67,22 @@ export function validateProps(component, props, required = true) {
 
     props = props || {};
 
+    // Set aliases
+
+    for (let key of Object.keys(component.props)) {
+        let prop = component.props[key];
+
+        if (prop.alias && props.hasOwnProperty(prop.alias)) {
+
+            let value = props[prop.alias];
+            delete props[prop.alias];
+
+            if (!props[key]) {
+                props[key] = value;
+            }
+        }
+    }
+
     // First make sure all of the props we were sent are actually valid prop names
 
     for (let key of Object.keys(props)) {
