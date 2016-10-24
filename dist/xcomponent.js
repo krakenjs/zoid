@@ -341,6 +341,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.addProp(options, 'validateProps');
 
+	        _this.addProp(options, 'domain');
+	        _this.addProp(options, 'domains');
 	        _this.addProp(options, 'remoteRenderDomain');
 
 	        // A mapping of tag->component so we can reference components by string tag name
@@ -403,11 +405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var data = _ref3.data;
 
 
-	                    var delegate = _this2.delegate(data.options);
-
-	                    (0, _lib.onCloseWindow)(source, function () {
-	                        return delegate.destroy();
-	                    });
+	                    var delegate = _this2.delegate(source, data.options);
 
 	                    return {
 	                        overrides: delegate.getOverrides(data.context),
@@ -482,10 +480,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: 'delegate',
-	        value: function delegate() {
-	            var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	        value: function delegate(source) {
+	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-	            return new _delegate.DelegateComponent(this, options);
+	            return new _delegate.DelegateComponent(this, source, options);
 	        }
 
 	        /*  Render
@@ -7408,6 +7406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'getDomain',
 	        value: function getDomain() {
+	            var _this5 = this;
 
 	            if (this.component.domain) {
 	                return this.component.domain;
@@ -7415,6 +7414,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
 	                return this.component.domains[this.props.env];
+	            }
+
+	            if (this.props.url) {
+	                return _promise.SyncPromise['try'](function () {
+	                    return _this5.props.url;
+	                }).then(function (url) {
+	                    return (0, _lib.getDomainFromUrl)(url);
+	                });
 	            }
 
 	            if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
@@ -7473,7 +7480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'updateProps',
 	        value: function updateProps() {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7495,7 +7502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    var key = _ref2;
 
-	                    if (props[key] !== _this5.props[key]) {
+	                    if (props[key] !== _this6.props[key]) {
 	                        changed = true;
 	                        break;
 	                    }
@@ -7505,10 +7512,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 
-	                _this5.setProps(props, false);
+	                _this6.setProps(props, false);
 
-	                return _this5.onInit.then(function () {
-	                    return _this5.childExports.updateProps(_this5.getPropsForChild(props));
+	                return _this6.onInit.then(function () {
+	                    return _this6.childExports.updateProps(_this6.getPropsForChild(props));
 	                });
 	            });
 	        }
@@ -7523,7 +7530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function getRenderContext(el, context) {
 
 	            if (el) {
-	                if (context && context !== _constants.CONTEXT_TYPES.IFRAME) {
+	                if (context && !_drivers.RENDER_DRIVERS[context].requiresElement) {
 	                    throw new Error('[' + this.component.tag + '] ' + context + ' context can not be rendered into element');
 	                }
 
@@ -7586,15 +7593,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'render',
 	        value: function render(element, context) {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return this.tryInit(function () {
-	                context = _this6.validateRender(element, context);
+	                context = _this7.validateRender(element, context);
 
-	                _this6.component.log('render_' + context, { context: context, element: element });
+	                _this7.component.log('render_' + context, { context: context, element: element });
 
-	                return _this6.preRender(element, context).then(function () {
-	                    return _this6.postRender(element, context);
+	                return _this7.preRender(element, context).then(function () {
+	                    return _this7.postRender(element, context);
 	                });
 	            });
 	        }
@@ -7612,12 +7619,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'open',
 	        value: function open(element, context) {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
-	                _this7.component.log('open_' + context, { element: element, windowName: _this7.childWindowName });
+	                _this8.component.log('open_' + context, { element: element, windowName: _this8.childWindowName });
 
-	                _drivers.RENDER_DRIVERS[context].open.call(_this7, element);
+	                _drivers.RENDER_DRIVERS[context].open.call(_this8, element);
 	            });
 	        }
 
@@ -7629,13 +7636,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'preRender',
 	        value: function preRender(element, context) {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                context = _this8.getRenderContext(element, context);
+	                context = _this9.getRenderContext(element, context);
 
-	                _this8.clean.set('context', context);
+	                _this9.clean.set('context', context);
 
 	                if (element) {
 	                    return (0, _lib.elementReady)(element);
@@ -7643,31 +7650,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }).then(function () {
 
 	                if (_drivers.RENDER_DRIVERS[context].renderedIntoParentTemplate) {
-	                    return _this8.createParentTemplate(context).then(function () {
-	                        return _this8.open(element, context);
+	                    return _this9.createParentTemplate(context).then(function () {
+	                        return _this9.open(element, context);
 	                    });
 	                }
 
-	                return _promise.SyncPromise.all([_this8.open(element, context), _this8.createParentTemplate(context)]);
+	                return _promise.SyncPromise.all([_this9.open(element, context), _this9.createParentTemplate(context)]);
 	            }).then(function () {
 
-	                return _this8.showParentTemplate();
+	                return _this9.showParentTemplate();
 	            }).then(function () {
 
-	                return _this8.getDomain();
+	                return _this9.getDomain();
 	            }).then(function (domain) {
 
-	                _this8.watchForClose();
-	                _this8.createComponentTemplate();
+	                _this9.watchForClose();
+	                _this9.createComponentTemplate();
 
-	                _src2['default'].linkUrl(_this8.window, domain);
-	                _this8.listen(_this8.window, domain);
+	                _src2['default'].linkUrl(_this9.window, domain);
+	                _this9.listen(_this9.window, domain);
 	            });
 	        }
 	    }, {
 	        key: 'postRender',
 	        value: function postRender(element, context) {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return _promise.SyncPromise.all([this.openBridge(context), this.buildUrl()]).then(function (_ref3) {
 	                var _ref4 = _slicedToArray(_ref3, 2);
@@ -7676,8 +7683,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var url = _ref4[1];
 
 
-	                _this9.loadUrl(context, url);
-	                _this9.runTimeout();
+	                _this10.loadUrl(context, url);
+	                _this10.runTimeout();
 	            });
 	        }
 	    }, {
@@ -7700,7 +7707,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'delegate',
 	        value: function delegate(win, context) {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            this.delegateWindow = win;
 
@@ -7726,16 +7733,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    overrides: {
 	                        focus: function focus() {
-	                            return _this10.focus();
+	                            return _this11.focus();
 	                        },
 	                        userClose: function userClose() {
-	                            return _this10.userClose();
+	                            return _this11.userClose();
 	                        },
 	                        getDomain: function getDomain() {
-	                            return _this10.getDomain();
+	                            return _this11.getDomain();
 	                        },
 	                        getParentTemplate: function getParentTemplate() {
-	                            return _this10.getParentTemplate();
+	                            return _this11.getParentTemplate();
 	                        }
 	                    }
 	                }
@@ -7744,7 +7751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var data = _ref5.data;
 
 
-	                _this10.clean.register(data.destroy);
+	                _this11.clean.register(data.destroy);
 	                return data;
 	            })['catch'](function (err) {
 
@@ -7771,10 +7778,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return 'continue';
 	                }
 
-	                var original = _this10[key];
+	                var original = _this11[key];
 
-	                _this10[key] = function () {
-	                    var _this11 = this,
+	                _this11[key] = function () {
+	                    var _this12 = this,
 	                        _arguments2 = arguments;
 
 	                    return delegate.then(function (data) {
@@ -7782,11 +7789,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        var override = data.overrides[key];
 
 	                        if (val === _constants.DELEGATE.CALL_DELEGATE) {
-	                            return override.apply(_this11, _arguments2);
+	                            return override.apply(_this12, _arguments2);
 	                        }
 
 	                        if (val instanceof Function) {
-	                            return val(original, override).apply(_this11, _arguments2);
+	                            return val(original, override).apply(_this12, _arguments2);
 	                        }
 
 	                        throw new Error('Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method');
@@ -7818,35 +7825,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderToParent',
 	        value: function renderToParent(element, context) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            return this.tryInit(function () {
-	                context = _this12.validateRenderToParent(element, context);
+	                context = _this13.validateRenderToParent(element, context);
 
-	                _this12.component.log('render_' + context + '_to_parent', { element: element, context: context });
+	                _this13.component.log('render_' + context + '_to_parent', { element: element, context: context });
 
-	                _this12.delegate((0, _window.getParentComponentWindow)(), context);
+	                _this13.delegate((0, _window.getParentComponentWindow)(), context);
 
-	                return _this12.render(element, context);
+	                return _this13.render(element, context);
 	            });
 	        }
 	    }, {
 	        key: 'renderTo',
 	        value: function renderTo(win, element, context) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
 	            return this.tryInit(function () {
-	                context = _this13.validateRenderToParent(element, context);
+	                context = _this14.validateRenderToParent(element, context);
 
-	                _this13.component.log('render_' + context + '_to_win', { element: element, context: context });
+	                _this14.component.log('render_' + context + '_to_win', { element: element, context: context });
 
-	                _this13.delegate(win, context);
+	                _this14.delegate(win, context);
 
-	                return _this13.render(element, context);
+	                return _this14.render(element, context);
 	            });
 	        }
 
@@ -7859,42 +7866,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this14 = this;
+	            var _this15 = this;
 
-	            this.closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this14.component.log('detect_close_child');
+	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
+	                _this15.component.log('detect_close_child');
 
 	                return _promise.SyncPromise['try'](function () {
-	                    return _this14.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
+	                    return _this15.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
 	                })['finally'](function () {
-	                    return _this14.destroy();
+	                    return _this15.destroy();
 	                });
 	            });
+
+	            this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
 
 	            // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
 	            // and close the child manually if that happens.
 
-	            this.unloadListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this14.component.log('navigate_away');
+	            var unloadWindowListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
+	                _this15.component.log('navigate_away');
 	                _lib.logger.flush();
 
-	                if (_this14.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return _this14.destroyComponent();
+	                closeWindowListener.cancel();
+
+	                if (_drivers.RENDER_DRIVERS[_this15.context].destroyOnUnload) {
+	                    return _this15.destroyComponent();
 	                }
 	            });
 
-	            this.clean.register(function () {
-
-	                if (_this14.closeWindowListener) {
-	                    _this14.closeWindowListener.cancel();
-	                    delete _this14.closeWindowListener;
-	                }
-
-	                if (_this14.unloadListener) {
-	                    _this14.unloadListener.cancel();
-	                    delete _this14.unloadListener;
-	                }
-	            });
+	            this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
 	        }
 
 	        /*  Load Url
@@ -7925,18 +7925,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderHijack',
 	        value: function renderHijack(targetElement, element, context) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return this.tryInit(function () {
-	                context = _this15.validateRender(element, context);
+	                context = _this16.validateRender(element, context);
 
-	                _this15.component.log('render_hijack_' + context);
+	                _this16.component.log('render_hijack_' + context);
 
-	                targetElement.target = _this15.childWindowName;
+	                targetElement.target = _this16.childWindowName;
 
-	                return _promise.SyncPromise.all([_this15.preRender(element, context).then(function () {
-	                    _this15.runTimeout();
-	                }), _this15.openBridge(context)]);
+	                return _promise.SyncPromise.all([_this16.preRender(element, context).then(function () {
+	                    _this16.runTimeout();
+	                }), _this16.openBridge(context)]);
 	            });
 	        }
 
@@ -7948,18 +7948,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this16.component.tag + '] Loading component ' + _this16.component.tag + ' timed out after ' + _this16.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this17.component.tag + '] Loading component ' + _this17.component.tag + ' timed out after ' + _this17.props.timeout + ' milliseconds');
 
-	                    _this16.onInit.reject(error)['catch'](function (err) {
-	                        return _this16.props.onTimeout(err)['finally'](function () {
-	                            _this16.component.log('timed_out', { timeout: _this16.props.timeout });
+	                    _this17.onInit.reject(error)['catch'](function (err) {
+	                        return _this17.props.onTimeout(err)['finally'](function () {
+	                            _this17.component.log('timed_out', { timeout: _this17.props.timeout });
 	                        });
 	                    });
 	                }, this.props.timeout);
@@ -7977,7 +7977,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ref7;
 
 	            return _ref7 = {}, _defineProperty(_ref7, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                var _this17 = this;
+	                var _this18 = this;
 
 	                this.childExports = data.exports;
 
@@ -7989,19 +7989,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _lib.logger.flush();
 
 	                    return {
-	                        props: _this17.getPropsForChild(),
-	                        context: _this17.context
+	                        props: _this18.getPropsForChild(),
+	                        context: _this18.context
 	                    };
 	                });
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.RESIZE, function (source, data) {
 
-	                if (this.context === _constants.CONTEXT_TYPES.POPUP) {
-	                    return;
+	                if (_drivers.RENDER_DRIVERS[this.context].allowResize) {
+	                    return this.resize(data.width, data.height);
 	                }
-
-	                return this.resize(data.width, data.height);
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.HIDE, function (source, data) {
 	                this.hide();
 	            }), _defineProperty(_ref7, _constants.POST_MESSAGE.ERROR, function (source, data) {
@@ -8065,46 +8063,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this18 = this;
-
-	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
-
-	            return _promise.SyncPromise['try'](function () {
-
-	                _this18.component.log('close', { reason: reason });
-
-	                return _this18.props.onClose(reason);
-	            }).then(function () {
-
-	                return _promise.SyncPromise.all([_this18.closeComponent(), _this18.closeParentTemplate()]);
-	            }).then(function () {
-
-	                return _this18.destroy();
-	            });
-	        }
-	    }, {
-	        key: 'closeParentTemplate',
-	        value: function closeParentTemplate() {
 	            var _this19 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 	            return _promise.SyncPromise['try'](function () {
 
+	                _this19.component.log('close', { reason: reason });
+
 	                return _this19.props.onClose(reason);
 	            }).then(function () {
 
-	                _this19.addCloseContainerClass();
+	                return _promise.SyncPromise.all([_this19.closeComponent(), _this19.closeParentTemplate()]);
+	            }).then(function () {
 
-	                if (_this19.component.closeDelay) {
-	                    return (0, _lib.delay)(_this19.component.closeDelay);
+	                return _this19.destroy();
+	            });
+	        }
+	    }, {
+	        key: 'closeParentTemplate',
+	        value: function closeParentTemplate() {
+	            var _this20 = this;
+
+	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
+
+	            return _promise.SyncPromise['try'](function () {
+
+	                return _this20.props.onClose(reason);
+	            }).then(function () {
+
+	                _this20.addCloseContainerClass();
+
+	                if (_this20.component.closeDelay) {
+	                    return (0, _lib.delay)(_this20.component.closeDelay);
 	                }
 	            }).then(function () {
 
-	                return _this19.closeComponent(reason);
+	                return _this20.closeComponent(reason);
 	            }).then(function () {
 
-	                return _this19.clean.run('destroyParentTemplate');
+	                return _this20.clean.run('destroyParentTemplate');
 	            });
 	        }
 	    }, {
@@ -8116,43 +8114,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'closeComponent',
 	        value: function closeComponent() {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 
-	            if (this.closeWindowListener) {
-	                this.closeWindowListener.cancel();
-	            }
-
-	            if (this.unloadListener) {
-	                this.unloadListener.cancel();
-	            }
+	            this.clean.run('destroyCloseWindowListener');
+	            this.clean.run('destroyUnloadWindowListener');
 
 	            var win = this.window;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                return _this20.destroyParentTemplateEventHandlers();
+	                return _this21.destroyParentTemplateEventHandlers();
 	            }).then(function () {
 
-	                return _this20.props.onClose(reason);
+	                return _this21.props.onClose(reason);
 	            }).then(function () {
 
-	                _this20.addCloseComponentClass();
+	                _this21.addCloseComponentClass();
 
-	                if (_this20.component.closeComponentDelay && _this20.context !== _constants.CONTEXT_TYPES.POPUP) {
-	                    return (0, _lib.delay)(_this20.component.closeComponentDelay);
+	                if (_this21.component.closeComponentDelay && _drivers.RENDER_DRIVERS[_this21.context].allowCloseDelay) {
+	                    return (0, _lib.delay)(_this21.component.closeComponentDelay);
 	                }
 	            }).then(function () {
 
-	                return _this20.destroyComponent();
+	                return _this21.destroyComponent();
 	            }).then(function () {
 
 	                // IE in metro mode -- child window needs to close itself, or close will hang
 
-	                if (_this20.childExports && _this20.context === _constants.CONTEXT_TYPES.POPUP && !(0, _lib.isWindowClosed)(win)) {
-	                    _this20.childExports.close()['catch'](_lib.noop);
+	                if (_this21.childExports && _this21.context === _constants.CONTEXT_TYPES.POPUP && !(0, _lib.isWindowClosed)(win)) {
+	                    _this21.childExports.close()['catch'](_lib.noop);
 	                }
 	            });
 	        }
@@ -8240,7 +8233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'createParentTemplate',
 	        value: function createParentTemplate(context) {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
@@ -8248,7 +8241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return;
 	                }
 
-	                return _this21.getParentTemplate();
+	                return _this22.getParentTemplate();
 	            }).then(function (parentTemplate) {
 
 	                if (!parentTemplate) {
@@ -8259,38 +8252,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // throw new Error(`Can only render parent template to top level window`);
 	                }
 
-	                _this21.parentTemplate = (0, _lib.createElement)('div', {
+	                _this22.parentTemplate = (0, _lib.createElement)('div', {
 
 	                    html: (0, _lib.template)(parentTemplate, {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid,
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this22.props.uid,
 	                        CLASS: _constants.CLASS_NAMES
 	                    }),
 
 	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this22.props.uid
 	                    },
 
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.context]
+	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this22.context]
 
 	                });
 
-	                _this21.parentTemplate.style.display = 'none';
+	                _this22.parentTemplate.style.display = 'none';
 
-	                document.body.appendChild(_this21.parentTemplate);
+	                document.body.appendChild(_this22.parentTemplate);
 
 	                var eventHandlers = [];
 
 	                if (_drivers.RENDER_DRIVERS[context].focusable) {
-	                    eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this21.focus();
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this22.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this22.focus();
 	                    }));
 	                }
 
-	                eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this21.userClose();
+	                eventHandlers.push((0, _lib.addEventToClass)(_this22.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    return _this22.userClose();
 	                }));
 
-	                _this21.clean.register('destroyParentTemplateEventHandlers', function () {
+	                _this22.clean.register('destroyParentTemplateEventHandlers', function () {
 	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	                        var _ref8;
 
@@ -8309,9 +8302,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 
-	                _this21.clean.register('destroyParentTemplate', function () {
-	                    document.body.removeChild(_this21.parentTemplate);
-	                    delete _this21.parentTemplate;
+	                _this22.clean.register('destroyParentTemplate', function () {
+	                    document.body.removeChild(_this22.parentTemplate);
+	                    delete _this22.parentTemplate;
 	                });
 	            });
 	        }
@@ -8336,28 +8329,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            var _this22 = this;
+	            var _this23 = this;
 
 	            return _promise.SyncPromise['try'](function () {
-	                if (_this22.clean.hasTasks()) {
-	                    _this22.component.log('destroy');
+	                if (_this23.clean.hasTasks()) {
+	                    _this23.component.log('destroy');
 	                    _lib.logger.flush();
-	                    return _this22.clean.all();
+	                    return _this23.clean.all();
 	                }
 	            });
 	        }
 	    }, {
 	        key: 'tryInit',
 	        value: function tryInit(method) {
-	            var _this23 = this;
+	            var _this24 = this;
 
 	            return _promise.SyncPromise.resolve().then(method)['catch'](function (err) {
 
-	                _this23.onInit.reject(err);
+	                _this24.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this23.onInit;
+	                return _this24.onInit;
 	            });
 	        }
 
@@ -8369,19 +8362,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'error',
 	        value: function error(err) {
-	            var _this24 = this;
+	            var _this25 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                _this24.component.logError('error', { error: err.stack || err.toString() });
-	                _this24.onInit.reject(err);
-	                return _this24.props.onError(err);
+	                _this25.component.logError('error', { error: err.stack || err.toString() });
+	                _this25.onInit.reject(err);
+	                return _this25.props.onError(err);
 	            }).then(function () {
 
-	                return _this24.props.onError(err);
+	                return _this25.props.onError(err);
 	            }).then(function () {
 
-	                return _this24.destroy();
+	                return _this25.destroy();
 	            })['catch'](function (err2) {
 
 	                throw new Error('An error was encountered while handling error:\n\n ' + err.stack + '\n\n' + err2.stack);
@@ -8496,6 +8489,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parentTemplate: false,
 	    requiresElement: true,
 	    renderedIntoParentTemplate: false,
+	    destroyOnUnload: false,
+	    allowResize: true,
+	    allowCloseDelay: true,
 
 	    open: function open(element) {
 	        var _this = this;
@@ -8596,6 +8592,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    focusable: true,
 	    requiresElement: false,
 	    renderedIntoParentTemplate: false,
+	    destroyOnUnload: true,
+	    allowResize: false,
+	    allowCloseDelay: false,
 
 	    open: function open() {
 	        var _this3 = this;
@@ -8699,6 +8698,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parentTemplate: true,
 	    requiresElement: false,
 	    renderedIntoParentTemplate: true,
+	    destroyOnUnload: false,
+	    allowResize: true,
+	    allowCloseDelay: true,
 
 	    renderToParentOverrides: {
 
@@ -8896,9 +8898,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    props = props || {};
 
-	    // First make sure all of the props we were sent are actually valid prop names
+	    // Set aliases
 
-	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        if (_isArray) {
@@ -8912,14 +8914,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var key = _ref;
 
-	        if (!component.props.hasOwnProperty(key)) {
-	            throw new Error('[' + component.tag + '] Invalid prop: ' + key);
+	        var prop = component.props[key];
+
+	        if (prop.alias && props.hasOwnProperty(prop.alias)) {
+
+	            var value = props[prop.alias];
+	            delete props[prop.alias];
+
+	            if (!props[key]) {
+	                props[key] = value;
+	            }
 	        }
 	    }
 
-	    // Then loop over the props we expect, and make sure they're all present and valid
+	    // First make sure all of the props we were sent are actually valid prop names
 
-	    for (var _iterator2 = Object.keys(component.props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -8933,11 +8943,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var _key = _ref2;
 
+	        if (!component.props.hasOwnProperty(_key)) {
+	            throw new Error('[' + component.tag + '] Invalid prop: ' + _key);
+	        }
+	    }
 
-	        var prop = component.props[_key];
-	        var value = props[_key];
+	    // Then loop over the props we expect, and make sure they're all present and valid
 
-	        validateProp(prop, _key, value, required);
+	    for (var _iterator3 = Object.keys(component.props), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
+	        }
+
+	        var _key2 = _ref3;
+
+
+	        var _prop = component.props[_key2];
+	        var _value = props[_key2];
+
+	        validateProp(_prop, _key2, _value, required);
 	    }
 	}
 
@@ -9295,6 +9326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(/*! ../parent/drivers */ 43);
 
+	var _lib = __webpack_require__(/*! ../../lib */ 31);
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -9304,14 +9337,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
 	    _inherits(DelegateComponent, _BaseComponent);
 
-	    function DelegateComponent(component) {
-	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    function DelegateComponent(component, source) {
+	        var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	        _classCallCheck(this, DelegateComponent);
 
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DelegateComponent).call(this, component, options));
 
 	        _this.component = component;
+	        _this.source = source;
 
 	        _this.context = options.context;
 
@@ -9350,10 +9384,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.childWindowName = options.childWindowName;
 
 	        _parent.ParentComponent.prototype.registerActiveComponent.call(_this);
+
+	        _this.watchForClose();
 	        return _this;
 	    }
 
 	    _createClass(DelegateComponent, [{
+	        key: 'watchForClose',
+	        value: function watchForClose() {
+	            var _this2 = this;
+
+	            var closeListener = (0, _lib.onCloseWindow)(this.source, function () {
+	                return _this2.destroy();
+	            });
+
+	            (0, _lib.addEventListener)(window, 'beforeunload', closeListener.cancel);
+	        }
+	    }, {
 	        key: 'getOverrides',
 	        value: function getOverrides(context) {
 
