@@ -15,7 +15,7 @@ import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
 
-import { logger, capitalizeFirstLetter, onCloseWindow } from '../../lib';
+import { logger, capitalizeFirstLetter } from '../../lib';
 
 export let components = {};
 
@@ -109,6 +109,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'validateProps');
 
+        this.addProp(options, 'domain');
+        this.addProp(options, 'domains');
         this.addProp(options, 'remoteRenderDomain');
 
         // A mapping of tag->component so we can reference components by string tag name
@@ -148,9 +150,7 @@ export class Component extends BaseComponent {
         if (this.remoteRenderDomain) {
             postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, { domain: this.remoteRenderDomain }, ({ source, data}) => {
 
-                let delegate = this.delegate(data.options);
-
-                onCloseWindow(source, () => delegate.destroy());
+                let delegate = this.delegate(source, data.options);
 
                 return {
                     overrides: delegate.getOverrides(data.context),
@@ -223,8 +223,8 @@ export class Component extends BaseComponent {
     }
 
 
-    delegate(options = {}) {
-        return new DelegateComponent(this, options);
+    delegate(source, options = {}) {
+        return new DelegateComponent(this, source, options);
     }
 
 
