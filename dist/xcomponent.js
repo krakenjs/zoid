@@ -4929,11 +4929,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	function isWindowClosed(win) {
+
 	    try {
-	        return !win || win.closed;
+	        if (!win) {
+	            return false;
+	        }
 	    } catch (err) {
 	        return true;
 	    }
+
+	    try {
+	        if (win.closed) {
+	            return true;
+	        }
+	    } catch (err) {
+
+	        // I love you so much IE
+
+	        if (err && err.message === 'Call was rejected by callee.\r\n') {
+	            return false;
+	        }
+
+	        return true;
+	    }
+
+	    return false;
 	}
 
 	/*  On Close Window
@@ -8152,6 +8172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroyComponent',
 	        value: function destroyComponent() {
+	            this.clean.run('destroyCloseWindowListener');
 	            this.clean.run('destroyParentTemplateEventHandlers');
 	            this.clean.run('destroyWindow');
 	        }
