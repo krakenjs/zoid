@@ -1,6 +1,6 @@
 {
   "name": "xcomponent",
-  "version": "1.0.82",
+  "version": "1.0.83",
   "description": "Cross domain components.",
   "main": "index.js",
   "scripts": {
