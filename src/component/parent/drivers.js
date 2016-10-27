@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getElement } from '../../lib';
+import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getElement, toCSS, isPerc, toNum } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
 import { getPosition, getParentWindow } from '../window';
 
@@ -35,6 +35,7 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: false,
         allowResize: true,
         allowCloseDelay: true,
+        openOnClick: false,
 
         open(element) {
 
@@ -79,20 +80,20 @@ export let RENDER_DRIVERS = {
         
         renderToParentOverrides: {
 
-            createParentTemplate:    DELEGATE.CALL_DELEGATE,
-            showParentTemplate:      DELEGATE.CALL_DELEGATE,
+            openContainer:           DELEGATE.CALL_DELEGATE,
             destroyComponent:        DELEGATE.CALL_DELEGATE,
-            destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
+            destroyContainer:        DELEGATE.CALL_DELEGATE,
+            cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
-            addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
-            addCloseComponentClass:  DELEGATE.CALL_DELEGATE,
+            showContainer:           DELEGATE.CALL_DELEGATE,
+            showComponent:           DELEGATE.CALL_DELEGATE,
+            hideContainer:           DELEGATE.CALL_DELEGATE,
+            hideComponent:           DELEGATE.CALL_DELEGATE,
             hide:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
             hijackSubmit:            DELEGATE.CALL_DELEGATE,
-
-            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
 
             open(original, override) {
                 return function() {
@@ -108,8 +109,8 @@ export let RENDER_DRIVERS = {
         },
 
         resize(width, height) {
-            this.iframe.style.width = `${width}px`;
-            this.iframe.style.height = `${height}px`;
+            this.iframe.style.width  = toCSS(width);
+            this.iframe.style.height = toCSS(height);
         },
 
         hide() {
@@ -145,22 +146,21 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: true,
         allowResize: false,
         allowCloseDelay: false,
+        openOnClick: true,
 
         open() {
 
-            let dimensions = this.props.dimensions || this.component.dimensions || {};
+            let { width, height, x, y } = this.props.dimensions || this.component.dimensions || {};
 
-            let pos = getPosition({
-                x:            dimensions.x,
-                y:            dimensions.y,
-                width:        dimensions.width,
-                height:       dimensions.height
-            });
+            width  = isPerc(width)  ? parseInt(window.innerWidth  * toNum(width)  / 100, 10) : toNum(width);
+            height = isPerc(height) ? parseInt(window.innerHeight * toNum(height) / 100, 10) : toNum(height);
+
+            let pos = getPosition({ width, height, x, y });
 
             this.window = popup('', {
                 name: this.childWindowName,
-                width: dimensions.width,
-                height: dimensions.height,
+                width,
+                height,
                 top: pos.y,
                 left: pos.x,
                 location: 1,
@@ -185,7 +185,7 @@ export let RENDER_DRIVERS = {
                 throw err;
             }
 
-            this.resize(dimensions.width, dimensions.height);
+            this.resize(width, height);
         },
 
         openBridge() {
@@ -225,14 +225,17 @@ export let RENDER_DRIVERS = {
 
         renderToParentOverrides: {
 
-            createParentTemplate:   DELEGATE.CALL_DELEGATE,
-            showParentTemplate:     DELEGATE.CALL_DELEGATE,
-            destroyParentTemplate:  DELEGATE.CALL_DELEGATE,
-            addCloseContainerClass: DELEGATE.CALL_DELEGATE,
-            addCloseComponentClass: DELEGATE.CALL_DELEGATE,
+            openContainer:          DELEGATE.CALL_DELEGATE,
+            destroyContainer:       DELEGATE.CALL_DELEGATE,
+
+            showContainer:          DELEGATE.CALL_DELEGATE,
+            showComponent:          DELEGATE.CALL_DELEGATE,
+            hideContainer:          DELEGATE.CALL_DELEGATE,
+            hideComponent:          DELEGATE.CALL_DELEGATE,
+
             hide:                   DELEGATE.CALL_DELEGATE,
 
-            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
+            cancelContainerEvents:  DELEGATE.CALL_DELEGATE,
 
             open:                    DELEGATE.CALL_ORIGINAL,
             loadUrl:                 DELEGATE.CALL_ORIGINAL,
@@ -257,22 +260,26 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: false,
         allowResize: true,
         allowCloseDelay: true,
+        openOnClick: false,
 
         renderToParentOverrides: {
 
-            createParentTemplate:    DELEGATE.CALL_DELEGATE,
-            showParentTemplate:      DELEGATE.CALL_DELEGATE,
+            openContainer:           DELEGATE.CALL_DELEGATE,
             destroyComponent:        DELEGATE.CALL_DELEGATE,
-            destroyParentTemplate:   DELEGATE.CALL_DELEGATE,
+            destroyContainer:        DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
-            addCloseContainerClass:  DELEGATE.CALL_DELEGATE,
-            addCloseComponentClass:  DELEGATE.CALL_DELEGATE,
+
+            showContainer:           DELEGATE.CALL_DELEGATE,
+            showComponent:           DELEGATE.CALL_DELEGATE,
+            hideContainer:           DELEGATE.CALL_DELEGATE,
+            hideComponent:           DELEGATE.CALL_DELEGATE,
+
             hide:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
 
-            destroyParentTemplateEventHandlers: DELEGATE.CALL_DELEGATE,
+            cancelContainerEvents: DELEGATE.CALL_DELEGATE,
 
             open(original, override) {
                 return function() {
@@ -300,41 +307,10 @@ export let RENDER_DRIVERS = {
 
         resize(width, height) {
 
-            width = Math.min(width, window.innerWidth - 20);
-            height = Math.min(height, window.innerHeight - 20);
-
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
-            container.style.position = 'fixed';
-
-            this.iframe.style.width  = '100%';
-            this.iframe.style.height = '100%';
-
-            if (width) {
-                this.parentTemplate.className += ' set-width';
-                container.style.width      = `${width}px`;
-                container.style.left       = '50%';
-                container.style.marginLeft = `-${Math.floor(width / 2)}px`;
-            } else {
-                this.parentTemplate.className += ' max-width';
-                container.style.width      = '100%';
-                container.style.left       = 0;
-                container.style.marginLeft = 0;
-                container.width            = '100%';
-            }
-
-            if (height) {
-                this.parentTemplate.className += ' set-height';
-                container.style.height    = `${height}px`;
-                container.style.top       = '50%';
-                container.style.marginTop = `-${Math.floor(height / 2)}px`;
-            } else {
-                this.parentTemplate.className += ' max-height';
-                container.style.height    = '100%';
-                container.style.top       = 0;
-                container.style.marginTop = 0;
-                container.height          = '100%';
-            }
+            container.style.width  = toCSS(width);
+            container.style.height = toCSS(height);
         },
 
         hide() {

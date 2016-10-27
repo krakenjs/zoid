@@ -36,7 +36,9 @@ describe('xcomponent render to parent', () => {
     it('should render a component to the parent as an iframe', done => {
 
         testComponent.init({
-            foo: done,
+            foo() {
+                done();
+            },
 
             run: `
                 xcomponent.getByTag('test-component2').init({

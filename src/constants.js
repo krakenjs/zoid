@@ -42,16 +42,26 @@ export const CONTEXT_TYPES = {
 
 export const CLASS_NAMES = {
     XCOMPONENT: `${XCOMPONENT}`,
-    COMPONENT: `${XCOMPONENT}-component`,
-    CLOSE: `${XCOMPONENT}-close`,
-    FOCUS: `${XCOMPONENT}-focus`,
-    ELEMENT: `${XCOMPONENT}-element`,
-    IFRAME: `${XCOMPONENT}-iframe`,
-    LIGHTBOX: `${XCOMPONENT}-lightbox`,
-    POPUP: `${XCOMPONENT}-popup`,
-    LOADING: `${XCOMPONENT}-LOADING`,
-    CLOSE_CONTAINER: `${XCOMPONENT}-close-container`,
-    CLOSE_COMPONENT: `${XCOMPONENT}-close-component`
+    COMPONENT:  `${XCOMPONENT}-component`,
+    CLOSE:      `${XCOMPONENT}-close`,
+    FOCUS:      `${XCOMPONENT}-focus`,
+    ELEMENT:    `${XCOMPONENT}-element`,
+    IFRAME:     `${XCOMPONENT}-iframe`,
+    LIGHTBOX:   `${XCOMPONENT}-lightbox`,
+    POPUP:      `${XCOMPONENT}-popup`,
+    LOADING:    `${XCOMPONENT}-loading`,
+
+    SHOW_CONTAINER: `${XCOMPONENT}-show-container`,
+    SHOW_COMPONENT: `${XCOMPONENT}-show-component`,
+    HIDE_CONTAINER: `${XCOMPONENT}-hide-container`,
+    HIDE_COMPONENT: `${XCOMPONENT}-hide-component`
+};
+
+export const ANIMATION_NAMES = {
+    SHOW_CONTAINER: `${XCOMPONENT}-show-container`,
+    SHOW_COMPONENT: `${XCOMPONENT}-show-component`,
+    HIDE_CONTAINER: `${XCOMPONENT}-hide-container`,
+    HIDE_COMPONENT: `${XCOMPONENT}-hide-component`
 };
 
 export const EVENT_NAMES = {

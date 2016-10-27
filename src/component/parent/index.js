@@ -5,9 +5,9 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop,
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement,
          capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -183,7 +183,7 @@ export class ParentComponent extends BaseComponent {
 
             queryProps[XCOMPONENT] = '1';
 
-            return Promise.resolve().then(() => {
+            return Promise.try(() => {
 
                 if (this.props.url) {
                     return this.props.url;
@@ -209,6 +209,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    @promise
     getDomain() {
 
         if (this.component.domain) {
@@ -269,27 +270,25 @@ export class ParentComponent extends BaseComponent {
         Send new props down to the child
     */
 
+    @promise
     updateProps(props = {}) {
-        return Promise.resolve().then(() => {
+        let changed = false;
 
-            let changed = false;
-
-            for (let key of Object.keys(props)) {
-                if (props[key] !== this.props[key]) {
-                    changed = true;
-                    break;
-                }
+        for (let key of Object.keys(props)) {
+            if (props[key] !== this.props[key]) {
+                changed = true;
+                break;
             }
+        }
 
-            if (!changed) {
-                return;
-            }
+        if (!changed) {
+            return;
+        }
 
-            this.setProps(props, false);
+        this.setProps(props, false);
 
-            return this.onInit.then(() => {
-                return this.childExports.updateProps(this.getPropsForChild(props));
-            });
+        return this.onInit.then(() => {
+            return this.childExports.updateProps(this.getPropsForChild(props));
         });
     }
 
@@ -370,9 +369,7 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`render_${context}`, { context, element });
 
-            return this.preRender(element, context).then(() => {
-                return this.postRender(element, context);
-            });
+            return this.preRender(element, context);
         });
     }
 
@@ -389,12 +386,21 @@ export class ParentComponent extends BaseComponent {
         Open a new window in the desired context
     */
 
+    @memoize
+    @promise
     open(element, context) {
-        return Promise.resolve().then(() => {
-            this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
+        this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
 
-            RENDER_DRIVERS[context].open.call(this, element);
-        });
+        RENDER_DRIVERS[context].open.call(this, element);
+    }
+
+    get driver() {
+
+        if (!this.context) {
+            throw new Error('Context not set');
+        }
+
+        return RENDER_DRIVERS[this.context];
     }
 
     /*  Pre Render
@@ -403,60 +409,77 @@ export class ParentComponent extends BaseComponent {
         Pre-render a new window in the desired context
     */
 
-    preRender(element, context) {
-        return Promise.resolve().then(() => {
+    @promise
+    preRender(element, context, options = {}) {
+        this.clean.set('context', this.getRenderContext(element, context));
 
-            context = this.getRenderContext(element, context);
+        let tasks = {
+            openContainer: this.openContainer(this.context),
+            openBridge:    this.openBridge(this.context),
+            getDomain:     this.getDomain()
+        };
 
-            this.clean.set('context', context);
-
+        tasks.elementReady = Promise.try(() => {
             if (element) {
                 return elementReady(element);
+            } else {
+                return tasks.openContainer;
             }
-
-        }).then(() => {
-
-            if (RENDER_DRIVERS[context].renderedIntoParentTemplate) {
-                return this.createParentTemplate(context).then(() => {
-                    return this.open(element, context);
-                });
-            }
-
-            return Promise.all([
-                this.open(element, context),
-                this.createParentTemplate(context)
-            ]);
-
-        }).then(() => {
-
-            return this.showParentTemplate();
-
-        }).then(() => {
-
-            return this.getDomain();
-
-        }).then(domain => {
-
-            this.watchForClose();
-            this.createComponentTemplate();
-
-            postRobot.linkUrl(this.window, domain);
-            this.listen(this.window, domain);
         });
-    }
 
-    postRender(element, context) {
+        if (this.driver.openOnClick) {
+            tasks.open = this.open(element, this.context);
+        } else {
+            tasks.open = tasks.elementReady.then(() => {
+                return this.open(element, this.context);
+            });
+        }
 
-        return Promise.all([
-
-            this.openBridge(context),
-            this.buildUrl()
-
-        ]).then(([bridge, url]) => {
-
-            this.loadUrl(context, url);
-            this.runTimeout();
+        tasks.showContainer = tasks.openContainer.then(() => {
+            return this.showContainer();
         });
+
+        tasks.createComponentTemplate = tasks.open.then(() => {
+            return this.createComponentTemplate();
+        });
+
+        tasks.showComponent = tasks.createComponentTemplate.then(() => {
+            return this.showComponent();
+        });
+
+        tasks.linkUrl = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            return postRobot.linkUrl(this.window, domain);
+        });
+
+        tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            return this.listen(this.window, domain);
+        });
+
+        tasks.watchForClose = tasks.open.then(() => {
+            return this.watchForClose();
+        });
+
+        if (options.loadUrl !== false) {
+
+            tasks.buildUrl = this.buildUrl();
+
+            tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.createComponentTemplate ]).then(([ url ]) => {
+                return this.loadUrl(this.context, url);
+            });
+
+            tasks.runTimeout = tasks.loadUrl.then(() => {
+                debugger; // eslint-disable-line
+                return this.runTimeout();
+            });
+
+        } else {
+
+            tasks.runTimeout = Promise.try(() => {
+                return this.runTimeout();
+            });
+        }
+
+        return Promise.hash(tasks);
     }
 
 
@@ -630,6 +653,7 @@ export class ParentComponent extends BaseComponent {
         where opening the child window and loading the url happen at different points.
     */
 
+    @promise
     loadUrl(context, url) {
         this.component.log(`load_url`);
 
@@ -659,16 +683,7 @@ export class ParentComponent extends BaseComponent {
 
             targetElement.target = this.childWindowName;
 
-            return Promise.all([
-
-                this.preRender(element, context).then(() => {
-                    this.runTimeout();
-                }),
-
-                this.openBridge(context)
-            ]);
-
-
+            return this.preRender(element, context, { loadUrl: false });
         });
     }
 
@@ -742,7 +757,7 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.RESIZE ](source, data) {
 
-                if (RENDER_DRIVERS[this.context].allowResize) {
+                if (RENDER_DRIVERS[this.context].allowResize && this.component.autoResize) {
                     return this.resize(data.width, data.height);
                 }
             },
@@ -831,7 +846,7 @@ export class ParentComponent extends BaseComponent {
 
             return Promise.all([
                 this.closeComponent(),
-                this.closeParentTemplate()
+                this.closeContainer()
             ]);
 
         }).then(() => {
@@ -842,31 +857,29 @@ export class ParentComponent extends BaseComponent {
 
 
     @memoize
-    closeParentTemplate(reason = CLOSE_REASONS.PARENT_CALL) {
+    closeContainer(reason = CLOSE_REASONS.PARENT_CALL) {
         return Promise.try(() => {
 
             return this.props.onClose(reason);
 
         }).then(() => {
 
-            this.addCloseContainerClass();
-
-            if (this.component.closeDelay) {
-                return delay(this.component.closeDelay);
-            }
-
-        }).then(() => {
-
-            return this.closeComponent(reason);
+            return Promise.all([
+                this.closeComponent(reason),
+                this.hideContainer()
+            ]);
 
         }).then(() => {
 
-            return this.clean.run('destroyParentTemplate');
+            return this.destroyContainer();
         });
     }
 
-    destroyParentTemplate() {
-        this.clean.run('destroyParentTemplateEventHandlers');
+
+    @memoize
+    @promise
+    destroyContainer() {
+        this.clean.run('destroyContainerEvents');
         this.clean.run('destroyParentTemplate');
     }
 
@@ -881,7 +894,7 @@ export class ParentComponent extends BaseComponent {
 
         return Promise.try(() => {
 
-            return this.destroyParentTemplateEventHandlers();
+            return this.cancelContainerEvents();
 
         }).then(() => {
 
@@ -889,11 +902,7 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            this.addCloseComponentClass();
-
-            if (this.component.closeComponentDelay && RENDER_DRIVERS[this.context].allowCloseDelay) {
-                return delay(this.component.closeComponentDelay);
-            }
+            return this.hideComponent();
 
         }).then(() => {
 
@@ -912,23 +921,56 @@ export class ParentComponent extends BaseComponent {
 
     destroyComponent() {
         this.clean.run('destroyCloseWindowListener');
-        this.clean.run('destroyParentTemplateEventHandlers');
+        this.clean.run('destroyContainerEvents');
         this.clean.run('destroyWindow');
     }
 
-
-    addCloseContainerClass() {
+    @memoize
+    @promise
+    showContainer() {
         if (this.parentTemplate) {
-            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
-            this.parentTemplate.classList.add(CLASS_NAMES.CLOSE_CONTAINER);
+            this.parentTemplate.classList.add(CLASS_NAMES.SHOW_CONTAINER);
+            return showAndAnimate(this.parentTemplate, ANIMATION_NAMES.SHOW_CONTAINER);
         }
     }
 
+    @memoize
+    @promise
+    showComponent() {
+        if (this.elementTemplate) {
+            this.elementTemplate.classList.add(CLASS_NAMES.SHOW_COMPONENT);
+            showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
+        }
+    }
 
-    addCloseComponentClass() {
+    @memoize
+    @promise
+    hideContainer() {
+        if (this.parentTemplate) {
+
+            this.parentTemplate.classList.add(CLASS_NAMES.HIDE_CONTAINER);
+            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+
+            return animateAndHide(this.parentTemplate, ANIMATION_NAMES.HIDE_CONTAINER);
+        }
+    }
+
+    @memoize
+    @promise
+    hideComponent() {
+
         if (this.parentTemplate) {
             this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
-            this.parentTemplate.classList.add(CLASS_NAMES.CLOSE_COMPONENT);
+        }
+
+        if (this.elementTemplate) {
+
+            this.elementTemplate.classList.add(CLASS_NAMES.HIDE_COMPONENT);
+            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+
+            if (this.elementTemplate) {
+                return animateAndHide(this.elementTemplate, ANIMATION_NAMES.HIDE_COMPONENT);
+            }
         }
     }
 
@@ -959,13 +1001,15 @@ export class ParentComponent extends BaseComponent {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
+    @memoize
     createComponentTemplate() {
 
         let componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
 
         let html = template(componentTemplate, {
             id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-            CLASS: CLASS_NAMES
+            CLASS: CLASS_NAMES,
+            ANIMATION: ANIMATION_NAMES
         });
 
         try {
@@ -994,8 +1038,10 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the popup/lightbox
     */
 
-    createParentTemplate(context) {
-        return Promise.resolve().then(() => {
+    @memoize
+    @promise
+    openContainer(context) {
+        return Promise.try(() => {
 
             if (!RENDER_DRIVERS[context].parentTemplate) {
                 return;
@@ -1017,7 +1063,8 @@ export class ParentComponent extends BaseComponent {
 
                 html: template(parentTemplate, {
                     id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    CLASS: CLASS_NAMES
+                    CLASS: CLASS_NAMES,
+                    ANIMATION: ANIMATION_NAMES
                 }),
 
                 attributes: {
@@ -1031,9 +1078,19 @@ export class ParentComponent extends BaseComponent {
 
             });
 
-            this.parentTemplate.style.display = 'none';
+            hideElement(this.parentTemplate);
 
             document.body.appendChild(this.parentTemplate);
+
+            if (this.driver.renderedIntoParentTemplate) {
+                this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
+
+                if (!this.elementTemplate) {
+                    throw new Error('Could not find element to render component into');
+                }
+
+                hideElement(this.elementTemplate);
+            }
 
             let eventHandlers = [];
 
@@ -1043,7 +1100,7 @@ export class ParentComponent extends BaseComponent {
 
             eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
 
-            this.clean.register('destroyParentTemplateEventHandlers', () => {
+            this.clean.register('destroyContainerEvents', () => {
                 for (let eventHandler of eventHandlers) {
                     eventHandler.cancel();
                 }
@@ -1056,14 +1113,8 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    showParentTemplate() {
-        if (this.parentTemplate) {
-            this.parentTemplate.style.display = 'block';
-        }
-    }
-
-    destroyParentTemplateEventHandlers() {
-        this.clean.run('destroyParentTemplateEventHandlers');
+    cancelContainerEvents() {
+        this.clean.run('destroyContainerEvents');
     }
 
 
@@ -1085,7 +1136,7 @@ export class ParentComponent extends BaseComponent {
 
 
     tryInit(method) {
-        return Promise.resolve().then(method).catch(err => {
+        return Promise.try(method).catch(err => {
 
             this.onInit.reject(err);
             throw err;

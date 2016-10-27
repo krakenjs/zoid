@@ -40,6 +40,15 @@ export class DelegateComponent extends BaseComponent {
         this.watchForClose();
     }
 
+    get driver() {
+
+        if (!this.context) {
+            throw new Error('Context not set');
+        }
+
+        return RENDER_DRIVERS[this.context];
+    }
+
     watchForClose() {
         let closeListener = onCloseWindow(this.source, () => this.destroy());
 

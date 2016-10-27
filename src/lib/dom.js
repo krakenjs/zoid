@@ -1,7 +1,7 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { once, noop, memoize } from './fn';
-import { extend, get, safeInterval, urlEncode } from './util';
+import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 
 
 /*  Get Element
@@ -532,11 +532,146 @@ export function onDimensionsChange(el, delay = 200, threshold = 0) {
                         if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
                             clearInterval(interval);
                             return resolve(noOverflowDimensions);
+                        } else {
+
+                            currentDimensions = newDimensions;
                         }
                     });
                 });
             }
 
         }, delay);
+    });
+}
+
+
+export function bindEvents(element, eventNames, handler) {
+
+    handler = once(handler);
+
+    for (let eventName of eventNames) {
+        element.addEventListener(eventName, handler);
+    }
+
+    return {
+        cancel: once(() => {
+            for (let eventName of eventNames) {
+                element.removeEventListener(eventName, handler);
+            }
+        })
+    };
+}
+
+const VENDOR_PREFIXES = [ 'webkit', 'moz', 'ms', 'o' ];
+
+export function setVendorCSS(element, name, value) {
+
+    element.style[name] = value;
+
+    let capitalizedName = capitalizeFirstLetter(name);
+
+    for (let prefix of VENDOR_PREFIXES) {
+        element.style[`${prefix}${capitalizedName}`] = value;
+    }
+}
+
+
+let CSSRule = window.CSSRule;
+
+const KEYFRAMES_RULE = CSSRule.KEYFRAMES_RULE || CSSRule.WEBKIT_KEYFRAMES_RULE ||  CSSRule.MOZ_KEYFRAMES_RULE ||
+                           CSSRule.O_KEYFRAMES_RULE || CSSRule.MS_KEYFRAMES_RULE;
+
+function isValidAnimation(element, name) {
+
+    let stylesheets = element.ownerDocument.styleSheets;
+
+    for (let i = 0; i < stylesheets.length; i++) {
+
+        let cssRules = stylesheets[i].cssRules;
+
+        for (let j = 0; j < cssRules.length; j++) {
+
+            let cssRule = cssRules[j];
+
+            if (cssRule.type === KEYFRAMES_RULE && cssRule.name === name) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+const ANIMATION_START_EVENTS = [ 'animationstart', 'webkitAnimationStart', 'oAnimationStart', 'MSAnimationStart' ];
+const ANIMATION_END_EVENTS   = [ 'animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd' ];
+
+export function animate(element, name) {
+    return new Promise((resolve, reject) => {
+
+        element = getElement(element);
+
+        if (!element || !isValidAnimation(element, name)) {
+            return resolve();
+        }
+
+        let hasStarted = false;
+
+        let startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
+            event.stopPropagation();
+
+            startEvent.cancel();
+            hasStarted = true;
+        });
+
+        let endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
+            event.stopPropagation();
+
+            startEvent.cancel();
+            endEvent.cancel();
+
+            if (event.animationName !== name) {
+                return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
+            }
+
+            setVendorCSS(element, 'animationName', 'none');
+
+            return resolve();
+        });
+
+        setVendorCSS(element, 'animationName', name);
+
+        setTimeout(() => {
+            setTimeout(() => {
+                if (!hasStarted) {
+                    startEvent.cancel();
+                    endEvent.cancel();
+                    return resolve();
+                }
+            }, 200);
+        }, 200);
+    });
+}
+
+const STYLE_DISPLAY_SHOW = 'block';
+const STYLE_DISPLAY_HIDE = 'none';
+
+export function showElement(element) {
+    element.style.display = STYLE_DISPLAY_SHOW;
+}
+
+export function hideElement(element) {
+    element.style.display = STYLE_DISPLAY_HIDE;
+}
+
+export function showAndAnimate(element, name) {
+    let animation = animate(element, name);
+    showElement(element);
+    return animation;
+}
+
+export function animateAndHide(element, name) {
+    return animate(element, name).then(() => {
+        hideElement(element);
     });
 }

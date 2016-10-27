@@ -333,7 +333,7 @@ export class ChildComponent extends BaseComponent {
         this.component.log(`error`, { error: err.stack || err.toString() });
 
         return this.sendToParent(POST_MESSAGE.ERROR, {
-            error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
+            error: err.stack || err.toString()
         });
     }
 }

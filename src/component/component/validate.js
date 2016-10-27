@@ -39,12 +39,12 @@ export function validate(options) { // eslint-ignore-line
     validateProps(options);
 
     if (options.dimensions) {
-        if (typeof options.dimensions.width !== 'number') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number`);
+        if (typeof options.dimensions.width !== 'number' && typeof options.dimensions.width !== 'string') {
+            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number or string`);
         }
 
-        if (typeof options.dimensions.height !== 'number') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number`);
+        if (typeof options.dimensions.height !== 'number' && typeof options.dimensions.height !== 'string') {
+            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number or string`);
         }
     }
 
