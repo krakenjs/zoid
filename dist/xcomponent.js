@@ -317,9 +317,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.contexts[context] = _this.contexts[context] === undefined ? true : Boolean(_this.contexts[context]);
 	        }
 
-	        _this.addProp(options, 'closeDelay');
-	        _this.addProp(options, 'closeComponentDelay');
-
 	        _this.addProp(options, 'resizeDelay');
 
 	        // The default context to render to
@@ -8004,7 +8001,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 
 	                tasks.runTimeout = tasks.loadUrl.then(function () {
-	                    debugger; // eslint-disable-line
 	                    return _this8.runTimeout();
 	                });
 	            } else {
@@ -8858,7 +8854,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderedIntoParentTemplate: false,
 	    destroyOnUnload: false,
 	    allowResize: true,
-	    allowCloseDelay: true,
 	    openOnClick: false,
 
 	    open: function open(element) {
@@ -8962,7 +8957,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderedIntoParentTemplate: false,
 	    destroyOnUnload: true,
 	    allowResize: false,
-	    allowCloseDelay: false,
 	    openOnClick: true,
 
 	    open: function open() {
@@ -9076,7 +9070,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderedIntoParentTemplate: true,
 	    destroyOnUnload: false,
 	    allowResize: true,
-	    allowCloseDelay: true,
 	    openOnClick: false,
 
 	    renderToParentOverrides: {
