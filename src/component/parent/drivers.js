@@ -34,7 +34,6 @@ export let RENDER_DRIVERS = {
         renderedIntoParentTemplate: false,
         destroyOnUnload: false,
         allowResize: true,
-        allowCloseDelay: true,
         openOnClick: false,
 
         open(element) {
@@ -145,7 +144,6 @@ export let RENDER_DRIVERS = {
         renderedIntoParentTemplate: false,
         destroyOnUnload: true,
         allowResize: false,
-        allowCloseDelay: false,
         openOnClick: true,
 
         open() {
@@ -259,7 +257,6 @@ export let RENDER_DRIVERS = {
         renderedIntoParentTemplate: true,
         destroyOnUnload: false,
         allowResize: true,
-        allowCloseDelay: true,
         openOnClick: false,
 
         renderToParentOverrides: {

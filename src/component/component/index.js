@@ -85,9 +85,6 @@ export class Component extends BaseComponent {
             this.contexts[context] = (this.contexts[context] === undefined) ? true : Boolean(this.contexts[context]);
         }
 
-        this.addProp(options, 'closeDelay');
-        this.addProp(options, 'closeComponentDelay');
-
         this.addProp(options, 'resizeDelay');
 
         // The default context to render to
