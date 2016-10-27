@@ -468,7 +468,6 @@ export class ParentComponent extends BaseComponent {
             });
 
             tasks.runTimeout = tasks.loadUrl.then(() => {
-                debugger; // eslint-disable-line
                 return this.runTimeout();
             });
 
