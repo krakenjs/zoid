@@ -418,6 +418,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function isXComponent() {
 	            return (0, _window.isXComponentWindow)();
 	        }
+	    }, {
+	        key: 'isChild',
+	        value: function isChild() {
+	            return (0, _window.isXComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
+	        }
 
 	        /*  Parent
 	            ------
