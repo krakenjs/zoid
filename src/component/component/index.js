@@ -162,6 +162,10 @@ export class Component extends BaseComponent {
         return isXComponentWindow();
     }
 
+    isChild() {
+        return isXComponentWindow() && getComponentMeta().tag === this.tag;
+    }
+
 
     /*  Parent
         ------
