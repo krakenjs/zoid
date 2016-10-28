@@ -5,8 +5,8 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement,
-         capitalizeFirstLetter, addEventToClass, template, isWindowClosed, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
+         capitalizeFirstLetter, addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -911,7 +911,7 @@ export class ParentComponent extends BaseComponent {
 
             // IE in metro mode -- child window needs to close itself, or close will hang
 
-            if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
+            if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !postRobot.winutil.isWindowClosed(win)) {
                 this.childExports.close().catch(noop);
             }
 
@@ -928,7 +928,7 @@ export class ParentComponent extends BaseComponent {
     @promise
     showContainer() {
         if (this.parentTemplate) {
-            this.parentTemplate.classList.add(CLASS_NAMES.SHOW_CONTAINER);
+            addClass(this.parentTemplate, CLASS_NAMES.SHOW_CONTAINER);
             return showAndAnimate(this.parentTemplate, ANIMATION_NAMES.SHOW_CONTAINER);
         }
     }
@@ -937,7 +937,7 @@ export class ParentComponent extends BaseComponent {
     @promise
     showComponent() {
         if (this.elementTemplate) {
-            this.elementTemplate.classList.add(CLASS_NAMES.SHOW_COMPONENT);
+            addClass(this.elementTemplate, CLASS_NAMES.SHOW_COMPONENT);
             showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
         }
     }
@@ -947,8 +947,8 @@ export class ParentComponent extends BaseComponent {
     hideContainer() {
         if (this.parentTemplate) {
 
-            this.parentTemplate.classList.add(CLASS_NAMES.HIDE_CONTAINER);
-            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+            addClass(this.parentTemplate, CLASS_NAMES.HIDE_CONTAINER);
+            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
 
             return animateAndHide(this.parentTemplate, ANIMATION_NAMES.HIDE_CONTAINER);
         }
@@ -959,13 +959,13 @@ export class ParentComponent extends BaseComponent {
     hideComponent() {
 
         if (this.parentTemplate) {
-            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
         }
 
         if (this.elementTemplate) {
 
-            this.elementTemplate.classList.add(CLASS_NAMES.HIDE_COMPONENT);
-            this.parentTemplate.classList.add(CLASS_NAMES.LOADING);
+            addClass(this.elementTemplate, CLASS_NAMES.HIDE_COMPONENT);
+            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
 
             if (this.elementTemplate) {
                 return animateAndHide(this.elementTemplate, ANIMATION_NAMES.HIDE_COMPONENT);

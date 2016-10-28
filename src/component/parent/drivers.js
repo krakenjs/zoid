@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, isWindowClosed, getDomainFromUrl, getDomain, getElement, toCSS, isPerc, toNum } from '../../lib';
+import { iframe, popup, getDomainFromUrl, getDomain, getElement, toCSS, isPerc, toNum } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
 import { getPosition, getParentWindow } from '../window';
 
@@ -178,7 +178,7 @@ export let RENDER_DRIVERS = {
 
             // Sometimes we'll be blocked from opening the popup because we're not in a click event.
 
-            if (isWindowClosed(this.window)) {
+            if (postRobot.winutil.isWindowClosed(this.window)) {
                 let err = new PopupOpenError(`[${this.component.tag}] Can not open popup window - blocked`);
                 throw err;
             }

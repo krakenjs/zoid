@@ -1,5 +1,7 @@
 
+import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+
 import { once, noop, memoize } from './fn';
 import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 
@@ -125,43 +127,6 @@ export function iframe(url, options, container) {
 }
 
 
-/*  Is Window Closed
-    ----------------
-
-    Determine if a window is closed
-*/
-
-export function isWindowClosed(win) {
-
-    try {
-        if (!win) {
-            return false;
-        }
-
-    } catch (err) {
-        return true;
-    }
-
-    try {
-        if (win.closed) {
-            return true;
-        }
-
-    } catch (err) {
-
-        // I love you so much IE
-
-        if (err && err.message === 'Call was rejected by callee.\r\n') {
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
 /*  On Close Window
     ---------------
 
@@ -186,7 +151,7 @@ export function onCloseWindow(win, callback) {
             // pass
         }
 
-        if (isWindowClosed(myWin)) {
+        if (postRobot.winutil.isWindowClosed(myWin)) {
             clearInterval(interval);
             return callback();
         }
