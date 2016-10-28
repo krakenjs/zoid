@@ -618,6 +618,11 @@ export function animate(element, name) {
         let hasStarted = false;
 
         let startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
+
+            if (event.target !== element || event.animationName !== name) {
+                return;
+            }
+
             event.stopPropagation();
 
             startEvent.cancel();
@@ -625,6 +630,11 @@ export function animate(element, name) {
         });
 
         let endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
+
+            if (event.target !== element || event.animationName !== name) {
+                return;
+            }
+
             event.stopPropagation();
 
             startEvent.cancel();
