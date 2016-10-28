@@ -650,3 +650,11 @@ export function animateAndHide(element, name) {
         hideElement(element);
     });
 }
+
+export function addClass(element, name) {
+    if (element.classList) {
+        element.classList.add(name);
+    } else if (element.className.split(/\s+/).indexOf(name) === -1) {
+        element.className += ` ${name}`;
+    }
+}
