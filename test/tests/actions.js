@@ -5,7 +5,7 @@ describe('xcomponent actions', () => {
 
     it('should close an xcomponent popup', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
 
             onEnter() {
                 let close = this.window.close;
@@ -18,12 +18,12 @@ describe('xcomponent actions', () => {
                 this.close();
             }
 
-        }).renderPopup();
+        });
     });
 
     it('should close an xcomponent lightbox', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             onEnter() {
                 let close = this.window.close;
@@ -36,18 +36,18 @@ describe('xcomponent actions', () => {
                 this.close();
             }
 
-        }).renderLightbox();
+        });
     });
 
     it('should focus an xcomponent popup', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
 
             onEnter() {
                 this.window.focus = done;
                 this.focus();
             }
 
-        }).renderPopup();
+        });
     });
 });

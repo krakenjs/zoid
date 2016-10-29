@@ -16,10 +16,10 @@ describe('xcomponent error cases', () => {
             };
         };
 
-        testComponent.init({
+        testComponent.renderPopup({
             onEnter: done
 
-        }).renderPopup().catch(err => {
+        }).catch(err => {
             assert.isTrue(err instanceof xcomponent.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
             window.open = windowOpen;
             done();
@@ -28,7 +28,7 @@ describe('xcomponent error cases', () => {
 
     it('should enter a component, throw an integration error, and return the error to the parent with the original stack', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             onError(err) {
                 assert.isTrue(err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
@@ -38,27 +38,27 @@ describe('xcomponent error cases', () => {
             run: `
                 window.xchild.error(new Error('xxxxx'));
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and timeout, then call onTimeout', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             timeout: 1,
             onTimeout() {
                 done();
             }
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and timeout, then call onError in the absense of onTimeout', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             timeout: 1,
             onError() {
                 done();
             }
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and timeout, then log an error in the absense of onTimeout and onError', done => {
@@ -72,9 +72,9 @@ describe('xcomponent error cases', () => {
             }
         };
 
-        testComponent.init({
+        testComponent.renderLightbox({
             timeout: 1
-        }).renderLightbox();
+        });
     });
 
     it.skip('should enter a component and error out when the page name is not valid', done => {
@@ -84,7 +84,7 @@ describe('xcomponent error cases', () => {
 
     it('should try to enter a singleton component twice and error out', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             onEnter() {
                 try {
                     testComponent.init();
@@ -92,7 +92,7 @@ describe('xcomponent error cases', () => {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
     });
 
     it('should try to render a component twice and error out', done => {
@@ -108,14 +108,14 @@ describe('xcomponent error cases', () => {
 
     it('should try to render a component to an unsupported context and error out', done => {
 
-        testComponent3.init().render(null, 'moo').catch(() => {
+        testComponent3.render(null, 'moo').catch(() => {
             done();
         });
     });
 
     it('should try to render a component with a specified element when iframe mode is not supported', done => {
 
-        testComponent3.init().render(document.body).catch(() => {
+        testComponent3.render(document.body).catch(() => {
             done();
         });
     });
@@ -132,7 +132,7 @@ describe('xcomponent error cases', () => {
             iframe: true
         };
 
-        testComponent.init().render().catch(err => {
+        testComponent.render().catch(err => {
             assert.ok(err);
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
@@ -142,7 +142,7 @@ describe('xcomponent error cases', () => {
 
     it('should call onclose when a popup is closed by someone other than xcomponent', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
 
             onEnter() {
                 setTimeout(() => {
@@ -153,12 +153,12 @@ describe('xcomponent error cases', () => {
             onClose() {
                 done();
             }
-        }).renderPopup();
+        });
     });
 
     it('should call onclose when a lightbox is closed by someone other than xcomponent', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             onEnter() {
                 setTimeout(() => {
@@ -169,6 +169,6 @@ describe('xcomponent error cases', () => {
             onClose() {
                 done();
             }
-        }).renderLightbox();
+        });
     });
 });

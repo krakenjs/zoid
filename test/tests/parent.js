@@ -5,138 +5,136 @@ describe('xcomponent render to parent', () => {
 
     it('should render a component to the parent as a lightbox', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
                     onEnter: function() {
                         return window.xprops.foo();
                     }
-                }).renderLightboxToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should render a component to the parent as a popup', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
                     onEnter: function() {
                         return window.xprops.foo();
                     }
-                }).renderPopupToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should render a component to the parent as an iframe', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo() {
                 done();
             },
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
                     onEnter: function() {
                         return window.xprops.foo();
                     }
-                }).renderIframeToParent('body');
+                }, 'body');
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should render a component to the parent as a lightbox and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
                     foo: function() {
                         window.xprops.foo();
                     },
 
                     run: 'window.xprops.foo();'
 
-                }).renderLightboxToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should render a component to the parent as an iframe and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
                     foo: function() {
                         window.xprops.foo();
                     },
 
                     run: 'window.xprops.foo();'
 
-                }).renderIframeToParent('body');
+                }, 'body');
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
 
     it('should render a component to the parent as a popup and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
                     foo: function() {
                         window.xprops.foo();
                     },
 
                     run: 'window.xprops.foo();'
 
-                }).renderPopupToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should render a component to the parent as a lightbox and close on enter', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             onClose: () => done(),
 
             run: `
-                var comp2 = xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
                     onEnter: function() {
-                        comp2.close();
+                        this.close();
                     },
 
                     onClose: function() {
                         window.xchild.close();
                     }
                 });
-
-                comp2.renderLightboxToParent();
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should close an xcomponent renderToParent lightbox on click of the overlay close button', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             childEntered() {
-                document.querySelector('.xcomponent-close').click();
+                window.frames[1].document.querySelector('.xcomponent-close').click();
             },
 
             foo: () => done(),
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
 
                     onEnter: function() {
 
@@ -149,22 +147,23 @@ describe('xcomponent render to parent', () => {
                         return window.xprops.childEntered();
                     }
 
-                }).renderLightboxToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should close an xcomponent renderToParent popup on click of the overlay close button', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
+
             childEntered() {
-                document.querySelector('.xcomponent-close').click();
+                window.frames[1].document.querySelector('.xcomponent-close').click();
             },
 
             foo: () => done(),
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
                     onEnter: function() {
 
@@ -177,23 +176,23 @@ describe('xcomponent render to parent', () => {
                         return window.xprops.childEntered();
                     }
 
-                }).renderPopupToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should focus an xcomponent renderToParent popup on click of the overlay', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
 
             childEntered() {
-                document.querySelector('.xcomponent-focus').click();
+                window.frames[1].document.querySelector('.xcomponent-focus').click();
             },
 
             foo: () => done(),
 
             run: `
-                xcomponent.getByTag('test-component2').init({
+                xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
                     onEnter: function() {
 
@@ -204,8 +203,8 @@ describe('xcomponent render to parent', () => {
                         return window.xprops.childEntered();
                     }
 
-                }).renderPopupToParent();
+                });
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 });

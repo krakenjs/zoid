@@ -91,19 +91,6 @@ export let isXComponentWindow = memoize(() => {
 });
 
 
-export let getParentWindow = memoize(() => {
-
-    if (window.opener) {
-        return window.opener;
-    } else if (window.parent && window.parent !== window) {
-        return window.parent;
-    }
-
-    throw new Error(`Can not find parent window`);
-});
-
-
-
 /*  Get Parent Component Window
     ---------------------------
 
@@ -118,13 +105,22 @@ export let getParentComponentWindow = memoize(() => {
         throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
-    let parentWindow = getParentWindow();
+    let parentWindow = postRobot.winutil.getAncestor(window);
 
     if (!parentWindow) {
-        throw new Error(`Can not find parent window`);
+        throw new Error(`Can not find parent component window`);
     }
 
     if (componentMeta.parent === WINDOW_REFERENCES.DIRECT_PARENT) {
+        return parentWindow;
+
+    } else if (componentMeta.parent === WINDOW_REFERENCES.PARENT_PARENT) {
+        parentWindow = postRobot.winutil.getAncestor(parentWindow);
+
+        if (!parentWindow) {
+            throw new Error(`Can not find parent component window`);
+        }
+
         return parentWindow;
     }
 

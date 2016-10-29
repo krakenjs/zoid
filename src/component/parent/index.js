@@ -6,8 +6,8 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         capitalizeFirstLetter, addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CONTEXT_TYPES_LIST, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+         addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl, iframe } from '../../lib';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -51,11 +51,15 @@ function promise(target, name, descriptor) {
 
 export class ParentComponent extends BaseComponent {
 
-    constructor(component, options = {}) {
+    constructor(component, context, options = {}) {
         super(component, options);
         validate(component, options);
 
         this.component = component;
+        this.context = context;
+        this.setProps(options.props || {});
+
+        this.childWindowName = this.buildChildWindowName();
 
         // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -65,13 +69,8 @@ export class ParentComponent extends BaseComponent {
 
         this.registerActiveComponent();
 
-        this.setProps(options.props || {});
-
-
         // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
-
-        this.childWindowName = this.buildChildWindowName(WINDOW_REFERENCES.DIRECT_PARENT);
 
         this.component.log(`construct_parent`);
 
@@ -97,6 +96,8 @@ export class ParentComponent extends BaseComponent {
 
 
     buildChildWindowName(parent, options = {}) {
+
+        parent = parent || (this.context === CONTEXT_TYPES.LIGHTBOX ? WINDOW_REFERENCES.PARENT_PARENT : WINDOW_REFERENCES.DIRECT_PARENT);
 
         let tag = this.component.tag;
 
@@ -293,66 +294,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Get Render Context
-        ------------------
-
-        Determine the ideal context to render to, if unspecified by the user
-    */
-
-    getRenderContext(el, context) {
-
-        if (el) {
-            if (context && !RENDER_DRIVERS[context].requiresElement) {
-                throw new Error(`[${this.component.tag}] ${context} context can not be rendered into element`);
-            }
-
-            context = CONTEXT_TYPES.IFRAME;
-        }
-
-        if (context) {
-            if (!this.component.contexts[context]) {
-                throw new Error(`[${this.component.tag}] ${context} context not allowed by component`);
-            }
-
-            return context;
-        }
-
-        if (this.component.defaultContext) {
-            return this.component.defaultContext;
-        }
-
-        for (let renderContext of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
-            if (this.component.contexts[renderContext]) {
-                return renderContext;
-            }
-        }
-
-        throw new Error(`[${this.component.tag}] No context options available for render`);
-    }
-
-
-    /*  Validate Render
-        ---------------
-
-        Ensure there is no reason we can't render
-    */
-
-    validateRender(element, context) {
-
-        context = this.getRenderContext(element, context);
-
-        if (this.window) {
-            throw new Error(`[${this.component.tag}] Can not render: component is already rendered`);
-        }
-
-        if (RENDER_DRIVERS[context].requiresElement && !element) {
-            throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
-        }
-
-        return context;
-    }
-
-
     /*  Render
         ------
 
@@ -365,17 +306,21 @@ export class ParentComponent extends BaseComponent {
 
     render(element, context) {
         return this.tryInit(() => {
-            context = this.validateRender(element, context);
 
-            this.component.log(`render_${context}`, { context, element });
+            if (!this.context) {
+                this.context = this.component.getRenderContext(element, context);
+                this.childWindowName = this.buildChildWindowName();
+            }
 
-            return this.preRender(element, context);
+            this.component.log(`render_${this.context}`, { context: this.context, element });
+
+            return this.preRender(element, this.context);
         });
     }
 
 
-    openBridge(context) {
-        return RENDER_DRIVERS[context].openBridge.call(this);
+    openBridge() {
+        return this.driver.openBridge.call(this);
     }
 
 
@@ -388,10 +333,10 @@ export class ParentComponent extends BaseComponent {
 
     @memoize
     @promise
-    open(element, context) {
-        this.component.log(`open_${context}`, { element, windowName: this.childWindowName });
+    open(element) {
+        this.component.log(`open_${this.context}`, { element, windowName: this.childWindowName });
 
-        RENDER_DRIVERS[context].open.call(this, element);
+        this.driver.open.call(this, element);
     }
 
     get driver() {
@@ -410,8 +355,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     @promise
-    preRender(element, context, options = {}) {
-        this.clean.set('context', this.getRenderContext(element, context));
+    preRender(element, options = {}) {
 
         let tasks = {
             openContainer: this.openContainer(this.context),
@@ -464,7 +408,7 @@ export class ParentComponent extends BaseComponent {
             tasks.buildUrl = this.buildUrl();
 
             tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.createComponentTemplate ]).then(([ url ]) => {
-                return this.loadUrl(this.context, url);
+                return this.loadUrl(url);
             });
 
             tasks.runTimeout = tasks.loadUrl.then(() => {
@@ -483,8 +427,7 @@ export class ParentComponent extends BaseComponent {
 
 
 
-    validateRenderToParent(element, context) {
-        context = this.getRenderContext(element, context);
+    validateRenderToParent(element) {
 
         let parentWindow = getParentComponentWindow();
 
@@ -495,26 +438,24 @@ export class ParentComponent extends BaseComponent {
         if (!isXComponentWindow()) {
             throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
         }
-
-        return context;
     }
 
 
-    delegate(win, context) {
+    delegate(win) {
 
         this.delegateWindow = win;
 
-        this.component.log(`delegate_${context}`);
+        this.component.log(`delegate_${this.context}`);
 
         this.childWindowName = this.buildChildWindowName(window.name, { secureProps: true });
 
         let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
-            context,
+            context: this.context,
 
             options: {
 
-                context,
+                context: this.context,
 
                 childWindowName: this.childWindowName,
 
@@ -542,7 +483,7 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${err.stack}`);
         });
 
-        let overrides = RENDER_DRIVERS[context].renderToParentOverrides;
+        let overrides = this.driver.renderToParentOverrides;
 
         for (let key of Object.keys(overrides)) {
             let val = overrides[key];
@@ -573,36 +514,17 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Render to Parent
-        ----------------
-
-        Instruct the parent window to render our component for us -- so, for example, we can have a button component
-        which opens a lightbox on the parent page, with a full template. Or, we could use this to render an iframe based
-        modal on top of our existing iframe component, without having to expand out the size of our current iframe.
-    */
-
-    renderToParent(element, context, options = {}) {
-        return this.tryInit(() => {
-            context = this.validateRenderToParent(element, context);
-
-            this.component.log(`render_${context}_to_parent`, { element, context });
-
-            this.delegate(getParentComponentWindow(), context);
-
-            return this.render(element, context);
-        });
-    }
-
-
     renderTo(win, element, context, options = {}) {
         return this.tryInit(() => {
-            context = this.validateRenderToParent(element, context);
+            this.context = this.context || this.component.getRenderContext(element, context);
 
-            this.component.log(`render_${context}_to_win`, { element, context });
+            this.validateRenderToParent(element, this.context);
 
-            this.delegate(win, context);
+            this.component.log(`render_${this.context}_to_win`, { element, context: this.context });
 
-            return this.render(element, context);
+            this.delegate(win, this.context);
+
+            return this.render(element, this.context);
         });
     }
 
@@ -636,7 +558,7 @@ export class ParentComponent extends BaseComponent {
 
             closeWindowListener.cancel();
 
-            if (RENDER_DRIVERS[this.context].destroyOnUnload) {
+            if (this.driver.destroyOnUnload) {
                 return this.destroyComponent();
             }
         });
@@ -653,7 +575,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     @promise
-    loadUrl(context, url) {
+    loadUrl(url) {
         this.component.log(`load_url`);
 
         if (window.location.href.split('#')[0] === url.split('#')[0]) {
@@ -664,7 +586,7 @@ export class ParentComponent extends BaseComponent {
             });
         }
 
-        return RENDER_DRIVERS[context].loadUrl.call(this, url);
+        return this.driver.loadUrl.call(this, url);
     }
 
 
@@ -676,13 +598,15 @@ export class ParentComponent extends BaseComponent {
 
     renderHijack(targetElement, element, context) {
         return this.tryInit(() => {
-            context =  this.validateRender(element, context);
+            this.context = this.component.getRenderContext(element, context);
 
-            this.component.log(`render_hijack_${context}`);
+            this.childWindowName = this.buildChildWindowName();
+
+            this.component.log(`render_hijack_${this.context}`);
 
             targetElement.target = this.childWindowName;
 
-            return this.preRender(element, context, { loadUrl: false });
+            return this.preRender(element, { loadUrl: false });
         });
     }
 
@@ -756,7 +680,7 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.RESIZE ](source, data) {
 
-                if (RENDER_DRIVERS[this.context].allowResize && this.component.autoResize) {
+                if (this.driver.allowResize && this.component.autoResize) {
                     return this.resize(data.width, data.height);
                 }
             },
@@ -786,7 +710,7 @@ export class ParentComponent extends BaseComponent {
 
     resize(width, height) {
         this.component.log(`resize`, { height, width });
-        RENDER_DRIVERS[this.context].resize.call(this, width, height);
+        this.driver.resize.call(this, width, height);
 
         if (this.component.resizeDelay) {
             return delay(this.component.resizeDelay);
@@ -801,7 +725,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     restyle() {
-        return RENDER_DRIVERS[this.context].restyle.call(this);
+        return this.driver.restyle.call(this);
     }
 
 
@@ -817,7 +741,7 @@ export class ParentComponent extends BaseComponent {
             this.parentTemplate.style.display = 'none';
         }
 
-        return RENDER_DRIVERS[this.context].hide.call(this);
+        return this.driver.hide.call(this);
     }
 
 
@@ -1039,10 +963,10 @@ export class ParentComponent extends BaseComponent {
 
     @memoize
     @promise
-    openContainer(context) {
+    openContainer() {
         return Promise.try(() => {
 
-            if (!RENDER_DRIVERS[context].parentTemplate) {
+            if (!this.driver.parentTemplate) {
                 return;
             }
 
@@ -1057,6 +981,28 @@ export class ParentComponent extends BaseComponent {
             if (window.top !== window) {
                 // throw new Error(`Can only render parent template to top level window`);
             }
+
+            this.parentTemplateFrame = iframe(null, { scrolling: 'no' }, document.body);
+
+            this.parentTemplateFrame.style.display = 'block';
+            this.parentTemplateFrame.style.position = 'fixed';
+            this.parentTemplateFrame.style.top = '0';
+            this.parentTemplateFrame.style.left = '0';
+            this.parentTemplateFrame.style.width = '100%';
+            this.parentTemplateFrame.style.height = '100%';
+
+            this.parentTemplateFrame.contentWindow.document.open();
+            this.parentTemplateFrame.contentWindow.document.write(`
+
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                </head>
+
+                <body>
+
+                </body>
+            `);
+            this.parentTemplateFrame.contentWindow.document.close();
 
             this.parentTemplate = createElement('div', {
 
@@ -1074,12 +1020,11 @@ export class ParentComponent extends BaseComponent {
                     CLASS_NAMES.XCOMPONENT,
                     `${CLASS_NAMES.XCOMPONENT}-${this.context}`
                 ]
-
             });
 
             hideElement(this.parentTemplate);
 
-            document.body.appendChild(this.parentTemplate);
+            this.parentTemplateFrame.contentWindow.document.body.appendChild(this.parentTemplate);
 
             if (this.driver.renderedIntoParentTemplate) {
                 this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
@@ -1093,8 +1038,8 @@ export class ParentComponent extends BaseComponent {
 
             let eventHandlers = [];
 
-            if (RENDER_DRIVERS[context].focusable) {
-                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event =>  this.focus()));
+            if (this.driver.focusable) {
+                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
             }
 
             eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
@@ -1106,7 +1051,10 @@ export class ParentComponent extends BaseComponent {
             });
 
             this.clean.register('destroyParentTemplate', () => {
-                document.body.removeChild(this.parentTemplate);
+
+                document.body.removeChild(this.parentTemplateFrame);
+
+                delete this.parentTemplateFrame;
                 delete this.parentTemplate;
             });
         });
@@ -1177,26 +1125,6 @@ export class ParentComponent extends BaseComponent {
             throw err;
         });
     }
-}
-
-
-/*  Generate Render Methods
-    -----------------------
-
-    Autogenerate methods like renderIframe, renderPopupToParent
-*/
-
-for (let context of CONTEXT_TYPES_LIST) {
-
-    let contextName = capitalizeFirstLetter(context);
-
-    ParentComponent.prototype[`render${contextName}`] = function(element) {
-        return this.render(element, context);
-    };
-
-    ParentComponent.prototype[`render${contextName}ToParent`] = function(element) {
-        return this.renderToParent(element, context);
-    };
 }
 
 export function destroyAll() {

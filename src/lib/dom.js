@@ -5,6 +5,19 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { once, noop, memoize } from './fn';
 import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 
+function isElement(element) {
+
+    if (element instanceof window.Element) {
+        return true;
+    }
+
+    if (typeof element === 'object' && element.nodeType === 1 && typeof element.style === 'object' && typeof element.ownerDocument === 'object') {
+        return true;
+    }
+
+    return false;
+}
+
 
 /*  Get Element
     -----------
@@ -16,7 +29,8 @@ import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './u
 */
 
 export function getElement(id) {
-    if (id instanceof window.Element) {
+
+    if (isElement(id)) {
         return id;
     }
 
@@ -137,21 +151,11 @@ export function onCloseWindow(win, callback) {
 
     callback = once(callback);
 
-    let isFunction = (win instanceof Function);
-
     let interval;
 
     let checkWindowClosed = () => {
 
-        let myWin;
-
-        try {
-            myWin = isFunction ? win() : win;
-        } catch (err) {
-            // pass
-        }
-
-        if (postRobot.winutil.isWindowClosed(myWin)) {
+        if (postRobot.winutil.isWindowClosed(win, false)) {
             clearInterval(interval);
             return callback();
         }
@@ -417,22 +421,6 @@ export function getParent(win) {
     }
 }
 
-export function getParentWindow(win) {
-    win = win || window;
-
-    let opener = getOpener(win);
-
-    if (opener) {
-        return opener;
-    }
-
-    let parent = getParent(win);
-
-    if (parent) {
-        return parent;
-    }
-}
-
 export function getCurrentDimensions(el) {
     return {
         width: el.offsetWidth,
@@ -550,19 +538,33 @@ function isValidAnimation(element, name) {
 
     let stylesheets = element.ownerDocument.styleSheets;
 
-    for (let i = 0; i < stylesheets.length; i++) {
+    try {
+        for (let i = 0; i < stylesheets.length; i++) {
 
-        let cssRules = stylesheets[i].cssRules;
+            let cssRules = stylesheets[i].cssRules;
 
-        for (let j = 0; j < cssRules.length; j++) {
+            if (!cssRules) {
+                continue;
+            }
 
-            let cssRule = cssRules[j];
+            for (let j = 0; j < cssRules.length; j++) {
 
-            if (cssRule.type === KEYFRAMES_RULE && cssRule.name === name) {
-                return true;
+                let cssRule = cssRules[j];
+
+                if (!cssRule) {
+                    continue;
+                }
+
+                if (cssRule.type === KEYFRAMES_RULE && cssRule.name === name) {
+                    return true;
+                }
             }
         }
+    } catch (err) {
+
+        return false;
     }
+
 
     return false;
 }

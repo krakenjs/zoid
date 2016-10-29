@@ -1,5 +1,6 @@
 
 import postRobot from 'post-robot/src';
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -7,7 +8,8 @@ import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
-import { CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants';
+import { CONTEXT_TYPES, CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants';
+import { RENDER_DRIVERS } from '../parent/drivers';
 import { validate } from './validate';
 
 import parentTemplate from './templates/parent.htm';
@@ -174,7 +176,7 @@ export class Component extends BaseComponent {
     */
 
     parent(options) {
-        return new ParentComponent(this, options);
+        return new ParentComponent(this, null, options);
     }
 
 
@@ -219,13 +221,53 @@ export class Component extends BaseComponent {
         Shortcut to instantiate a component on a parent page, with props
     */
 
-    init(props) {
-        return new ParentComponent(this, { props });
+    init(props, context) {
+        return new ParentComponent(this, context, { props });
     }
 
 
     delegate(source, options = {}) {
         return new DelegateComponent(this, source, options);
+    }
+
+    getRenderContext(element, context) {
+
+        let tag = this.tag;
+        let defaultContext = this.defaultContext;
+        let contexts = this.contexts;
+
+        if (element) {
+            if (context && !RENDER_DRIVERS[context].requiresElement) {
+                throw new Error(`[${tag}] ${context} context can not be rendered into element`);
+            }
+
+            context = CONTEXT_TYPES.IFRAME;
+        }
+
+        if (context) {
+
+            if (!contexts[context]) {
+                throw new Error(`[${tag}] ${context} context not allowed by component`);
+            }
+
+            if (RENDER_DRIVERS[context].requiresElement && !element) {
+                throw new Error(`[${tag}] Must specify element to render to iframe`);
+            }
+
+            return context;
+        }
+
+        if (defaultContext) {
+            return defaultContext;
+        }
+
+        for (let renderContext of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
+            if (contexts[renderContext]) {
+                return renderContext;
+            }
+        }
+
+        throw new Error(`[${tag}] No context options available for render`);
     }
 
 
@@ -236,22 +278,17 @@ export class Component extends BaseComponent {
     */
 
     render(props, element, context) {
-        return this.init(props).render(element, context);
-    }
-
-
-    /*  Render To Parent
-        ----------------
-
-        Shortcut to render a parent component
-    */
-
-    renderToParent(props, element, context) {
-        return this.init(props).renderToParent(element, context);
+        return Promise.try(() => {
+            context = this.getRenderContext(element, context);
+            return new ParentComponent(this, context, { props }).render(element);
+        });
     }
 
     renderTo(win, props, element, context) {
-        return this.init(props).renderTo(win, element, context);
+        return Promise.try(() => {
+            context = this.getRenderContext(element, context);
+            return new ParentComponent(this, context, { props }).renderTo(win, element);
+        });
     }
 
 
@@ -326,14 +363,10 @@ for (let context of CONTEXT_TYPES_LIST) {
     let contextName = capitalizeFirstLetter(context);
 
     Component.prototype[`render${contextName}`] = function(props, element) {
-        return this.init(props).render(element, context);
-    };
-
-    Component.prototype[`render${contextName}ToParent`] = function(props, element) {
-        return this.init(props).renderToParent(element, context);
+        return this.render(props, element, context);
     };
 
     Component.prototype[`render${contextName}To`] = function(win, props, element) {
-        return this.init(props).renderTo(win, element, context);
+        return this.renderTo(win, props, element, context);
     };
 }

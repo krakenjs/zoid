@@ -5,14 +5,14 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component rendered as a lightbox', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             onEnter: done
-        }).renderLightbox();
+        });
     });
 
     it.skip('should enter a component rendered as a lightbox with the correct dimensions', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             onEnter() {
                 if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
@@ -20,7 +20,7 @@ describe('xcomponent happy cases', () => {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
     });
 
     it.skip('should enter a component rendered as a popup with the correct dimensions', done => {
@@ -32,7 +32,7 @@ describe('xcomponent happy cases', () => {
             return open.apply(this, arguments);
         };
 
-        testComponent.init({
+        testComponent.renderPopup({
             onEnter() {
                 done();
 
@@ -46,14 +46,14 @@ describe('xcomponent happy cases', () => {
 
                 */
             }
-        }).renderPopup();
+        });
 
         window.open = open;
     });
 
     it.skip('should enter a component rendered as a lightbox with no dimensions', done => {
 
-        testComponent4.init({
+        testComponent4.renderLightbox({
             onEnter() {
                 if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
@@ -61,7 +61,7 @@ describe('xcomponent happy cases', () => {
                     done();
                 }
             }
-        }).renderLightbox();
+        });
     });
 
     it.skip('should enter a component rendered as a popup with no dimensions', done => {
@@ -73,7 +73,7 @@ describe('xcomponent happy cases', () => {
             return open.apply(this, arguments);
         };
 
-        testComponent4.init({
+        testComponent4.renderPopup({
             onEnter() {
                 done();
 
@@ -87,14 +87,14 @@ describe('xcomponent happy cases', () => {
 
                 */
             }
-        }).renderPopup();
+        });
 
         window.open = open;
     });
 
     it('should enter a component rendered as a lightbox and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             foo(bar) {
                 assert.equal(bar, 'bar');
@@ -104,19 +104,19 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo('bar');
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component rendered as an iframe', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
             onEnter: done
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should enter a component rendered as an iframe and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderIframe({
 
             foo(bar) {
                 assert.equal(bar, 'bar');
@@ -126,19 +126,19 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo('bar');
             `
-        }).renderIframe(document.body);
+        }, document.body);
     });
 
     it('should enter a component rendered as a popup', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
             onEnter: done
-        }).renderPopup();
+        });
     });
 
     it('should enter a component rendered as a popup and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
 
             foo(bar) {
                 assert.equal(bar, 'bar');
@@ -148,12 +148,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo('bar');
             `
-        }).renderPopup();
+        });
     });
 
     it('should enter a component, update a prop, and call a prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             foo() {
                 return this.updateProps({
@@ -171,14 +171,14 @@ describe('xcomponent happy cases', () => {
                     window.xprops.foo('bar');
                 });
             `
-        }).renderLightbox();
+        });
     });
 
     it('should try to render by passing in an element', done => {
 
-        testComponent.init({
+        testComponent.render({
             onEnter: done
-        }).render(document.body);
+        }, document.body);
     });
 
     it('should try to render to defaultContext lightbox', done => {
@@ -186,12 +186,12 @@ describe('xcomponent happy cases', () => {
         let originalDefaultContext = testComponent.defaultContext;
         testComponent.defaultContext = 'lightbox';
 
-        testComponent.init({
+        testComponent.render({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        }).render();
+        });
     });
 
     it('should try to render to defaultContext popup', done => {
@@ -199,12 +199,12 @@ describe('xcomponent happy cases', () => {
         let originalDefaultContext = testComponent.defaultContext;
         testComponent.defaultContext = 'popup';
 
-        testComponent.init({
+        testComponent.render({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        }).render();
+        });
     });
 
     it('should try to render to when popup is the only available option', done => {
@@ -219,13 +219,13 @@ describe('xcomponent happy cases', () => {
             iframe: false
         };
 
-        testComponent.init({
+        testComponent.render({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
             }
-        }).render();
+        });
     });
 
     it('should try to render to when lightbox is the only available option', done => {
@@ -240,18 +240,18 @@ describe('xcomponent happy cases', () => {
             iframe: false
         };
 
-        testComponent.init({
+        testComponent.render({
             onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
             }
-        }).render();
+        });
     });
 
     it('should enter a component and call back with a string prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             stringProp: 'bar',
 
@@ -263,12 +263,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.stringProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a number prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             numberProp: 123,
 
@@ -280,12 +280,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.numberProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a parseInted number prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             numberProp: '123',
 
@@ -297,12 +297,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.numberProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a boolean prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             booleanProp: true,
 
@@ -314,12 +314,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a truthy boolean prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             booleanProp: 1,
 
@@ -331,12 +331,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a falsy boolean prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             booleanProp: 0,
 
@@ -348,12 +348,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with an object prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             objectProp: { foo: 'bar', x: 12345, fn() { done(); }, obj: { bar: 'baz' } },
 
@@ -368,12 +368,12 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.objectProp);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call back with a function prop', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             functionProp: done,
 
@@ -385,6 +385,6 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.functionProp);
             `
-        }).renderLightbox();
+        });
     });
 });

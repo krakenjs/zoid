@@ -30,7 +30,7 @@ export let htmlComponent = {
             let container = document.createElement('div');
             element.parentNode.replaceChild(container, element);
 
-            component.init(props).render(container);
+            component.render(props, container);
         }
 
         function scan() {

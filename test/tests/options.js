@@ -7,7 +7,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component with a custom url', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl(url) {
@@ -18,12 +18,12 @@ describe('xcomponent options', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component with a custom env', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
             env: 'dev',
 
             sendUrl(url) {
@@ -34,14 +34,14 @@ describe('xcomponent options', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a memoized function', done => {
 
         let x = 0;
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             memoizedFunction() {
                 x += 1;
@@ -61,14 +61,14 @@ describe('xcomponent options', () => {
                     });
                 });
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a once function', done => {
 
         let x = 0;
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             onceFunction() {
                 x += 1;
@@ -88,12 +88,12 @@ describe('xcomponent options', () => {
                     });
                 });
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a denodeify function', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -111,12 +111,12 @@ describe('xcomponent options', () => {
                     return window.xprops.complete(result);
                 });
             `
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a denodeify function returning a promise', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             denodeifyFunction(val) {
                 return Promise.resolve(`${val}bar`);
@@ -133,12 +133,12 @@ describe('xcomponent options', () => {
                 });
             `
 
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a denodeify function with an error', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -157,12 +157,12 @@ describe('xcomponent options', () => {
                 });
             `
 
-        }).renderLightbox();
+        });
     });
 
     it('should enter a component and call a denodeify function incorrectly', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -185,6 +185,6 @@ describe('xcomponent options', () => {
                 });
             `
 
-        }).renderLightbox();
+        });
     });
 });

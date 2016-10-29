@@ -195,7 +195,7 @@ export class ChildComponent extends BaseComponent {
 
     watchForClose() {
 
-        onCloseWindow(getParentComponentWindow, () => {
+        onCloseWindow(getParentComponentWindow(), () => {
 
             this.component.log(`parent_window_closed`);
 

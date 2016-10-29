@@ -29,7 +29,8 @@ export const INITIAL_PROPS = {
 };
 
 export const WINDOW_REFERENCES = {
-    DIRECT_PARENT: `__direct_parent__`
+    DIRECT_PARENT: `__direct_parent__`,
+    PARENT_PARENT: `__parent_parent__`
 };
 
 export const PROP_TYPES_LIST = values(PROP_TYPES);

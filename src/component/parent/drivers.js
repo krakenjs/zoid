@@ -4,7 +4,7 @@ import postRobot from 'post-robot/src';
 import { PopupOpenError } from '../../error';
 import { iframe, popup, getDomainFromUrl, getDomain, getElement, toCSS, isPerc, toNum } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
-import { getPosition, getParentWindow } from '../window';
+import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
     --------------
@@ -97,7 +97,7 @@ export let RENDER_DRIVERS = {
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
-                        this.window = postRobot.winutil.getFrameByName(getParentWindow(), this.childWindowName);
+                        this.window = postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName);
 
                         if (!this.window) {
                             throw new Error(`Unable to find parent component iframe window`);
@@ -118,15 +118,6 @@ export let RENDER_DRIVERS = {
 
         restyle() {
             this.iframe.style.backgroundColor = 'transparent';
-        },
-
-        renderToParent(element, options) {
-
-            if (!element) {
-                throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
-            }
-
-            return this.renderToParentRemote(element, CONTEXT_TYPES.IFRAME, options);
         },
 
         loadUrl(url) {
@@ -281,7 +272,7 @@ export let RENDER_DRIVERS = {
             open(original, override) {
                 return function() {
                     return override.apply(this, arguments).then(() => {
-                        this.window = postRobot.winutil.getFrameByName(this.delegateWindow, this.childWindowName);
+                        this.window = postRobot.winutil.findFrameByName(this.delegateWindow, this.childWindowName);
 
                         if (!this.window) {
                             throw new Error(`Unable to find parent component iframe window`);

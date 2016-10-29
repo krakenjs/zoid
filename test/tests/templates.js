@@ -4,7 +4,7 @@ import { testComponent } from '../component';
 describe('xcomponent templates and styles', () => {
 
     it('should focus an xcomponent popup on click of the overlay', done => {
-        testComponent.init({
+        testComponent.renderPopup({
 
             onEnter() {
 
@@ -12,15 +12,15 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                document.querySelector('.xcomponent-overlay').click();
+                this.parentTemplateFrame.contentDocument.querySelector('.xcomponent-overlay').click();
             }
 
-        }).renderPopup();
+        });
     });
 
     it('should close an xcomponent popup on click of the overlay close button', done => {
 
-        testComponent.init({
+        testComponent.renderPopup({
 
             onEnter() {
                 let close = this.window.close;
@@ -30,16 +30,16 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                document.querySelector('.xcomponent-close').click();
+                this.parentTemplateFrame.contentDocument.querySelector('.xcomponent-close').click();
             }
 
-        }).renderPopup();
+        });
     });
 
 
     it('should close an xcomponent lightbox on click of the overlay close button', done => {
 
-        testComponent.init({
+        testComponent.renderLightbox({
 
             onEnter() {
                 let close = this.window.close;
@@ -49,9 +49,9 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                document.querySelector('.xcomponent-close').click();
+                this.parentTemplateFrame.contentDocument.querySelector('.xcomponent-close').click();
             }
 
-        }).renderLightbox();
+        });
     });
 });

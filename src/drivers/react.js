@@ -22,7 +22,7 @@ export let react = {
 
                 this.setState({ parent });
 
-                parent.renderIframe(window.ReactDOM.findDOMNode(this));
+                parent.render(window.ReactDOM.findDOMNode(this));
             },
 
             componentDidUpdate() {
