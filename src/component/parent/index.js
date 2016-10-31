@@ -982,7 +982,10 @@ export class ParentComponent extends BaseComponent {
                 // throw new Error(`Can only render parent template to top level window`);
             }
 
-            this.parentTemplateFrame = iframe(null, { scrolling: 'no' }, document.body);
+            this.parentTemplateFrame = iframe(null, {
+                name: `__lightbox_container__${uniqueID()}__`,
+                scrolling: 'no'
+            }, document.body);
 
             this.parentTemplateFrame.style.display = 'block';
             this.parentTemplateFrame.style.position = 'fixed';
