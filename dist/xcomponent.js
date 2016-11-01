@@ -8579,7 +8579,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // throw new Error(`Can only render parent template to top level window`);
 	                }
 
-	                _this19.parentTemplateFrame = (0, _lib.iframe)(null, { scrolling: 'no' }, document.body);
+	                _this19.parentTemplateFrame = (0, _lib.iframe)(null, {
+	                    name: '__lightbox_container__' + (0, _lib.uniqueID)() + '__',
+	                    scrolling: 'no'
+	                }, document.body);
 
 	                _this19.parentTemplateFrame.style.display = 'block';
 	                _this19.parentTemplateFrame.style.position = 'fixed';
@@ -8587,6 +8590,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this19.parentTemplateFrame.style.left = '0';
 	                _this19.parentTemplateFrame.style.width = '100%';
 	                _this19.parentTemplateFrame.style.height = '100%';
+	                _this19.parentTemplateFrame.style.zIndex = '2147483647';
 
 	                _this19.parentTemplateFrame.contentWindow.document.open();
 	                _this19.parentTemplateFrame.contentWindow.document.write('\n\n                <head>\n                    <meta name="viewport" content="width=device-width, initial-scale=1">\n                </head>\n\n                <body>\n\n                </body>\n            ');
