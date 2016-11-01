@@ -993,6 +993,7 @@ export class ParentComponent extends BaseComponent {
             this.parentTemplateFrame.style.left = '0';
             this.parentTemplateFrame.style.width = '100%';
             this.parentTemplateFrame.style.height = '100%';
+            this.parentTemplateFrame.style.zIndex = '2147483647';
 
             this.parentTemplateFrame.contentWindow.document.open();
             this.parentTemplateFrame.contentWindow.document.write(`
