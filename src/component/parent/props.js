@@ -4,6 +4,17 @@ import { validateProp } from './validate';
 import { normalizeProps } from '../props';
 import { PROP_DEFER_TO_URL, CLOSE_REASONS } from '../../constants';
 
+function dotify(obj, prefix = '', newobj = {}) {
+    prefix = prefix ? `${prefix}.` : prefix;
+    for (let key in obj) {
+        if (obj[key] && typeof obj[key] === 'object') {
+            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
+        } else {
+            newobj[`${prefix}${key}`] = obj[key];
+        }
+    }
+    return newobj;
+}
 
 /*  Props to Query
     --------------
@@ -69,7 +80,19 @@ export function propsToQuery(propsDef, props) {
             } else if (typeof value === 'function') {
                 return;
             } else if (typeof value === 'object') {
-                result = JSON.stringify(value);
+
+                if (prop.serialization === 'json') {
+                    result = JSON.stringify(value);
+                } else {
+                    result = dotify(value, key);
+
+                    for (let dotkey in result) {
+                        params[dotkey] = result[dotkey];
+                    }
+
+                    return;
+                }
+
             } else if (typeof value === 'number') {
                 result = value.toString();
             }
