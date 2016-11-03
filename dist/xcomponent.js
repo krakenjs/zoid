@@ -9311,6 +9311,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _constants = __webpack_require__(/*! ../../constants */ 41);
 
+	function dotify(obj) {
+	    var prefix = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+	    var newobj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	    prefix = prefix ? prefix + '.' : prefix;
+	    for (var key in obj) {
+	        if (obj[key] && _typeof(obj[key]) === 'object') {
+	            newobj = dotify(obj[key], '' + prefix + key, newobj);
+	        } else {
+	            newobj['' + prefix + key] = obj[key];
+	        }
+	    }
+	    return newobj;
+	}
+
 	/*  Props to Query
 	    --------------
 
@@ -9374,7 +9389,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (typeof value === 'function') {
 	                return;
 	            } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
-	                result = JSON.stringify(value);
+
+	                if (prop.serialization === 'json') {
+	                    result = JSON.stringify(value);
+	                } else {
+	                    result = dotify(value, key);
+
+	                    for (var dotkey in result) {
+	                        params[dotkey] = result[dotkey];
+	                    }
+
+	                    return;
+	                }
 	            } else if (typeof value === 'number') {
 	                result = value.toString();
 	            }
