@@ -220,6 +220,11 @@ export class ChildComponent extends BaseComponent {
 
         let el = document.documentElement;
 
+        // Believe me, I strugged. There's no other way.
+        if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
+            el = document.body;
+        }
+
         let resize = (width, height) => {
 
             let tracker = trackDimensions(el);
