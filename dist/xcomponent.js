@@ -8658,7 +8658,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this20.parentTemplateFrame.style.zIndex = '2147483647';
 
 	                _this20.parentTemplateFrame.contentWindow.document.open();
-	                _this20.parentTemplateFrame.contentWindow.document.write('\n\n                <head>\n                    <meta name="viewport" content="width=device-width, initial-scale=1">\n                </head>\n\n                <body>\n\n                </body>\n            ');
+	                _this20.parentTemplateFrame.contentWindow.document.write('<body></body>');
 	                _this20.parentTemplateFrame.contentWindow.document.close();
 
 	                _this20.parentTemplate = (0, _lib.createElement)('div', {
@@ -8721,7 +8721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 
-	                var overflow = (0, _lib.setOverflow)(document.documentElement, 'hidden');
+	                // let overflow = setOverflow(document.documentElement, 'hidden');
 
 	                _this20.clean.register('destroyParentTemplate', function () {
 
@@ -8730,7 +8730,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    delete _this20.parentTemplateFrame;
 	                    delete _this20.parentTemplate;
 
-	                    overflow.reset();
+	                    // overflow.reset();
 	                });
 	            });
 	        }
