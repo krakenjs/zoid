@@ -1008,16 +1008,7 @@ export class ParentComponent extends BaseComponent {
             this.parentTemplateFrame.style.zIndex = '2147483647';
 
             this.parentTemplateFrame.contentWindow.document.open();
-            this.parentTemplateFrame.contentWindow.document.write(`
-
-                <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                </head>
-
-                <body>
-
-                </body>
-            `);
+            this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
             this.parentTemplateFrame.contentWindow.document.close();
 
             this.parentTemplate = createElement('div', {
@@ -1066,7 +1057,7 @@ export class ParentComponent extends BaseComponent {
                 }
             });
 
-            let overflow = setOverflow(document.documentElement, 'hidden');
+            // let overflow = setOverflow(document.documentElement, 'hidden');
 
             this.clean.register('destroyParentTemplate', () => {
 
@@ -1075,7 +1066,7 @@ export class ParentComponent extends BaseComponent {
                 delete this.parentTemplateFrame;
                 delete this.parentTemplate;
 
-                overflow.reset();
+                // overflow.reset();
             });
         });
     }
