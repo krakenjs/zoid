@@ -6584,6 +6584,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var el = document.documentElement;
 
+	            // Believe me, I strugged. There's no other way.
+	            if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
+	                el = document.body;
+	            }
+
 	            var resize = function resize(width, height) {
 
 	                var tracker = (0, _lib.trackDimensions)(el);
