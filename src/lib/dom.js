@@ -439,62 +439,74 @@ export function changeStyle(el, styles) {
     });
 }
 
-export function setOverflow(el, overflow = 'auto') {
+export function setOverflow(el, value = 'auto') {
 
-    let dimensions = getCurrentDimensions(el);
+    let { overflow, overflowX, overflowY } = el.style;
 
-    if (window.innerHeight < dimensions.height) {
-        el.style.overflowY = overflow;
-    } else {
-        el.style.overflowY = 'hidden';
-    }
+    el.style.overflow = el.style.overflowX = el.overflowY = value;
 
-    if (window.innerWidth < dimensions.width) {
-        el.style.overflowX = overflow;
-    } else {
-        el.style.overflowX = 'hidden';
-    }
+    return {
+        reset() {
+            el.style.overflow = overflow;
+            el.style.overflowX = overflowX;
+            el.style.overflowY = overflowY;
+        }
+    };
 }
+
+function dimensionsDiff(one, two, threshold) {
+    return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+}
+
+export function trackDimensions(el, threshold = 0) {
+
+    let currentDimensions = getCurrentDimensions(el);
+
+    return {
+        check() {
+            let newDimensions = getCurrentDimensions(el);
+
+            return {
+                changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
+                dimensions: newDimensions
+            };
+        }
+    };
+}
+
+
+let activeWatchers = [];
 
 export function onDimensionsChange(el, delay = 200, threshold = 0) {
 
-    let dimensionsChanged = (one, two) => {
-        return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
-    };
+    for (let watcher of activeWatchers) {
+        if (watcher.el === el) {
+            return watcher.promise;
+        }
+    }
 
-    return new Promise(resolve => {
-        let currentDimensions = getCurrentDimensions(el);
+    let promise = new Promise(resolve => {
+
+        let tracker = trackDimensions(el, threshold);
 
         let interval = setInterval(() => {
-            let newDimensions = getCurrentDimensions(el);
-
-            if (dimensionsChanged(currentDimensions, newDimensions)) {
-
-                let { overflow, overflowX, overflowY }  = el.style;
-
-                if (overflow === 'hidden' || overflowX === overflowY === 'hidden') {
-                    clearInterval(interval);
-                    return resolve(newDimensions);
-                }
-
-                return changeStyle(el, { overflow: 'hidden', overflowX: 'hidden', overflowY: 'hidden' }).then(() => {
-                    let noOverflowDimensions = getCurrentDimensions(el);
-
-                    return changeStyle(el, { overflow, overflowX, overflowY }).then(() => {
-
-                        if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
-                            clearInterval(interval);
-                            return resolve(noOverflowDimensions);
-                        } else {
-
-                            currentDimensions = newDimensions;
-                        }
-                    });
-                });
+            let { changed, dimensions } = tracker.check();
+            if (changed) {
+                clearInterval(interval);
+                return resolve(dimensions);
             }
-
         }, delay);
     });
+
+    let obj = { el, promise };
+
+    activeWatchers.push(obj);
+
+    promise.then(() => {
+        activeWatchers.splice(activeWatchers.indexOf(obj), 1);
+    });
+
+    return promise;
 }
 
 

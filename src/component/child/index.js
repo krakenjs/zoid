@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow, trackDimensions } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -218,18 +218,27 @@ export class ChildComponent extends BaseComponent {
             return;
         }
 
-        let el = document.body;
+        let el = document.documentElement;
 
-        setOverflow(el);
+        let resize = (width, height) => {
+
+            let tracker = trackDimensions(el);
+
+            return this.resize(width, height).then(() => {
+
+                let { changed, dimensions } = tracker.check();
+
+                if (changed) {
+                    return resize(dimensions.width, dimensions.height);
+                }
+            });
+        };
 
         let watcher = () => {
             onDimensionsChange(el).then(dimensions => {
-
-                return this.resize(dimensions.width, dimensions.height);
+                return resize(dimensions.width, dimensions.height);
 
             }).then(() => {
-
-                setOverflow(el);
                 watcher();
             });
         };
@@ -262,7 +271,11 @@ export class ChildComponent extends BaseComponent {
                 return; // window.resizeTo(width, height);
             }
 
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
+            let overflow = setOverflow(document.documentElement, 'hidden');
+
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height }).then(() => {
+                overflow.reset();
+            });
         });
     }
 
