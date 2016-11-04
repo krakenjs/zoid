@@ -4903,6 +4903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getCurrentDimensions = getCurrentDimensions;
 	exports.changeStyle = changeStyle;
 	exports.setOverflow = setOverflow;
+	exports.trackDimensions = trackDimensions;
 	exports.onDimensionsChange = onDimensionsChange;
 	exports.bindEvents = bindEvents;
 	exports.setVendorCSS = setVendorCSS;
@@ -5446,83 +5447,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function setOverflow(el) {
-	    var overflow = arguments.length <= 1 || arguments[1] === undefined ? 'auto' : arguments[1];
+	    var value = arguments.length <= 1 || arguments[1] === undefined ? 'auto' : arguments[1];
+	    var _el$style = el.style;
+	    var overflow = _el$style.overflow;
+	    var overflowX = _el$style.overflowX;
+	    var overflowY = _el$style.overflowY;
 
 
-	    var dimensions = getCurrentDimensions(el);
+	    el.style.overflow = el.style.overflowX = el.overflowY = value;
 
-	    if (window.innerHeight < dimensions.height) {
-	        el.style.overflowY = overflow;
-	    } else {
-	        el.style.overflowY = 'hidden';
-	    }
-
-	    if (window.innerWidth < dimensions.width) {
-	        el.style.overflowX = overflow;
-	    } else {
-	        el.style.overflowX = 'hidden';
-	    }
+	    return {
+	        reset: function reset() {
+	            el.style.overflow = overflow;
+	            el.style.overflowX = overflowX;
+	            el.style.overflowY = overflowY;
+	        }
+	    };
 	}
+
+	function dimensionsDiff(one, two, threshold) {
+	    return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+	}
+
+	function trackDimensions(el) {
+	    var threshold = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+
+	    var currentDimensions = getCurrentDimensions(el);
+
+	    return {
+	        check: function check() {
+	            var newDimensions = getCurrentDimensions(el);
+
+	            return {
+	                changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
+	                dimensions: newDimensions
+	            };
+	        }
+	    };
+	}
+
+	var activeWatchers = [];
 
 	function onDimensionsChange(el) {
 	    var delay = arguments.length <= 1 || arguments[1] === undefined ? 200 : arguments[1];
 	    var threshold = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
 
-	    var dimensionsChanged = function dimensionsChanged(one, two) {
-	        return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
-	    };
-
-	    return new _promise.SyncPromise(function (resolve) {
-	        var currentDimensions = getCurrentDimensions(el);
-
-	        var interval = setInterval(function () {
-	            var newDimensions = getCurrentDimensions(el);
-
-	            if (dimensionsChanged(currentDimensions, newDimensions)) {
-	                var _ret = function () {
-	                    var _el$style = el.style;
-	                    var overflow = _el$style.overflow;
-	                    var overflowX = _el$style.overflowX;
-	                    var overflowY = _el$style.overflowY;
-
-
-	                    if (overflow === 'hidden' || overflowX === overflowY === 'hidden') {
-	                        clearInterval(interval);
-	                        return {
-	                            v: resolve(newDimensions)
-	                        };
-	                    }
-
-	                    return {
-	                        v: changeStyle(el, { overflow: 'hidden', overflowX: 'hidden', overflowY: 'hidden' }).then(function () {
-	                            var noOverflowDimensions = getCurrentDimensions(el);
-
-	                            return changeStyle(el, { overflow: overflow, overflowX: overflowX, overflowY: overflowY }).then(function () {
-
-	                                if (dimensionsChanged(currentDimensions, noOverflowDimensions)) {
-	                                    clearInterval(interval);
-	                                    return resolve(noOverflowDimensions);
-	                                } else {
-
-	                                    currentDimensions = newDimensions;
-	                                }
-	                            });
-	                        })
-	                    };
-	                }();
-
-	                if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-	            }
-	        }, delay);
-	    });
-	}
-
-	function bindEvents(element, eventNames, handler) {
-
-	    handler = (0, _fn.once)(handler);
-
-	    for (var _iterator7 = eventNames, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
+	    for (var _iterator7 = activeWatchers, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray7) {
@@ -5534,26 +5506,77 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _ref8 = _i7.value;
 	        }
 
-	        var eventName = _ref8;
+	        var watcher = _ref8;
+
+	        if (watcher.el === el) {
+	            return watcher.promise;
+	        }
+	    }
+
+	    var promise = new _promise.SyncPromise(function (resolve) {
+
+	        var tracker = trackDimensions(el, threshold);
+
+	        var interval = setInterval(function () {
+	            var _tracker$check = tracker.check();
+
+	            var changed = _tracker$check.changed;
+	            var dimensions = _tracker$check.dimensions;
+
+	            if (changed) {
+	                clearInterval(interval);
+	                return resolve(dimensions);
+	            }
+	        }, delay);
+	    });
+
+	    var obj = { el: el, promise: promise };
+
+	    activeWatchers.push(obj);
+
+	    promise.then(function () {
+	        activeWatchers.splice(activeWatchers.indexOf(obj), 1);
+	    });
+
+	    return promise;
+	}
+
+	function bindEvents(element, eventNames, handler) {
+
+	    handler = (0, _fn.once)(handler);
+
+	    for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	        var _ref9;
+
+	        if (_isArray8) {
+	            if (_i8 >= _iterator8.length) break;
+	            _ref9 = _iterator8[_i8++];
+	        } else {
+	            _i8 = _iterator8.next();
+	            if (_i8.done) break;
+	            _ref9 = _i8.value;
+	        }
+
+	        var eventName = _ref9;
 
 	        element.addEventListener(eventName, handler);
 	    }
 
 	    return {
 	        cancel: (0, _fn.once)(function () {
-	            for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
-	                var _ref9;
+	            for (var _iterator9 = eventNames, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+	                var _ref10;
 
-	                if (_isArray8) {
-	                    if (_i8 >= _iterator8.length) break;
-	                    _ref9 = _iterator8[_i8++];
+	                if (_isArray9) {
+	                    if (_i9 >= _iterator9.length) break;
+	                    _ref10 = _iterator9[_i9++];
 	                } else {
-	                    _i8 = _iterator8.next();
-	                    if (_i8.done) break;
-	                    _ref9 = _i8.value;
+	                    _i9 = _iterator9.next();
+	                    if (_i9.done) break;
+	                    _ref10 = _i9.value;
 	                }
 
-	                var eventName = _ref9;
+	                var eventName = _ref10;
 
 	                element.removeEventListener(eventName, handler);
 	            }
@@ -5569,19 +5592,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var capitalizedName = (0, _util.capitalizeFirstLetter)(name);
 
-	    for (var _iterator9 = VENDOR_PREFIXES, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
-	        var _ref10;
+	    for (var _iterator10 = VENDOR_PREFIXES, _isArray10 = Array.isArray(_iterator10), _i10 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+	        var _ref11;
 
-	        if (_isArray9) {
-	            if (_i9 >= _iterator9.length) break;
-	            _ref10 = _iterator9[_i9++];
+	        if (_isArray10) {
+	            if (_i10 >= _iterator10.length) break;
+	            _ref11 = _iterator10[_i10++];
 	        } else {
-	            _i9 = _iterator9.next();
-	            if (_i9.done) break;
-	            _ref10 = _i9.value;
+	            _i10 = _iterator10.next();
+	            if (_i10.done) break;
+	            _ref11 = _i10.value;
 	        }
 
-	        var prefix = _ref10;
+	        var prefix = _ref11;
 
 	        element.style['' + prefix + capitalizedName] = value;
 	    }
@@ -6559,17 +6582,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
-	            var el = document.body;
+	            var el = document.documentElement;
 
-	            (0, _lib.setOverflow)(el);
+	            var resize = function resize(width, height) {
+
+	                var tracker = (0, _lib.trackDimensions)(el);
+
+	                return _this4.resize(width, height).then(function () {
+	                    var _tracker$check = tracker.check();
+
+	                    var changed = _tracker$check.changed;
+	                    var dimensions = _tracker$check.dimensions;
+
+
+	                    if (changed) {
+	                        return resize(dimensions.width, dimensions.height);
+	                    }
+	                });
+	            };
 
 	            var watcher = function watcher() {
 	                (0, _lib.onDimensionsChange)(el).then(function (dimensions) {
-
-	                    return _this4.resize(dimensions.width, dimensions.height);
+	                    return resize(dimensions.width, dimensions.height);
 	                }).then(function () {
-
-	                    (0, _lib.setOverflow)(el);
 	                    watcher();
 	                });
 	            };
@@ -6609,7 +6644,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return; // window.resizeTo(width, height);
 	                }
 
-	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	                var overflow = (0, _lib.setOverflow)(document.documentElement, 'hidden');
+
+	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height }).then(function () {
+	                    overflow.reset();
+	                });
 	            });
 	        }
 
@@ -7497,6 +7536,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.ParentComponent = undefined;
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8322,11 +8363,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(width, height) {
+	            var _this16 = this;
+
 	            this.component.log('resize', { height: height, width: width });
 	            this.driver.resize.call(this, width, height);
 
 	            if (this.component.resizeDelay) {
-	                return (0, _lib.delay)(this.component.resizeDelay);
+	                var _ret2 = function () {
+	                    var overflow = void 0;
+
+	                    if (_this16.elementTemplate) {
+	                        (0, _lib.setOverflow)(_this16.elementTemplate, 'hidden');
+	                    }
+
+	                    return {
+	                        v: (0, _lib.delay)(_this16.component.resizeDelay).then(function () {
+
+	                            if (overflow) {
+	                                overflow.reset();
+	                            }
+	                        })
+	                    };
+	                }();
+
+	                if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
 	            }
 	        }
 
@@ -8370,39 +8430,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this16 = this;
-
-	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
-
-	            return _promise.SyncPromise['try'](function () {
-
-	                _this16.component.log('close', { reason: reason });
-
-	                return _this16.props.onClose(reason);
-	            }).then(function () {
-
-	                return _promise.SyncPromise.all([_this16.closeComponent(), _this16.closeContainer()]);
-	            }).then(function () {
-
-	                return _this16.destroy();
-	            });
-	        }
-	    }, {
-	        key: 'closeContainer',
-	        value: function closeContainer() {
 	            var _this17 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 	            return _promise.SyncPromise['try'](function () {
 
+	                _this17.component.log('close', { reason: reason });
+
 	                return _this17.props.onClose(reason);
 	            }).then(function () {
 
-	                return _promise.SyncPromise.all([_this17.closeComponent(reason), _this17.hideContainer()]);
+	                return _promise.SyncPromise.all([_this17.closeComponent(), _this17.closeContainer()]);
 	            }).then(function () {
 
-	                return _this17.destroyContainer();
+	                return _this17.destroy();
+	            });
+	        }
+	    }, {
+	        key: 'closeContainer',
+	        value: function closeContainer() {
+	            var _this18 = this;
+
+	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
+
+	            return _promise.SyncPromise['try'](function () {
+
+	                return _this18.props.onClose(reason);
+	            }).then(function () {
+
+	                return _promise.SyncPromise.all([_this18.closeComponent(reason), _this18.hideContainer()]);
+	            }).then(function () {
+
+	                return _this18.destroyContainer();
 	            });
 	        }
 	    }, {
@@ -8414,7 +8474,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'closeComponent',
 	        value: function closeComponent() {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
@@ -8426,22 +8486,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                return _this18.cancelContainerEvents();
+	                return _this19.cancelContainerEvents();
 	            }).then(function () {
 
-	                return _this18.props.onClose(reason);
+	                return _this19.props.onClose(reason);
 	            }).then(function () {
 
-	                return _this18.hideComponent();
+	                return _this19.hideComponent();
 	            }).then(function () {
 
-	                return _this18.destroyComponent();
+	                return _this19.destroyComponent();
 	            }).then(function () {
 
 	                // IE in metro mode -- child window needs to close itself, or close will hang
 
-	                if (_this18.childExports && _this18.context === _constants.CONTEXT_TYPES.POPUP && !_src2['default'].winutil.isWindowClosed(win)) {
-	                    _this18.childExports.close()['catch'](_lib.noop);
+	                if (_this19.childExports && _this19.context === _constants.CONTEXT_TYPES.POPUP && !_src2['default'].winutil.isWindowClosed(win)) {
+	                    _this19.childExports.close()['catch'](_lib.noop);
 	                }
 	            });
 	        }
@@ -8560,15 +8620,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'openContainer',
 	        value: function openContainer() {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                if (!_this19.driver.parentTemplate) {
+	                if (!_this20.driver.parentTemplate) {
 	                    return;
 	                }
 
-	                return _this19.getParentTemplate();
+	                return _this20.getParentTemplate();
 	            }).then(function (parentTemplate) {
 
 	                if (!parentTemplate) {
@@ -8579,65 +8639,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // throw new Error(`Can only render parent template to top level window`);
 	                }
 
-	                _this19.parentTemplateFrame = (0, _lib.iframe)(null, {
+	                _this20.parentTemplateFrame = (0, _lib.iframe)(null, {
 	                    name: '__lightbox_container__' + (0, _lib.uniqueID)() + '__',
 	                    scrolling: 'no'
 	                }, document.body);
 
-	                _this19.parentTemplateFrame.style.display = 'block';
-	                _this19.parentTemplateFrame.style.position = 'fixed';
-	                _this19.parentTemplateFrame.style.top = '0';
-	                _this19.parentTemplateFrame.style.left = '0';
-	                _this19.parentTemplateFrame.style.width = '100%';
-	                _this19.parentTemplateFrame.style.height = '100%';
-	                _this19.parentTemplateFrame.style.zIndex = '2147483647';
+	                _this20.parentTemplateFrame.style.display = 'block';
+	                _this20.parentTemplateFrame.style.position = 'fixed';
+	                _this20.parentTemplateFrame.style.top = '0';
+	                _this20.parentTemplateFrame.style.left = '0';
+	                _this20.parentTemplateFrame.style.width = '100%';
+	                _this20.parentTemplateFrame.style.height = '100%';
+	                _this20.parentTemplateFrame.style.zIndex = '2147483647';
 
-	                _this19.parentTemplateFrame.contentWindow.document.open();
-	                _this19.parentTemplateFrame.contentWindow.document.write('\n\n                <head>\n                    <meta name="viewport" content="width=device-width, initial-scale=1">\n                </head>\n\n                <body>\n\n                </body>\n            ');
-	                _this19.parentTemplateFrame.contentWindow.document.close();
+	                _this20.parentTemplateFrame.contentWindow.document.open();
+	                _this20.parentTemplateFrame.contentWindow.document.write('\n\n                <head>\n                    <meta name="viewport" content="width=device-width, initial-scale=1">\n                </head>\n\n                <body>\n\n                </body>\n            ');
+	                _this20.parentTemplateFrame.contentWindow.document.close();
 
-	                _this19.parentTemplate = (0, _lib.createElement)('div', {
+	                _this20.parentTemplate = (0, _lib.createElement)('div', {
 
 	                    html: (0, _lib.template)(parentTemplate, {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this19.props.uid,
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid,
 	                        CLASS: _constants.CLASS_NAMES,
 	                        ANIMATION: _constants.ANIMATION_NAMES
 	                    }),
 
 	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this19.props.uid
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid
 	                    },
 
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this19.context]
+	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.context]
 	                });
 
-	                (0, _lib.hideElement)(_this19.parentTemplate);
+	                (0, _lib.hideElement)(_this20.parentTemplate);
 
-	                _this19.parentTemplateFrame.contentWindow.document.body.appendChild(_this19.parentTemplate);
+	                _this20.parentTemplateFrame.contentWindow.document.body.appendChild(_this20.parentTemplate);
 
-	                if (_this19.driver.renderedIntoParentTemplate) {
-	                    _this19.elementTemplate = _this19.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
+	                if (_this20.driver.renderedIntoParentTemplate) {
+	                    _this20.elementTemplate = _this20.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
 
-	                    if (!_this19.elementTemplate) {
+	                    if (!_this20.elementTemplate) {
 	                        throw new Error('Could not find element to render component into');
 	                    }
 
-	                    (0, _lib.hideElement)(_this19.elementTemplate);
+	                    (0, _lib.hideElement)(_this20.elementTemplate);
 	                }
 
 	                var eventHandlers = [];
 
-	                if (_this19.driver.focusable) {
-	                    eventHandlers.push((0, _lib.addEventToClass)(_this19.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this19.focus();
+	                if (_this20.driver.focusable) {
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this20.focus();
 	                    }));
 	                }
 
-	                eventHandlers.push((0, _lib.addEventToClass)(_this19.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this19.userClose();
+	                eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    return _this20.userClose();
 	                }));
 
-	                _this19.clean.register('destroyContainerEvents', function () {
+	                _this20.clean.register('destroyContainerEvents', function () {
 	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	                        var _ref12;
 
@@ -8656,12 +8716,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 
-	                _this19.clean.register('destroyParentTemplate', function () {
+	                var overflow = (0, _lib.setOverflow)(document.documentElement, 'hidden');
 
-	                    document.body.removeChild(_this19.parentTemplateFrame);
+	                _this20.clean.register('destroyParentTemplate', function () {
 
-	                    delete _this19.parentTemplateFrame;
-	                    delete _this19.parentTemplate;
+	                    document.body.removeChild(_this20.parentTemplateFrame);
+
+	                    delete _this20.parentTemplateFrame;
+	                    delete _this20.parentTemplate;
+
+	                    overflow.reset();
 	                });
 	            });
 	        }
@@ -8679,28 +8743,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return _promise.SyncPromise['try'](function () {
-	                if (_this20.clean.hasTasks()) {
-	                    _this20.component.log('destroy');
+	                if (_this21.clean.hasTasks()) {
+	                    _this21.component.log('destroy');
 	                    _lib.logger.flush();
-	                    return _this20.clean.all();
+	                    return _this21.clean.all();
 	                }
 	            });
 	        }
 	    }, {
 	        key: 'tryInit',
 	        value: function tryInit(method) {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return _promise.SyncPromise['try'](method)['catch'](function (err) {
 
-	                _this21.onInit.reject(err);
+	                _this22.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this21.onInit;
+	                return _this22.onInit;
 	            });
 	        }
 
@@ -8712,19 +8776,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'error',
 	        value: function error(err) {
-	            var _this22 = this;
+	            var _this23 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                _this22.component.logError('error', { error: err.stack || err.toString() });
-	                _this22.onInit.reject(err);
-	                return _this22.props.onError(err);
+	                _this23.component.logError('error', { error: err.stack || err.toString() });
+	                _this23.onInit.reject(err);
+	                return _this23.props.onError(err);
 	            }).then(function () {
 
-	                return _this22.props.onError(err);
+	                return _this23.props.onError(err);
 	            }).then(function () {
 
-	                return _this22.destroy();
+	                return _this23.destroy();
 	            })['catch'](function (err2) {
 
 	                throw new Error('An error was encountered while handling error:\n\n ' + err.stack + '\n\n' + err2.stack);
@@ -8752,7 +8816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return ParentComponent;
-	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'preRender', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'preRender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
+	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'preRender', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'preRender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resize', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'resize'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
 	function destroyAll() {
 	    var results = [];
 
