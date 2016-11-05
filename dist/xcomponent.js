@@ -5708,15 +5708,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	var STYLE_DISPLAY_SHOW = 'block';
-	var STYLE_DISPLAY_HIDE = 'none';
+	var STYLE = {
+	    VISIBILITY: {
+	        VISIBLE: 'visible',
+	        HIDDEN: 'hidden'
+	    }
+	};
 
 	function showElement(element) {
-	    element.style.display = STYLE_DISPLAY_SHOW;
+	    element.style.visibility = STYLE.VISIBILITY.VISIBLE;
+	    element.style.opacity = '1';
 	}
 
 	function hideElement(element) {
-	    element.style.display = STYLE_DISPLAY_HIDE;
+	    element.style.visibility = STYLE.VISIBILITY.HIDDEN;
+	    element.style.opacity = '0';
 	}
 
 	function showAndAnimate(element, name) {
