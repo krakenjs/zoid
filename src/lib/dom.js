@@ -642,15 +642,21 @@ export function animate(element, name) {
     });
 }
 
-const STYLE_DISPLAY_SHOW = 'block';
-const STYLE_DISPLAY_HIDE = 'none';
+const STYLE = {
+    VISIBILITY: {
+        VISIBLE: 'visible',
+        HIDDEN: 'hidden'
+    }
+};
 
 export function showElement(element) {
-    element.style.display = STYLE_DISPLAY_SHOW;
+    element.style.visibility = STYLE.VISIBILITY.VISIBLE;
+    element.style.opacity = '1';
 }
 
 export function hideElement(element) {
-    element.style.display = STYLE_DISPLAY_HIDE;
+    element.style.visibility = STYLE.VISIBILITY.HIDDEN;
+    element.style.opacity = '0';
 }
 
 export function showAndAnimate(element, name) {
