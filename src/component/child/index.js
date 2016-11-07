@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, setOverflow, trackDimensions } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -276,11 +276,7 @@ export class ChildComponent extends BaseComponent {
                 return; // window.resizeTo(width, height);
             }
 
-            let overflow = setOverflow(document.documentElement, 'hidden');
-
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height }).then(() => {
-                overflow.reset();
-            });
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
         });
     }
 
