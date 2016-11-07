@@ -222,6 +222,7 @@ export class Component extends BaseComponent {
     */
 
     init(props, context) {
+        context = this.getRenderContext(null, context);
         return new ParentComponent(this, context, { props });
     }
 
