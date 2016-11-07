@@ -32,7 +32,7 @@ describe('xcomponent hijack', () => {
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.hijack(target);
-            component.preRender(null, false);
+            component.render(null, false);
         });
 
         button.click();
@@ -65,7 +65,7 @@ describe('xcomponent hijack', () => {
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.hijack(target);
-            component.preRender(null, false);
+            component.render(null, false);
         });
 
         button.click();
@@ -94,7 +94,7 @@ describe('xcomponent hijack', () => {
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.hijack(target);
-            component.preRender(null, false);
+            component.render(null, false);
         });
 
         link.click();
@@ -123,7 +123,7 @@ describe('xcomponent hijack', () => {
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
             component.hijack(target);
-            component.preRender(null, false);
+            component.render(null, false);
         });
 
         link.click();
