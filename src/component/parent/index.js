@@ -212,40 +212,42 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     getDomain() {
+        return Promise.try(() => {
 
-        if (this.component.domain) {
-            return this.component.domain;
-        }
+            if (this.component.domain) {
+                return this.component.domain;
+            }
 
-        if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
-            return this.component.domains[this.props.env];
-        }
+            if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
+                return this.component.domains[this.props.env];
+            }
 
-        if (this.props.url) {
-            return Promise.try(() => {
-                return this.props.url;
-            }).then(url => {
-                return getDomainFromUrl(url);
-            });
-        }
+            return this.props.url;
 
-        if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
-            return getDomainFromUrl(this.component.envUrls[this.props.env]);
-        }
+        }).then(propUrl => {
 
-        if (this.component.envUrls && this.component.defaultEnv && this.component.envUrls[this.component.defaultEnv]) {
-            return getDomainFromUrl(this.component.envUrls[this.component.defaultEnv]);
-        }
+            if (propUrl) {
+                return getDomainFromUrl(propUrl);
+            }
 
-        if (this.component.buildUrl) {
-            return getDomainFromUrl(this.component.buildUrl(this));
-        }
+            if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
+                return getDomainFromUrl(this.component.envUrls[this.props.env]);
+            }
 
-        if (this.component.url) {
-            return getDomainFromUrl(this.component.url);
-        }
+            if (this.component.envUrls && this.component.defaultEnv && this.component.envUrls[this.component.defaultEnv]) {
+                return getDomainFromUrl(this.component.envUrls[this.component.defaultEnv]);
+            }
 
-        throw new Error(`Can not determine domain for component`);
+            if (this.component.buildUrl) {
+                return getDomainFromUrl(this.component.buildUrl(this));
+            }
+
+            if (this.component.url) {
+                return getDomainFromUrl(this.component.url);
+            }
+
+            throw new Error(`Can not determine domain for component`);
+        });
     }
 
 
@@ -294,31 +296,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Render
-        ------
-
-        Kick off the actual rendering of the component:
-
-        - open the popup/iframe
-        - load the url into it
-        - set up listeners
-    */
-
-    render(element, context) {
-        return this.tryInit(() => {
-
-            if (!this.context) {
-                this.context = this.component.getRenderContext(element, context);
-                this.childWindowName = this.buildChildWindowName();
-            }
-
-            this.component.log(`render_${this.context}`, { context: this.context, element });
-
-            return this.preRender(element, this.context);
-        });
-    }
-
-
     openBridge() {
         return this.driver.openBridge.call(this);
     }
@@ -348,6 +325,10 @@ export class ParentComponent extends BaseComponent {
         return RENDER_DRIVERS[this.context];
     }
 
+    elementReady(element) {
+        return elementReady(element);
+    }
+
     /*  Pre Render
         ----------
 
@@ -355,74 +336,78 @@ export class ParentComponent extends BaseComponent {
     */
 
     @promise
-    preRender(element, options = {}) {
+    render(element, loadUrl = true) {
+        return this.tryInit(() => {
 
-        let tasks = {
-            openContainer: this.openContainer(this.context),
-            openBridge:    this.openBridge(this.context),
-            getDomain:     this.getDomain()
-        };
+            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
-        tasks.elementReady = Promise.try(() => {
-            if (element) {
-                return elementReady(element);
+            let tasks = {
+                openContainer: this.openContainer(this.context),
+                getDomain:     this.getDomain(),
+                openBridge:    this.openBridge(this.context)
+            };
+
+            tasks.elementReady = Promise.try(() => {
+                if (element) {
+                    return this.elementReady(element);
+                } else {
+                    return tasks.openContainer;
+                }
+            });
+
+            if (this.driver.openOnClick) {
+                tasks.open = this.open(element, this.context);
             } else {
-                return tasks.openContainer;
+                tasks.open = tasks.elementReady.then(() => {
+                    return this.open(element, this.context);
+                });
             }
-        });
 
-        if (this.driver.openOnClick) {
-            tasks.open = this.open(element, this.context);
-        } else {
-            tasks.open = tasks.elementReady.then(() => {
-                return this.open(element, this.context);
-            });
-        }
-
-        tasks.showContainer = tasks.openContainer.then(() => {
-            return this.showContainer();
-        });
-
-        tasks.createComponentTemplate = tasks.open.then(() => {
-            return this.createComponentTemplate();
-        });
-
-        tasks.showComponent = tasks.createComponentTemplate.then(() => {
-            return this.showComponent();
-        });
-
-        tasks.linkUrl = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-            return postRobot.linkUrl(this.window, domain);
-        });
-
-        tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-            return this.listen(this.window, domain);
-        });
-
-        tasks.watchForClose = tasks.open.then(() => {
-            return this.watchForClose();
-        });
-
-        if (options.loadUrl !== false) {
-
-            tasks.buildUrl = this.buildUrl();
-
-            tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.createComponentTemplate ]).then(([ url ]) => {
-                return this.loadUrl(url);
+            tasks.showContainer = tasks.openContainer.then(() => {
+                return this.showContainer();
             });
 
-            tasks.runTimeout = tasks.loadUrl.then(() => {
-                return this.runTimeout();
+            tasks.createComponentTemplate = tasks.open.then(() => {
+                return this.createComponentTemplate();
             });
 
-        } else {
-
-            tasks.runTimeout = Promise.try(() => {
-                return this.runTimeout();
+            tasks.showComponent = tasks.createComponentTemplate.then(() => {
+                return this.showComponent();
             });
-        }
 
-        return Promise.hash(tasks);
+            tasks.linkUrl = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                return postRobot.linkUrl(this.window, domain);
+            });
+
+            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                return this.listen(this.window, domain);
+            });
+
+            tasks.watchForClose = tasks.open.then(() => {
+                return this.watchForClose();
+            });
+
+            if (loadUrl) {
+
+                tasks.buildUrl = this.buildUrl();
+
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.createComponentTemplate ]).then(([ url ]) => {
+                    return this.loadUrl(url);
+                });
+
+                tasks.runTimeout = tasks.loadUrl.then(() => {
+                    return this.runTimeout();
+                });
+
+            } else {
+
+                tasks.runTimeout = Promise.try(() => {
+                    return this.runTimeout();
+                });
+            }
+
+            return Promise.hash(tasks);
+        });
     }
 
 
@@ -590,26 +575,9 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    /*  Render Hijack
-        -------------
-
-        Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
-    */
-
-    renderHijack(targetElement, element, context) {
-        return this.tryInit(() => {
-            this.context = this.component.getRenderContext(element, context);
-
-            this.childWindowName = this.buildChildWindowName();
-
-            this.component.log(`render_hijack_${this.context}`);
-
-            targetElement.target = this.childWindowName;
-
-            return this.preRender(element, { loadUrl: false });
-        });
+    hijack(targetElement) {
+        targetElement.target = this.childWindowName;
     }
-
 
     /*  Run Timeout
         -----------

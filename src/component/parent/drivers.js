@@ -84,6 +84,7 @@ export let RENDER_DRIVERS = {
             destroyContainer:        DELEGATE.CALL_DELEGATE,
             cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
+            elementReady:            DELEGATE.CALL_DELEGATE,
             showContainer:           DELEGATE.CALL_DELEGATE,
             showComponent:           DELEGATE.CALL_DELEGATE,
             hideContainer:           DELEGATE.CALL_DELEGATE,
@@ -217,6 +218,8 @@ export let RENDER_DRIVERS = {
             openContainer:          DELEGATE.CALL_DELEGATE,
             destroyContainer:       DELEGATE.CALL_DELEGATE,
 
+            elementReady:           DELEGATE.CALL_DELEGATE,
+
             showContainer:          DELEGATE.CALL_DELEGATE,
             showComponent:          DELEGATE.CALL_DELEGATE,
             hideContainer:          DELEGATE.CALL_DELEGATE,
@@ -256,6 +259,8 @@ export let RENDER_DRIVERS = {
             destroyComponent:        DELEGATE.CALL_DELEGATE,
             destroyContainer:        DELEGATE.CALL_DELEGATE,
             createComponentTemplate: DELEGATE.CALL_DELEGATE,
+
+            elementReady:            DELEGATE.CALL_DELEGATE,
 
             showContainer:           DELEGATE.CALL_DELEGATE,
             showComponent:           DELEGATE.CALL_DELEGATE,

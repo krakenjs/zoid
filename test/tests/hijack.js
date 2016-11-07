@@ -27,11 +27,12 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
-            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+            component.hijack(target);
+            component.preRender(null, false);
         });
 
         button.click();
@@ -63,11 +64,12 @@ describe('xcomponent hijack', () => {
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
-            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
+            component.hijack(target);
+            component.preRender(null, false);
         });
 
         button.click();
-    });
+    }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
     it('should render a component by hijacking a link to a lightbox', done => {
 
@@ -87,11 +89,12 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
-            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+            component.hijack(target);
+            component.preRender(null, false);
         });
 
         link.click();
@@ -115,11 +118,12 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
-            component.renderHijack(target, null, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+            component.hijack(target);
+            component.preRender(null, false);
         });
 
         link.click();
