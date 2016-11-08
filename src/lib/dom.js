@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
-import { once, noop, memoize } from './fn';
+import { once, noop, memoize, debounce } from './fn';
 import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 
 function isElement(element) {
@@ -392,6 +392,35 @@ export function extendUrl(url, options = {}) {
 }
 
 
+export function elementStoppedMoving(element, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        element = getElement(element);
+
+        let start = element.getBoundingClientRect();
+
+        let interval;
+        let timer;
+
+        interval = setInterval(() => {
+            let end = element.getBoundingClientRect();
+
+            if (start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height) {
+                clearTimeout(timer);
+                clearInterval(interval);
+                return resolve();
+            }
+
+            start = end;
+
+        }, 50);
+
+        timer = setTimeout(() => {
+            clearInterval(interval);
+            reject(new Error(`Timed out waiting for element to stop animating after ${timeout}ms`));
+        }, timeout);
+    });
+}
+
 
 export function getOpener(win) {
 
@@ -470,43 +499,35 @@ export function trackDimensions(el, threshold = 0) {
                 changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
                 dimensions: newDimensions
             };
+        },
+
+        reset() {
+            currentDimensions = getCurrentDimensions(el);
         }
     };
 }
 
+export function onDimensionsChange(el, delay = 50, threshold = 0) {
 
-let activeWatchers = [];
-
-export function onDimensionsChange(el, delay = 200, threshold = 0) {
-
-    for (let watcher of activeWatchers) {
-        if (watcher.el === el) {
-            return watcher.promise;
-        }
-    }
-
-    let promise = new Promise(resolve => {
+    return new Promise(resolve => {
 
         let tracker = trackDimensions(el, threshold);
 
-        let interval = setInterval(() => {
+        let interval;
+
+        let resolver = debounce((dimensions) => {
+            clearInterval(interval);
+            return resolve(dimensions);
+        }, delay * 4);
+
+        interval = setInterval(() => {
             let { changed, dimensions } = tracker.check();
             if (changed) {
-                clearInterval(interval);
-                return resolve(dimensions);
+                tracker.reset();
+                return resolver(dimensions);
             }
         }, delay);
     });
-
-    let obj = { el, promise };
-
-    activeWatchers.push(obj);
-
-    promise.then(() => {
-        activeWatchers.splice(activeWatchers.indexOf(obj), 1);
-    });
-
-    return promise;
 }
 
 
@@ -585,7 +606,7 @@ function isValidAnimation(element, name) {
 const ANIMATION_START_EVENTS = [ 'animationstart', 'webkitAnimationStart', 'oAnimationStart', 'MSAnimationStart' ];
 const ANIMATION_END_EVENTS   = [ 'animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd' ];
 
-export function animate(element, name) {
+export function animate(element, name, timeout = 1000) {
     return new Promise((resolve, reject) => {
 
         element = getElement(element);
@@ -595,6 +616,8 @@ export function animate(element, name) {
         }
 
         let hasStarted = false;
+
+        let timer;
 
         let startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
 
@@ -606,6 +629,10 @@ export function animate(element, name) {
 
             startEvent.cancel();
             hasStarted = true;
+
+            timer = setTimeout(() => {
+                resolve();
+            }, timeout);
         });
 
         let endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
@@ -622,6 +649,8 @@ export function animate(element, name) {
             if (event.animationName !== name) {
                 return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
             }
+
+            clearTimeout(timer);
 
             setVendorCSS(element, 'animationName', 'none');
 

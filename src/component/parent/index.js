@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow } from '../../lib';
+         addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -698,14 +698,15 @@ export class ParentComponent extends BaseComponent {
         this.component.log(`resize`, { height, width });
         this.driver.resize.call(this, width, height);
 
-        if (this.component.resizeDelay) {
+        if (this.elementTemplate || this.iframe) {
+
             let overflow;
 
             if (this.elementTemplate) {
                 overflow = setOverflow(this.elementTemplate, 'hidden');
             }
 
-            return delay(this.component.resizeDelay).then(() => {
+            return elementStoppedMoving(this.elementTemplate || this.iframe).then(() => {
 
                 if (overflow) {
                     overflow.reset();

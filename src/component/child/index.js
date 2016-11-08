@@ -225,18 +225,30 @@ export class ChildComponent extends BaseComponent {
             el = document.body;
         }
 
-        let resize = (width, height) => {
+        let resize = (width, height, history = []) => {
+            return Promise.try(() => {
 
-            let tracker = trackDimensions(el);
-
-            return this.resize(width, height).then(() => {
-
-                let { changed, dimensions } = tracker.check();
-
-                if (changed) {
-                    return resize(dimensions.width, dimensions.height);
+                for (let size of history) {
+                    if (size.width === width && size.height === height) {
+                        return;
+                    }
                 }
+
+                history.push({ width, height });
+
+                let tracker = trackDimensions(el);
+
+                return this.resize(width, height).then(() => {
+
+                    let { changed, dimensions } = tracker.check();
+
+                    if (changed) {
+                        return resize(dimensions.width, dimensions.height, history);
+                    }
+                });
             });
+
+
         };
 
         let watcher = () => {
