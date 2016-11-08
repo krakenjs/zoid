@@ -482,6 +482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'init',
 	        value: function init(props, context) {
+	            context = this.getRenderContext(null, context);
 	            return new _parent.ParentComponent(this, context, { props: props });
 	        }
 	    }, {
@@ -5709,20 +5710,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var STYLE = {
+
 	    VISIBILITY: {
 	        VISIBLE: 'visible',
 	        HIDDEN: 'hidden'
+	    },
+
+	    DISPLAY: {
+	        NONE: 'none',
+	        BLOCK: 'block'
 	    }
 	};
 
 	function showElement(element) {
-	    element.style.visibility = STYLE.VISIBILITY.VISIBLE;
-	    element.style.opacity = '1';
+	    element.style.display = STYLE.DISPLAY.BLOCK;
+	    // element.style.visibility = STYLE.VISIBILITY.VISIBLE;
+	    // element.style.opacity = '1';
 	}
 
 	function hideElement(element) {
-	    element.style.visibility = STYLE.VISIBILITY.HIDDEN;
-	    element.style.opacity = '0';
+	    element.style.display = STYLE.DISPLAY.NONE;
+	    // element.style.visibility = STYLE.VISIBILITY.HIDDEN;
+	    // element.style.opacity = '0';
 	}
 
 	function showAndAnimate(element, name) {
@@ -6655,11 +6664,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return; // window.resizeTo(width, height);
 	                }
 
-	                var overflow = (0, _lib.setOverflow)(document.documentElement, 'hidden');
-
-	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height }).then(function () {
-	                    overflow.reset();
-	                });
+	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
 	            });
 	        }
 
@@ -7834,39 +7839,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function getDomain() {
 	            var _this5 = this;
 
-	            if (this.component.domain) {
-	                return this.component.domain;
-	            }
+	            return _promise.SyncPromise['try'](function () {
 
-	            if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
-	                return this.component.domains[this.props.env];
-	            }
+	                if (_this5.component.domain) {
+	                    return _this5.component.domain;
+	                }
 
-	            if (this.props.url) {
-	                return _promise.SyncPromise['try'](function () {
-	                    return _this5.props.url;
-	                }).then(function (url) {
-	                    return (0, _lib.getDomainFromUrl)(url);
-	                });
-	            }
+	                if (_this5.component.domains && _this5.props.env && _this5.component.domains[_this5.props.env]) {
+	                    return _this5.component.domains[_this5.props.env];
+	                }
 
-	            if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
-	                return (0, _lib.getDomainFromUrl)(this.component.envUrls[this.props.env]);
-	            }
+	                return _this5.props.url;
+	            }).then(function (propUrl) {
 
-	            if (this.component.envUrls && this.component.defaultEnv && this.component.envUrls[this.component.defaultEnv]) {
-	                return (0, _lib.getDomainFromUrl)(this.component.envUrls[this.component.defaultEnv]);
-	            }
+	                if (propUrl) {
+	                    return (0, _lib.getDomainFromUrl)(propUrl);
+	                }
 
-	            if (this.component.buildUrl) {
-	                return (0, _lib.getDomainFromUrl)(this.component.buildUrl(this));
-	            }
+	                if (_this5.component.envUrls && _this5.props.env && _this5.component.envUrls[_this5.props.env]) {
+	                    return (0, _lib.getDomainFromUrl)(_this5.component.envUrls[_this5.props.env]);
+	                }
 
-	            if (this.component.url) {
-	                return (0, _lib.getDomainFromUrl)(this.component.url);
-	            }
+	                if (_this5.component.envUrls && _this5.component.defaultEnv && _this5.component.envUrls[_this5.component.defaultEnv]) {
+	                    return (0, _lib.getDomainFromUrl)(_this5.component.envUrls[_this5.component.defaultEnv]);
+	                }
 
-	            throw new Error('Can not determine domain for component');
+	                if (_this5.component.buildUrl) {
+	                    return (0, _lib.getDomainFromUrl)(_this5.component.buildUrl(_this5));
+	                }
+
+	                if (_this5.component.url) {
+	                    return (0, _lib.getDomainFromUrl)(_this5.component.url);
+	                }
+
+	                throw new Error('Can not determine domain for component');
+	            });
 	        }
 	    }, {
 	        key: 'getPropsForChild',
@@ -7942,32 +7949,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _this6.childExports.updateProps(_this6.getPropsForChild(props));
 	            });
 	        }
-
-	        /*  Render
-	            ------
-	             Kick off the actual rendering of the component:
-	             - open the popup/iframe
-	            - load the url into it
-	            - set up listeners
-	        */
-
-	    }, {
-	        key: 'render',
-	        value: function render(element, context) {
-	            var _this7 = this;
-
-	            return this.tryInit(function () {
-
-	                if (!_this7.context) {
-	                    _this7.context = _this7.component.getRenderContext(element, context);
-	                    _this7.childWindowName = _this7.buildChildWindowName();
-	                }
-
-	                _this7.component.log('render_' + _this7.context, { context: _this7.context, element: element });
-
-	                return _this7.preRender(element, _this7.context);
-	            });
-	        }
 	    }, {
 	        key: 'openBridge',
 	        value: function openBridge() {
@@ -7987,90 +7968,105 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.driver.open.call(this, element);
 	        }
 	    }, {
-	        key: 'preRender',
-	        value: function preRender(element) {
-	            var _this8 = this;
+	        key: 'elementReady',
+	        value: function elementReady(element) {
+	            return (0, _lib.elementReady)(element).then(_lib.noop);
+	        }
 
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	        /*  Pre Render
+	            ----------
+	             Pre-render a new window in the desired context
+	        */
 
+	    }, {
+	        key: 'render',
+	        value: function render(element) {
+	            var _this7 = this;
 
-	            var tasks = {
-	                openContainer: this.openContainer(this.context),
-	                openBridge: this.openBridge(this.context),
-	                getDomain: this.getDomain()
-	            };
+	            var loadUrl = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-	            tasks.elementReady = _promise.SyncPromise['try'](function () {
-	                if (element) {
-	                    return (0, _lib.elementReady)(element);
+	            return this.tryInit(function () {
+
+	                _this7.component.log('render_' + _this7.context, { context: _this7.context, element: element, loadUrl: loadUrl });
+
+	                var tasks = {
+	                    openContainer: _this7.openContainer(_this7.context),
+	                    getDomain: _this7.getDomain(),
+	                    openBridge: _this7.openBridge(_this7.context)
+	                };
+
+	                tasks.elementReady = _promise.SyncPromise['try'](function () {
+	                    if (element) {
+	                        return _this7.elementReady(element);
+	                    } else {
+	                        return tasks.openContainer;
+	                    }
+	                });
+
+	                if (_this7.driver.openOnClick) {
+	                    tasks.open = _this7.open(element, _this7.context);
 	                } else {
-	                    return tasks.openContainer;
+	                    tasks.open = tasks.elementReady.then(function () {
+	                        return _this7.open(element, _this7.context);
+	                    });
 	                }
-	            });
 
-	            if (this.driver.openOnClick) {
-	                tasks.open = this.open(element, this.context);
-	            } else {
-	                tasks.open = tasks.elementReady.then(function () {
-	                    return _this8.open(element, _this8.context);
-	                });
-	            }
-
-	            tasks.showContainer = tasks.openContainer.then(function () {
-	                return _this8.showContainer();
-	            });
-
-	            tasks.createComponentTemplate = tasks.open.then(function () {
-	                return _this8.createComponentTemplate();
-	            });
-
-	            tasks.showComponent = tasks.createComponentTemplate.then(function () {
-	                return _this8.showComponent();
-	            });
-
-	            tasks.linkUrl = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref3) {
-	                var _ref4 = _slicedToArray(_ref3, 1);
-
-	                var domain = _ref4[0];
-
-	                return _src2['default'].linkUrl(_this8.window, domain);
-	            });
-
-	            tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
-	                var _ref6 = _slicedToArray(_ref5, 1);
-
-	                var domain = _ref6[0];
-
-	                return _this8.listen(_this8.window, domain);
-	            });
-
-	            tasks.watchForClose = tasks.open.then(function () {
-	                return _this8.watchForClose();
-	            });
-
-	            if (options.loadUrl !== false) {
-
-	                tasks.buildUrl = this.buildUrl();
-
-	                tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.createComponentTemplate]).then(function (_ref7) {
-	                    var _ref8 = _slicedToArray(_ref7, 1);
-
-	                    var url = _ref8[0];
-
-	                    return _this8.loadUrl(url);
+	                tasks.showContainer = tasks.openContainer.then(function () {
+	                    return _this7.showContainer();
 	                });
 
-	                tasks.runTimeout = tasks.loadUrl.then(function () {
-	                    return _this8.runTimeout();
+	                tasks.createComponentTemplate = tasks.open.then(function () {
+	                    return _this7.createComponentTemplate();
 	                });
-	            } else {
 
-	                tasks.runTimeout = _promise.SyncPromise['try'](function () {
-	                    return _this8.runTimeout();
+	                tasks.showComponent = tasks.createComponentTemplate.then(function () {
+	                    return _this7.showComponent();
 	                });
-	            }
 
-	            return _promise.SyncPromise.hash(tasks);
+	                tasks.linkUrl = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref3) {
+	                    var _ref4 = _slicedToArray(_ref3, 1);
+
+	                    var domain = _ref4[0];
+
+	                    return _src2['default'].linkUrl(_this7.window, domain);
+	                });
+
+	                tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
+	                    var _ref6 = _slicedToArray(_ref5, 1);
+
+	                    var domain = _ref6[0];
+
+	                    return _this7.listen(_this7.window, domain);
+	                });
+
+	                tasks.watchForClose = tasks.open.then(function () {
+	                    return _this7.watchForClose();
+	                });
+
+	                if (loadUrl) {
+
+	                    tasks.buildUrl = _this7.buildUrl();
+
+	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.createComponentTemplate]).then(function (_ref7) {
+	                        var _ref8 = _slicedToArray(_ref7, 1);
+
+	                        var url = _ref8[0];
+
+	                        return _this7.loadUrl(url);
+	                    });
+
+	                    tasks.runTimeout = tasks.loadUrl.then(function () {
+	                        return _this7.runTimeout();
+	                    });
+	                } else {
+
+	                    tasks.runTimeout = _promise.SyncPromise['try'](function () {
+	                        return _this7.runTimeout();
+	                    });
+	                }
+
+	                return _promise.SyncPromise.hash(tasks);
+	            });
 	        }
 	    }, {
 	        key: 'validateRenderToParent',
@@ -8089,7 +8085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'delegate',
 	        value: function delegate(win) {
-	            var _this9 = this;
+	            var _this8 = this;
 
 	            this.delegateWindow = win;
 
@@ -8115,16 +8111,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    overrides: {
 	                        focus: function focus() {
-	                            return _this9.focus();
+	                            return _this8.focus();
 	                        },
 	                        userClose: function userClose() {
-	                            return _this9.userClose();
+	                            return _this8.userClose();
 	                        },
 	                        getDomain: function getDomain() {
-	                            return _this9.getDomain();
+	                            return _this8.getDomain();
 	                        },
 	                        getParentTemplate: function getParentTemplate() {
-	                            return _this9.getParentTemplate();
+	                            return _this8.getParentTemplate();
 	                        }
 	                    }
 	                }
@@ -8133,7 +8129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var data = _ref9.data;
 
 
-	                _this9.clean.register(data.destroy);
+	                _this8.clean.register(data.destroy);
 	                return data;
 	            })['catch'](function (err) {
 
@@ -8160,10 +8156,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return 'continue';
 	                }
 
-	                var original = _this9[key];
+	                var original = _this8[key];
 
-	                _this9[key] = function () {
-	                    var _this10 = this,
+	                _this8[key] = function () {
+	                    var _this9 = this,
 	                        _arguments2 = arguments;
 
 	                    return delegate.then(function (data) {
@@ -8171,11 +8167,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        var override = data.overrides[key];
 
 	                        if (val === _constants.DELEGATE.CALL_DELEGATE) {
-	                            return override.apply(_this10, _arguments2);
+	                            return override.apply(_this9, _arguments2);
 	                        }
 
 	                        if (val instanceof Function) {
-	                            return val(original, override).apply(_this10, _arguments2);
+	                            return val(original, override).apply(_this9, _arguments2);
 	                        }
 
 	                        throw new Error('Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method');
@@ -8199,20 +8195,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'renderTo',
 	        value: function renderTo(win, element, context) {
-	            var _this11 = this;
+	            var _this10 = this;
 
 	            var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
 	            return this.tryInit(function () {
-	                _this11.context = _this11.context || _this11.component.getRenderContext(element, context);
+	                _this10.context = _this10.context || _this10.component.getRenderContext(element, context);
 
-	                _this11.validateRenderToParent(element, _this11.context);
+	                _this10.validateRenderToParent(element, _this10.context);
 
-	                _this11.component.log('render_' + _this11.context + '_to_win', { element: element, context: _this11.context });
+	                _this10.component.log('render_' + _this10.context + '_to_win', { element: element, context: _this10.context });
 
-	                _this11.delegate(win, _this11.context);
+	                _this10.delegate(win, _this10.context);
 
-	                return _this11.render(element, _this11.context);
+	                return _this10.render(element, _this10.context);
 	            });
 	        }
 
@@ -8225,15 +8221,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'watchForClose',
 	        value: function watchForClose() {
-	            var _this12 = this;
+	            var _this11 = this;
 
 	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
-	                _this12.component.log('detect_close_child');
+	                _this11.component.log('detect_close_child');
 
 	                return _promise.SyncPromise['try'](function () {
-	                    return _this12.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
+	                    return _this11.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
 	                })['finally'](function () {
-	                    return _this12.destroy();
+	                    return _this11.destroy();
 	                });
 	            });
 
@@ -8243,13 +8239,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // and close the child manually if that happens.
 
 	            var unloadWindowListener = (0, _lib.addEventListener)(window, 'beforeunload', function () {
-	                _this12.component.log('navigate_away');
+	                _this11.component.log('navigate_away');
 	                _lib.logger.flush();
 
 	                closeWindowListener.cancel();
 
-	                if (_this12.driver.destroyOnUnload) {
-	                    return _this12.destroyComponent();
+	                if (_this11.driver.destroyOnUnload) {
+	                    return _this11.destroyComponent();
 	                }
 	            });
 
@@ -8275,28 +8271,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return this.driver.loadUrl.call(this, url);
 	        }
-
-	        /*  Render Hijack
-	            -------------
-	             Do a normal render, with the exception that we don't load the url into the child since our hijacked link or button will do that for us
-	        */
-
 	    }, {
-	        key: 'renderHijack',
-	        value: function renderHijack(targetElement, element, context) {
-	            var _this13 = this;
-
-	            return this.tryInit(function () {
-	                _this13.context = _this13.component.getRenderContext(element, context);
-
-	                _this13.childWindowName = _this13.buildChildWindowName();
-
-	                _this13.component.log('render_hijack_' + _this13.context);
-
-	                targetElement.target = _this13.childWindowName;
-
-	                return _this13.preRender(element, { loadUrl: false });
-	            });
+	        key: 'hijack',
+	        value: function hijack(targetElement) {
+	            targetElement.target = this.childWindowName;
 	        }
 
 	        /*  Run Timeout
@@ -8307,18 +8285,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'runTimeout',
 	        value: function runTimeout() {
-	            var _this14 = this;
+	            var _this12 = this;
 
 	            if (this.props.timeout) {
 	                setTimeout(function () {
 
 	                    // If this.onInit has been previously resolved, this won't have any effect.
 
-	                    var error = new Error('[' + _this14.component.tag + '] Loading component ' + _this14.component.tag + ' timed out after ' + _this14.props.timeout + ' milliseconds');
+	                    var error = new Error('[' + _this12.component.tag + '] Loading component ' + _this12.component.tag + ' timed out after ' + _this12.props.timeout + ' milliseconds');
 
-	                    _this14.onInit.reject(error)['catch'](function (err) {
-	                        return _this14.props.onTimeout(err)['finally'](function () {
-	                            _this14.component.log('timed_out', { timeout: _this14.props.timeout });
+	                    _this12.onInit.reject(error)['catch'](function (err) {
+	                        return _this12.props.onTimeout(err)['finally'](function () {
+	                            _this12.component.log('timed_out', { timeout: _this12.props.timeout });
 	                        });
 	                    });
 	                }, this.props.timeout);
@@ -8336,7 +8314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ref11;
 
 	            return _ref11 = {}, _defineProperty(_ref11, _constants.POST_MESSAGE.INIT, function (source, data) {
-	                var _this15 = this;
+	                var _this13 = this;
 
 	                this.childExports = data.exports;
 
@@ -8348,8 +8326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _lib.logger.flush();
 
 	                    return {
-	                        props: _this15.getPropsForChild(),
-	                        context: _this15.context
+	                        props: _this13.getPropsForChild(),
+	                        context: _this13.context
 	                    };
 	                });
 	            }), _defineProperty(_ref11, _constants.POST_MESSAGE.CLOSE, function (source, data) {
@@ -8374,7 +8352,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(width, height) {
-	            var _this16 = this;
+	            var _this14 = this;
 
 	            this.component.log('resize', { height: height, width: width });
 	            this.driver.resize.call(this, width, height);
@@ -8383,12 +8361,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _ret2 = function () {
 	                    var overflow = void 0;
 
-	                    if (_this16.elementTemplate) {
-	                        (0, _lib.setOverflow)(_this16.elementTemplate, 'hidden');
+	                    if (_this14.elementTemplate) {
+	                        (0, _lib.setOverflow)(_this14.elementTemplate, 'hidden');
 	                    }
 
 	                    return {
-	                        v: (0, _lib.delay)(_this16.component.resizeDelay).then(function () {
+	                        v: (0, _lib.delay)(_this14.component.resizeDelay).then(function () {
 
 	                            if (overflow) {
 	                                overflow.reset();
@@ -8441,39 +8419,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'close',
 	        value: function close() {
-	            var _this17 = this;
+	            var _this15 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                _this17.component.log('close', { reason: reason });
+	                _this15.component.log('close', { reason: reason });
 
-	                return _this17.props.onClose(reason);
+	                return _this15.props.onClose(reason);
 	            }).then(function () {
 
-	                return _promise.SyncPromise.all([_this17.closeComponent(), _this17.closeContainer()]);
+	                return _promise.SyncPromise.all([_this15.closeComponent(), _this15.closeContainer()]);
 	            }).then(function () {
 
-	                return _this17.destroy();
+	                return _this15.destroy();
 	            });
 	        }
 	    }, {
 	        key: 'closeContainer',
 	        value: function closeContainer() {
-	            var _this18 = this;
+	            var _this16 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                return _this18.props.onClose(reason);
+	                return _this16.props.onClose(reason);
 	            }).then(function () {
 
-	                return _promise.SyncPromise.all([_this18.closeComponent(reason), _this18.hideContainer()]);
+	                return _promise.SyncPromise.all([_this16.closeComponent(reason), _this16.hideContainer()]);
 	            }).then(function () {
 
-	                return _this18.destroyContainer();
+	                return _this16.destroyContainer();
 	            });
 	        }
 	    }, {
@@ -8485,7 +8463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'closeComponent',
 	        value: function closeComponent() {
-	            var _this19 = this;
+	            var _this17 = this;
 
 	            var reason = arguments.length <= 0 || arguments[0] === undefined ? _constants.CLOSE_REASONS.PARENT_CALL : arguments[0];
 
@@ -8497,22 +8475,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                return _this19.cancelContainerEvents();
+	                return _this17.cancelContainerEvents();
 	            }).then(function () {
 
-	                return _this19.props.onClose(reason);
+	                return _this17.props.onClose(reason);
 	            }).then(function () {
 
-	                return _this19.hideComponent();
+	                return _this17.hideComponent();
 	            }).then(function () {
 
-	                return _this19.destroyComponent();
+	                return _this17.destroyComponent();
 	            }).then(function () {
 
 	                // IE in metro mode -- child window needs to close itself, or close will hang
 
-	                if (_this19.childExports && _this19.context === _constants.CONTEXT_TYPES.POPUP && !_src2['default'].winutil.isWindowClosed(win)) {
-	                    _this19.childExports.close()['catch'](_lib.noop);
+	                if (_this17.childExports && _this17.context === _constants.CONTEXT_TYPES.POPUP && !_src2['default'].winutil.isWindowClosed(win)) {
+	                    _this17.childExports.close()['catch'](_lib.noop);
 	                }
 	            });
 	        }
@@ -8631,15 +8609,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'openContainer',
 	        value: function openContainer() {
-	            var _this20 = this;
+	            var _this18 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                if (!_this20.driver.parentTemplate) {
+	                if (!_this18.driver.parentTemplate) {
 	                    return;
 	                }
 
-	                return _this20.getParentTemplate();
+	                return _this18.getParentTemplate();
 	            }).then(function (parentTemplate) {
 
 	                if (!parentTemplate) {
@@ -8650,65 +8628,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // throw new Error(`Can only render parent template to top level window`);
 	                }
 
-	                _this20.parentTemplateFrame = (0, _lib.iframe)(null, {
+	                _this18.parentTemplateFrame = (0, _lib.iframe)(null, {
 	                    name: '__lightbox_container__' + (0, _lib.uniqueID)() + '__',
 	                    scrolling: 'no'
 	                }, document.body);
 
-	                _this20.parentTemplateFrame.style.display = 'block';
-	                _this20.parentTemplateFrame.style.position = 'fixed';
-	                _this20.parentTemplateFrame.style.top = '0';
-	                _this20.parentTemplateFrame.style.left = '0';
-	                _this20.parentTemplateFrame.style.width = '100%';
-	                _this20.parentTemplateFrame.style.height = '100%';
-	                _this20.parentTemplateFrame.style.zIndex = '2147483647';
+	                _this18.parentTemplateFrame.style.display = 'block';
+	                _this18.parentTemplateFrame.style.position = 'fixed';
+	                _this18.parentTemplateFrame.style.top = '0';
+	                _this18.parentTemplateFrame.style.left = '0';
+	                _this18.parentTemplateFrame.style.width = '100%';
+	                _this18.parentTemplateFrame.style.height = '100%';
+	                _this18.parentTemplateFrame.style.zIndex = '2147483647';
 
-	                _this20.parentTemplateFrame.contentWindow.document.open();
-	                _this20.parentTemplateFrame.contentWindow.document.write('<body></body>');
-	                _this20.parentTemplateFrame.contentWindow.document.close();
+	                _this18.parentTemplateFrame.contentWindow.document.open();
+	                _this18.parentTemplateFrame.contentWindow.document.write('<body></body>');
+	                _this18.parentTemplateFrame.contentWindow.document.close();
 
-	                _this20.parentTemplate = (0, _lib.createElement)('div', {
+	                _this18.parentTemplate = (0, _lib.createElement)('div', {
 
 	                    html: (0, _lib.template)(parentTemplate, {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid,
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.props.uid,
 	                        CLASS: _constants.CLASS_NAMES,
 	                        ANIMATION: _constants.ANIMATION_NAMES
 	                    }),
 
 	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.props.uid
+	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.props.uid
 	                    },
 
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this20.context]
+	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this18.context]
 	                });
 
-	                (0, _lib.hideElement)(_this20.parentTemplate);
+	                (0, _lib.hideElement)(_this18.parentTemplate);
 
-	                _this20.parentTemplateFrame.contentWindow.document.body.appendChild(_this20.parentTemplate);
+	                _this18.parentTemplateFrame.contentWindow.document.body.appendChild(_this18.parentTemplate);
 
-	                if (_this20.driver.renderedIntoParentTemplate) {
-	                    _this20.elementTemplate = _this20.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
+	                if (_this18.driver.renderedIntoParentTemplate) {
+	                    _this18.elementTemplate = _this18.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
 
-	                    if (!_this20.elementTemplate) {
+	                    if (!_this18.elementTemplate) {
 	                        throw new Error('Could not find element to render component into');
 	                    }
 
-	                    (0, _lib.hideElement)(_this20.elementTemplate);
+	                    (0, _lib.hideElement)(_this18.elementTemplate);
 	                }
 
 	                var eventHandlers = [];
 
-	                if (_this20.driver.focusable) {
-	                    eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this20.focus();
+	                if (_this18.driver.focusable) {
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this18.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this18.focus();
 	                    }));
 	                }
 
-	                eventHandlers.push((0, _lib.addEventToClass)(_this20.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this20.userClose();
+	                eventHandlers.push((0, _lib.addEventToClass)(_this18.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                    return _this18.userClose();
 	                }));
 
-	                _this20.clean.register('destroyContainerEvents', function () {
+	                _this18.clean.register('destroyContainerEvents', function () {
 	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	                        var _ref12;
 
@@ -8729,12 +8707,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                // let overflow = setOverflow(document.documentElement, 'hidden');
 
-	                _this20.clean.register('destroyParentTemplate', function () {
+	                _this18.clean.register('destroyParentTemplate', function () {
 
-	                    document.body.removeChild(_this20.parentTemplateFrame);
+	                    document.body.removeChild(_this18.parentTemplateFrame);
 
-	                    delete _this20.parentTemplateFrame;
-	                    delete _this20.parentTemplate;
+	                    delete _this18.parentTemplateFrame;
+	                    delete _this18.parentTemplate;
 
 	                    // overflow.reset();
 	                });
@@ -8754,28 +8732,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            var _this21 = this;
+	            var _this19 = this;
 
 	            return _promise.SyncPromise['try'](function () {
-	                if (_this21.clean.hasTasks()) {
-	                    _this21.component.log('destroy');
+	                if (_this19.clean.hasTasks()) {
+	                    _this19.component.log('destroy');
 	                    _lib.logger.flush();
-	                    return _this21.clean.all();
+	                    return _this19.clean.all();
 	                }
 	            });
 	        }
 	    }, {
 	        key: 'tryInit',
 	        value: function tryInit(method) {
-	            var _this22 = this;
+	            var _this20 = this;
 
 	            return _promise.SyncPromise['try'](method)['catch'](function (err) {
 
-	                _this22.onInit.reject(err);
+	                _this20.onInit.reject(err);
 	                throw err;
 	            }).then(function () {
 
-	                return _this22.onInit;
+	                return _this20.onInit;
 	            });
 	        }
 
@@ -8787,19 +8765,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'error',
 	        value: function error(err) {
-	            var _this23 = this;
+	            var _this21 = this;
 
 	            return _promise.SyncPromise['try'](function () {
 
-	                _this23.component.logError('error', { error: err.stack || err.toString() });
-	                _this23.onInit.reject(err);
-	                return _this23.props.onError(err);
+	                _this21.component.logError('error', { error: err.stack || err.toString() });
+	                _this21.onInit.reject(err);
+	                return _this21.props.onError(err);
 	            }).then(function () {
 
-	                return _this23.props.onError(err);
+	                return _this21.props.onError(err);
 	            }).then(function () {
 
-	                return _this23.destroy();
+	                return _this21.destroy();
 	            })['catch'](function (err2) {
 
 	                throw new Error('An error was encountered while handling error:\n\n ' + err.stack + '\n\n' + err2.stack);
@@ -8818,16 +8796,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _drivers.RENDER_DRIVERS[this.context];
 	        }
-
-	        /*  Pre Render
-	            ----------
-	             Pre-render a new window in the desired context
-	        */
-
 	    }]);
 
 	    return ParentComponent;
-	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'preRender', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'preRender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resize', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'resize'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
+	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'render', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'render'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resize', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'resize'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
 	function destroyAll() {
 	    var results = [];
 
@@ -8942,6 +8914,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        destroyContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        cancelContainerEvents: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+	        elementReady: _constants.DELEGATE.CALL_DELEGATE,
 	        showContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        showComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        hideContainer: _constants.DELEGATE.CALL_DELEGATE,
@@ -9074,6 +9047,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        openContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyContainer: _constants.DELEGATE.CALL_DELEGATE,
 
+	        elementReady: _constants.DELEGATE.CALL_DELEGATE,
+
 	        showContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        showComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        hideContainer: _constants.DELEGATE.CALL_DELEGATE,
@@ -9109,6 +9084,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        destroyComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        destroyContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        createComponentTemplate: _constants.DELEGATE.CALL_DELEGATE,
+
+	        elementReady: _constants.DELEGATE.CALL_DELEGATE,
 
 	        showContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        showComponent: _constants.DELEGATE.CALL_DELEGATE,
@@ -10153,7 +10130,7 @@ return /******/ (function(modules) { // webpackBootstrap
   \******************************************************/
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.LIGHTBOX} .{CLASS.ELEMENT} {\n        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
+	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.LIGHTBOX} .{CLASS.ELEMENT} {\n        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);\n        position: fixed;\n\n        top: 50%;\n        left: 50%;\n\n        transform: translate3d(-50%, -50%, 0);\n        -webkit-transform: translate3d(-50%, -50%, 0);\n        -moz-transform: translate3d(-50%, -50%, 0);\n        -o-transform: translate3d(-50%, -50%, 0);\n        -ms-transform: translate3d(-50%, -50%, 0);\n    }\n\n    #{id}.{CLASS.LIGHTBOX} iframe {\n        height: 100%;\n        width: 100%;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
 /* 53 */
