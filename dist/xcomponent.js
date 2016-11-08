@@ -8362,7 +8362,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var overflow = void 0;
 
 	                    if (_this14.elementTemplate) {
-	                        (0, _lib.setOverflow)(_this14.elementTemplate, 'hidden');
+	                        overflow = (0, _lib.setOverflow)(_this14.elementTemplate, 'hidden');
 	                    }
 
 	                    return {
