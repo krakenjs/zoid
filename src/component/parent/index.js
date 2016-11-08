@@ -326,7 +326,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     elementReady(element) {
-        return elementReady(element);
+        return elementReady(element).then(noop);
     }
 
     /*  Pre Render
