@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, getDomainFromUrl, getDomain, getElement, toCSS, isPerc, toNum } from '../../lib';
+import { iframe, popup, getElement, toCSS, isPerc, toNum } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -71,10 +71,6 @@ export let RENDER_DRIVERS = {
                     delete this.iframe;
                 }
             });
-        },
-
-        openBridge() {
-
         },
         
         renderToParentOverrides: {
@@ -178,26 +174,6 @@ export let RENDER_DRIVERS = {
             this.resize(width, height);
         },
 
-        openBridge() {
-
-            let bridgeUrl = this.component.bridgeUrl;
-
-            if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
-                bridgeUrl = this.component.bridgeUrls[this.props.env];
-            }
-
-            if (bridgeUrl) {
-
-                // No point loading a bridge if we're on the same domain. Maybe should move this logic to post-robot though?
-
-                if (getDomainFromUrl(bridgeUrl) === getDomain(window)) {
-                    return;
-                }
-
-                return postRobot.openBridge(bridgeUrl);
-            }
-        },
-
         resize(width, height) {
 
             if (width && height) {
@@ -292,10 +268,6 @@ export let RENDER_DRIVERS = {
             let element = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
 
             return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
-        },
-
-        openBridge() {
-
         },
 
         resize(width, height) {

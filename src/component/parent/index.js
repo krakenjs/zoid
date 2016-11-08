@@ -296,8 +296,22 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    @promise
     openBridge() {
-        return this.driver.openBridge.call(this);
+
+        let bridgeUrl = this.component.bridgeUrl;
+
+        if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
+            bridgeUrl = this.component.bridgeUrls[this.props.env];
+        }
+
+        if (!bridgeUrl) {
+            return;
+        }
+
+        if (postRobot.needsBridge({ window: this.window, domain: getDomainFromUrl(bridgeUrl) })) {
+            return postRobot.openBridge(bridgeUrl);
+        }
     }
 
 
@@ -343,8 +357,7 @@ export class ParentComponent extends BaseComponent {
 
             let tasks = {
                 openContainer: this.openContainer(this.context),
-                getDomain:     this.getDomain(),
-                openBridge:    this.openBridge(this.context)
+                getDomain:     this.getDomain()
             };
 
             tasks.elementReady = Promise.try(() => {
@@ -362,6 +375,10 @@ export class ParentComponent extends BaseComponent {
                     return this.open(element, this.context);
                 });
             }
+
+            tasks.openBridge = tasks.open.then(() => {
+                return this.openBridge(this.context);
+            });
 
             tasks.showContainer = tasks.openContainer.then(() => {
                 return this.showContainer();
@@ -391,7 +408,7 @@ export class ParentComponent extends BaseComponent {
 
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.createComponentTemplate ]).then(([ url ]) => {
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 
