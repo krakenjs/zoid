@@ -685,7 +685,7 @@ export class ParentComponent extends BaseComponent {
             let overflow;
 
             if (this.elementTemplate) {
-                setOverflow(this.elementTemplate, 'hidden');
+                overflow = setOverflow(this.elementTemplate, 'hidden');
             }
 
             return delay(this.component.resizeDelay).then(() => {
