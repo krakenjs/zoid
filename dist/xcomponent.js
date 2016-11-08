@@ -736,7 +736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.winutil = exports.util = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(/*! ./client */ 5);
 
@@ -807,6 +807,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.isBridge;
+	  }
+	});
+	Object.defineProperty(exports, 'needsBridge', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.needsBridge;
 	  }
 	});
 
@@ -1130,8 +1136,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        GLOBAL: 'postrobot_global'
 	    },
 
-	    MOCK_PROTOCOL: 'mock://',
-	    FILE_PROTOCOL: 'file://',
+	    MOCK_PROTOCOL: 'mock:',
+	    FILE_PROTOCOL: 'file:',
 
 	    BRIDGE_NAME_PREFIX: '__postrobot_bridge__',
 	    POSTROBOT_PROXY: '__postrobot_proxy__'
@@ -2155,6 +2161,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Can not read window protocol');
 	        }
 
+	        if (win.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) {
+	            return win.location.protocol + '//' + win.location.host;
+	        }
+
 	        if (!win.location.host) {
 	            throw new Error('Can not read window host');
 	        }
@@ -2740,15 +2750,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return true;
 	    }
 
-	    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
-
-	    try {
+	    /*
+	     // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+	     try {
 	        if (win.parent === win && !getOpener(win) && win !== getTop(window)) {
 	            // return true;
 	        }
 	    } catch (err) {
 	        // pass
 	    }
+	     */
 
 	    return false;
 	}
@@ -2819,10 +2830,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var childFrame = _ref8;
 
-	        var _frame2 = findChildFrameByName(childFrame, name);
+	        var namedFrame = findChildFrameByName(childFrame, name);
 
-	        if (_frame2) {
-	            return _frame2;
+	        if (namedFrame) {
+	            return namedFrame;
 	        }
 	    }
 	}
@@ -3747,6 +3758,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.openTunnelToOpener = openTunnelToOpener;
 	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
+	exports.needsBridge = needsBridge;
 	exports.isBridge = isBridge;
 
 	var _conf = __webpack_require__(/*! ../conf */ 6);
@@ -4222,6 +4234,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _global.global.bridges[domain];
 	}
 
+	function needsBridge(_ref8) {
+	    var win = _ref8.win;
+	    var domain = _ref8.domain;
+
+
+	    if (!window.navigator.userAgent.match(/MSIE|trident|edge/i)) {
+	        return false;
+	    }
+
+	    if (win && (0, _lib.isSameTopWindow)(window, win)) {
+	        return false;
+	    }
+
+	    if (domain && _lib.util.getDomain() === domain) {
+	        return false;
+	    }
+
+	    return true;
+	}
+
 	function isBridge() {
 	    return window.name && window.name === getBridgeName(_lib.util.getDomain());
 	}
@@ -4258,17 +4290,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _global.global.listeners.response = [];
 	}
 
+	function isRegex(item) {
+	    return Object.prototype.toString.call(item) === '[object RegExp]';
+	}
+
 	function matchDomain(domain, origin) {
 
 	    if (typeof domain === 'string') {
+
+	        if (isRegex(origin)) {
+	            return false;
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return false;
+	        }
+
 	        return domain === '*' || origin === domain;
 	    }
 
-	    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+	    if (isRegex(domain)) {
+
+	        if (isRegex(origin)) {
+	            return domain.toString() === origin.toString();
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return false;
+	        }
+
 	        return origin.match(domain);
 	    }
 
 	    if (Array.isArray(domain)) {
+
+	        if (isRegex(origin)) {
+	            return false;
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return JSON.stringify(domain) === JSON.stringify(origin);
+	        }
+
 	        return domain.indexOf(origin) !== -1;
 	    }
 
@@ -4306,18 +4369,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (specifiedWin && specifiedDomain) {
 	            if (matchedWin && matchedDomain) {
-	                result.all = requestListener.options;
+	                result.all = result.all || requestListener.options;
 	            }
 	        } else if (specifiedDomain) {
 	            if (matchedDomain) {
-	                result.domain = requestListener.options;
+	                result.domain = result.domain || requestListener.options;
 	            }
 	        } else if (specifiedWin) {
 	            if (matchedWin) {
-	                result.win = requestListener.options;
+	                result.win = result.win || requestListener.options;
 	            }
 	        } else {
-	            result.name = requestListener.options;
+	            result.name = result.name || requestListener.options;
 	        }
 	    }
 
@@ -7952,7 +8015,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'openBridge',
 	        value: function openBridge() {
-	            return this.driver.openBridge.call(this);
+
+	            var bridgeUrl = this.component.bridgeUrl;
+
+	            if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
+	                bridgeUrl = this.component.bridgeUrls[this.props.env];
+	            }
+
+	            if (!bridgeUrl) {
+	                return;
+	            }
+
+	            if (_src2['default'].needsBridge({ window: this.window, domain: (0, _lib.getDomainFromUrl)(bridgeUrl) })) {
+	                return _src2['default'].openBridge(bridgeUrl);
+	            }
 	        }
 
 	        /*  Open
@@ -7991,8 +8067,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var tasks = {
 	                    openContainer: _this7.openContainer(_this7.context),
-	                    getDomain: _this7.getDomain(),
-	                    openBridge: _this7.openBridge(_this7.context)
+	                    getDomain: _this7.getDomain()
 	                };
 
 	                tasks.elementReady = _promise.SyncPromise['try'](function () {
@@ -8010,6 +8085,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        return _this7.open(element, _this7.context);
 	                    });
 	                }
+
+	                tasks.openBridge = tasks.open.then(function () {
+	                    return _this7.openBridge(_this7.context);
+	                });
 
 	                tasks.showContainer = tasks.openContainer.then(function () {
 	                    return _this7.showContainer();
@@ -8047,7 +8126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    tasks.buildUrl = _this7.buildUrl();
 
-	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.createComponentTemplate]).then(function (_ref7) {
+	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref7) {
 	                        var _ref8 = _slicedToArray(_ref7, 1);
 
 	                        var url = _ref8[0];
@@ -8799,7 +8878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return ParentComponent;
-	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'render', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'render'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resize', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'resize'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
+	}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getDomain', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getDomain'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProps', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProps'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openBridge', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openBridge'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'render', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'render'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadUrl', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'loadUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resize', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'resize'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createComponentTemplate', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'createComponentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'getParentTemplate', [promise], Object.getOwnPropertyDescriptor(_class.prototype, 'getParentTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoize, promise], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
 	function destroyAll() {
 	    var results = [];
 
@@ -8904,7 +8983,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 	    },
-	    openBridge: function openBridge() {},
 
 
 	    renderToParentOverrides: {
@@ -9009,25 +9087,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.resize(width, height);
 	    },
-	    openBridge: function openBridge() {
-
-	        var bridgeUrl = this.component.bridgeUrl;
-
-	        if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
-	            bridgeUrl = this.component.bridgeUrls[this.props.env];
-	        }
-
-	        if (bridgeUrl) {
-
-	            // No point loading a bridge if we're on the same domain. Maybe should move this logic to post-robot though?
-
-	            if ((0, _lib.getDomainFromUrl)(bridgeUrl) === (0, _lib.getDomain)(window)) {
-	                return;
-	            }
-
-	            return _src2['default'].openBridge(bridgeUrl);
-	        }
-	    },
 	    resize: function resize(width, height) {
 
 	        if (width && height) {
@@ -9120,7 +9179,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return RENDER_DRIVERS[_constants.CONTEXT_TYPES.IFRAME].open.call(this, element);
 	    },
-	    openBridge: function openBridge() {},
 	    resize: function resize(width, height) {
 
 	        var container = this.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0] || this.iframe;
