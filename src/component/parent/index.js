@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, delay, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving } from '../../lib';
+         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -180,32 +180,27 @@ export class ParentComponent extends BaseComponent {
 
     buildUrl() {
 
-        return propsToQuery(this.component.props, this.props).then(queryProps => {
+        return Promise.hash({
+            url:   this.props.url,
+            query: propsToQuery(this.component.props, this.props)
 
-            queryProps[XCOMPONENT] = '1';
+        }).then(({ url, query }) => {
 
-            return Promise.try(() => {
-
-                if (this.props.url) {
-                    return this.props.url;
+            if (!url) {
+                if (this.props.env && this.component.envUrls) {
+                    url = this.component.envUrls[this.props.env];
+                } else if (this.component.defaultEnv && this.component.envUrls) {
+                    url = this.component.envUrls[this.component.defaultEnv];
+                } else if (this.component.buildUrl) {
+                    url = this.component.buildUrl(this);
+                } else {
+                    url = this.component.url;
                 }
+            }
 
-            }).then(url => {
+            query[XCOMPONENT] = '1';
 
-                if (!url) {
-                    if (this.props.env && this.component.envUrls) {
-                        url = this.component.envUrls[this.props.env];
-                    } else if (this.component.defaultEnv && this.component.envUrls) {
-                        url = this.component.envUrls[this.component.defaultEnv];
-                    } else if (this.component.buildUrl) {
-                        url = this.component.buildUrl(this);
-                    } else {
-                        url = this.component.url;
-                    }
-                }
-
-                return extendUrl(url, { query: queryProps });
-            });
+            return extendUrl(url, { query });
         });
     }
 
@@ -405,7 +400,6 @@ export class ParentComponent extends BaseComponent {
             });
 
             if (loadUrl) {
-
                 tasks.buildUrl = this.buildUrl();
 
                 tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
@@ -413,12 +407,6 @@ export class ParentComponent extends BaseComponent {
                 });
 
                 tasks.runTimeout = tasks.loadUrl.then(() => {
-                    return this.runTimeout();
-                });
-
-            } else {
-
-                tasks.runTimeout = Promise.try(() => {
                     return this.runTimeout();
                 });
             }
