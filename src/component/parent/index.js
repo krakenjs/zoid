@@ -186,6 +186,10 @@ export class ParentComponent extends BaseComponent {
 
         }).then(({ url, query }) => {
 
+            if (url && !this.getValidDomain(url)) {
+                return url;
+            }
+
             if (!url) {
                 if (this.props.env && this.component.envUrls) {
                     url = this.component.envUrls[this.props.env];
@@ -204,10 +208,43 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    getValidDomain(url) {
+
+        if (!url) {
+            return;
+        }
+
+        let domain = getDomainFromUrl(url);
+
+        if (this.component.domain) {
+            if (domain === this.component.domain) {
+                return domain;
+            }
+        }
+
+        if (this.component.domains) {
+            for (let env of Object.keys(this.component.domains)) {
+                if (domain === this.component.domains[env]) {
+                    return domain;
+                }
+            }
+        }
+    }
+
 
     @promise
     getDomain() {
         return Promise.try(() => {
+
+            return this.props.url;
+
+        }).then(url => {
+
+            let domain = this.getValidDomain(url);
+
+            if (domain) {
+                return domain;
+            }
 
             if (this.component.domain) {
                 return this.component.domain;
@@ -215,14 +252,6 @@ export class ParentComponent extends BaseComponent {
 
             if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
                 return this.component.domains[this.props.env];
-            }
-
-            return this.props.url;
-
-        }).then(propUrl => {
-
-            if (propUrl) {
-                return getDomainFromUrl(propUrl);
             }
 
             if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
@@ -402,7 +431,7 @@ export class ParentComponent extends BaseComponent {
             if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 
