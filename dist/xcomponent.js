@@ -321,8 +321,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.contexts[context] = _this.contexts[context] === undefined ? true : Boolean(_this.contexts[context]);
 	        }
 
-	        _this.addProp(options, 'resizeDelay');
-
 	        // The default context to render to
 
 	        _this.addProp(options, 'defaultContext');
@@ -4962,6 +4960,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.formatQuery = formatQuery;
 	exports.extendQuery = extendQuery;
 	exports.extendUrl = extendUrl;
+	exports.elementStoppedMoving = elementStoppedMoving;
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
 	exports.getCurrentDimensions = getCurrentDimensions;
@@ -5451,6 +5450,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return originalUrl;
 	}
 
+	function elementStoppedMoving(element) {
+	    var timeout = arguments.length <= 1 || arguments[1] === undefined ? 5000 : arguments[1];
+
+	    return new _promise.SyncPromise(function (resolve, reject) {
+	        element = getElement(element);
+
+	        var start = element.getBoundingClientRect();
+
+	        var interval = void 0;
+	        var timer = void 0;
+
+	        interval = setInterval(function () {
+	            var end = element.getBoundingClientRect();
+
+	            if (start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height) {
+	                clearTimeout(timer);
+	                clearInterval(interval);
+	                return resolve();
+	            }
+
+	            start = end;
+	        }, 50);
+
+	        timer = setTimeout(function () {
+	            clearInterval(interval);
+	            reject(new Error('Timed out waiting for element to stop animating after ' + timeout + 'ms'));
+	        }, timeout);
+	    });
+	}
+
 	function getOpener(win) {
 
 	    if (!win) {
@@ -5547,18 +5576,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	                changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
 	                dimensions: newDimensions
 	            };
+	        },
+	        reset: function reset() {
+	            currentDimensions = getCurrentDimensions(el);
 	        }
 	    };
 	}
 
-	var activeWatchers = [];
-
 	function onDimensionsChange(el) {
-	    var delay = arguments.length <= 1 || arguments[1] === undefined ? 200 : arguments[1];
+	    var delay = arguments.length <= 1 || arguments[1] === undefined ? 50 : arguments[1];
 	    var threshold = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
 
-	    for (var _iterator7 = activeWatchers, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
+	    return new _promise.SyncPromise(function (resolve) {
+
+	        var tracker = trackDimensions(el, threshold);
+
+	        var interval = void 0;
+
+	        var resolver = (0, _fn.debounce)(function (dimensions) {
+	            clearInterval(interval);
+	            return resolve(dimensions);
+	        }, delay * 4);
+
+	        interval = setInterval(function () {
+	            var _tracker$check = tracker.check();
+
+	            var changed = _tracker$check.changed;
+	            var dimensions = _tracker$check.dimensions;
+
+	            if (changed) {
+	                tracker.reset();
+	                return resolver(dimensions);
+	            }
+	        }, delay);
+	    });
+	}
+
+	function bindEvents(element, eventNames, handler) {
+
+	    handler = (0, _fn.once)(handler);
+
+	    for (var _iterator7 = eventNames, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray7) {
@@ -5570,77 +5629,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _ref8 = _i7.value;
 	        }
 
-	        var watcher = _ref8;
-
-	        if (watcher.el === el) {
-	            return watcher.promise;
-	        }
-	    }
-
-	    var promise = new _promise.SyncPromise(function (resolve) {
-
-	        var tracker = trackDimensions(el, threshold);
-
-	        var interval = setInterval(function () {
-	            var _tracker$check = tracker.check();
-
-	            var changed = _tracker$check.changed;
-	            var dimensions = _tracker$check.dimensions;
-
-	            if (changed) {
-	                clearInterval(interval);
-	                return resolve(dimensions);
-	            }
-	        }, delay);
-	    });
-
-	    var obj = { el: el, promise: promise };
-
-	    activeWatchers.push(obj);
-
-	    promise.then(function () {
-	        activeWatchers.splice(activeWatchers.indexOf(obj), 1);
-	    });
-
-	    return promise;
-	}
-
-	function bindEvents(element, eventNames, handler) {
-
-	    handler = (0, _fn.once)(handler);
-
-	    for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
-	        var _ref9;
-
-	        if (_isArray8) {
-	            if (_i8 >= _iterator8.length) break;
-	            _ref9 = _iterator8[_i8++];
-	        } else {
-	            _i8 = _iterator8.next();
-	            if (_i8.done) break;
-	            _ref9 = _i8.value;
-	        }
-
-	        var eventName = _ref9;
+	        var eventName = _ref8;
 
 	        element.addEventListener(eventName, handler);
 	    }
 
 	    return {
 	        cancel: (0, _fn.once)(function () {
-	            for (var _iterator9 = eventNames, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
-	                var _ref10;
+	            for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	                var _ref9;
 
-	                if (_isArray9) {
-	                    if (_i9 >= _iterator9.length) break;
-	                    _ref10 = _iterator9[_i9++];
+	                if (_isArray8) {
+	                    if (_i8 >= _iterator8.length) break;
+	                    _ref9 = _iterator8[_i8++];
 	                } else {
-	                    _i9 = _iterator9.next();
-	                    if (_i9.done) break;
-	                    _ref10 = _i9.value;
+	                    _i8 = _iterator8.next();
+	                    if (_i8.done) break;
+	                    _ref9 = _i8.value;
 	                }
 
-	                var eventName = _ref10;
+	                var eventName = _ref9;
 
 	                element.removeEventListener(eventName, handler);
 	            }
@@ -5656,19 +5664,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var capitalizedName = (0, _util.capitalizeFirstLetter)(name);
 
-	    for (var _iterator10 = VENDOR_PREFIXES, _isArray10 = Array.isArray(_iterator10), _i10 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
-	        var _ref11;
+	    for (var _iterator9 = VENDOR_PREFIXES, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+	        var _ref10;
 
-	        if (_isArray10) {
-	            if (_i10 >= _iterator10.length) break;
-	            _ref11 = _iterator10[_i10++];
+	        if (_isArray9) {
+	            if (_i9 >= _iterator9.length) break;
+	            _ref10 = _iterator9[_i9++];
 	        } else {
-	            _i10 = _iterator10.next();
-	            if (_i10.done) break;
-	            _ref11 = _i10.value;
+	            _i9 = _iterator9.next();
+	            if (_i9.done) break;
+	            _ref10 = _i9.value;
 	        }
 
-	        var prefix = _ref11;
+	        var prefix = _ref10;
 
 	        element.style['' + prefix + capitalizedName] = value;
 	    }
@@ -5716,6 +5724,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ANIMATION_END_EVENTS = ['animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd'];
 
 	function animate(element, name) {
+	    var timeout = arguments.length <= 2 || arguments[2] === undefined ? 1000 : arguments[2];
+
 	    return new _promise.SyncPromise(function (resolve, reject) {
 
 	        element = getElement(element);
@@ -5725,6 +5735,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var hasStarted = false;
+
+	        var timer = void 0;
 
 	        var startEvent = bindEvents(element, ANIMATION_START_EVENTS, function (event) {
 
@@ -5736,6 +5748,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            startEvent.cancel();
 	            hasStarted = true;
+
+	            timer = setTimeout(function () {
+	                resolve();
+	            }, timeout);
 	        });
 
 	        var endEvent = bindEvents(element, ANIMATION_END_EVENTS, function (event) {
@@ -5752,6 +5768,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (event.animationName !== name) {
 	                return reject('Expected animation name to be ' + name + ', found ' + event.animationName);
 	            }
+
+	            clearTimeout(timer);
 
 	            setVendorCSS(element, 'animationName', 'none');
 
@@ -6668,19 +6686,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            var resize = function resize(width, height) {
+	                var history = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
-	                var tracker = (0, _lib.trackDimensions)(el);
+	                return _promise.SyncPromise['try'](function () {
 
-	                return _this4.resize(width, height).then(function () {
-	                    var _tracker$check = tracker.check();
+	                    for (var _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                        var _ref3;
 
-	                    var changed = _tracker$check.changed;
-	                    var dimensions = _tracker$check.dimensions;
+	                        if (_isArray2) {
+	                            if (_i2 >= _iterator2.length) break;
+	                            _ref3 = _iterator2[_i2++];
+	                        } else {
+	                            _i2 = _iterator2.next();
+	                            if (_i2.done) break;
+	                            _ref3 = _i2.value;
+	                        }
 
+	                        var size = _ref3;
 
-	                    if (changed) {
-	                        return resize(dimensions.width, dimensions.height);
+	                        if (size.width === width && size.height === height) {
+	                            return;
+	                        }
 	                    }
+
+	                    history.push({ width: width, height: height });
+
+	                    var tracker = (0, _lib.trackDimensions)(el);
+
+	                    return _this4.resize(width, height).then(function () {
+	                        var _tracker$check = tracker.check();
+
+	                        var changed = _tracker$check.changed;
+	                        var dimensions = _tracker$check.dimensions;
+
+
+	                        if (changed) {
+	                            return resize(dimensions.width, dimensions.height, history);
+	                        }
+	                    });
 	                });
 	            };
 
@@ -7870,32 +7913,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function buildUrl() {
 	            var _this4 = this;
 
-	            return (0, _props.propsToQuery)(this.component.props, this.props).then(function (queryProps) {
+	            return _promise.SyncPromise.hash({
+	                url: this.props.url,
+	                query: (0, _props.propsToQuery)(this.component.props, this.props)
 
-	                queryProps[_constants.XCOMPONENT] = '1';
+	            }).then(function (_ref) {
+	                var url = _ref.url;
+	                var query = _ref.query;
 
-	                return _promise.SyncPromise['try'](function () {
 
-	                    if (_this4.props.url) {
-	                        return _this4.props.url;
+	                if (url && !_this4.getValidDomain(url)) {
+	                    return url;
+	                }
+
+	                if (!url) {
+	                    if (_this4.props.env && _this4.component.envUrls) {
+	                        url = _this4.component.envUrls[_this4.props.env];
+	                    } else if (_this4.component.defaultEnv && _this4.component.envUrls) {
+	                        url = _this4.component.envUrls[_this4.component.defaultEnv];
+	                    } else if (_this4.component.buildUrl) {
+	                        url = _this4.component.buildUrl(_this4);
+	                    } else {
+	                        url = _this4.component.url;
 	                    }
-	                }).then(function (url) {
+	                }
 
-	                    if (!url) {
-	                        if (_this4.props.env && _this4.component.envUrls) {
-	                            url = _this4.component.envUrls[_this4.props.env];
-	                        } else if (_this4.component.defaultEnv && _this4.component.envUrls) {
-	                            url = _this4.component.envUrls[_this4.component.defaultEnv];
-	                        } else if (_this4.component.buildUrl) {
-	                            url = _this4.component.buildUrl(_this4);
-	                        } else {
-	                            url = _this4.component.url;
-	                        }
-	                    }
+	                query[_constants.XCOMPONENT] = '1';
 
-	                    return (0, _lib.extendUrl)(url, { query: queryProps });
-	                });
+	                return (0, _lib.extendUrl)(url, { query: query });
 	            });
+	        }
+	    }, {
+	        key: 'getValidDomain',
+	        value: function getValidDomain(url) {
+
+	            if (!url) {
+	                return;
+	            }
+
+	            var domain = (0, _lib.getDomainFromUrl)(url);
+
+	            if (this.component.domain) {
+	                if (domain === this.component.domain) {
+	                    return domain;
+	                }
+	            }
+
+	            if (this.component.domains) {
+	                for (var _iterator = Object.keys(this.component.domains), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	                    var _ref2;
+
+	                    if (_isArray) {
+	                        if (_i >= _iterator.length) break;
+	                        _ref2 = _iterator[_i++];
+	                    } else {
+	                        _i = _iterator.next();
+	                        if (_i.done) break;
+	                        _ref2 = _i.value;
+	                    }
+
+	                    var env = _ref2;
+
+	                    if (domain === this.component.domains[env]) {
+	                        return domain;
+	                    }
+	                }
+	            }
 	        }
 	    }, {
 	        key: 'getDomain',
@@ -7904,19 +7987,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return _promise.SyncPromise['try'](function () {
 
+	                return _this5.props.url;
+	            }).then(function (url) {
+
+	                var domain = _this5.getValidDomain(url);
+
+	                if (domain) {
+	                    return domain;
+	                }
+
 	                if (_this5.component.domain) {
 	                    return _this5.component.domain;
 	                }
 
 	                if (_this5.component.domains && _this5.props.env && _this5.component.domains[_this5.props.env]) {
 	                    return _this5.component.domains[_this5.props.env];
-	                }
-
-	                return _this5.props.url;
-	            }).then(function (propUrl) {
-
-	                if (propUrl) {
-	                    return (0, _lib.getDomainFromUrl)(propUrl);
 	                }
 
 	                if (_this5.component.envUrls && _this5.props.env && _this5.component.envUrls[_this5.props.env]) {
@@ -7946,19 +8031,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var result = {};
 
-	            for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                var _ref;
+	            for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                var _ref3;
 
-	                if (_isArray) {
-	                    if (_i >= _iterator.length) break;
-	                    _ref = _iterator[_i++];
+	                if (_isArray2) {
+	                    if (_i2 >= _iterator2.length) break;
+	                    _ref3 = _iterator2[_i2++];
 	                } else {
-	                    _i = _iterator.next();
-	                    if (_i.done) break;
-	                    _ref = _i.value;
+	                    _i2 = _iterator2.next();
+	                    if (_i2.done) break;
+	                    _ref3 = _i2.value;
 	                }
 
-	                var key = _ref;
+	                var key = _ref3;
 
 	                if (this.component.props[key].sendToChild !== false) {
 	                    result[key] = props[key];
@@ -7982,19 +8067,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var changed = false;
 
-	            for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	                var _ref2;
+	            for (var _iterator3 = Object.keys(props), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	                var _ref4;
 
-	                if (_isArray2) {
-	                    if (_i2 >= _iterator2.length) break;
-	                    _ref2 = _iterator2[_i2++];
+	                if (_isArray3) {
+	                    if (_i3 >= _iterator3.length) break;
+	                    _ref4 = _iterator3[_i3++];
 	                } else {
-	                    _i2 = _iterator2.next();
-	                    if (_i2.done) break;
-	                    _ref2 = _i2.value;
+	                    _i3 = _iterator3.next();
+	                    if (_i3.done) break;
+	                    _ref4 = _i3.value;
 	                }
 
-	                var key = _ref2;
+	                var key = _ref4;
 
 	                if (props[key] !== this.props[key]) {
 	                    changed = true;
@@ -8102,18 +8187,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return _this7.showComponent();
 	                });
 
-	                tasks.linkUrl = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref3) {
-	                    var _ref4 = _slicedToArray(_ref3, 1);
+	                tasks.linkUrl = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
+	                    var _ref6 = _slicedToArray(_ref5, 1);
 
-	                    var domain = _ref4[0];
+	                    var domain = _ref6[0];
 
 	                    return _src2['default'].linkUrl(_this7.window, domain);
 	                });
 
-	                tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
-	                    var _ref6 = _slicedToArray(_ref5, 1);
+	                tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref7) {
+	                    var _ref8 = _slicedToArray(_ref7, 1);
 
-	                    var domain = _ref6[0];
+	                    var domain = _ref8[0];
 
 	                    return _this7.listen(_this7.window, domain);
 	                });
@@ -8123,23 +8208,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 
 	                if (loadUrl) {
-
 	                    tasks.buildUrl = _this7.buildUrl();
 
-	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref7) {
-	                        var _ref8 = _slicedToArray(_ref7, 1);
+	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.listen, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref9) {
+	                        var _ref10 = _slicedToArray(_ref9, 1);
 
-	                        var url = _ref8[0];
+	                        var url = _ref10[0];
 
 	                        return _this7.loadUrl(url);
 	                    });
 
 	                    tasks.runTimeout = tasks.loadUrl.then(function () {
-	                        return _this7.runTimeout();
-	                    });
-	                } else {
-
-	                    tasks.runTimeout = _promise.SyncPromise['try'](function () {
 	                        return _this7.runTimeout();
 	                    });
 	                }
@@ -8204,8 +8283,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                }
 
-	            }).then(function (_ref9) {
-	                var data = _ref9.data;
+	            }).then(function (_ref11) {
+	                var data = _ref11.data;
 
 
 	                _this8.clean.register(data.destroy);
@@ -8218,16 +8297,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var overrides = this.driver.renderToParentOverrides;
 
 	            var _loop = function _loop() {
-	                if (_isArray3) {
-	                    if (_i3 >= _iterator3.length) return 'break';
-	                    _ref10 = _iterator3[_i3++];
+	                if (_isArray4) {
+	                    if (_i4 >= _iterator4.length) return 'break';
+	                    _ref12 = _iterator4[_i4++];
 	                } else {
-	                    _i3 = _iterator3.next();
-	                    if (_i3.done) return 'break';
-	                    _ref10 = _i3.value;
+	                    _i4 = _iterator4.next();
+	                    if (_i4.done) return 'break';
+	                    _ref12 = _i4.value;
 	                }
 
-	                var key = _ref10;
+	                var key = _ref12;
 
 	                var val = overrides[key];
 
@@ -8258,8 +8337,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                };
 	            };
 
-	            _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	                var _ref10;
+	            _loop2: for (var _iterator4 = Object.keys(overrides), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	                var _ref12;
 
 	                var _ret = _loop();
 
@@ -8390,9 +8469,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
-	            var _ref11;
+	            var _ref13;
 
-	            return _ref11 = {}, _defineProperty(_ref11, _constants.POST_MESSAGE.INIT, function (source, data) {
+	            return _ref13 = {}, _defineProperty(_ref13, _constants.POST_MESSAGE.INIT, function (source, data) {
 	                var _this13 = this;
 
 	                this.childExports = data.exports;
@@ -8409,18 +8488,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        context: _this13.context
 	                    };
 	                });
-	            }), _defineProperty(_ref11, _constants.POST_MESSAGE.CLOSE, function (source, data) {
+	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
-	            }), _defineProperty(_ref11, _constants.POST_MESSAGE.RESIZE, function (source, data) {
+	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.RESIZE, function (source, data) {
 
 	                if (this.driver.allowResize && this.component.autoResize) {
 	                    return this.resize(data.width, data.height);
 	                }
-	            }), _defineProperty(_ref11, _constants.POST_MESSAGE.HIDE, function (source, data) {
+	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function (source, data) {
 	                this.hide();
-	            }), _defineProperty(_ref11, _constants.POST_MESSAGE.ERROR, function (source, data) {
+	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function (source, data) {
 	                this.error(new Error(data.error));
-	            }), _ref11;
+	            }), _ref13;
 	        }
 
 	        /*  Resize
@@ -8436,8 +8515,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.component.log('resize', { height: height, width: width });
 	            this.driver.resize.call(this, width, height);
 
-	            if (this.component.resizeDelay) {
+	            if (this.elementTemplate || this.iframe) {
 	                var _ret2 = function () {
+
 	                    var overflow = void 0;
 
 	                    if (_this14.elementTemplate) {
@@ -8445,7 +8525,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    return {
-	                        v: (0, _lib.delay)(_this14.component.resizeDelay).then(function () {
+	                        v: (0, _lib.elementStoppedMoving)(_this14.elementTemplate || _this14.iframe).then(function () {
 
 	                            if (overflow) {
 	                                overflow.reset();
@@ -8766,19 +8846,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }));
 
 	                _this18.clean.register('destroyContainerEvents', function () {
-	                    for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	                        var _ref12;
+	                    for (var _iterator5 = eventHandlers, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	                        var _ref14;
 
-	                        if (_isArray4) {
-	                            if (_i4 >= _iterator4.length) break;
-	                            _ref12 = _iterator4[_i4++];
+	                        if (_isArray5) {
+	                            if (_i5 >= _iterator5.length) break;
+	                            _ref14 = _iterator5[_i5++];
 	                        } else {
-	                            _i4 = _iterator4.next();
-	                            if (_i4.done) break;
-	                            _ref12 = _i4.value;
+	                            _i5 = _iterator5.next();
+	                            if (_i5.done) break;
+	                            _ref14 = _i5.value;
 	                        }
 
-	                        var eventHandler = _ref12;
+	                        var eventHandler = _ref14;
 
 	                        eventHandler.cancel();
 	                    }
