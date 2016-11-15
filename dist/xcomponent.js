@@ -7974,6 +7974,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    var env = _ref2;
 
+
+	                    if (env === 'test') {
+	                        continue;
+	                    }
+
 	                    if (domain === this.component.domains[env]) {
 	                        return domain;
 	                    }
