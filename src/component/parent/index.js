@@ -224,6 +224,11 @@ export class ParentComponent extends BaseComponent {
 
         if (this.component.domains) {
             for (let env of Object.keys(this.component.domains)) {
+
+                if (env === 'test') {
+                    continue;
+                }
+
                 if (domain === this.component.domains[env]) {
                     return domain;
                 }
