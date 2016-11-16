@@ -156,13 +156,21 @@ export class BaseComponent {
 
         for (let listenerName of Object.keys(listeners)) {
 
+            let name = listenerName.replace(/^xcomponent_/, '');
+
             let listener = postRobot.on(listenerName, { window: win, domain, errorHandler: err => this.error(err) }, ({ source, data }) => {
-                this.component.log(`listener_${listenerName.replace(/^xcomponent_/, '')}`);
+                this.component.log(`listener_${name}`);
                 return listeners[listenerName].call(this, source, data);
+            });
+
+            let errorListener = postRobot.on(listenerName, { window: win, errorHandler: err => this.error(err) }, ({ origin, data }) => {
+                this.component.logError(`unexpected_listener_${name}`, { origin, domain });
+                this.error(new Error(`Unexpected ${name} message from domain ${origin} -- expected message from ${domain}`));
             });
 
             this.clean.register(() => {
                 listener.cancel();
+                errorListener.cancel();
             });
         }
     }

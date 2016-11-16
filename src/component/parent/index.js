@@ -426,7 +426,7 @@ export class ParentComponent extends BaseComponent {
             });
 
             tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                return this.listen(this.window, domain);
+                this.listen(this.window, domain);
             });
 
             tasks.watchForClose = tasks.open.then(() => {
@@ -448,7 +448,6 @@ export class ParentComponent extends BaseComponent {
             return Promise.hash(tasks);
         });
     }
-
 
 
     validateRenderToParent(element) {
@@ -1120,7 +1119,16 @@ export class ParentComponent extends BaseComponent {
         Handle an error
     */
 
+    @promise
     error(err) {
+        this.handledErrors = this.handledErrors || [];
+
+        if (this.handledErrors.indexOf(err) !== -1) {
+            return;
+        }
+
+        this.handledErrors.push(err);
+
         return Promise.try(() => {
 
             this.component.logError(`error`, { error: err.stack || err.toString() });
