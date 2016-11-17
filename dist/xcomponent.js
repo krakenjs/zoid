@@ -6484,7 +6484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.onPropHandlers = [];
 
-	        _this.setProps(_this.getInitialProps());
+	        _this.setProps(_this.getInitialProps(), (0, _window.getParentDomain)());
 
 	        _this.component.log('init_child');
 
@@ -6502,13 +6502,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            exports: _this.exports()
 
 	        }).then(function (_ref) {
+	            var origin = _ref.origin;
 	            var data = _ref.data;
 
 
 	            _this.context = data.context;
 
 	            window.xprops = _this.props = {};
-	            _this.setProps(data.props);
+	            _this.setProps(data.props, origin);
 
 	            if (_this.component.autoResize) {
 	                _this.watchForResize();
@@ -6569,9 +6570,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'setProps',
 	        value: function setProps() {
 	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var origin = arguments[1];
 
 	            window.xprops = this.props = this.props || {};
-	            (0, _lib.extend)(this.props, (0, _props.normalizeChildProps)(this.component, props));
+	            (0, _lib.extend)(this.props, (0, _props.normalizeChildProps)(this.component, props, origin));
 	            for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	                var _ref2;
 
@@ -6753,14 +6755,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'exports',
 	        value: function exports() {
-	            var _this5 = this;
+
+	            var self = this;
 
 	            return {
 	                updateProps: function updateProps(props) {
-	                    return _this5.setProps(props);
+	                    return self.setProps(props, this.origin);
 	                },
 	                close: function close() {
-	                    return _this5.destroy();
+	                    return self.destroy();
 	                }
 	            };
 	        }
@@ -6773,17 +6776,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize(width, height) {
-	            var _this6 = this;
+	            var _this5 = this;
 
 	            return _promise.SyncPromise.resolve().then(function () {
 
-	                _this6.component.log('resize', { width: width, height: height });
+	                _this5.component.log('resize', { width: width, height: height });
 
-	                if (_this6.context === _constants.CONTEXT_TYPES.POPUP) {
+	                if (_this5.context === _constants.CONTEXT_TYPES.POPUP) {
 	                    return; // window.resizeTo(width, height);
 	                }
 
-	                return _this6.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
+	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
 	            });
 	        }
 
@@ -7583,7 +7586,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _constants = __webpack_require__(/*! ../../constants */ 41);
 
-	function normalizeChildProps(component, props) {
+	function normalizeChildProps(component, props, origin) {
 
 	    var result = {};
 
@@ -7632,6 +7635,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    });
 	                };
 	            })();
+	        }
+
+	        if (value && prop.sameDomain && origin !== window.location.protocol + '//' + window.location.host) {
+	            value = null;
 	        }
 
 	        result[key] = value;
