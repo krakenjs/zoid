@@ -34,7 +34,7 @@ export class ChildComponent extends BaseComponent {
 
         this.onPropHandlers = [];
 
-        this.setProps(this.getInitialProps());
+        this.setProps(this.getInitialProps(), getParentDomain());
 
         this.component.log(`init_child`);
 
@@ -51,12 +51,12 @@ export class ChildComponent extends BaseComponent {
 
             exports: this.exports()
 
-        }).then(({ data }) => {
+        }).then(({ origin, data }) => {
 
             this.context = data.context;
 
             window.xprops = this.props = {};
-            this.setProps(data.props);
+            this.setProps(data.props, origin);
 
             if (this.component.autoResize) {
                 this.watchForResize();
@@ -111,9 +111,9 @@ export class ChildComponent extends BaseComponent {
     }
 
 
-    setProps(props = {}) {
+    setProps(props = {}, origin) {
         window.xprops = this.props = this.props || {};
-        extend(this.props, normalizeChildProps(this.component, props));
+        extend(this.props, normalizeChildProps(this.component, props, origin));
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
@@ -266,9 +266,16 @@ export class ChildComponent extends BaseComponent {
 
     exports() {
 
+        let self = this;
+
         return {
-            updateProps: props => this.setProps(props),
-            close: () => this.destroy()
+            updateProps(props) {
+                return self.setProps(props, this.origin);
+            },
+
+            close() {
+                return self.destroy();
+            }
         };
     }
 

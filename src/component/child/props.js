@@ -3,7 +3,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { getQueryParam } from '../../lib';
 import { PROP_DEFER_TO_URL } from '../../constants';
 
-export function normalizeChildProps(component, props) {
+export function normalizeChildProps(component, props, origin) {
 
     let result = {};
 
@@ -37,6 +37,11 @@ export function normalizeChildProps(component, props) {
                     return res;
                 });
             };
+        }
+
+
+        if (value && prop.sameDomain && origin !== `${window.location.protocol}//${window.location.host}`) {
+            value = null;
         }
 
         result[key] = value;
