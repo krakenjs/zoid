@@ -8963,8 +8963,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _this21.component.logError('error', { error: err.stack || err.toString() });
 	                _this21.onInit.reject(err);
-	                return _this21.props.onError(err);
-	            }).then(function () {
 
 	                return _this21.props.onError(err);
 	            }).then(function () {
