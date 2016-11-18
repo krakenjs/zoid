@@ -1133,9 +1133,6 @@ export class ParentComponent extends BaseComponent {
 
             this.component.logError(`error`, { error: err.stack || err.toString() });
             this.onInit.reject(err);
-            return this.props.onError(err);
-
-        }).then(() => {
 
             return this.props.onError(err);
 
