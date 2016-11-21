@@ -81,7 +81,6 @@ export const internalProps = {
         type: 'function',
         required: false,
         memoize: true,
-        autoClose: true,
         promisify: true,
         def() {
             return function(err) {

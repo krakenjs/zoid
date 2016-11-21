@@ -270,3 +270,15 @@ export function copyProp(source, target, name, def) {
         target[name] = def;
     }
 }
+
+export function dotify(obj, prefix = '', newobj = {}) {
+    prefix = prefix ? `${prefix}.` : prefix;
+    for (let key in obj) {
+        if (obj[key] && typeof obj[key] === 'object') {
+            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
+        } else {
+            newobj[`${prefix}${key}`] = obj[key];
+        }
+    }
+    return newobj;
+}

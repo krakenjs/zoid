@@ -11,7 +11,7 @@ import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES,
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
-import { normalizeParentProps } from './props';
+import { normalizeProps } from './props';
 
 let activeComponents = [];
 
@@ -167,7 +167,7 @@ export class ParentComponent extends BaseComponent {
         if (this.component.validateProps) {
             this.component.validateProps(this.component, props, required);
         }
-        extend(this.props, normalizeParentProps(this.component, this, props, required));
+        extend(this.props, normalizeProps(this.component, this, props, required));
     }
 
 

@@ -1,8 +1,8 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
-import { noop, denodeify, once, memoize, promisify, getter } from '../../lib';
-import { PROP_DEFER_TO_URL, CLOSE_REASONS } from '../../constants';
+import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
+import { PROP_DEFER_TO_URL } from '../../constants';
 
 
 /*  Normalize Prop
@@ -142,17 +142,9 @@ export function normalizeProps(component, instance, props, required = true) {
 
 
 
-function dotify(obj, prefix = '', newobj = {}) {
-    prefix = prefix ? `${prefix}.` : prefix;
-    for (let key in obj) {
-        if (obj[key] && typeof obj[key] === 'object') {
-            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
-        } else {
-            newobj[`${prefix}${key}`] = obj[key];
-        }
-    }
-    return newobj;
-}
+
+
+
 
 /*  Props to Query
     --------------
@@ -241,35 +233,4 @@ export function propsToQuery(propsDef, props) {
     })).then(() => {
         return params;
     });
-}
-
-
-
-export function normalizeParentProps(component, instance, props, required = true) {
-    props = normalizeProps(component, instance, props, required);
-
-    for (let key of Object.keys(props)) {
-        let value = props[key];
-
-        if (value) {
-            let prop = component.props[key];
-
-            if (prop.autoClose) {
-                props[key] = function() {
-                    instance.component.log(`autoclose`, { prop: key });
-
-                    let result = Promise.resolve(value.apply(this, arguments));
-
-                    return Promise.all([
-
-                        result,
-                        instance.close(CLOSE_REASONS.AUTOCLOSE)
-
-                    ]).then(() => result);
-                };
-            }
-        }
-    }
-
-    return props;
 }
