@@ -1,6 +1,4 @@
 
-import { PROP_DEFER_TO_URL } from '../../constants';
-
 export function validateProp(prop, key, value, required = true) {
 
     let hasProp = value !== null && value !== undefined && value !== '';
@@ -10,11 +8,6 @@ export function validateProp(prop, key, value, required = true) {
             throw new Error(`Prop is required: ${key}`);
         }
 
-        return;
-    }
-
-
-    if (value === PROP_DEFER_TO_URL) {
         return;
     }
 

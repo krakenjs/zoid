@@ -1,44 +1,31 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import { getQueryParam } from '../../lib';
-import { PROP_DEFER_TO_URL } from '../../constants';
-
 export function normalizeChildProps(component, props, origin) {
 
     let result = {};
 
-    for (let key of Object.keys(props)) {
+    for (let key of Object.keys(component.props)) {
 
         let prop = component.props[key];
         let value = props[key];
 
-        if (!prop) {
-            continue;
-        }
-
-        let queryParam = (typeof prop.queryParam === 'string') ? prop.queryParam : key;
-
-        if (value === PROP_DEFER_TO_URL) {
-            let actualValue = getQueryParam(queryParam);
-            if (prop.getter) {
+        if (typeof prop.childDef === 'function') {
+            if (!value) {
+                if (prop.getter) {
+                    value = function() {
+                        return Promise.resolve(prop.childDef.call());
+                    };
+                } else {
+                    value = prop.childDef.call();
+                }
+            } else if (prop.getter) {
+                let val = value;
                 value = function() {
-                    return Promise.resolve(actualValue);
+                    return val.apply(this, arguments).then(res => {
+                        return res ? res : prop.childDef.call();
+                    });
                 };
-            } else {
-                value = actualValue;
             }
-        } else if (prop.getter && value) {
-            let val = value;
-            value = function() {
-                return val().then(res => {
-                    if (res === PROP_DEFER_TO_URL) {
-                        return getQueryParam(queryParam);
-                    }
-                    return res;
-                });
-            };
         }
-
 
         if (value && prop.sameDomain && origin !== `${window.location.protocol}//${window.location.host}`) {
             value = null;

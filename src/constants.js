@@ -79,8 +79,6 @@ export const CLOSE_REASONS = {
 
 export const CONTEXT_TYPES_LIST = values(CONTEXT_TYPES);
 
-export const PROP_DEFER_TO_URL = `xcomponent_prop_defer_to_url`;
-
 export const DELEGATE = {
     CALL_ORIGINAL: 'call_original',
     CALL_DELEGATE: 'call_delegate'

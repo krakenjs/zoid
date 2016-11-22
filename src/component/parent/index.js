@@ -190,21 +190,25 @@ export class ParentComponent extends BaseComponent {
                 return url;
             }
 
-            if (!url) {
-                if (this.props.env && this.component.envUrls) {
-                    url = this.component.envUrls[this.props.env];
+            return Promise.try(() => {
+
+                if (url) {
+                    return url;
+                } else if (this.props.env && this.component.envUrls) {
+                    return this.component.envUrls[this.props.env];
                 } else if (this.component.defaultEnv && this.component.envUrls) {
-                    url = this.component.envUrls[this.component.defaultEnv];
+                    return this.component.envUrls[this.component.defaultEnv];
                 } else if (this.component.buildUrl) {
-                    url = this.component.buildUrl(this);
+                    return this.component.buildUrl(this, this.props);
                 } else {
-                    url = this.component.url;
+                    return this.component.url;
                 }
-            }
 
-            query[XCOMPONENT] = '1';
+            }).then(finalUrl => {
 
-            return extendUrl(url, { query });
+                query[XCOMPONENT] = '1';
+                return extendUrl(finalUrl, { query });
+            });
         });
     }
 

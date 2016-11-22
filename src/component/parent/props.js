@@ -2,7 +2,6 @@
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
 import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
-import { PROP_DEFER_TO_URL } from '../../constants';
 
 
 /*  Normalize Prop
@@ -27,10 +26,6 @@ export function normalizeProp(component, instance, props, key, value) {
 
     if (prop.decorate) {
         value = prop.decorate(value);
-    }
-
-    if (value === PROP_DEFER_TO_URL) {
-        return value;
     }
 
     if (prop.getter) {
@@ -182,10 +177,6 @@ export function propsToQuery(propsDef, props) {
                 return;
             }
 
-            if (value === PROP_DEFER_TO_URL) {
-                return;
-            }
-
             if (prop.getter) {
                 return value.call().then(result => {
                     validateProp(prop, key, result);
@@ -199,6 +190,10 @@ export function propsToQuery(propsDef, props) {
 
             if (!value) {
                 return;
+            }
+
+            if (typeof prop.queryParam === 'function') {
+                queryParam = prop.queryParam(value);
             }
 
             let result;
