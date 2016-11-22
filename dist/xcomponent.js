@@ -203,9 +203,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _parent = __webpack_require__(/*! ../parent */ 43);
 
-	var _delegate = __webpack_require__(/*! ../delegate */ 49);
+	var _delegate = __webpack_require__(/*! ../delegate */ 48);
 
-	var _props = __webpack_require__(/*! ./props */ 50);
+	var _props = __webpack_require__(/*! ./props */ 49);
 
 	var _window = __webpack_require__(/*! ../window */ 39);
 
@@ -213,17 +213,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(/*! ../parent/drivers */ 44);
 
-	var _validate2 = __webpack_require__(/*! ./validate */ 51);
+	var _validate2 = __webpack_require__(/*! ./validate */ 50);
 
-	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 52);
+	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 51);
 
 	var _parent3 = _interopRequireDefault(_parent2);
 
-	var _component = __webpack_require__(/*! ./templates/component.htm */ 53);
+	var _component = __webpack_require__(/*! ./templates/component.htm */ 52);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _drivers2 = __webpack_require__(/*! ../../drivers */ 54);
+	var _drivers2 = __webpack_require__(/*! ../../drivers */ 53);
 
 	var drivers = _interopRequireWildcard(_drivers2);
 
@@ -5968,6 +5968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.each = each;
 	exports.replaceObject = replaceObject;
 	exports.copyProp = copyProp;
+	exports.dotify = dotify;
 
 	/*  Url Encode
 	    ----------
@@ -6225,6 +6226,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	        target[name] = def;
 	    }
+	}
+
+	function dotify(obj) {
+	    var prefix = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+	    var newobj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	    prefix = prefix ? prefix + '.' : prefix;
+	    for (var key in obj) {
+	        if (obj[key] && _typeof(obj[key]) === 'object') {
+	            newobj = dotify(obj[key], '' + prefix + key, newobj);
+	        } else {
+	            newobj['' + prefix + key] = obj[key];
+	        }
+	    }
+	    return newobj;
 	}
 
 /***/ },
@@ -7476,7 +7492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.DELEGATE = exports.PROP_DEFER_TO_URL = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.ANIMATION_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
+	exports.DELEGATE = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.ANIMATION_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
 
 	var _lib = __webpack_require__(/*! ./lib */ 31);
 
@@ -7551,15 +7567,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var CLOSE_REASONS = exports.CLOSE_REASONS = {
 	    PARENT_CALL: 'parent_call',
 	    CHILD_CALL: 'child_call',
-	    AUTOCLOSE: 'autoclose',
 	    CLOSE_DETECTED: 'close_detected',
 	    USER_CLOSED: 'user_closed',
 	    PARENT_CLOSE_DETECTED: 'parent_close_detected'
 	};
 
 	var CONTEXT_TYPES_LIST = exports.CONTEXT_TYPES_LIST = (0, _lib.values)(CONTEXT_TYPES);
-
-	var PROP_DEFER_TO_URL = exports.PROP_DEFER_TO_URL = 'xcomponent_prop_defer_to_url';
 
 	var DELEGATE = exports.DELEGATE = {
 	    CALL_ORIGINAL: 'call_original',
@@ -7571,7 +7584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!**************************************!*\
   !*** ./src/component/child/props.js ***!
   \**************************************/
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -7579,13 +7592,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.normalizeChildProps = normalizeChildProps;
-
-	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 13);
-
-	var _lib = __webpack_require__(/*! ../../lib */ 31);
-
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
-
 	function normalizeChildProps(component, props, origin) {
 
 	    var result = {};
@@ -7606,35 +7612,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var prop = component.props[key];
 	        var value = props[key];
 
-	        if (!prop) {
-	            return 'continue';
-	        }
-
-	        var queryParam = typeof prop.queryParam === 'string' ? prop.queryParam : key;
-
-	        if (value === _constants.PROP_DEFER_TO_URL) {
-	            (function () {
-	                var actualValue = (0, _lib.getQueryParam)(queryParam);
+	        if (typeof prop.childDef === 'function') {
+	            if (!value) {
 	                if (prop.getter) {
 	                    value = function value() {
-	                        return _promise.SyncPromise.resolve(actualValue);
+	                        return Promise.resolve(prop.childDef.call());
 	                    };
 	                } else {
-	                    value = actualValue;
+	                    value = prop.childDef.call();
 	                }
-	            })();
-	        } else if (prop.getter && value) {
-	            (function () {
-	                var val = value;
-	                value = function value() {
-	                    return val().then(function (res) {
-	                        if (res === _constants.PROP_DEFER_TO_URL) {
-	                            return (0, _lib.getQueryParam)(queryParam);
-	                        }
-	                        return res;
-	                    });
-	                };
-	            })();
+	            } else if (prop.getter) {
+	                (function () {
+	                    var val = value;
+	                    value = function value() {
+	                        return val.apply(this, arguments).then(function (res) {
+	                            return res ? res : prop.childDef.call();
+	                        });
+	                    };
+	                })();
+	            }
 	        }
 
 	        if (value && prop.sameDomain && origin !== window.location.protocol + '//' + window.location.host) {
@@ -7648,17 +7644,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 
-	    _loop2: for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        var _ret = _loop();
 
-	        switch (_ret) {
-	            case 'break':
-	                break _loop2;
-
-	            case 'continue':
-	                continue;}
+	        if (_ret === 'break') break;
 	    }
 
 	    return result;
@@ -7919,7 +7910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (this.component.validateProps) {
 	                this.component.validateProps(this.component, props, required);
 	            }
-	            (0, _lib.extend)(this.props, (0, _props.normalizeParentProps)(this.component, this, props, required));
+	            (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props, required));
 	        }
 
 	        /*  Build Url
@@ -7946,21 +7937,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return url;
 	                }
 
-	                if (!url) {
-	                    if (_this4.props.env && _this4.component.envUrls) {
-	                        url = _this4.component.envUrls[_this4.props.env];
+	                return _promise.SyncPromise['try'](function () {
+
+	                    if (url) {
+	                        return url;
+	                    } else if (_this4.props.env && _this4.component.envUrls) {
+	                        return _this4.component.envUrls[_this4.props.env];
 	                    } else if (_this4.component.defaultEnv && _this4.component.envUrls) {
-	                        url = _this4.component.envUrls[_this4.component.defaultEnv];
+	                        return _this4.component.envUrls[_this4.component.defaultEnv];
 	                    } else if (_this4.component.buildUrl) {
-	                        url = _this4.component.buildUrl(_this4);
+	                        return _this4.component.buildUrl(_this4, _this4.props);
 	                    } else {
-	                        url = _this4.component.url;
+	                        return _this4.component.url;
 	                    }
-	                }
+	                }).then(function (finalUrl) {
 
-	                query[_constants.XCOMPONENT] = '1';
-
-	                return (0, _lib.extendUrl)(url, { query: query });
+	                    query[_constants.XCOMPONENT] = '1';
+	                    return (0, _lib.extendUrl)(finalUrl, { query: query });
+	                });
 	            });
 	        }
 	    }, {
@@ -9339,7 +9333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!******************************************!*\
   !*** ./src/component/parent/validate.js ***!
   \******************************************/
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -9349,9 +9343,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.validateProp = validateProp;
 	exports.validateProps = validateProps;
 	exports.validate = validate;
-
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
-
 	function validateProp(prop, key, value) {
 	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
@@ -9363,10 +9354,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Prop is required: ' + key);
 	        }
 
-	        return;
-	    }
-
-	    if (value === _constants.PROP_DEFER_TO_URL) {
 	        return;
 	    }
 
@@ -9521,183 +9508,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
+	exports.normalizeProp = normalizeProp;
+	exports.normalizeProps = normalizeProps;
 	exports.propsToQuery = propsToQuery;
-	exports.normalizeParentProps = normalizeParentProps;
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 13);
 
 	var _validate = __webpack_require__(/*! ./validate */ 46);
 
-	var _props = __webpack_require__(/*! ../props */ 48);
-
-	var _constants = __webpack_require__(/*! ../../constants */ 41);
-
-	function dotify(obj) {
-	    var prefix = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-	    var newobj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-	    prefix = prefix ? prefix + '.' : prefix;
-	    for (var key in obj) {
-	        if (obj[key] && _typeof(obj[key]) === 'object') {
-	            newobj = dotify(obj[key], '' + prefix + key, newobj);
-	        } else {
-	            newobj['' + prefix + key] = obj[key];
-	        }
-	    }
-	    return newobj;
-	}
-
-	/*  Props to Query
-	    --------------
-
-	    Turn props into an initial query string to open the component with
-
-	    string -> string
-	    bool   -> 1
-	    object -> json
-	    number -> string
-	*/
-
-	function propsToQuery(propsDef, props) {
-
-	    var params = {};
-
-	    return _promise.SyncPromise.all(Object.keys(props).map(function (key) {
-
-	        var prop = propsDef[key];
-	        var queryParam = key;
-
-	        if (typeof prop.queryParam === 'string') {
-	            queryParam = prop.queryParam;
-	        }
-
-	        return _promise.SyncPromise.resolve().then(function () {
-
-	            var value = props[key];
-
-	            if (!value) {
-	                return;
-	            }
-
-	            if (!prop.queryParam) {
-	                return;
-	            }
-
-	            if (value === _constants.PROP_DEFER_TO_URL) {
-	                return;
-	            }
-
-	            if (prop.getter) {
-	                return value.call().then(function (result) {
-	                    (0, _validate.validateProp)(prop, key, result);
-	                    return result;
-	                });
-	            }
-
-	            return value;
-	        }).then(function (value) {
-
-	            if (!value) {
-	                return;
-	            }
-
-	            var result = void 0;
-
-	            if (typeof value === 'boolean') {
-	                result = '1';
-	            } else if (typeof value === 'string') {
-	                result = value.toString();
-	            } else if (typeof value === 'function') {
-	                return;
-	            } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
-
-	                if (prop.serialization === 'json') {
-	                    result = JSON.stringify(value);
-	                } else {
-	                    result = dotify(value, key);
-
-	                    for (var dotkey in result) {
-	                        params[dotkey] = result[dotkey];
-	                    }
-
-	                    return;
-	                }
-	            } else if (typeof value === 'number') {
-	                result = value.toString();
-	            }
-
-	            params[queryParam] = result;
-	        });
-	    })).then(function () {
-	        return params;
-	    });
-	}
-
-	function normalizeParentProps(component, instance, props) {
-	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
-
-	    props = (0, _props.normalizeProps)(component, instance, props, required);
-
-	    var _loop = function _loop() {
-	        if (_isArray) {
-	            if (_i >= _iterator.length) return 'break';
-	            _ref = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) return 'break';
-	            _ref = _i.value;
-	        }
-
-	        var key = _ref;
-
-	        var value = props[key];
-
-	        if (value) {
-	            var prop = component.props[key];
-
-	            if (prop.autoClose) {
-	                props[key] = function () {
-	                    instance.component.log('autoclose', { prop: key });
-
-	                    var result = _promise.SyncPromise.resolve(value.apply(this, arguments));
-
-	                    return _promise.SyncPromise.all([result, instance.close(_constants.CLOSE_REASONS.AUTOCLOSE)]).then(function () {
-	                        return result;
-	                    });
-	                };
-	            }
-	        }
-	    };
-
-	    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
-	        var _ret = _loop();
-
-	        if (_ret === 'break') break;
-	    }
-
-	    return props;
-	}
-
-/***/ },
-/* 48 */
-/*!********************************!*\
-  !*** ./src/component/props.js ***!
-  \********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.normalizeProp = normalizeProp;
-	exports.normalizeProps = normalizeProps;
-
-	var _lib = __webpack_require__(/*! ../lib */ 31);
-
-	var _constants = __webpack_require__(/*! ../constants */ 41);
+	var _lib = __webpack_require__(/*! ../../lib */ 31);
 
 	/*  Normalize Prop
 	    --------------
@@ -9721,10 +9540,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (prop.decorate) {
 	        value = prop.decorate(value);
-	    }
-
-	    if (value === _constants.PROP_DEFER_TO_URL) {
-	        return value;
 	    }
 
 	    if (prop.getter) {
@@ -9849,8 +9664,94 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	}
 
+	/*  Props to Query
+	    --------------
+
+	    Turn props into an initial query string to open the component with
+
+	    string -> string
+	    bool   -> 1
+	    object -> json
+	    number -> string
+	*/
+
+	function propsToQuery(propsDef, props) {
+
+	    var params = {};
+
+	    return _promise.SyncPromise.all(Object.keys(props).map(function (key) {
+
+	        var prop = propsDef[key];
+	        var queryParam = key;
+
+	        if (typeof prop.queryParam === 'string') {
+	            queryParam = prop.queryParam;
+	        }
+
+	        return _promise.SyncPromise.resolve().then(function () {
+
+	            var value = props[key];
+
+	            if (!value) {
+	                return;
+	            }
+
+	            if (!prop.queryParam) {
+	                return;
+	            }
+
+	            if (prop.getter) {
+	                return value.call().then(function (result) {
+	                    (0, _validate.validateProp)(prop, key, result);
+	                    return result;
+	                });
+	            }
+
+	            return value;
+	        }).then(function (value) {
+
+	            if (!value) {
+	                return;
+	            }
+
+	            if (typeof prop.queryParam === 'function') {
+	                queryParam = prop.queryParam(value);
+	            }
+
+	            var result = void 0;
+
+	            if (typeof value === 'boolean') {
+	                result = '1';
+	            } else if (typeof value === 'string') {
+	                result = value.toString();
+	            } else if (typeof value === 'function') {
+	                return;
+	            } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+
+	                if (prop.serialization === 'json') {
+	                    result = JSON.stringify(value);
+	                } else {
+	                    result = (0, _lib.dotify)(value, key);
+
+	                    for (var dotkey in result) {
+	                        params[dotkey] = result[dotkey];
+	                    }
+
+	                    return;
+	                }
+	            } else if (typeof value === 'number') {
+	                result = value.toString();
+	            }
+
+	            params[queryParam] = result;
+	        });
+	    })).then(function () {
+	        return params;
+	    });
+	}
+
 /***/ },
-/* 49 */
+/* 48 */
 /*!*****************************************!*\
   !*** ./src/component/delegate/index.js ***!
   \*****************************************/
@@ -10003,7 +9904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 50 */
+/* 49 */
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
@@ -10099,7 +10000,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type: 'function',
 	        required: false,
 	        memoize: true,
-	        autoClose: true,
 	        promisify: true,
 	        def: function def() {
 	            return function (err) {
@@ -10125,7 +10025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 51 */
+/* 50 */
 /*!*********************************************!*\
   !*** ./src/component/component/validate.js ***!
   \*********************************************/
@@ -10293,7 +10193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 52 */
+/* 51 */
 /*!******************************************************!*\
   !*** ./src/component/component/templates/parent.htm ***!
   \******************************************************/
@@ -10302,7 +10202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.LIGHTBOX} .{CLASS.ELEMENT} {\n        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);\n        position: fixed;\n\n        top: 50%;\n        left: 50%;\n\n        transform: translate3d(-50%, -50%, 0);\n        -webkit-transform: translate3d(-50%, -50%, 0);\n        -moz-transform: translate3d(-50%, -50%, 0);\n        -o-transform: translate3d(-50%, -50%, 0);\n        -ms-transform: translate3d(-50%, -50%, 0);\n    }\n\n    #{id}.{CLASS.LIGHTBOX} iframe {\n        height: 100%;\n        width: 100%;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
-/* 53 */
+/* 52 */
 /*!*********************************************************!*\
   !*** ./src/component/component/templates/component.htm ***!
   \*********************************************************/
@@ -10311,7 +10211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ""
 
 /***/ },
-/* 54 */
+/* 53 */
 /*!******************************!*\
   !*** ./src/drivers/index.js ***!
   \******************************/
@@ -10323,7 +10223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _script = __webpack_require__(/*! ./script */ 55);
+	var _script = __webpack_require__(/*! ./script */ 54);
 
 	Object.keys(_script).forEach(function (key) {
 	  if (key === "default") return;
@@ -10335,7 +10235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _react = __webpack_require__(/*! ./react */ 56);
+	var _react = __webpack_require__(/*! ./react */ 55);
 
 	Object.keys(_react).forEach(function (key) {
 	  if (key === "default") return;
@@ -10347,7 +10247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _angular = __webpack_require__(/*! ./angular */ 57);
+	var _angular = __webpack_require__(/*! ./angular */ 56);
 
 	Object.keys(_angular).forEach(function (key) {
 	  if (key === "default") return;
@@ -10359,7 +10259,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ember = __webpack_require__(/*! ./ember */ 58);
+	var _ember = __webpack_require__(/*! ./ember */ 57);
 
 	Object.keys(_ember).forEach(function (key) {
 	  if (key === "default") return;
@@ -10372,7 +10272,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 55 */
+/* 54 */
 /*!*******************************!*\
   !*** ./src/drivers/script.js ***!
   \*******************************/
@@ -10447,7 +10347,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 56 */
+/* 55 */
 /*!******************************!*\
   !*** ./src/drivers/react.js ***!
   \******************************/
@@ -10492,7 +10392,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 57 */
+/* 56 */
 /*!********************************!*\
   !*** ./src/drivers/angular.js ***!
   \********************************/
@@ -10600,7 +10500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 58 */
+/* 57 */
 /*!******************************!*\
   !*** ./src/drivers/ember.js ***!
   \******************************/
