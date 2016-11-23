@@ -40,6 +40,8 @@ export class ChildComponent extends BaseComponent {
 
         this.setWindows();
 
+        this.sendLogsToOpener();
+
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -184,6 +186,48 @@ export class ChildComponent extends BaseComponent {
         // if there's no parent to message to.
 
         this.watchForClose();
+    }
+
+
+    sendLogsToOpener() {
+        try {
+            let opener = postRobot.winutil.getOpener(window);
+
+            if (!opener || !window.console) {
+                return;
+            }
+
+            for (let frame of postRobot.winutil.getAllFramesInWindow(opener)) {
+
+                if (!postRobot.winutil.isSameDomain(frame) || !frame.console) {
+                    continue;
+                }
+
+                for (let level of [ 'log', 'debug', 'info', 'warn', 'error' ]) {
+                    let original = window.console[level];
+
+                    if (!original) {
+                        continue;
+                    }
+
+                    window.console[level] = function() {
+
+                        try {
+                            frame.console[level].apply(frame, arguments);
+                        } catch (err2) {
+                            // pass
+                        }
+
+                        return original.apply(this, arguments);
+                    };
+                }
+
+                return;
+            }
+
+        } catch (err) {
+            // pass
+        }
     }
 
 
