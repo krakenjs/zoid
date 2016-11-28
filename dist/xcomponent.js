@@ -6446,6 +6446,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.ChildComponent = undefined;
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _lib = __webpack_require__(/*! ../../lib */ 31);
@@ -6505,6 +6507,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.component.log('init_child');
 
 	        _this.setWindows();
+
+	        _this.sendLogsToOpener();
 
 	        // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
 	        //
@@ -6673,6 +6677,91 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.watchForClose();
 	        }
+	    }, {
+	        key: 'sendLogsToOpener',
+	        value: function sendLogsToOpener() {
+	            try {
+	                var opener = _src2['default'].winutil.getOpener(window);
+
+	                if (!opener || !window.console) {
+	                    return;
+	                }
+
+	                var _loop = function _loop() {
+	                    if (_isArray2) {
+	                        if (_i2 >= _iterator2.length) return 'break';
+	                        _ref3 = _iterator2[_i2++];
+	                    } else {
+	                        _i2 = _iterator2.next();
+	                        if (_i2.done) return 'break';
+	                        _ref3 = _i2.value;
+	                    }
+
+	                    var frame = _ref3;
+
+
+	                    if (!_src2['default'].winutil.isSameDomain(frame) || !frame.console || frame === window) {
+	                        return 'continue';
+	                    }
+
+	                    var _arr = ['log', 'debug', 'info', 'warn', 'error'];
+
+	                    var _loop3 = function _loop3() {
+	                        var level = _arr[_i3];
+	                        var original = window.console[level];
+
+	                        if (!original) {
+	                            return 'continue';
+	                        }
+
+	                        try {
+
+	                            window.console[level] = function () {
+
+	                                try {
+	                                    return frame.console[level].apply(frame, arguments);
+	                                } catch (err3) {
+	                                    // pass
+	                                }
+
+	                                return original.apply(this, arguments);
+	                            };
+	                        } catch (err2) {
+	                            // pass
+	                        }
+	                    };
+
+	                    for (var _i3 = 0; _i3 < _arr.length; _i3++) {
+	                        var _ret2 = _loop3();
+
+	                        if (_ret2 === 'continue') continue;
+	                    }
+
+	                    return {
+	                        v: void 0
+	                    };
+	                };
+
+	                _loop2: for (var _iterator2 = _src2['default'].winutil.getAllFramesInWindow(opener), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                    var _ref3;
+
+	                    var _ret = _loop();
+
+	                    switch (_ret) {
+	                        case 'break':
+	                            break _loop2;
+
+	                        case 'continue':
+	                            continue;
+
+	                        default:
+	                            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	                    }
+	                }
+	            } catch (err) {
+	                // pass
+	            }
+	        }
 
 	        /*  Watch For Close
 	            ---------------
@@ -6721,19 +6810,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _promise.SyncPromise['try'](function () {
 
-	                    for (var _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	                        var _ref3;
+	                    for (var _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	                        var _ref4;
 
-	                        if (_isArray2) {
-	                            if (_i2 >= _iterator2.length) break;
-	                            _ref3 = _iterator2[_i2++];
+	                        if (_isArray3) {
+	                            if (_i4 >= _iterator3.length) break;
+	                            _ref4 = _iterator3[_i4++];
 	                        } else {
-	                            _i2 = _iterator2.next();
-	                            if (_i2.done) break;
-	                            _ref3 = _i2.value;
+	                            _i4 = _iterator3.next();
+	                            if (_i4.done) break;
+	                            _ref4 = _i4.value;
 	                        }
 
-	                        var size = _ref3;
+	                        var size = _ref4;
 
 	                        if (size.width === width && size.height === height) {
 	                            return;
