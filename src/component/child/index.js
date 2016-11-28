@@ -199,7 +199,7 @@ export class ChildComponent extends BaseComponent {
 
             for (let frame of postRobot.winutil.getAllFramesInWindow(opener)) {
 
-                if (!postRobot.winutil.isSameDomain(frame) || !frame.console) {
+                if (!postRobot.winutil.isSameDomain(frame) || !frame.console || frame === window) {
                     continue;
                 }
 
@@ -210,16 +210,22 @@ export class ChildComponent extends BaseComponent {
                         continue;
                     }
 
-                    window.console[level] = function() {
+                    try {
 
-                        try {
-                            frame.console[level].apply(frame, arguments);
-                        } catch (err2) {
-                            // pass
-                        }
+                        window.console[level] = function() {
 
-                        return original.apply(this, arguments);
-                    };
+                            try {
+                                return frame.console[level].apply(frame, arguments);
+                            } catch (err3) {
+                                // pass
+                            }
+
+                            return original.apply(this, arguments);
+                        };
+
+                    } catch (err2) {
+                        // pass
+                    }
                 }
 
                 return;
