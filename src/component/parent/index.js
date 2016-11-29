@@ -283,6 +283,26 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    @promise
+    getBridgeDomain(url) {
+        return Promise.try(() => {
+
+            if (this.component.bridgeDomain) {
+                return this.component.bridgeDomain;
+            }
+
+            if (this.component.bridgeDomains && this.props.env && this.component.bridgeDomains[this.props.env]) {
+                return this.component.bridgeDomains[this.props.env];
+            }
+
+            if (url) {
+                return getDomainFromUrl(url);
+            }
+
+            throw new Error(`Can not determine domain for bridge`);
+        });
+    }
+
 
     getPropsForChild(props) {
 
@@ -342,9 +362,11 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
-        if (postRobot.needsBridge({ window: this.window, domain: getDomainFromUrl(bridgeUrl) })) {
-            return postRobot.openBridge(bridgeUrl);
-        }
+        return this.getBridgeDomain(bridgeUrl).then(bridgeDomain => {
+            if (postRobot.needsBridge({ window: this.window, domain: bridgeDomain })) {
+                return postRobot.openBridge(bridgeUrl, bridgeDomain);
+            }
+        });
     }
 
 

@@ -26,6 +26,8 @@ export class ChildComponent extends BaseComponent {
         super(component);
         this.component = component;
 
+        this.sendLogsToOpener();
+
         this.component.log(`construct_child`);
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
@@ -39,8 +41,6 @@ export class ChildComponent extends BaseComponent {
         this.component.log(`init_child`);
 
         this.setWindows();
-
-        this.sendLogsToOpener();
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
@@ -66,6 +66,10 @@ export class ChildComponent extends BaseComponent {
 
             return this;
 
+        }).catch(err => {
+
+            this.error(err);
+            return this;
         });
     }
 
@@ -413,8 +417,8 @@ export class ChildComponent extends BaseComponent {
 
     error(err) {
 
-        this.component.log(`error`, { error: err.stack || err.toString() });
-
+        this.component.logError(`error`, { error: err.stack || err.toString() });
+        
         return this.sendToParent(POST_MESSAGE.ERROR, {
             error: err.stack || err.toString()
         });
