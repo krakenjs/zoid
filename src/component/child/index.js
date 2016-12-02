@@ -83,6 +83,9 @@ export class ChildComponent extends BaseComponent {
         this.onPropHandlers.push(handler);
     }
 
+    getParentComponentWindow() {
+        return getParentComponentWindow();
+    }
 
     getInitialProps() {
         let componentMeta = getComponentMeta();
