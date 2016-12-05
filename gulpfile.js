@@ -43,6 +43,11 @@ var WEBPACK_CONFIG = {
     library: MODULE_NAME,
     pathinfo: true
   },
+  plugins: [
+    new webpack.DefinePlugin({
+        __TEST__: false
+    })
+  ],
   bail: true
 };
 
@@ -57,6 +62,9 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
     new webpack.optimize.UglifyJsPlugin({
       test: /\.js$/,
       minimize: true
+    }),
+    new webpack.DefinePlugin({
+        __TEST__: false
     })
   ]
 });
