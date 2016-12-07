@@ -222,8 +222,8 @@ export class Component extends BaseComponent {
         Shortcut to instantiate a component on a parent page, with props
     */
 
-    init(props, context) {
-        context = this.getRenderContext(null, context);
+    init(props, context, element) {
+        context = this.getRenderContext(element, context);
         return new ParentComponent(this, context, { props });
     }
 

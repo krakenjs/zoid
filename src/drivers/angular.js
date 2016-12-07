@@ -42,7 +42,7 @@ export let angular = {
                         return instanceProps;
                     }
 
-                    let parent = component.init(getProps());
+                    let parent = component.init(getProps(), null, $element[0]);
                     parent.render($element[0]);
 
                     $scope.$watch(() => {

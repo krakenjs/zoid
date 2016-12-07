@@ -18,11 +18,13 @@ export let react = {
             componentDidMount() {
                 component.log(`instantiate_react_component`);
 
-                let parent = component.init(extend({}, this.props));
+                let el = window.ReactDOM.findDOMNode(this);
+
+                let parent = component.init(extend({}, this.props), null, el);
 
                 this.setState({ parent });
 
-                parent.render(window.ReactDOM.findDOMNode(this));
+                parent.render(el);
             },
 
             componentDidUpdate() {
