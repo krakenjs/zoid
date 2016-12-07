@@ -652,19 +652,21 @@ export class ParentComponent extends BaseComponent {
     runTimeout() {
 
         if (this.props.timeout) {
-            setTimeout(() => {
+            this.timeout = setTimeout(() => {
 
-                // If this.onInit has been previously resolved, this won't have any effect.
+                this.component.log(`timed_out`, { timeout: this.props.timeout });
 
                 let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} timed out after ${this.props.timeout} milliseconds`);
 
-                this.onInit.reject(error).catch(err => {
-                    return this.props.onTimeout(err).finally(() => {
-                        this.component.log(`timed_out`, { timeout: this.props.timeout });
-                    });
-                });
+                this.onInit.reject(error);
+                this.props.onTimeout(error);
 
             }, this.props.timeout);
+
+            this.clean.register(() => {
+                clearTimeout(this.timeout);
+                delete this.timeout;
+            });
         }
     }
 
@@ -687,6 +689,11 @@ export class ParentComponent extends BaseComponent {
                 this.childExports = data.exports;
 
                 this.onInit.resolve(this);
+
+                if (this.timeout) {
+                    clearTimeout(this.timeout);
+                }
+
                 return this.props.onEnter().then(() => {
 
                     // Let the child know what its context is, and what its initial props are.
