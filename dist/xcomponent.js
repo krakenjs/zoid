@@ -482,8 +482,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'init',
-	        value: function init(props, context) {
-	            context = this.getRenderContext(null, context);
+	        value: function init(props, context, element) {
+	            context = this.getRenderContext(element, context);
 	            return new _parent.ParentComponent(this, context, { props: props });
 	        }
 	    }, {
@@ -10861,11 +10861,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            componentDidMount: function componentDidMount() {
 	                component.log('instantiate_react_component');
 
-	                var parent = component.init((0, _lib.extend)({}, this.props));
+	                var el = window.ReactDOM.findDOMNode(this);
+
+	                var parent = component.init((0, _lib.extend)({}, this.props), null, el);
 
 	                this.setState({ parent: parent });
 
-	                parent.render(window.ReactDOM.findDOMNode(this));
+	                parent.render(el);
 	            },
 	            componentDidUpdate: function componentDidUpdate() {
 
@@ -10965,7 +10967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        return instanceProps;
 	                    }
 
-	                    var parent = component.init(getProps());
+	                    var parent = component.init(getProps(), null, $element[0]);
 	                    parent.render($element[0]);
 
 	                    $scope.$watch(function () {
