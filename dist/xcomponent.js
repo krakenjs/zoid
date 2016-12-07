@@ -744,7 +744,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.parent = undefined;
+	exports.winutil = exports.util = exports.destroyBridges = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.parent = undefined;
 
 	var _client = __webpack_require__(/*! ./client */ 5);
 
@@ -830,6 +830,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.openTunnelToOpener;
+	  }
+	});
+	Object.defineProperty(exports, 'destroyBridges', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.destroyBridges;
 	  }
 	});
 
@@ -1086,7 +1092,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var CONFIG = exports.CONFIG = {
 
-	    ALLOW_POSTMESSAGE_POPUP: false,
+	    ALLOW_POSTMESSAGE_POPUP:  false ? false : true,
 
 	    LOG_LEVEL: 'info',
 
@@ -3265,6 +3271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        run: function run(name) {
 	            var results = [];
+	            var toClean = [];
 
 	            for (var _iterator = tasks, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	                var _ref;
@@ -3281,8 +3288,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var item = _ref;
 
 	                if (item.name === name) {
+	                    toClean.push(item);
 	                    results.push(item.run());
 	                }
+	            }
+
+	            for (var _iterator2 = toClean, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                var _ref2;
+
+	                if (_isArray2) {
+	                    if (_i2 >= _iterator2.length) break;
+	                    _ref2 = _iterator2[_i2++];
+	                } else {
+	                    _i2 = _iterator2.next();
+	                    if (_i2.done) break;
+	                    _ref2 = _i2.value;
+	                }
+
+	                var _item = _ref2;
+
+	                tasks.splice(tasks.indexOf(_item), 1);
 	            }
 
 	            return _promise.SyncPromise.all(results).then(function () {
@@ -3409,6 +3434,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    wrapper.__name__ = obj.__name__;
+	    wrapper.source = source;
+	    wrapper.origin = origin;
 
 	    return wrapper;
 	}
@@ -4021,6 +4048,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	exports.openTunnelToOpener = openTunnelToOpener;
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 13);
@@ -4034,27 +4064,73 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _common = __webpack_require__(/*! ./common */ 30);
 
 	function getRemoteBridgeForWindow(win) {
-	    try {
-	        var frames = (0, _lib.getFrames)(win);
+	    return _promise.SyncPromise['try'](function () {
+	        for (var _iterator = (0, _lib.getFrames)(win), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	            var _ref;
 
-	        if (!frames || !frames.length) {
-	            return;
-	        }
+	            if (_isArray) {
+	                if (_i >= _iterator.length) break;
+	                _ref = _iterator[_i++];
+	            } else {
+	                _i = _iterator.next();
+	                if (_i.done) break;
+	                _ref = _i.value;
+	            }
 
-	        for (var i = 0; i < frames.length; i++) {
+	            var _frame = _ref;
+
 	            try {
-	                var frame = frames[i];
-
-	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	                    return frame;
+	                if (_frame && _frame !== window && (0, _lib.isSameDomain)(_frame) && _frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                    return _frame;
 	                }
 	            } catch (err) {
 	                continue;
 	            }
 	        }
-	    } catch (err) {
-	        // pass
-	    }
+
+	        try {
+	            var _ret = function () {
+	                var frame = (0, _lib.getFrameByName)(win, (0, _common.getBridgeName)(_lib.util.getDomain()));
+
+	                if (!frame) {
+	                    return {
+	                        v: void 0
+	                    };
+	                }
+
+	                if ((0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                    return {
+	                        v: frame
+	                    };
+	                }
+
+	                return {
+	                    v: new _promise.SyncPromise(function (resolve) {
+
+	                        var interval = void 0;
+	                        var timeout = void 0;
+
+	                        interval = setInterval(function () {
+	                            if ((0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                                clearInterval(interval);
+	                                clearTimeout(timeout);
+	                                return resolve(frame);
+	                            }
+
+	                            setTimeout(function () {
+	                                clearInterval(interval);
+	                                return resolve();
+	                            }, 2000);
+	                        }, 100);
+	                    })
+	                };
+	            }();
+
+	            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	        } catch (err) {
+	            return;
+	        }
+	    });
 	}
 
 	function openTunnelToOpener() {
@@ -4072,52 +4148,53 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        (0, _common.registerRemoteWindow)(opener);
 
-	        var bridge = getRemoteBridgeForWindow(opener);
+	        return getRemoteBridgeForWindow(opener).then(function (bridge) {
 
-	        if (!bridge) {
-	            return (0, _common.rejectRemoteSendMessage)(opener, new Error('Can not register with opener: no bridge found in opener'));
-	        }
+	            if (!bridge) {
+	                return (0, _common.rejectRemoteSendMessage)(opener, new Error('Can not register with opener: no bridge found in opener'));
+	            }
 
-	        if (!window.name) {
-	            return (0, _common.rejectRemoteSendMessage)(opener, new Error('Can not register with opener: window does not have a name'));
-	        }
+	            if (!window.name) {
+	                return (0, _common.rejectRemoteSendMessage)(opener, new Error('Can not register with opener: window does not have a name'));
+	            }
 
-	        return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+	            return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
-	            name: window.name,
+	                name: window.name,
 
-	            source: window,
+	                source: window,
 
-	            canary: function canary() {
-	                // pass
-	            },
-	            sendMessage: function sendMessage(message) {
+	                canary: function canary() {
+	                    // pass
+	                },
+	                sendMessage: function sendMessage(message) {
 
-	                if (!window || window.closed) {
-	                    return;
+	                    if (!window || window.closed) {
+	                        return;
+	                    }
+
+	                    (0, _drivers.receiveMessage)({
+	                        data: message,
+	                        origin: this.origin,
+	                        source: this.source
+	                    });
+	                }
+	            }).then(function (_ref2) {
+	                var source = _ref2.source;
+	                var origin = _ref2.origin;
+	                var data = _ref2.data;
+
+
+	                if (source !== opener) {
+	                    throw new Error('Source does not match opener');
 	                }
 
-	                (0, _drivers.receiveMessage)({
-	                    data: message,
-	                    origin: this.origin,
-	                    source: this.source
-	                });
-	            }
-	        }).then(function (_ref) {
-	            var source = _ref.source;
-	            var origin = _ref.origin;
-	            var data = _ref.data;
+	                (0, _common.registerRemoteSendMessage)(source, origin, data.sendMessage);
+	            })['catch'](function (err) {
 
-
-	            if (source !== opener) {
-	                throw new Error('Source does not match opener');
-	            }
-
-	            (0, _common.registerRemoteSendMessage)(source, origin, data.sendMessage);
-	        })['catch'](function (err) {
-
-	            (0, _common.rejectRemoteSendMessage)(opener, err);
-	            throw err;
+	                (0, _common.rejectRemoteSendMessage)(opener, err);
+	                throw err;
+	            });
 	        });
 	    });
 	}
@@ -4319,6 +4396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	exports.openBridge = openBridge;
+	exports.destroyBridges = destroyBridges;
 	exports.linkUrl = linkUrl;
 
 	var _conf = __webpack_require__(/*! ../conf */ 6);
@@ -4443,8 +4521,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                body.appendChild(iframe);
 
-	                _global.global.clean.register(function () {
+	                _global.global.clean.register('bridgeFrames', function () {
 	                    body.removeChild(iframe);
+	                    delete _global.global.bridges[domain];
 	                });
 
 	                var bridge = iframe.contentWindow;
@@ -4465,6 +4544,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        });
 	    }));
+	}
+
+	function destroyBridges() {
+	    return _global.global.clean.run('bridgeFrames');
 	}
 
 	_global.global.popupWindows = _global.global.popupWindows || {};
@@ -8861,18 +8944,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _this14 = this;
 
 	            if (this.props.timeout) {
-	                setTimeout(function () {
+	                this.timeout = setTimeout(function () {
 
-	                    // If this.onInit has been previously resolved, this won't have any effect.
+	                    _this14.component.log('timed_out', { timeout: _this14.props.timeout });
 
 	                    var error = new Error('[' + _this14.component.tag + '] Loading component ' + _this14.component.tag + ' timed out after ' + _this14.props.timeout + ' milliseconds');
 
-	                    _this14.onInit.reject(error)['catch'](function (err) {
-	                        return _this14.props.onTimeout(err)['finally'](function () {
-	                            _this14.component.log('timed_out', { timeout: _this14.props.timeout });
-	                        });
-	                    });
+	                    _this14.onInit.reject(error);
+	                    _this14.props.onTimeout(error);
 	                }, this.props.timeout);
+
+	                this.clean.register(function () {
+	                    clearTimeout(_this14.timeout);
+	                    delete _this14.timeout;
+	                });
 	            }
 	        }
 
@@ -8892,6 +8977,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.childExports = data.exports;
 
 	                this.onInit.resolve(this);
+
+	                if (this.timeout) {
+	                    clearTimeout(this.timeout);
+	                }
+
 	                return this.props.onEnter().then(function () {
 
 	                    // Let the child know what its context is, and what its initial props are.
@@ -10827,15 +10917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var _key = _ref;
 
-	                var prop = component.props[_key];
-
-	                if (prop.type === 'function' || prop.type === 'object') {
-	                    scope[_key] = '=';
-	                } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
-	                    scope[_key] = '@';
-	                } else {
-	                    throw new Error('Unrecognized prop type: ' + prop.type);
-	                }
+	                scope[_key] = '=';
 	            }
 
 	            return {
