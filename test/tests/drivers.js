@@ -97,7 +97,7 @@ describe('xcomponent drivers', () => {
         `;
 
         $compile(`
-            <test-component foo="foo" run="{{run}}"></test-component>
+            <test-component foo="foo" run="run"></test-component>
         `)($scope, element => {
             document.body.appendChild(element[0]);
         });

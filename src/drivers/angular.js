@@ -14,15 +14,7 @@ export let angular = {
             let scope = {};
 
             for (let key of Object.keys(component.props)) {
-                let prop = component.props[key];
-
-                if (prop.type === 'function' || prop.type === 'object') {
-                    scope[key] = '=';
-                } else if (prop.type === 'string' || prop.type === 'boolean' || prop.type === 'number') {
-                    scope[key] = '@';
-                } else {
-                    throw new Error(`Unrecognized prop type: ${prop.type}`);
-                }
+                scope[key] = '=';
             }
 
             return {
