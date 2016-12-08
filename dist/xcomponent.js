@@ -8907,6 +8907,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var closeWindowListener = (0, _lib.onCloseWindow)(this.window, function () {
 	                _this13.component.log('detect_close_child');
 
+	                _this13.onInit.reject(new Error('Detected close during init'));
+
 	                return _promise.SyncPromise['try'](function () {
 	                    return _this13.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
 	                })['finally'](function () {
