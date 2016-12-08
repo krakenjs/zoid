@@ -6956,9 +6956,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setProps() {
 	            var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	            var origin = arguments[1];
+	            var required = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 
 	            window.xprops = this.props = this.props || {};
-	            (0, _lib.extend)(this.props, (0, _props.normalizeChildProps)(this.component, props, origin));
+	            (0, _lib.extend)(this.props, (0, _props.normalizeChildProps)(this.component, props, origin, required));
 	            for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	                var _ref2;
 
@@ -7230,7 +7231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return {
 	                updateProps: function updateProps(props) {
-	                    return self.setProps(props, this.origin);
+	                    return self.setProps(props, this.origin, false);
 	                },
 	                close: function close() {
 	                    return self.destroy();
@@ -8050,6 +8051,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _lib = __webpack_require__(/*! ../../lib */ 36);
 
 	function normalizeChildProps(component, props, origin) {
+	    var required = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 
 	    var result = {};
 
@@ -8065,6 +8068,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var key = _ref;
 
+
+	        if (!props.hasOwnProperty(key) && !required) {
+	            return 'continue';
+	        }
 
 	        var prop = component.props[key];
 	        var value = props[key];
@@ -8101,12 +8108,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 
-	    for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    _loop2: for (var _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        var _ret = _loop();
 
-	        if (_ret === 'break') break;
+	        switch (_ret) {
+	            case 'break':
+	                break _loop2;
+
+	            case 'continue':
+	                continue;}
 	    }
 
 	    return result;
