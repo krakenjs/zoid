@@ -29,15 +29,7 @@ export let angular = {
                     function getProps() {
                         let instanceProps = {};
                         for (let key of Object.keys(scope)) {
-                            let prop = component.props[key];
-
-                            let value = prop.type === 'function' ? $scope[key] && function() {
-                                let result = $scope[key].apply(this, arguments);
-                                $scope.$apply();
-                                return result;
-                            } : $scope[key];
-
-                            instanceProps[key] = value;
+                            instanceProps[key] = $scope[key];
                         }
                         return instanceProps;
                     }

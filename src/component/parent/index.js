@@ -55,6 +55,8 @@ export class ParentComponent extends BaseComponent {
         super(component, options);
         validate(component, options);
 
+        this.rawProps = { ...(options.props || {}) };
+
         this.component = component;
         this.context = context;
         this.setProps(options.props || {});
@@ -304,15 +306,13 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    getPropsForChild(props) {
-
-        props = props || this.props;
+    getPropsForChild() {
 
         let result = {};
 
-        for (let key of Object.keys(props)) {
+        for (let key of Object.keys(this.props)) {
             if (this.component.props[key].sendToChild !== false) {
-                result[key] = props[key];
+                result[key] = this.props[key];
             }
         }
 
@@ -331,7 +331,7 @@ export class ParentComponent extends BaseComponent {
         let changed = false;
 
         for (let key of Object.keys(props)) {
-            if (props[key] !== this.props[key]) {
+            if (props[key] !== this.rawProps[key]) {
                 changed = true;
                 break;
             }
@@ -341,11 +341,19 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
+        this.rawProps = { ...this.rawProps, ...props };
         this.setProps(props, false);
 
-        return this.onInit.then(() => {
-            return this.childExports.updateProps(this.getPropsForChild(props));
+        if (this.propUpdater) {
+            return this.propUpdater;
+        }
+
+        this.propUpdater = this.onInit.then(() => {
+            delete this.propUpdater;
+            return this.childExports.updateProps(this.getPropsForChild());
         });
+
+        return this.propUpdater;
     }
 
 
