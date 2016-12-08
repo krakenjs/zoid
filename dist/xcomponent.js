@@ -8142,6 +8142,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _desc, _value, _class;
@@ -8256,6 +8258,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(ParentComponent).call(this, component, options));
 
 	        (0, _validate.validate)(component, options);
+
+	        _this2.rawProps = _extends({}, options.props || {});
 
 	        _this2.component = component;
 	        _this2.context = context;
@@ -8535,13 +8539,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: 'getPropsForChild',
-	        value: function getPropsForChild(props) {
-
-	            props = props || this.props;
+	        value: function getPropsForChild() {
 
 	            var result = {};
 
-	            for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	            for (var _iterator2 = Object.keys(this.props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	                var _ref3;
 
 	                if (_isArray2) {
@@ -8556,7 +8558,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var key = _ref3;
 
 	                if (this.component.props[key].sendToChild !== false) {
-	                    result[key] = props[key];
+	                    result[key] = this.props[key];
 	                }
 	            }
 
@@ -8591,7 +8593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var key = _ref4;
 
-	                if (props[key] !== this.props[key]) {
+	                if (props[key] !== this.rawProps[key]) {
 	                    changed = true;
 	                    break;
 	                }
@@ -8601,11 +8603,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }
 
+	            this.rawProps = _extends({}, this.rawProps, props);
 	            this.setProps(props, false);
 
-	            return this.onInit.then(function () {
-	                return _this7.childExports.updateProps(_this7.getPropsForChild(props));
+	            if (this.propUpdater) {
+	                return this.propUpdater;
+	            }
+
+	            this.propUpdater = this.onInit.then(function () {
+	                delete _this7.propUpdater;
+	                return _this7.childExports.updateProps(_this7.getPropsForChild());
 	            });
+
+	            return this.propUpdater;
 	        }
 	    }, {
 	        key: 'openBridge',
@@ -10932,9 +10942,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _ref = _i.value;
 	                }
 
-	                var _key = _ref;
+	                var key = _ref;
 
-	                scope[_key] = '=';
+	                scope[key] = '=';
 	            }
 
 	            return {
@@ -10948,36 +10958,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                    function getProps() {
 	                        var instanceProps = {};
+	                        for (var _iterator2 = Object.keys(scope), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	                            var _ref2;
 
-	                        var _loop = function _loop() {
 	                            if (_isArray2) {
-	                                if (_i2 >= _iterator2.length) return 'break';
+	                                if (_i2 >= _iterator2.length) break;
 	                                _ref2 = _iterator2[_i2++];
 	                            } else {
 	                                _i2 = _iterator2.next();
-	                                if (_i2.done) return 'break';
+	                                if (_i2.done) break;
 	                                _ref2 = _i2.value;
 	                            }
 
 	                            var key = _ref2;
 
-	                            var prop = component.props[key];
-
-	                            var value = prop.type === 'function' ? $scope[key] && function () {
-	                                var result = $scope[key].apply(this, arguments);
-	                                $scope.$apply();
-	                                return result;
-	                            } : $scope[key];
-
-	                            instanceProps[key] = value;
-	                        };
-
-	                        for (var _iterator2 = Object.keys(scope), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	                            var _ref2;
-
-	                            var _ret = _loop();
-
-	                            if (_ret === 'break') break;
+	                            instanceProps[key] = $scope[key];
 	                        }
 	                        return instanceProps;
 	                    }
