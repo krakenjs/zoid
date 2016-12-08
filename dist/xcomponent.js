@@ -8038,7 +8038,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /*!**************************************!*\
   !*** ./src/component/child/props.js ***!
   \**************************************/
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -8046,6 +8046,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.normalizeChildProps = normalizeChildProps;
+
+	var _lib = __webpack_require__(/*! ../../lib */ 36);
+
 	function normalizeChildProps(component, props, origin) {
 
 	    var result = {};
@@ -8087,7 +8090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        if (value && prop.sameDomain && origin !== window.location.protocol + '//' + window.location.host) {
+	        if (value && prop.sameDomain && origin !== (0, _lib.getDomain)(window)) {
 	            value = null;
 	        }
 
