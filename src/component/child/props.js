@@ -1,4 +1,6 @@
 
+import { getDomain } from '../../lib';
+
 export function normalizeChildProps(component, props, origin) {
 
     let result = {};
@@ -27,7 +29,7 @@ export function normalizeChildProps(component, props, origin) {
             }
         }
 
-        if (value && prop.sameDomain && origin !== `${window.location.protocol}//${window.location.host}`) {
+        if (value && prop.sameDomain && origin !== getDomain(window)) {
             value = null;
         }
 
