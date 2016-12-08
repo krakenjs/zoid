@@ -120,9 +120,9 @@ export class ChildComponent extends BaseComponent {
     }
 
 
-    setProps(props = {}, origin) {
+    setProps(props = {}, origin, required = true) {
         window.xprops = this.props = this.props || {};
-        extend(this.props, normalizeChildProps(this.component, props, origin));
+        extend(this.props, normalizeChildProps(this.component, props, origin, required));
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
@@ -327,7 +327,7 @@ export class ChildComponent extends BaseComponent {
 
         return {
             updateProps(props) {
-                return self.setProps(props, this.origin);
+                return self.setProps(props, this.origin, false);
             },
 
             close() {

@@ -1,11 +1,15 @@
 
 import { getDomain } from '../../lib';
 
-export function normalizeChildProps(component, props, origin) {
+export function normalizeChildProps(component, props, origin, required = true) {
 
     let result = {};
 
     for (let key of Object.keys(component.props)) {
+
+        if (!props.hasOwnProperty(key) && !required) {
+            continue;
+        }
 
         let prop = component.props[key];
         let value = props[key];
