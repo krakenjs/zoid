@@ -597,6 +597,8 @@ export class ParentComponent extends BaseComponent {
         let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
 
+            this.onInit.reject(new Error(`Detected close during init`));
+
             return Promise.try(() => {
                 return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
             }).finally(() => {
