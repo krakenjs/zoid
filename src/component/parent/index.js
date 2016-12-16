@@ -188,6 +188,8 @@ export class ParentComponent extends BaseComponent {
 
         }).then(({ url, query }) => {
 
+            // Do not extend the url if it is for a different domain
+
             if (url && !this.getValidDomain(url)) {
                 return url;
             }
@@ -455,7 +457,7 @@ export class ParentComponent extends BaseComponent {
                 return this.showComponent();
             });
 
-            tasks.linkUrl = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 return postRobot.linkUrl(this.window, domain);
             });
 
@@ -470,7 +472,7 @@ export class ParentComponent extends BaseComponent {
             if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 
@@ -597,7 +599,9 @@ export class ParentComponent extends BaseComponent {
         let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
 
-            this.onInit.reject(new Error(`Detected close during init`));
+            if (this.driver.errorOnCloseDuringInit) {
+                this.onInit.reject(new Error(`Detected close during init`));
+            }
 
             return Promise.try(() => {
                 return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);

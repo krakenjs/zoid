@@ -35,6 +35,7 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: false,
         allowResize: true,
         openOnClick: false,
+        errorOnCloseDuringInit: true,
 
         open(element) {
 
@@ -133,6 +134,7 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: true,
         allowResize: false,
         openOnClick: true,
+        errorOnCloseDuringInit: false,
 
         open() {
 
@@ -228,6 +230,7 @@ export let RENDER_DRIVERS = {
         destroyOnUnload: false,
         allowResize: true,
         openOnClick: false,
+        errorOnCloseDuringInit: true,
 
         renderToParentOverrides: {
 
