@@ -6895,7 +6895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        })['catch'](function (err) {
 
 	            _this.error(err);
-	            return _this;
+	            throw err;
 	        });
 	        return _this;
 	    }
