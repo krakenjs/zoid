@@ -8406,6 +8406,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var query = _ref.query;
 
 
+	                // Do not extend the url if it is for a different domain
+
 	                if (url && !_this4.getValidDomain(url)) {
 	                    return url;
 	                }
@@ -8710,7 +8712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return _this9.showComponent();
 	                });
 
-	                tasks.linkUrl = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
+	                tasks.linkDomain = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
 	                    var _ref6 = _slicedToArray(_ref5, 1);
 
 	                    var domain = _ref6[0];
@@ -8733,7 +8735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (loadUrl) {
 	                    tasks.buildUrl = _this9.buildUrl();
 
-	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.listen, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref9) {
+	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref9) {
 	                        var _ref10 = _slicedToArray(_ref9, 1);
 
 	                        var url = _ref10[0];
