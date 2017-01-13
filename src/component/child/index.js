@@ -69,7 +69,7 @@ export class ChildComponent extends BaseComponent {
         }).catch(err => {
 
             this.error(err);
-            return this;
+            throw err;
         });
     }
 
