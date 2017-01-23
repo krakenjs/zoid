@@ -29,17 +29,26 @@ export function normalizeProp(component, instance, props, key, value) {
     }
 
     if (prop.getter) {
+
         if (!value) {
             return;
         }
 
-        let result = getter((value instanceof Function ? value : () => value).bind(instance));
-
-        if (prop.memoize) {
-            result = memoize(result);
+        if (value instanceof Function) {
+            value = value.bind(instance);
+        } else {
+            let val = value;
+            value = () => val;
         }
 
-        return result;
+        value = getter(value);
+
+        if (prop.memoize) {
+            let val = memoize(value);
+            value = () => val();
+        }
+
+        return value;
     }
 
     if (prop.type === 'boolean') {

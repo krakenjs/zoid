@@ -282,3 +282,67 @@ export function dotify(obj, prefix = '', newobj = {}) {
     }
     return newobj;
 }
+
+
+function WeakMap() {
+    this.id = `__weakmap_${uniqueID()}__`;
+}
+
+WeakMap.prototype = {
+
+    set(item, value) {
+
+        if (item === null || item === undefined || typeof item !== 'object' && typeof item !== 'function') {
+            throw new Error(`Invalid key for WeakMap`);
+        }
+
+        let entry = item[this.id];
+
+        if (entry && entry[0] === item) {
+            entry[1] = value;
+        } else {
+            Object.defineProperty(item, this.id, { value: [ item, value ], writable: true });
+        }
+    },
+
+    get(item) {
+        let entry = item[this.id];
+
+        if (entry && entry[0] === item) {
+            return entry[1];
+        }
+    },
+
+    delete(item) {
+        let entry = item[this.id];
+
+        if (entry && entry[0] === item) {
+            entry[0] = entry[1] = undefined;
+        }
+    },
+
+    has(item) {
+        let entry = item[this.id];
+
+        return entry && entry[0] === item;
+    }
+};
+
+let objectIDs = new WeakMap();
+
+export function getObjectID(obj) {
+
+    if (obj === null || obj === undefined || typeof obj !== 'object' && typeof obj !== 'function') {
+        throw new Error(`Invalid object`);
+    }
+
+    let uid = objectIDs.get(obj);
+
+    if (!uid) {
+        uid = `${typeof obj}:${uniqueID()}`;
+        objectIDs.set(obj, uid);
+    }
+
+    return uid;
+}
+

@@ -1,4 +1,7 @@
 
+import { getObjectID } from './util';
+
+
 /*  Noop
     ----
 
@@ -40,19 +43,27 @@ export function memoize(method) {
 
     return function() {
 
-        let args;
+        let cacheKey;
 
         try {
-            args = JSON.stringify(Array.prototype.slice.call(arguments));
+            cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), (key, val) => {
+
+                if (typeof val === 'function') {
+                    return `xcomponent:memoize[${getObjectID(val)}]`;
+                }
+
+                return val;
+            });
+
         } catch (err) {
             throw new Error('Arguments not serializable -- can not be used to memoize');
         }
 
-        if (!results.hasOwnProperty(args)) {
-            results[args] = method.apply(this, arguments);
+        if (!results.hasOwnProperty(cacheKey)) {
+            results[cacheKey] = method.apply(this, arguments);
         }
 
-        return results[args];
+        return results[cacheKey];
     };
 }
 
