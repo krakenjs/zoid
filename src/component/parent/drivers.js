@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 
 import { PopupOpenError } from '../../error';
-import { iframe, popup, getElement, toCSS, isPerc, toNum } from '../../lib';
+import { iframe, popup, getElement, toCSS, isPerc, toNum, hideElement } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -47,10 +47,12 @@ export let RENDER_DRIVERS = {
                 throw new Error(`[${this.component.tag}] Can not find element ${element}`);
             }
 
-            this.iframe = iframe(null, {
+            this.elementTemplate = this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
             }, element);
+
+            hideElement(this.elementTemplate);
 
             let dimensions = this.props.dimensions || this.component.dimensions || {};
             this.resize(dimensions.width, dimensions.height);

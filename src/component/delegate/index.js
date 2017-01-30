@@ -19,7 +19,8 @@ export class DelegateComponent extends BaseComponent {
         this.props = {
             uid:        options.props.uid,
             dimensions: options.props.dimensions,
-            onClose:    options.props.onClose
+            onClose:    options.props.onClose,
+            onDisplay:  options.props.onDisplay
         };
 
         this.focus     = options.overrides.focus;

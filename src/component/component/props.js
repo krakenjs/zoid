@@ -56,6 +56,13 @@ export const internalProps = {
         required: false
     },
 
+    onDisplay: {
+        type: 'function',
+        required: false,
+        noop: true,
+        promisify: true
+    },
+
     // When we get an INIT message from the child
 
     onEnter: {

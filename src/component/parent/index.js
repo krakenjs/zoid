@@ -521,7 +521,8 @@ export class ParentComponent extends BaseComponent {
                 props: {
                     uid:        this.props.uid,
                     dimensions: this.props.dimensions,
-                    onClose:    this.props.onClose
+                    onClose:    this.props.onClose,
+                    onDisplay:  this.props.onDisplay
                 },
 
                 overrides: {
@@ -926,10 +927,12 @@ export class ParentComponent extends BaseComponent {
     @memoize
     @promise
     showComponent() {
-        if (this.elementTemplate) {
-            addClass(this.elementTemplate, CLASS_NAMES.SHOW_COMPONENT);
-            showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
-        }
+        return this.props.onDisplay().then(() => {
+            if (this.elementTemplate) {
+                addClass(this.elementTemplate, CLASS_NAMES.SHOW_COMPONENT);
+                showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
+            }
+        });
     }
 
     @memoize
@@ -953,13 +956,8 @@ export class ParentComponent extends BaseComponent {
         }
 
         if (this.elementTemplate) {
-
             addClass(this.elementTemplate, CLASS_NAMES.HIDE_COMPONENT);
-            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
-
-            if (this.elementTemplate) {
-                return animateAndHide(this.elementTemplate, ANIMATION_NAMES.HIDE_COMPONENT);
-            }
+            return animateAndHide(this.elementTemplate, ANIMATION_NAMES.HIDE_COMPONENT);
         }
     }
 
