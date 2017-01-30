@@ -4,6 +4,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';
 import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
+import { PopupOpenError } from '../error';
 
 function isElement(element) {
 
@@ -108,6 +109,11 @@ export function popup(url, options) {
     }).filter(Boolean).join(',');
 
     let win = window.open(url, options.name, params, true);
+
+    if (postRobot.winutil.isWindowClosed(win)) {
+        let err = new PopupOpenError(`Can not open popup window - blocked`);
+        throw err;
+    }
 
     return win;
 }
