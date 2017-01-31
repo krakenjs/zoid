@@ -80,7 +80,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	var _error = __webpack_require__(/*! ./error */ 50);
+	var _error = __webpack_require__(/*! ./error */ 40);
 
 	Object.keys(_error).forEach(function (key) {
 	    if (key === "default") return;
@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _constants = __webpack_require__(/*! ./constants */ 46);
+	var _constants = __webpack_require__(/*! ./constants */ 47);
 
 	var CONSTANTS = _interopRequireWildcard(_constants);
 
@@ -147,7 +147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _parent = __webpack_require__(/*! ./parent */ 48);
+	var _parent = __webpack_require__(/*! ./parent */ 49);
 
 	Object.keys(_parent).forEach(function (key) {
 	  if (key === "default") return;
@@ -159,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _child = __webpack_require__(/*! ./child */ 43);
+	var _child = __webpack_require__(/*! ./child */ 44);
 
 	Object.keys(_child).forEach(function (key) {
 	  if (key === "default") return;
@@ -199,19 +199,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ../base */ 35);
 
-	var _child = __webpack_require__(/*! ../child */ 43);
+	var _child = __webpack_require__(/*! ../child */ 44);
 
-	var _parent = __webpack_require__(/*! ../parent */ 48);
+	var _parent = __webpack_require__(/*! ../parent */ 49);
 
 	var _delegate = __webpack_require__(/*! ../delegate */ 53);
 
 	var _props = __webpack_require__(/*! ./props */ 54);
 
-	var _window = __webpack_require__(/*! ../window */ 44);
+	var _window = __webpack_require__(/*! ../window */ 45);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 46);
+	var _constants = __webpack_require__(/*! ../../constants */ 47);
 
-	var _drivers = __webpack_require__(/*! ../parent/drivers */ 49);
+	var _drivers = __webpack_require__(/*! ../parent/drivers */ 50);
 
 	var _validate2 = __webpack_require__(/*! ./validate */ 55);
 
@@ -5315,7 +5315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _promise = __webpack_require__(/*! ./promise */ 40);
+	var _promise = __webpack_require__(/*! ./promise */ 41);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -5339,7 +5339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _logger = __webpack_require__(/*! ./logger */ 41);
+	var _logger = __webpack_require__(/*! ./logger */ 42);
 
 	Object.keys(_logger).forEach(function (key) {
 	  if (key === "default") return;
@@ -5351,7 +5351,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _css = __webpack_require__(/*! ./css */ 42);
+	var _css = __webpack_require__(/*! ./css */ 43);
 
 	Object.keys(_css).forEach(function (key) {
 	  if (key === "default") return;
@@ -5425,6 +5425,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _fn = __webpack_require__(/*! ./fn */ 38);
 
 	var _util = __webpack_require__(/*! ./util */ 39);
+
+	var _error = __webpack_require__(/*! ../error */ 40);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -5528,6 +5530,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).filter(Boolean).join(',');
 
 	    var win = window.open(url, options.name, params, true);
+
+	    if (_src2['default'].winutil.isWindowClosed(win)) {
+	        var err = new _error.PopupOpenError('Can not open popup window - blocked');
+	        throw err;
+	    }
 
 	    return win;
 	}
@@ -6739,6 +6746,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 40 */
+/*!**********************!*\
+  !*** ./src/error.js ***!
+  \**********************/
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.PopupOpenError = PopupOpenError;
+	exports.IntegrationError = IntegrationError;
+	function PopupOpenError(message) {
+	    this.message = message;
+	}
+
+	PopupOpenError.prototype = Object.create(Error.prototype);
+
+	function IntegrationError(message) {
+	    this.message = message;
+	}
+
+	IntegrationError.prototype = Object.create(Error.prototype);
+
+/***/ },
+/* 41 */
 /*!****************************!*\
   !*** ./src/lib/promise.js ***!
   \****************************/
@@ -6826,7 +6859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 42 */
 /*!***************************!*\
   !*** ./src/lib/logger.js ***!
   \***************************/
@@ -6870,7 +6903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 42 */
+/* 43 */
 /*!************************!*\
   !*** ./src/lib/css.js ***!
   \************************/
@@ -6927,7 +6960,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 44 */
 /*!**************************************!*\
   !*** ./src/component/child/index.js ***!
   \**************************************/
@@ -6954,11 +6987,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ../base */ 35);
 
-	var _window = __webpack_require__(/*! ../window */ 44);
+	var _window = __webpack_require__(/*! ../window */ 45);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 46);
+	var _constants = __webpack_require__(/*! ../../constants */ 47);
 
-	var _props = __webpack_require__(/*! ./props */ 47);
+	var _props = __webpack_require__(/*! ./props */ 48);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -7410,6 +7443,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this.sendToParent(_constants.POST_MESSAGE.HIDE);
 	        }
 	    }, {
+	        key: 'show',
+	        value: function show() {
+	            return this.sendToParent(_constants.POST_MESSAGE.SHOW);
+	        }
+	    }, {
 	        key: 'userClose',
 	        value: function userClose() {
 	            return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
@@ -7476,7 +7514,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 44 */
+/* 45 */
 /*!*********************************!*\
   !*** ./src/component/window.js ***!
   \*********************************/
@@ -7499,13 +7537,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _hiBase = __webpack_require__(/*! hi-base32 */ 45);
+	var _hiBase = __webpack_require__(/*! hi-base32 */ 46);
 
 	var _hiBase2 = _interopRequireDefault(_hiBase);
 
 	var _lib = __webpack_require__(/*! ../lib */ 36);
 
-	var _constants = __webpack_require__(/*! ../constants */ 46);
+	var _constants = __webpack_require__(/*! ../constants */ 47);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -7671,7 +7709,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 45 */
+/* 46 */
 /*!***********************************!*\
   !*** ./~/hi-base32/src/base32.js ***!
   \***********************************/
@@ -8074,7 +8112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 46 */
+/* 47 */
 /*!**************************!*\
   !*** ./src/constants.js ***!
   \**************************/
@@ -8100,7 +8138,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    RESIZE: XCOMPONENT + '_resize',
 	    DELEGATE: XCOMPONENT + '_delegate',
 	    ERROR: XCOMPONENT + '_error',
-	    HIDE: XCOMPONENT + '_hide'
+	    HIDE: XCOMPONENT + '_hide',
+	    SHOW: XCOMPONENT + '_show'
 	};
 
 	var PROP_TYPES = exports.PROP_TYPES = {
@@ -8173,7 +8212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 47 */
+/* 48 */
 /*!**************************************!*\
   !*** ./src/component/child/props.js ***!
   \**************************************/
@@ -8263,7 +8302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 48 */
+/* 49 */
 /*!***************************************!*\
   !*** ./src/component/parent/index.js ***!
   \***************************************/
@@ -8298,11 +8337,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ../base */ 35);
 
-	var _window = __webpack_require__(/*! ../window */ 44);
+	var _window = __webpack_require__(/*! ../window */ 45);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 46);
+	var _constants = __webpack_require__(/*! ../../constants */ 47);
 
-	var _drivers = __webpack_require__(/*! ./drivers */ 49);
+	var _drivers = __webpack_require__(/*! ./drivers */ 50);
 
 	var _validate = __webpack_require__(/*! ./validate */ 51);
 
@@ -9172,6 +9211,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function (source, data) {
 	                this.hide();
+	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.SHOW, function (source, data) {
+	                this.show();
 	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function (source, data) {
 	                this.error(new Error(data.error));
 	            }), _ref13;
@@ -9238,6 +9279,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            return this.driver.hide.call(this);
+	        }
+	    }, {
+	        key: 'show',
+	        value: function show() {
+
+	            if (this.parentTemplate) {
+	                this.parentTemplate.style.display = 'block';
+	            }
+
+	            return this.driver.show.call(this);
 	        }
 	    }, {
 	        key: 'userClose',
@@ -9650,7 +9701,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 49 */
+/* 50 */
 /*!*****************************************!*\
   !*** ./src/component/parent/drivers.js ***!
   \*****************************************/
@@ -9669,13 +9720,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _src2 = _interopRequireDefault(_src);
 
-	var _error = __webpack_require__(/*! ../../error */ 50);
-
 	var _lib = __webpack_require__(/*! ../../lib */ 36);
 
-	var _constants = __webpack_require__(/*! ../../constants */ 46);
+	var _constants = __webpack_require__(/*! ../../constants */ 47);
 
-	var _window = __webpack_require__(/*! ../window */ 44);
+	var _window = __webpack_require__(/*! ../window */ 45);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -9718,10 +9767,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('[' + this.component.tag + '] Can not find element ' + element);
 	        }
 
-	        this.elementTemplate = this.iframe = (0, _lib.iframe)(null, {
+	        this.iframe = (0, _lib.iframe)(null, {
 	            name: this.childWindowName,
 	            scrolling: this.component.scrolling === false ? 'no' : 'yes'
 	        }, element);
+
+	        this.elementTemplate = this.elementTemplate || this.iframe;
 
 	        (0, _lib.hideElement)(this.elementTemplate);
 
@@ -9761,6 +9812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        hideContainer: _constants.DELEGATE.CALL_DELEGATE,
 	        hideComponent: _constants.DELEGATE.CALL_DELEGATE,
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
+	        show: _constants.DELEGATE.CALL_DELEGATE,
 	        resize: _constants.DELEGATE.CALL_DELEGATE,
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
 	        loadUrl: _constants.DELEGATE.CALL_DELEGATE,
@@ -9787,6 +9839,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    hide: function hide() {
 	        this.iframe.style.display = 'none';
+	    },
+	    show: function show() {
+	        this.iframe.style.display = 'block';
 	    },
 	    restyle: function restyle() {
 	        this.iframe.style.backgroundColor = 'transparent';
@@ -9842,13 +9897,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 
-	        // Sometimes we'll be blocked from opening the popup because we're not in a click event.
-
-	        if (_src2['default'].winutil.isWindowClosed(this.window)) {
-	            var err = new _error.PopupOpenError('[' + this.component.tag + '] Can not open popup window - blocked');
-	            throw err;
-	        }
-
 	        this.resize(width, height);
 	    },
 	    resize: function resize(width, height) {
@@ -9859,6 +9907,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    hide: function hide() {
 	        throw new Error('Can not hide popup');
+	    },
+	    show: function show() {
+	        throw new Error('Can not show popup');
 	    },
 	    restyle: function restyle() {
 	        // pass
@@ -9878,6 +9929,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        hideComponent: _constants.DELEGATE.CALL_DELEGATE,
 
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
+	        show: _constants.DELEGATE.CALL_DELEGATE,
 
 	        cancelContainerEvents: _constants.DELEGATE.CALL_DELEGATE,
 
@@ -9917,6 +9969,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        hideComponent: _constants.DELEGATE.CALL_DELEGATE,
 
 	        hide: _constants.DELEGATE.CALL_DELEGATE,
+	        show: _constants.DELEGATE.CALL_DELEGATE,
 	        resize: _constants.DELEGATE.CALL_DELEGATE,
 	        restyle: _constants.DELEGATE.CALL_DELEGATE,
 	        loadUrl: _constants.DELEGATE.CALL_DELEGATE,
@@ -9954,6 +10007,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    hide: function hide() {
 	        this.iframe.style.display = 'none';
 	    },
+	    show: function show() {
+	        this.iframe.style.display = 'block';
+	    },
 	    restyle: function restyle() {
 	        // pass
 	    },
@@ -9961,32 +10017,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.iframe.src = url;
 	    }
 	}), _RENDER_DRIVERS);
-
-/***/ },
-/* 50 */
-/*!**********************!*\
-  !*** ./src/error.js ***!
-  \**********************/
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.PopupOpenError = PopupOpenError;
-	exports.IntegrationError = IntegrationError;
-	function PopupOpenError(message) {
-	    this.message = message;
-	}
-
-	PopupOpenError.prototype = Object.create(Error.prototype);
-
-	function IntegrationError(message) {
-	    this.message = message;
-	}
-
-	IntegrationError.prototype = Object.create(Error.prototype);
 
 /***/ },
 /* 51 */
@@ -10443,9 +10473,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _base = __webpack_require__(/*! ../base */ 35);
 
-	var _parent = __webpack_require__(/*! ../parent */ 48);
+	var _parent = __webpack_require__(/*! ../parent */ 49);
 
-	var _drivers = __webpack_require__(/*! ../parent/drivers */ 49);
+	var _drivers = __webpack_require__(/*! ../parent/drivers */ 50);
 
 	var _lib = __webpack_require__(/*! ../../lib */ 36);
 
@@ -10724,7 +10754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.validate = validate;
 
-	var _constants = __webpack_require__(/*! ../../constants */ 46);
+	var _constants = __webpack_require__(/*! ../../constants */ 47);
 
 	function validateProps(options) {
 
