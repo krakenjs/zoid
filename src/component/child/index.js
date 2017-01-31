@@ -367,7 +367,9 @@ export class ChildComponent extends BaseComponent {
         return this.sendToParent(POST_MESSAGE.HIDE);
     }
 
-
+    show() {
+        return this.sendToParent(POST_MESSAGE.SHOW);
+    }
 
     userClose() {
         return this.close(CLOSE_REASONS.USER_CLOSED);

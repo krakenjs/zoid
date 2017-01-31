@@ -740,10 +740,12 @@ export class ParentComponent extends BaseComponent {
             },
 
 
-            // The child encountered an error
-
             [ POST_MESSAGE.HIDE ](source, data) {
                 this.hide();
+            },
+
+            [ POST_MESSAGE.SHOW ](source, data) {
+                this.show();
             },
 
 
@@ -809,6 +811,15 @@ export class ParentComponent extends BaseComponent {
         }
 
         return this.driver.hide.call(this);
+    }
+
+    show() {
+
+        if (this.parentTemplate) {
+            this.parentTemplate.style.display = 'block';
+        }
+
+        return this.driver.show.call(this);
     }
 
 

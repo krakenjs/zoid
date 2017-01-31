@@ -90,6 +90,7 @@ export let RENDER_DRIVERS = {
             hideContainer:           DELEGATE.CALL_DELEGATE,
             hideComponent:           DELEGATE.CALL_DELEGATE,
             hide:                    DELEGATE.CALL_DELEGATE,
+            show:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
@@ -115,6 +116,10 @@ export let RENDER_DRIVERS = {
 
         hide() {
             this.iframe.style.display = 'none';
+        },
+
+        show() {
+            this.iframe.style.display = 'block';
         },
 
         restyle() {
@@ -183,6 +188,10 @@ export let RENDER_DRIVERS = {
             throw new Error('Can not hide popup');
         },
 
+        show() {
+            throw new Error('Can not show popup');
+        },
+
         restyle() {
             // pass
         },
@@ -200,6 +209,7 @@ export let RENDER_DRIVERS = {
             hideComponent:          DELEGATE.CALL_DELEGATE,
 
             hide:                   DELEGATE.CALL_DELEGATE,
+            show:                   DELEGATE.CALL_DELEGATE,
 
             cancelContainerEvents:  DELEGATE.CALL_DELEGATE,
 
@@ -243,6 +253,7 @@ export let RENDER_DRIVERS = {
             hideComponent:           DELEGATE.CALL_DELEGATE,
 
             hide:                    DELEGATE.CALL_DELEGATE,
+            show:                    DELEGATE.CALL_DELEGATE,
             resize:                  DELEGATE.CALL_DELEGATE,
             restyle:                 DELEGATE.CALL_DELEGATE,
             loadUrl:                 DELEGATE.CALL_DELEGATE,
@@ -279,6 +290,10 @@ export let RENDER_DRIVERS = {
 
         hide() {
             this.iframe.style.display = 'none';
+        },
+
+        show() {
+            this.iframe.style.display = 'block';
         },
 
         restyle() {

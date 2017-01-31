@@ -12,7 +12,8 @@ export const POST_MESSAGE = {
     RESIZE: `${XCOMPONENT}_resize`,
     DELEGATE: `${XCOMPONENT}_delegate`,
     ERROR: `${XCOMPONENT}_error`,
-    HIDE: `${XCOMPONENT}_hide`
+    HIDE: `${XCOMPONENT}_hide`,
+    SHOW: `${XCOMPONENT}_show`
 };
 
 export const PROP_TYPES = {
