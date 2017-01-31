@@ -46,10 +46,12 @@ export let RENDER_DRIVERS = {
                 throw new Error(`[${this.component.tag}] Can not find element ${element}`);
             }
 
-            this.elementTemplate = this.iframe = iframe(null, {
+            this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
             }, element);
+
+            this.elementTemplate = this.elementTemplate || this.iframe;
 
             hideElement(this.elementTemplate);
 
