@@ -7087,6 +7087,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return (0, _window.getParentComponentWindow)();
 	        }
 	    }, {
+	        key: 'getParentRenderWindow',
+	        value: function getParentRenderWindow() {
+	            return (0, _window.getParentRenderWindow)();
+	        }
+	    }, {
 	        key: 'getInitialProps',
 	        value: function getInitialProps() {
 	            var componentMeta = (0, _window.getComponentMeta)();
@@ -7098,7 +7103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (props.type === _constants.INITIAL_PROPS.RAW) {
 	                    props = props.value;
 	                } else if (props.type === _constants.INITIAL_PROPS.UID) {
-	                    props = (0, _window.getParentComponentWindow)().__xcomponent__.props[props.value];
+	                    props = (0, _window.getParentComponentWindow)().__xcomponent__.props[componentMeta.uid];
 	                } else {
 	                    throw new Error('Unrecognized props type: ' + props.type);
 	                }
@@ -7525,7 +7530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.getParentComponentWindow = exports.isXComponentWindow = exports.getComponentMeta = undefined;
+	exports.getParentRenderWindow = exports.getParentComponentWindow = exports.isXComponentWindow = exports.getComponentMeta = undefined;
 
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -7651,7 +7656,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var parentWindow = _src2['default'].winutil.getAncestor(window);
 
 	    if (!parentWindow) {
-	        throw new Error('Can not find parent component window');
+	        throw new Error('Can not find parent window');
 	    }
 
 	    if (componentMeta.parent === _constants.WINDOW_REFERENCES.DIRECT_PARENT) {
@@ -7673,6 +7678,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return parentFrame;
+	});
+
+	var getParentRenderWindow = exports.getParentRenderWindow = (0, _lib.memoize)(function () {
+
+	    var componentMeta = getComponentMeta();
+
+	    if (!componentMeta) {
+	        throw new Error('Can not get parent component window - window not rendered by xcomponent');
+	    }
+
+	    var parentWindow = _src2['default'].winutil.getAncestor(window);
+
+	    if (!parentWindow) {
+	        throw new Error('Can not find parent window');
+	    }
+
+	    if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.DIRECT_PARENT) {
+	        return parentWindow;
+	    } else if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.PARENT_PARENT) {
+	        parentWindow = _src2['default'].winutil.getAncestor(parentWindow);
+
+	        if (!parentWindow) {
+	            throw new Error('Can not find parent render window');
+	        }
+
+	        return parentWindow;
+	    } else if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.PARENT_UID) {
+
+	        parentWindow = getParentComponentWindow()[_constants.__XCOMPONENT__].windows[componentMeta.uid];
+
+	        if (!parentWindow) {
+	            throw new Error('Can not find parent render window');
+	        }
+
+	        return parentWindow;
+	    }
+
+	    throw new Error('Unrecognized renderParent reference: ' + componentMeta.renderParent);
 	});
 
 	/*  Get Position
@@ -8123,11 +8166,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.DELEGATE = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.ANIMATION_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPES = exports.POST_MESSAGE = exports.XCOMPONENT = undefined;
+	exports.DELEGATE = exports.CONTEXT_TYPES_LIST = exports.CLOSE_REASONS = exports.EVENT_NAMES = exports.ANIMATION_NAMES = exports.CLASS_NAMES = exports.CONTEXT_TYPES = exports.PROP_TYPES_LIST = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPES = exports.POST_MESSAGE = exports.__XCOMPONENT__ = exports.XCOMPONENT = undefined;
 
 	var _lib = __webpack_require__(/*! ./lib */ 36);
 
 	var XCOMPONENT = exports.XCOMPONENT = 'xcomponent';
+
+	var __XCOMPONENT__ = exports.__XCOMPONENT__ = '__' + XCOMPONENT + '__';
 
 	var POST_MESSAGE = exports.POST_MESSAGE = {
 	    INIT: XCOMPONENT + '_init',
@@ -8157,7 +8202,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var WINDOW_REFERENCES = exports.WINDOW_REFERENCES = {
 	    DIRECT_PARENT: '__direct_parent__',
-	    PARENT_PARENT: '__parent_parent__'
+	    PARENT_PARENT: '__parent_parent__',
+	    PARENT_UID: '__parent_uid__'
 	};
 
 	var PROP_TYPES_LIST = exports.PROP_TYPES_LIST = (0, _lib.values)(PROP_TYPES);
@@ -8416,6 +8462,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
+	var global = window[_constants.__XCOMPONENT__] = window[_constants.__XCOMPONENT__] || {};
+
+	global.props = global.props || {};
+	global.windows = global.windows || {};
+
 	/*  Parent Component
 	    ----------------
 
@@ -8442,7 +8493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this2.context = context;
 	        _this2.setProps(options.props || {});
 
-	        _this2.childWindowName = _this2.buildChildWindowName();
+	        _this2.childWindowName = _this2.buildChildWindowName({ renderTo: window });
 
 	        // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -8484,44 +8535,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }, {
 	        key: 'buildChildWindowName',
-	        value: function buildChildWindowName(parent) {
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	        value: function buildChildWindowName() {
+	            var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	            var _ref$renderTo = _ref.renderTo;
+	            var renderTo = _ref$renderTo === undefined ? window : _ref$renderTo;
+	            var _ref$secureProps = _ref.secureProps;
+	            var secureProps = _ref$secureProps === undefined ? false : _ref$secureProps;
 
 
-	            parent = parent || (this.context === _constants.CONTEXT_TYPES.LIGHTBOX ? _constants.WINDOW_REFERENCES.PARENT_PARENT : _constants.WINDOW_REFERENCES.DIRECT_PARENT);
+	            var sameWindow = renderTo === window;
+	            var isLightbox = this.context === _constants.CONTEXT_TYPES.LIGHTBOX;
 
+	            var uid = (0, _lib.uniqueID)();
 	            var tag = this.component.tag;
+	            var sProps = this.getSerializedPropsForChild();
 
-	            var props = (0, _lib.replaceObject)(this.getPropsForChild(), function (value, key, fullKey) {
-	                if (value instanceof Function) {
-	                    return {
-	                        __type__: '__function__'
-	                    };
-	                }
-	            });
+	            var defaultParent = isLightbox ? _constants.WINDOW_REFERENCES.PARENT_PARENT : _constants.WINDOW_REFERENCES.DIRECT_PARENT;
 
-	            if (options.secureProps) {
+	            var parent = sameWindow ? defaultParent : window.name;
 
-	                window.__xcomponent__ = window.__xcomponent__ || {};
-	                window.__xcomponent__.props = window.__xcomponent__.props || {};
+	            var renderParent = sameWindow ? defaultParent : _constants.WINDOW_REFERENCES.PARENT_UID;
 
-	                var uid = (0, _lib.uniqueID)();
+	            var props = secureProps ? { type: _constants.INITIAL_PROPS.UID } : { type: _constants.INITIAL_PROPS.RAW, value: sProps };
 
-	                window.__xcomponent__.props[uid] = props;
-
-	                props = {
-	                    type: _constants.INITIAL_PROPS.UID,
-	                    value: uid
-	                };
-	            } else {
-
-	                props = {
-	                    type: _constants.INITIAL_PROPS.RAW,
-	                    value: props
-	                };
+	            if (props.type === _constants.INITIAL_PROPS.UID) {
+	                global.props[uid] = sProps;
 	            }
 
-	            return (0, _window.buildChildWindowName)(this.component.name, this.component.version, { tag: tag, parent: parent, props: props });
+	            if (renderParent === _constants.WINDOW_REFERENCES.PARENT_UID) {
+	                global.windows[uid] = renderTo;
+	            }
+
+	            return (0, _window.buildChildWindowName)(this.component.name, this.component.version, { uid: uid, tag: tag, parent: parent, renderParent: renderParent, props: props });
 	        }
 
 	        /*  Send to Parent
@@ -8578,9 +8624,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                url: this.props.url,
 	                query: (0, _props.propsToQuery)(this.component.props, this.props)
 
-	            }).then(function (_ref) {
-	                var url = _ref.url;
-	                var query = _ref.query;
+	            }).then(function (_ref2) {
+	                var url = _ref2.url;
+	                var query = _ref2.query;
 
 
 	                // Do not extend the url if it is for a different domain
@@ -8627,18 +8673,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (this.component.domains) {
 	                for (var _iterator = Object.keys(this.component.domains), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	                    var _ref2;
+	                    var _ref3;
 
 	                    if (_isArray) {
 	                        if (_i >= _iterator.length) break;
-	                        _ref2 = _iterator[_i++];
+	                        _ref3 = _iterator[_i++];
 	                    } else {
 	                        _i = _iterator.next();
 	                        if (_i.done) break;
-	                        _ref2 = _i.value;
+	                        _ref3 = _i.value;
 	                    }
 
-	                    var env = _ref2;
+	                    var env = _ref3;
 
 
 	                    if (env === 'test') {
@@ -8723,18 +8769,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var result = {};
 
 	            for (var _iterator2 = Object.keys(this.props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	                var _ref3;
+	                var _ref4;
 
 	                if (_isArray2) {
 	                    if (_i2 >= _iterator2.length) break;
-	                    _ref3 = _iterator2[_i2++];
+	                    _ref4 = _iterator2[_i2++];
 	                } else {
 	                    _i2 = _iterator2.next();
 	                    if (_i2.done) break;
-	                    _ref3 = _i2.value;
+	                    _ref4 = _i2.value;
 	                }
 
-	                var key = _ref3;
+	                var key = _ref4;
 
 	                if (this.component.props[key].sendToChild !== false) {
 	                    result[key] = this.props[key];
@@ -8742,6 +8788,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            return result;
+	        }
+	    }, {
+	        key: 'getSerializedPropsForChild',
+	        value: function getSerializedPropsForChild() {
+
+	            return (0, _lib.replaceObject)(this.getPropsForChild(), function (value, key, fullKey) {
+	                if (value instanceof Function) {
+	                    return {
+	                        __type__: '__function__'
+	                    };
+	                }
+	            });
 	        }
 
 	        /*  Update Props
@@ -8759,18 +8817,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var changed = false;
 
 	            for (var _iterator3 = Object.keys(props), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	                var _ref4;
+	                var _ref5;
 
 	                if (_isArray3) {
 	                    if (_i3 >= _iterator3.length) break;
-	                    _ref4 = _iterator3[_i3++];
+	                    _ref5 = _iterator3[_i3++];
 	                } else {
 	                    _i3 = _iterator3.next();
 	                    if (_i3.done) break;
-	                    _ref4 = _i3.value;
+	                    _ref5 = _i3.value;
 	                }
 
-	                var key = _ref4;
+	                var key = _ref5;
 
 	                if (props[key] !== this.rawProps[key]) {
 	                    changed = true;
@@ -8889,18 +8947,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return _this9.showComponent();
 	                });
 
-	                tasks.linkDomain = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref5) {
-	                    var _ref6 = _slicedToArray(_ref5, 1);
+	                tasks.linkDomain = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref6) {
+	                    var _ref7 = _slicedToArray(_ref6, 1);
 
-	                    var domain = _ref6[0];
+	                    var domain = _ref7[0];
 
 	                    return _src2['default'].linkUrl(_this9.window, domain);
 	                });
 
-	                tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref7) {
-	                    var _ref8 = _slicedToArray(_ref7, 1);
+	                tasks.listen = _promise.SyncPromise.all([tasks.getDomain, tasks.open]).then(function (_ref8) {
+	                    var _ref9 = _slicedToArray(_ref8, 1);
 
-	                    var domain = _ref8[0];
+	                    var domain = _ref9[0];
 
 	                    _this9.listen(_this9.window, domain);
 	                });
@@ -8912,10 +8970,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (loadUrl) {
 	                    tasks.buildUrl = _this9.buildUrl();
 
-	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref9) {
-	                        var _ref10 = _slicedToArray(_ref9, 1);
+	                    tasks.loadUrl = _promise.SyncPromise.all([tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate]).then(function (_ref10) {
+	                        var _ref11 = _slicedToArray(_ref10, 1);
 
-	                        var url = _ref10[0];
+	                        var url = _ref11[0];
 
 	                        return _this9.loadUrl(url);
 	                    });
@@ -8951,7 +9009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.component.log('delegate_' + this.context);
 
-	            this.childWindowName = this.buildChildWindowName(window.name, { secureProps: true });
+	            this.childWindowName = this.buildChildWindowName({ renderTo: win, secureProps: true });
 
 	            var delegate = _src2['default'].send(win, _constants.POST_MESSAGE.DELEGATE + '_' + this.component.name, {
 
@@ -8986,8 +9044,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                }
 
-	            }).then(function (_ref11) {
-	                var data = _ref11.data;
+	            }).then(function (_ref12) {
+	                var data = _ref12.data;
 
 
 	                _this10.clean.register(data.destroy);
@@ -9002,14 +9060,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _loop = function _loop() {
 	                if (_isArray4) {
 	                    if (_i4 >= _iterator4.length) return 'break';
-	                    _ref12 = _iterator4[_i4++];
+	                    _ref13 = _iterator4[_i4++];
 	                } else {
 	                    _i4 = _iterator4.next();
 	                    if (_i4.done) return 'break';
-	                    _ref12 = _i4.value;
+	                    _ref13 = _i4.value;
 	                }
 
-	                var key = _ref12;
+	                var key = _ref13;
 
 	                var val = overrides[key];
 
@@ -9041,7 +9099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 
 	            _loop2: for (var _iterator4 = Object.keys(overrides), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	                var _ref12;
+	                var _ref13;
 
 	                var _ret = _loop();
 
@@ -9178,9 +9236,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'listeners',
 	        value: function listeners() {
-	            var _ref13;
+	            var _ref14;
 
-	            return _ref13 = {}, _defineProperty(_ref13, _constants.POST_MESSAGE.INIT, function (source, data) {
+	            return _ref14 = {}, _defineProperty(_ref14, _constants.POST_MESSAGE.INIT, function (source, data) {
 	                var _this15 = this;
 
 	                this.childExports = data.exports;
@@ -9202,20 +9260,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        context: _this15.context
 	                    };
 	                });
-	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.CLOSE, function (source, data) {
+	            }), _defineProperty(_ref14, _constants.POST_MESSAGE.CLOSE, function (source, data) {
 	                this.close(data.reason);
-	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.RESIZE, function (source, data) {
+	            }), _defineProperty(_ref14, _constants.POST_MESSAGE.RESIZE, function (source, data) {
 
 	                if (this.driver.allowResize && this.component.autoResize) {
 	                    return this.resize(data.width, data.height);
 	                }
-	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function (source, data) {
+	            }), _defineProperty(_ref14, _constants.POST_MESSAGE.HIDE, function (source, data) {
 	                this.hide();
-	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.SHOW, function (source, data) {
+	            }), _defineProperty(_ref14, _constants.POST_MESSAGE.SHOW, function (source, data) {
 	                this.show();
-	            }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function (source, data) {
+	            }), _defineProperty(_ref14, _constants.POST_MESSAGE.ERROR, function (source, data) {
 	                this.error(new Error(data.error));
-	            }), _ref13;
+	            }), _ref14;
 	        }
 
 	        /*  Resize
@@ -9572,18 +9630,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _this21.clean.register('destroyContainerEvents', function () {
 	                    for (var _iterator5 = eventHandlers, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
-	                        var _ref14;
+	                        var _ref15;
 
 	                        if (_isArray5) {
 	                            if (_i5 >= _iterator5.length) break;
-	                            _ref14 = _iterator5[_i5++];
+	                            _ref15 = _iterator5[_i5++];
 	                        } else {
 	                            _i5 = _iterator5.next();
 	                            if (_i5.done) break;
-	                            _ref14 = _i5.value;
+	                            _ref15 = _i5.value;
 	                        }
 
-	                        var eventHandler = _ref14;
+	                        var eventHandler = _ref15;
 
 	                        eventHandler.cancel();
 	                    }
