@@ -3,7 +3,13 @@ xcomponent
 
 [https://medium.com/@bluepnume/introducing-xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
 
-A cross-domain component toolkit. Useful if you want to build a component which can be rendered into an inline iframe, a
+A cross-domain component toolkit, supporting:
+
+- Render an iframe or popup on a different domain and pass down props, including objects and functions
+- Call callbacks natively from the child window without worrying about post-messaging or cross-domain restrictions
+- Create components to share functionality from your site to other domains!
+
+Useful if you want to build a component which can be rendered into an inline iframe, a
 lightboxed iframe, or a popup, and take advantage of the sandboxing provided by iframes alongside the flexibility of passing
 props and callbacks instead of url params and post message listeners.
 
