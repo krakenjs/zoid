@@ -2,7 +2,7 @@
 import postRobot from 'post-robot/src';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
-import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
+import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';
 
 
 function normalize(str) {
@@ -90,7 +90,6 @@ export let isXComponentWindow = memoize(() => {
     return Boolean(getComponentMeta());
 });
 
-
 /*  Get Parent Component Window
     ---------------------------
 
@@ -108,7 +107,7 @@ export let getParentComponentWindow = memoize(() => {
     let parentWindow = postRobot.winutil.getAncestor(window);
 
     if (!parentWindow) {
-        throw new Error(`Can not find parent component window`);
+        throw new Error(`Can not find parent window`);
     }
 
     if (componentMeta.parent === WINDOW_REFERENCES.DIRECT_PARENT) {
@@ -131,6 +130,47 @@ export let getParentComponentWindow = memoize(() => {
     }
 
     return parentFrame;
+});
+
+
+export let getParentRenderWindow = memoize(() => {
+
+    let componentMeta = getComponentMeta();
+
+    if (!componentMeta) {
+        throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
+    }
+
+    let parentWindow = postRobot.winutil.getAncestor(window);
+
+    if (!parentWindow) {
+        throw new Error(`Can not find parent window`);
+    }
+
+    if (componentMeta.renderParent === WINDOW_REFERENCES.DIRECT_PARENT) {
+        return parentWindow;
+
+    } else if (componentMeta.renderParent === WINDOW_REFERENCES.PARENT_PARENT) {
+        parentWindow = postRobot.winutil.getAncestor(parentWindow);
+
+        if (!parentWindow) {
+            throw new Error(`Can not find parent render window`);
+        }
+
+        return parentWindow;
+
+    } else if (componentMeta.renderParent === WINDOW_REFERENCES.PARENT_UID) {
+
+        parentWindow = getParentComponentWindow()[__XCOMPONENT__].windows[componentMeta.uid];
+
+        if (!parentWindow) {
+            throw new Error(`Can not find parent render window`);
+        }
+
+        return parentWindow;
+    }
+
+    throw new Error(`Unrecognized renderParent reference: ${componentMeta.renderParent}`);
 });
 
 

@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
          addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, __XCOMPONENT__ } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -40,6 +40,11 @@ function promise(target, name, descriptor) {
     };
 }
 
+let global = window[__XCOMPONENT__] = window[__XCOMPONENT__] || {};
+
+global.props = global.props || {};
+global.windows = global.windows || {};
+
 
 /*  Parent Component
     ----------------
@@ -61,7 +66,7 @@ export class ParentComponent extends BaseComponent {
         this.context = context;
         this.setProps(options.props || {});
 
-        this.childWindowName = this.buildChildWindowName();
+        this.childWindowName = this.buildChildWindowName({ renderTo: window });
 
         // Ensure the component is not loaded twice on the same page, if it is a singleton
 
@@ -97,43 +102,40 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    buildChildWindowName(parent, options = {}) {
+    buildChildWindowName({ renderTo = window, secureProps = false } = {}) {
 
-        parent = parent || (this.context === CONTEXT_TYPES.LIGHTBOX ? WINDOW_REFERENCES.PARENT_PARENT : WINDOW_REFERENCES.DIRECT_PARENT);
+        let sameWindow = (renderTo === window);
+        let isLightbox = (this.context === CONTEXT_TYPES.LIGHTBOX);
 
-        let tag = this.component.tag;
+        let uid    = uniqueID();
+        let tag    = this.component.tag;
+        let sProps = this.getSerializedPropsForChild();
 
-        let props = replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
-            if (value instanceof Function) {
-                return {
-                    __type__: '__function__'
-                };
-            }
-        });
+        let defaultParent = isLightbox
+            ? WINDOW_REFERENCES.PARENT_PARENT
+            : WINDOW_REFERENCES.DIRECT_PARENT;
 
-        if (options.secureProps) {
+        let parent = sameWindow
+            ? defaultParent
+            : window.name;
 
-            window.__xcomponent__ = window.__xcomponent__ || {};
-            window.__xcomponent__.props = window.__xcomponent__.props || {};
+        let renderParent = sameWindow
+            ? defaultParent
+            : WINDOW_REFERENCES.PARENT_UID;
 
-            let uid = uniqueID();
+        let props = secureProps
+            ? { type: INITIAL_PROPS.UID }
+            : { type: INITIAL_PROPS.RAW, value: sProps };
 
-            window.__xcomponent__.props[uid] = props;
-
-            props = {
-                type: INITIAL_PROPS.UID,
-                value: uid
-            };
-
-        } else {
-
-            props = {
-                type: INITIAL_PROPS.RAW,
-                value: props
-            };
+        if (props.type === INITIAL_PROPS.UID) {
+            global.props[uid] = sProps;
         }
 
-        return buildChildWindowName(this.component.name, this.component.version, { tag, parent, props });
+        if (renderParent === WINDOW_REFERENCES.PARENT_UID) {
+            global.windows[uid] = renderTo;
+        }
+
+        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, parent, renderParent, props });
     }
 
 
@@ -321,6 +323,17 @@ export class ParentComponent extends BaseComponent {
         return result;
     }
 
+    getSerializedPropsForChild() {
+
+        return replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
+            if (value instanceof Function) {
+                return {
+                    __type__: '__function__'
+                };
+            }
+        });
+    }
+
 
     /*  Update Props
         ------------
@@ -506,7 +519,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`delegate_${this.context}`);
 
-        this.childWindowName = this.buildChildWindowName(window.name, { secureProps: true });
+        this.childWindowName = this.buildChildWindowName({ renderTo: win, secureProps: true });
 
         let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 

@@ -3,6 +3,8 @@ import { values } from './lib';
 
 export const XCOMPONENT = `xcomponent`;
 
+export const __XCOMPONENT__ = `__${XCOMPONENT}__`;
+
 export const POST_MESSAGE = {
     INIT: `${XCOMPONENT}_init`,
     PROPS: `${XCOMPONENT}_props`,
@@ -31,7 +33,8 @@ export const INITIAL_PROPS = {
 
 export const WINDOW_REFERENCES = {
     DIRECT_PARENT: `__direct_parent__`,
-    PARENT_PARENT: `__parent_parent__`
+    PARENT_PARENT: `__parent_parent__`,
+    PARENT_UID:    `__parent_uid__`
 };
 
 export const PROP_TYPES_LIST = values(PROP_TYPES);
