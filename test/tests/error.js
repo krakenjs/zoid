@@ -61,22 +61,6 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should enter a component and timeout, then log an error in the absense of onTimeout and onError', done => {
-
-        let console = window.console;
-
-        window.console = {
-            error() {
-                window.console = console;
-                done();
-            }
-        };
-
-        testComponent.renderLightbox({
-            timeout: 1
-        });
-    });
-
     it.skip('should enter a component and error out when the page name is not valid', done => {
 
         window.open('/base/test/child.htm', 'INVALIDNAME');
