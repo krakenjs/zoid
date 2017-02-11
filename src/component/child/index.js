@@ -1,5 +1,5 @@
 
-import { logger } from '../../lib';
+import $logger from 'beaver-logger/client';
 
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
@@ -399,7 +399,7 @@ export class ChildComponent extends BaseComponent {
 
 
     destroy() {
-        logger.flush().then(() => {
+        $logger.flush().then(() => {
             window.close();
         });
     }

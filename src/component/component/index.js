@@ -1,5 +1,6 @@
 
 import postRobot from 'post-robot/src';
+import $logger from 'beaver-logger/client';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
@@ -17,7 +18,7 @@ import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
 
-import { logger, capitalizeFirstLetter } from '../../lib';
+import { capitalizeFirstLetter } from '../../lib';
 
 export let components = {};
 
@@ -323,7 +324,7 @@ export class Component extends BaseComponent {
     */
 
     log(event, payload = {}) {
-        logger.info(`xc_${this.name}_${event}`, payload);
+        $logger.info(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -334,7 +335,7 @@ export class Component extends BaseComponent {
     */
 
     logWarning(event, payload) {
-        logger.warn(`xc_${this.name}_${event}`, payload);
+        $logger.warn(`xc_${this.name}_${event}`, payload);
     }
 
 
@@ -345,7 +346,7 @@ export class Component extends BaseComponent {
     */
 
     logError(event, payload) {
-        logger.error(`xc_${this.name}_${event}`, payload);
+        $logger.error(`xc_${this.name}_${event}`, payload);
     }
 }
 

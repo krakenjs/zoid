@@ -1,5 +1,5 @@
 
-import { logger } from '../../lib';
+import $logger from 'beaver-logger/client';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
@@ -631,7 +631,7 @@ export class ParentComponent extends BaseComponent {
 
         let unloadWindowListener = addEventListener(window, 'beforeunload', () => {
             this.component.log(`navigate_away`);
-            logger.flush();
+            $logger.flush();
 
             closeWindowListener.cancel();
 
@@ -726,7 +726,7 @@ export class ParentComponent extends BaseComponent {
 
                     // Let the child know what its context is, and what its initial props are.
 
-                    logger.flush();
+                    $logger.flush();
 
                     return {
                         props: this.getPropsForChild(),
@@ -1162,7 +1162,7 @@ export class ParentComponent extends BaseComponent {
         return Promise.try(() => {
             if (this.clean.hasTasks()) {
                 this.component.log(`destroy`);
-                logger.flush();
+                $logger.flush();
                 return this.clean.all();
             }
         });
