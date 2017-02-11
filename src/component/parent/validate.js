@@ -46,6 +46,10 @@ export function validateProp(prop, key, value, required = true) {
             throw new Error(`Prop is not a number: ${key}`);
         }
     }
+
+    if (typeof prop.validate === 'function') {
+        prop.validate(value);
+    }
 }
 
 
