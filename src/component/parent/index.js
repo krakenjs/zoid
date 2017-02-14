@@ -951,7 +951,11 @@ export class ParentComponent extends BaseComponent {
     @memoize
     @promise
     showComponent() {
-        return this.props.onDisplay().then(() => {
+        return Promise.try(() => {
+            if (this.props.onDisplay) {
+                return this.props.onDisplay();
+            }
+        }).then(() => {
             if (this.elementTemplate) {
                 addClass(this.elementTemplate, CLASS_NAMES.SHOW_COMPONENT);
                 showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
