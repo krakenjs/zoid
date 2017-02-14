@@ -10370,7 +10370,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function showComponent() {
 	            var _this20 = this;
 
-	            return this.props.onDisplay().then(function () {
+	            return _promise.SyncPromise['try'](function () {
+	                if (_this20.props.onDisplay) {
+	                    return _this20.props.onDisplay();
+	                }
+	            }).then(function () {
 	                if (_this20.elementTemplate) {
 	                    (0, _lib.addClass)(_this20.elementTemplate, _constants.CLASS_NAMES.SHOW_COMPONENT);
 	                    (0, _lib.showAndAnimate)(_this20.elementTemplate, _constants.ANIMATION_NAMES.SHOW_COMPONENT);
