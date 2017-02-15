@@ -28,6 +28,10 @@ export function normalizeProp(component, instance, props, key, value) {
         value = prop.decorate(value);
     }
 
+    if (prop.value) {
+        value = prop.value;
+    }
+
     if (prop.getter) {
 
         if (!value) {
