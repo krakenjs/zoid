@@ -11211,6 +11211,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value = prop.decorate(value);
 	    }
 
+	    if (prop.value) {
+	        value = prop.value;
+	    }
+
 	    if (prop.getter) {
 
 	        if (!value) {
