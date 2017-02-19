@@ -489,11 +489,20 @@ export function setOverflow(el, value = 'auto') {
     };
 }
 
-function dimensionsDiff(one, two, threshold) {
-    return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+function dimensionsDiff(one, two, { width = true, height = true, threshold = 0 }) {
+
+    if (width && Math.abs(one.width - two.width) > threshold) {
+        return true;
+    }
+
+    if (height && Math.abs(one.height - two.height) > threshold) {
+        return true;
+    }
+
+    return false;
 }
 
-export function trackDimensions(el, threshold = 0) {
+export function trackDimensions(el, { width = true, height = true, threshold = 0 }) {
 
     let currentDimensions = getCurrentDimensions(el);
 
@@ -502,7 +511,7 @@ export function trackDimensions(el, threshold = 0) {
             let newDimensions = getCurrentDimensions(el);
 
             return {
-                changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
+                changed: dimensionsDiff(currentDimensions, newDimensions, { width, height, threshold }),
                 dimensions: newDimensions
             };
         },
@@ -513,11 +522,11 @@ export function trackDimensions(el, threshold = 0) {
     };
 }
 
-export function onDimensionsChange(el, delay = 50, threshold = 0) {
+export function onDimensionsChange(el, { width = true, height = true, delay = 50, threshold = 0 }) {
 
     return new Promise(resolve => {
 
-        let tracker = trackDimensions(el, threshold);
+        let tracker = trackDimensions(el, { width, height, threshold });
 
         let interval;
 
@@ -534,6 +543,22 @@ export function onDimensionsChange(el, delay = 50, threshold = 0) {
             }
         }, delay);
     });
+}
+
+
+export function dimensionsMatchViewport(el, { width, height }) {
+
+    let dimensions = getCurrentDimensions(el);
+
+    if (width && dimensions.width !== window.innerWidth) {
+        return false;
+    }
+
+    if (height && dimensions.height !== window.innerHeight) {
+        return false;
+    }
+
+    return true;
 }
 
 

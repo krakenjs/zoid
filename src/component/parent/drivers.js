@@ -110,8 +110,14 @@ export let RENDER_DRIVERS = {
         },
 
         resize(width, height) {
-            this.iframe.style.width  = toCSS(width);
-            this.iframe.style.height = toCSS(height);
+
+            if (width) {
+                this.iframe.style.width  = toCSS(width);
+            }
+
+            if (height) {
+                this.iframe.style.height = toCSS(height);
+            }
         },
 
         hide() {
@@ -284,8 +290,13 @@ export let RENDER_DRIVERS = {
 
             let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
-            container.style.width  = toCSS(width);
-            container.style.height = toCSS(height);
+            if (width) {
+                container.style.width  = toCSS(width);
+            }
+
+            if (height) {
+                container.style.height = toCSS(height);
+            }
         },
 
         hide() {

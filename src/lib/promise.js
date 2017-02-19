@@ -65,3 +65,7 @@ export function delay(time) {
         setTimeout(resolve, time);
     });
 }
+
+export function cycle(method) {
+    return Promise.try(method).then(() => cycle(method));
+}

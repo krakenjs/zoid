@@ -5,7 +5,7 @@ import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -60,9 +60,7 @@ export class ChildComponent extends BaseComponent {
             window.xprops = this.props = {};
             this.setProps(data.props, origin);
 
-            if (this.component.autoResize) {
-                this.watchForResize();
-            }
+            this.watchForResize();
 
             return this;
 
@@ -269,7 +267,31 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
+    autoResize() {
+
+        let width = false;
+        let height = false;
+
+        let autoResize = this.component.autoResize;
+
+        if (typeof autoResize === 'object') {
+            width = Boolean(autoResize.width);
+            height = Boolean(autoResize.height);
+        } else if (autoResize) {
+            width = true;
+            height = true;
+        }
+
+        return { width, height };
+    }
+
     watchForResize() {
+
+        let { width, height } = this.autoResize();
+
+        if (!width && !height) {
+            return;
+        }
 
         if (!this.component.dimensions) {
             return;
@@ -281,47 +303,25 @@ export class ChildComponent extends BaseComponent {
 
         let el = document.documentElement;
 
-        // Believe me, I strugged. There's no other way.
+        // Believe me, I struggled. There's no other way.
         if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
             el = document.body;
         }
 
-        let resize = (width, height, history = []) => {
-            return Promise.try(() => {
+        return Promise.try(() => {
 
-                for (let size of history) {
-                    if (size.width === width && size.height === height) {
-                        return;
-                    }
-                }
+            if (!dimensionsMatchViewport(el, { width, height })) {
+                return this.resizeToElement(el, { width, height });
+            }
 
-                history.push({ width, height });
+        }).then(() => {
 
-                let tracker = trackDimensions(el);
-
-                return this.resize(width, height).then(() => {
-
-                    let { changed, dimensions } = tracker.check();
-
-                    if (changed) {
-                        return resize(dimensions.width, dimensions.height, history);
-                    }
+            return cycle(() => {
+                return onDimensionsChange(el, { width, height }).then(dimensions => {
+                    return this.resizeToElement(el, { width, height });
                 });
             });
-
-
-        };
-
-        let watcher = () => {
-            onDimensionsChange(el).then(dimensions => {
-                return resize(dimensions.width, dimensions.height);
-
-            }).then(() => {
-                watcher();
-            });
-        };
-
-        watcher();
+        });
     }
 
 
@@ -358,6 +358,41 @@ export class ChildComponent extends BaseComponent {
 
             return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
         });
+    }
+
+
+    resizeToElement(el, { width, height }) {
+
+        let history = [];
+
+        let resize = () => {
+            return Promise.try(() => {
+
+                let tracker = trackDimensions(el, { width, height });
+                let { dimensions } = tracker.check();
+
+                for (let size of history) {
+
+                    let widthMatch = !width || size.width === dimensions.width;
+                    let heightMatch = !height || size.height === dimensions.height;
+
+                    if (widthMatch && heightMatch) {
+                        return;
+                    }
+                }
+
+                history.push({ width: dimensions.width, height: dimensions.height });
+
+                return this.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(() => {
+
+                    if (tracker.check().changed) {
+                        return resize();
+                    }
+                });
+            });
+        };
+
+        return resize();
     }
 
 
