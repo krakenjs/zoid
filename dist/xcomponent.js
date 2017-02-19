@@ -6356,6 +6356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.setOverflow = setOverflow;
 	exports.trackDimensions = trackDimensions;
 	exports.onDimensionsChange = onDimensionsChange;
+	exports.dimensionsMatchViewport = dimensionsMatchViewport;
 	exports.bindEvents = bindEvents;
 	exports.setVendorCSS = setVendorCSS;
 	exports.animate = animate;
@@ -6953,12 +6954,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	function dimensionsDiff(one, two, threshold) {
-	    return Math.abs(one.height - two.height) > threshold || Math.abs(one.width - two.width) > threshold;
+	function dimensionsDiff(one, two, _ref8) {
+	    var _ref8$width = _ref8.width;
+	    var width = _ref8$width === undefined ? true : _ref8$width;
+	    var _ref8$height = _ref8.height;
+	    var height = _ref8$height === undefined ? true : _ref8$height;
+	    var _ref8$threshold = _ref8.threshold;
+	    var threshold = _ref8$threshold === undefined ? 0 : _ref8$threshold;
+
+
+	    if (width && Math.abs(one.width - two.width) > threshold) {
+	        return true;
+	    }
+
+	    if (height && Math.abs(one.height - two.height) > threshold) {
+	        return true;
+	    }
+
+	    return false;
 	}
 
-	function trackDimensions(el) {
-	    var threshold = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	function trackDimensions(el, _ref9) {
+	    var _ref9$width = _ref9.width;
+	    var width = _ref9$width === undefined ? true : _ref9$width;
+	    var _ref9$height = _ref9.height;
+	    var height = _ref9$height === undefined ? true : _ref9$height;
+	    var _ref9$threshold = _ref9.threshold;
+	    var threshold = _ref9$threshold === undefined ? 0 : _ref9$threshold;
 
 
 	    var currentDimensions = getCurrentDimensions(el);
@@ -6968,7 +6990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var newDimensions = getCurrentDimensions(el);
 
 	            return {
-	                changed: dimensionsDiff(currentDimensions, newDimensions, threshold),
+	                changed: dimensionsDiff(currentDimensions, newDimensions, { width: width, height: height, threshold: threshold }),
 	                dimensions: newDimensions
 	            };
 	        },
@@ -6978,14 +7000,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	function onDimensionsChange(el) {
-	    var delay = arguments.length <= 1 || arguments[1] === undefined ? 50 : arguments[1];
-	    var threshold = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	function onDimensionsChange(el, _ref10) {
+	    var _ref10$width = _ref10.width;
+	    var width = _ref10$width === undefined ? true : _ref10$width;
+	    var _ref10$height = _ref10.height;
+	    var height = _ref10$height === undefined ? true : _ref10$height;
+	    var _ref10$delay = _ref10.delay;
+	    var delay = _ref10$delay === undefined ? 50 : _ref10$delay;
+	    var _ref10$threshold = _ref10.threshold;
+	    var threshold = _ref10$threshold === undefined ? 0 : _ref10$threshold;
 
 
 	    return new _promise.SyncPromise(function (resolve) {
 
-	        var tracker = trackDimensions(el, threshold);
+	        var tracker = trackDimensions(el, { width: width, height: height, threshold: threshold });
 
 	        var interval = void 0;
 
@@ -7008,23 +7036,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
+	function dimensionsMatchViewport(el, _ref11) {
+	    var width = _ref11.width;
+	    var height = _ref11.height;
+
+
+	    var dimensions = getCurrentDimensions(el);
+
+	    if (width && dimensions.width !== window.innerWidth) {
+	        return false;
+	    }
+
+	    if (height && dimensions.height !== window.innerHeight) {
+	        return false;
+	    }
+
+	    return true;
+	}
+
 	function bindEvents(element, eventNames, handler) {
 
 	    handler = (0, _fn.once)(handler);
 
 	    for (var _iterator7 = eventNames, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
-	        var _ref8;
+	        var _ref12;
 
 	        if (_isArray7) {
 	            if (_i7 >= _iterator7.length) break;
-	            _ref8 = _iterator7[_i7++];
+	            _ref12 = _iterator7[_i7++];
 	        } else {
 	            _i7 = _iterator7.next();
 	            if (_i7.done) break;
-	            _ref8 = _i7.value;
+	            _ref12 = _i7.value;
 	        }
 
-	        var eventName = _ref8;
+	        var eventName = _ref12;
 
 	        element.addEventListener(eventName, handler);
 	    }
@@ -7032,18 +7078,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return {
 	        cancel: (0, _fn.once)(function () {
 	            for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
-	                var _ref9;
+	                var _ref13;
 
 	                if (_isArray8) {
 	                    if (_i8 >= _iterator8.length) break;
-	                    _ref9 = _iterator8[_i8++];
+	                    _ref13 = _iterator8[_i8++];
 	                } else {
 	                    _i8 = _iterator8.next();
 	                    if (_i8.done) break;
-	                    _ref9 = _i8.value;
+	                    _ref13 = _i8.value;
 	                }
 
-	                var eventName = _ref9;
+	                var eventName = _ref13;
 
 	                element.removeEventListener(eventName, handler);
 	            }
@@ -7060,18 +7106,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var capitalizedName = (0, _util.capitalizeFirstLetter)(name);
 
 	    for (var _iterator9 = VENDOR_PREFIXES, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
-	        var _ref10;
+	        var _ref14;
 
 	        if (_isArray9) {
 	            if (_i9 >= _iterator9.length) break;
-	            _ref10 = _iterator9[_i9++];
+	            _ref14 = _iterator9[_i9++];
 	        } else {
 	            _i9 = _iterator9.next();
 	            if (_i9.done) break;
-	            _ref10 = _i9.value;
+	            _ref14 = _i9.value;
 	        }
 
-	        var prefix = _ref10;
+	        var prefix = _ref14;
 
 	        element.style['' + prefix + capitalizedName] = value;
 	    }
@@ -7735,6 +7781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.promisify = promisify;
 	exports.getter = getter;
 	exports.delay = delay;
+	exports.cycle = cycle;
 
 	var _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 13);
 
@@ -7804,6 +7851,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	function delay(time) {
 	    return new _promise.SyncPromise(function (resolve) {
 	        setTimeout(resolve, time);
+	    });
+	}
+
+	function cycle(method) {
+	    return _promise.SyncPromise['try'](method).then(function () {
+	        return cycle(method);
 	    });
 	}
 
@@ -7967,9 +8020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            window.xprops = _this.props = {};
 	            _this.setProps(data.props, origin);
 
-	            if (_this.component.autoResize) {
-	                _this.watchForResize();
-	            }
+	            _this.watchForResize();
 
 	            return _this;
 	        })['catch'](function (err) {
@@ -8237,9 +8288,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
+	        key: 'autoResize',
+	        value: function autoResize() {
+
+	            var width = false;
+	            var height = false;
+
+	            var autoResize = this.component.autoResize;
+
+	            if ((typeof autoResize === 'undefined' ? 'undefined' : _typeof(autoResize)) === 'object') {
+	                width = Boolean(autoResize.width);
+	                height = Boolean(autoResize.height);
+	            } else if (autoResize) {
+	                width = true;
+	                height = true;
+	            }
+
+	            return { width: width, height: height };
+	        }
+	    }, {
 	        key: 'watchForResize',
 	        value: function watchForResize() {
 	            var _this4 = this;
+
+	            var _autoResize = this.autoResize();
+
+	            var width = _autoResize.width;
+	            var height = _autoResize.height;
+
+
+	            if (!width && !height) {
+	                return;
+	            }
 
 	            if (!this.component.dimensions) {
 	                return;
@@ -8251,62 +8331,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var el = document.documentElement;
 
-	            // Believe me, I strugged. There's no other way.
+	            // Believe me, I struggled. There's no other way.
 	            if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
 	                el = document.body;
 	            }
 
-	            var resize = function resize(width, height) {
-	                var history = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+	            return _promise.SyncPromise['try'](function () {
 
-	                return _promise.SyncPromise['try'](function () {
+	                if (!(0, _lib.dimensionsMatchViewport)(el, { width: width, height: height })) {
+	                    return _this4.resizeToElement(el, { width: width, height: height });
+	                }
+	            }).then(function () {
 
-	                    for (var _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	                        var _ref4;
-
-	                        if (_isArray3) {
-	                            if (_i4 >= _iterator3.length) break;
-	                            _ref4 = _iterator3[_i4++];
-	                        } else {
-	                            _i4 = _iterator3.next();
-	                            if (_i4.done) break;
-	                            _ref4 = _i4.value;
-	                        }
-
-	                        var size = _ref4;
-
-	                        if (size.width === width && size.height === height) {
-	                            return;
-	                        }
-	                    }
-
-	                    history.push({ width: width, height: height });
-
-	                    var tracker = (0, _lib.trackDimensions)(el);
-
-	                    return _this4.resize(width, height).then(function () {
-	                        var _tracker$check = tracker.check();
-
-	                        var changed = _tracker$check.changed;
-	                        var dimensions = _tracker$check.dimensions;
-
-
-	                        if (changed) {
-	                            return resize(dimensions.width, dimensions.height, history);
-	                        }
+	                return (0, _lib.cycle)(function () {
+	                    return (0, _lib.onDimensionsChange)(el, { width: width, height: height }).then(function (dimensions) {
+	                        return _this4.resizeToElement(el, { width: width, height: height });
 	                    });
 	                });
-	            };
-
-	            var watcher = function watcher() {
-	                (0, _lib.onDimensionsChange)(el).then(function (dimensions) {
-	                    return resize(dimensions.width, dimensions.height);
-	                }).then(function () {
-	                    watcher();
-	                });
-	            };
-
-	            watcher();
+	            });
 	        }
 	    }, {
 	        key: 'exports',
@@ -8344,6 +8386,63 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _this5.sendToParent(_constants.POST_MESSAGE.RESIZE, { width: width, height: height });
 	            });
+	        }
+	    }, {
+	        key: 'resizeToElement',
+	        value: function resizeToElement(el, _ref4) {
+	            var _this6 = this;
+
+	            var width = _ref4.width;
+	            var height = _ref4.height;
+
+
+	            var history = [];
+
+	            var resize = function resize() {
+	                return _promise.SyncPromise['try'](function () {
+
+	                    var tracker = (0, _lib.trackDimensions)(el, { width: width, height: height });
+
+	                    var _tracker$check = tracker.check();
+
+	                    var dimensions = _tracker$check.dimensions;
+
+
+	                    for (var _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	                        var _ref5;
+
+	                        if (_isArray3) {
+	                            if (_i4 >= _iterator3.length) break;
+	                            _ref5 = _iterator3[_i4++];
+	                        } else {
+	                            _i4 = _iterator3.next();
+	                            if (_i4.done) break;
+	                            _ref5 = _i4.value;
+	                        }
+
+	                        var size = _ref5;
+
+
+	                        var widthMatch = !width || size.width === dimensions.width;
+	                        var heightMatch = !height || size.height === dimensions.height;
+
+	                        if (widthMatch && heightMatch) {
+	                            return;
+	                        }
+	                    }
+
+	                    history.push({ width: dimensions.width, height: dimensions.height });
+
+	                    return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function () {
+
+	                        if (tracker.check().changed) {
+	                            return resize();
+	                        }
+	                    });
+	                });
+	            };
+
+	            return resize();
 	        }
 
 	        /*  Hide
@@ -10809,8 +10908,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    resize: function resize(width, height) {
-	        this.iframe.style.width = (0, _lib.toCSS)(width);
-	        this.iframe.style.height = (0, _lib.toCSS)(height);
+
+	        if (width) {
+	            this.iframe.style.width = (0, _lib.toCSS)(width);
+	        }
+
+	        if (height) {
+	            this.iframe.style.height = (0, _lib.toCSS)(height);
+	        }
 	    },
 	    hide: function hide() {
 	        this.iframe.style.display = 'none';
@@ -10976,8 +11081,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var container = this.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
-	        container.style.width = (0, _lib.toCSS)(width);
-	        container.style.height = (0, _lib.toCSS)(height);
+	        if (width) {
+	            container.style.width = (0, _lib.toCSS)(width);
+	        }
+
+	        if (height) {
+	            container.style.height = (0, _lib.toCSS)(height);
+	        }
 	    },
 	    hide: function hide() {
 	        this.iframe.style.display = 'none';
