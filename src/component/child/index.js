@@ -4,7 +4,7 @@ import $logger from 'beaver-logger/client';
 import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
-import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
+import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
@@ -468,3 +468,30 @@ export class ChildComponent extends BaseComponent {
         });
     }
 }
+
+if (isXComponentWindow()) {
+    let logLevels = $logger.logLevels;
+
+    for (let level of logLevels) {
+        let original = window.console[level];
+
+        if (!original || !original.apply) {
+            continue;
+        }
+
+        console[level] = function() {
+            let logLevel = window.LOG_LEVEL;
+
+            if (!logLevel || logLevels.indexOf(logLevel) === -1) {
+                return original.apply(this, arguments);
+            }
+
+            if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
+                return;
+            }
+
+            return original.apply(this, arguments);
+        };
+    }
+}
+
