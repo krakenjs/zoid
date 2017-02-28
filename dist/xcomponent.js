@@ -5091,6 +5091,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  });
 	});
+
+	var _config = __webpack_require__(/*! ./config */ 41);
+
+	Object.keys(_config).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _config[key];
+	    }
+	  });
+	});
 	exports['default'] = module.exports;
 
 /***/ },
@@ -5106,9 +5118,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.flush = exports.tracking = exports.buffer = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	exports.print = print;
 	exports.immediateFlush = immediateFlush;
 	exports.log = log;
+	exports.prefix = prefix;
 	exports.debug = debug;
 	exports.info = info;
 	exports.warn = warn;
@@ -5124,9 +5140,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	var buffer = exports.buffer = [];
 	var tracking = exports.tracking = {};
 
+	if (Function.prototype.bind && window.console && _typeof(console.log) === 'object') {
+	    ['log', 'info', 'warn', 'error'].forEach(function (method) {
+	        console[method] = this.bind(console[method], console);
+	    }, Function.prototype.call);
+	}
+
+	var loaded = false;
+
+	setTimeout(function () {
+	    loaded = true;
+	}, 1);
+
 	function print(level, event, payload) {
 
+	    if (!loaded) {
+	        return setTimeout(function () {
+	            return print(level, event, payload);
+	        }, 1);
+	    }
+
 	    if (!window.console || !window.console.log) {
+	        return;
+	    }
+
+	    var logLevel = window.LOG_LEVEL || _config.config.logLevel;
+
+	    if (_config.logLevels.indexOf(level) > _config.logLevels.indexOf(logLevel)) {
 	        return;
 	    }
 
@@ -5140,7 +5180,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        args.push('\n\n', payload.error || payload.warning);
 	    }
 
-	    (window.console[level] || window.console.log).apply(window.console, args);
+	    if (window.console) {
+
+	        if (window.console[level] && window.console[level].apply) {
+	            window.console[level].apply(window.console, args);
+	        } else if (window.console.log && window.console.log.apply) {
+	            window.console.log.apply(window.console, args);
+	        }
+	    }
 	}
 
 	function immediateFlush() {
@@ -5243,8 +5290,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return req;
 	}
 
-	var flush = exports.flush = (0, _util.promiseDebounce)(immediateFlush, _config.config.debounceInterval);
+	var _flush = (0, _util.promiseDebounce)(immediateFlush, _config.config.debounceInterval);
 
+	exports.flush = _flush;
 	function enqueue(level, event, payload) {
 
 	    buffer.push({
@@ -5254,11 +5302,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    if (_config.config.autoLog.indexOf(level) > -1) {
-	        flush();
+	        _flush();
 	    }
 	}
 
 	function log(level, event, payload) {
+
+	    if (_config.config.prefix) {
+	        event = _config.config.prefix + '_' + event;
+	    }
 
 	    payload = payload || {};
 
@@ -5295,13 +5347,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    print(level, event, payload);
+	    if (!_config.config.silent) {
+	        print(level, event, payload);
+	    }
 
 	    if (buffer.length === _config.config.sizeLimit) {
 	        enqueue('info', 'logger_max_buffer_length');
 	    } else if (buffer.length < _config.config.sizeLimit) {
 	        enqueue(level, event, payload);
 	    }
+	}
+
+	function prefix(name) {
+
+	    return {
+	        debug: function debug(event, payload) {
+	            return log('debug', name + '_' + event, payload);
+	        },
+	        info: function info(event, payload) {
+	            return log('info', name + '_' + event, payload);
+	        },
+	        warn: function warn(event, payload) {
+	            return log('warn', name + '_' + event, payload);
+	        },
+	        error: function error(event, payload) {
+	            return log('error', name + '_' + event, payload);
+	        },
+	        flush: function flush() {
+	            return _flush();
+	        }
+	    };
 	}
 
 	function debug(event, payload) {
@@ -5338,6 +5413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.windowReady = undefined;
 	exports.extend = extend;
+	exports.isSameProtocol = isSameProtocol;
 	exports.isSameDomain = isSameDomain;
 	exports.ajax = ajax;
 	exports.promiseDebounce = promiseDebounce;
@@ -5363,6 +5439,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return dest;
 	}
 
+	function isSameProtocol(url) {
+	    return window.location.protocol === url.split('/')[0];
+	}
+
 	function isSameDomain(url) {
 	    var match = url.match(/https?:\/\/[^/]+/);
 
@@ -5383,6 +5463,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var XRequest = window.XMLHttpRequest || window.ActiveXObject;
 
 	        if (window.XDomainRequest && !isSameDomain(url)) {
+
+	            if (!isSameProtocol(url)) {
+	                return resolve();
+	            }
+
 	            XRequest = window.XDomainRequest;
 	        }
 
@@ -5667,6 +5752,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var config = exports.config = {
 
 	    uri: '',
+	    prefix: '',
 
 	    initial_state_name: 'init',
 
@@ -5675,11 +5761,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    sizeLimit: 300,
 
+	    // Supress `console.log`s when `true`
+	    // Recommended for production usage
+	    silent: false,
+
 	    heartbeat: true,
 	    heartbeatConsoleLog: true,
 	    heartbeatInterval: 5000,
-	    hearbeatMaxThreshold: 50,
+	    heartbeatTooBusy: false,
 	    heartbeatTooBusyThreshold: 10000,
+
+	    logLevel: 'debug',
 
 	    autoLog: ['warn', 'error'],
 
@@ -5687,6 +5779,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    logUnloadSync: false,
 	    logPerformance: true
 	};
+
+	var logLevels = exports.logLevels = ['error', 'warn', 'info', 'debug'];
 
 /***/ },
 /* 42 */
@@ -5825,11 +5919,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _util.safeInterval)(function () {
 
-	        if (!_logger.buffer.length || _logger.buffer[_logger.buffer.length - 1].event !== 'heartbeat') {
-	            heartbeatCount = 0;
-	        }
-
-	        if (!_logger.buffer.length || heartbeatCount > _config.config.hearbeatMaxThreshold) {
+	        if (_config.config.heartbeatMaxThreshold && heartbeatCount > _config.config.heartbeatMaxThreshold) {
 	            return;
 	        }
 
@@ -5838,21 +5928,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var elapsed = heartBeatTimer.elapsed();
 	        var lag = elapsed - _config.config.heartbeatInterval;
 
-	        if (lag >= _config.config.heartbeatTooBusyThreshold) {
-	            (0, _logger.info)('toobusy', {
-	                count: heartbeatCount,
-	                elapsed: elapsed,
-	                lag: lag
-	            }, {
-	                noConsole: !_config.config.heartbeatConsoleLog
-	            });
+	        var heartbeatPayload = {
+	            count: heartbeatCount,
+	            elapsed: elapsed
+	        };
+
+	        if (_config.config.heartbeatTooBusy) {
+	            heartbeatPayload.lag = lag;
+
+	            if (lag >= _config.config.heartbeatTooBusyThreshold) {
+	                (0, _logger.info)('toobusy', heartbeatPayload, {
+	                    noConsole: !_config.config.heartbeatConsoleLog
+	                });
+	            }
 	        }
 
-	        (0, _logger.info)('heartbeat', {
-	            count: heartbeatCount,
-	            elapsed: elapsed,
-	            lag: lag
-	        }, {
+	        (0, _logger.info)('heartbeat', heartbeatPayload, {
 	            noConsole: !_config.config.heartbeatConsoleLog
 	        });
 	    }, _config.config.heartbeatInterval);
@@ -8525,6 +8616,58 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return ChildComponent;
 	}(_base.BaseComponent);
+
+	if ((0, _window.isXComponentWindow)()) {
+	    (function () {
+	        var logLevels = _client2['default'].logLevels;
+
+	        var _loop4 = function _loop4() {
+	            if (_isArray4) {
+	                if (_i5 >= _iterator4.length) return 'break';
+	                _ref6 = _iterator4[_i5++];
+	            } else {
+	                _i5 = _iterator4.next();
+	                if (_i5.done) return 'break';
+	                _ref6 = _i5.value;
+	            }
+
+	            var level = _ref6;
+
+	            var original = window.console[level];
+
+	            if (!original || !original.apply) {
+	                return 'continue';
+	            }
+
+	            console[level] = function () {
+	                var logLevel = window.LOG_LEVEL;
+
+	                if (!logLevel || logLevels.indexOf(logLevel) === -1) {
+	                    return original.apply(this, arguments);
+	                }
+
+	                if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
+	                    return;
+	                }
+
+	                return original.apply(this, arguments);
+	            };
+	        };
+
+	        _loop5: for (var _iterator4 = logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	            var _ref6;
+
+	            var _ret4 = _loop4();
+
+	            switch (_ret4) {
+	                case 'break':
+	                    break _loop5;
+
+	                case 'continue':
+	                    continue;}
+	        }
+	    })();
+	}
 
 /***/ },
 /* 54 */
