@@ -224,7 +224,7 @@ export class ChildComponent extends BaseComponent {
                         window.console[level] = function() {
 
                             try {
-                                return frame.console[level].apply(frame, arguments);
+                                return frame.console[level].apply(frame.console, arguments);
                             } catch (err3) {
                                 // pass
                             }
@@ -469,29 +469,45 @@ export class ChildComponent extends BaseComponent {
     }
 }
 
-if (isXComponentWindow()) {
+if (isXComponentWindow() && window.console) {
     let logLevels = $logger.logLevels;
 
     for (let level of logLevels) {
-        let original = window.console[level];
 
-        if (!original || !original.apply) {
-            continue;
+        try {
+
+            let original = window.console[level];
+
+            if (!original || !original.apply) {
+                continue;
+            }
+
+            window.console[level] = function() {
+                try {
+                    let logLevel = window.LOG_LEVEL;
+
+                    if (!logLevel || logLevels.indexOf(logLevel) === -1) {
+                        return original.apply(this, arguments);
+                    }
+
+                    if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
+                        return;
+                    }
+
+                    return original.apply(this, arguments);
+
+                } catch (err2) {
+                    // pass
+                }
+            };
+
+            if (level === 'info') {
+                window.console.log = window.console[level];
+            }
+
+        } catch (err) {
+            // pass
         }
-
-        console[level] = function() {
-            let logLevel = window.LOG_LEVEL;
-
-            if (!logLevel || logLevels.indexOf(logLevel) === -1) {
-                return original.apply(this, arguments);
-            }
-
-            if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
-                return;
-            }
-
-            return original.apply(this, arguments);
-        };
     }
 }
 
