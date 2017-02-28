@@ -8312,7 +8312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            window.console[level] = function () {
 
 	                                try {
-	                                    return frame.console[level].apply(frame, arguments);
+	                                    return frame.console[level].apply(frame.console, arguments);
 	                                } catch (err3) {
 	                                    // pass
 	                                }
@@ -8617,7 +8617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ChildComponent;
 	}(_base.BaseComponent);
 
-	if ((0, _window.isXComponentWindow)()) {
+	if ((0, _window.isXComponentWindow)() && window.console) {
 	    (function () {
 	        var logLevels = _client2['default'].logLevels;
 
@@ -8633,25 +8633,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var level = _ref6;
 
-	            var original = window.console[level];
 
-	            if (!original || !original.apply) {
-	                return 'continue';
+	            try {
+	                var _ret5 = function () {
+
+	                    var original = window.console[level];
+
+	                    if (!original || !original.apply) {
+	                        return {
+	                            v: 'continue'
+	                        };
+	                    }
+
+	                    window.console[level] = function () {
+	                        try {
+	                            var logLevel = window.LOG_LEVEL;
+
+	                            if (!logLevel || logLevels.indexOf(logLevel) === -1) {
+	                                return original.apply(this, arguments);
+	                            }
+
+	                            if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
+	                                return;
+	                            }
+
+	                            return original.apply(this, arguments);
+	                        } catch (err2) {
+	                            // pass
+	                        }
+	                    };
+
+	                    if (level === 'info') {
+	                        window.console.log = window.console[level];
+	                    }
+	                }();
+
+	                if ((typeof _ret5 === 'undefined' ? 'undefined' : _typeof(_ret5)) === "object") return _ret5.v;
+	            } catch (err) {
+	                // pass
 	            }
-
-	            console[level] = function () {
-	                var logLevel = window.LOG_LEVEL;
-
-	                if (!logLevel || logLevels.indexOf(logLevel) === -1) {
-	                    return original.apply(this, arguments);
-	                }
-
-	                if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
-	                    return;
-	                }
-
-	                return original.apply(this, arguments);
-	            };
 	        };
 
 	        _loop5: for (var _iterator4 = logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
