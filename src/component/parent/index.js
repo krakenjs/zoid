@@ -823,6 +823,10 @@ export class ParentComponent extends BaseComponent {
             this.parentTemplate.style.display = 'none';
         }
 
+        if (this.parentTemplateFrame) {
+            this.parentTemplateFrame.style.display = 'none';
+        }
+
         return this.driver.hide.call(this);
     }
 
@@ -830,6 +834,10 @@ export class ParentComponent extends BaseComponent {
 
         if (this.parentTemplate) {
             this.parentTemplate.style.display = 'block';
+        }
+
+        if (this.parentTemplateFrame) {
+            this.parentTemplateFrame.style.display = 'block';
         }
 
         return this.driver.show.call(this);
