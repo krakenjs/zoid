@@ -12,6 +12,7 @@ var FILE_NAME = 'xcomponent';
 var MODULE_NAME = 'xcomponent';
 
 var WEBPACK_CONFIG = {
+  devtool: 'source-map',
   module: {
     loaders: [
       {
