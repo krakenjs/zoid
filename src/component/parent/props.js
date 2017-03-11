@@ -45,14 +45,14 @@ export function normalizeProp(component, instance, props, key, value) {
             value = () => val;
         }
 
+        value = getter(value);
+
         let _value = value;
 
         value = function() {
             component.log(`call_getter_${key}`);
             return _value.apply(this, arguments);
         };
-
-        value = getter(value);
 
         if (prop.memoize) {
             let val = memoize(value);
