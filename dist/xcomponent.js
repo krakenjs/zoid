@@ -11579,14 +11579,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        }
 	
+	        value = (0, _lib.getter)(value);
+	
 	        var _value = value;
 	
 	        value = function value() {
 	            component.log('call_getter_' + key);
 	            return _value.apply(this, arguments);
 	        };
-	
-	        value = (0, _lib.getter)(value);
 	
 	        if (prop.memoize) {
 	            var _val = (0, _lib.memoize)(value);
