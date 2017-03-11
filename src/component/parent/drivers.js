@@ -28,9 +28,8 @@ export let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.IFRAME ]: {
 
-        parentTemplate: false,
         requiresElement: true,
-        renderedIntoParentTemplate: false,
+        renderedIntoParentTemplate: true,
         destroyOnUnload: false,
         allowResize: true,
         openOnClick: false,
@@ -49,7 +48,7 @@ export let RENDER_DRIVERS = {
             this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            }, element);
+            }, this.elementTemplate || element);
 
             this.elementTemplate = this.elementTemplate || this.iframe;
 
@@ -141,7 +140,6 @@ export let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.POPUP ]: {
 
-        parentTemplate: true,
         focusable: true,
         requiresElement: false,
         renderedIntoParentTemplate: false,
@@ -236,7 +234,6 @@ export let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
-        parentTemplate: true,
         requiresElement: false,
         renderedIntoParentTemplate: true,
         destroyOnUnload: false,

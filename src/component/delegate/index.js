@@ -27,6 +27,7 @@ export class DelegateComponent extends BaseComponent {
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;
         this.getParentTemplate = options.overrides.getParentTemplate;
+        this.getComponentTemplate = options.overrides.getComponentTemplate;
 
         let renderToParentOverrides = RENDER_DRIVERS[options.context].renderToParentOverrides;
 

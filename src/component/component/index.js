@@ -105,7 +105,7 @@ export class Component extends BaseComponent {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.addProp(options, 'parentTemplate', parentTemplate);
+        this.addProp(options, 'parentTemplate', parentTemplate, `<div class="{CLASS.ELEMENT}"></div>`);
         this.addProp(options, 'componentTemplate', componentTemplate);
 
         this.addProp(options, 'validateProps');

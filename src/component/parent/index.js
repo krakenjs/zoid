@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving } from '../../lib';
+         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving, getElement } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, __XCOMPONENT__ } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -434,22 +434,20 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
             let tasks = {
-                openContainer: this.openContainer(this.context),
+                openContainer: this.openContainer(element),
                 getDomain:     this.getDomain()
             };
 
             tasks.elementReady = Promise.try(() => {
                 if (element) {
                     return this.elementReady(element);
-                } else {
-                    return tasks.openContainer;
                 }
             });
 
             if (this.driver.openOnClick) {
                 tasks.open = this.open(element, this.context);
             } else {
-                tasks.open = tasks.elementReady.then(() => {
+                tasks.open = Promise.all([ tasks.openContainer, tasks.elementReady ]).then(() => {
                     return this.open(element, this.context);
                 });
             }
@@ -539,10 +537,11 @@ export class ParentComponent extends BaseComponent {
                 },
 
                 overrides: {
-                    focus:             () => this.focus(),
-                    userClose:         () => this.userClose(),
-                    getDomain:         () => this.getDomain(),
-                    getParentTemplate: () => this.getParentTemplate()
+                    focus:                () => this.focus(),
+                    userClose:            () => this.userClose(),
+                    getDomain:            () => this.getDomain(),
+                    getParentTemplate:    () => this.getParentTemplate(),
+                    getComponentTemplate: () => this.getComponentTemplate()
                 }
             }
 
@@ -1018,6 +1017,12 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    @promise
+    getComponentTemplate() {
+        return this.component.componentTemplate;
+    }
+
+
     /*  Create Component Template
         -------------------------
 
@@ -1025,27 +1030,35 @@ export class ParentComponent extends BaseComponent {
     */
 
     @memoize
+    @promise
     createComponentTemplate() {
+        return Promise.try(() => {
 
-        let componentTemplate = this.component.componentTemplate instanceof Function ? this.component.componentTemplate() : this.component.componentTemplate;
+            return this.getComponentTemplate();
 
-        let html = template(componentTemplate, {
-            id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-            CLASS: CLASS_NAMES,
-            ANIMATION: ANIMATION_NAMES
-        });
+        }).then(componentTemplate => {
 
-        try {
-            this.window.document.open();
-            this.window.document.write(html);
-            this.window.document.close();
-        } catch (err) {
+            return template(componentTemplate, {
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+                props: this.props,
+                CLASS: CLASS_NAMES,
+                ANIMATION: ANIMATION_NAMES
+            });
+
+        }).then(html => {
+
             try {
-                this.window.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
-            } catch (err2) {
-                // pass
+                this.window.document.open();
+                this.window.document.write(html);
+                this.window.document.close();
+            } catch (err) {
+                try {
+                    this.window.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
+                } catch (err2) {
+                    // pass
+                }
             }
-        }
+        });
     }
 
 
@@ -1063,49 +1076,57 @@ export class ParentComponent extends BaseComponent {
 
     @memoize
     @promise
-    openContainer() {
+    openContainer(element) {
         return Promise.try(() => {
-
-            if (!this.driver.parentTemplate) {
-                return;
-            }
 
             return this.getParentTemplate();
 
         }).then(parentTemplate => {
 
-            if (!parentTemplate) {
-                return;
+            return template(parentTemplate, {
+                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+                props: this.props,
+                CLASS: CLASS_NAMES,
+                ANIMATION: ANIMATION_NAMES
+            });
+
+        }).then(html => {
+
+            let el;
+
+            if (element) {
+
+                el = getElement(element);
+
+                if (!el) {
+                    throw new Error(`Could not find element: ${element}`);
+                }
+
+            } else {
+
+                this.parentTemplateFrame = iframe(null, {
+                    name: `__lightbox_container__${uniqueID()}__`,
+                    scrolling: 'no'
+                }, document.body);
+
+                this.parentTemplateFrame.style.display = 'block';
+                this.parentTemplateFrame.style.position = 'fixed';
+                this.parentTemplateFrame.style.top = '0';
+                this.parentTemplateFrame.style.left = '0';
+                this.parentTemplateFrame.style.width = '100%';
+                this.parentTemplateFrame.style.height = '100%';
+                this.parentTemplateFrame.style.zIndex = '2147483647';
+
+                this.parentTemplateFrame.contentWindow.document.open();
+                this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
+                this.parentTemplateFrame.contentWindow.document.close();
+
+                el = this.parentTemplateFrame.contentWindow.document.body;
             }
-
-            if (window.top !== window) {
-                // throw new Error(`Can only render parent template to top level window`);
-            }
-
-            this.parentTemplateFrame = iframe(null, {
-                name: `__lightbox_container__${uniqueID()}__`,
-                scrolling: 'no'
-            }, document.body);
-
-            this.parentTemplateFrame.style.display = 'block';
-            this.parentTemplateFrame.style.position = 'fixed';
-            this.parentTemplateFrame.style.top = '0';
-            this.parentTemplateFrame.style.left = '0';
-            this.parentTemplateFrame.style.width = '100%';
-            this.parentTemplateFrame.style.height = '100%';
-            this.parentTemplateFrame.style.zIndex = '2147483647';
-
-            this.parentTemplateFrame.contentWindow.document.open();
-            this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
-            this.parentTemplateFrame.contentWindow.document.close();
 
             this.parentTemplate = createElement('div', {
 
-                html: template(parentTemplate, {
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    CLASS: CLASS_NAMES,
-                    ANIMATION: ANIMATION_NAMES
-                }),
+                html,
 
                 attributes: {
                     id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`
@@ -1119,7 +1140,7 @@ export class ParentComponent extends BaseComponent {
 
             hideElement(this.parentTemplate);
 
-            this.parentTemplateFrame.contentWindow.document.body.appendChild(this.parentTemplate);
+            el.appendChild(this.parentTemplate);
 
             if (this.driver.renderedIntoParentTemplate) {
                 this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
@@ -1149,7 +1170,13 @@ export class ParentComponent extends BaseComponent {
 
             this.clean.register('destroyParentTemplate', () => {
 
-                document.body.removeChild(this.parentTemplateFrame);
+                if (this.parentTemplateFrame) {
+                    this.parentTemplateFrame.parentNode.removeChild(this.parentTemplateFrame);
+                }
+
+                if (this.parentTemplate) {
+                    this.parentTemplate.parentNode.removeChild(this.parentTemplate);
+                }
 
                 delete this.parentTemplateFrame;
                 delete this.parentTemplate;
