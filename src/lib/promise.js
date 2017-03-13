@@ -43,19 +43,23 @@ export function promisify(method) {
     };
 }
 
-export function getter(method) {
+export function getter(method, { name = 'property', timeout = 10000 } = {}) {
 
     return function() {
         return new Promise((resolve, reject) => {
             let result = method.call(this, resolve, reject);
 
-            if (result && result.then instanceof Function) {
+            if (result && typeof result.then === 'function') {
                 return result.then(resolve, reject);
             }
 
-            if (method.length === 0 || result !== undefined) {
+            if (result !== undefined) {
                 return resolve(result);
             }
+
+            setTimeout(() => {
+                reject(`Timed out waiting ${timeout}ms for ${name} getter`);
+            }, timeout);
         });
     };
 }

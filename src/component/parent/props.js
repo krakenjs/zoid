@@ -42,16 +42,21 @@ export function normalizeProp(component, instance, props, key, value) {
             value = value.bind(instance);
         } else {
             let val = value;
-            value = () => val;
+            value = () => val || Promise.resolve(val);
         }
 
-        value = getter(value);
+        value = getter(value, { name: key, timeout: prop.timeout });
 
         let _value = value;
 
         value = function() {
             component.log(`call_getter_${key}`);
-            return _value.apply(this, arguments);
+
+            return _value.apply(this, arguments).then(result => {
+                component.log(`return_getter_${key}`);
+                validateProp(prop, key, result);
+                return result;
+            });
         };
 
         if (prop.memoize) {
@@ -199,7 +204,6 @@ export function propsToQuery(propsDef, props) {
 
             if (prop.getter) {
                 return value.call().then(result => {
-                    validateProp(prop, key, result);
                     return result;
                 });
             }
