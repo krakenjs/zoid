@@ -54,7 +54,7 @@ export function normalizeProp(component, instance, props, key, value) {
 
             return _value.apply(this, arguments).then(result => {
                 component.log(`return_getter_${key}`);
-                validateProp(prop, key, result);
+                validateProp(prop, key, result, props);
                 return result;
             });
         };

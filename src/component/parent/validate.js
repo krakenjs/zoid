@@ -1,5 +1,5 @@
 
-export function validateProp(prop, key, value, required = true) {
+export function validateProp(prop, key, value, props, required = true) {
 
     let hasProp = value !== null && value !== undefined && value !== '';
 
@@ -48,7 +48,7 @@ export function validateProp(prop, key, value, required = true) {
     }
 
     if (typeof prop.validate === 'function') {
-        prop.validate(value);
+        prop.validate(value, props);
     }
 }
 
@@ -95,7 +95,7 @@ export function validateProps(component, props, required = true) {
         let prop = component.props[key];
         let value = props[key];
 
-        validateProp(prop, key, value, required);
+        validateProp(prop, key, value, props, required);
     }
 }
 
