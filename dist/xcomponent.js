@@ -11366,8 +11366,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.validateProp = validateProp;
 	exports.validateProps = validateProps;
 	exports.validate = validate;
-	function validateProp(prop, key, value) {
-	    var required = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+	function validateProp(prop, key, value, props) {
+	    var required = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 	
 	
 	    var hasProp = value !== null && value !== undefined && value !== '';
@@ -11414,7 +11414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    if (typeof prop.validate === 'function') {
-	        prop.validate(value);
+	        prop.validate(value, props);
 	    }
 	}
 	
@@ -11501,7 +11501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _prop = component.props[_key2];
 	        var _value = props[_key2];
 	
-	        validateProp(_prop, _key2, _value, required);
+	        validateProp(_prop, _key2, _value, props, required);
 	    }
 	}
 	
@@ -11597,7 +11597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            return _value.apply(this, arguments).then(function (result) {
 	                component.log('return_getter_' + key);
-	                (0, _validate.validateProp)(prop, key, result);
+	                (0, _validate.validateProp)(prop, key, result, props);
 	                return result;
 	            });
 	        };
