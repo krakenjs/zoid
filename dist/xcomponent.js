@@ -7999,6 +7999,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	function getter(method) {
+	    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+	        _ref$name = _ref.name,
+	        name = _ref$name === undefined ? 'property' : _ref$name,
+	        _ref$timeout = _ref.timeout,
+	        timeout = _ref$timeout === undefined ? 10000 : _ref$timeout;
 	
 	    return function () {
 	        var _this2 = this;
@@ -8006,13 +8011,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return new _promise.SyncPromise(function (resolve, reject) {
 	            var result = method.call(_this2, resolve, reject);
 	
-	            if (result && result.then instanceof Function) {
+	            if (result && typeof result.then === 'function') {
 	                return result.then(resolve, reject);
 	            }
 	
-	            if (method.length === 0 || result !== undefined) {
+	            if (result !== undefined) {
 	                return resolve(result);
 	            }
+	
+	            setTimeout(function () {
+	                reject('Timed out waiting ' + timeout + 'ms for ' + name + ' getter');
+	            }, timeout);
 	        });
 	    };
 	}
@@ -11575,17 +11584,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            var val = value;
 	            value = function value() {
-	                return val;
+	                return val || _promise.SyncPromise.resolve(val);
 	            };
 	        }
 	
-	        value = (0, _lib.getter)(value);
+	        value = (0, _lib.getter)(value, { name: key, timeout: prop.timeout });
 	
 	        var _value = value;
 	
 	        value = function value() {
 	            component.log('call_getter_' + key);
-	            return _value.apply(this, arguments);
+	
+	            return _value.apply(this, arguments).then(function (result) {
+	                component.log('return_getter_' + key);
+	                (0, _validate.validateProp)(prop, key, result);
+	                return result;
+	            });
 	        };
 	
 	        if (prop.memoize) {
@@ -11740,7 +11754,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            if (prop.getter) {
 	                return value.call().then(function (result) {
-	                    (0, _validate.validateProp)(prop, key, result);
 	                    return result;
 	                });
 	            }
