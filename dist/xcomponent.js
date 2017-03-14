@@ -198,9 +198,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _parent = __webpack_require__(/*! ../parent */ 58);
 	
-	var _delegate = __webpack_require__(/*! ../delegate */ 62);
+	var _delegate = __webpack_require__(/*! ../delegate */ 63);
 	
-	var _props = __webpack_require__(/*! ./props */ 63);
+	var _props = __webpack_require__(/*! ./props */ 64);
 	
 	var _window = __webpack_require__(/*! ../window */ 54);
 	
@@ -208,9 +208,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _drivers = __webpack_require__(/*! ../parent/drivers */ 59);
 	
-	var _validate2 = __webpack_require__(/*! ./validate */ 64);
+	var _validate2 = __webpack_require__(/*! ./validate */ 65);
 	
-	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 65);
+	var _parent2 = __webpack_require__(/*! ./templates/parent.htm */ 62);
 	
 	var _parent3 = _interopRequireDefault(_parent2);
 	
@@ -333,7 +333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        // Templates and styles for the parent page and the initial rendering of the component
 	
-	        _this.addProp(options, 'parentTemplate', _parent3['default'], '<div class="{CLASS.ELEMENT}"></div>');
+	        _this.addProp(options, 'parentTemplate', _parent3['default']);
 	        _this.addProp(options, 'componentTemplate', _component2['default']);
 	
 	        _this.addProp(options, 'validateProps');
@@ -9638,6 +9638,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _props = __webpack_require__(/*! ./props */ 61);
 	
+	var _parent = __webpack_require__(/*! ../component/templates/parent.htm */ 62);
+	
+	var _parent2 = _interopRequireDefault(_parent);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -10815,117 +10819,121 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return _this21.getParentTemplate();
 	            }).then(function (parentTemplate) {
 	
+	                if (parentTemplate === _parent2['default'] && _this21.context === _constants.CONTEXT_TYPES.IFRAME) {
+	                    return;
+	                }
+	
 	                return (0, _lib.template)(parentTemplate, {
 	                    id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid,
 	                    props: _this21.props,
 	                    CLASS: _constants.CLASS_NAMES,
 	                    ANIMATION: _constants.ANIMATION_NAMES
-	                });
-	            }).then(function (html) {
+	                }).then(function (html) {
 	
-	                var el = void 0;
+	                    var el = void 0;
 	
-	                if (element) {
+	                    if (element) {
 	
-	                    el = (0, _lib.getElement)(element);
+	                        el = (0, _lib.getElement)(element);
 	
-	                    if (!el) {
-	                        throw new Error('Could not find element: ' + element);
-	                    }
-	                } else {
+	                        if (!el) {
+	                            throw new Error('Could not find element: ' + element);
+	                        }
+	                    } else {
 	
-	                    _this21.parentTemplateFrame = (0, _lib.iframe)(null, {
-	                        name: '__lightbox_container__' + (0, _lib.uniqueID)() + '__',
-	                        scrolling: 'no'
-	                    }, document.body);
+	                        _this21.parentTemplateFrame = (0, _lib.iframe)(null, {
+	                            name: '__lightbox_container__' + (0, _lib.uniqueID)() + '__',
+	                            scrolling: 'no'
+	                        }, document.body);
 	
-	                    _this21.parentTemplateFrame.style.display = 'block';
-	                    _this21.parentTemplateFrame.style.position = 'fixed';
-	                    _this21.parentTemplateFrame.style.top = '0';
-	                    _this21.parentTemplateFrame.style.left = '0';
-	                    _this21.parentTemplateFrame.style.width = '100%';
-	                    _this21.parentTemplateFrame.style.height = '100%';
-	                    _this21.parentTemplateFrame.style.zIndex = '2147483647';
+	                        _this21.parentTemplateFrame.style.display = 'block';
+	                        _this21.parentTemplateFrame.style.position = 'fixed';
+	                        _this21.parentTemplateFrame.style.top = '0';
+	                        _this21.parentTemplateFrame.style.left = '0';
+	                        _this21.parentTemplateFrame.style.width = '100%';
+	                        _this21.parentTemplateFrame.style.height = '100%';
+	                        _this21.parentTemplateFrame.style.zIndex = '2147483647';
 	
-	                    _this21.parentTemplateFrame.contentWindow.document.open();
-	                    _this21.parentTemplateFrame.contentWindow.document.write('<body></body>');
-	                    _this21.parentTemplateFrame.contentWindow.document.close();
+	                        _this21.parentTemplateFrame.contentWindow.document.open();
+	                        _this21.parentTemplateFrame.contentWindow.document.write('<body></body>');
+	                        _this21.parentTemplateFrame.contentWindow.document.close();
 	
-	                    el = _this21.parentTemplateFrame.contentWindow.document.body;
-	                }
-	
-	                _this21.parentTemplate = (0, _lib.createElement)('div', {
-	
-	                    html: html,
-	
-	                    attributes: {
-	                        id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid
-	                    },
-	
-	                    'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.context]
-	                });
-	
-	                (0, _lib.hideElement)(_this21.parentTemplate);
-	
-	                el.appendChild(_this21.parentTemplate);
-	
-	                if (_this21.driver.renderedIntoParentTemplate) {
-	                    _this21.elementTemplate = _this21.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
-	
-	                    if (!_this21.elementTemplate) {
-	                        throw new Error('Could not find element to render component into');
+	                        el = _this21.parentTemplateFrame.contentWindow.document.body;
 	                    }
 	
-	                    (0, _lib.hideElement)(_this21.elementTemplate);
-	                }
+	                    _this21.parentTemplate = (0, _lib.createElement)('div', {
 	
-	                var eventHandlers = [];
+	                        html: html,
 	
-	                if (_this21.driver.focusable) {
-	                    eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
-	                        return _this21.focus();
-	                    }));
-	                }
+	                        attributes: {
+	                            id: _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.props.uid
+	                        },
 	
-	                eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
-	                    return _this21.userClose();
-	                }));
+	                        'class': [_constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + '-' + _this21.context]
+	                    });
 	
-	                _this21.clean.register('destroyContainerEvents', function () {
-	                    for (var _iterator5 = eventHandlers, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
-	                        var _ref15;
+	                    (0, _lib.hideElement)(_this21.parentTemplate);
 	
-	                        if (_isArray5) {
-	                            if (_i5 >= _iterator5.length) break;
-	                            _ref15 = _iterator5[_i5++];
-	                        } else {
-	                            _i5 = _iterator5.next();
-	                            if (_i5.done) break;
-	                            _ref15 = _i5.value;
+	                    el.appendChild(_this21.parentTemplate);
+	
+	                    if (_this21.driver.renderedIntoParentTemplate) {
+	                        _this21.elementTemplate = _this21.parentTemplate.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
+	
+	                        if (!_this21.elementTemplate) {
+	                            throw new Error('Could not find element to render component into');
 	                        }
 	
-	                        var eventHandler = _ref15;
-	
-	                        eventHandler.cancel();
-	                    }
-	                });
-	
-	                // let overflow = setOverflow(document.documentElement, 'hidden');
-	
-	                _this21.clean.register('destroyParentTemplate', function () {
-	
-	                    if (_this21.parentTemplateFrame) {
-	                        _this21.parentTemplateFrame.parentNode.removeChild(_this21.parentTemplateFrame);
+	                        (0, _lib.hideElement)(_this21.elementTemplate);
 	                    }
 	
-	                    if (_this21.parentTemplate) {
-	                        _this21.parentTemplate.parentNode.removeChild(_this21.parentTemplate);
+	                    var eventHandlers = [];
+	
+	                    if (_this21.driver.focusable) {
+	                        eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.FOCUS, _constants.EVENT_NAMES.CLICK, function (event) {
+	                            return _this21.focus();
+	                        }));
 	                    }
 	
-	                    delete _this21.parentTemplateFrame;
-	                    delete _this21.parentTemplate;
+	                    eventHandlers.push((0, _lib.addEventToClass)(_this21.parentTemplate, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function (event) {
+	                        return _this21.userClose();
+	                    }));
 	
-	                    // overflow.reset();
+	                    _this21.clean.register('destroyContainerEvents', function () {
+	                        for (var _iterator5 = eventHandlers, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	                            var _ref15;
+	
+	                            if (_isArray5) {
+	                                if (_i5 >= _iterator5.length) break;
+	                                _ref15 = _iterator5[_i5++];
+	                            } else {
+	                                _i5 = _iterator5.next();
+	                                if (_i5.done) break;
+	                                _ref15 = _i5.value;
+	                            }
+	
+	                            var eventHandler = _ref15;
+	
+	                            eventHandler.cancel();
+	                        }
+	                    });
+	
+	                    // let overflow = setOverflow(document.documentElement, 'hidden');
+	
+	                    _this21.clean.register('destroyParentTemplate', function () {
+	
+	                        if (_this21.parentTemplateFrame) {
+	                            _this21.parentTemplateFrame.parentNode.removeChild(_this21.parentTemplateFrame);
+	                        }
+	
+	                        if (_this21.parentTemplate) {
+	                            _this21.parentTemplate.parentNode.removeChild(_this21.parentTemplate);
+	                        }
+	
+	                        delete _this21.parentTemplateFrame;
+	                        delete _this21.parentTemplate;
+	
+	                        // overflow.reset();
+	                    });
 	                });
 	            });
 	        }
@@ -11803,6 +11811,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 62 */
+/*!******************************************************!*\
+  !*** ./src/component/component/templates/parent.htm ***!
+  \******************************************************/
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.LIGHTBOX} .{CLASS.ELEMENT} {\n        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);\n        position: fixed;\n\n        top: 50%;\n        left: 50%;\n\n        transform: translate3d(-50%, -50%, 0);\n        -webkit-transform: translate3d(-50%, -50%, 0);\n        -moz-transform: translate3d(-50%, -50%, 0);\n        -o-transform: translate3d(-50%, -50%, 0);\n        -ms-transform: translate3d(-50%, -50%, 0);\n    }\n\n    #{id}.{CLASS.LIGHTBOX} iframe {\n        height: 100%;\n        width: 100%;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
+
+/***/ },
+/* 63 */
 /*!*****************************************!*\
   !*** ./src/component/delegate/index.js ***!
   \*****************************************/
@@ -11957,7 +11974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(_base.BaseComponent);
 
 /***/ },
-/* 63 */
+/* 64 */
 /*!******************************************!*\
   !*** ./src/component/component/props.js ***!
   \******************************************/
@@ -12085,7 +12102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 64 */
+/* 65 */
 /*!*********************************************!*\
   !*** ./src/component/component/validate.js ***!
   \*********************************************/
@@ -12251,15 +12268,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	}
-
-/***/ },
-/* 65 */
-/*!******************************************************!*\
-  !*** ./src/component/component/templates/parent.htm ***!
-  \******************************************************/
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"{CLASS.XCOMPONENT}-overlay {CLASS.FOCUS}\">\n    <a href=\"#{CLASS.CLOSE}\" class=\"{CLASS.CLOSE}\"></a>\n\n    <div class=\"{CLASS.ELEMENT}\"></div>\n</div>\n\n<style>\n    #{id} .{CLASS.XCOMPONENT}-overlay {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    #{id}.{CLASS.POPUP} .{CLASS.XCOMPONENT}-overlay {\n        cursor: pointer;\n    }\n\n    #{id}.{CLASS.LIGHTBOX} .{CLASS.ELEMENT} {\n        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);\n        position: fixed;\n\n        top: 50%;\n        left: 50%;\n\n        transform: translate3d(-50%, -50%, 0);\n        -webkit-transform: translate3d(-50%, -50%, 0);\n        -moz-transform: translate3d(-50%, -50%, 0);\n        -o-transform: translate3d(-50%, -50%, 0);\n        -ms-transform: translate3d(-50%, -50%, 0);\n    }\n\n    #{id}.{CLASS.LIGHTBOX} iframe {\n        height: 100%;\n        width: 100%;\n    }\n\n    #{id} .{CLASS.CLOSE} {\n        position: absolute;\n        right: 16px;\n        top: 16px;\n        width: 16px;\n        height: 16px;\n        opacity: 0.6;\n    }\n\n    #{id} .{CLASS.CLOSE}:hover {\n        opacity: 1;\n    }\n\n    #{id} .{CLASS.CLOSE}:before, .{CLASS.CLOSE}:after {\n        position: absolute;\n        left: 8px;\n        content: ' ';\n        height: 16px;\n        width: 2px;\n        background-color: white;\n    }\n\n    #{id} .{CLASS.CLOSE}:before {\n        transform: rotate(45deg);\n    }\n\n    #{id} .{CLASS.CLOSE}:after {\n        transform: rotate(-45deg);\n    }\n</style>"
 
 /***/ },
 /* 66 */
