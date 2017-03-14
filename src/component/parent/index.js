@@ -13,6 +13,8 @@ import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
 
+import defaultParentTemplate from '../component/templates/parent.htm';
+
 let activeComponents = [];
 
 function memoize(target, name, descriptor) {
@@ -1083,105 +1085,108 @@ export class ParentComponent extends BaseComponent {
 
         }).then(parentTemplate => {
 
+            if (parentTemplate === defaultParentTemplate && this.context === CONTEXT_TYPES.IFRAME) {
+                return;
+            }
+
             return template(parentTemplate, {
                 id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
                 props: this.props,
                 CLASS: CLASS_NAMES,
                 ANIMATION: ANIMATION_NAMES
-            });
+            }).then(html => {
 
-        }).then(html => {
+                let el;
 
-            let el;
+                if (element) {
 
-            if (element) {
+                    el = getElement(element);
 
-                el = getElement(element);
+                    if (!el) {
+                        throw new Error(`Could not find element: ${element}`);
+                    }
 
-                if (!el) {
-                    throw new Error(`Could not find element: ${element}`);
+                } else {
+
+                    this.parentTemplateFrame = iframe(null, {
+                        name: `__lightbox_container__${uniqueID()}__`,
+                        scrolling: 'no'
+                    }, document.body);
+
+                    this.parentTemplateFrame.style.display = 'block';
+                    this.parentTemplateFrame.style.position = 'fixed';
+                    this.parentTemplateFrame.style.top = '0';
+                    this.parentTemplateFrame.style.left = '0';
+                    this.parentTemplateFrame.style.width = '100%';
+                    this.parentTemplateFrame.style.height = '100%';
+                    this.parentTemplateFrame.style.zIndex = '2147483647';
+
+                    this.parentTemplateFrame.contentWindow.document.open();
+                    this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
+                    this.parentTemplateFrame.contentWindow.document.close();
+
+                    el = this.parentTemplateFrame.contentWindow.document.body;
                 }
 
-            } else {
+                this.parentTemplate = createElement('div', {
 
-                this.parentTemplateFrame = iframe(null, {
-                    name: `__lightbox_container__${uniqueID()}__`,
-                    scrolling: 'no'
-                }, document.body);
+                    html,
 
-                this.parentTemplateFrame.style.display = 'block';
-                this.parentTemplateFrame.style.position = 'fixed';
-                this.parentTemplateFrame.style.top = '0';
-                this.parentTemplateFrame.style.left = '0';
-                this.parentTemplateFrame.style.width = '100%';
-                this.parentTemplateFrame.style.height = '100%';
-                this.parentTemplateFrame.style.zIndex = '2147483647';
+                    attributes: {
+                        id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`
+                    },
 
-                this.parentTemplateFrame.contentWindow.document.open();
-                this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
-                this.parentTemplateFrame.contentWindow.document.close();
+                    class: [
+                        CLASS_NAMES.XCOMPONENT,
+                        `${CLASS_NAMES.XCOMPONENT}-${this.context}`
+                    ]
+                });
 
-                el = this.parentTemplateFrame.contentWindow.document.body;
-            }
+                hideElement(this.parentTemplate);
 
-            this.parentTemplate = createElement('div', {
+                el.appendChild(this.parentTemplate);
 
-                html,
+                if (this.driver.renderedIntoParentTemplate) {
+                    this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
 
-                attributes: {
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`
-                },
+                    if (!this.elementTemplate) {
+                        throw new Error('Could not find element to render component into');
+                    }
 
-                class: [
-                    CLASS_NAMES.XCOMPONENT,
-                    `${CLASS_NAMES.XCOMPONENT}-${this.context}`
-                ]
-            });
-
-            hideElement(this.parentTemplate);
-
-            el.appendChild(this.parentTemplate);
-
-            if (this.driver.renderedIntoParentTemplate) {
-                this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
-
-                if (!this.elementTemplate) {
-                    throw new Error('Could not find element to render component into');
+                    hideElement(this.elementTemplate);
                 }
 
-                hideElement(this.elementTemplate);
-            }
+                let eventHandlers = [];
 
-            let eventHandlers = [];
-
-            if (this.driver.focusable) {
-                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
-            }
-
-            eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
-
-            this.clean.register('destroyContainerEvents', () => {
-                for (let eventHandler of eventHandlers) {
-                    eventHandler.cancel();
-                }
-            });
-
-            // let overflow = setOverflow(document.documentElement, 'hidden');
-
-            this.clean.register('destroyParentTemplate', () => {
-
-                if (this.parentTemplateFrame) {
-                    this.parentTemplateFrame.parentNode.removeChild(this.parentTemplateFrame);
+                if (this.driver.focusable) {
+                    eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
                 }
 
-                if (this.parentTemplate) {
-                    this.parentTemplate.parentNode.removeChild(this.parentTemplate);
-                }
+                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
 
-                delete this.parentTemplateFrame;
-                delete this.parentTemplate;
+                this.clean.register('destroyContainerEvents', () => {
+                    for (let eventHandler of eventHandlers) {
+                        eventHandler.cancel();
+                    }
+                });
 
-                // overflow.reset();
+                // let overflow = setOverflow(document.documentElement, 'hidden');
+
+                this.clean.register('destroyParentTemplate', () => {
+
+                    if (this.parentTemplateFrame) {
+                        this.parentTemplateFrame.parentNode.removeChild(this.parentTemplateFrame);
+                    }
+
+                    if (this.parentTemplate) {
+                        this.parentTemplate.parentNode.removeChild(this.parentTemplate);
+                    }
+
+                    delete this.parentTemplateFrame;
+                    delete this.parentTemplate;
+
+                    // overflow.reset();
+                });
             });
         });
     }
