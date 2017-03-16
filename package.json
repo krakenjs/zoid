@@ -27,6 +27,7 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "babel-core": "^6.7.7",
+    "babel-eslint": "^7.1.1",
     "babel-loader": "^6.2.4",
     "babel-plugin-__coverage__": "^11.0.0",
     "babel-plugin-add-module-exports": "^0.1.4",
@@ -71,10 +72,7 @@
     "yargs": "^4.7.1"
   },
   "dependencies": {
-    "babel-eslint": "^6.0.4",
     "beaver-logger": "^2",
-    "es6-promise": "^3.1.2",
-    "es6-promise-min": "^2.0.1",
     "hi-base32": "^0.1.1",
     "post-robot": "^4.0.0",
     "sync-browser-mocks": "^1.0.4"
