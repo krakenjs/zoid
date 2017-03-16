@@ -1,10 +1,11 @@
 
 var gulp = require('gulp');
 var webpack = require('webpack');
-var gulpWebpack = require('gulp-webpack');
+var gulpWebpack = require('webpack-stream');
 var eslint = require('gulp-eslint');
 var Server = require('karma').Server;
 var argv = require('yargs').argv;
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 gulp.task('build', ['karma', 'webpack', 'webpack-min']);
 
@@ -12,13 +13,12 @@ var FILE_NAME = 'xcomponent';
 var MODULE_NAME = 'xcomponent';
 
 var WEBPACK_CONFIG = {
-  devtool: 'source-map',
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         exclude: /(dist)/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           presets: ['es2015'],
           plugins: [
@@ -47,6 +47,9 @@ var WEBPACK_CONFIG = {
   plugins: [
     new webpack.DefinePlugin({
         __TEST__: false
+    }),
+    new webpack.SourceMapDevToolPlugin({
+        filename: '[file].map'
     })
   ],
   bail: true
@@ -60,9 +63,13 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
     library: MODULE_NAME
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
+    new webpack.SourceMapDevToolPlugin({
+        filename: '[file].map'
+    }),
+    new UglifyJSPlugin({
       test: /\.js$/,
-      minimize: true
+      minimize: true,
+      sourceMap: true
     }),
     new webpack.DefinePlugin({
         __TEST__: false
@@ -72,13 +79,13 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
 
 gulp.task('webpack', ['lint'], function() {
   return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG))
+      .pipe(gulpWebpack(WEBPACK_CONFIG, webpack))
       .pipe(gulp.dest('dist'));
 });
 
 gulp.task('webpack-min', ['lint'], function() {
   return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN))
+      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN, webpack))
       .pipe(gulp.dest('dist'));
 });
 
