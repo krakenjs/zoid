@@ -5733,12 +5733,12 @@ function dotify(obj) {
 
     prefix = prefix ? prefix + '.' : prefix;
     for (var key in obj) {
-        if (!obj[key]) {
+        if (obj[key] === undefined || obj[key] === null) {
             continue;
         } else if (obj[key] && _typeof(obj[key]) === 'object') {
             newobj = dotify(obj[key], '' + prefix + key, newobj);
         } else {
-            newobj['' + prefix + key] = obj[key];
+            newobj['' + prefix + key] = obj[key].toString();
         }
     }
     return newobj;
