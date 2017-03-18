@@ -4556,7 +4556,6 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 _this9.component.log('render_' + _this9.context, { context: _this9.context, element: element, loadUrl: loadUrl });
 
                 var tasks = {
-                    openContainer: _this9.openContainer(element),
                     getDomain: _this9.getDomain()
                 };
 
@@ -4564,6 +4563,10 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                     if (element) {
                         return _this9.elementReady(element);
                     }
+                });
+
+                tasks.openContainer = tasks.elementReady.then(function () {
+                    return _this9.openContainer(element);
                 });
 
                 if (_this9.driver.openOnClick) {
