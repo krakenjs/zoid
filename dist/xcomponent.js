@@ -5733,7 +5733,9 @@ function dotify(obj) {
 
     prefix = prefix ? prefix + '.' : prefix;
     for (var key in obj) {
-        if (obj[key] && _typeof(obj[key]) === 'object') {
+        if (!obj[key]) {
+            continue;
+        } else if (obj[key] && _typeof(obj[key]) === 'object') {
             newobj = dotify(obj[key], '' + prefix + key, newobj);
         } else {
             newobj['' + prefix + key] = obj[key];
@@ -12130,7 +12132,9 @@ function formatQuery() {
     var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 
-    return Object.keys(obj).map(function (key) {
+    return Object.keys(obj).filter(function (key) {
+        return typeof obj[key] === 'string';
+    }).map(function (key) {
         return (0, _util.urlEncode)(key) + '=' + (0, _util.urlEncode)(obj[key]);
     }).join('&');
 }
