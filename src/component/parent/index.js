@@ -436,7 +436,6 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
             let tasks = {
-                openContainer: this.openContainer(element),
                 getDomain:     this.getDomain()
             };
 
@@ -444,6 +443,10 @@ export class ParentComponent extends BaseComponent {
                 if (element) {
                     return this.elementReady(element);
                 }
+            });
+
+            tasks.openContainer = tasks.elementReady.then(() => {
+                return this.openContainer(element);
             });
 
             if (this.driver.openOnClick) {
