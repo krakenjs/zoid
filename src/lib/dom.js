@@ -369,7 +369,9 @@ export function getDomainFromUrl(url) {
 
 export function formatQuery(obj = {}) {
 
-    return Object.keys(obj).map(key => {
+    return Object.keys(obj).filter(key => {
+        return typeof obj[key] === 'string';
+    }).map(key => {
         return `${urlEncode(key)}=${urlEncode(obj[key])}`;
     }).join('&');
 }
