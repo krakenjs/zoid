@@ -1,5 +1,5 @@
 
-import postRobot from 'post-robot/src';
+import * as postRobot from 'post-robot/src';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';

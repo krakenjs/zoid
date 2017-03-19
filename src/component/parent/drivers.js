@@ -1,5 +1,5 @@
 
-import postRobot from 'post-robot/src';
+import * as postRobot from 'post-robot/src';
 
 import { iframe, popup, getElement, toCSS, isPerc, toNum, hideElement } from '../../lib';
 import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';

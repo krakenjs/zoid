@@ -1,6 +1,6 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
-import postRobot from 'post-robot/src';
+import * as postRobot from 'post-robot/src';
 
 import { once, copyProp } from '../lib';
 

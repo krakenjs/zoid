@@ -1,5 +1,5 @@
 
-import postRobot from 'post-robot/src';
+import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';

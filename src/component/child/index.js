@@ -1,7 +1,7 @@
 
-import $logger from 'beaver-logger/client';
+import * as $logger from 'beaver-logger/client';
+import * as postRobot from 'post-robot/src';
 
-import postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
