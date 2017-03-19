@@ -23,9 +23,7 @@ export let htmlComponent = {
 
             component.log(`instantiate_script_component`);
 
-            let props;
-
-            eval(`props = ${element.innerText}`); // eslint-disable-line no-eval
+            let props = eval(`(${element.innerText})`); // eslint-disable-line no-eval
 
             let container = document.createElement('div');
             element.parentNode.replaceChild(container, element);
