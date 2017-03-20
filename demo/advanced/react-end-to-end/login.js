@@ -1,5 +1,5 @@
 
-window.MyLoginComponent = xcomponent.create({
+window.MyLoginXComponent = xcomponent.create({
 
     // The html tag used to render my component
 
