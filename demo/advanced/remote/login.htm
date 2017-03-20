@@ -2,13 +2,70 @@
 <head>
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-	<link rel="stylesheet" href="./component.css" />
 
 	<!-- Pull in xcomponent and the login component we defined -->
 
-	<script src="../../dist/xcomponent.js"></script>
-	<script src="./component.js"></script>
+	<script src="../../../dist/xcomponent.js"></script>
+	<script src="./login.js"></script>
 
+	<style>
+		html, body {
+			overflow: hidden;
+		}
+
+		body {
+			text-align: center;
+			border: 1px solid #ccc;
+			height: 100%;
+			width: 100%;
+		}
+
+		form, input, button {
+			text-align: center;
+			margin-top: 10px;
+		}
+
+		.spinner {
+			animation: rotator 1.4s linear infinite;
+			display: inline-block;
+			margin-top: 40px;
+			display: none;
+		}
+
+		@keyframes rotator {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(270deg); }
+		}
+
+		.path {
+			stroke-dasharray: 187;
+			stroke-dashoffset: 0;
+			transform-origin: center;
+			animation:
+					dash 1.4s ease-in-out infinite,
+					colors 5.6s ease-in-out infinite;
+		}
+
+		@keyframes colors {
+			0% { stroke: #4285F4; }
+			25% { stroke: #DE3E35; }
+			50% { stroke: #F7C223; }
+			75% { stroke: #1B9A59; }
+			100% { stroke: #4285F4; }
+		}
+
+		@keyframes dash {
+			0% { stroke-dashoffset:187; }
+			50% {
+				stroke-dashoffset: 47;
+				transform:rotate(135deg);
+			}
+			100% {
+				stroke-dashoffset: 187;
+				transform:rotate(450deg);
+			}
+		}
+	</style>
 </head>
 
 <body>
@@ -29,8 +86,8 @@
 
 		// Pre-polulate the email field, if we're passed an email
 
-		if (window.xchild.props.prefilledEmail) {
-			document.querySelector('#email').value = window.xchild.props.prefilledEmail;
+		if (window.xprops.prefilledEmail) {
+			document.querySelector('#email').value = window.xprops.prefilledEmail;
 		}
 
 		// Handle the button click to log the user in
@@ -56,7 +113,7 @@
 
 				// Since we had a successful login, call-back the parent page to let them know which user logged in:
 
-				window.xchild.props.onLogin(email);
+				window.xprops.onLogin(email);
 				window.xchild.close();
 
 			}, 2000);

@@ -1,19 +1,32 @@
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="./style.css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="../../dist/xcomponent.js"></script>
-    <script src="../component/component.js"></script>
+    <script src="../../../dist/xcomponent.js"></script>
+    <script src="./login.js"></script>
+
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h3 {
+            margin: 50px;
+        }
+
+        #container {
+            display: inline-block;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div id="page"></div>
+    <div id="container"></div>
 
     <script type="text/babel">
 
@@ -39,18 +52,18 @@
 
             render() {
                 return (
-                    <div>
-                        <h3>Log in on xyz.com</h3>
+                        <div>
+                            <h3>Log in on xyz.com</h3>
 
-                        <MyLoginComponent.react prefilledEmail={ this.state.email } onLogin={ email => this.onLogin(email) } />
+                            <MyLoginComponent.react prefilledEmail={ this.state.email } onLogin={ email => this.onLogin(email) } />
 
-                        <div id="result">{this.state.userLoggedIn ? 'User logged in with email: ' + this.state.email : ''}</div>
-                    </div>
+                            <div id="result">{this.state.userLoggedIn ? 'User logged in with email: ' + this.state.email : ''}</div>
+                        </div>
                 );
             }
         }
 
-        ReactDOM.render(<Main />, document.querySelector('#page'));
+        ReactDOM.render(<Main />, document.querySelector('#container'));
 
     </script>
 

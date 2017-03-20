@@ -1,10 +1,23 @@
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="./style.css" />
 
-    <script src="../../dist/xcomponent.js"></script>
-    <script src="../component/component.js"></script>
+    <script src="../../../dist/xcomponent.js"></script>
+    <script src="./login.js"></script>
+
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h3 {
+            margin: 50px;
+        }
+
+        #container {
+            display: inline-block;
+        }
+    </style>
 </head>
 
 <body>
@@ -19,7 +32,7 @@
 
         // Render the component
 
-        MyLoginComponent.render({
+        MyLoginComponent.renderLightbox({
 
             prefilledEmail: 'foo@bar.com',
 
@@ -28,7 +41,7 @@
                 document.querySelector('#result').innerText = email + ' logged in!';
             }
 
-        }, '#container');
+        });
 
     </script>
 

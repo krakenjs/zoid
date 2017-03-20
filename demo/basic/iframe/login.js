@@ -7,7 +7,7 @@ window.MyLoginComponent = xcomponent.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: document.currentScript.src.replace(/[^\/]+$/, 'component.htm'),
+    url: './login.htm',
 
     // The size of the component on their page
 

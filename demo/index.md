@@ -10,18 +10,16 @@
 
 ## basic demos
 
-- [iframe component](./basic/iframe.htm)
-- [lightbox component](./basic/lightbox.htm)
-- [popup component](./basic/popup.htm)
+- [iframe component](./basic/iframe/index.htm)
+- [lightbox component](./basic/lightbox/index.htm)
+- [popup component](./basic/popup/index.htm)
 
 ## framework demos
 
-- [script tag component](./frameworks/script.htm)
-- [react component](./frameworks/react.htm)
-- [angular component](./angular/popup.htm)
+- [script tag component](./frameworks/script/index.htm)
+- [react component](./frameworks/react/index.htm)
+- [angular component](./angular/popup/index.htm)
 
-## render to parent demos
+## advanced demos
 
-- [render iframe to parent](./renderToParent/iframe.htm)
-- [render lightbox to parent](./renderToParent/lightbox.htm)
-- [render popup to parent](./renderToParent/popup.htm)
+- [render remote](./advanced/remote/index.htm)

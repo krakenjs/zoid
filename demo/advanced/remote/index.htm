@@ -1,0 +1,46 @@
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+
+    <script src="../../../dist/xcomponent.js"></script>
+
+    <script src="./login-button.js"></script>
+    <script src="./login.js"></script>
+
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h3 {
+            margin: 50px;
+        }
+
+        #container, #loginContainer {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Log in on xyz.com</h3>
+
+    <div id="container"></div>
+
+    <hr>
+
+    <div id="loginContainer"></div>
+
+    <script>
+        if (window.location.protocol === 'file:') {
+            throw new Error(`Must run remote render demo on a webserver, not on local filesystem`);
+        }
+
+        MyLoginButtonComponent.render({
+
+            loginContainer: '#loginContainer'
+
+        }, '#container');
+    </script>
+
+</body>

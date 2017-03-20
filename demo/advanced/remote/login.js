@@ -1,13 +1,13 @@
 
-window.MyLoginButtonComponent = xcomponent.create({
+window.MyLoginComponent = xcomponent.create({
 
     // The html tag used to render my component
 
-    tag: 'my-login-button-component',
+    tag: 'my-login-component',
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: document.currentScript.src.replace(/[^\/]+$/, 'component.htm'),
+    url: './login.htm',
 
     // The size of the component on their page
 
@@ -16,17 +16,19 @@ window.MyLoginButtonComponent = xcomponent.create({
         height: 150
     },
 
+    remoteRenderDomain: /.*/,
+
     // The properties they can (or must) pass down to my component
 
     props: {
 
-        context: {
-            type: 'string'
-        },
-
-        element: {
+        prefilledEmail: {
             type: 'string',
             required: false
+        },
+
+        onLogin: {
+            type: 'function'
         }
     }
 });
