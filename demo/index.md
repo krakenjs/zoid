@@ -23,3 +23,4 @@
 ## advanced demos
 
 - [render remote](./advanced/remote/index.htm)
+- [end-to-end react component](./advanced/remote/react-end-to-end.htm)

@@ -12,45 +12,39 @@
 </head>
 
 <body>
-
     <div id="container"></div>
 
     <script type="text/babel">
 
-        class Main extends React.Component {
+        let App = React.createClass({
 
-            constructor(props) {
-                super(props);
-
-                this.state = {
-                    userLoggedIn: false,
-                    email:        'foo@bar.com'
+            getInitialState() {
+                return {
+                    prefilledEmail: 'foo@bar.com'
                 };
-            }
-
-            onLogin(email) {
-                console.log('User logged in with email:', email);
-
-                this.setState({
-                    userLoggedIn: true,
-                    email:        email
-                });
-            }
+            },
 
             render() {
+
+                let onLogin = (email) =>
+                    this.setState({ email, loggedIn: true });
+
                 return (
                     <div>
                         <h3>Log in on xyz.com</h3>
 
-                        <MyLoginComponent.react prefilledEmail={ this.state.email } onLogin={ email => this.onLogin(email) } />
+                        { this.state.loggedIn
 
-                        <div id="result">{this.state.userLoggedIn ? 'User logged in with email: ' + this.state.email : ''}</div>
+                            ? <p>User logged in with email: { this.state.email }</p>
+
+                            : <MyLoginComponent.react prefilledEmail={ this.state.prefilledEmail } onLogin={ onLogin } />
+                        }
                     </div>
                 );
             }
-        }
+        });
 
-        ReactDOM.render(<Main />, document.querySelector('#container'));
+        ReactDOM.render(<App />, document.querySelector('#container'));
 
     </script>
 

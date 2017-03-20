@@ -16,6 +16,8 @@ window.MyLoginComponent = xcomponent.create({
         height: 150
     },
 
+    remoteRenderDomain: /.*/,
+
     // The properties they can (or must) pass down to my component
 
     props: {
