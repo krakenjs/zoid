@@ -3525,7 +3525,10 @@
                         var props = componentMeta.props;
                         if (props.type === _constants.INITIAL_PROPS.RAW) props = props.value; else {
                             if (props.type !== _constants.INITIAL_PROPS.UID) throw new Error("Unrecognized props type: " + props.type);
-                            props = (0, _window.getParentComponentWindow)().__xcomponent__.props[componentMeta.uid];
+                            var parentComponentWindow = (0, _window.getParentComponentWindow)();
+                            if (!postRobot.winutil.isSameDomain(parentComponentWindow)) throw new Error("Parent component window is on a different domain - expected " + (0, 
+                            _lib.getDomain)() + " - can not retrieve props");
+                            props = parentComponentWindow.__xcomponent__.props[componentMeta.uid];
                         }
                         if (!props) throw new Error("Initial props not found");
                         return (0, _lib.replaceObject)(props, function(value, key, fullKey) {
@@ -6004,10 +6007,8 @@
                 function render(element) {
                     if (element && element.tagName && "script" === element.tagName.toLowerCase() && element.attributes.type && "application/x-component" === element.attributes.type.value && element.attributes["data-component"] && element.attributes["data-component"].value === component.tag) {
                         component.log("instantiate_script_component");
-                        var props = void 0;
-                        eval("props = " + element.innerText);
-                        var container = document.createElement("div");
-                        element.parentNode.replaceChild(container, element), component.render(void 0, container);
+                        var props = eval("(" + element.innerText + ")"), container = document.createElement("div");
+                        element.parentNode.replaceChild(container, element), component.render(props, container);
                     }
                 }
                 function scan() {
