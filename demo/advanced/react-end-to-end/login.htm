@@ -1,20 +1,20 @@
 
 <head>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-	<link rel="stylesheet" href="../../common/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+    <link rel="stylesheet" href="../../common/login.css" />
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-	<script src="../../../dist/xcomponent.js"></script>
-	<script src="./login.js"></script>
+    <script src="../../../dist/xcomponent.js"></script>
+    <script src="./login.js"></script>
 </head>
 
 <body>
-	<div id="container"></div>
+    <div id="container"></div>
 
-	<script type="text/babel">
+    <script type="text/babel">
 
         let MyLoginComponent = React.createClass({
 
@@ -25,64 +25,64 @@
             render() {
 
                 let login = () => {
-					this.setState({ displayForm: false, displaySpinner: true });
+                    this.setState({ displayForm: false, displaySpinner: true });
 
-					setTimeout(() => {
+                    setTimeout(() => {
                         this.setState({ displaySpinner: false });
                         this.props.onLogin(this.state.email);
-					}, 2000);
-				};
+                    }, 2000);
+                };
 
-				return (
-					<form>
-						{
-						    this.state.displayForm && <div>
+                return (
+                    <form>
+                        {
+                            this.state.displayForm && <div>
 
-								<input
-								    placeholder='email'
-									defaultValue={ this.props.prefilledEmail }
-									onChange={
-									    event => this.setState({ email: event.target.value })
-									}>
-								</input>
+                                <input
+                                    placeholder='email'
+                                    defaultValue={ this.props.prefilledEmail }
+                                    onChange={
+                                        event => this.setState({ email: event.target.value })
+                                    }>
+                                </input>
 
-								<br/>
+                                <br/>
 
-								<input
-								    placeholder='password' type='password'
-									onChange={
-									    event => this.setState({ password: event.target.value })
-									}>
-								</input>
+                                <input
+                                    placeholder='password' type='password'
+                                    onChange={
+                                        event => this.setState({ password: event.target.value })
+                                    }>
+                                </input>
 
-								<br/>
+                                <br/>
 
-								<button
-									className='btn btn-primary'
-									onClick={ login }>
-										Log In
-								</button>
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={ login }>
+                                        Log In
+                                </button>
 
-							</div>
-						}
+                            </div>
+                        }
 
-						{
-						    this.state.displaySpinner && <div>
-								<svg id='spinner' className='spinner' width='65px' height='65px' viewBox='0 0 66 66' xmlns='http://www.w3.org/2000/svg'>
-									<circle className='path' fill='none' strokeWidth='6' strokeLinecap='round' cx='33' cy='33' r='30'></circle>
-								</svg>
-							</div>
-						}
-					</form>
-				);
+                        {
+                            this.state.displaySpinner && <div>
+                                <svg id='spinner' className='spinner' width='65px' height='65px' viewBox='0 0 66 66' xmlns='http://www.w3.org/2000/svg'>
+                                    <circle className='path' fill='none' strokeWidth='6' strokeLinecap='round' cx='33' cy='33' r='30'></circle>
+                                </svg>
+                            </div>
+                        }
+                    </form>
+                );
             }
         });
 
         ReactDOM.render(
             <MyLoginComponent { ...window.xprops } />,
-			document.querySelector('#container')
-		);
+            document.querySelector('#container')
+        );
 
-	</script>
+    </script>
 
 </body>
