@@ -5,7 +5,7 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -99,7 +99,15 @@ export class ChildComponent extends BaseComponent {
             if (props.type === INITIAL_PROPS.RAW) {
                 props = props.value;
             } else if (props.type === INITIAL_PROPS.UID) {
-                props = getParentComponentWindow().__xcomponent__.props[componentMeta.uid];
+
+                let parentComponentWindow = getParentComponentWindow();
+
+                if (!postRobot.winutil.isSameDomain(parentComponentWindow)) {
+                    throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
+                }
+
+                props = parentComponentWindow.__xcomponent__.props[componentMeta.uid];
+
             } else {
                 throw new Error(`Unrecognized props type: ${props.type}`);
             }
