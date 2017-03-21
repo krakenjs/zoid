@@ -6,7 +6,9 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow, elementStoppedMoving, getElement } from '../../lib';
+         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow,
+         elementStoppedMoving, getElement, memoized, promise } from '../../lib';
+
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, __XCOMPONENT__ } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
@@ -16,31 +18,6 @@ import { normalizeProps } from './props';
 import defaultParentTemplate from '../component/templates/parent.htm';
 
 let activeComponents = [];
-
-function memoize(target, name, descriptor) {
-    let method = descriptor.value;
-
-    descriptor.value = function() {
-
-        this.__memoized__ = this.__memoized__ || {};
-
-        if (!this.__memoized__.hasOwnProperty(name)) {
-            this.__memoized__[name] = method.apply(this, arguments);
-        }
-
-        return this.__memoized__[name];
-    };
-}
-
-function promise(target, name, descriptor) {
-    let method = descriptor.value;
-
-    descriptor.value = function() {
-        return Promise.try(() => {
-            return method.apply(this, arguments);
-        });
-    };
-}
 
 let global = window[__XCOMPONENT__] = window[__XCOMPONENT__] || {};
 
@@ -194,7 +171,7 @@ export class ParentComponent extends BaseComponent {
 
             // Do not extend the url if it is for a different domain
 
-            if (url && !this.getValidDomain(url)) {
+            if (url && !this.component.getValidDomain(url)) {
                 return url;
             }
 
@@ -207,7 +184,7 @@ export class ParentComponent extends BaseComponent {
                 } else if (this.component.defaultEnv && this.component.envUrls) {
                     return this.component.envUrls[this.component.defaultEnv];
                 } else if (this.component.buildUrl) {
-                    return this.component.buildUrl(this, this.props);
+                    return this.component.buildUrl(this.props);
                 } else {
                     return this.component.url;
                 }
@@ -220,74 +197,15 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    getValidDomain(url) {
-
-        if (!url) {
-            return;
-        }
-
-        let domain = getDomainFromUrl(url);
-
-        if (this.component.domain) {
-            if (domain === this.component.domain) {
-                return domain;
-            }
-        }
-
-        if (this.component.domains) {
-            for (let env of Object.keys(this.component.domains)) {
-
-                if (env === 'test') {
-                    continue;
-                }
-
-                if (domain === this.component.domains[env]) {
-                    return domain;
-                }
-            }
-        }
-    }
 
 
     @promise
     getDomain() {
         return Promise.try(() => {
-
             return this.props.url;
 
         }).then(url => {
-
-            let domain = this.getValidDomain(url);
-
-            if (domain) {
-                return domain;
-            }
-
-            if (this.component.domain) {
-                return this.component.domain;
-            }
-
-            if (this.component.domains && this.props.env && this.component.domains[this.props.env]) {
-                return this.component.domains[this.props.env];
-            }
-
-            if (this.component.envUrls && this.props.env && this.component.envUrls[this.props.env]) {
-                return getDomainFromUrl(this.component.envUrls[this.props.env]);
-            }
-
-            if (this.component.envUrls && this.component.defaultEnv && this.component.envUrls[this.component.defaultEnv]) {
-                return getDomainFromUrl(this.component.envUrls[this.component.defaultEnv]);
-            }
-
-            if (this.component.buildUrl) {
-                return getDomainFromUrl(this.component.buildUrl(this));
-            }
-
-            if (this.component.url) {
-                return getDomainFromUrl(this.component.url);
-            }
-
-            throw new Error(`Can not determine domain for component`);
+            return this.component.getDomain(url, this.props);
         });
     }
 
@@ -402,7 +320,7 @@ export class ParentComponent extends BaseComponent {
         Open a new window in the desired context
     */
 
-    @memoize
+    @memoized
     @promise
     open(element) {
         this.component.log(`open_${this.context}`, { element, windowName: this.childWindowName });
@@ -436,7 +354,7 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
             let tasks = {
-                getDomain:     this.getDomain()
+                getDomain: this.getDomain()
             };
 
             tasks.elementReady = Promise.try(() => {
@@ -527,6 +445,7 @@ export class ParentComponent extends BaseComponent {
         let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
             context: this.context,
+            env: this.props.env,
 
             options: {
 
@@ -860,7 +779,7 @@ export class ParentComponent extends BaseComponent {
         Close the child component
     */
 
-    @memoize
+    @memoized
     close(reason = CLOSE_REASONS.PARENT_CALL) {
         return Promise.try(() => {
 
@@ -882,7 +801,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    @memoize
+    @memoized
     closeContainer(reason = CLOSE_REASONS.PARENT_CALL) {
         return Promise.try(() => {
 
@@ -902,7 +821,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    @memoize
+    @memoized
     @promise
     destroyContainer() {
         this.clean.run('destroyContainerEvents');
@@ -910,7 +829,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    @memoize
+    @memoized
     closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
 
         this.clean.run('destroyCloseWindowListener');
@@ -951,7 +870,7 @@ export class ParentComponent extends BaseComponent {
         this.clean.run('destroyWindow');
     }
 
-    @memoize
+    @memoized
     @promise
     showContainer() {
         if (this.parentTemplate) {
@@ -960,7 +879,7 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
-    @memoize
+    @memoized
     @promise
     showComponent() {
         return Promise.try(() => {
@@ -975,7 +894,7 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    @memoize
+    @memoized
     @promise
     hideContainer() {
         if (this.parentTemplate) {
@@ -987,7 +906,7 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
-    @memoize
+    @memoized
     @promise
     hideComponent() {
 
@@ -1034,7 +953,7 @@ export class ParentComponent extends BaseComponent {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    @memoize
+    @memoized
     @promise
     createComponentTemplate() {
         return Promise.try(() => {
@@ -1079,7 +998,7 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the popup/lightbox
     */
 
-    @memoize
+    @memoized
     @promise
     openContainer(element) {
         return Promise.try(() => {

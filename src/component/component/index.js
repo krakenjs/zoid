@@ -18,7 +18,7 @@ import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
 
-import { capitalizeFirstLetter } from '../../lib';
+import { capitalizeFirstLetter, getDomainFromUrl } from '../../lib';
 
 export let components = {};
 
@@ -112,7 +112,6 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'domain');
         this.addProp(options, 'domains');
-        this.addProp(options, 'remoteRenderDomain');
 
         // A mapping of tag->component so we can reference components by string tag name
 
@@ -148,18 +147,96 @@ export class Component extends BaseComponent {
     }
 
     listenDelegate() {
-        if (this.remoteRenderDomain) {
-            postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, { domain: this.remoteRenderDomain }, ({ source, data}) => {
+        postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
 
-                let delegate = this.delegate(source, data.options);
+            let domain = this.getDomain(null, { env: data.env });
 
-                return {
-                    overrides: delegate.getOverrides(data.context),
-                    destroy:   () => delegate.destroy()
-                };
-            });
+            if (domain !== origin) {
+                throw new Error(`Can not render from ${origin} - expected ${domain}`);
+            }
+
+            let delegate = this.delegate(source, data.options);
+
+            return {
+                overrides: delegate.getOverrides(data.context),
+                destroy:   () => delegate.destroy()
+            };
+        });
+    }
+
+
+    getValidDomain(url) {
+
+        if (!url) {
+            return;
+        }
+
+        let domain = getDomainFromUrl(url);
+
+        if (this.domain) {
+            if (domain === this.domain) {
+                return domain;
+            }
+        }
+
+        if (this.domains) {
+            for (let env of Object.keys(this.domains)) {
+
+                if (env === 'test') {
+                    continue;
+                }
+
+                if (domain === this.domains[env]) {
+                    return domain;
+                }
+            }
         }
     }
+
+
+    getDomain(url, props = {}) {
+
+        let domain = this.getValidDomain(url);
+
+        if (domain) {
+            return domain;
+        }
+
+        if (this.domain) {
+            return this.domain;
+        }
+
+        if (this.domains && props.env && this.domains[props.env]) {
+            return this.domains[props.env];
+        }
+
+        if (this.envUrls && props.env && this.envUrls[props.env]) {
+            return getDomainFromUrl(this.envUrls[props.env]);
+        }
+
+        if (this.envUrls && this.defaultEnv && this.envUrls[this.defaultEnv]) {
+            return getDomainFromUrl(this.envUrls[this.defaultEnv]);
+        }
+
+        if (this.buildUrl) {
+            return getDomainFromUrl(this.buildUrl(props));
+        }
+
+        if (this.url) {
+            return getDomainFromUrl(this.url);
+        }
+
+        if (url) {
+            let urlDomain = getDomainFromUrl(url);
+
+            if (urlDomain) {
+                return urlDomain;
+            }
+        }
+
+        throw new Error(`Can not determine domain for component`);
+    }
+
 
 
     isXComponent() {

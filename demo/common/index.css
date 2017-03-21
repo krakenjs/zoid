@@ -6,6 +6,6 @@ h3 {
     margin: 50px;
 }
 
-#container, #loginContainer, #container div {
+#container, #container div {
     display: inline-block;
 }

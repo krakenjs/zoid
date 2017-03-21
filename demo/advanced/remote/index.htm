@@ -19,6 +19,10 @@
     <div id="loginContainer"></div>
 
     <script>
+        if (window.location.protocol === 'file:') {
+            throw new Error(`Must run remote render demo on a webserver, not on local filesystem`);
+        }
+
         MyLoginButtonComponent.render({
 
             loginContainer: '#loginContainer'

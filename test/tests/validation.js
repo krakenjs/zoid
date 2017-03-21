@@ -73,7 +73,7 @@ describe('xcomponent validation errors', () => {
         });
 
         xcomponent.create({
-            tag: 'my-component',
+            tag: 'my-component-working-1',
             dimensions: {
                 height: 50,
                 width: 200
@@ -190,7 +190,7 @@ describe('xcomponent validation errors', () => {
         });
 
         xcomponent.create({
-            tag: 'my-component',
+            tag: 'my-component-working-2',
             dimensions: {
                 height: 50,
                 width: 200
