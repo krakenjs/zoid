@@ -2557,6 +2557,9 @@
                     var _this11 = this;
                     arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : {};
                     return this.tryInit(function() {
+                        if ("file:" === window.location.protocol) throw new Error("Can not render remotely from file:// domain");
+                        var origin = (0, _lib.getDomain)(), domain = _this11.component.getDomain(null, _this11.props);
+                        if (domain !== origin) throw new Error("Can not render remotely to " + domain + " - can only render to " + origin);
                         return _this11.context = _this11.context || _this11.component.getRenderContext(element, context), 
                         _this11.validateRenderToParent(element, _this11.context), _this11.component.log("render_" + _this11.context + "_to_win", {
                             element: element,
@@ -3620,8 +3623,11 @@
                         if (props.type === _constants.INITIAL_PROPS.RAW) props = props.value; else {
                             if (props.type !== _constants.INITIAL_PROPS.UID) throw new Error("Unrecognized props type: " + props.type);
                             var parentComponentWindow = (0, _window.getParentComponentWindow)();
-                            if (!postRobot.winutil.isSameDomain(parentComponentWindow)) throw new Error("Parent component window is on a different domain - expected " + (0, 
-                            _lib.getDomain)() + " - can not retrieve props");
+                            if (!postRobot.winutil.isSameDomain(parentComponentWindow)) {
+                                if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
+                                throw new Error("Parent component window is on a different domain - expected " + (0, 
+                                _lib.getDomain)() + " - can not retrieve props");
+                            }
                             props = parentComponentWindow.__xcomponent__.props[componentMeta.uid];
                         }
                         if (!props) throw new Error("Initial props not found");
