@@ -103,6 +103,11 @@ export class ChildComponent extends BaseComponent {
                 let parentComponentWindow = getParentComponentWindow();
 
                 if (!postRobot.winutil.isSameDomain(parentComponentWindow)) {
+
+                    if (window.location.protocol === 'file:') {
+                        throw new Error(`Can not get props from file:// domain`);
+                    }
+
                     throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
                 }
 

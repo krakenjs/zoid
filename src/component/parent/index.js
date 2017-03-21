@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
          addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise } from '../../lib';
+         elementStoppedMoving, getElement, memoized, promise, getDomain } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, __XCOMPONENT__ } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -512,6 +512,18 @@ export class ParentComponent extends BaseComponent {
 
     renderTo(win, element, context, options = {}) {
         return this.tryInit(() => {
+
+            if (window.location.protocol === 'file:') {
+                throw new Error(`Can not render remotely from file:// domain`);
+            }
+
+            let origin = getDomain();
+            let domain = this.component.getDomain(null, this.props);
+
+            if (domain !== origin) {
+                throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
+            }
+
             this.context = this.context || this.component.getRenderContext(element, context);
 
             this.validateRenderToParent(element, this.context);
