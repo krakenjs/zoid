@@ -5,7 +5,7 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain, memoized } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -303,7 +303,6 @@ export class ChildComponent extends BaseComponent {
         return { width, height };
     }
 
-    @memoized
     watchForResize() {
 
         let { width, height } = this.getAutoResize();
@@ -326,6 +325,12 @@ export class ChildComponent extends BaseComponent {
         if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
             el = document.body;
         }
+
+        if (this.watchingForResize) {
+            return;
+        }
+
+        this.watchingForResize = true;
 
         return Promise.try(() => {
 
