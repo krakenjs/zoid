@@ -2338,7 +2338,15 @@
                     return _promise.SyncPromise.try(function() {
                         return _this4.props.url;
                     }).then(function(url) {
-                        return _this4.component.getDomain(url, _this4.props);
+                        var domain = _this4.component.getDomain(url, _this4.props);
+                        return domain ? domain : _this4.component.buildUrl ? _promise.SyncPromise.try(function() {
+                            return _this4.component.buildUrl(_this4.props);
+                        }).then(function(builtUrl) {
+                            return _this4.component.getDomain(builtUrl, _this4.props);
+                        }) : void 0;
+                    }).then(function(domain) {
+                        if (!domain) throw new Error("Could not determine domain");
+                        return domain;
                     });
                 }
             }, {
@@ -2559,6 +2567,7 @@
                     return this.tryInit(function() {
                         if ("file:" === window.location.protocol) throw new Error("Can not render remotely from file:// domain");
                         var origin = (0, _lib.getDomain)(), domain = _this11.component.getDomain(null, _this11.props);
+                        if (!domain) throw new Error("Could not determine domain to allow remote render");
                         if (domain !== origin) throw new Error("Can not render remotely to " + domain + " - can only render to " + origin);
                         return _this11.context = _this11.context || _this11.component.getRenderContext(element, context), 
                         _this11.validateRenderToParent(element, _this11.context), _this11.component.log("render_" + _this11.context + "_to_win", {
@@ -3558,10 +3567,21 @@
                 }
             }), superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
         }
+        function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+            var desc = {};
+            return Object.keys(descriptor).forEach(function(key) {
+                desc[key] = descriptor[key];
+            }), desc.enumerable = !!desc.enumerable, desc.configurable = !!desc.configurable, 
+            ("value" in desc || desc.initializer) && (desc.writable = !0), desc = decorators.slice().reverse().reduce(function(desc, decorator) {
+                return decorator(target, property, desc) || desc;
+            }, desc), context && void 0 !== desc.initializer && (desc.value = desc.initializer ? desc.initializer.call(context) : void 0, 
+            desc.initializer = void 0), void 0 === desc.initializer && (Object.defineProperty(target, property, desc), 
+            desc = null), desc;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.ChildComponent = void 0;
-        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _class, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -3578,7 +3598,7 @@
                 Constructor;
             };
         }(), _client = __webpack_require__(/*! beaver-logger/client */ 17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(/*! post-robot/src */ 5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 3), _base = __webpack_require__(/*! ../base */ 15), _window = __webpack_require__(/*! ../window */ 16), _lib = __webpack_require__(/*! ../../lib */ 1), _constants = __webpack_require__(/*! ../../constants */ 7), _props = __webpack_require__(/*! ./props */ 56);
-        exports.ChildComponent = function(_BaseComponent) {
+        exports.ChildComponent = (_class = function(_BaseComponent) {
             function ChildComponent(component) {
                 _classCallCheck(this, ChildComponent);
                 var _this = _possibleConstructorReturn(this, (ChildComponent.__proto__ || Object.getPrototypeOf(ChildComponent)).call(this, component));
@@ -3737,9 +3757,18 @@
                     });
                 }
             }, {
-                key: "autoResize",
-                value: function autoResize() {
-                    var width = !1, height = !1, autoResize = this.component.autoResize;
+                key: "enableAutoResize",
+                value: function() {
+                    var _ref4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref4$width = _ref4.width, width = void 0 === _ref4$width || _ref4$width, _ref4$height = _ref4.height, height = void 0 === _ref4$height || _ref4$height;
+                    this.autoResize = {
+                        width: width,
+                        height: height
+                    }, this.watchForResize();
+                }
+            }, {
+                key: "getAutoResize",
+                value: function() {
+                    var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
                     return "object" === ("undefined" == typeof autoResize ? "undefined" : _typeof(autoResize)) ? (width = Boolean(autoResize.width), 
                     height = Boolean(autoResize.height)) : autoResize && (width = !0, height = !0), 
                     {
@@ -3750,7 +3779,7 @@
             }, {
                 key: "watchForResize",
                 value: function() {
-                    var _this4 = this, _autoResize = this.autoResize(), width = _autoResize.width, height = _autoResize.height;
+                    var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
                     if ((width || height) && this.component.dimensions && this.context !== _constants.CONTEXT_TYPES.POPUP) {
                         var el = document.documentElement;
                         return window.navigator.userAgent.match(/MSIE (9|10)\./) && (el = document.body), 
@@ -3806,22 +3835,22 @@
                 }
             }, {
                 key: "resizeToElement",
-                value: function(el, _ref4) {
-                    var _this6 = this, width = _ref4.width, height = _ref4.height, history = [], resize = function resize() {
+                value: function(el, _ref5) {
+                    var _this6 = this, width = _ref5.width, height = _ref5.height, history = [], resize = function resize() {
                         return _promise.SyncPromise.try(function() {
                             for (var tracker = (0, _lib.trackDimensions)(el, {
                                 width: width,
                                 height: height
                             }), _tracker$check = tracker.check(), dimensions = _tracker$check.dimensions, _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                var _ref5;
+                                var _ref6;
                                 if (_isArray3) {
                                     if (_i4 >= _iterator3.length) break;
-                                    _ref5 = _iterator3[_i4++];
+                                    _ref6 = _iterator3[_i4++];
                                 } else {
                                     if (_i4 = _iterator3.next(), _i4.done) break;
-                                    _ref5 = _i4.value;
+                                    _ref6 = _i4.value;
                                 }
-                                var size = _ref5, widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
+                                var size = _ref6, widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
                                 if (widthMatch && heightMatch) return;
                             }
                             return history.push({
@@ -3881,17 +3910,18 @@
                     });
                 }
             } ]), ChildComponent;
-        }(_base.BaseComponent);
+        }(_base.BaseComponent), _applyDecoratedDescriptor(_class.prototype, "watchForResize", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "watchForResize"), _class.prototype), 
+        _class);
         (0, _window.isXComponentWindow)() && window.console && !function() {
             var logLevels = $logger.logLevels, _loop4 = function() {
                 if (_isArray4) {
                     if (_i5 >= _iterator4.length) return "break";
-                    _ref6 = _iterator4[_i5++];
+                    _ref7 = _iterator4[_i5++];
                 } else {
                     if (_i5 = _iterator4.next(), _i5.done) return "break";
-                    _ref6 = _i5.value;
+                    _ref7 = _i5.value;
                 }
-                var level = _ref6;
+                var level = _ref7;
                 try {
                     var _original = window.console[level];
                     if (!_original || !_original.apply) return "continue";
@@ -3906,7 +3936,7 @@
                 } catch (err) {}
             };
             _loop5: for (var _iterator4 = logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                var _ref6, _ret4 = _loop4();
+                var _ref7, _ret4 = _loop4();
                 switch (_ret4) {
                   case "break":
                     break _loop5;
@@ -5331,6 +5361,7 @@
                         var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this2.getDomain(null, {
                             env: data.env
                         });
+                        if (!domain) throw new Error("Could not determine domain to allow remote render");
                         if (domain !== origin) throw new Error("Can not render from " + origin + " - expected " + domain);
                         var delegate = _this2.delegate(source, data.options);
                         return {
@@ -5371,13 +5402,11 @@
                     if (this.envUrls && props.env && this.envUrls[props.env]) return (0, _lib.getDomainFromUrl)(this.envUrls[props.env]);
                     if (this.envUrls && this.defaultEnv && this.envUrls[this.defaultEnv]) return (0, 
                     _lib.getDomainFromUrl)(this.envUrls[this.defaultEnv]);
-                    if (this.buildUrl) return (0, _lib.getDomainFromUrl)(this.buildUrl(props));
                     if (this.url) return (0, _lib.getDomainFromUrl)(this.url);
                     if (url) {
                         var urlDomain = (0, _lib.getDomainFromUrl)(url);
                         if (urlDomain) return urlDomain;
                     }
-                    throw new Error("Can not determine domain for component");
                 }
             }, {
                 key: "isXComponent",
