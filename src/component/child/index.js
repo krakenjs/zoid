@@ -5,7 +5,7 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain } from '../../lib';
+import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain, memoized } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -280,12 +280,17 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
-    autoResize() {
+    enableAutoResize({ width = true, height = true } = {}) {
+        this.autoResize = { width, height };
+        this.watchForResize();
+    }
+
+    getAutoResize() {
 
         let width = false;
         let height = false;
 
-        let autoResize = this.component.autoResize;
+        let autoResize = this.autoResize || this.component.autoResize;
 
         if (typeof autoResize === 'object') {
             width = Boolean(autoResize.width);
@@ -298,9 +303,10 @@ export class ChildComponent extends BaseComponent {
         return { width, height };
     }
 
+    @memoized
     watchForResize() {
 
-        let { width, height } = this.autoResize();
+        let { width, height } = this.getAutoResize();
 
         if (!width && !height) {
             return;
