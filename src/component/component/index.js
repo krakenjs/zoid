@@ -151,6 +151,10 @@ export class Component extends BaseComponent {
 
             let domain = this.getDomain(null, { env: data.env });
 
+            if (!domain) {
+                throw new Error(`Could not determine domain to allow remote render`);
+            }
+
             if (domain !== origin) {
                 throw new Error(`Can not render from ${origin} - expected ${domain}`);
             }
@@ -218,10 +222,6 @@ export class Component extends BaseComponent {
             return getDomainFromUrl(this.envUrls[this.defaultEnv]);
         }
 
-        if (this.buildUrl) {
-            return getDomainFromUrl(this.buildUrl(props));
-        }
-
         if (this.url) {
             return getDomainFromUrl(this.url);
         }
@@ -233,8 +233,6 @@ export class Component extends BaseComponent {
                 return urlDomain;
             }
         }
-
-        throw new Error(`Can not determine domain for component`);
     }
 
 

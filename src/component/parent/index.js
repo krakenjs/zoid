@@ -205,7 +205,26 @@ export class ParentComponent extends BaseComponent {
             return this.props.url;
 
         }).then(url => {
-            return this.component.getDomain(url, this.props);
+
+            let domain = this.component.getDomain(url, this.props);
+
+            if (domain) {
+                return domain;
+            }
+
+            if (this.component.buildUrl) {
+                return Promise.try(() => this.component.buildUrl(this.props)).then(builtUrl => {
+                    return this.component.getDomain(builtUrl, this.props);
+                });
+            }
+
+        }).then(domain => {
+
+            if (!domain) {
+                throw new Error(`Could not determine domain`);
+            }
+
+            return domain;
         });
     }
 
@@ -519,6 +538,10 @@ export class ParentComponent extends BaseComponent {
 
             let origin = getDomain();
             let domain = this.component.getDomain(null, this.props);
+
+            if (!domain) {
+                throw new Error(`Could not determine domain to allow remote render`);
+            }
 
             if (domain !== origin) {
                 throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
