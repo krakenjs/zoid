@@ -3567,21 +3567,10 @@
                 }
             }), superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
         }
-        function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
-            var desc = {};
-            return Object.keys(descriptor).forEach(function(key) {
-                desc[key] = descriptor[key];
-            }), desc.enumerable = !!desc.enumerable, desc.configurable = !!desc.configurable, 
-            ("value" in desc || desc.initializer) && (desc.writable = !0), desc = decorators.slice().reverse().reduce(function(desc, decorator) {
-                return decorator(target, property, desc) || desc;
-            }, desc), context && void 0 !== desc.initializer && (desc.value = desc.initializer ? desc.initializer.call(context) : void 0, 
-            desc.initializer = void 0), void 0 === desc.initializer && (Object.defineProperty(target, property, desc), 
-            desc = null), desc;
-        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.ChildComponent = void 0;
-        var _class, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -3598,7 +3587,7 @@
                 Constructor;
             };
         }(), _client = __webpack_require__(/*! beaver-logger/client */ 17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(/*! post-robot/src */ 5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(/*! sync-browser-mocks/src/promise */ 3), _base = __webpack_require__(/*! ../base */ 15), _window = __webpack_require__(/*! ../window */ 16), _lib = __webpack_require__(/*! ../../lib */ 1), _constants = __webpack_require__(/*! ../../constants */ 7), _props = __webpack_require__(/*! ./props */ 56);
-        exports.ChildComponent = (_class = function(_BaseComponent) {
+        exports.ChildComponent = function(_BaseComponent) {
             function ChildComponent(component) {
                 _classCallCheck(this, ChildComponent);
                 var _this = _possibleConstructorReturn(this, (ChildComponent.__proto__ || Object.getPrototypeOf(ChildComponent)).call(this, component));
@@ -3782,7 +3771,7 @@
                     var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
                     if ((width || height) && this.component.dimensions && this.context !== _constants.CONTEXT_TYPES.POPUP) {
                         var el = document.documentElement;
-                        return window.navigator.userAgent.match(/MSIE (9|10)\./) && (el = document.body), 
+                        if (window.navigator.userAgent.match(/MSIE (9|10)\./) && (el = document.body), !this.watchingForResize) return this.watchingForResize = !0, 
                         _promise.SyncPromise.try(function() {
                             if (!(0, _lib.dimensionsMatchViewport)(el, {
                                 width: width,
@@ -3910,8 +3899,7 @@
                     });
                 }
             } ]), ChildComponent;
-        }(_base.BaseComponent), _applyDecoratedDescriptor(_class.prototype, "watchForResize", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "watchForResize"), _class.prototype), 
-        _class);
+        }(_base.BaseComponent);
         (0, _window.isXComponentWindow)() && window.console && !function() {
             var logLevels = $logger.logLevels, _loop4 = function() {
                 if (_isArray4) {
