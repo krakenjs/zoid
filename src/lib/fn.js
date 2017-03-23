@@ -1,5 +1,5 @@
 
-import { getObjectID } from './util';
+import { getObjectID, replaceObject } from './util';
 
 
 /*  Noop
@@ -78,4 +78,24 @@ export function debounce(method, time = 100) {
             return method.apply(this, arguments);
         }, time);
     };
+}
+
+export function serializeFunctions(obj) {
+    return replaceObject(obj, (value, key, fullKey) => {
+        if (value instanceof Function) {
+            return {
+                __type__: '__function__'
+            };
+        }
+    });
+}
+
+export function deserializeFunctions(obj, handler) {
+    return replaceObject(obj, (value, key, fullKey) => {
+        if (value && value.__type__ === '__function__') {
+            return function() {
+                return handler({ key, fullKey, self: this, args: arguments });
+            };
+        }
+    });
 }

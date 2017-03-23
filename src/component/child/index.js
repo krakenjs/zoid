@@ -5,7 +5,8 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, onCloseWindow, replaceObject, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getDomain } from '../../lib';
+import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
+         cycle, getDomain, globalFor } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -91,7 +92,6 @@ export class ChildComponent extends BaseComponent {
 
     getInitialProps() {
         let componentMeta = getComponentMeta();
-        let self = this;
 
         if (componentMeta) {
             let props = componentMeta.props;
@@ -111,7 +111,7 @@ export class ChildComponent extends BaseComponent {
                     throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
                 }
 
-                props = parentComponentWindow.__xcomponent__.props[componentMeta.uid];
+                props = globalFor(parentComponentWindow).props[componentMeta.uid];
 
             } else {
                 throw new Error(`Unrecognized props type: ${props.type}`);
@@ -121,15 +121,10 @@ export class ChildComponent extends BaseComponent {
                 throw new Error(`Initial props not found`);
             }
 
-            return replaceObject(props, (value, key, fullKey) => {
-                if (value && value.__type__ === '__function__') {
-                    return function() {
-                        return self.onInit.then(() => {
-                            let original = get(self.props, fullKey);
-                            return original.apply(this, arguments);
-                        });
-                    };
-                }
+            return deserializeFunctions(props, ({ fullKey, self, args }) => {
+                return this.onInit.then(() => {
+                    return get(this.props, fullKey).apply(self, args);
+                });
             });
         }
     }

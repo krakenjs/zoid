@@ -6,10 +6,10 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, replaceObject, extendUrl, getDomainFromUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain } from '../../lib';
+         addEventToClass, template, extend, serializeFunctions, extendUrl, iframe, setOverflow,
+         elementStoppedMoving, getElement, memoized, promise, getDomain, global } from '../../lib';
 
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, __XCOMPONENT__ } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -18,8 +18,6 @@ import { normalizeProps } from './props';
 import defaultContainerTemplate from '../component/templates/container.htm';
 
 let activeComponents = [];
-
-let global = window[__XCOMPONENT__] = window[__XCOMPONENT__] || {};
 
 global.props = global.props || {};
 global.windows = global.windows || {};
@@ -88,7 +86,7 @@ export class ParentComponent extends BaseComponent {
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
-        let sProps = this.getSerializedPropsForChild();
+        let sProps = serializeFunctions(this.getPropsForChild());
 
         let defaultParent = isLightbox
             ? WINDOW_REFERENCES.PARENT_PARENT
@@ -177,17 +175,7 @@ export class ParentComponent extends BaseComponent {
 
             return Promise.try(() => {
 
-                if (url) {
-                    return url;
-                } else if (this.props.env && this.component.envUrls) {
-                    return this.component.envUrls[this.props.env];
-                } else if (this.component.defaultEnv && this.component.envUrls) {
-                    return this.component.envUrls[this.component.defaultEnv];
-                } else if (this.component.buildUrl) {
-                    return this.component.buildUrl(this.props);
-                } else {
-                    return this.component.url;
-                }
+                return url || this.component.getUrl(this.props.env, this.props);
 
             }).then(finalUrl => {
 
@@ -228,27 +216,6 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    @promise
-    getBridgeDomain(url) {
-        return Promise.try(() => {
-
-            if (this.component.bridgeDomain) {
-                return this.component.bridgeDomain;
-            }
-
-            if (this.component.bridgeDomains && this.props.env && this.component.bridgeDomains[this.props.env]) {
-                return this.component.bridgeDomains[this.props.env];
-            }
-
-            if (url) {
-                return getDomainFromUrl(url);
-            }
-
-            throw new Error(`Can not determine domain for bridge`);
-        });
-    }
-
-
     getPropsForChild() {
 
         let result = {};
@@ -260,17 +227,6 @@ export class ParentComponent extends BaseComponent {
         }
 
         return result;
-    }
-
-    getSerializedPropsForChild() {
-
-        return replaceObject(this.getPropsForChild(), (value, key, fullKey) => {
-            if (value instanceof Function) {
-                return {
-                    __type__: '__function__'
-                };
-            }
-        });
     }
 
 
@@ -314,21 +270,21 @@ export class ParentComponent extends BaseComponent {
     @promise
     openBridge() {
 
-        let bridgeUrl = this.component.bridgeUrl;
-
-        if (!bridgeUrl && this.component.bridgeUrls && this.props.env) {
-            bridgeUrl = this.component.bridgeUrls[this.props.env];
-        }
+        let bridgeUrl = this.component.getBridgeUrl(this.props.env);
 
         if (!bridgeUrl) {
             return;
         }
 
-        return this.getBridgeDomain(bridgeUrl).then(bridgeDomain => {
-            if (postRobot.needsBridge({ window: this.window, domain: bridgeDomain })) {
-                return postRobot.openBridge(bridgeUrl, bridgeDomain);
-            }
-        });
+        let bridgeDomain = this.component.getBridgeDomain(this.props.env);
+
+        if (!bridgeDomain) {
+            throw new Error(`Can not determine domain for bridge`);
+        }
+
+        if (postRobot.needsBridge({ window: this.window, domain: bridgeDomain })) {
+            return postRobot.openBridge(bridgeUrl, bridgeDomain);
+        }
     }
 
 

@@ -237,7 +237,52 @@ export class Component extends BaseComponent {
         }
     }
 
+    getBridgeUrl(env) {
 
+        if (this.bridgeUrl) {
+            return this.bridgeUrl;
+        }
+
+        if (this.bridgeUrls && env && this.bridgeUrls[env]) {
+            return this.bridgeUrls[env];
+        }
+    }
+
+    getBridgeDomain(env) {
+
+        if (this.bridgeDomain) {
+            return this.bridgeDomain;
+        }
+
+        if (this.bridgeDomains && env && this.bridgeDomains[this.props.env]) {
+            return this.bridgeDomains[env];
+        }
+
+        let bridgeUrl = this.getBridgeUrl(env);
+
+        if (bridgeUrl) {
+            return getDomainFromUrl(bridgeUrl);
+        }
+    }
+
+    getUrl(env, props) {
+
+        if (env && this.envUrls) {
+            return this.envUrls[env];
+        }
+
+        if (this.defaultEnv && this.envUrls) {
+            return this.envUrls[this.defaultEnv];
+        }
+
+        if (this.buildUrl) {
+            return this.buildUrl(props);
+        }
+
+        if (this.url) {
+            return this.url;
+        }
+    }
 
     isXComponent() {
         return isXComponentWindow();
