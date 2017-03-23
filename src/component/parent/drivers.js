@@ -29,7 +29,7 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.IFRAME ]: {
 
         requiresElement: true,
-        renderedIntoParentTemplate: true,
+        renderedIntoContainerTemplate: true,
         destroyOnUnload: false,
         allowResize: true,
         openOnClick: false,
@@ -48,11 +48,11 @@ export let RENDER_DRIVERS = {
             this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            }, this.elementTemplate || element);
+            }, this.element || element);
 
-            this.elementTemplate = this.elementTemplate || this.iframe;
+            this.element = this.element || this.iframe;
 
-            hideElement(this.elementTemplate);
+            hideElement(this.element);
 
             let dimensions = this.props.dimensions || this.component.dimensions || {};
             this.resize(dimensions.width, dimensions.height);
@@ -142,7 +142,7 @@ export let RENDER_DRIVERS = {
 
         focusable: true,
         requiresElement: false,
-        renderedIntoParentTemplate: false,
+        renderedIntoContainerTemplate: false,
         destroyOnUnload: true,
         allowResize: false,
         openOnClick: true,
@@ -235,7 +235,7 @@ export let RENDER_DRIVERS = {
     [ CONTEXT_TYPES.LIGHTBOX ]: {
 
         requiresElement: false,
-        renderedIntoParentTemplate: true,
+        renderedIntoContainerTemplate: true,
         destroyOnUnload: false,
         allowResize: true,
         openOnClick: false,
@@ -278,14 +278,14 @@ export let RENDER_DRIVERS = {
 
         open() {
 
-            let element = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
+            let element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
 
             return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
         },
 
         resize(width, height) {
 
-            let container = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
+            let container = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
 
             if (width) {
                 container.style.width  = toCSS(width);

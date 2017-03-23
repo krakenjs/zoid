@@ -15,7 +15,7 @@ import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
 
-import defaultParentTemplate from '../component/templates/parent.htm';
+import defaultContainerTemplate from '../component/templates/container.htm';
 
 let activeComponents = [];
 
@@ -483,7 +483,7 @@ export class ParentComponent extends BaseComponent {
                     focus:                () => this.focus(),
                     userClose:            () => this.userClose(),
                     getDomain:            () => this.getDomain(),
-                    getParentTemplate:    () => this.getParentTemplate(),
+                    getContainerTemplate: () => this.getContainerTemplate(),
                     getComponentTemplate: () => this.getComponentTemplate()
                 }
             }
@@ -740,15 +740,15 @@ export class ParentComponent extends BaseComponent {
         this.component.log(`resize`, { height, width });
         this.driver.resize.call(this, width, height);
 
-        if (this.elementTemplate || this.iframe) {
+        if (this.element || this.iframe) {
 
             let overflow;
 
-            if (this.elementTemplate) {
-                overflow = setOverflow(this.elementTemplate, 'hidden');
+            if (this.element) {
+                overflow = setOverflow(this.element, 'hidden');
             }
 
-            return elementStoppedMoving(this.elementTemplate || this.iframe).then(() => {
+            return elementStoppedMoving(this.element || this.iframe).then(() => {
 
                 if (overflow) {
                     overflow.reset();
@@ -777,12 +777,12 @@ export class ParentComponent extends BaseComponent {
 
     hide() {
 
-        if (this.parentTemplate) {
-            this.parentTemplate.style.display = 'none';
+        if (this.container) {
+            this.container.style.display = 'none';
         }
 
-        if (this.parentTemplateFrame) {
-            this.parentTemplateFrame.style.display = 'none';
+        if (this.containerFrame) {
+            this.containerFrame.style.display = 'none';
         }
 
         return this.driver.hide.call(this);
@@ -790,12 +790,12 @@ export class ParentComponent extends BaseComponent {
 
     show() {
 
-        if (this.parentTemplate) {
-            this.parentTemplate.style.display = 'block';
+        if (this.container) {
+            this.container.style.display = 'block';
         }
 
-        if (this.parentTemplateFrame) {
-            this.parentTemplateFrame.style.display = 'block';
+        if (this.containerFrame) {
+            this.containerFrame.style.display = 'block';
         }
 
         return this.driver.show.call(this);
@@ -860,7 +860,7 @@ export class ParentComponent extends BaseComponent {
     @promise
     destroyContainer() {
         this.clean.run('destroyContainerEvents');
-        this.clean.run('destroyParentTemplate');
+        this.clean.run('destroyContainerTemplate');
     }
 
 
@@ -908,9 +908,9 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     showContainer() {
-        if (this.parentTemplate) {
-            addClass(this.parentTemplate, CLASS_NAMES.SHOW_CONTAINER);
-            return showAndAnimate(this.parentTemplate, ANIMATION_NAMES.SHOW_CONTAINER);
+        if (this.container) {
+            addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
+            return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER);
         }
     }
 
@@ -922,9 +922,9 @@ export class ParentComponent extends BaseComponent {
                 return this.props.onDisplay();
             }
         }).then(() => {
-            if (this.elementTemplate) {
-                addClass(this.elementTemplate, CLASS_NAMES.SHOW_COMPONENT);
-                showAndAnimate(this.elementTemplate, ANIMATION_NAMES.SHOW_COMPONENT);
+            if (this.element) {
+                addClass(this.element, CLASS_NAMES.SHOW_COMPONENT);
+                showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT);
             }
         });
     }
@@ -932,12 +932,12 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     hideContainer() {
-        if (this.parentTemplate) {
+        if (this.container) {
 
-            addClass(this.parentTemplate, CLASS_NAMES.HIDE_CONTAINER);
-            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
+            addClass(this.container, CLASS_NAMES.HIDE_CONTAINER);
+            addClass(this.container, CLASS_NAMES.LOADING);
 
-            return animateAndHide(this.parentTemplate, ANIMATION_NAMES.HIDE_CONTAINER);
+            return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER);
         }
     }
 
@@ -945,13 +945,13 @@ export class ParentComponent extends BaseComponent {
     @promise
     hideComponent() {
 
-        if (this.parentTemplate) {
-            addClass(this.parentTemplate, CLASS_NAMES.LOADING);
+        if (this.container) {
+            addClass(this.container, CLASS_NAMES.LOADING);
         }
 
-        if (this.elementTemplate) {
-            addClass(this.elementTemplate, CLASS_NAMES.HIDE_COMPONENT);
-            return animateAndHide(this.elementTemplate, ANIMATION_NAMES.HIDE_COMPONENT);
+        if (this.element) {
+            addClass(this.element, CLASS_NAMES.HIDE_COMPONENT);
+            return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT);
         }
     }
 
@@ -1022,7 +1022,7 @@ export class ParentComponent extends BaseComponent {
 
 
     @promise
-    getParentTemplate() {
+    getContainerTemplate() {
         return this.component.parentTemplate;
     }
 
@@ -1038,15 +1038,15 @@ export class ParentComponent extends BaseComponent {
     openContainer(element) {
         return Promise.try(() => {
 
-            return this.getParentTemplate();
+            return this.getContainerTemplate();
 
-        }).then(parentTemplate => {
+        }).then(containerTemplate => {
 
-            if (parentTemplate === defaultParentTemplate && this.context === CONTEXT_TYPES.IFRAME) {
+            if (containerTemplate === defaultContainerTemplate && this.context === CONTEXT_TYPES.IFRAME) {
                 return;
             }
 
-            return template(parentTemplate, {
+            return template(containerTemplate, {
                 id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
                 props: this.props,
                 CLASS: CLASS_NAMES,
@@ -1065,31 +1065,31 @@ export class ParentComponent extends BaseComponent {
 
                 } else if (this.component.sandboxContainer) {
 
-                    this.parentTemplateFrame = iframe(null, {
+                    this.containerFrame = iframe(null, {
                         name: `__lightbox_container__${uniqueID()}__`,
                         scrolling: 'no'
                     }, document.body);
 
-                    this.parentTemplateFrame.style.display = 'block';
-                    this.parentTemplateFrame.style.position = 'fixed';
-                    this.parentTemplateFrame.style.top = '0';
-                    this.parentTemplateFrame.style.left = '0';
-                    this.parentTemplateFrame.style.width = '100%';
-                    this.parentTemplateFrame.style.height = '100%';
-                    this.parentTemplateFrame.style.zIndex = '2147483647';
+                    this.containerFrame.style.display = 'block';
+                    this.containerFrame.style.position = 'fixed';
+                    this.containerFrame.style.top = '0';
+                    this.containerFrame.style.left = '0';
+                    this.containerFrame.style.width = '100%';
+                    this.containerFrame.style.height = '100%';
+                    this.containerFrame.style.zIndex = '2147483647';
 
-                    this.parentTemplateFrame.contentWindow.document.open();
-                    this.parentTemplateFrame.contentWindow.document.write(`<body></body>`);
-                    this.parentTemplateFrame.contentWindow.document.close();
+                    this.containerFrame.contentWindow.document.open();
+                    this.containerFrame.contentWindow.document.write(`<body></body>`);
+                    this.containerFrame.contentWindow.document.close();
 
-                    el = this.parentTemplateFrame.contentWindow.document.body;
+                    el = this.containerFrame.contentWindow.document.body;
 
                 } else {
 
                     el = document.body;
                 }
 
-                this.parentTemplate = createElement('div', {
+                this.container = createElement('div', {
 
                     html,
 
@@ -1103,27 +1103,27 @@ export class ParentComponent extends BaseComponent {
                     ]
                 });
 
-                hideElement(this.parentTemplate);
+                hideElement(this.container);
 
-                el.appendChild(this.parentTemplate);
+                el.appendChild(this.container);
 
-                if (this.driver.renderedIntoParentTemplate) {
-                    this.elementTemplate = this.parentTemplate.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
+                if (this.driver.renderedIntoContainerTemplate) {
+                    this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
 
-                    if (!this.elementTemplate) {
+                    if (!this.element) {
                         throw new Error('Could not find element to render component into');
                     }
 
-                    hideElement(this.elementTemplate);
+                    hideElement(this.element);
                 }
 
                 let eventHandlers = [];
 
                 if (this.driver.focusable) {
-                    eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
+                    eventHandlers.push(addEventToClass(this.container, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
                 }
 
-                eventHandlers.push(addEventToClass(this.parentTemplate, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
+                eventHandlers.push(addEventToClass(this.container, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
 
                 this.clean.register('destroyContainerEvents', () => {
                     for (let eventHandler of eventHandlers) {
@@ -1133,18 +1133,18 @@ export class ParentComponent extends BaseComponent {
 
                 // let overflow = setOverflow(document.documentElement, 'hidden');
 
-                this.clean.register('destroyParentTemplate', () => {
+                this.clean.register('destroyContainerTemplate', () => {
 
-                    if (this.parentTemplateFrame) {
-                        this.parentTemplateFrame.parentNode.removeChild(this.parentTemplateFrame);
+                    if (this.containerFrame) {
+                        this.containerFrame.parentNode.removeChild(this.containerFrame);
                     }
 
-                    if (this.parentTemplate) {
-                        this.parentTemplate.parentNode.removeChild(this.parentTemplate);
+                    if (this.container) {
+                        this.container.parentNode.removeChild(this.container);
                     }
 
-                    delete this.parentTemplateFrame;
-                    delete this.parentTemplate;
+                    delete this.containerFrame;
+                    delete this.container;
 
                     // overflow.reset();
                 });

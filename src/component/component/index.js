@@ -13,7 +13,7 @@ import { CONTEXT_TYPES, CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants
 import { RENDER_DRIVERS } from '../parent/drivers';
 import { validate } from './validate';
 
-import parentTemplate from './templates/parent.htm';
+import containerTemplate from './templates/container.htm';
 import componentTemplate from './templates/component.htm';
 
 import * as drivers from '../../drivers';
@@ -107,7 +107,7 @@ export class Component extends BaseComponent {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.addProp(options, 'parentTemplate', parentTemplate);
+        this.addProp(options, 'parentTemplate', containerTemplate);
         this.addProp(options, 'componentTemplate', componentTemplate);
 
         this.addProp(options, 'validateProps');
