@@ -74,6 +74,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'buildUrl');
 
+        this.addProp(options, 'sandboxContainer', true);
+
         this.addProp(options, 'bridgeUrl');
         this.addProp(options, 'bridgeUrls');
 

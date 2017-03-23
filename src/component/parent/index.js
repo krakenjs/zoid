@@ -1063,7 +1063,7 @@ export class ParentComponent extends BaseComponent {
                         throw new Error(`Could not find element: ${element}`);
                     }
 
-                } else {
+                } else if (this.component.sandboxContainer) {
 
                     this.parentTemplateFrame = iframe(null, {
                         name: `__lightbox_container__${uniqueID()}__`,
@@ -1083,6 +1083,10 @@ export class ParentComponent extends BaseComponent {
                     this.parentTemplateFrame.contentWindow.document.close();
 
                     el = this.parentTemplateFrame.contentWindow.document.body;
+
+                } else {
+
+                    el = document.body;
                 }
 
                 this.parentTemplate = createElement('div', {
