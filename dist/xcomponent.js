@@ -2823,7 +2823,7 @@
                             var el = void 0;
                             if (element) {
                                 if (el = (0, _lib.getElement)(element), !el) throw new Error("Could not find element: " + element);
-                            } else _this20.parentTemplateFrame = (0, _lib.iframe)(null, {
+                            } else _this20.component.sandboxContainer ? (_this20.parentTemplateFrame = (0, _lib.iframe)(null, {
                                 name: "__lightbox_container__" + (0, _lib.uniqueID)() + "__",
                                 scrolling: "no"
                             }, document.body), _this20.parentTemplateFrame.style.display = "block", _this20.parentTemplateFrame.style.position = "fixed", 
@@ -2831,7 +2831,7 @@
                             _this20.parentTemplateFrame.style.width = "100%", _this20.parentTemplateFrame.style.height = "100%", 
                             _this20.parentTemplateFrame.style.zIndex = "2147483647", _this20.parentTemplateFrame.contentWindow.document.open(), 
                             _this20.parentTemplateFrame.contentWindow.document.write("<body></body>"), _this20.parentTemplateFrame.contentWindow.document.close(), 
-                            el = _this20.parentTemplateFrame.contentWindow.document.body;
+                            el = _this20.parentTemplateFrame.contentWindow.document.body) : el = document.body;
                             if (_this20.parentTemplate = (0, _lib.createElement)("div", {
                                 html: html,
                                 attributes: {
@@ -5296,8 +5296,9 @@
                 _this.props = _extends({}, _props.internalProps, options.props), _this.addProp(options, "dimensions"), 
                 _this.addProp(options, "scrolling"), _this.addProp(options, "version", "latest"), 
                 _this.addProp(options, "defaultEnv"), _this.addProp(options, "envUrls"), _this.addProp(options, "buildUrl"), 
-                _this.addProp(options, "bridgeUrl"), _this.addProp(options, "bridgeUrls"), _this.addProp(options, "bridgeDomain"), 
-                _this.addProp(options, "bridgeDomains"), _this.addProp(options, "url"), _this.addProp(options, "contexts", {});
+                _this.addProp(options, "sandboxContainer", !0), _this.addProp(options, "bridgeUrl"), 
+                _this.addProp(options, "bridgeUrls"), _this.addProp(options, "bridgeDomain"), _this.addProp(options, "bridgeDomains"), 
+                _this.addProp(options, "url"), _this.addProp(options, "contexts", {});
                 for (var _iterator = _constants.CONTEXT_TYPES_LIST, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                     var _ref;
                     if (_isArray) {
