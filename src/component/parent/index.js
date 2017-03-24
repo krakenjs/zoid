@@ -7,7 +7,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
          addEventToClass, template, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global } from '../../lib';
+         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -961,18 +961,7 @@ export class ParentComponent extends BaseComponent {
             });
 
         }).then(html => {
-
-            try {
-                this.window.document.open();
-                this.window.document.write(html);
-                this.window.document.close();
-            } catch (err) {
-                try {
-                    this.window.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
-                } catch (err2) {
-                    // pass
-                }
-            }
+            writeToWindow(this.window, html);
         });
     }
 

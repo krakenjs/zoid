@@ -763,3 +763,17 @@ export function addClass(element, name) {
         element.className += ` ${name}`;
     }
 }
+
+export function writeToWindow(win, html) {
+    try {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+    } catch (err) {
+        try {
+            win.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
+        } catch (err2) {
+            // pass
+        }
+    }
+}
