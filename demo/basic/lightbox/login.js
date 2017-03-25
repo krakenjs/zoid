@@ -16,6 +16,10 @@ window.MyLoginComponent = xcomponent.create({
         height: 150
     },
 
+    // The background overlay
+
+    containerTemplate: xcomponent.containerTemplate,
+
     // The properties they can (or must) pass down to my component
 
     props: {

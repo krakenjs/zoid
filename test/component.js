@@ -21,6 +21,8 @@ export let testComponent = xcomponent.create({
         height: 500
     },
 
+    containerTemplate: xcomponent.containerTemplate,
+
     props: {
         childEntered: {
             type: 'function',
@@ -97,6 +99,8 @@ export let testComponent2 = xcomponent.create({
     tag: 'test-component2',
     url: '/base/test/child.htm',
 
+    containerTemplate: xcomponent.containerTemplate,
+
     envUrls: {
         dev: '/base/test/child.htm?devenv=true'
     },
@@ -129,6 +133,8 @@ export let testComponent3 = xcomponent.create({
     tag: 'test-component3',
     url: '/base/test/child.htm',
 
+    containerTemplate: xcomponent.containerTemplate,
+
     envUrls: {
         dev: '/base/test/child.htm?devenv=true'
     },
@@ -151,9 +157,8 @@ export let testComponent3 = xcomponent.create({
     },
 
     contexts: {
-        popup: false,
-        iframe: false,
-        lightbox: true
+        popup: true,
+        iframe: false
     }
 });
 
@@ -161,6 +166,8 @@ export let testComponent4 = xcomponent.create({
 
     tag: 'test-component4',
     url: '/base/test/child.htm',
+
+    containerTemplate: xcomponent.containerTemplate,
 
     envUrls: {
         dev: '/base/test/child.htm?devenv=true'
@@ -172,6 +179,8 @@ export let testComponent5 = xcomponent.create({
 
     tag: 'test-component5',
     url: '/base/test/child.htm',
+
+    containerTemplate: xcomponent.containerTemplate,
 
     envUrls: {
         dev: '/base/test/child.htm?devenv=true'
@@ -191,7 +200,6 @@ export let testComponent5 = xcomponent.create({
 
     contexts: {
         popup: false,
-        iframe: false,
-        lightbox: true
+        iframe: true
     }
 });

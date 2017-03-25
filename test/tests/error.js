@@ -17,7 +17,7 @@ describe('xcomponent error cases', () => {
         };
 
         testComponent.renderPopup({
-            onEnter: done
+            onRender: done
 
         }).catch(err => {
             assert.isTrue(err instanceof xcomponent.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
@@ -28,7 +28,7 @@ describe('xcomponent error cases', () => {
 
     it('should enter a component, throw an integration error, and return the error to the parent with the original stack', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             onError(err) {
                 assert.isTrue(err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
@@ -43,7 +43,7 @@ describe('xcomponent error cases', () => {
 
     it('should enter a component and timeout, then call onTimeout', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
             timeout: 1,
             onTimeout() {
                 done();
@@ -53,7 +53,7 @@ describe('xcomponent error cases', () => {
 
     it('should enter a component and timeout, then call onError in the absense of onTimeout', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
             timeout: 1,
             onError() {
                 done();
@@ -68,25 +68,14 @@ describe('xcomponent error cases', () => {
 
     it('should try to enter a singleton component twice and error out', done => {
 
-        testComponent.renderLightbox({
-            onEnter() {
+        testComponent.renderIframe({
+            onRender() {
                 try {
                     testComponent.init();
                 } catch (err) {
                     done();
                 }
             }
-        });
-    });
-
-    it('should try to render a component twice and error out', done => {
-
-        let component = testComponent.init();
-
-        component.render().then(() => {
-            component.render().catch(() => {
-                done();
-            });
         });
     });
 
@@ -112,12 +101,10 @@ describe('xcomponent error cases', () => {
         delete testComponent.defaultContext;
         testComponent.contexts = {
             popup: false,
-            lightbox: false,
             iframe: true
         };
 
-        testComponent.render().catch(err => {
-            assert.ok(err);
+        testComponent.render().then(() => {
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
             done();
@@ -128,7 +115,7 @@ describe('xcomponent error cases', () => {
 
         testComponent.renderPopup({
 
-            onEnter() {
+            onRender() {
                 setTimeout(() => {
                     this.window.close();
                 });
@@ -140,11 +127,11 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should call onclose when a lightbox is closed by someone other than xcomponent', done => {
+    it('should call onclose when an iframe is closed by someone other than xcomponent', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
-            onEnter() {
+            onRender() {
                 setTimeout(() => {
                     this.iframe.parentNode.removeChild(this.iframe);
                 });

@@ -2,7 +2,7 @@
 import * as postRobot from 'post-robot/src';
 
 import { iframe, popup, getElement, toCSS, isPerc, toNum, hideElement } from '../../lib';
-import { CONTEXT_TYPES, CLASS_NAMES, DELEGATE } from '../../constants';
+import { CONTEXT_TYPES, DELEGATE } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
@@ -18,7 +18,7 @@ import { getPosition, getParentComponentWindow } from '../window';
     based on the context we're rendering to.
 
     These render drivers split this functionality out in a driver pattern, so our component code doesn't bunch up into a
-    series of if-popup-then-else-if-lightbox code.
+    series of if-popup-then-else-if-iframe code.
 */
 
 export let RENDER_DRIVERS = {
@@ -28,7 +28,6 @@ export let RENDER_DRIVERS = {
 
     [ CONTEXT_TYPES.IFRAME ]: {
 
-        requiresElement: true,
         renderedIntoContainerTemplate: true,
         destroyOnUnload: false,
         allowResize: true,
@@ -37,18 +36,16 @@ export let RENDER_DRIVERS = {
 
         open(element) {
 
-            if (!element) {
-                throw new Error(`[${this.component.tag}] Must specify element to render to iframe`);
-            }
-
-            if (!getElement(element)) {
+            if (element && !getElement(element)) {
                 throw new Error(`[${this.component.tag}] Can not find element ${element}`);
             }
+
+            element = this.element || element || document.body;
 
             this.iframe = iframe(null, {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            }, this.element || element);
+            }, element);
 
             this.element = this.element || this.iframe;
 
@@ -75,8 +72,8 @@ export let RENDER_DRIVERS = {
                 }
             });
         },
-        
-        renderToParentOverrides: {
+
+        delegateOverrides: {
 
             openContainer:           DELEGATE.CALL_DELEGATE,
             destroyComponent:        DELEGATE.CALL_DELEGATE,
@@ -111,20 +108,20 @@ export let RENDER_DRIVERS = {
         resize(width, height) {
 
             if (width) {
-                this.iframe.style.width  = toCSS(width);
+                this.element.style.width  = toCSS(width);
             }
 
             if (height) {
-                this.iframe.style.height = toCSS(height);
+                this.element.style.height = toCSS(height);
             }
         },
 
         hide() {
-            this.iframe.style.display = 'none';
+            this.element.style.display = 'none';
         },
 
         show() {
-            this.iframe.style.display = 'block';
+            this.element.style.display = 'block';
         },
 
         restyle() {
@@ -136,12 +133,11 @@ export let RENDER_DRIVERS = {
         }
     },
 
-    // Popup context opens up a centered lightbox-like popup window on the page, with an overlay behind it.
+    // Popup context opens up a centered popup window on the page.
 
     [ CONTEXT_TYPES.POPUP ]: {
 
         focusable: true,
-        requiresElement: false,
         renderedIntoContainerTemplate: false,
         destroyOnUnload: true,
         allowResize: false,
@@ -200,7 +196,7 @@ export let RENDER_DRIVERS = {
             // pass
         },
 
-        renderToParentOverrides: {
+        delegateOverrides: {
 
             openContainer:          DELEGATE.CALL_DELEGATE,
             destroyContainer:       DELEGATE.CALL_DELEGATE,
@@ -227,89 +223,6 @@ export let RENDER_DRIVERS = {
 
         loadUrl(url) {
             this.window.location = url;
-        }
-    },
-
-    // Lightbox context opens up a centered, iframe based lightbox on the page, with a template behind it.
-
-    [ CONTEXT_TYPES.LIGHTBOX ]: {
-
-        requiresElement: false,
-        renderedIntoContainerTemplate: true,
-        destroyOnUnload: false,
-        allowResize: true,
-        openOnClick: false,
-        errorOnCloseDuringInit: true,
-
-        renderToParentOverrides: {
-
-            openContainer:           DELEGATE.CALL_DELEGATE,
-            destroyComponent:        DELEGATE.CALL_DELEGATE,
-            destroyContainer:        DELEGATE.CALL_DELEGATE,
-            createComponentTemplate: DELEGATE.CALL_DELEGATE,
-
-            elementReady:            DELEGATE.CALL_DELEGATE,
-
-            showContainer:           DELEGATE.CALL_DELEGATE,
-            showComponent:           DELEGATE.CALL_DELEGATE,
-            hideContainer:           DELEGATE.CALL_DELEGATE,
-            hideComponent:           DELEGATE.CALL_DELEGATE,
-
-            hide:                    DELEGATE.CALL_DELEGATE,
-            show:                    DELEGATE.CALL_DELEGATE,
-            resize:                  DELEGATE.CALL_DELEGATE,
-            restyle:                 DELEGATE.CALL_DELEGATE,
-            loadUrl:                 DELEGATE.CALL_DELEGATE,
-
-            cancelContainerEvents: DELEGATE.CALL_DELEGATE,
-
-            open(original, override) {
-                return function() {
-                    return override.apply(this, arguments).then(() => {
-                        this.window = postRobot.winutil.findFrameByName(this.delegateWindow, this.childWindowName);
-
-                        if (!this.window) {
-                            throw new Error(`Unable to find parent component iframe window`);
-                        }
-                    });
-                };
-            }
-        },
-
-        open() {
-
-            let element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || document.body;
-
-            return RENDER_DRIVERS[CONTEXT_TYPES.IFRAME].open.call(this, element);
-        },
-
-        resize(width, height) {
-
-            let container = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0] || this.iframe;
-
-            if (width) {
-                container.style.width  = toCSS(width);
-            }
-
-            if (height) {
-                container.style.height = toCSS(height);
-            }
-        },
-
-        hide() {
-            this.iframe.style.display = 'none';
-        },
-
-        show() {
-            this.iframe.style.display = 'block';
-        },
-
-        restyle() {
-            // pass
-        },
-
-        loadUrl(url) {
-            this.iframe.src = url;
         }
     }
 };

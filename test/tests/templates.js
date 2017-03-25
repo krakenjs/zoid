@@ -6,13 +6,13 @@ describe('xcomponent templates and styles', () => {
     it('should focus an xcomponent popup on click of the overlay', done => {
         testComponent.renderPopup({
 
-            onEnter() {
+            onRender() {
 
                 this.window.focus = function() {
                     done();
                 };
 
-                this.containerFrame.contentDocument.querySelector('.xcomponent-overlay').click();
+                this.container.querySelector('.xcomponent-overlay').click();
             }
 
         });
@@ -22,7 +22,7 @@ describe('xcomponent templates and styles', () => {
 
         testComponent.renderPopup({
 
-            onEnter() {
+            onRender() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -30,18 +30,18 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                this.containerFrame.contentDocument.querySelector('.xcomponent-close').click();
+                this.container.querySelector('.xcomponent-close').click();
             }
 
         });
     });
 
 
-    it('should close an xcomponent lightbox on click of the overlay close button', done => {
+    it('should close an xcomponent iframe on click of the overlay close button', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
-            onEnter() {
+            onRender() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -49,7 +49,7 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                this.containerFrame.contentDocument.querySelector('.xcomponent-close').click();
+                this.container.querySelector('.xcomponent-close').click();
             }
 
         });

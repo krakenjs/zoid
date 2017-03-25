@@ -3,14 +3,14 @@ import { testComponent } from '../component';
 
 describe('xcomponent render to parent', () => {
 
-    it('should render a component to the parent as a lightbox', done => {
+    it('should render a component to the parent as an iframe', done => {
 
         testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
-                    onEnter: function() {
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
+                    onRender: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -25,7 +25,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
-                    onEnter: function() {
+                    onRender: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -42,7 +42,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onEnter: function() {
+                    onRender: function() {
                         return window.xprops.foo();
                     }
                 }, 'body');
@@ -50,13 +50,13 @@ describe('xcomponent render to parent', () => {
         }, document.body);
     });
 
-    it('should render a component to the parent as a lightbox and call a prop', done => {
+    it('should render a component to the parent as an iframe and call a prop', done => {
 
         testComponent.renderIframe({
             foo: done,
 
             run: `
-                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
                     foo: function() {
                         window.xprops.foo();
                     },
@@ -105,14 +105,14 @@ describe('xcomponent render to parent', () => {
         }, document.body);
     });
 
-    it('should render a component to the parent as a lightbox and close on enter', done => {
+    it('should render a component to the parent as an iframe and close on enter', done => {
 
         testComponent.renderIframe({
             onClose: () => done(),
 
             run: `
-                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
-                    onEnter: function() {
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
+                    onRender: function() {
                         this.close();
                     },
 
@@ -124,19 +124,19 @@ describe('xcomponent render to parent', () => {
         }, document.body);
     });
 
-    it('should close an xcomponent renderToParent lightbox on click of the overlay close button', done => {
+    it('should close an xcomponent renderToParent iframe on click of the overlay close button', done => {
 
         testComponent.renderIframe({
             childEntered() {
-                window.frames[1].document.querySelector('.xcomponent-close').click();
+                document.querySelector('.xcomponent-test-component2 .xcomponent-close').click();
             },
 
             foo: () => done(),
 
             run: `
-                xcomponent.getByTag('test-component2').renderLightboxTo(window.parent, {
+                xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
 
-                    onEnter: function() {
+                    onRender: function() {
 
                         var winClose = this.window.close;
                         this.window.close = function() {
@@ -157,7 +157,7 @@ describe('xcomponent render to parent', () => {
         testComponent.renderIframe({
 
             childEntered() {
-                window.frames[1].document.querySelector('.xcomponent-close').click();
+                document.querySelector('.xcomponent-test-component2 .xcomponent-close').click();
             },
 
             foo: () => done(),
@@ -165,7 +165,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onEnter: function() {
+                    onRender: function() {
 
                         var winClose = this.window.close;
                         this.window.close = function() {
@@ -186,7 +186,7 @@ describe('xcomponent render to parent', () => {
         testComponent.renderIframe({
 
             childEntered() {
-                window.frames[1].document.querySelector('.xcomponent-focus').click();
+                document.querySelector('.xcomponent-test-component2 .xcomponent-focus').click();
             },
 
             foo: () => done(),
@@ -194,7 +194,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onEnter: function() {
+                    onRender: function() {
 
                         this.window.focus = function() {
                             window.xprops.foo();

@@ -7,7 +7,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component with a custom url', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
             url: '/base/test/child.htm?foo=xyztest',
 
             sendUrl(url) {
@@ -23,7 +23,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component with a custom env', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
             env: 'dev',
 
             sendUrl(url) {
@@ -41,7 +41,7 @@ describe('xcomponent options', () => {
 
         let x = 0;
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             memoizedFunction() {
                 x += 1;
@@ -68,7 +68,7 @@ describe('xcomponent options', () => {
 
         let x = 0;
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             onceFunction() {
                 x += 1;
@@ -93,7 +93,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component and call a denodeify function', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -116,7 +116,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component and call a denodeify function returning a promise', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             denodeifyFunction(val) {
                 return Promise.resolve(`${val}bar`);
@@ -138,7 +138,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component and call a denodeify function with an error', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
@@ -162,7 +162,7 @@ describe('xcomponent options', () => {
 
     it('should enter a component and call a denodeify function incorrectly', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {

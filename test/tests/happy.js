@@ -3,17 +3,17 @@ import { testComponent, testComponent4 } from '../component';
 
 describe('xcomponent happy cases', () => {
 
-    it('should enter a component rendered as a lightbox', done => {
+    it('should enter a component rendered as an iframe', done => {
 
-        testComponent.renderLightbox({
-            onEnter: done
+        testComponent.renderIframe({
+            onRender: done
         });
     });
 
-    it.skip('should enter a component rendered as a lightbox with the correct dimensions', done => {
+    it.skip('should enter a component rendered as an iframe with the correct dimensions', done => {
 
-        testComponent.renderLightbox({
-            onEnter() {
+        testComponent.renderIframe({
+            onRender() {
                 if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
                 } else {
@@ -33,7 +33,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent.renderPopup({
-            onEnter() {
+            onRender() {
                 done();
 
                 /* For some reason karma/phantomjs don't respect the passed dimensions, so can't check them this way
@@ -51,10 +51,10 @@ describe('xcomponent happy cases', () => {
         window.open = open;
     });
 
-    it.skip('should enter a component rendered as a lightbox with no dimensions', done => {
+    it.skip('should enter a component rendered as an iframe with no dimensions', done => {
 
-        testComponent4.renderLightbox({
-            onEnter() {
+        testComponent4.renderIframe({
+            onRender() {
                 if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
                 } else {
@@ -74,7 +74,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent4.renderPopup({
-            onEnter() {
+            onRender() {
                 done();
 
                 /* Chrome opens up a new window with different dimensions to the parent, so this doesn't work
@@ -92,9 +92,9 @@ describe('xcomponent happy cases', () => {
         window.open = open;
     });
 
-    it('should enter a component rendered as a lightbox and call a prop', done => {
+    it('should enter a component rendered as an iframe and call a prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             foo(bar) {
                 assert.equal(bar, 'bar');
@@ -110,7 +110,7 @@ describe('xcomponent happy cases', () => {
     it('should enter a component rendered as an iframe', done => {
 
         testComponent.renderIframe({
-            onEnter: done
+            onRender: done
         }, document.body);
     });
 
@@ -132,7 +132,7 @@ describe('xcomponent happy cases', () => {
     it('should enter a component rendered as a popup', done => {
 
         testComponent.renderPopup({
-            onEnter: done
+            onRender: done
         });
     });
 
@@ -153,7 +153,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component, update a prop, and call a prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             foo() {
                 return this.updateProps({
@@ -177,17 +177,17 @@ describe('xcomponent happy cases', () => {
     it('should try to render by passing in an element', done => {
 
         testComponent.render({
-            onEnter: done
+            onRender: done
         }, document.body);
     });
 
-    it('should try to render to defaultContext lightbox', done => {
+    it('should try to render to defaultContext iframe', done => {
 
         let originalDefaultContext = testComponent.defaultContext;
-        testComponent.defaultContext = 'lightbox';
+        testComponent.defaultContext = 'iframe';
 
         testComponent.render({
-            onEnter() {
+            onRender() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
@@ -200,7 +200,7 @@ describe('xcomponent happy cases', () => {
         testComponent.defaultContext = 'popup';
 
         testComponent.render({
-            onEnter() {
+            onRender() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
@@ -215,12 +215,11 @@ describe('xcomponent happy cases', () => {
         delete testComponent.defaultContext;
         testComponent.contexts = {
             popup: true,
-            lightbox: false,
             iframe: false
         };
 
         testComponent.render({
-            onEnter() {
+            onRender() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
@@ -228,7 +227,7 @@ describe('xcomponent happy cases', () => {
         });
     });
 
-    it('should try to render to when lightbox is the only available option', done => {
+    it('should try to render to when iframe is the only available option', done => {
 
         let originalDefaultContext = testComponent.defaultContext;
         let originalContexts = testComponent.contexts;
@@ -236,12 +235,11 @@ describe('xcomponent happy cases', () => {
         delete testComponent.defaultContext;
         testComponent.contexts = {
             popup: false,
-            lightbox: true,
-            iframe: false
+            iframe: true
         };
 
         testComponent.render({
-            onEnter() {
+            onRender() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
@@ -251,7 +249,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a string prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             stringProp: 'bar',
 
@@ -268,7 +266,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a number prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             numberProp: 123,
 
@@ -285,7 +283,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a parseInted number prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             numberProp: '123',
 
@@ -302,7 +300,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a boolean prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             booleanProp: true,
 
@@ -319,7 +317,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a truthy boolean prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             booleanProp: 1,
 
@@ -336,7 +334,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a falsy boolean prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             booleanProp: 0,
 
@@ -353,7 +351,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with an object prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             objectProp: { foo: 'bar', x: 12345, fn() { done(); }, obj: { bar: 'baz' } },
 
@@ -373,7 +371,7 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component and call back with a function prop', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
             functionProp: done,
 

@@ -162,7 +162,7 @@ export class ChildComponent extends BaseComponent {
         -----------
 
         Determine the parent window, and the parent component window. Note -- these may be different, if we were
-        rendered using renderToParent.
+        rendered using renderTo.
     */
 
     setWindows() {

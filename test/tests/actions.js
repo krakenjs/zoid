@@ -7,7 +7,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onEnter() {
+            onRender() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -21,11 +21,11 @@ describe('xcomponent actions', () => {
         });
     });
 
-    it('should close an xcomponent lightbox', done => {
+    it('should close an xcomponent iframe', done => {
 
-        testComponent.renderLightbox({
+        testComponent.renderIframe({
 
-            onEnter() {
+            onRender() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -43,7 +43,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onEnter() {
+            onRender() {
                 this.window.focus = done;
                 this.focus();
             }

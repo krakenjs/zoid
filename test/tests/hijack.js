@@ -5,7 +5,7 @@ import { testComponent } from '../component';
 
 describe('xcomponent hijack', () => {
 
-    it('should render a component by hijacking a button to a lightbox', done => {
+    it('should render a component by hijacking a button to an iframe', done => {
 
         let form = document.createElement('form');
         form.method = 'POST';
@@ -27,7 +27,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
@@ -71,7 +71,7 @@ describe('xcomponent hijack', () => {
         button.click();
     }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
-    it('should render a component by hijacking a link to a lightbox', done => {
+    it('should render a component by hijacking a link to an iframe', done => {
 
         let link = document.createElement('a');
         link.id = 'hijackLink';
@@ -89,7 +89,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
@@ -118,7 +118,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.LIGHTBOX);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;

@@ -5,7 +5,7 @@ export function create(options) {
     return new Component(options);
 }
 
-export { getByTag, destroyAll } from './component';
+export { getByTag, destroyAll, componentTemplate, containerTemplate } from './component';
 
 export * from './error';
 

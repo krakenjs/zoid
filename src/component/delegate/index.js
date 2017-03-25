@@ -29,9 +29,9 @@ export class DelegateComponent extends BaseComponent {
         this.getContainerTemplate = options.overrides.getContainerTemplate;
         this.getComponentTemplate = options.overrides.getComponentTemplate;
 
-        let renderToParentOverrides = RENDER_DRIVERS[options.context].renderToParentOverrides;
+        let delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
 
-        for (let key of Object.keys(renderToParentOverrides)) {
+        for (let key of Object.keys(delegateOverrides)) {
             this[key] = ParentComponent.prototype[key];
         }
 
@@ -59,13 +59,13 @@ export class DelegateComponent extends BaseComponent {
 
     getOverrides(context) {
 
-        let renderToParentOverrides = RENDER_DRIVERS[context].renderToParentOverrides;
+        let delegateOverrides = RENDER_DRIVERS[context].delegateOverrides;
 
         let overrides = {};
 
         let self = this;
 
-        for (let key of Object.keys(renderToParentOverrides)) {
+        for (let key of Object.keys(delegateOverrides)) {
             overrides[key] = function() {
                 return ParentComponent.prototype[key].apply(self, arguments);
             };

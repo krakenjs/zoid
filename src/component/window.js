@@ -17,7 +17,7 @@ function normalize(str) {
 
     - That the window was created by, and is owned by xcomponent
     - The name of the child's parent. This is so the child can identify which window created it, even when we do a
-      renderToParent, in which case the true parent may actually be a sibling frame in the window hierarchy
+      renderTo, in which case the true parent may actually be a sibling frame in the window hierarchy
 
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
@@ -82,7 +82,7 @@ export let getComponentMeta = memoize(() => {
 });
 
 export function getParentDomain() {
-    return getComponentMeta().domain; // How does this work for renderToParent..?
+    return getComponentMeta().domain; // How does this work for renderTo..?
 }
 
 
@@ -177,7 +177,7 @@ export let getParentRenderWindow = memoize(() => {
 /*  Get Position
     ------------
 
-    Calculate the position for the popup / lightbox
+    Calculate the position for the popup
 
     This is either
     - Specified by the user

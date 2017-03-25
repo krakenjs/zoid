@@ -108,4 +108,12 @@ export function validate(options) { // eslint-ignore-line
             }
         }
     }
+
+    if (options.componentTemplate && typeof options.componentTemplate !== 'function') {
+        throw new Error(`[${options.tag}] Expected options.componentTemplate to be a function`);
+    }
+
+    if (options.containerTemplate && typeof options.containerTemplate !== 'function') {
+        throw new Error(`[${options.tag}] Expected options.containerTemplate to be a function`);
+    }
 }

@@ -41,7 +41,6 @@ export const PROP_TYPES_LIST = values(PROP_TYPES);
 
 export const CONTEXT_TYPES = {
     IFRAME: `iframe`,
-    LIGHTBOX: `lightbox`,
     POPUP: `popup`
 };
 
@@ -52,7 +51,6 @@ export const CLASS_NAMES = {
     FOCUS:      `${XCOMPONENT}-focus`,
     ELEMENT:    `${XCOMPONENT}-element`,
     IFRAME:     `${XCOMPONENT}-iframe`,
-    LIGHTBOX:   `${XCOMPONENT}-lightbox`,
     POPUP:      `${XCOMPONENT}-popup`,
     LOADING:    `${XCOMPONENT}-loading`,
 

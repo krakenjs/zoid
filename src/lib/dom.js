@@ -3,7 +3,7 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';
-import { extend, get, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
+import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 import { PopupOpenError } from '../error';
 
 function isElement(element) {
@@ -282,34 +282,6 @@ export function addEventToClass(element, className, eventName, handler) {
             }
         }
     };
-}
-
-
-/*  Template
-    --------
-
-    Render a simple template with [[substitutions]]
-*/
-
-export function template(html, context) {
-    return Promise.try(() => {
-
-        if (typeof html === 'function') {
-            return html(context || {});
-        }
-
-        return html.replace(/\{([\w_\.]+)\}/g, variable => {
-            return get(context, variable.slice(1, variable.length - 1), '');
-        });
-
-    }).then(result => {
-
-        if (typeof result !== 'string') {
-            throw new Error(`Expected template to return string, got ${typeof result}`);
-        }
-
-        return result;
-    });
 }
 
 export let parseQuery = memoize(queryString => {

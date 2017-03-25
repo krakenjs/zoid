@@ -1,7 +1,6 @@
 
 import * as postRobot from 'post-robot/src';
 import * as $logger from 'beaver-logger/client';
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -10,15 +9,14 @@ import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants';
-import { RENDER_DRIVERS } from '../parent/drivers';
 import { validate } from './validate';
 
-import containerTemplate from './templates/container.htm';
-import componentTemplate from './templates/component.htm';
+export { containerTemplate } from './templates/container';
+export { componentTemplate } from './templates/component';
 
 import * as drivers from '../../drivers';
 
-import { capitalizeFirstLetter, getDomainFromUrl } from '../../lib';
+import { getDomainFromUrl, promise } from '../../lib';
 
 export let components = {};
 
@@ -74,7 +72,7 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'buildUrl');
 
-        this.addProp(options, 'sandboxContainer', true);
+        this.addProp(options, 'sandboxContainer', false);
 
         this.addProp(options, 'bridgeUrl');
         this.addProp(options, 'bridgeUrls');
@@ -86,7 +84,7 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'url');
 
-        // The allowed contexts. For example { iframe: true, lightbox: false, popup: false }. Defaults to true for all.
+        // The allowed contexts. For example { iframe: true, popup: false }. Defaults to true for all.
 
         this.addProp(options, 'contexts', {});
         for (let context of CONTEXT_TYPES_LIST) {
@@ -107,8 +105,8 @@ export class Component extends BaseComponent {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.addProp(options, 'parentTemplate', containerTemplate);
-        this.addProp(options, 'componentTemplate', componentTemplate);
+        this.addProp(options, 'containerTemplate');
+        this.addProp(options, 'componentTemplate');
 
         this.addProp(options, 'validateProps');
 
@@ -320,10 +318,6 @@ export class Component extends BaseComponent {
             // throw new Error(`Child instantiated from a different component: ${window.xchild.tag}`);
         }
 
-        if (options && options.onEnter) {
-            options.onEnter.call(window.xchild);
-        }
-
         return window.xchild;
     }
 
@@ -346,7 +340,7 @@ export class Component extends BaseComponent {
     */
 
     init(props, context, element) {
-        context = this.getRenderContext(element, context);
+        context = this.getRenderContext(element);
         return new ParentComponent(this, context, { props });
     }
 
@@ -355,44 +349,27 @@ export class Component extends BaseComponent {
         return new DelegateComponent(this, source, options);
     }
 
-    getRenderContext(element, context) {
+    validateRenderContext(context) {
+        if (!this.contexts[context]) {
+            throw new Error(`[${this.tag}] Can not render to ${context}`);
+        }
 
-        let tag = this.tag;
-        let defaultContext = this.defaultContext;
-        let contexts = this.contexts;
+    }
+
+    getRenderContext(element) {
 
         if (element) {
-            if (context && !RENDER_DRIVERS[context].requiresElement) {
-                throw new Error(`[${tag}] ${context} context can not be rendered into element`);
-            }
-
-            context = CONTEXT_TYPES.IFRAME;
+            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+            return CONTEXT_TYPES.IFRAME;
+        } else if (this.defaultContext) {
+            return this.defaultContext;
+        } else if (this.contexts[CONTEXT_TYPES.IFRAME]) {
+            return CONTEXT_TYPES.IFRAME;
+        } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
+            return CONTEXT_TYPES.POPUP;
         }
 
-        if (context) {
-
-            if (!contexts[context]) {
-                throw new Error(`[${tag}] ${context} context not allowed by component`);
-            }
-
-            if (RENDER_DRIVERS[context].requiresElement && !element) {
-                throw new Error(`[${tag}] Must specify element to render to iframe`);
-            }
-
-            return context;
-        }
-
-        if (defaultContext) {
-            return defaultContext;
-        }
-
-        for (let renderContext of [ CONTEXT_TYPES.LIGHTBOX, CONTEXT_TYPES.POPUP ]) {
-            if (contexts[renderContext]) {
-                return renderContext;
-            }
-        }
-
-        throw new Error(`[${tag}] No context options available for render`);
+        throw new Error(`[${this.tag}] No context options available for render`);
     }
 
 
@@ -402,18 +379,38 @@ export class Component extends BaseComponent {
         Shortcut to render a parent component
     */
 
-    render(props, element, context) {
-        return Promise.try(() => {
-            context = this.getRenderContext(element, context);
-            return new ParentComponent(this, context, { props }).render(element);
-        });
+    @promise
+    render(props, element) {
+        return new ParentComponent(this, this.getRenderContext(element), { props }).render(element || document.body);
     }
 
-    renderTo(win, props, element, context) {
-        return Promise.try(() => {
-            context = this.getRenderContext(element, context);
-            return new ParentComponent(this, context, { props }).renderTo(win, element);
-        });
+    @promise
+    renderIframe(props, element = document.body) {
+        this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+        return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).render(element);
+    }
+
+    @promise
+    renderPopup(props) {
+        this.validateRenderContext(CONTEXT_TYPES.POPUP);
+        return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).render();
+    }
+
+    @promise
+    renderTo(win, props, element) {
+        return new ParentComponent(this, this.getRenderContext(element), { props }).renderTo(win, element);
+    }
+
+    @promise
+    renderIframeTo(win, props, element) {
+        this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+        return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).renderTo(win, element);
+    }
+
+    @promise
+    renderPopupTo(win, props) {
+        this.validateRenderContext(CONTEXT_TYPES.POPUP);
+        return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
     }
 
 
@@ -475,23 +472,4 @@ export class Component extends BaseComponent {
 
 export function getByTag(tag) {
     return components[tag];
-}
-
-/*  Generate Render Methods
- -----------------------
-
- Autogenerate methods like renderIframe, renderPopupToParent
- */
-
-for (let context of CONTEXT_TYPES_LIST) {
-
-    let contextName = capitalizeFirstLetter(context);
-
-    Component.prototype[`render${contextName}`] = function(props, element) {
-        return this.render(props, element, context);
-    };
-
-    Component.prototype[`render${contextName}To`] = function(win, props, element) {
-        return this.renderTo(win, props, element, context);
-    };
 }

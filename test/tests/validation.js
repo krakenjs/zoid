@@ -167,7 +167,6 @@ describe('xcomponent validation errors', () => {
                 url: 'http://zombo.com',
                 contexts: {
                     invalid: true,
-                    lightbox: false,
                     popup: false
                 }
             });
@@ -183,7 +182,6 @@ describe('xcomponent validation errors', () => {
                 url: 'http://zombo.com',
                 contexts: {
                     iframe: false,
-                    lightbox: false,
                     popup: false
                 }
             });
@@ -198,7 +196,6 @@ describe('xcomponent validation errors', () => {
             url: 'http://zombo.com',
             contexts: {
                 iframe: true,
-                lightbox: false,
                 popup: false
             }
         });
@@ -212,7 +209,6 @@ describe('xcomponent validation errors', () => {
                 },
                 contexts: {
                     iframe: true,
-                    lightbox: false,
                     popup: false
                 },
                 url: 'http://zombo.com',
@@ -230,7 +226,6 @@ describe('xcomponent validation errors', () => {
                 url: 'http://zombo.com',
                 contexts: {
                     iframe: true,
-                    lightbox: false,
                     popup: false
                 },
                 defaultContext: 'popup'
@@ -246,7 +241,6 @@ describe('xcomponent validation errors', () => {
             url: 'http://zombo.com',
             contexts: {
                 iframe: true,
-                lightbox: false,
                 popup: false
             },
             defaultContext: 'iframe'

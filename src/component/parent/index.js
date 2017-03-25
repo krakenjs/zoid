@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, template, extend, serializeFunctions, extendUrl, iframe, setOverflow,
+         addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
          elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
@@ -14,8 +14,6 @@ import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
-
-import defaultContainerTemplate from '../component/templates/container.htm';
 
 let activeComponents = [];
 
@@ -53,7 +51,7 @@ export class ParentComponent extends BaseComponent {
 
         this.registerActiveComponent();
 
-        // Options passed during renderToParent. We would not ordinarily expect a user to pass these, since we depend on
+        // Options passed during renderTo. We would not ordinarily expect a user to pass these, since we depend on
         // them only when we're trying to render from a sibling to a sibling
 
         this.component.log(`construct_parent`);
@@ -78,17 +76,33 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    renderedIntoSandboxFrame() {
+
+        if (!this.driver.renderedIntoContainerTemplate) {
+            return false;
+        }
+
+        if (!this.component.sandboxContainer) {
+            return false;
+        }
+
+        if (this.component.containerTemplate) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     buildChildWindowName({ renderTo = window, secureProps = false } = {}) {
 
         let sameWindow = (renderTo === window);
-        let isLightbox = (this.context === CONTEXT_TYPES.LIGHTBOX);
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
         let sProps = serializeFunctions(this.getPropsForChild());
 
-        let defaultParent = isLightbox
+        let defaultParent = this.renderedIntoSandboxFrame()
             ? WINDOW_REFERENCES.PARENT_PARENT
             : WINDOW_REFERENCES.DIRECT_PARENT;
 
@@ -391,31 +405,18 @@ export class ParentComponent extends BaseComponent {
             }
 
             return Promise.hash(tasks);
+
+        }).then(() => {
+
+            return this.props.onRender();
         });
     }
 
-
-    validateRenderToParent(element) {
-
-        let parentWindow = getParentComponentWindow();
-
-        if (!parentWindow) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - no parent exists`);
-        }
-
-        if (!isXComponentWindow()) {
-            throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
-        }
-    }
-
-
     delegate(win) {
 
-        this.delegateWindow = win;
+        this.childWindowName = this.buildChildWindowName({ renderTo: win, secureProps: true });
 
         this.component.log(`delegate_${this.context}`);
-
-        this.childWindowName = this.buildChildWindowName({ renderTo: win, secureProps: true });
 
         let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
@@ -454,7 +455,7 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${err.stack}`);
         });
 
-        let overrides = this.driver.renderToParentOverrides;
+        let overrides = this.driver.delegateOverrides;
 
         for (let key of Object.keys(overrides)) {
             let val = overrides[key];
@@ -488,6 +489,10 @@ export class ParentComponent extends BaseComponent {
     renderTo(win, element, context, options = {}) {
         return this.tryInit(() => {
 
+            if (!win) {
+                throw new Error(`[${this.component.tag}] Must pass window to renderTo`);
+            }
+
             if (window.location.protocol === 'file:') {
                 throw new Error(`Can not render remotely from file:// domain`);
             }
@@ -503,9 +508,9 @@ export class ParentComponent extends BaseComponent {
                 throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
             }
 
-            this.context = this.context || this.component.getRenderContext(element, context);
-
-            this.validateRenderToParent(element, this.context);
+            if (!isXComponentWindow()) {
+                throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
+            }
 
             this.component.log(`render_${this.context}_to_win`, { element, context: this.context });
 
@@ -637,11 +642,6 @@ export class ParentComponent extends BaseComponent {
                 }
 
                 return this.props.onEnter().then(() => {
-
-                    // Let the child know what its context is, and what its initial props are.
-
-                    $logger.flush();
-
                     return {
                         props: this.getPropsForChild(),
                         context: this.context
@@ -650,7 +650,7 @@ export class ParentComponent extends BaseComponent {
             },
 
 
-            // The child has requested that we close it. Since lightboxes and iframes can't close themselves, we need
+            // The child has requested that we close it. Since iframes can't close themselves, we need
             // this logic to exist in the parent window
 
             [ POST_MESSAGE.CLOSE ](source, data) {
@@ -953,29 +953,34 @@ export class ParentComponent extends BaseComponent {
 
         }).then(componentTemplate => {
 
-            return template(componentTemplate, {
-                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                props: this.props,
-                CLASS: CLASS_NAMES,
-                ANIMATION: ANIMATION_NAMES
-            });
+            if (!componentTemplate) {
+                return;
+            }
 
-        }).then(html => {
-            writeToWindow(this.window, html);
+            return Promise.try(() => {
+                return componentTemplate({
+                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+                    props: this.props,
+                    CLASS: CLASS_NAMES,
+                    ANIMATION: ANIMATION_NAMES
+                });
+            }).then(html => {
+                writeToWindow(this.window, html);
+            });
         });
     }
 
 
     @promise
     getContainerTemplate() {
-        return this.component.parentTemplate;
+        return this.component.containerTemplate;
     }
 
 
     /*  Create Parent Template
         ----------------------
 
-        Create a template and stylesheet for the parent template behind the popup/lightbox
+        Create a template and stylesheet for the parent template behind the element
     */
 
     @memoized
@@ -987,33 +992,37 @@ export class ParentComponent extends BaseComponent {
 
         }).then(containerTemplate => {
 
-            if (containerTemplate === defaultContainerTemplate && this.context === CONTEXT_TYPES.IFRAME) {
+            if (!containerTemplate) {
                 return;
             }
 
-            return template(containerTemplate, {
-                id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                props: this.props,
-                CLASS: CLASS_NAMES,
-                ANIMATION: ANIMATION_NAMES
+            return Promise.try(() => {
+                return containerTemplate({
+                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+                    props: this.props,
+                    CLASS: CLASS_NAMES,
+                    ANIMATION: ANIMATION_NAMES
+                });
             }).then(html => {
 
                 let el;
 
                 if (element) {
-
                     el = getElement(element);
 
                     if (!el) {
                         throw new Error(`Could not find element: ${element}`);
                     }
+                } else {
+                    el = document.body;
+                }
 
-                } else if (this.component.sandboxContainer) {
+                if (this.component.sandboxContainer) {
 
                     this.containerFrame = iframe(null, {
-                        name: `__lightbox_container__${uniqueID()}__`,
+                        name: `__xcomponent_container_${uniqueID()}__`,
                         scrolling: 'no'
-                    }, document.body);
+                    }, el);
 
                     this.containerFrame.style.display = 'block';
                     this.containerFrame.style.position = 'fixed';
@@ -1028,10 +1037,6 @@ export class ParentComponent extends BaseComponent {
                     this.containerFrame.contentWindow.document.close();
 
                     el = this.containerFrame.contentWindow.document.body;
-
-                } else {
-
-                    el = document.body;
                 }
 
                 this.container = createElement('div', {
@@ -1044,6 +1049,7 @@ export class ParentComponent extends BaseComponent {
 
                     class: [
                         CLASS_NAMES.XCOMPONENT,
+                        `${CLASS_NAMES.XCOMPONENT}-${this.component.tag}`,
                         `${CLASS_NAMES.XCOMPONENT}-${this.context}`
                     ]
                 });

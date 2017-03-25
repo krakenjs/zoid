@@ -63,9 +63,16 @@ export const internalProps = {
         promisify: true
     },
 
+    onEnter: {
+        type: 'function',
+        required: false,
+        noop: true,
+        promisify: true
+    },
+
     // When we get an INIT message from the child
 
-    onEnter: {
+    onRender: {
         type: 'function',
         required: false,
         noop: true,

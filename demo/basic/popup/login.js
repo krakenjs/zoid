@@ -16,6 +16,17 @@ window.MyLoginComponent = xcomponent.create({
         height: 150
     },
 
+    // Allow the component to be rendered as a popup
+
+    contexts: {
+        popup: true,
+        iframe: false
+    },
+
+    // The background overlay
+
+    containerTemplate: xcomponent.containerTemplate,
+
     // The properties they can (or must) pass down to my component
 
     props: {
