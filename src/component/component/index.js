@@ -90,10 +90,6 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'defaultContext');
 
-        // Should this be a singleton component? Do I want to allow it to be rendered more than once on the same page?
-
-        this.addProp(options, 'singleton');
-
         // Auto Resize option
 
         this.addProp(options, 'autoResize', false);

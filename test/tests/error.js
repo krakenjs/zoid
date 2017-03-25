@@ -66,19 +66,6 @@ describe('xcomponent error cases', () => {
         window.open('/base/test/child.htm', 'INVALIDNAME');
     });
 
-    it('should try to enter a singleton component twice and error out', done => {
-
-        testComponent.renderIframe({
-            onRender() {
-                try {
-                    testComponent.init();
-                } catch (err) {
-                    done();
-                }
-            }
-        });
-    });
-
     it('should try to render a component to an unsupported context and error out', done => {
 
         testComponent3.render(null, 'moo').catch(() => {

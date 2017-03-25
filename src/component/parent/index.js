@@ -43,12 +43,6 @@ export class ParentComponent extends BaseComponent {
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });
 
-        // Ensure the component is not loaded twice on the same page, if it is a singleton
-
-        if (component.singleton && activeComponents.some(comp => comp.component === component)) {
-            throw new Error(`${component.tag} is a singleton, and an only be instantiated once`);
-        }
-
         this.registerActiveComponent();
 
         // Options passed during renderTo. We would not ordinarily expect a user to pass these, since we depend on
