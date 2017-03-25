@@ -24,10 +24,10 @@ describe('xcomponent options', () => {
     it('should enter a component with a custom env', done => {
 
         testComponent.renderIframe({
-            env: 'dev',
+            env: 'custom',
 
             sendUrl(url) {
-                assert.isTrue(url.indexOf('devenv') !== -1, 'Expected url to be custom env url');
+                assert.isTrue(url.indexOf('customenv') !== -1, 'Expected url to be custom env url');
                 done();
             },
 

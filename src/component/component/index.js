@@ -68,21 +68,19 @@ export class Component extends BaseComponent {
 
         // A mapping of env->url, used to determine which url to load for which env
 
-        this.addProp(options, 'envUrls');
-
         this.addProp(options, 'buildUrl');
 
         this.addProp(options, 'sandboxContainer', false);
 
-        this.addProp(options, 'bridgeUrl');
-        this.addProp(options, 'bridgeUrls');
+        this.addProp(options, 'url');
+        this.addProp(options, 'domain');
 
+        this.addProp(options, 'bridgeUrl');
         this.addProp(options, 'bridgeDomain');
-        this.addProp(options, 'bridgeDomains');
 
         // A url to use by default to render the component, if not using envs
 
-        this.addProp(options, 'url');
+
 
         // The allowed contexts. For example { iframe: true, popup: false }. Defaults to true for all.
 
@@ -109,9 +107,6 @@ export class Component extends BaseComponent {
         this.addProp(options, 'componentTemplate');
 
         this.addProp(options, 'validateProps');
-
-        this.addProp(options, 'domain');
-        this.addProp(options, 'domains');
 
         // A mapping of tag->component so we can reference components by string tag name
 
@@ -177,20 +172,18 @@ export class Component extends BaseComponent {
 
         let domain = getDomainFromUrl(url);
 
-        if (this.domain) {
-            if (domain === this.domain) {
-                return domain;
-            }
+        if (typeof this.domain === 'string' && domain === this.domain) {
+            return domain;
         }
 
-        if (this.domains) {
-            for (let env of Object.keys(this.domains)) {
+        if (this.domain && typeof this.domain === 'object') {
+            for (let env of Object.keys(this.domain)) {
 
                 if (env === 'test') {
                     continue;
                 }
 
-                if (domain === this.domains[env]) {
+                if (domain === this.domain[env]) {
                     return domain;
                 }
             }
@@ -206,54 +199,56 @@ export class Component extends BaseComponent {
             return domain;
         }
 
-        if (this.domain) {
-            return this.domain;
+        domain = this.getForEnv(this.domain, props.env);
+
+        if (domain) {
+            return domain;
         }
 
-        if (this.domains && props.env && this.domains[props.env]) {
-            return this.domains[props.env];
-        }
+        let envUrl = this.getForEnv(this.url, props.env);
 
-        if (this.envUrls && props.env && this.envUrls[props.env]) {
-            return getDomainFromUrl(this.envUrls[props.env]);
-        }
-
-        if (this.envUrls && this.defaultEnv && this.envUrls[this.defaultEnv]) {
-            return getDomainFromUrl(this.envUrls[this.defaultEnv]);
-        }
-
-        if (this.url) {
-            return getDomainFromUrl(this.url);
+        if (envUrl) {
+            return getDomainFromUrl(envUrl);
         }
 
         if (url) {
-            let urlDomain = getDomainFromUrl(url);
-
-            if (urlDomain) {
-                return urlDomain;
-            }
+            return getDomainFromUrl(url);
         }
     }
 
     getBridgeUrl(env) {
+        return this.getForEnv(this.bridgeUrl, env);
+    }
 
-        if (this.bridgeUrl) {
-            return this.bridgeUrl;
+    getForEnv(item, env) {
+
+        if (!item) {
+            return;
         }
 
-        if (this.bridgeUrls && env && this.bridgeUrls[env]) {
-            return this.bridgeUrls[env];
+        if (typeof item === 'string') {
+            return item;
+        }
+
+        if (!env) {
+            env = this.defaultEnv;
+        }
+
+        if (!env) {
+            return;
+        }
+
+        if (env && typeof item === 'object' && item[env]) {
+            return item[env];
         }
     }
 
     getBridgeDomain(env) {
 
-        if (this.bridgeDomain) {
-            return this.bridgeDomain;
-        }
+        let bridgeDomain = this.getForEnv(this.bridgeDomain, env);
 
-        if (this.bridgeDomains && env && this.bridgeDomains[this.props.env]) {
-            return this.bridgeDomains[env];
+        if (bridgeDomain) {
+            return bridgeDomain;
         }
 
         let bridgeUrl = this.getBridgeUrl(env);
@@ -265,20 +260,14 @@ export class Component extends BaseComponent {
 
     getUrl(env, props) {
 
-        if (env && this.envUrls) {
-            return this.envUrls[env];
-        }
+        let url = this.getForEnv(this.url, env);
 
-        if (this.defaultEnv && this.envUrls) {
-            return this.envUrls[this.defaultEnv];
+        if (url) {
+            return url;
         }
 
         if (this.buildUrl) {
             return this.buildUrl(props);
-        }
-
-        if (this.url) {
-            return this.url;
         }
     }
 

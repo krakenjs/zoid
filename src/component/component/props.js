@@ -10,6 +10,8 @@ import { uniqueID } from '../../lib';
 
 export const internalProps = {
 
+    // The desired env in which the component is being rendered. Used to determine the correct url
+
     env: {
         type: 'string',
         required: false,
@@ -35,8 +37,6 @@ export const internalProps = {
         promise: true,
         sendToChild: false
     },
-
-    // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
 
     version: {
         type: 'string',

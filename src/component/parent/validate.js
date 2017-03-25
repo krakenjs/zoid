@@ -110,7 +110,7 @@ export function validate(component, options) {
 
     let props = options.props || {};
 
-    if (props.env && component.envUrls && !component.envUrls[props.env]) {
+    if (props.env && typeof component.url === 'object' && !component.url[props.env]) {
         throw new Error(`Invalid env: ${props.env}`);
     }
 }

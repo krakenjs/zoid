@@ -83,28 +83,37 @@ export function validate(options) { // eslint-ignore-line
         }
     }
 
-    if (options.envUrls) {
-        for (let env of Object.keys(options.envUrls)) {
-            if (!options.envUrls[env]) {
-                throw new Error(`[${options.tag}] No url specified for env: ${env}`);
-            }
+    if (!options.url && !options.buildUrl) {
+        throw new Error(`[${options.tag}] Expected options.url to be passed`);
+    }
+
+    if (options.url && options.buildUrl) {
+        throw new Error(`[${options.tag}] Can not pass options.url and options.buildUrl`);
+    }
+
+    if (options.defaultEnv) {
+        if (typeof options.defaultEnv !== 'string') {
+            throw new Error(`[${options.tag}] Expected options.defaultEnv to be a string`);
+        }
+
+        if (typeof options.url !== 'object') {
+            throw new Error(`[${options.tag}] Expected options.url to be an object mapping env->url`);
+        }
+
+        if (options.url && typeof options.url === 'object' && !options.url[options.defaultEnv]) {
+            throw new Error(`[${options.tag}] No url found for default env: ${options.defaultEnv}`);
         }
     }
 
-    if (options.defaultEnv && !options.envUrls) {
-        throw new Error(`[${options.tag}] options.envUrls must be set if passing in a defaultEnv`);
-    }
+    if (options.url && typeof options.url === 'object') {
 
-    if (options.defaultEnv && !options.envUrls[options.defaultEnv]) {
-        throw new Error(`[${options.tag}] Invalid default env: ${options.defaultEnv}`);
-    }
+        if (!options.defaultEnv) {
+            throw new Error(`[${options.tag}] Must pass options.defaultEnv with env->url mapping`);
+        }
 
-    if ((!options.url || !(typeof options.url === 'string')) && !options.buildUrl) {
-        if (!options.defaultEnv || typeof options.defaultEnv !== 'string') {
-            if (options.envUrls) {
-                throw new Error(`[${options.tag}] Expected options.defaultEnv to be a string`);
-            } else {
-                throw new Error(`[${options.tag}] Expected options.url to be a string`);
+        for (let env of Object.keys(options.url)) {
+            if (!options.url[env]) {
+                throw new Error(`[${options.tag}] No url specified for env: ${env}`);
             }
         }
     }

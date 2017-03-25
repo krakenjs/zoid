@@ -8,13 +8,15 @@ window.xcomponent = xcomponent;
 export let testComponent = xcomponent.create({
 
     tag: 'test-component',
-    url: '/base/test/child.htm',
 
     singleton: true,
 
-    envUrls: {
-        dev: '/base/test/child.htm?devenv=true'
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
     },
+
+    defaultEnv: 'dev',
 
     dimensions: {
         width: 500,
@@ -97,13 +99,14 @@ export let testComponent = xcomponent.create({
 export let testComponent2 = xcomponent.create({
 
     tag: 'test-component2',
-    url: '/base/test/child.htm',
 
     containerTemplate: xcomponent.containerTemplate,
 
-    envUrls: {
+    url: {
         dev: '/base/test/child.htm?devenv=true'
     },
+
+    defaultEnv: 'dev',
 
     dimensions: {
         width: 500,
@@ -131,13 +134,14 @@ export let testComponent2 = xcomponent.create({
 export let testComponent3 = xcomponent.create({
 
     tag: 'test-component3',
-    url: '/base/test/child.htm',
 
     containerTemplate: xcomponent.containerTemplate,
 
-    envUrls: {
+    url: {
         dev: '/base/test/child.htm?devenv=true'
     },
+
+    defaultEnv: 'dev',
 
     dimensions: {
         width: 500,
@@ -165,26 +169,28 @@ export let testComponent3 = xcomponent.create({
 export let testComponent4 = xcomponent.create({
 
     tag: 'test-component4',
-    url: '/base/test/child.htm',
 
     containerTemplate: xcomponent.containerTemplate,
 
-    envUrls: {
+    url: {
         dev: '/base/test/child.htm?devenv=true'
-    }
+    },
+
+    defaultEnv: 'dev',
 });
 
 
 export let testComponent5 = xcomponent.create({
 
     tag: 'test-component5',
-    url: '/base/test/child.htm',
 
     containerTemplate: xcomponent.containerTemplate,
 
-    envUrls: {
+    url: {
         dev: '/base/test/child.htm?devenv=true'
     },
+
+    defaultEnv: 'dev',
 
     dimensions: {
         width: 500,
