@@ -10,6 +10,15 @@ import { uniqueID } from '../../lib';
 
 export const internalProps = {
 
+    env: {
+        type: 'string',
+        required: false,
+        queryParam: true,
+        def() {
+            return this.defaultEnv;
+        }
+    },
+
     uid: {
         type: 'string',
         def() {
@@ -29,15 +38,6 @@ export const internalProps = {
 
     // The desired env in which the component is being rendered. Used to determine the correct url to use from envUrls
 
-    env: {
-        type: 'string',
-        required: false,
-        queryParam: true,
-        def() {
-            return this.defaultEnv;
-        }
-    },
-
     version: {
         type: 'string',
         required: false,
@@ -46,28 +46,32 @@ export const internalProps = {
 
     dimensions: {
         type: 'object',
-        required: false
+        required: false,
+        sendToChild: false
     },
 
     // A millisecond timeout before onTimeout is called
 
     timeout: {
         type: 'number',
-        required: false
+        required: false,
+        sendToChild: false
     },
 
     onDisplay: {
         type: 'function',
         required: false,
         noop: true,
-        promisify: true
+        promisify: true,
+        sendToChild: false
     },
 
     onEnter: {
         type: 'function',
         required: false,
         noop: true,
-        promisify: true
+        promisify: true,
+        sendToChild: false
     },
 
     // When we get an INIT message from the child
@@ -76,7 +80,8 @@ export const internalProps = {
         type: 'function',
         required: false,
         noop: true,
-        promisify: true
+        promisify: true,
+        sendToChild: false
     },
 
     // When the user closes the component. Defaults to onError if no handler passed.
@@ -86,7 +91,8 @@ export const internalProps = {
         required: false,
         noop: true,
         once: true,
-        promisify: true
+        promisify: true,
+        sendToChild: false
     },
 
     // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -96,6 +102,7 @@ export const internalProps = {
         required: false,
         memoize: true,
         promisify: true,
+        sendToChild: false,
         def() {
             return function(err) {
                 return this.props.onError(err);
@@ -109,6 +116,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         promisify: true,
+        sendToChild: false,
         def() {
             return function() {
                 // pass
