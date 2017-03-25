@@ -23,6 +23,11 @@ export let testComponent = xcomponent.create({
         height: 500
     },
 
+    contexts: {
+        iframe: true,
+        popup: true
+    },
+
     containerTemplate: xcomponent.containerTemplate,
 
     props: {
@@ -111,6 +116,11 @@ export let testComponent2 = xcomponent.create({
     dimensions: {
         width: 500,
         height: 500
+    },
+
+    contexts: {
+        iframe: true,
+        popup: true
     },
 
     props: {

@@ -8,7 +8,7 @@ import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
-import { CONTEXT_TYPES, CONTEXT_TYPES_LIST, POST_MESSAGE } from '../../constants';
+import { CONTEXT_TYPES, POST_MESSAGE } from '../../constants';
 import { validate } from './validate';
 
 export { containerTemplate } from './templates/container';
@@ -82,12 +82,9 @@ export class Component extends BaseComponent {
 
 
 
-        // The allowed contexts. For example { iframe: true, popup: false }. Defaults to true for all.
+        // The allowed contexts. For example { iframe: true, popup: false }
 
-        this.addProp(options, 'contexts', {});
-        for (let context of CONTEXT_TYPES_LIST) {
-            this.contexts[context] = (this.contexts[context] === undefined) ? true : Boolean(this.contexts[context]);
-        }
+        this.addProp(options, 'contexts', { iframe: true, popup: false });
 
         // The default context to render to
 
