@@ -4,7 +4,7 @@ import * as postRobot from 'post-robot/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
-import { buildChildWindowName, isXComponentWindow, getParentDomain, getParentComponentWindow } from '../window';
+import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
          addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
          elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
@@ -61,6 +61,128 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    @promise
+    render(element, loadUrl = true) {
+        return this.tryInit(() => {
+
+            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
+
+            let tasks = {
+                getDomain: this.getDomain()
+            };
+
+            tasks.elementReady = Promise.try(() => {
+                if (element) {
+                    return this.elementReady(element);
+                }
+            });
+
+            tasks.openContainer = tasks.elementReady.then(() => {
+                return this.openContainer(element);
+            });
+
+            if (this.driver.openOnClick) {
+                tasks.open = this.open(element, this.context);
+            } else {
+                tasks.open = Promise.all([ tasks.openContainer, tasks.elementReady ]).then(() => {
+                    return this.open(element, this.context);
+                });
+            }
+
+            tasks.openBridge = tasks.open.then(() => {
+                return this.openBridge(this.context);
+            });
+
+            tasks.showContainer = tasks.openContainer.then(() => {
+                return this.showContainer();
+            });
+
+            tasks.createComponentTemplate = tasks.open.then(() => {
+                return this.createComponentTemplate();
+            });
+
+            tasks.showComponent = tasks.createComponentTemplate.then(() => {
+                return this.showComponent();
+            });
+
+            tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                return postRobot.linkUrl(this.window, domain);
+            });
+
+            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                this.listen(this.window, domain);
+            });
+
+            tasks.watchForClose = tasks.open.then(() => {
+                return this.watchForClose();
+            });
+
+            if (loadUrl) {
+                tasks.buildUrl = this.buildUrl();
+
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
+                    return this.loadUrl(url);
+                });
+
+                tasks.runTimeout = tasks.loadUrl.then(() => {
+                    return this.runTimeout();
+                });
+            }
+
+            return Promise.hash(tasks);
+
+        }).then(() => {
+
+            return this.props.onRender();
+        });
+    }
+
+    renderTo(win, element) {
+        return this.tryInit(() => {
+
+            if (win === window) {
+                return this.render(element);
+            }
+
+            if (element && typeof element !== 'string') {
+                throw new Error(`Element passed to renderTo must be a string selector, got ${typeof element} ${element}`);
+            }
+
+            this.checkAllowRenderTo(win);
+
+            this.component.log(`render_${this.context}_to_win`, { element, context: this.context });
+
+            this.childWindowName = this.buildChildWindowName({ renderTo: win });
+
+            this.delegate(win, this.context);
+
+            return this.render(element, this.context);
+        });
+    }
+
+    checkAllowRenderTo(win) {
+
+        if (!win) {
+            throw new Error(`[${this.component.tag}] Must pass window to renderTo`);
+        }
+
+        if (postRobot.winutil.isSameDomain(win)) {
+            return;
+        }
+
+        let origin = getDomain();
+        let domain = this.component.getDomain(null, this.props);
+
+        if (!domain) {
+            throw new Error(`Could not determine domain to allow remote render`);
+        }
+
+        if (domain === origin) {
+            return;
+        }
+
+        throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
+    }
 
     registerActiveComponent() {
         activeComponents.push(this);
@@ -88,9 +210,10 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    buildChildWindowName({ renderTo = window, secureProps = false } = {}) {
+    buildChildWindowName({ renderTo = window } = {}) {
 
         let sameWindow = (renderTo === window);
+        let sameDomain = postRobot.winutil.isSameDomain(renderTo);
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
@@ -107,6 +230,8 @@ export class ParentComponent extends BaseComponent {
         let renderParent = sameWindow
             ? defaultParent
             : WINDOW_REFERENCES.PARENT_UID;
+
+        let secureProps = !sameDomain;
 
         let props = secureProps
             ? { type: INITIAL_PROPS.UID }
@@ -321,91 +446,9 @@ export class ParentComponent extends BaseComponent {
         return elementReady(element).then(noop);
     }
 
-    /*  Pre Render
-        ----------
 
-        Pre-render a new window in the desired context
-    */
-
-    @promise
-    render(element, loadUrl = true) {
-        return this.tryInit(() => {
-
-            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
-
-            let tasks = {
-                getDomain: this.getDomain()
-            };
-
-            tasks.elementReady = Promise.try(() => {
-                if (element) {
-                    return this.elementReady(element);
-                }
-            });
-
-            tasks.openContainer = tasks.elementReady.then(() => {
-                return this.openContainer(element);
-            });
-
-            if (this.driver.openOnClick) {
-                tasks.open = this.open(element, this.context);
-            } else {
-                tasks.open = Promise.all([ tasks.openContainer, tasks.elementReady ]).then(() => {
-                    return this.open(element, this.context);
-                });
-            }
-
-            tasks.openBridge = tasks.open.then(() => {
-                return this.openBridge(this.context);
-            });
-
-            tasks.showContainer = tasks.openContainer.then(() => {
-                return this.showContainer();
-            });
-
-            tasks.createComponentTemplate = tasks.open.then(() => {
-                return this.createComponentTemplate();
-            });
-
-            tasks.showComponent = tasks.createComponentTemplate.then(() => {
-                return this.showComponent();
-            });
-
-            tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                return postRobot.linkUrl(this.window, domain);
-            });
-
-            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                this.listen(this.window, domain);
-            });
-
-            tasks.watchForClose = tasks.open.then(() => {
-                return this.watchForClose();
-            });
-
-            if (loadUrl) {
-                tasks.buildUrl = this.buildUrl();
-
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
-                    return this.loadUrl(url);
-                });
-
-                tasks.runTimeout = tasks.loadUrl.then(() => {
-                    return this.runTimeout();
-                });
-            }
-
-            return Promise.hash(tasks);
-
-        }).then(() => {
-
-            return this.props.onRender();
-        });
-    }
 
     delegate(win) {
-
-        this.childWindowName = this.buildChildWindowName({ renderTo: win, secureProps: true });
 
         this.component.log(`delegate_${this.context}`);
 
@@ -474,41 +517,6 @@ export class ParentComponent extends BaseComponent {
                 });
             };
         }
-    }
-
-
-    renderTo(win, element, context, options = {}) {
-        return this.tryInit(() => {
-
-            if (!win) {
-                throw new Error(`[${this.component.tag}] Must pass window to renderTo`);
-            }
-
-            if (window.location.protocol === 'file:') {
-                throw new Error(`Can not render remotely from file:// domain`);
-            }
-
-            let origin = getDomain();
-            let domain = this.component.getDomain(null, this.props);
-
-            if (!domain) {
-                throw new Error(`Could not determine domain to allow remote render`);
-            }
-
-            if (domain !== origin) {
-                throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
-            }
-
-            if (!isXComponentWindow()) {
-                throw new Error(`[${this.component.tag}] Can not render to parent - not in a child component window`);
-            }
-
-            this.component.log(`render_${this.context}_to_win`, { element, context: this.context });
-
-            this.delegate(win, this.context);
-
-            return this.render(element, this.context);
-        });
     }
 
     /*  Watch For Close
