@@ -7,7 +7,7 @@ Create a component definition, which will be loaded in both the parent and child
 
 ### options
 
-#### `tag` - `string` (required)
+#### tag `string` [required]
 
 A tag-name for the component, used for:
 
@@ -18,7 +18,7 @@ A tag-name for the component, used for:
 tag: 'my-component-tag'
 ```
 
-#### `url` - `string | Object<string, string>` (required)
+#### url `string | Object<string>` [required]
 
 The full url that will be loaded when your component is rendered, or an object mapping different urls for different
 environments.
@@ -35,7 +35,7 @@ url: {
 }
 ```
 
-#### `dimensions` - `{ width : string, height : string}` (required)
+#### dimensions `{ width : string, height : string }` [required]
 
 The dimensions for your component, in css-style units, with support for `px` or `%`.
 
@@ -53,7 +53,7 @@ dimensions: {
 }
 ```
 
-#### `props` - `Object<string, Object>` (required)
+#### props `Object<string, Object>` [required]
 
 A mapping of prop name to prop settings. Used to do run-time validation and prop normalization.
 
@@ -74,33 +74,64 @@ props: {
 
 ##### Prop Options
 
-- `type` - `string` - The data-type expected for the prop
+- **type** `string`
+
+  The data-type expected for the prop
+
   - `'string'`
   - `'number'`
   - `'boolean'`
   - `'object'`
   - `'function'`
 
-- `required` - `boolean` - Whether or not the prop is mandatory
+- **required** `boolean`
 
-- `def` - `function` - A function returning the default value for the prop, if none is passed
+  Whether or not the prop is mandatory
 
-- `childDef` - `any` - A function returning the default value for the prop, if none is passed, but called in the child window
+- **def** `function()`
 
-- `alias` - `string` - An aliased name for the prop
+  A function returning the default value for the prop, if none is passed
 
-- `value` - `any` - The value for the prop, if it should be statically defined at component creation time
+- **childDef** `any`
 
-- `decorate` - `function` - A function used to decorate the prop at render-time. Called with the value of the prop, should return the new value.
+  A function returning the default value for the prop, if none is passed, but called in the child window
 
-- `promisify` - `boolean` - Should a function prop be turned into a promise-returning function
+- **validate** `function(value)`
 
-- `noop` - `boolean` - Should a function prop default to noop
+  A function to validate the passed value. Should throw an appopriate error if invalid.
 
-- `once` - `boolean` - Should a function prop be turned into a one-time function
+- **queryParam** `boolean | string`
 
-- `memoize` - `boolean` - Should a function prop be turned into a memoizing function
+  Should a prop be passed in the url. If a string, this specifies the url param name which will be used.
 
-- `queryParam` - `boolean | string` - Should a prop be passed in the url. If a string, this specifies the url param name which will be used.
+- **value** `any`
 
-- `serialization` - `string` - If `'json'`, the prop will be JSON stringified before being inserted into the url, otherwise the prop will be converted to dot-notation.
+  The value for the prop, if it should be statically defined at component creation time
+
+- **decorate** `function(value)`
+
+  A function used to decorate the prop at render-time. Called with the value of the prop, should return the new value.
+
+- **promisify** `boolean`
+
+  Should a function prop be turned into a promise-returning function
+
+- **noop** `boolean`
+
+  Should a function prop default to noop
+
+- **once** `boolean`
+
+  Should a function prop be turned into a one-time function
+
+- **memoize** `boolean`
+
+  Should a function prop be turned into a memoizing function
+
+- **serialization** `string`
+
+  If `'json'`, the prop will be JSON stringified before being inserted into the url, otherwise the prop will be converted to dot-notation.
+
+- **alias** `string`
+
+  An aliased name for the prop
