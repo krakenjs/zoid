@@ -11,6 +11,8 @@ A cross-domain component toolkit, supporting:
 
 It's 'data-down, actions up', but 100% cross-domain! You can even use it directly with libraries like React and Angular.
 
+## [API Docs](./docs/api.md)
+
 ## Example
 
 Define a component:
