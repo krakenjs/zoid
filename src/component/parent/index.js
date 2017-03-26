@@ -106,7 +106,7 @@ export class ParentComponent extends BaseComponent {
             });
 
             tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                return postRobot.linkUrl(this.window, domain);
+                return postRobot.bridge.linkUrl(this.window, domain);
             });
 
             tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
@@ -412,8 +412,8 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`Can not determine domain for bridge`);
         }
 
-        if (postRobot.needsBridge({ window: this.window, domain: bridgeDomain })) {
-            return postRobot.openBridge(bridgeUrl, bridgeDomain);
+        if (postRobot.bridge.needsBridge({ window: this.window, domain: bridgeDomain })) {
+            return postRobot.bridge.openBridge(bridgeUrl, bridgeDomain);
         }
     }
 

@@ -26,7 +26,8 @@
         "assert": true,
         "ReactDOM": true,
         "React": true,
-        "angular": true
+        "angular": true,
+        "__POPUP_SUPPORT__": true
     },
 
     "fix": true,

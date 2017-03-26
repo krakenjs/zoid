@@ -49,6 +49,11 @@ export function validate(options) { // eslint-ignore-line
     }
 
     if (options.contexts) {
+
+        if (options.contexts.popup && !__POPUP_SUPPORT__) {
+            throw new Error(`Popups not supported in this build -- please use the full xcomponent.js build`);
+        }
+
         let anyEnabled = false;
 
         for (let context of Object.keys(options.contexts)) {

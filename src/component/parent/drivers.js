@@ -21,121 +21,123 @@ import { getPosition, getParentComponentWindow } from '../window';
     series of if-popup-then-else-if-iframe code.
 */
 
-export let RENDER_DRIVERS = {
+export let RENDER_DRIVERS = {};
 
     // Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
     // to feel like a native element on the page.
 
-    [ CONTEXT_TYPES.IFRAME ]: {
+RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
-        renderedIntoContainerTemplate: true,
-        destroyOnUnload: false,
-        allowResize: true,
-        openOnClick: false,
-        errorOnCloseDuringInit: true,
+    renderedIntoContainerTemplate: true,
+    destroyOnUnload: false,
+    allowResize: true,
+    openOnClick: false,
+    errorOnCloseDuringInit: true,
 
-        open(element) {
+    open(element) {
 
-            if (element && !getElement(element)) {
-                throw new Error(`[${this.component.tag}] Can not find element ${element}`);
-            }
+        if (element && !getElement(element)) {
+            throw new Error(`[${this.component.tag}] Can not find element ${element}`);
+        }
 
-            element = this.element || element || document.body;
+        element = this.element || element || document.body;
 
-            this.iframe = iframe(null, {
-                name: this.childWindowName,
-                scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            }, element);
+        this.iframe = iframe(null, {
+            name: this.childWindowName,
+            scrolling: this.component.scrolling === false ? 'no' : 'yes'
+        }, element);
 
-            this.element = this.element || this.iframe;
+        this.element = this.element || this.iframe;
 
-            hideElement(this.element);
+        hideElement(this.element);
 
-            let dimensions = this.props.dimensions || this.component.dimensions || {};
-            this.resize(dimensions.width, dimensions.height);
-            this.restyle();
+        let dimensions = this.props.dimensions || this.component.dimensions || {};
+        this.resize(dimensions.width, dimensions.height);
+        this.restyle();
 
-            this.window = this.iframe.contentWindow;
+        this.window = this.iframe.contentWindow;
 
-            this.clean.register('destroyWindow', () => {
+        this.clean.register('destroyWindow', () => {
 
-                this.window.close();
-                delete this.window;
+            this.window.close();
+            delete this.window;
 
-                if (this.iframe) {
+            if (this.iframe) {
 
-                    if (this.iframe.parentNode) {
-                        this.iframe.parentNode.removeChild(this.iframe);
-                    }
-
-                    delete this.iframe;
+                if (this.iframe.parentNode) {
+                    this.iframe.parentNode.removeChild(this.iframe);
                 }
-            });
-        },
 
-        delegateOverrides: {
-
-            openContainer:           DELEGATE.CALL_DELEGATE,
-            destroyComponent:        DELEGATE.CALL_DELEGATE,
-            destroyContainer:        DELEGATE.CALL_DELEGATE,
-            cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
-            createComponentTemplate: DELEGATE.CALL_DELEGATE,
-            elementReady:            DELEGATE.CALL_DELEGATE,
-            showContainer:           DELEGATE.CALL_DELEGATE,
-            showComponent:           DELEGATE.CALL_DELEGATE,
-            hideContainer:           DELEGATE.CALL_DELEGATE,
-            hideComponent:           DELEGATE.CALL_DELEGATE,
-            hide:                    DELEGATE.CALL_DELEGATE,
-            show:                    DELEGATE.CALL_DELEGATE,
-            resize:                  DELEGATE.CALL_DELEGATE,
-            restyle:                 DELEGATE.CALL_DELEGATE,
-            loadUrl:                 DELEGATE.CALL_DELEGATE,
-            hijackSubmit:            DELEGATE.CALL_DELEGATE,
-
-            open(original, override) {
-                return function() {
-                    return override.apply(this, arguments).then(() => {
-                        this.window = postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName);
-
-                        if (!this.window) {
-                            throw new Error(`Unable to find parent component iframe window`);
-                        }
-                    });
-                };
+                delete this.iframe;
             }
-        },
+        });
+    },
 
-        resize(width, height) {
+    delegateOverrides: {
 
-            if (width) {
-                this.element.style.width  = toCSS(width);
-            }
+        openContainer:           DELEGATE.CALL_DELEGATE,
+        destroyComponent:        DELEGATE.CALL_DELEGATE,
+        destroyContainer:        DELEGATE.CALL_DELEGATE,
+        cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
+        createComponentTemplate: DELEGATE.CALL_DELEGATE,
+        elementReady:            DELEGATE.CALL_DELEGATE,
+        showContainer:           DELEGATE.CALL_DELEGATE,
+        showComponent:           DELEGATE.CALL_DELEGATE,
+        hideContainer:           DELEGATE.CALL_DELEGATE,
+        hideComponent:           DELEGATE.CALL_DELEGATE,
+        hide:                    DELEGATE.CALL_DELEGATE,
+        show:                    DELEGATE.CALL_DELEGATE,
+        resize:                  DELEGATE.CALL_DELEGATE,
+        restyle:                 DELEGATE.CALL_DELEGATE,
+        loadUrl:                 DELEGATE.CALL_DELEGATE,
+        hijackSubmit:            DELEGATE.CALL_DELEGATE,
 
-            if (height) {
-                this.element.style.height = toCSS(height);
-            }
-        },
+        open(original, override) {
+            return function() {
+                return override.apply(this, arguments).then(() => {
+                    this.window = postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName);
 
-        hide() {
-            this.element.style.display = 'none';
-        },
-
-        show() {
-            this.element.style.display = 'block';
-        },
-
-        restyle() {
-            this.iframe.style.backgroundColor = 'transparent';
-        },
-
-        loadUrl(url) {
-            this.iframe.src = url;
+                    if (!this.window) {
+                        throw new Error(`Unable to find parent component iframe window`);
+                    }
+                });
+            };
         }
     },
 
+    resize(width, height) {
+
+        if (width) {
+            this.element.style.width  = toCSS(width);
+        }
+
+        if (height) {
+            this.element.style.height = toCSS(height);
+        }
+    },
+
+    hide() {
+        this.element.style.display = 'none';
+    },
+
+    show() {
+        this.element.style.display = 'block';
+    },
+
+    restyle() {
+        this.iframe.style.backgroundColor = 'transparent';
+    },
+
+    loadUrl(url) {
+        this.iframe.src = url;
+    }
+};
+
+if (__POPUP_SUPPORT__) {
+
     // Popup context opens up a centered popup window on the page.
 
-    [ CONTEXT_TYPES.POPUP ]: {
+    RENDER_DRIVERS[CONTEXT_TYPES.POPUP] = {
 
         focusable: true,
         renderedIntoContainerTemplate: false,
@@ -224,5 +226,5 @@ export let RENDER_DRIVERS = {
         loadUrl(url) {
             this.window.location = url;
         }
-    }
-};
+    };
+}

@@ -7,95 +7,114 @@ var Server = require('karma').Server;
 var argv = require('yargs').argv;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-gulp.task('build', ['karma', 'webpack', 'webpack-min']);
+gulp.task('test', ['lint', 'karma']);
+gulp.task('build', ['test', 'webpack']);
 
-var FILE_NAME = 'xcomponent';
 var MODULE_NAME = 'xcomponent';
 
-var WEBPACK_CONFIG = {
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /(dist)/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015'],
-          plugins: [
-            'transform-object-rest-spread',
-            'syntax-object-rest-spread',
-            'transform-es3-property-literals',
-            'transform-es3-member-expression-literals',
-            ['transform-es2015-for-of', {loose: true}],
-            'transform-decorators-legacy'
-          ]
-        }
-      },
-      {
-        test: /\.(html?|css)$/,
-        loader: 'raw-loader'
-      }
-    ]
-  },
-  output: {
-    filename: `${FILE_NAME}.js`,
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
-    library: MODULE_NAME,
-    pathinfo: true
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-        __TEST__: false
-    }),
-    new webpack.SourceMapDevToolPlugin({
-        filename: '[file].map'
-    }),
-    new UglifyJSPlugin({
-        beautify: true,
-        minimize: false,
-        compress: { warnings: false },
-        mangle: false,
-        sourceMap: true
-    })
-  ],
-  bail: true
-};
+function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
 
-var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
-  output: {
-    filename: `${FILE_NAME}.min.js`,
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
-    library: MODULE_NAME
-  },
-  plugins: [
-    new webpack.SourceMapDevToolPlugin({
-        filename: '[file].map'
-    }),
-    new UglifyJSPlugin({
-        beautify: false,
-        minimize: true,
-        compress: { warnings: false },
-        mangle: true,
-        sourceMap: true
-    }),
-    new webpack.DefinePlugin({
-        __TEST__: false
-    })
-  ]
+    return {
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    loader: 'babel-loader',
+                    query: {
+                        presets: ['es2015'],
+                        plugins: [
+                            'transform-object-rest-spread',
+                            'syntax-object-rest-spread',
+                            'transform-es3-property-literals',
+                            'transform-es3-member-expression-literals',
+                            ['transform-es2015-for-of', {loose: true}],
+                            'transform-decorators-legacy'
+                        ]
+                    }
+                }
+            ]
+        },
+        resolve: {
+            modules: [
+                'node_modules',
+                'src',
+                'client'
+            ]
+        },
+        output: {
+            filename: filename,
+            libraryTarget: 'umd',
+            umdNamedDefine: true,
+            library: modulename
+        },
+        plugins: [
+            new webpack.DefinePlugin(Object.assign({
+                __TEST__: false,
+                __POPUP_SUPPORT__: true,
+                __IE_POPUP_SUPPORT__: true
+            }, globals)),
+            new webpack.SourceMapDevToolPlugin({
+                filename: '[file].map'
+            }),
+            new UglifyJSPlugin({
+                test: /\.js$/,
+                beautify: !minify,
+                minimize: minify,
+                compress: { warnings: false },
+                mangle: minify,
+                sourceMap: true
+            })
+        ],
+        bail: true
+    };
+}
+
+gulp.task('webpack', [ 'webpack-max', 'webpack-min', 'webpack-max-frame', 'webpack-min-frame' ]);
+
+gulp.task('webpack-max', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `${MODULE_NAME}.js`,
+            modulename: MODULE_NAME
+        }), webpack))
+        .pipe(gulp.dest('dist'));
 });
 
-gulp.task('webpack', ['lint'], function() {
-  return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG, webpack))
-      .pipe(gulp.dest('dist'));
+gulp.task('webpack-min', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `${MODULE_NAME}.min.js`,
+            modulename: MODULE_NAME,
+            minify: true
+        }), webpack))
+        .pipe(gulp.dest('dist'));
 });
 
-gulp.task('webpack-min', ['lint'], function() {
-  return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN, webpack))
-      .pipe(gulp.dest('dist'));
+gulp.task('webpack-max-frame', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `${MODULE_NAME}.frame.js`,
+            modulename: MODULE_NAME,
+            globals: {
+                __POPUP_SUPPORT__: false,
+                __IE_POPUP_SUPPORT__: false
+            }
+        }), webpack))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('webpack-min-frame', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `${MODULE_NAME}.frame.min.js`,
+            modulename: MODULE_NAME,
+            minify: true,
+            globals: {
+                __POPUP_SUPPORT__: false,
+                __IE_POPUP_SUPPORT__: false
+            }
+        }), webpack))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('lint', function() {
@@ -128,5 +147,3 @@ gulp.task('karma', ['lint'], function (done) {
 
   server.start();
 });
-
-gulp.task('test', ['karma']);

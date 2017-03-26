@@ -74,7 +74,7 @@
   "dependencies": {
     "beaver-logger": "^2",
     "hi-base32": "^0.1.1",
-    "post-robot": "^4.0.0",
+    "post-robot": "^5.0.0",
     "sync-browser-mocks": "^1.0.4"
   }
 }
