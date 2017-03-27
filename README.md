@@ -63,8 +63,8 @@ onUserLogin(function(email) {
 
 ### Useful Links
 
-- [Turn your web-app into a cross-domain component with five lines of code](https://medium.com/@bluepnume/turn-your-web-app-into-a-cross-domain-component-with-5-lines-of-code-ced01e6795f9#.w8ea7h6ky)
 - [Introducing xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
+- [Turn your web-app into a cross-domain component with five lines of code](https://medium.com/@bluepnume/turn-your-web-app-into-a-cross-domain-component-with-5-lines-of-code-ced01e6795f9#.w8ea7h6ky)
 - [A full example of how to implement and use an xcomponent](./docs/example.md)
 - [Build a cross-domain React component](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-xcomponent-fbcccc4778fd#.73jnwv44c)
 - [Building PayPal's Button with xcomponent](https://medium.com/@bluepnume/less-is-more-reducing-thousands-of-paypal-buttons-into-a-single-iframe-using-xcomponent-d902d71d8875#.o3ib7y58n)
