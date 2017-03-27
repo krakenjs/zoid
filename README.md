@@ -101,3 +101,41 @@ You could just use a vanilla iframe for all of this. But:
 
 It will even automatically generate React and Angular bindings, so people can drop-in your component anywhere and not
 worry about iframes or post-messages.
+
+
+## FAQ
+
+- **Do I need to use a particular framework like React to use xcomponent?**
+
+  No, xcomponent is framework agnostic. You can:
+
+  - Use it with vanilla javascript.
+  - Use it with any framework of your choice.
+  - Use it with React or Angular and take advantage of the automatic bindings on the parent page
+
+- **Why write another ui / component library?**
+
+  This isn't designed to replace libraries like React, which are responsible for rendering same-domain components. In fact, the only
+  real rendering xcomoponent does is iframes and popups; the rest is up to you! You can build your components using any framework,
+  library or pattern you want, then use xcomponent to expose your components cross-domain. It should play nicely with any other framework!
+
+- **Aren't iframes really slow?**
+
+  Yes, but there are a few things to bear in mind here:
+
+  - xcomponent isn't designed for building components for your own site. For that you should use native component libraries
+    like React, which render quickly onto your page. Use xcomponent to share functionality with other sites, that you can't
+    share native-javascript components with
+
+  - xcomponent also provides mechanisms for pre-rendering html and css into iframes and popups, so you can at least render a
+    loading spinner, or maybe something more advanced, while the new window loads its content.
+
+- **I don't want to bother with popups, can I get xcomponent with just the iframe support?**
+
+  You can indeed. There's an `xcomponent.frame.js` and `xcomponent.frame.min.js` in the `dist/` folder. There's a lot of
+  magic that's needed to make popups work with IE, and that's all trimmed out.
+
+- **Can I contribute?**
+
+  By all means! But please raise an issue first if it's more than a small change, to discuss the feasibility.
+
