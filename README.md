@@ -70,7 +70,7 @@ onUserLogin(function(email) {
 ### Useful Links
 
 - [Introducing xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
-- [A full example](./docs/example.md)
+- [A full example of how to implement and use an xcomponent](./docs/example.md)
 - [Build a cross-domain React component](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-xcomponent-fbcccc4778fd#.73jnwv44c)
 - [Building PayPal's Button with xcomponent](https://medium.com/@bluepnume/less-is-more-reducing-thousands-of-paypal-buttons-into-a-single-iframe-using-xcomponent-d902d71d8875#.o3ib7y58n)
 - [PayPal Checkout - xcomponent powered Button and Checkout components](https://github.com/paypal/paypal-checkout)
@@ -78,15 +78,16 @@ onUserLogin(function(email) {
 
 ## Rationale
 
-Writing cross domain components is tricky.
+**Writing cross domain components is tricky.**
 
 Consider this: I own `foo.com`, you own `bar.com`, and I have some functionality I want to share on your page.
-
 I could just give you some javascript to load in your page. But then:
 
 - What if I've written a component in React, but you're using some other framework?
 - What if I have secure form fields, or secure data I don't want your site to spy on?
 - What if I need to make secure calls to my back-end, without resorting to CORS?
+
+** What about an iframe?**
 
 You could just use a vanilla iframe for all of this. But:
 
@@ -95,7 +96,7 @@ You could just use a vanilla iframe for all of this. But:
 - You need to deal with error cases, like if your iframe fails to load or doesn't respond to a post-message.
 - You need to think carefully about how to expose all this functionality behind a simple, clear interface.
 
-xcomponent solves all of these problems.
+**xcomponent solves all of these problems.**
 
 - You pass data and callbacks down as a javascript object
 - xcomponent renders the component and passes down the data
