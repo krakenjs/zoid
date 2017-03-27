@@ -141,7 +141,7 @@ export class BaseComponent {
     listen(win, domain) {
 
         if (!win) {
-            throw new Error(`[${this.component.tag}] window to listen to not set`);
+            throw this.component.error(`window to listen to not set`);
         }
 
         if (!domain) {

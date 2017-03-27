@@ -36,12 +36,12 @@ export class Component extends BaseComponent {
     constructor(options = {}) {
         super(options);
 
-        this.validate(options);
-
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
         this.addProp(options, 'tag');
+
+        this.validate(options);
 
         // Name of the component, used for logging. Auto-generated from the tag name by default.
 
@@ -316,6 +316,10 @@ export class Component extends BaseComponent {
         return this.child(options);
     }
 
+    error(message, tag) {
+        return new Error(`[${this.tag || tag}] ${message}`);
+    }
+
 
     /*  Init
         ----
@@ -416,7 +420,7 @@ export class Component extends BaseComponent {
     */
 
     validate(options) {
-        return validate(options);
+        return validate(this, options);
     }
 
 

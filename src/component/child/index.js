@@ -172,7 +172,7 @@ export class ChildComponent extends BaseComponent {
         // Ensure we do not try to .attach() multiple times for the same component on the same page
 
         if (window.__activeXComponent__) {
-            throw new Error(`[${this.component.tag}] Can not attach multiple components to the same window`);
+            throw this.component.error(`Can not attach multiple components to the same window`);
         }
 
         window.__activeXComponent__ = this;
@@ -180,13 +180,13 @@ export class ChildComponent extends BaseComponent {
         // Get the direct parent window
 
         if (!getParentComponentWindow()) {
-            throw new Error(`[${this.component.tag}] Can not find parent window`);
+            throw this.component.error(`Can not find parent window`);
         }
 
         let componentMeta = getComponentMeta();
 
         if (componentMeta.tag !== this.component.tag) {
-            throw new Error(`[${this.component.tag}] Parent is ${componentMeta.tag} - can not attach ${this.component.tag}`);
+            throw this.component.error(`Parent is ${componentMeta.tag} - can not attach ${this.component.tag}`);
         }
 
         // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
@@ -351,7 +351,7 @@ export class ChildComponent extends BaseComponent {
 
         return {
             updateProps(props) {
-                return self.setProps(props, this.origin);
+                return self.setProps(props, this.origin, false);
             },
 
             close() {

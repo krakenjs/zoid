@@ -163,7 +163,7 @@ export class ParentComponent extends BaseComponent {
     checkAllowRenderTo(win) {
 
         if (!win) {
-            throw new Error(`[${this.component.tag}] Must pass window to renderTo`);
+            throw this.component.error(`Must pass window to renderTo`);
         }
 
         if (postRobot.winutil.isSameDomain(win)) {
@@ -604,7 +604,7 @@ export class ParentComponent extends BaseComponent {
 
                 this.component.log(`timed_out`, { timeout: this.props.timeout });
 
-                let error = new Error(`[${this.component.tag}] Loading component ${this.component.tag} timed out after ${this.props.timeout} milliseconds`);
+                let error = this.component.error(`Loading component timed out after ${this.props.timeout} milliseconds`);
 
                 this.onInit.reject(error);
                 this.props.onTimeout(error);

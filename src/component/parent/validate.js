@@ -85,7 +85,7 @@ export function validateProps(component, props, required = true) {
     if (!component.looseProps) {
         for (let key of Object.keys(props)) {
             if (!component.props.hasOwnProperty(key)) {
-                throw new Error(`[${component.tag}] Invalid prop: ${key}`);
+                throw component.error(`Invalid prop: ${key}`);
             }
         }
     }

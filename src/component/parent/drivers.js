@@ -37,7 +37,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     open(element) {
 
         if (element && !getElement(element)) {
-            throw new Error(`[${this.component.tag}] Can not find element ${element}`);
+            throw this.component.error(`Can not find element ${element}`);
         }
 
         element = this.element || element || document.body;
