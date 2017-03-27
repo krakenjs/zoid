@@ -19,8 +19,6 @@ It's 'data-down, actions up', but 100% cross-domain! You can even use it directl
 
 ## [Example](./docs/example.md) - A full example of how to build a cross-domain component using xcomponent
 
------
-
 ### Quick example:
 
 Define a component:
