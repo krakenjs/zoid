@@ -13,11 +13,19 @@ It's 'data-down, actions up', but 100% cross-domain! You can even use it directl
 
 -----
 
-## [API Docs](./docs/api.md) - Public options and methods supported by xcomponent
+### [API Docs](./docs/api.md)
 
-## [Demos](http://krakenjs.com/xcomponent/demo/index.htm) - Working demos of different xcomponent patterns
+Public options and methods supported by xcomponent
 
-## [Example](./docs/example.md) - A full example of a cross-domain component using xcomponent
+### [Demos](http://krakenjs.com/xcomponent/demo/index.htm)
+
+Working demos of different xcomponent patterns
+
+### [Example](./docs/example.md)
+
+A full example of a cross-domain component using xcomponent
+
+-----
 
 ### Quick example:
 
