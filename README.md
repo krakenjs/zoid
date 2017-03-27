@@ -1,7 +1,7 @@
 xcomponent
 ----------
 
-[https://medium.com/@bluepnume/introducing-xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
+[Introducing xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
 
 A cross-domain component toolkit, supporting:
 
@@ -27,7 +27,7 @@ A full example of a cross-domain component using xcomponent
 
 -----
 
-### Quick example:
+### Quick example
 
 Define a component:
 
@@ -70,28 +70,39 @@ onUserLogin(function(email) {
 - [See a full example here](./docs/example.md)
 - [Or try building a cross-domain React component](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-xcomponent-fbcccc4778fd#.73jnwv44c)
 
+### Useful Links
+
+- [Introducing xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
+- [A full example](./docs/example.md)
+- [Build a cross-domain React component](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-xcomponent-fbcccc4778fd#.73jnwv44c)
+- [Building PayPal's Button with xcomponent](https://medium.com/@bluepnume/less-is-more-reducing-thousands-of-paypal-buttons-into-a-single-iframe-using-xcomponent-d902d71d8875#.o3ib7y58n)
+- [PayPal Checkout - xcomponent powered Button and Checkout components](https://github.com/paypal/paypal-checkout)
+- [Post-Robot - the cross-domain messaging library which powers xcomponent]
+
 ## Rationale
 
 Writing cross domain components is tricky.
 
-Consider this: I own `x.com`, you own `y.com`, and I have some functionality I want to put within your page.
+Consider this: I own `foo.com`, you own `bar.com`, and I have some functionality I want to share on your page.
 
-I could just give you some javascript to drop in your page. But then:
+I could just give you some javascript to load in your page. But then:
 
-- What if I write a component in React, and you're using Ember or Angular on your page, or no framework at all?
-- What if I have secure data like login credentials that I don't want you to have access to?
-- What if I need to make secure calls to apis from my component that I don't want to expose using CORS?
+- What if I've written a component in React, but you're using some other framework?
+- What if I have secure form fields, or secure data I don't want your site to spy on?
+- What if I need to make secure calls to my back-end, without resorting to CORS?
 
-The obvious choice would be to embed the component in an iframe, or a popup window, rather than dropping it straight
-onto the parent page. But:
+You could just use a vanilla iframe for all of this. But:
 
-- How should people pass down data? Should they pass everything in the url?
-- How should people get events back up? Should I set up a global post message listener, and send fire-and-forget post messages from the child?
-- How do I deal with error cases when my component fails, or when messaging fails?
-- How do I create a nice, simple interface for my component that people can easily reason about?
+- You have to pass data down in the url, or with a post-message.
+- You need to set up post-message listeners to get events back up from the child.
+- You need to deal with error cases, like if your iframe fails to load or doesn't respond to a post-message.
+- You need to think carefully about how to expose all this functionality behind a simple, clear interface.
 
-xcomponent aims to solve all of these problems, by providing a clean way to build distributable, cross-domain components
-that work seamlessly with both iframes and popups. The primary focus of this is to allow you to define your interface,
-and then do the heavy lifting in the background, and do all of the things you shouldn't need to think about.
+xcomponent solves all of these problems.
 
-It will even automatically generate React, Angular and Ember bindings, so using the component feels even more native.
+- You pass data and callbacks down as a javascript object
+- xcomponent renders the component and passes down the data
+- The child calls your callbacks when it's ready
+
+It will even automatically generate React and Angular bindings, so people can drop-in your component anywhere and not
+worry about iframes or post-messages.
