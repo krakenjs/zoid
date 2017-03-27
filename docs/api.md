@@ -35,7 +35,7 @@ url: {
 }
 ```
 
-#### dimensions `{ width : string, height : string }` [required]
+#### dimensions `{ width : string, height : string }`
 
 The dimensions for your component, in css-style units, with support for `px` or `%`.
 
@@ -53,7 +53,7 @@ dimensions: {
 }
 ```
 
-#### props `Object<string, Object>` [required]
+#### props `Object<string, Object>`
 
 A mapping of prop name to prop settings. Used to do run-time validation and prop normalization.
 
@@ -96,7 +96,7 @@ props: {
 
   A function returning the default value for the prop, if none is passed, but called in the child window
 
-- **validate** `function(value)`
+- **validate** `function(value, props)`
 
   A function to validate the passed value. Should throw an appopriate error if invalid.
 

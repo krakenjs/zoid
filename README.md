@@ -35,13 +35,7 @@ Define a component:
 var MyLoginComponent = xcomponent.create({
 
     tag: 'my-login-component',
-    url: 'http://www.my-site.com/my-login-component',
-    dimensions: {  width: 400, height: 300 },
-
-    props: {
-        prefilledEmail: { type: 'string', required: false },
-        onLogin: { type: 'function', required: true }
-    }
+    url: 'http://www.my-site.com/my-login-component'
 });
 ```
 
