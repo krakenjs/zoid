@@ -11,9 +11,21 @@ A cross-domain component toolkit, supporting:
 
 It's 'data-down, actions up', but 100% cross-domain! You can even use it directly with libraries like React and Angular.
 
-## [API Docs](./docs/api.md)
+-----
 
-## Example
+## [API Docs](./docs/api.md) - The public options and methods supported by xcomponent
+
+-----
+
+## [Demos](http://krakenjs.com/xcomponent/demo/index.htm) - Some working demos of different xcomponent integration patterns
+
+-----
+
+## [Example](./docs/example.md) - A full example of how to build a cross-domain component using xcomponent
+
+-----
+
+#### Quick example:
 
 Define a component:
 
