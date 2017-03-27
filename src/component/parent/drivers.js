@@ -1,7 +1,7 @@
 
 import * as postRobot from 'post-robot/src';
 
-import { iframe, popup, getElement, toCSS, isPerc, toNum, hideElement } from '../../lib';
+import { iframe, popup, getElement, toCSS, hideElement, normalizeDimension } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -150,8 +150,8 @@ if (__POPUP_SUPPORT__) {
 
             let { width, height, x, y } = this.props.dimensions || this.component.dimensions || {};
 
-            width  = isPerc(width)  ? parseInt(window.innerWidth  * toNum(width)  / 100, 10) : toNum(width);
-            height = isPerc(height) ? parseInt(window.innerHeight * toNum(height) / 100, 10) : toNum(height);
+            width = normalizeDimension(width, window.innerWidth);
+            height = normalizeDimension(height, window.innerHeight);
 
             let pos = getPosition({ width, height, x, y });
 

@@ -9,13 +9,6 @@ window.MyLoginComponent = xcomponent.create({
 
     url: './login.htm',
 
-    // The size of the component on their page
-
-    dimensions: {
-        width: 250,
-        height: 150
-    },
-
     // The properties they can (or must) pass down to my component
 
     props: {

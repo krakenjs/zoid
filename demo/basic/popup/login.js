@@ -9,18 +9,10 @@ window.MyLoginComponent = xcomponent.create({
 
     url: './login.htm',
 
-    // The size of the component on their page
-
-    dimensions: {
-        width: 250,
-        height: 150
-    },
-
     // Allow the component to be rendered as a popup
 
     contexts: {
-        popup: true,
-        iframe: false
+        popup: true
     },
 
     // The background overlay

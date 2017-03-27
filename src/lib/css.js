@@ -34,3 +34,15 @@ export function toCSS(num) {
 export function mathCSS(num, action) {
     return isPerc(num) ? toPerc(action(toNum(num))) : toPx(Math.floor(action(toNum(num))));
 }
+
+export function percOf(num, perc) {
+    return parseInt(num * toNum(perc)  / 100, 10);
+}
+
+export function normalizeDimension(dim, max) {
+    if (isPerc(dim)) {
+        return percOf(max, dim);
+    } else if (isPx(dim)) {
+        return toNum(dim);
+    }
+}

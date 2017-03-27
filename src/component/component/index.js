@@ -59,9 +59,9 @@ export class Component extends BaseComponent {
             this.looseProps = true;
         }
 
-        // The dimensions of the component, e.g. { width: 500, height: 200 }
+        // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions');
+        this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
         this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');

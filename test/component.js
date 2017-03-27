@@ -18,11 +18,6 @@ export let testComponent = xcomponent.create({
 
     defaultEnv: 'dev',
 
-    dimensions: {
-        width: 500,
-        height: 500
-    },
-
     contexts: {
         iframe: true,
         popup: true
@@ -113,11 +108,6 @@ export let testComponent2 = xcomponent.create({
 
     defaultEnv: 'dev',
 
-    dimensions: {
-        width: 500,
-        height: 500
-    },
-
     contexts: {
         iframe: true,
         popup: true
@@ -152,11 +142,6 @@ export let testComponent3 = xcomponent.create({
     },
 
     defaultEnv: 'dev',
-
-    dimensions: {
-        width: 500,
-        height: 500
-    },
 
     props: {
         foo: {
@@ -201,11 +186,6 @@ export let testComponent5 = xcomponent.create({
     },
 
     defaultEnv: 'dev',
-
-    dimensions: {
-        width: 500,
-        height: 500
-    },
 
     props: {
         foo: {

@@ -5,15 +5,15 @@ import { testComponent, testComponent5 } from '../component';
 
 describe('xcomponent validation errors', () => {
 
-    function expectError(method) {
+    function expectError(description, method) {
         try {
             method();
         } catch (err) {
-            assert.isTrue(err instanceof Error, 'Expected Error object to be thrown');
+            assert.isTrue(err instanceof Error, `Expected Error for use case: ${description}, got ${typeof err}`);
             return;
         }
 
-        throw new Error('Expected error to be thrown');
+        throw new Error(`Expected Error for use case: ${description}`);
     }
 
     it('should throw validation errors when a component is created without the correct options', () => {
@@ -66,8 +66,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 }
             });
         });
@@ -76,8 +76,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 props: 'foo'
@@ -88,8 +88,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 props: {
@@ -102,8 +102,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 props: {
@@ -118,8 +118,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 props: {
@@ -134,8 +134,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 props: {
@@ -152,8 +152,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 contexts: {
@@ -167,8 +167,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 contexts: {
@@ -181,8 +181,8 @@ describe('xcomponent validation errors', () => {
         xcomponent.create({
             tag: 'my-component-working-2',
             dimensions: {
-                height: 50,
-                width: 200
+                height: '50px',
+                width: '200px'
             },
             url: 'http://zombo.com',
             contexts: {
@@ -195,8 +195,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 contexts: {
                     iframe: true,
@@ -211,8 +211,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 'http://zombo.com',
                 contexts: {
@@ -226,8 +226,8 @@ describe('xcomponent validation errors', () => {
         xcomponent.create({
             tag: 'my-component',
             dimensions: {
-                height: 50,
-                width: 200
+                height: '50px',
+                width: '200px'
             },
             url: 'http://zombo.com',
             contexts: {
@@ -241,8 +241,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: {
                     foo: undefined
@@ -254,8 +254,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: {
                     foo: 'http://www.zombo.com'
@@ -267,8 +267,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 envUrls: {
                     foo: 'http://www.zombo.com'
@@ -281,8 +281,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 defaultEnv: 'moo'
             });
@@ -292,8 +292,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: {
 
@@ -306,8 +306,8 @@ describe('xcomponent validation errors', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
-                    height: 50,
-                    width: 200
+                    height: '50px',
+                    width: '200px'
                 },
                 url: 12345
             });

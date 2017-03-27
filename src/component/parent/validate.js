@@ -101,6 +101,16 @@ export function validateProps(component, props, required = true) {
             validateProp(prop, key, value, props, required);
         }
     }
+
+    for (let key of Object.keys(component.props)) {
+
+        let prop = component.props[key];
+        let value = props[key];
+
+        if (!props.hasOwnProperty(key)) {
+            validateProp(prop, key, value, props, required);
+        }
+    }
 }
 
 

@@ -1,5 +1,6 @@
 
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
+import { isPerc, isPx } from '../../lib';
 
 function validateProps(options) {
 
@@ -39,12 +40,12 @@ export function validate(options) { // eslint-ignore-line
     validateProps(options);
 
     if (options.dimensions) {
-        if (typeof options.dimensions.width !== 'number' && typeof options.dimensions.width !== 'string') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a number or string`);
+        if (!isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
+            throw new Error(`[${options.tag}] Expected options.dimensions.width to be a px or % string value`);
         }
 
-        if (typeof options.dimensions.height !== 'number' && typeof options.dimensions.height !== 'string') {
-            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a number or string`);
+        if (!isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
+            throw new Error(`[${options.tag}] Expected options.dimensions.height to be a px or % string value`);
         }
     }
 
@@ -69,12 +70,6 @@ export function validate(options) { // eslint-ignore-line
 
         if (!anyEnabled) {
             throw new Error(`[${options.tag}] No context type is enabled`);
-        }
-
-        if (options.contexts.iframe !== false) {
-            if (!options.dimensions) {
-                throw new Error(`[${options.tag}] dimesions.width and dimensions.height required for rendering to iframe`);
-            }
         }
     }
 

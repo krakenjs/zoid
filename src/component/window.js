@@ -188,17 +188,25 @@ export let getParentRenderWindow = memoize(() => {
 
 export function getPosition(options) {
 
-    let left;
-    let top;
     let width = options.width;
     let height = options.height;
+    let left;
+    let top;
 
-    if (window.outerWidth) {
-        left = Math.round((window.outerWidth - width) / 2) + window.screenX;
-        top = Math.round((window.outerHeight - height) / 2) + window.screenY;
-    } else if (window.screen.width) {
-        left = Math.round((window.screen.width - width) / 2);
-        top = Math.round((window.screen.height - height) / 2);
+    if (width) {
+        if (window.outerWidth) {
+            left = Math.round((window.outerWidth - width) / 2) + window.screenX;
+        } else if (window.screen.width) {
+            left = Math.round((window.screen.width - width) / 2);
+        }
+    }
+
+    if (height) {
+        if (window.outerHeight) {
+            top = Math.round((window.outerHeight - height) / 2) + window.screenY;
+        } else if (window.screen.height) {
+            top = Math.round((window.screen.height - height) / 2);
+        }
     }
 
     return {
