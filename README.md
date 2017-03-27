@@ -78,6 +78,7 @@ onUserLogin(function(email) {
 
 ## Rationale
 
+
 **Writing cross domain components is tricky.**
 
 Consider this: I own `foo.com`, you own `bar.com`, and I have some functionality I want to share on your page.
@@ -87,7 +88,8 @@ I could just give you some javascript to load in your page. But then:
 - What if I have secure form fields, or secure data I don't want your site to spy on?
 - What if I need to make secure calls to my back-end, without resorting to CORS?
 
-** What about an iframe?**
+
+**What about an iframe?**
 
 You could just use a vanilla iframe for all of this. But:
 
@@ -95,6 +97,7 @@ You could just use a vanilla iframe for all of this. But:
 - You need to set up post-message listeners to get events back up from the child.
 - You need to deal with error cases, like if your iframe fails to load or doesn't respond to a post-message.
 - You need to think carefully about how to expose all this functionality behind a simple, clear interface.
+
 
 **xcomponent solves all of these problems.**
 
