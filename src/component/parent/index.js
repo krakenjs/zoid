@@ -278,7 +278,7 @@ export class ParentComponent extends BaseComponent {
         this.props = this.props || {};
         props.version = this.component.version;
         validateProps(this.component, props, required);
-        extend(this.props, normalizeProps(this.component, this, props, required));
+        extend(this.props, normalizeProps(this.component, this, props));
     }
 
 
@@ -351,7 +351,9 @@ export class ParentComponent extends BaseComponent {
         let result = {};
 
         for (let key of Object.keys(this.props)) {
-            if (this.component.props[key].sendToChild !== false) {
+            let prop = this.component.props[key];
+
+            if (!prop || prop.sendToChild !== false) {
                 result[key] = this.props[key];
             }
         }

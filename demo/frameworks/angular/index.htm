@@ -14,7 +14,7 @@
     <h3>Log in on xyz.com</h3>
 
     <div id="container">
-        <my-login-component prefilled-email="email" on-login="onLogin"></my-login-component>
+        <my-login-component props="{ prefilledEmail: email, onLogin: onLogin }"></my-login-component>
     </div>
 
     <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>

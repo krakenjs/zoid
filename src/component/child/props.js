@@ -1,18 +1,19 @@
 
 import { getDomain } from '../../lib';
 
-export function normalizeChildProps(component, props, origin, required = true) {
+export function normalizeChildProps(component, props, origin) {
 
     let result = {};
 
-    for (let key of Object.keys(component.props)) {
-
-        if (!props.hasOwnProperty(key) && !required) {
-            continue;
-        }
+    for (let key of Object.keys(props)) {
 
         let prop = component.props[key];
         let value = props[key];
+
+        if (component.looseProps && !prop) {
+            result[key] = value;
+            continue;
+        }
 
         if (typeof prop.childDef === 'function') {
             if (!value) {

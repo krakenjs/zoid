@@ -52,8 +52,12 @@ export class Component extends BaseComponent {
 
         this.props = {
             ...internalProps,
-            ...options.props
+            ...(options.props || {})
         };
+
+        if (!options.props) {
+            this.looseProps = true;
+        }
 
         // The dimensions of the component, e.g. { width: 500, height: 200 }
 

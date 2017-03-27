@@ -1,5 +1,5 @@
 
-import { dasherizeToCamel } from '../lib';
+import { dasherizeToCamel, replaceObject } from '../lib';
 
 export let angular = {
 
@@ -17,6 +17,10 @@ export let angular = {
                 scope[key] = '=';
             }
 
+            if (component.looseProps) {
+                scope.props = '=';
+            }
+
             return {
                 scope,
 
@@ -24,14 +28,46 @@ export let angular = {
 
                 controller: ($scope, $element) => {
 
+                    if (component.looseProps && !$scope.props) {
+                        throw new Error(`For angular bindings to work, prop definitions must be passed to xcomponent.create`);
+                    }
+
                     component.log(`instantiate_angular_component`);
 
-                    function getProps() {
-                        let instanceProps = {};
-                        for (let key of Object.keys(scope)) {
-                            instanceProps[key] = $scope[key];
+                    function safeApply(fn) {
+                        if ($scope.$root.$$phase !== '$apply' && $scope.$root.$$phase !== '$digest') {
+                            try {
+                                $scope.$apply();
+                            } catch (err) {
+                                console.warn('Error trying to scope.apply on prop function call:', err);
+                            }
                         }
-                        return instanceProps;
+                    }
+
+                    function getProps() {
+
+                        let scopeProps;
+
+                        if ($scope.props) {
+                            scopeProps = $scope.props;
+                        } else {
+                            scopeProps = {};
+                            for (let key of Object.keys(scope)) {
+                                scopeProps[key] = $scope[key];
+                            }
+                        }
+
+                        scopeProps = replaceObject(scopeProps, (value, key, fullKey) => {
+                            if (typeof value === 'function') {
+                                return function() {
+                                    let result = value.apply(this, arguments);
+                                    safeApply();
+                                    return result;
+                                };
+                            }
+                        });
+
+                        return scopeProps;
                     }
 
                     let parent = component.init(getProps(), null, $element[0]);

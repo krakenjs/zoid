@@ -25,19 +25,5 @@ window.MyLoginComponent = xcomponent.create({
 
     // The background overlay
 
-    containerTemplate: xcomponent.containerTemplate,
-
-    // The properties they can (or must) pass down to my component
-
-    props: {
-
-        prefilledEmail: {
-            type: 'string',
-            required: false
-        },
-
-        onLogin: {
-            type: 'function'
-        }
-    }
+    containerTemplate: xcomponent.containerTemplate
 });

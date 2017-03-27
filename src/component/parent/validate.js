@@ -82,20 +82,24 @@ export function validateProps(component, props, required = true) {
 
     // First make sure all of the props we were sent are actually valid prop names
 
-    for (let key of Object.keys(props)) {
-        if (!component.props.hasOwnProperty(key)) {
-            throw new Error(`[${component.tag}] Invalid prop: ${key}`);
+    if (!component.looseProps) {
+        for (let key of Object.keys(props)) {
+            if (!component.props.hasOwnProperty(key)) {
+                throw new Error(`[${component.tag}] Invalid prop: ${key}`);
+            }
         }
     }
 
     // Then loop over the props we expect, and make sure they're all present and valid
 
-    for (let key of Object.keys(component.props)) {
+    for (let key of Object.keys(props)) {
 
         let prop = component.props[key];
         let value = props[key];
 
-        validateProp(prop, key, value, props, required);
+        if (prop) {
+            validateProp(prop, key, value, props, required);
+        }
     }
 }
 

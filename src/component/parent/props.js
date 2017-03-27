@@ -151,8 +151,16 @@ export function normalizeProps(component, instance, props, required = true) {
     props = props || {};
     let result = {};
 
+    for (let key of Object.keys(props)) {
+        if (component.props.hasOwnProperty(key)) {
+            result[key] = normalizeProp(component, instance, props, key, props[key]);
+        } else {
+            result[key] = props[key];
+        }
+    }
+
     for (let key of Object.keys(component.props)) {
-        if (required || props.hasOwnProperty(key)) {
+        if (!props.hasOwnProperty(key)) {
             result[key] = normalizeProp(component, instance, props, key, props[key]);
         }
     }
@@ -184,6 +192,11 @@ export function propsToQuery(propsDef, props) {
     return Promise.all(Object.keys(props).map(key => {
 
         let prop = propsDef[key];
+
+        if (!prop) {
+            return;
+        }
+
         let queryParam = key;
 
         if (typeof prop.queryParam === 'string') {

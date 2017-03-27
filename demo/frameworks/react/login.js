@@ -14,19 +14,5 @@ window.MyLoginComponent = xcomponent.create({
     dimensions: {
         width: 250,
         height: 150
-    },
-
-    // The properties they can (or must) pass down to my component
-
-    props: {
-
-        prefilledEmail: {
-            type: 'string',
-            required: false
-        },
-
-        onLogin: {
-            type: 'function'
-        }
     }
 });

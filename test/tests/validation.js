@@ -18,31 +18,31 @@ describe('xcomponent validation errors', () => {
 
     it('should throw validation errors when a component is created without the correct options', () => {
 
-        expectError(() => {
+        expectError('Empty options', () => {
             xcomponent.create({});
         });
 
-        expectError(() => {
+        expectError('Special chars in tag name', () => {
             xcomponent.create({
                 tag: 'special$%&-chars'
             });
         });
 
-        expectError(() => {
+        expectError('String passed for dimensions', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: 'moo'
             });
         });
 
-        expectError(() => {
+        expectError('Empty options passed for dimensions', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {}
             });
         });
 
-        expectError(() => {
+        expectError('Strings passed for dimensions', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -52,7 +52,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('String passed for height', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -62,7 +62,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('No url passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -72,16 +72,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        xcomponent.create({
-            tag: 'my-component-working-1',
-            dimensions: {
-                height: 50,
-                width: 200
-            },
-            url: 'http://zombo.com'
-        });
-
-        expectError(() => {
+        expectError('Props passed as string', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -93,7 +84,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Prop passed as string', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -107,7 +98,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Invalid prop type passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -123,7 +114,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Empty prop definition', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -139,7 +130,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Required and default passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -157,7 +148,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Invalid context passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -172,7 +163,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('No contexts enabled', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -200,7 +191,7 @@ describe('xcomponent validation errors', () => {
             }
         });
 
-        expectError(() => {
+        expectError('Invalid default context', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -216,7 +207,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Default context disabled', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -246,33 +237,33 @@ describe('xcomponent validation errors', () => {
             defaultContext: 'iframe'
         });
 
-        expectError(() => {
+        expectError('Undefined url', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
                     height: 50,
                     width: 200
                 },
-                envUrls: {
+                url: {
                     foo: undefined
                 }
             });
         });
 
-        expectError(() => {
+        expectError('No default env passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
                     height: 50,
                     width: 200
                 },
-                envUrls: {
+                url: {
                     foo: 'http://www.zombo.com'
                 }
             });
         });
 
-        expectError(() => {
+        expectError('Invalid default env passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -282,11 +273,11 @@ describe('xcomponent validation errors', () => {
                 envUrls: {
                     foo: 'http://www.zombo.com'
                 },
-                defaultUrl: 1234
+                defaultEnv: 1234
             });
         });
 
-        expectError(() => {
+        expectError('Default env passed with no urls', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -297,21 +288,21 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Default env passed with empty urls', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
                     height: 50,
                     width: 200
                 },
-                envUrls: {
+                url: {
 
                 },
                 defaultEnv: 'moo'
             });
         });
 
-        expectError(() => {
+        expectError('Invalid url passed', () => {
             xcomponent.create({
                 tag: 'my-component',
                 dimensions: {
@@ -325,25 +316,25 @@ describe('xcomponent validation errors', () => {
 
     it('should throw validation errors when a component is inited without the correct options', () => {
 
-        expectError(() => {
+        expectError('String passed for function prop', () => {
             testComponent.init({
                 functionProp: 'foobar'
             });
         });
 
-        expectError(() => {
+        expectError('Object passed for string prop', () => {
             testComponent.init({
                 stringProp() {}
             });
         });
 
-        expectError(() => {
+        expectError('Object passed fro number prop', () => {
             testComponent.init({
                 numberProp() {}
             });
         });
 
-        expectError(() => {
+        expectError('Unserializable object passed for object prop', () => {
             let obj = {};
             obj.obj = obj;
 
@@ -352,13 +343,13 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError(() => {
+        expectError('Invalid prop passed', () => {
             testComponent.init({
                 invalidProp: 'foobar'
             });
         });
 
-        expectError(() => {
+        expectError('No props passed', () => {
             testComponent5.init();
         });
     });

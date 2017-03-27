@@ -14,15 +14,5 @@ window.MyLoginButtonComponent = xcomponent.create({
     dimensions: {
         width: 250,
         height: 100
-    },
-
-    // The properties they can (or must) pass down to my component
-
-    props: {
-
-        loginContainer: {
-            type: 'string',
-            required: true
-        }
     }
 });
