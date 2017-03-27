@@ -19,7 +19,7 @@
         let MyLoginComponent = React.createClass({
 
             getInitialState() {
-                return { displayForm: true, displaySpinner: false };
+                return { displayForm: true, displaySpinner: false, email: this.props.prefilledEmail };
             },
 
             render() {
@@ -40,7 +40,7 @@
 
                                 <input
                                     placeholder='email'
-                                    defaultValue={ this.props.prefilledEmail }
+                                    defaultValue={ this.state.email }
                                     onChange={
                                         event => this.setState({ email: event.target.value })
                                     }>
