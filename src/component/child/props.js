@@ -37,7 +37,7 @@ export function normalizeChildProp(component, props, key, value) {
 }
 
 
-export function normalizeChildProps(component, props, origin) {
+export function normalizeChildProps(component, props, origin, required = true) {
 
     let result = {};
 
@@ -57,9 +57,11 @@ export function normalizeChildProps(component, props, origin) {
         }
     }
 
-    for (let key of Object.keys(component.props)) {
-        if (!props.hasOwnProperty(key)) {
-            result[key] = normalizeChildProp(component, props, key, props[key]);
+    if (required) {
+        for (let key of Object.keys(component.props)) {
+            if (!props.hasOwnProperty(key)) {
+                result[key] = normalizeChildProp(component, props, key, props[key]);
+            }
         }
     }
 

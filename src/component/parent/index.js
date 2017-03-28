@@ -35,8 +35,6 @@ export class ParentComponent extends BaseComponent {
         super(component, options);
         validate(component, options);
 
-        this.rawProps = { ...(options.props || {}) };
-
         this.component = component;
         this.context = context;
         this.setProps(options.props || {});
@@ -370,20 +368,6 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     updateProps(props = {}) {
-        let changed = false;
-
-        for (let key of Object.keys(props)) {
-            if (props[key] !== this.rawProps[key]) {
-                changed = true;
-                break;
-            }
-        }
-
-        if (!changed) {
-            return;
-        }
-
-        this.rawProps = { ...this.rawProps, ...props };
         this.setProps(props, false);
 
         if (this.propUpdater) {
