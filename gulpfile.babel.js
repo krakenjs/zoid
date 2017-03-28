@@ -1,16 +1,16 @@
 
-var gulp = require('gulp');
-var webpack = require('webpack');
-var gulpWebpack = require('webpack-stream');
-var eslint = require('gulp-eslint');
-var Server = require('karma').Server;
-var argv = require('yargs').argv;
-var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+let gulp = require('gulp');
+let webpack = require('webpack');
+let gulpWebpack = require('webpack-stream');
+let eslint = require('gulp-eslint');
+let Server = require('karma').Server;
+let argv = require('yargs').argv;
+let UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 gulp.task('test', ['lint', 'karma']);
 gulp.task('build', ['test', 'webpack']);
 
-var MODULE_NAME = 'xcomponent';
+let MODULE_NAME = 'xcomponent';
 
 function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
 
@@ -19,18 +19,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             rules: [
                 {
                     test: /\.js$/,
-                    loader: 'babel-loader',
-                    query: {
-                        presets: ['es2015'],
-                        plugins: [
-                            'transform-object-rest-spread',
-                            'syntax-object-rest-spread',
-                            'transform-es3-property-literals',
-                            'transform-es3-member-expression-literals',
-                            ['transform-es2015-for-of', {loose: true}],
-                            'transform-decorators-legacy'
-                        ]
-                    }
+                    loader: 'babel-loader'
                 }
             ]
         },
@@ -125,7 +114,7 @@ gulp.task('lint', function() {
 
 gulp.task('karma', ['lint'], function (done) {
 
-  var server = new Server({
+    let server = new Server({
     configFile: __dirname + '/karma.conf.js',
     singleRun: !Boolean(argv['keep-browser-open']),
     client: {
