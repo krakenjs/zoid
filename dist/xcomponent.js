@@ -2227,6 +2227,16 @@
                     }
                 }
             }, {
+                key: "getInitialDimensions",
+                value: function() {
+                    var _ref12 = this.props.dimensions || this.component.dimensions || {}, width = _ref12.width, height = _ref12.height, x = _ref12.x, y = _ref12.y, result = {
+                        x: x,
+                        y: y
+                    };
+                    return width && (result.width = (0, _lib.toCSS)(width)), height && (result.height = (0, 
+                    _lib.toCSS)(height)), result;
+                }
+            }, {
                 key: "watchForClose",
                 value: function() {
                     var _this10 = this, closeWindowListener = (0, _lib.onCloseWindow)(this.window, function() {
@@ -2274,8 +2284,8 @@
             }, {
                 key: "listeners",
                 value: function() {
-                    var _ref12;
-                    return _ref12 = {}, _defineProperty(_ref12, _constants.POST_MESSAGE.INIT, function(source, data) {
+                    var _ref13;
+                    return _ref13 = {}, _defineProperty(_ref13, _constants.POST_MESSAGE.INIT, function(source, data) {
                         var _this12 = this;
                         return this.childExports = data.exports, this.onInit.resolve(this), this.timeout && clearTimeout(this.timeout), 
                         this.props.onEnter().then(function() {
@@ -2284,17 +2294,17 @@
                                 context: _this12.context
                             };
                         });
-                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.CLOSE, function(source, data) {
+                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.CLOSE, function(source, data) {
                         this.close(data.reason);
-                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.RESIZE, function(source, data) {
+                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.RESIZE, function(source, data) {
                         if (this.driver.allowResize && this.component.autoResize) return this.resize(data.width, data.height);
-                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.HIDE, function(source, data) {
+                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function(source, data) {
                         this.hide();
-                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.SHOW, function(source, data) {
+                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.SHOW, function(source, data) {
                         this.show();
-                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.ERROR, function(source, data) {
+                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function(source, data) {
                         this.error(new Error(data.error));
-                    }), _ref12;
+                    }), _ref13;
                 }
             }, {
                 key: "resize",
@@ -2309,11 +2319,6 @@
                             overflow && overflow.reset();
                         });
                     }
-                }
-            }, {
-                key: "restyle",
-                value: function() {
-                    return this.driver.restyle.call(this);
                 }
             }, {
                 key: "hide",
@@ -2499,15 +2504,15 @@
                                 return _this18.userClose();
                             })), _this18.clean.register("destroyContainerEvents", function() {
                                 for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref13;
+                                    var _ref14;
                                     if (_isArray3) {
                                         if (_i3 >= _iterator3.length) break;
-                                        _ref13 = _iterator3[_i3++];
+                                        _ref14 = _iterator3[_i3++];
                                     } else {
                                         if (_i3 = _iterator3.next(), _i3.done) break;
-                                        _ref13 = _i3.value;
+                                        _ref14 = _i3.value;
                                     }
-                                    var eventHandler = _ref13;
+                                    var eventHandler = _ref14;
                                     eventHandler.cancel();
                                 }
                             }), _this18.clean.register("destroyContainerTemplate", function() {
@@ -3575,13 +3580,19 @@
             open: function(element) {
                 var _this = this;
                 if (element && !(0, _lib.getElement)(element)) throw this.component.error("Can not find element " + element);
-                element = this.element || element || document.body, this.iframe = (0, _lib.iframe)(null, {
-                    name: this.childWindowName,
-                    scrolling: this.component.scrolling === !1 ? "no" : "yes"
-                }, element), this.element = this.element || this.iframe, (0, _lib.hideElement)(this.element);
-                var dimensions = this.props.dimensions || this.component.dimensions || {};
-                this.resize(dimensions.width, dimensions.height), this.restyle(), this.window = this.iframe.contentWindow, 
-                this.clean.register("destroyWindow", function() {
+                element = this.element || element || document.body;
+                var _getInitialDimensions = this.getInitialDimensions(), width = _getInitialDimensions.width, height = _getInitialDimensions.height, options = {
+                    attributes: {
+                        name: this.childWindowName,
+                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
+                    },
+                    style: {
+                        width: width,
+                        height: height
+                    }
+                };
+                this.iframe = (0, _lib.iframe)(null, options, element), this.element = this.element || this.iframe, 
+                this.window = this.iframe.contentWindow, (0, _lib.hideElement)(this.element), this.clean.register("destroyWindow", function() {
                     _this.window.close(), delete _this.window, _this.iframe && (_this.iframe.parentNode && _this.iframe.parentNode.removeChild(_this.iframe), 
                     delete _this.iframe);
                 });
@@ -3600,9 +3611,9 @@
                 hide: _constants.DELEGATE.CALL_DELEGATE,
                 show: _constants.DELEGATE.CALL_DELEGATE,
                 resize: _constants.DELEGATE.CALL_DELEGATE,
-                restyle: _constants.DELEGATE.CALL_DELEGATE,
                 loadUrl: _constants.DELEGATE.CALL_DELEGATE,
                 hijackSubmit: _constants.DELEGATE.CALL_DELEGATE,
+                getInitialDimensions: _constants.DELEGATE.CALL_ORIGINAL,
                 open: function(original, override) {
                     return function() {
                         var _this2 = this;
@@ -3623,9 +3634,6 @@
             show: function() {
                 this.element.style.display = "block";
             },
-            restyle: function() {
-                this.iframe.style.backgroundColor = "transparent";
-            },
             loadUrl: function(url) {
                 this.iframe.src = url;
             }
@@ -3637,7 +3645,7 @@
             openOnClick: !0,
             errorOnCloseDuringInit: !1,
             open: function() {
-                var _this3 = this, _ref = this.props.dimensions || this.component.dimensions || {}, width = _ref.width, height = _ref.height, x = _ref.x, y = _ref.y;
+                var _this3 = this, _getInitialDimensions2 = this.getInitialDimensions(), width = _getInitialDimensions2.width, height = _getInitialDimensions2.height, x = _getInitialDimensions2.x, y = _getInitialDimensions2.y;
                 width = (0, _lib.normalizeDimension)(width, window.innerWidth), height = (0, _lib.normalizeDimension)(height, window.innerHeight);
                 var pos = (0, _window.getPosition)({
                     width: width,
@@ -3668,7 +3676,6 @@
             show: function() {
                 throw new Error("Can not show popup");
             },
-            restyle: function() {},
             delegateOverrides: {
                 openContainer: _constants.DELEGATE.CALL_DELEGATE,
                 destroyContainer: _constants.DELEGATE.CALL_DELEGATE,
@@ -3685,7 +3692,7 @@
                 createComponentTemplate: _constants.DELEGATE.CALL_ORIGINAL,
                 destroyComponent: _constants.DELEGATE.CALL_ORIGINAL,
                 resize: _constants.DELEGATE.CALL_ORIGINAL,
-                restyle: _constants.DELEGATE.CALL_ORIGINAL
+                getInitialDimensions: _constants.DELEGATE.CALL_ORIGINAL
             },
             loadUrl: function(url) {
                 this.window.location = url;
@@ -5406,7 +5413,7 @@
                     var _this2 = this;
                     postRobot.on(_constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref2) {
                         var source = _ref2.source, origin = _ref2.origin, data = _ref2.data, domain = _this2.getDomain(null, {
-                            env: data.env
+                            env: data.env || _this2.defaultEnv
                         });
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
                         if (domain !== origin) throw new Error("Can not render from " + origin + " - expected " + domain);
@@ -5777,7 +5784,7 @@
             if (options.url && options.buildUrl) throw component.error("Can not pass options.url and options.buildUrl");
             if (options.defaultEnv) {
                 if ("string" != typeof options.defaultEnv) throw component.error("Expected options.defaultEnv to be a string");
-                if ("object" !== _typeof(options.url)) throw component.error("Expected options.url to be an object mapping env->url");
+                if (!options.buildUrl && "object" !== _typeof(options.url)) throw component.error("Expected options.url to be an object mapping env->url");
                 if (options.url && "object" === _typeof(options.url) && !options.url[options.defaultEnv]) throw component.error("No url found for default env: " + options.defaultEnv);
             }
             if (options.url && "object" === _typeof(options.url)) {
@@ -6344,9 +6351,11 @@
             }
             return win;
         }
-        function iframe(url, options, container) {
+        function iframe(url) {
+            var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, container = arguments[2];
             container = getElement(container);
-            for (var frame = document.createElement("iframe"), _iterator = Object.keys(options), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+            var frame = document.createElement("iframe");
+            if (options.attributes) for (var _iterator = Object.keys(options.attributes), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref;
                 if (_isArray) {
                     if (_i >= _iterator.length) break;
@@ -6356,10 +6365,22 @@
                     _ref = _i.value;
                 }
                 var key = _ref;
-                frame[key] = options[key];
+                frame[key] = options.attributes[key];
             }
-            return frame.frameBorder = "0", frame.allowTransparency = "true", container && container.appendChild(frame), 
-            frame;
+            if (options.style) for (var _iterator2 = Object.keys(options.style), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                var _ref2;
+                if (_isArray2) {
+                    if (_i2 >= _iterator2.length) break;
+                    _ref2 = _iterator2[_i2++];
+                } else {
+                    if (_i2 = _iterator2.next(), _i2.done) break;
+                    _ref2 = _i2.value;
+                }
+                var _key = _ref2;
+                frame.style[_key] = options.style[_key];
+            }
+            return frame.frameBorder = "0", frame.allowTransparency = "true", frame.style.backgroundColor = "transparent", 
+            container && container.appendChild(frame), frame;
         }
         function onCloseWindow(win, callback) {
             callback = (0, _fn.once)(callback);
@@ -6389,23 +6410,7 @@
             var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, element = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : null, 
             document.createElement(tag));
             if (options.style && (0, _util.extend)(element.style, options.style), options.html && (element.innerHTML = options.html), 
-            options.class && (element.className = options.class.join(" ")), options.attributes) for (var _iterator2 = Object.keys(options.attributes), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                var _ref2;
-                if (_isArray2) {
-                    if (_i2 >= _iterator2.length) break;
-                    _ref2 = _iterator2[_i2++];
-                } else {
-                    if (_i2 = _iterator2.next(), _i2.done) break;
-                    _ref2 = _i2.value;
-                }
-                var key = _ref2;
-                element.setAttribute(key, options.attributes[key]);
-            }
-            return options.styleSheet && (element.styleSheet ? element.styleSheet.cssText = options.styleSheet : element.appendChild(document.createTextNode(options.styleSheet))), 
-            element;
-        }
-        function addEventToClass(element, className, eventName, handler) {
-            for (var handlers = [], _iterator3 = Array.prototype.slice.call(element.getElementsByClassName(className)), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+            options.class && (element.className = options.class.join(" ")), options.attributes) for (var _iterator3 = Object.keys(options.attributes), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                 var _ref3;
                 if (_isArray3) {
                     if (_i3 >= _iterator3.length) break;
@@ -6414,7 +6419,23 @@
                     if (_i3 = _iterator3.next(), _i3.done) break;
                     _ref3 = _i3.value;
                 }
-                var el = _ref3, eventHandler = function(event) {
+                var key = _ref3;
+                element.setAttribute(key, options.attributes[key]);
+            }
+            return options.styleSheet && (element.styleSheet ? element.styleSheet.cssText = options.styleSheet : element.appendChild(document.createTextNode(options.styleSheet))), 
+            element;
+        }
+        function addEventToClass(element, className, eventName, handler) {
+            for (var handlers = [], _iterator4 = Array.prototype.slice.call(element.getElementsByClassName(className)), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                var _ref4;
+                if (_isArray4) {
+                    if (_i4 >= _iterator4.length) break;
+                    _ref4 = _iterator4[_i4++];
+                } else {
+                    if (_i4 = _iterator4.next(), _i4.done) break;
+                    _ref4 = _i4.value;
+                }
+                var el = _ref4, eventHandler = function(event) {
                     event.preventDefault(), event.stopPropagation(), handler();
                 };
                 handlers.push({
@@ -6424,16 +6445,16 @@
             }
             return {
                 cancel: function() {
-                    for (var _iterator4 = handlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                        var _ref5;
-                        if (_isArray4) {
-                            if (_i4 >= _iterator4.length) break;
-                            _ref5 = _iterator4[_i4++];
+                    for (var _iterator5 = handlers, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                        var _ref6;
+                        if (_isArray5) {
+                            if (_i5 >= _iterator5.length) break;
+                            _ref6 = _iterator5[_i5++];
                         } else {
-                            if (_i4 = _iterator4.next(), _i4.done) break;
-                            _ref5 = _i4.value;
+                            if (_i5 = _iterator5.next(), _i5.done) break;
+                            _ref6 = _i5.value;
                         }
-                        var _ref6 = _ref5, el = _ref6.el, eventHandler = _ref6.eventHandler;
+                        var _ref7 = _ref6, el = _ref7.el, eventHandler = _ref7.eventHandler;
                         el.removeEventListener(eventName, eventHandler);
                     }
                 }
@@ -6506,16 +6527,16 @@
         }
         function changeStyle(el, styles) {
             return new _promise.SyncPromise(function(resolve) {
-                for (var _iterator6 = Object.keys(styles), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
-                    var _ref8;
-                    if (_isArray6) {
-                        if (_i6 >= _iterator6.length) break;
-                        _ref8 = _iterator6[_i6++];
+                for (var _iterator7 = Object.keys(styles), _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
+                    var _ref9;
+                    if (_isArray7) {
+                        if (_i7 >= _iterator7.length) break;
+                        _ref9 = _iterator7[_i7++];
                     } else {
-                        if (_i6 = _iterator6.next(), _i6.done) break;
-                        _ref8 = _i6.value;
+                        if (_i7 = _iterator7.next(), _i7.done) break;
+                        _ref9 = _i7.value;
                     }
-                    var key = _ref8;
+                    var key = _ref9;
                     el.style[key] = styles[key];
                 }
                 setTimeout(resolve, 1);
@@ -6529,12 +6550,12 @@
                 }
             };
         }
-        function dimensionsDiff(one, two, _ref9) {
-            var _ref9$width = _ref9.width, width = void 0 === _ref9$width || _ref9$width, _ref9$height = _ref9.height, height = void 0 === _ref9$height || _ref9$height, _ref9$threshold = _ref9.threshold, threshold = void 0 === _ref9$threshold ? 0 : _ref9$threshold;
+        function dimensionsDiff(one, two, _ref10) {
+            var _ref10$width = _ref10.width, width = void 0 === _ref10$width || _ref10$width, _ref10$height = _ref10.height, height = void 0 === _ref10$height || _ref10$height, _ref10$threshold = _ref10.threshold, threshold = void 0 === _ref10$threshold ? 0 : _ref10$threshold;
             return !!(width && Math.abs(one.width - two.width) > threshold) || !!(height && Math.abs(one.height - two.height) > threshold);
         }
-        function trackDimensions(el, _ref10) {
-            var _ref10$width = _ref10.width, width = void 0 === _ref10$width || _ref10$width, _ref10$height = _ref10.height, height = void 0 === _ref10$height || _ref10$height, _ref10$threshold = _ref10.threshold, threshold = void 0 === _ref10$threshold ? 0 : _ref10$threshold, currentDimensions = getCurrentDimensions(el);
+        function trackDimensions(el, _ref11) {
+            var _ref11$width = _ref11.width, width = void 0 === _ref11$width || _ref11$width, _ref11$height = _ref11.height, height = void 0 === _ref11$height || _ref11$height, _ref11$threshold = _ref11.threshold, threshold = void 0 === _ref11$threshold ? 0 : _ref11$threshold, currentDimensions = getCurrentDimensions(el);
             return {
                 check: function() {
                     var newDimensions = getCurrentDimensions(el);
@@ -6552,8 +6573,8 @@
                 }
             };
         }
-        function onDimensionsChange(el, _ref11) {
-            var _ref11$width = _ref11.width, width = void 0 === _ref11$width || _ref11$width, _ref11$height = _ref11.height, height = void 0 === _ref11$height || _ref11$height, _ref11$delay = _ref11.delay, delay = void 0 === _ref11$delay ? 50 : _ref11$delay, _ref11$threshold = _ref11.threshold, threshold = void 0 === _ref11$threshold ? 0 : _ref11$threshold;
+        function onDimensionsChange(el, _ref12) {
+            var _ref12$width = _ref12.width, width = void 0 === _ref12$width || _ref12$width, _ref12$height = _ref12.height, height = void 0 === _ref12$height || _ref12$height, _ref12$delay = _ref12.delay, delay = void 0 === _ref12$delay ? 50 : _ref12$delay, _ref12$threshold = _ref12.threshold, threshold = void 0 === _ref12$threshold ? 0 : _ref12$threshold;
             return new _promise.SyncPromise(function(resolve) {
                 var tracker = trackDimensions(el, {
                     width: width,
@@ -6568,36 +6589,36 @@
                 }, delay);
             });
         }
-        function dimensionsMatchViewport(el, _ref12) {
-            var width = _ref12.width, height = _ref12.height, dimensions = getCurrentDimensions(el);
+        function dimensionsMatchViewport(el, _ref13) {
+            var width = _ref13.width, height = _ref13.height, dimensions = getCurrentDimensions(el);
             return (!width || dimensions.width === window.innerWidth) && (!height || dimensions.height === window.innerHeight);
         }
         function bindEvents(element, eventNames, handler) {
             handler = (0, _fn.once)(handler);
-            for (var _iterator7 = eventNames, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
-                var _ref13;
-                if (_isArray7) {
-                    if (_i7 >= _iterator7.length) break;
-                    _ref13 = _iterator7[_i7++];
+            for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
+                var _ref14;
+                if (_isArray8) {
+                    if (_i8 >= _iterator8.length) break;
+                    _ref14 = _iterator8[_i8++];
                 } else {
-                    if (_i7 = _iterator7.next(), _i7.done) break;
-                    _ref13 = _i7.value;
+                    if (_i8 = _iterator8.next(), _i8.done) break;
+                    _ref14 = _i8.value;
                 }
-                var eventName = _ref13;
+                var eventName = _ref14;
                 element.addEventListener(eventName, handler);
             }
             return {
                 cancel: (0, _fn.once)(function() {
-                    for (var _iterator8 = eventNames, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
-                        var _ref14;
-                        if (_isArray8) {
-                            if (_i8 >= _iterator8.length) break;
-                            _ref14 = _iterator8[_i8++];
+                    for (var _iterator9 = eventNames, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
+                        var _ref15;
+                        if (_isArray9) {
+                            if (_i9 >= _iterator9.length) break;
+                            _ref15 = _iterator9[_i9++];
                         } else {
-                            if (_i8 = _iterator8.next(), _i8.done) break;
-                            _ref14 = _i8.value;
+                            if (_i9 = _iterator9.next(), _i9.done) break;
+                            _ref15 = _i9.value;
                         }
-                        var eventName = _ref14;
+                        var eventName = _ref15;
                         element.removeEventListener(eventName, handler);
                     }
                 })
@@ -6605,16 +6626,16 @@
         }
         function setVendorCSS(element, name, value) {
             element.style[name] = value;
-            for (var capitalizedName = (0, _util.capitalizeFirstLetter)(name), _iterator9 = VENDOR_PREFIXES, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
-                var _ref15;
-                if (_isArray9) {
-                    if (_i9 >= _iterator9.length) break;
-                    _ref15 = _iterator9[_i9++];
+            for (var capitalizedName = (0, _util.capitalizeFirstLetter)(name), _iterator10 = VENDOR_PREFIXES, _isArray10 = Array.isArray(_iterator10), _i10 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
+                var _ref16;
+                if (_isArray10) {
+                    if (_i10 >= _iterator10.length) break;
+                    _ref16 = _iterator10[_i10++];
                 } else {
-                    if (_i9 = _iterator9.next(), _i9.done) break;
-                    _ref15 = _i9.value;
+                    if (_i10 = _iterator10.next(), _i10.done) break;
+                    _ref16 = _i10.value;
                 }
-                var prefix = _ref15;
+                var prefix = _ref16;
                 element.style["" + prefix + capitalizedName] = value;
             }
         }
@@ -6738,16 +6759,16 @@
             var params = {};
             if (!queryString) return params;
             if (queryString.indexOf("=") === -1) throw new Error("Can not parse query string params: " + queryString);
-            for (var _iterator5 = queryString.split("&"), _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
-                var _ref7;
-                if (_isArray5) {
-                    if (_i5 >= _iterator5.length) break;
-                    _ref7 = _iterator5[_i5++];
+            for (var _iterator6 = queryString.split("&"), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
+                var _ref8;
+                if (_isArray6) {
+                    if (_i6 >= _iterator6.length) break;
+                    _ref8 = _iterator6[_i6++];
                 } else {
-                    if (_i5 = _iterator5.next(), _i5.done) break;
-                    _ref7 = _i5.value;
+                    if (_i6 = _iterator6.next(), _i6.done) break;
+                    _ref8 = _i6.value;
                 }
-                var pair = _ref7;
+                var pair = _ref8;
                 pair = pair.split("="), pair[0] && pair[1] && (params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]));
             }
             return params;
