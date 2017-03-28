@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 77);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 78);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(47);
+        var _config = __webpack_require__(48);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -60,7 +60,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _dom = __webpack_require__(74);
+        var _dom = __webpack_require__(75);
         Object.keys(_dom).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -69,7 +69,7 @@
                 }
             });
         });
-        var _fn = __webpack_require__(36);
+        var _fn = __webpack_require__(37);
         Object.keys(_fn).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -78,7 +78,7 @@
                 }
             });
         });
-        var _promise = __webpack_require__(76);
+        var _promise = __webpack_require__(77);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -96,7 +96,7 @@
                 }
             });
         });
-        var _css = __webpack_require__(72);
+        var _css = __webpack_require__(73);
         Object.keys(_css).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -105,7 +105,7 @@
                 }
             });
         });
-        var _decorators = __webpack_require__(73);
+        var _decorators = __webpack_require__(74);
         Object.keys(_decorators).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -114,7 +114,7 @@
                 }
             });
         });
-        var _global = __webpack_require__(75);
+        var _global = __webpack_require__(76);
         Object.keys(_global).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -164,7 +164,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(51);
+        var _methods = __webpack_require__(52);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -182,7 +182,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(52);
+        var _ready = __webpack_require__(53);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -237,16 +237,15 @@
             possiblyUnhandledPromiseTimeout = null;
             var promises = possiblyUnhandledPromises;
             possiblyUnhandledPromises = [];
-            for (var i = 0; i < promises.length; i++) {
-                (function(i) {
-                    var promise = promises[i];
-                    if (promise.silentReject) return "continue";
-                    promise.handlers.push({
-                        onError: function(err) {
-                            promise.silentReject || dispatchError(err);
-                        }
-                    }), promise.dispatch();
-                })(i);
+            for (var _loop = function(i) {
+                var promise = promises[i];
+                return promise.silentReject ? "continue" : (promise.handlers.push({
+                    onError: function(err) {
+                        promise.silentReject || dispatchError(err);
+                    }
+                }), void promise.dispatch());
+            }, i = 0; i < promises.length; i++) {
+                _loop(i);
             }
         }
         function dispatchError(err) {
@@ -305,22 +304,21 @@
             this.silentReject = !0, this.reject(error);
         }, SyncPromise.prototype.dispatch = function() {
             var _this = this;
-            if (this.resolved || this.rejected) for (;this.handlers.length; ) {
-                (function() {
-                    var handler = _this.handlers.shift(), result = void 0, error = void 0;
-                    try {
-                        _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
-                    } catch (err) {
-                        error = err;
-                    }
-                    if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
-                    if (!handler.promise) return "continue";
-                    error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
-                        handler.promise.resolve(res);
-                    }, function(err) {
-                        handler.promise.reject(err);
-                    }) : handler.promise.resolve(result);
-                })();
+            if (this.resolved || this.rejected) for (var _loop2 = function() {
+                var handler = _this.handlers.shift(), result = void 0, error = void 0;
+                try {
+                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
+                } catch (err) {
+                    error = err;
+                }
+                if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
+                return handler.promise ? void (error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
+                    handler.promise.resolve(res);
+                }, function(err) {
+                    handler.promise.reject(err);
+                }) : handler.promise.resolve(result)) : "continue";
+            }; this.handlers.length; ) {
+                _loop2();
             }
         }, SyncPromise.prototype.then = function(onSuccess, onError) {
             if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
@@ -344,13 +342,14 @@
                 });
             });
         }, SyncPromise.all = function(promises) {
-            for (var promise = new SyncPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
-                (isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i])).then(function(result) {
-                    results[i] = result, 0 == (count -= 1) && promise.resolve(results);
+            for (var promise = new SyncPromise(), count = promises.length, results = [], _loop3 = function(i) {
+                var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
+                prom.then(function(result) {
+                    results[i] = result, count -= 1, 0 === count && promise.resolve(results);
                 }, function(err) {
                     promise.reject(err);
                 });
-            }(i);
+            }, i = 0; i < promises.length; i++) _loop3(i);
             return count || promise.resolve(results), promise;
         }, SyncPromise.onPossiblyUnhandledException = function(handler) {
             possiblyUnhandledPromiseHandlers.push(handler);
@@ -361,12 +360,12 @@
                 setTimeout(resolve, delay);
             });
         }, SyncPromise.hash = function(obj) {
-            var results = {}, promises = [];
-            for (var key in obj) !function(key) {
+            var results = {}, promises = [], _loop4 = function(key) {
                 obj.hasOwnProperty(key) && promises.push(SyncPromise.resolve(obj[key]).then(function(result) {
                     results[key] = result;
                 }));
-            }(key);
+            };
+            for (var key in obj) _loop4(key);
             return SyncPromise.all(promises).then(function() {
                 return results;
             });
@@ -388,6 +387,12 @@
         global.clean = global.clean || (0, _cleanup.cleanup)(global), global.registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
@@ -400,12 +405,7 @@
                 }
             });
         });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
+        var INTERFACE = _interopRequireWildcard(_interface);
         exports.default = INTERFACE;
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -476,7 +476,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _receive = __webpack_require__(48);
+        var _receive = __webpack_require__(49);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -598,7 +598,7 @@
                 return obj;
             },
             each: function(obj, callback) {
-                if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
+                if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === ("undefined" == typeof obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
             },
             replaceObject: function(obj, callback) {
                 var depth = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1;
@@ -606,7 +606,7 @@
                 var newobj = Array.isArray(obj) ? [] : {};
                 return util.each(obj, function(item, key) {
                     var result = callback(item, key);
-                    void 0 !== result ? newobj[key] = result : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = util.replaceObject(item, callback, depth + 1) : newobj[key] = item;
+                    void 0 !== result ? newobj[key] = result : "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = util.replaceObject(item, callback, depth + 1) : newobj[key] = item;
                 }), newobj;
             },
             safeInterval: function(method, time) {
@@ -687,7 +687,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.Promise = void 0, exports.init = init, exports.reset = reset;
-        var _public = __webpack_require__(55);
+        var _public = __webpack_require__(56);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -735,10 +735,8 @@
                 if (!(_config.logLevels.indexOf(level) > _config.logLevels.indexOf(logLevel))) {
                     payload = payload || {};
                     var args = [ event ];
-                    args.push(payload), (payload.error || payload.warning) && args.push("\n\n", payload.error || payload.warning);
-                    try {
-                        window.console[level] && window.console[level].apply ? window.console[level].apply(window.console, args) : window.console.log && window.console.log.apply && window.console.log.apply(window.console, args);
-                    } catch (err) {}
+                    args.push(payload), (payload.error || payload.warning) && args.push("\n\n", payload.error || payload.warning), 
+                    window.console && (window.console[level] && window.console[level].apply ? window.console[level].apply(window.console, args) : window.console.log && window.console.log.apply && window.console.log.apply(window.console, args));
                 }
             }
         }
@@ -909,7 +907,7 @@
         }
         function ajax(method, url) {
             var headers = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, data = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : {}, async = !(arguments.length > 4 && void 0 !== arguments[4]) || arguments[4];
-            return new _promise.SyncPromise(function(resolve) {
+            return new _es6PromiseMin.Promise(function(resolve) {
                 var XRequest = window.XMLHttpRequest || window.ActiveXObject;
                 if (window.XDomainRequest && !isSameDomain(url)) {
                     if (!isSameProtocol(url)) return resolve();
@@ -932,10 +930,10 @@
                 debounce.timeout = setTimeout(function() {
                     var resolver = debounce.resolver, rejector = debounce.rejector;
                     return delete debounce.promise, delete debounce.resolver, delete debounce.rejector, 
-                    delete debounce.timeout, _promise.SyncPromise.resolve().then(function() {
+                    delete debounce.timeout, _es6PromiseMin.Promise.resolve().then(function() {
                         return method.apply(null, args);
                     }).then(resolver, rejector);
-                }, interval), debounce.promise = debounce.promise || new _promise.SyncPromise(function(resolver, rejector) {
+                }, interval), debounce.promise = debounce.promise || new _es6PromiseMin.Promise(function(resolver, rejector) {
                     debounce.resolver = resolver, debounce.rejector = rejector;
                 }), debounce.promise;
             };
@@ -964,8 +962,8 @@
         }), exports.windowReady = void 0, exports.extend = extend, exports.isSameProtocol = isSameProtocol, 
         exports.isSameDomain = isSameDomain, exports.ajax = ajax, exports.promiseDebounce = promiseDebounce, 
         exports.safeInterval = safeInterval, exports.uniqueID = uniqueID;
-        var _promise = __webpack_require__(3);
-        exports.windowReady = new _promise.SyncPromise(function(resolve) {
+        var _es6PromiseMin = __webpack_require__(41);
+        exports.windowReady = new _es6PromiseMin.Promise(function(resolve) {
             "complete" === document.readyState && resolve(), window.addEventListener("load", resolve);
         });
     }, function(module, exports, __webpack_require__) {
@@ -1230,7 +1228,8 @@
                     if (_i10 = _iterator9.next(), _i10.done) break;
                     _ref9 = _i10.value;
                 }
-                if (_ref9 === frame) return !0;
+                var childFrame = _ref9;
+                if (childFrame === frame) return !0;
             }
             return !1;
         }
@@ -1245,7 +1244,8 @@
             return parent ? parent : void 0;
         }
         function getAncestors(win) {
-            for (var results = [], ancestor = win; ancestor; ) (ancestor = getAncestor(ancestor)) && results.push(ancestor);
+            for (var results = [], ancestor = win; ancestor; ) ancestor = getAncestor(ancestor), 
+            ancestor && results.push(ancestor);
             return results;
         }
         function isAncestor(parent, child) {
@@ -1262,7 +1262,8 @@
                     if (_i11 = _iterator10.next(), _i11.done) break;
                     _ref10 = _i11.value;
                 }
-                if (_ref10 === child) return !0;
+                var frame = _ref10;
+                if (frame === child) return !0;
             }
             return !1;
         }
@@ -1297,7 +1298,8 @@
                         if (_i13 = _iterator12.next(), _i13.done) break;
                         _ref12 = _i13.value;
                     }
-                    if (item1 === _ref12) return !0;
+                    var item2 = _ref12;
+                    if (item1 === item2) return !0;
                 }
             }
         }
@@ -1349,6 +1351,12 @@
         var domainMatchTimeout = void 0;
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
         }
@@ -1410,12 +1418,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _promise = __webpack_require__(3), _src = __webpack_require__(5), postRobot = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_src), _lib = __webpack_require__(1);
+        }(), _promise = __webpack_require__(3), _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _lib = __webpack_require__(1);
         exports.BaseComponent = function() {
             function BaseComponent() {
                 _classCallCheck(this, BaseComponent), this.clean = cleanup(this);
@@ -1443,41 +1446,41 @@
                     var _this = this;
                     if (!win) throw this.component.error("window to listen to not set");
                     if (!domain) throw new Error("Must pass domain to listen to");
-                    if (this.listeners) for (var listeners = this.listeners(), _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                        var _ref2, _ret = function() {
-                            if (_isArray2) {
-                                if (_i2 >= _iterator2.length) return "break";
-                                _ref2 = _iterator2[_i2++];
-                            } else {
-                                if (_i2 = _iterator2.next(), _i2.done) return "break";
-                                _ref2 = _i2.value;
+                    if (this.listeners) for (var listeners = this.listeners(), _loop = function() {
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) return "break";
+                            _ref2 = _iterator2[_i2++];
+                        } else {
+                            if (_i2 = _iterator2.next(), _i2.done) return "break";
+                            _ref2 = _i2.value;
+                        }
+                        var listenerName = _ref2, name = listenerName.replace(/^xcomponent_/, ""), listener = postRobot.on(listenerName, {
+                            window: win,
+                            domain: domain,
+                            errorHandler: function(err) {
+                                return _this.error(err);
                             }
-                            var listenerName = _ref2, name = listenerName.replace(/^xcomponent_/, ""), listener = postRobot.on(listenerName, {
-                                window: win,
-                                domain: domain,
-                                errorHandler: function(err) {
-                                    return _this.error(err);
-                                }
-                            }, function(_ref3) {
-                                var source = _ref3.source, data = _ref3.data;
-                                return _this.component.log("listener_" + name), listeners[listenerName].call(_this, source, data);
-                            }), errorListener = postRobot.on(listenerName, {
-                                window: win,
-                                errorHandler: function(err) {
-                                    return _this.error(err);
-                                }
-                            }, function(_ref4) {
-                                var origin = _ref4.origin;
-                                _ref4.data;
-                                _this.component.logError("unexpected_listener_" + name, {
-                                    origin: origin,
-                                    domain: domain
-                                }), _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain));
-                            });
-                            _this.clean.register(function() {
-                                listener.cancel(), errorListener.cancel();
-                            });
-                        }();
+                        }, function(_ref3) {
+                            var source = _ref3.source, data = _ref3.data;
+                            return _this.component.log("listener_" + name), listeners[listenerName].call(_this, source, data);
+                        }), errorListener = postRobot.on(listenerName, {
+                            window: win,
+                            errorHandler: function(err) {
+                                return _this.error(err);
+                            }
+                        }, function(_ref4) {
+                            var origin = _ref4.origin;
+                            _ref4.data;
+                            _this.component.logError("unexpected_listener_" + name, {
+                                origin: origin,
+                                domain: domain
+                            }), _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain));
+                        });
+                        _this.clean.register(function() {
+                            listener.cancel(), errorListener.cancel();
+                        });
+                    }, _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                        var _ref2, _ret = _loop();
                         if ("break" === _ret) break;
                     }
                 }
@@ -1485,6 +1488,17 @@
         }();
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireDefault(obj) {
+            return obj && obj.__esModule ? obj : {
+                default: obj
+            };
+        }
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         function normalize(str) {
             return str && str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_");
         }
@@ -1536,16 +1550,7 @@
         }();
         exports.buildChildWindowName = buildChildWindowName, exports.getParentDomain = getParentDomain, 
         exports.getPosition = getPosition;
-        var _src = __webpack_require__(5), postRobot = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_src), _hiBase = __webpack_require__(41), _hiBase2 = function(obj) {
-            return obj && obj.__esModule ? obj : {
-                default: obj
-            };
-        }(_hiBase), _lib = __webpack_require__(1), _constants = __webpack_require__(6), getComponentMeta = exports.getComponentMeta = (0, 
+        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _hiBase = __webpack_require__(42), _hiBase2 = _interopRequireDefault(_hiBase), _lib = __webpack_require__(1), _constants = __webpack_require__(6), getComponentMeta = exports.getComponentMeta = (0, 
         _lib.memoize)(function() {
             if (window.name) {
                 var _window$name$split = window.name.split("__"), _window$name$split2 = _slicedToArray(_window$name$split, 4), xcomp = _window$name$split2[0], name = _window$name$split2[1], version = _window$name$split2[2], encodedOptions = _window$name$split2[3];
@@ -1569,7 +1574,7 @@
             if (!parentWindow) throw new Error("Can not find parent window");
             if (componentMeta.parent === _constants.WINDOW_REFERENCES.DIRECT_PARENT) return parentWindow;
             if (componentMeta.parent === _constants.WINDOW_REFERENCES.PARENT_PARENT) {
-                if (!(parentWindow = postRobot.winutil.getAncestor(parentWindow))) throw new Error("Can not find parent component window");
+                if (parentWindow = postRobot.winutil.getAncestor(parentWindow), !parentWindow) throw new Error("Can not find parent component window");
                 return parentWindow;
             }
             var parentFrame = postRobot.winutil.findFrameByName(parentWindow, componentMeta.parent);
@@ -1583,11 +1588,12 @@
             if (!parentWindow) throw new Error("Can not find parent window");
             if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.DIRECT_PARENT) return parentWindow;
             if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.PARENT_PARENT) {
-                if (!(parentWindow = postRobot.winutil.getAncestor(parentWindow))) throw new Error("Can not find parent render window");
+                if (parentWindow = postRobot.winutil.getAncestor(parentWindow), !parentWindow) throw new Error("Can not find parent render window");
                 return parentWindow;
             }
             if (componentMeta.renderParent === _constants.WINDOW_REFERENCES.PARENT_UID) {
-                if (!(parentWindow = getParentComponentWindow()[_constants.__XCOMPONENT__].windows[componentMeta.uid])) throw new Error("Can not find parent render window");
+                if (parentWindow = getParentComponentWindow()[_constants.__XCOMPONENT__].windows[componentMeta.uid], 
+                !parentWindow) throw new Error("Can not find parent render window");
                 return parentWindow;
             }
             throw new Error("Unrecognized renderParent reference: " + componentMeta.renderParent);
@@ -1597,22 +1603,51 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(39);
-        Object.keys(_interface).forEach(function(key) {
+        var _logger = __webpack_require__(12);
+        Object.keys(_logger).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
                 get: function() {
-                    return _interface[key];
+                    return _logger[key];
                 }
             });
         });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
-        exports.default = INTERFACE;
+        var _init = __webpack_require__(39);
+        Object.keys(_init).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _init[key];
+                }
+            });
+        });
+        var _transitions = __webpack_require__(40);
+        Object.keys(_transitions).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _transitions[key];
+                }
+            });
+        });
+        var _builders = __webpack_require__(11);
+        Object.keys(_builders).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _builders[key];
+                }
+            });
+        });
+        var _config = __webpack_require__(9);
+        Object.keys(_config).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _config[key];
+                }
+            });
+        }), exports.default = module.exports;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function needsBridgeForBrowser() {
@@ -1630,8 +1665,8 @@
         }
         function getBridgeName(domain) {
             domain = domain || _lib.util.getDomainFromUrl(domain);
-            var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_");
-            return _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+            var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_"), id = _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+            return id;
         }
         function isBridge() {
             return window.name && window.name === getBridgeName(_lib.util.getDomain());
@@ -1694,7 +1729,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _bridge = __webpack_require__(42);
+        var _bridge = __webpack_require__(43);
         Object.keys(_bridge).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1703,7 +1738,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(43);
+        var _child = __webpack_require__(44);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1721,7 +1756,7 @@
                 }
             });
         });
-        var _parent = __webpack_require__(45);
+        var _parent = __webpack_require__(46);
         Object.keys(_parent).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1882,13 +1917,7 @@
                 if (Symbol.iterator in Object(arr)) return sliceIterator(arr, i);
                 throw new TypeError("Invalid attempt to destructure non-iterable instance");
             };
-        }(), _extends = Object.assign || function(target) {
-            for (var i = 1; i < arguments.length; i++) {
-                var source = arguments[i];
-                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
-            }
-            return target;
-        }, _createClass = function() {
+        }(), _createClass = function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
                     var descriptor = props[i];
@@ -1902,16 +1931,15 @@
             };
         }();
         exports.destroyAll = destroyAll;
-        var _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _drivers = __webpack_require__(33), _validate = __webpack_require__(34), _props = __webpack_require__(66), activeComponents = [];
+        var _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _drivers = __webpack_require__(34), _validate = __webpack_require__(35), _props = __webpack_require__(67), activeComponents = [];
         _lib.global.props = _lib.global.props || {}, _lib.global.windows = _lib.global.windows || {};
         exports.ParentComponent = (_class = function(_BaseComponent) {
             function ParentComponent(component, context) {
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 _classCallCheck(this, ParentComponent);
                 var _this = _possibleConstructorReturn(this, (ParentComponent.__proto__ || Object.getPrototypeOf(ParentComponent)).call(this, component, options));
-                return (0, _validate.validate)(component, options), _this.rawProps = _extends({}, options.props || {}), 
-                _this.component = component, _this.context = context, _this.setProps(options.props || {}), 
-                _this.childWindowName = _this.buildChildWindowName({
+                return (0, _validate.validate)(component, options), _this.component = component, 
+                _this.context = context, _this.setProps(options.props || {}), _this.childWindowName = _this.buildChildWindowName({
                     renderTo: window
                 }), _this.registerActiveComponent(), _this.component.log("construct_parent"), _this.onInit = new _promise.SyncPromise(), 
                 _this.clean.register(function() {
@@ -1971,7 +1999,7 @@
                     var _this3 = this;
                     return this.tryInit(function() {
                         if (win === window) return _this3.render(element);
-                        if (element && "string" != typeof element) throw new Error("Element passed to renderTo must be a string selector, got " + (void 0 === element ? "undefined" : _typeof(element)) + " " + element);
+                        if (element && "string" != typeof element) throw new Error("Element passed to renderTo must be a string selector, got " + ("undefined" == typeof element ? "undefined" : _typeof(element)) + " " + element);
                         return _this3.checkAllowRenderTo(win), _this3.component.log("render_" + _this3.context + "_to_win", {
                             element: element,
                             context: _this3.context
@@ -2026,7 +2054,8 @@
             }, {
                 key: "sendToParent",
                 value: function(name, data) {
-                    if (!(0, _window.getParentComponentWindow)()) throw new Error("Can not find parent component window to message");
+                    var parentWindow = (0, _window.getParentComponentWindow)();
+                    if (!parentWindow) throw new Error("Can not find parent component window to message");
                     return this.component.log("send_to_parent_" + name), postRobot.send((0, _window.getParentComponentWindow)(), name, data, {
                         domain: (0, _window.getParentDomain)()
                     });
@@ -2094,23 +2123,8 @@
             }, {
                 key: "updateProps",
                 value: function() {
-                    for (var _this7 = this, props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, changed = !1, _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                        var _ref10;
-                        if (_isArray2) {
-                            if (_i2 >= _iterator2.length) break;
-                            _ref10 = _iterator2[_i2++];
-                        } else {
-                            if (_i2 = _iterator2.next(), _i2.done) break;
-                            _ref10 = _i2.value;
-                        }
-                        var key = _ref10;
-                        if (props[key] !== this.rawProps[key]) {
-                            changed = !0;
-                            break;
-                        }
-                    }
-                    if (changed) return this.rawProps = _extends({}, this.rawProps, props), this.setProps(props, !1), 
-                    this.propUpdater ? this.propUpdater : (this.propUpdater = this.onInit.then(function() {
+                    var _this7 = this, props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
+                    return this.setProps(props, !1), this.propUpdater ? this.propUpdater : (this.propUpdater = this.onInit.then(function() {
                         return delete _this7.propUpdater, _this7.childExports.updateProps(_this7.getPropsForChild());
                     }), this.propUpdater);
                 }
@@ -2175,34 +2189,34 @@
                                 }
                             }
                         }
-                    }).then(function(_ref11) {
-                        var data = _ref11.data;
+                    }).then(function(_ref10) {
+                        var data = _ref10.data;
                         return _this8.clean.register(data.destroy), data;
                     }).catch(function(err) {
                         throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + err.stack);
-                    }), overrides = this.driver.delegateOverrides;
-                    _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                        var _ref12, _ret = function() {
-                            if (_isArray3) {
-                                if (_i3 >= _iterator3.length) return "break";
-                                _ref12 = _iterator3[_i3++];
-                            } else {
-                                if (_i3 = _iterator3.next(), _i3.done) return "break";
-                                _ref12 = _i3.value;
-                            }
-                            var key = _ref12, val = overrides[key];
-                            if (val === _constants.DELEGATE.CALL_ORIGINAL) return "continue";
-                            var original = _this8[key];
-                            _this8[key] = function() {
-                                var _this9 = this, _arguments = arguments;
-                                return delegate.then(function(data) {
-                                    var override = data.overrides[key];
-                                    if (val === _constants.DELEGATE.CALL_DELEGATE) return override.apply(_this9, _arguments);
-                                    if (val instanceof Function) return val(original, override).apply(_this9, _arguments);
-                                    throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
-                                });
-                            };
-                        }();
+                    }), overrides = this.driver.delegateOverrides, _loop = function() {
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) return "break";
+                            _ref11 = _iterator2[_i2++];
+                        } else {
+                            if (_i2 = _iterator2.next(), _i2.done) return "break";
+                            _ref11 = _i2.value;
+                        }
+                        var key = _ref11, val = overrides[key];
+                        if (val === _constants.DELEGATE.CALL_ORIGINAL) return "continue";
+                        var original = _this8[key];
+                        _this8[key] = function() {
+                            var _this9 = this, _arguments = arguments;
+                            return delegate.then(function(data) {
+                                var override = data.overrides[key];
+                                if (val === _constants.DELEGATE.CALL_DELEGATE) return override.apply(_this9, _arguments);
+                                if (val instanceof Function) return val(original, override).apply(_this9, _arguments);
+                                throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
+                            });
+                        };
+                    };
+                    _loop2: for (var _iterator2 = Object.keys(overrides), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                        var _ref11, _ret = _loop();
                         switch (_ret) {
                           case "break":
                             break _loop2;
@@ -2260,8 +2274,8 @@
             }, {
                 key: "listeners",
                 value: function() {
-                    var _ref13;
-                    return _ref13 = {}, _defineProperty(_ref13, _constants.POST_MESSAGE.INIT, function(source, data) {
+                    var _ref12;
+                    return _ref12 = {}, _defineProperty(_ref12, _constants.POST_MESSAGE.INIT, function(source, data) {
                         var _this12 = this;
                         return this.childExports = data.exports, this.onInit.resolve(this), this.timeout && clearTimeout(this.timeout), 
                         this.props.onEnter().then(function() {
@@ -2270,17 +2284,17 @@
                                 context: _this12.context
                             };
                         });
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.CLOSE, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.CLOSE, function(source, data) {
                         this.close(data.reason);
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.RESIZE, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.RESIZE, function(source, data) {
                         if (this.driver.allowResize && this.component.autoResize) return this.resize(data.width, data.height);
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.HIDE, function(source, data) {
                         this.hide();
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.SHOW, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.SHOW, function(source, data) {
                         this.show();
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.ERROR, function(source, data) {
                         this.error(new Error(data.error));
-                    }), _ref13;
+                    }), _ref12;
                 }
             }, {
                 key: "resize",
@@ -2455,7 +2469,7 @@
                         }).then(function(html) {
                             var el = void 0;
                             if (element) {
-                                if (!(el = (0, _lib.getElement)(element))) throw new Error("Could not find element: " + element);
+                                if (el = (0, _lib.getElement)(element), !el) throw new Error("Could not find element: " + element);
                             } else el = document.body;
                             if (_this18.component.sandboxContainer && (_this18.containerFrame = (0, _lib.iframe)(null, {
                                 name: "__xcomponent_container_" + (0, _lib.uniqueID)() + "__",
@@ -2484,16 +2498,17 @@
                             })), eventHandlers.push((0, _lib.addEventToClass)(_this18.container, _constants.CLASS_NAMES.CLOSE, _constants.EVENT_NAMES.CLICK, function(event) {
                                 return _this18.userClose();
                             })), _this18.clean.register("destroyContainerEvents", function() {
-                                for (var _iterator4 = eventHandlers, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                                    var _ref14;
-                                    if (_isArray4) {
-                                        if (_i4 >= _iterator4.length) break;
-                                        _ref14 = _iterator4[_i4++];
+                                for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                                    var _ref13;
+                                    if (_isArray3) {
+                                        if (_i3 >= _iterator3.length) break;
+                                        _ref13 = _iterator3[_i3++];
                                     } else {
-                                        if (_i4 = _iterator4.next(), _i4.done) break;
-                                        _ref14 = _i4.value;
+                                        if (_i3 = _iterator3.next(), _i3.done) break;
+                                        _ref13 = _i3.value;
                                     }
-                                    _ref14.cancel();
+                                    var eventHandler = _ref13;
+                                    eventHandler.cancel();
                                 }
                             }), _this18.clean.register("destroyContainerTemplate", function() {
                                 _this18.containerFrame && _this18.containerFrame.parentNode.removeChild(_this18.containerFrame), 
@@ -2622,7 +2637,7 @@
             if (!path) return def;
             path = path.split(".");
             for (var i = 0; i < path.length; i++) {
-                if ("object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item) return def;
+                if ("object" !== ("undefined" == typeof item ? "undefined" : _typeof(item)) || null === item) return def;
                 item = item[path[i]];
             }
             return void 0 === item ? def : item;
@@ -2640,11 +2655,11 @@
         }
         function safeTimeout(method, time) {
             var interval = safeInterval(function() {
-                (time -= 100) <= 0 && (interval.cancel(), method());
+                time -= 100, time <= 0 && (interval.cancel(), method());
             }, 100);
         }
         function each(item, callback) {
-            if (item) if (item instanceof Array) for (var len = item.length, i = 0; i < len; i++) callback(item[i], i); else if ("object" === (void 0 === item ? "undefined" : _typeof(item))) for (var keys = Object.keys(item), _len = keys.length, _i = 0; _i < _len; _i++) {
+            if (item) if (item instanceof Array) for (var len = item.length, i = 0; i < len; i++) callback(item[i], i); else if ("object" === ("undefined" == typeof item ? "undefined" : _typeof(item))) for (var keys = Object.keys(item), _len = keys.length, _i = 0; _i < _len; _i++) {
                 var key = keys[_i];
                 callback(item[key], key);
             }
@@ -2653,7 +2668,7 @@
             var parentKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "", newobj = obj instanceof Array ? [] : {};
             return each(obj, function(item, key) {
                 var fullKey = parentKey ? parentKey + "." + key : key, result = callback(item, key, fullKey);
-                void 0 !== result ? newobj[key] = result : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = replaceObject(item, callback, fullKey) : newobj[key] = item;
+                void 0 !== result ? newobj[key] = result : "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = replaceObject(item, callback, fullKey) : newobj[key] = item;
             }), newobj;
         }
         function copyProp(source, target, name, def) {
@@ -2672,9 +2687,9 @@
             this.id = "__weakmap_" + uniqueID() + "__";
         }
         function getObjectID(obj) {
-            if (null === obj || void 0 === obj || "object" !== (void 0 === obj ? "undefined" : _typeof(obj)) && "function" != typeof obj) throw new Error("Invalid object");
+            if (null === obj || void 0 === obj || "object" !== ("undefined" == typeof obj ? "undefined" : _typeof(obj)) && "function" != typeof obj) throw new Error("Invalid object");
             var uid = objectIDs.get(obj);
-            return uid || (uid = (void 0 === obj ? "undefined" : _typeof(obj)) + ":" + uniqueID(), 
+            return uid || (uid = ("undefined" == typeof obj ? "undefined" : _typeof(obj)) + ":" + uniqueID(), 
             objectIDs.set(obj, uid)), uid;
         }
         Object.defineProperty(exports, "__esModule", {
@@ -2692,7 +2707,7 @@
         exports.each = each, exports.replaceObject = replaceObject, exports.copyProp = copyProp, 
         exports.dotify = dotify, exports.getObjectID = getObjectID, WeakMap.prototype = {
             set: function(item, value) {
-                if (null === item || void 0 === item || "object" !== (void 0 === item ? "undefined" : _typeof(item)) && "function" != typeof item) throw new Error("Invalid key for WeakMap");
+                if (null === item || void 0 === item || "object" !== ("undefined" == typeof item ? "undefined" : _typeof(item)) && "function" != typeof item) throw new Error("Invalid key for WeakMap");
                 var entry = item[this.id];
                 entry && entry[0] === item ? entry[1] = value : Object.defineProperty(item, this.id, {
                     value: [ item, value ],
@@ -2754,12 +2769,11 @@
             }, _config.config.heartbeatInterval);
         }
         function initPerformance() {
-            if (!enablePerformance) return (0, _logger.info)("no_performance_data");
-            (0, _builders.addPayloadBuilder)(function() {
+            return enablePerformance ? ((0, _builders.addPayloadBuilder)(function() {
                 var payload = {};
                 return payload.client_elapsed = clientTimer.elapsed(), enablePerformance && (payload.req_elapsed = reqTimer.elapsed()), 
                 payload;
-            }), _util.windowReady.then(function() {
+            }), void _util.windowReady.then(function() {
                 var keys = [ "connectEnd", "connectStart", "domComplete", "domContentLoadedEventEnd", "domContentLoadedEventStart", "domInteractive", "domLoading", "domainLookupEnd", "domainLookupStart", "fetchStart", "loadEventEnd", "loadEventStart", "navigationStart", "redirectEnd", "redirectStart", "requestStart", "responseEnd", "responseStart", "secureConnectionStart", "unloadEventEnd", "unloadEventStart" ], timing = {};
                 keys.forEach(function(key) {
                     timing[key] = parseInt(window.performance.timing[key], 10) || 0;
@@ -2775,7 +2789,7 @@
                 (0, _logger.info)("navigation", window.performance.navigation), window.performance.getEntries && window.performance.getEntries().forEach(function(resource) {
                     [ "link", "script", "img", "css" ].indexOf(resource.initiatorType) > -1 && (0, _logger.info)(resource.initiatorType, resource);
                 });
-            });
+            })) : (0, _logger.info)("no_performance_data");
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -2787,7 +2801,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _ie = __webpack_require__(46);
+        var _ie = __webpack_require__(47);
         Object.keys(_ie).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2918,9 +2932,9 @@
         }
         function buildMessage(win, message) {
             var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = _lib.util.uniqueID(), type = (0, 
-            _lib.getWindowType)();
+            _lib.getWindowType)(), sourceDomain = _lib.util.getDomain(window);
             return _extends({}, message, options, {
-                sourceDomain: _lib.util.getDomain(window),
+                sourceDomain: sourceDomain,
                 id: message.id || id,
                 windowType: type
             });
@@ -2970,7 +2984,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(2), _strategies = __webpack_require__(50);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(2), _strategies = __webpack_require__(51);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function cleanup(obj) {
@@ -3088,12 +3102,11 @@
                 };
             },
             nodeify: function(prom, callback) {
-                if (!callback) return prom;
-                prom.then(function(result) {
+                return callback ? void prom.then(function(result) {
                     callback(null, result);
                 }, function(err) {
                     callback(err);
-                });
+                }) : prom;
             },
             deNodeify: function(method) {
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) args[_key - 1] = arguments[_key];
@@ -3110,11 +3123,11 @@
                 });
             },
             map: function(items, method) {
-                for (var results = [], i = 0; i < items.length; i++) !function(i) {
+                for (var results = [], _loop = function(i) {
                     results.push(promise.run(function() {
                         return method(items[i]);
                     }));
-                }(i);
+                }, i = 0; i < items.length; i++) _loop(i);
                 return Promise.all(results);
             }
         };
@@ -3129,9 +3142,26 @@
         var _util = __webpack_require__(8), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + _util.util.uniqueID(), queue = [];
         window.addEventListener("message", function(event) {
             if (event.data === tickMessageName) {
-                queue.shift().call();
+                var method = queue.shift();
+                method.call();
             }
         });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        var g, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+        g = function() {
+            return this;
+        }();
+        try {
+            g = g || Function("return this")() || (0, eval)("this");
+        } catch (e) {
+            "object" === ("undefined" == typeof window ? "undefined" : _typeof(window)) && (g = window);
+        }
+        module.exports = g;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireWildcard(obj) {
@@ -3177,7 +3207,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _props = __webpack_require__(58);
+        }(), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _props = __webpack_require__(59);
         exports.ChildComponent = function(_BaseComponent) {
             function ChildComponent(component) {
                 _classCallCheck(this, ChildComponent);
@@ -3242,9 +3272,9 @@
             }, {
                 key: "setProps",
                 value: function() {
-                    var _this3 = this, props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, origin = arguments[1];
+                    var props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _this3 = this, origin = arguments[1], required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
                     window.xprops = this.props = this.props || {}, (0, _lib.extend)(this.props, (0, 
-                    _props.normalizeChildProps)(this.component, props, origin)), this.props.onError = function(err) {
+                    _props.normalizeChildProps)(this.component, props, origin, required)), this.props.onError = function(err) {
                         return _this3.error(err);
                     };
                     for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -3256,13 +3286,15 @@
                             if (_i = _iterator.next(), _i.done) break;
                             _ref3 = _i.value;
                         }
-                        _ref3.call(this, this.props);
+                        var handler = _ref3;
+                        handler.call(this, this.props);
                     }
                 }
             }, {
                 key: "sendToParent",
                 value: function(name, data) {
-                    if (!(0, _window.getParentComponentWindow)()) throw new Error("Can not find parent component window to message");
+                    var parentWindow = (0, _window.getParentComponentWindow)();
+                    if (!parentWindow) throw new Error("Can not find parent component window to message");
                     return this.component.log("send_to_parent_" + name), postRobot.send((0, _window.getParentComponentWindow)(), name, data, {
                         domain: (0, _window.getParentDomain)()
                     });
@@ -3282,35 +3314,36 @@
                     try {
                         var opener = postRobot.winutil.getOpener(window);
                         if (!opener || !window.console) return;
-                        _loop2: for (var _iterator2 = postRobot.winutil.getAllFramesInWindow(opener), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                            var _ref4, _ret = function() {
-                                if (_isArray2) {
-                                    if (_i2 >= _iterator2.length) return "break";
-                                    _ref4 = _iterator2[_i2++];
-                                } else {
-                                    if (_i2 = _iterator2.next(), _i2.done) return "break";
-                                    _ref4 = _i2.value;
-                                }
-                                var frame = _ref4;
-                                if (!postRobot.winutil.isSameDomain(frame) || !frame.console || frame === window) return "continue";
-                                for (var _arr = [ "log", "debug", "info", "warn", "error" ], _i3 = 0; _i3 < _arr.length; _i3++) {
-                                    (function() {
-                                        var level = _arr[_i3], original = window.console[level];
-                                        if (!original) return "continue";
+                        var _loop = function() {
+                            if (_isArray2) {
+                                if (_i2 >= _iterator2.length) return "break";
+                                _ref4 = _iterator2[_i2++];
+                            } else {
+                                if (_i2 = _iterator2.next(), _i2.done) return "break";
+                                _ref4 = _i2.value;
+                            }
+                            var frame = _ref4;
+                            if (!postRobot.winutil.isSameDomain(frame) || !frame.console || frame === window) return "continue";
+                            for (var _arr = [ "log", "debug", "info", "warn", "error" ], _loop3 = function() {
+                                var level = _arr[_i3], original = window.console[level];
+                                if (!original) return "continue";
+                                try {
+                                    window.console[level] = function() {
                                         try {
-                                            window.console[level] = function() {
-                                                try {
-                                                    return frame.console[level].apply(frame.console, arguments);
-                                                } catch (err3) {}
-                                                return original.apply(this, arguments);
-                                            };
-                                        } catch (err2) {}
-                                    })();
-                                }
-                                return {
-                                    v: void 0
-                                };
-                            }();
+                                            return frame.console[level].apply(frame.console, arguments);
+                                        } catch (err3) {}
+                                        return original.apply(this, arguments);
+                                    };
+                                } catch (err2) {}
+                            }, _i3 = 0; _i3 < _arr.length; _i3++) {
+                                _loop3();
+                            }
+                            return {
+                                v: void 0
+                            };
+                        };
+                        _loop2: for (var _iterator2 = postRobot.winutil.getAllFramesInWindow(opener), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                            var _ref4, _ret = _loop();
                             switch (_ret) {
                               case "break":
                                 break _loop2;
@@ -3319,7 +3352,7 @@
                                 continue;
 
                               default:
-                                if ("object" === (void 0 === _ret ? "undefined" : _typeof(_ret))) return _ret.v;
+                                if ("object" === ("undefined" == typeof _ret ? "undefined" : _typeof(_ret))) return _ret.v;
                             }
                         }
                     } catch (err) {}
@@ -3345,7 +3378,7 @@
                 key: "getAutoResize",
                 value: function() {
                     var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
-                    return "object" === (void 0 === autoResize ? "undefined" : _typeof(autoResize)) ? (width = Boolean(autoResize.width), 
+                    return "object" === ("undefined" == typeof autoResize ? "undefined" : _typeof(autoResize)) ? (width = Boolean(autoResize.width), 
                     height = Boolean(autoResize.height)) : autoResize && (width = !0, height = !0), 
                     {
                         width: width,
@@ -3412,8 +3445,7 @@
             }, {
                 key: "resizeToElement",
                 value: function(el, _ref6) {
-                    var _this7 = this, width = _ref6.width, height = _ref6.height, history = [];
-                    return function resize() {
+                    var _this7 = this, width = _ref6.width, height = _ref6.height, history = [], resize = function resize() {
                         return _promise.SyncPromise.try(function() {
                             for (var tracker = (0, _lib.trackDimensions)(el, {
                                 width: width,
@@ -3437,7 +3469,8 @@
                                 if (tracker.check().changed) return resize();
                             });
                         });
-                    }();
+                    };
+                    return resize();
                 }
             }, {
                 key: "hide",
@@ -3487,31 +3520,31 @@
                 }
             } ]), ChildComponent;
         }(_base.BaseComponent);
-        (0, _window.isXComponentWindow)() && window.console && function() {
-            var logLevels = $logger.logLevels;
+        (0, _window.isXComponentWindow)() && window.console && !function() {
+            var logLevels = $logger.logLevels, _loop4 = function() {
+                if (_isArray4) {
+                    if (_i5 >= _iterator4.length) return "break";
+                    _ref8 = _iterator4[_i5++];
+                } else {
+                    if (_i5 = _iterator4.next(), _i5.done) return "break";
+                    _ref8 = _i5.value;
+                }
+                var level = _ref8;
+                try {
+                    var _original = window.console[level];
+                    if (!_original || !_original.apply) return "continue";
+                    window.console[level] = function() {
+                        try {
+                            var logLevel = window.LOG_LEVEL;
+                            if (!logLevel || logLevels.indexOf(logLevel) === -1) return _original.apply(this, arguments);
+                            if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) return;
+                            return _original.apply(this, arguments);
+                        } catch (err2) {}
+                    }, "info" === level && (window.console.log = window.console[level]);
+                } catch (err) {}
+            };
             _loop5: for (var _iterator4 = logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                var _ref8, _ret4 = function() {
-                    if (_isArray4) {
-                        if (_i5 >= _iterator4.length) return "break";
-                        _ref8 = _iterator4[_i5++];
-                    } else {
-                        if (_i5 = _iterator4.next(), _i5.done) return "break";
-                        _ref8 = _i5.value;
-                    }
-                    var level = _ref8;
-                    try {
-                        var _original = window.console[level];
-                        if (!_original || !_original.apply) return "continue";
-                        window.console[level] = function() {
-                            try {
-                                var logLevel = window.LOG_LEVEL;
-                                if (!logLevel || logLevels.indexOf(logLevel) === -1) return _original.apply(this, arguments);
-                                if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) return;
-                                return _original.apply(this, arguments);
-                            } catch (err2) {}
-                        }, "info" === level && (window.console.log = window.console[level]);
-                    } catch (err) {}
-                }();
+                var _ref8, _ret4 = _loop4();
                 switch (_ret4) {
                   case "break":
                     break _loop5;
@@ -3523,15 +3556,16 @@
         }();
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.RENDER_DRIVERS = void 0;
-        var _src = __webpack_require__(5), postRobot = function(obj) {
+        function _interopRequireWildcard(obj) {
             if (obj && obj.__esModule) return obj;
             var newObj = {};
             if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
             return newObj.default = obj, newObj;
-        }(_src), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _window = __webpack_require__(16), RENDER_DRIVERS = exports.RENDER_DRIVERS = {};
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.RENDER_DRIVERS = void 0;
+        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _lib = __webpack_require__(1), _constants = __webpack_require__(6), _window = __webpack_require__(16), RENDER_DRIVERS = exports.RENDER_DRIVERS = {};
         RENDER_DRIVERS[_constants.CONTEXT_TYPES.IFRAME] = {
             renderedIntoContainerTemplate: !0,
             destroyOnUnload: !1,
@@ -3660,8 +3694,8 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function validateProp(prop, key, value, props) {
-            var required = !(arguments.length > 4 && void 0 !== arguments[4]) || arguments[4];
-            if (null !== value && void 0 !== value && "" !== value) {
+            var required = !(arguments.length > 4 && void 0 !== arguments[4]) || arguments[4], hasProp = null !== value && void 0 !== value && "" !== value;
+            if (hasProp) {
                 if (!value.then || !prop.promise) {
                     if ("function" === prop.type) {
                         if (!(value instanceof Function)) throw new Error("Prop is not of type function: " + key);
@@ -3828,7 +3862,7 @@
             value: !0
         }), exports.CONSTANTS = exports.postRobot = exports.containerTemplate = exports.componentTemplate = exports.destroyAll = exports.getByTag = void 0, 
         exports.create = create;
-        var _component = __webpack_require__(65);
+        var _component = __webpack_require__(66);
         Object.defineProperty(exports, "getByTag", {
             enumerable: !0,
             get: function() {
@@ -3850,7 +3884,7 @@
                 return _component.containerTemplate;
             }
         });
-        var _error = __webpack_require__(35);
+        var _error = __webpack_require__(36);
         Object.keys(_error).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3884,56 +3918,6 @@
             value: !0
         }), exports.init = init;
         var _config = __webpack_require__(9), _util = __webpack_require__(13), _performance = __webpack_require__(23), _logger = __webpack_require__(12), initiated = !1;
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var _logger = __webpack_require__(12);
-        Object.keys(_logger).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _logger[key];
-                }
-            });
-        });
-        var _init = __webpack_require__(38);
-        Object.keys(_init).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _init[key];
-                }
-            });
-        });
-        var _transitions = __webpack_require__(40);
-        Object.keys(_transitions).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _transitions[key];
-                }
-            });
-        });
-        var _builders = __webpack_require__(11);
-        Object.keys(_builders).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _builders[key];
-                }
-            });
-        });
-        var _config = __webpack_require__(9);
-        Object.keys(_config).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _config[key];
-                }
-            });
-        });
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function startTransition() {
@@ -3973,9 +3957,241 @@
         });
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        (function(process, global) {
+            var __WEBPACK_AMD_DEFINE_RESULT__, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+                return typeof obj;
+            } : function(obj) {
+                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+            };
+            /*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
+ * @version   2.0.1
+ */
+            (function() {
+                function r(a, b) {
+                    n[l] = a, n[l + 1] = b, l += 2, 2 === l && A();
+                }
+                function s(a) {
+                    return "function" == typeof a;
+                }
+                function F() {
+                    return function() {
+                        process.nextTick(t);
+                    };
+                }
+                function G() {
+                    var a = 0, b = new B(t), c = document.createTextNode("");
+                    return b.observe(c, {
+                        characterData: !0
+                    }), function() {
+                        c.data = a = ++a % 2;
+                    };
+                }
+                function H() {
+                    var a = new MessageChannel();
+                    return a.port1.onmessage = t, function() {
+                        a.port2.postMessage(0);
+                    };
+                }
+                function I() {
+                    return function() {
+                        setTimeout(t, 1);
+                    };
+                }
+                function t() {
+                    for (var a = 0; a < l; a += 2) (0, n[a])(n[a + 1]), n[a] = void 0, n[a + 1] = void 0;
+                    l = 0;
+                }
+                function p() {}
+                function J(a, b, c, d) {
+                    try {
+                        a.call(b, c, d);
+                    } catch (e) {
+                        return e;
+                    }
+                }
+                function K(a, b, c) {
+                    r(function(a) {
+                        var e = !1, f = J(c, b, function(c) {
+                            e || (e = !0, b !== c ? q(a, c) : m(a, c));
+                        }, function(b) {
+                            e || (e = !0, g(a, b));
+                        });
+                        !e && f && (e = !0, g(a, f));
+                    }, a);
+                }
+                function L(a, b) {
+                    1 === b.a ? m(a, b.b) : 2 === a.a ? g(a, b.b) : u(b, void 0, function(b) {
+                        q(a, b);
+                    }, function(b) {
+                        g(a, b);
+                    });
+                }
+                function q(a, b) {
+                    if (a === b) g(a, new TypeError("You cannot resolve a promise with itself")); else if ("function" == typeof b || "object" === ("undefined" == typeof b ? "undefined" : _typeof(b)) && null !== b) if (b.constructor === a.constructor) L(a, b); else {
+                        var c;
+                        try {
+                            c = b.then;
+                        } catch (d) {
+                            v.error = d, c = v;
+                        }
+                        c === v ? g(a, v.error) : void 0 === c ? m(a, b) : s(c) ? K(a, b, c) : m(a, b);
+                    } else m(a, b);
+                }
+                function M(a) {
+                    a.f && a.f(a.b), x(a);
+                }
+                function m(a, b) {
+                    void 0 === a.a && (a.b = b, a.a = 1, 0 !== a.e.length && r(x, a));
+                }
+                function g(a, b) {
+                    void 0 === a.a && (a.a = 2, a.b = b, r(M, a));
+                }
+                function u(a, b, c, d) {
+                    var e = a.e, f = e.length;
+                    a.f = null, e[f] = b, e[f + 1] = c, e[f + 2] = d, 0 === f && a.a && r(x, a);
+                }
+                function x(a) {
+                    var b = a.e, c = a.a;
+                    if (0 !== b.length) {
+                        for (var d, e, f = a.b, g = 0; g < b.length; g += 3) d = b[g], e = b[g + c], d ? C(c, d, e, f) : e(f);
+                        a.e.length = 0;
+                    }
+                }
+                function D() {
+                    this.error = null;
+                }
+                function C(a, b, c, d) {
+                    var f, k, h, l, e = s(c);
+                    if (e) {
+                        try {
+                            f = c(d);
+                        } catch (n) {
+                            y.error = n, f = y;
+                        }
+                        if (f === y ? (l = !0, k = f.error, f = null) : h = !0, b === f) return void g(b, new TypeError("A promises callback cannot return that same promise."));
+                    } else f = d, h = !0;
+                    void 0 === b.a && (e && h ? q(b, f) : l ? g(b, k) : 1 === a ? m(b, f) : 2 === a && g(b, f));
+                }
+                function N(a, b) {
+                    try {
+                        b(function(b) {
+                            q(a, b);
+                        }, function(b) {
+                            g(a, b);
+                        });
+                    } catch (c) {
+                        g(a, c);
+                    }
+                }
+                function k(a, b, c, d) {
+                    this.n = a, this.c = new a(p, d), this.i = c, this.o(b) ? (this.m = b, this.d = this.length = b.length, 
+                    this.l(), 0 === this.length ? m(this.c, this.b) : (this.length = this.length || 0, 
+                    this.k(), 0 === this.d && m(this.c, this.b))) : g(this.c, this.p());
+                }
+                function h(a) {
+                    if (O++, this.b = this.a = void 0, this.e = [], p !== a) {
+                        if (!s(a)) throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");
+                        if (!(this instanceof h)) throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+                        N(this, a);
+                    }
+                }
+                var A, E = Array.isArray ? Array.isArray : function(a) {
+                    return "[object Array]" === Object.prototype.toString.call(a);
+                }, l = 0, w = "undefined" != typeof window ? window : {}, B = w.MutationObserver || w.WebKitMutationObserver, w = "undefined" != typeof Uint8ClampedArray && "undefined" != typeof importScripts && "undefined" != typeof MessageChannel, n = Array(1e3);
+                A = "undefined" != typeof process && "[object process]" === {}.toString.call(process) ? F() : B ? G() : w ? H() : I();
+                var v = new D(), y = new D();
+                k.prototype.o = function(a) {
+                    return E(a);
+                }, k.prototype.p = function() {
+                    return Error("Array Methods must be provided an Array");
+                }, k.prototype.l = function() {
+                    this.b = Array(this.length);
+                }, k.prototype.k = function() {
+                    for (var a = this.length, b = this.c, c = this.m, d = 0; void 0 === b.a && d < a; d++) this.j(c[d], d);
+                }, k.prototype.j = function(a, b) {
+                    var c = this.n;
+                    "object" === ("undefined" == typeof a ? "undefined" : _typeof(a)) && null !== a ? a.constructor === c && void 0 !== a.a ? (a.f = null, 
+                    this.g(a.a, b, a.b)) : this.q(c.resolve(a), b) : (this.d--, this.b[b] = this.h(a));
+                }, k.prototype.g = function(a, b, c) {
+                    var d = this.c;
+                    void 0 === d.a && (this.d--, this.i && 2 === a ? g(d, c) : this.b[b] = this.h(c)), 
+                    0 === this.d && m(d, this.b);
+                }, k.prototype.h = function(a) {
+                    return a;
+                }, k.prototype.q = function(a, b) {
+                    var c = this;
+                    u(a, void 0, function(a) {
+                        c.g(1, b, a);
+                    }, function(a) {
+                        c.g(2, b, a);
+                    });
+                };
+                var O = 0;
+                h.all = function(a, b) {
+                    return new k(this, a, !0, b).c;
+                }, h.race = function(a, b) {
+                    function c(a) {
+                        q(e, a);
+                    }
+                    function d(a) {
+                        g(e, a);
+                    }
+                    var e = new this(p, b);
+                    if (!E(a)) return g(e, new TypeError("You must pass an array to race.")), e;
+                    for (var f = a.length, h = 0; void 0 === e.a && h < f; h++) u(this.resolve(a[h]), void 0, c, d);
+                    return e;
+                }, h.resolve = function(a, b) {
+                    if (a && "object" === ("undefined" == typeof a ? "undefined" : _typeof(a)) && a.constructor === this) return a;
+                    var c = new this(p, b);
+                    return q(c, a), c;
+                }, h.reject = function(a, b) {
+                    var c = new this(p, b);
+                    return g(c, a), c;
+                }, h.prototype = {
+                    constructor: h,
+                    then: function(a, b) {
+                        var c = this.a;
+                        if (1 === c && !a || 2 === c && !b) return this;
+                        var d = new this.constructor(p), e = this.b;
+                        if (c) {
+                            var f = arguments[c - 1];
+                            r(function() {
+                                C(c, d, f, e);
+                            });
+                        } else u(this, d, a, b);
+                        return d;
+                    },
+                    catch: function(a) {
+                        return this.then(null, a);
+                    }
+                };
+                var z = {
+                    Promise: h,
+                    polyfill: function() {
+                        var a;
+                        a = "undefined" != typeof global ? global : "undefined" != typeof window && window.document ? window : self, 
+                        "Promise" in a && "resolve" in a.Promise && "reject" in a.Promise && "all" in a.Promise && "race" in a.Promise && function() {
+                            var b;
+                            return new a.Promise(function(a) {
+                                b = a;
+                            }), s(b);
+                        }() || (a.Promise = h);
+                    }
+                };
+                __WEBPACK_AMD_DEFINE_RESULT__ = function() {
+                    return z;
+                }.call(exports, __webpack_require__, exports, module), !(void 0 !== __WEBPACK_AMD_DEFINE_RESULT__ && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+            }).call(void 0);
+        }).call(exports, __webpack_require__(58), __webpack_require__(32));
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
         (function(global) {
             !function(root, undefined) {
-                var NODE_JS = void 0 !== module;
+                var NODE_JS = "undefined" != typeof module;
                 NODE_JS && (root = global);
                 var BASE32_ENCODE_CHAR = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".split(""), BASE32_DECODE_CHAR = {
                     A: 0,
@@ -4011,20 +4227,21 @@
                     "6": 30,
                     "7": 31
                 }, blocks = [ 0, 0, 0, 0, 0, 0, 0, 0 ], toUtf8String = function(bytes) {
-                    for (var b, c, str = "", length = bytes.length, i = 0, followingChars = 0; i < length; ) if ((b = bytes[i++]) <= 127) str += String.fromCharCode(b); else {
+                    for (var b, c, str = "", length = bytes.length, i = 0, followingChars = 0; i < length; ) if (b = bytes[i++], 
+                    b <= 127) str += String.fromCharCode(b); else {
                         if (b > 191 && b <= 223) c = 31 & b, followingChars = 1; else if (b <= 239) c = 15 & b, 
                         followingChars = 2; else {
                             if (!(b <= 247)) throw "not a UTF-8 string";
                             c = 7 & b, followingChars = 3;
                         }
                         for (var j = 0; j < followingChars; ++j) {
-                            if ((b = bytes[i++]) < 128 || b > 191) throw "not a UTF-8 string";
+                            if (b = bytes[i++], b < 128 || b > 191) throw "not a UTF-8 string";
                             c <<= 6, c += 63 & b;
                         }
                         if (c >= 55296 && c <= 57343) throw "not a UTF-8 string";
                         if (c > 1114111) throw "not a UTF-8 string";
-                        c <= 65535 ? str += String.fromCharCode(c) : (c -= 65536, str += String.fromCharCode(55296 + (c >> 10)), 
-                        str += String.fromCharCode(56320 + (1023 & c)));
+                        c <= 65535 ? str += String.fromCharCode(c) : (c -= 65536, str += String.fromCharCode((c >> 10) + 55296), 
+                        str += String.fromCharCode((1023 & c) + 56320));
                     }
                     return str;
                 }, decodeAsBytes = function(base32Str) {
@@ -4122,7 +4339,7 @@
                 };
                 root.HI_BASE32_TEST && (exports.toUtf8String = toUtf8String), !root.HI_BASE32_TEST && NODE_JS ? module.exports = exports : root && (root.base32 = exports);
             }(void 0);
-        }).call(exports, __webpack_require__(57));
+        }).call(exports, __webpack_require__(32));
     }, function(module, exports, __webpack_require__) {
         "use strict";
         var _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _interface = __webpack_require__(10);
@@ -4170,11 +4387,10 @@
                     var frame = (0, _lib.getFrameByName)(win, (0, _common.getBridgeName)(_lib.util.getDomain()));
                     if (!frame) return;
                     return (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] ? frame : new _promise.SyncPromise(function(resolve) {
-                        var interval = void 0;
+                        var interval = void 0, timeout = void 0;
                         interval = setInterval(function() {
-                            if ((0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) return clearInterval(interval), 
-                            clearTimeout(void 0), resolve(frame);
-                            setTimeout(function() {
+                            return (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] ? (clearInterval(interval), 
+                            clearTimeout(timeout), resolve(frame)) : void setTimeout(function() {
                                 return clearInterval(interval), resolve();
                             }, 2e3);
                         }, 100);
@@ -4221,14 +4437,12 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var bridge = (exports.openBridge = void 0, exports.linkUrl = void 0, exports.isBridge = void 0, 
-        exports.needsBridge = void 0, exports.needsBridgeForBrowser = void 0, exports.needsBridgeForWin = void 0, 
-        exports.needsBridgeForDomain = void 0, exports.openTunnelToOpener = void 0, exports.destroyBridges = void 0, 
-        __webpack_require__(19));
-        exports.openBridge = bridge.openBridge, exports.linkUrl = bridge.linkUrl, exports.isBridge = bridge.isBridge, 
-        exports.needsBridge = bridge.needsBridge, exports.needsBridgeForBrowser = bridge.needsBridgeForBrowser, 
-        exports.needsBridgeForWin = bridge.needsBridgeForWin, exports.needsBridgeForDomain = bridge.needsBridgeForDomain, 
-        exports.openTunnelToOpener = bridge.openTunnelToOpener, exports.destroyBridges = bridge.destroyBridges;
+        var openBridge = exports.openBridge = void 0, linkUrl = exports.linkUrl = void 0, isBridge = exports.isBridge = void 0, needsBridge = exports.needsBridge = void 0, needsBridgeForBrowser = exports.needsBridgeForBrowser = void 0, needsBridgeForWin = exports.needsBridgeForWin = void 0, needsBridgeForDomain = exports.needsBridgeForDomain = void 0, openTunnelToOpener = exports.openTunnelToOpener = void 0, destroyBridges = exports.destroyBridges = void 0, bridge = __webpack_require__(19);
+        exports.openBridge = openBridge = bridge.openBridge, exports.linkUrl = linkUrl = bridge.linkUrl, 
+        exports.isBridge = isBridge = bridge.isBridge, exports.needsBridge = needsBridge = bridge.needsBridge, 
+        exports.needsBridgeForBrowser = needsBridgeForBrowser = bridge.needsBridgeForBrowser, 
+        exports.needsBridgeForWin = needsBridgeForWin = bridge.needsBridgeForWin, exports.needsBridgeForDomain = needsBridgeForDomain = bridge.needsBridgeForDomain, 
+        exports.openTunnelToOpener = openTunnelToOpener = bridge.openTunnelToOpener, exports.destroyBridges = destroyBridges = bridge.destroyBridges;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function listenForRegister(source, domain) {
@@ -4268,8 +4482,8 @@
         function openBridge(url, domain) {
             return domain = domain || _lib.util.getDomainFromUrl(url), _global.global.bridges[domain] ? _global.global.bridges[domain] : _global.global.clean.setItem(_global.global.bridges, domain, _lib.promise.run(function() {
                 if (_lib.util.getDomain() === domain) throw new Error("Can not open bridge on the same domain as current domain: " + domain);
-                var name = (0, _common.getBridgeName)(domain);
-                if ((0, _lib.getFrameByName)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
+                var name = (0, _common.getBridgeName)(domain), frame = (0, _lib.getFrameByName)(window, name);
+                if (frame) throw new Error("Frame with name " + name + " already exists on page");
                 var iframe = openBridgeFrame(name, url);
                 return _common.documentBodyReady.then(function(body) {
                     return new _lib.promise.Promise(function(resolve, reject) {
@@ -4396,7 +4610,7 @@
             } catch (err) {
                 return;
             }
-            if (message && (message = message[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) && message.type && _types.RECEIVE_MESSAGE_TYPES[message.type]) return message;
+            if (message && (message = message[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT], message && message.type && _types.RECEIVE_MESSAGE_TYPES[message.type])) return message;
         }
         function receiveMessage(event) {
             if (!window || window.closed) throw new Error("Message recieved in closed window");
@@ -4445,7 +4659,7 @@
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _types = __webpack_require__(49);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _types = __webpack_require__(50);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -4506,8 +4720,7 @@
                     error: err.stack ? err.message + "\n" + err.stack : err.toString()
                 });
             }) ]).catch(function(err) {
-                if (options && options.handleError) return options.handleError(err);
-                _lib.log.error(err.stack || err.toString());
+                return options && options.handleError ? options.handleError(err) : void _lib.log.error(err.stack || err.toString());
             });
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
             var options = _listeners.listeners.response[message.hash];
@@ -4566,7 +4779,7 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function isSerialized(item, type) {
-            return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
+            return "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
         function serializeMethod(destination, domain, method, name) {
             var id = _util.util.uniqueID();
@@ -4816,10 +5029,16 @@
         var _drivers = __webpack_require__(7);
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.winutil = exports.util = exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(53);
+        var _client = __webpack_require__(54);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4828,7 +5047,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(56);
+        var _server = __webpack_require__(57);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4837,7 +5056,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(54);
+        var _config = __webpack_require__(55);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4853,14 +5072,9 @@
                 return _util.util;
             }
         });
-        var _windows = __webpack_require__(14), windowUtil = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_windows);
-        exports.parent = (0, _windows.getAncestor)(), exports.bridge = void 0;
-        exports.bridge = __webpack_require__(44);
+        var _windows = __webpack_require__(14), windowUtil = _interopRequireWildcard(_windows), bridge = (exports.parent = (0, 
+        _windows.getAncestor)(), exports.bridge = void 0);
+        exports.bridge = bridge = __webpack_require__(45);
         exports.winutil = windowUtil;
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -4919,63 +5133,146 @@
         exports.on = _on;
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        var g, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-            return typeof obj;
-        } : function(obj) {
-            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        };
-        g = function() {
-            return this;
-        }();
-        try {
-            g = g || Function("return this")() || (0, eval)("this");
-        } catch (e) {
-            "object" === ("undefined" == typeof window ? "undefined" : _typeof(window)) && (g = window);
+        function defaultSetTimout() {
+            throw new Error("setTimeout has not been defined");
         }
-        module.exports = g;
+        function defaultClearTimeout() {
+            throw new Error("clearTimeout has not been defined");
+        }
+        function runTimeout(fun) {
+            if (cachedSetTimeout === setTimeout) return setTimeout(fun, 0);
+            if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) return cachedSetTimeout = setTimeout, 
+            setTimeout(fun, 0);
+            try {
+                return cachedSetTimeout(fun, 0);
+            } catch (e) {
+                try {
+                    return cachedSetTimeout.call(null, fun, 0);
+                } catch (e) {
+                    return cachedSetTimeout.call(this, fun, 0);
+                }
+            }
+        }
+        function runClearTimeout(marker) {
+            if (cachedClearTimeout === clearTimeout) return clearTimeout(marker);
+            if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) return cachedClearTimeout = clearTimeout, 
+            clearTimeout(marker);
+            try {
+                return cachedClearTimeout(marker);
+            } catch (e) {
+                try {
+                    return cachedClearTimeout.call(null, marker);
+                } catch (e) {
+                    return cachedClearTimeout.call(this, marker);
+                }
+            }
+        }
+        function cleanUpNextTick() {
+            draining && currentQueue && (draining = !1, currentQueue.length ? queue = currentQueue.concat(queue) : queueIndex = -1, 
+            queue.length && drainQueue());
+        }
+        function drainQueue() {
+            if (!draining) {
+                var timeout = runTimeout(cleanUpNextTick);
+                draining = !0;
+                for (var len = queue.length; len; ) {
+                    for (currentQueue = queue, queue = []; ++queueIndex < len; ) currentQueue && currentQueue[queueIndex].run();
+                    queueIndex = -1, len = queue.length;
+                }
+                currentQueue = null, draining = !1, runClearTimeout(timeout);
+            }
+        }
+        function Item(fun, array) {
+            this.fun = fun, this.array = array;
+        }
+        function noop() {}
+        var cachedSetTimeout, cachedClearTimeout, process = module.exports = {};
+        !function() {
+            try {
+                cachedSetTimeout = "function" == typeof setTimeout ? setTimeout : defaultSetTimout;
+            } catch (e) {
+                cachedSetTimeout = defaultSetTimout;
+            }
+            try {
+                cachedClearTimeout = "function" == typeof clearTimeout ? clearTimeout : defaultClearTimeout;
+            } catch (e) {
+                cachedClearTimeout = defaultClearTimeout;
+            }
+        }();
+        var currentQueue, queue = [], draining = !1, queueIndex = -1;
+        process.nextTick = function(fun) {
+            var args = new Array(arguments.length - 1);
+            if (arguments.length > 1) for (var i = 1; i < arguments.length; i++) args[i - 1] = arguments[i];
+            queue.push(new Item(fun, args)), 1 !== queue.length || draining || runTimeout(drainQueue);
+        }, Item.prototype.run = function() {
+            this.fun.apply(null, this.array);
+        }, process.title = "browser", process.browser = !0, process.env = {}, process.argv = [], 
+        process.version = "", process.versions = {}, process.on = noop, process.addListener = noop, 
+        process.once = noop, process.off = noop, process.removeListener = noop, process.removeAllListeners = noop, 
+        process.emit = noop, process.binding = function(name) {
+            throw new Error("process.binding is not supported");
+        }, process.cwd = function() {
+            return "/";
+        }, process.chdir = function(dir) {
+            throw new Error("process.chdir is not supported");
+        }, process.umask = function() {
+            return 0;
+        };
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        function normalizeChildProps(component, props, origin) {
-            var result = {};
-            _loop2: for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                var _ref, _ret = function() {
-                    if (_isArray) {
-                        if (_i >= _iterator.length) return "break";
-                        _ref = _iterator[_i++];
-                    } else {
-                        if (_i = _iterator.next(), _i.done) return "break";
-                        _ref = _i.value;
-                    }
-                    var key = _ref, prop = component.props[key], value = props[key];
-                    if (component.looseProps && !prop) return result[key] = value, "continue";
-                    if ("function" == typeof prop.childDef) if (value) {
+        function normalizeChildProp(component, props, key, value) {
+            var prop = component.props[key];
+            {
+                if (prop) {
+                    if ("function" == typeof prop.childDef) {
+                        if (!value) return prop.getter ? function() {
+                            return Promise.resolve(prop.childDef.call());
+                        } : prop.childDef.call();
                         if (prop.getter) {
                             var val = value;
-                            value = function() {
+                            return function() {
                                 return val.apply(this, arguments).then(function(res) {
                                     return res ? res : prop.childDef.call();
                                 });
                             };
                         }
-                    } else value = prop.getter ? function() {
-                        return Promise.resolve(prop.childDef.call());
-                    } : prop.childDef.call();
-                    value && prop.sameDomain && origin !== (0, _lib.getDomain)(window) && (value = null), 
-                    result[key] = value, prop.alias && !result[prop.alias] && (result[prop.alias] = value);
-                }();
-                switch (_ret) {
-                  case "break":
-                    break _loop2;
-
-                  case "continue":
-                    continue;
+                    }
+                    return value;
                 }
+                if (component.looseProps) return value;
+            }
+        }
+        function normalizeChildProps(component, props, origin) {
+            for (var required = !(arguments.length > 3 && void 0 !== arguments[3]) || arguments[3], result = {}, _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                var _ref;
+                if (_isArray) {
+                    if (_i >= _iterator.length) break;
+                    _ref = _iterator[_i++];
+                } else {
+                    if (_i = _iterator.next(), _i.done) break;
+                    _ref = _i.value;
+                }
+                var _key = _ref, prop = component.props[_key], value = props[_key];
+                if (prop.sameDomain && origin !== (0, _lib.getDomain)(window)) return;
+                result[_key] = normalizeChildProp(component, props, _key, value), prop && prop.alias && !result[prop.alias] && (result[prop.alias] = value);
+            }
+            if (required) for (var _iterator2 = Object.keys(component.props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                var _ref2;
+                if (_isArray2) {
+                    if (_i2 >= _iterator2.length) break;
+                    _ref2 = _iterator2[_i2++];
+                } else {
+                    if (_i2 = _iterator2.next(), _i2.done) break;
+                    _ref2 = _i2.value;
+                }
+                var key = _ref2;
+                props.hasOwnProperty(key) || (result[key] = normalizeChildProp(component, props, key, props[key]));
             }
             return result;
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.normalizeChildProps = normalizeChildProps;
+        }), exports.normalizeChildProp = normalizeChildProp, exports.normalizeChildProps = normalizeChildProps;
         var _lib = __webpack_require__(1);
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -5042,21 +5339,21 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _container = __webpack_require__(62);
+        }(), _container = __webpack_require__(63);
         Object.defineProperty(exports, "containerTemplate", {
             enumerable: !0,
             get: function() {
                 return _container.containerTemplate;
             }
         });
-        var _component = __webpack_require__(61);
+        var _component = __webpack_require__(62);
         Object.defineProperty(exports, "componentTemplate", {
             enumerable: !0,
             get: function() {
                 return _component.componentTemplate;
             }
         }), exports.getByTag = getByTag;
-        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(15), _child = __webpack_require__(32), _parent = __webpack_require__(21), _delegate = __webpack_require__(64), _props = __webpack_require__(60), _window = __webpack_require__(16), _constants = __webpack_require__(6), _validate2 = __webpack_require__(63), _drivers = __webpack_require__(69), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
+        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(15), _child = __webpack_require__(33), _parent = __webpack_require__(21), _delegate = __webpack_require__(65), _props = __webpack_require__(61), _window = __webpack_require__(16), _constants = __webpack_require__(6), _validate2 = __webpack_require__(64), _drivers = __webpack_require__(70), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
         exports.Component = (_class = function(_BaseComponent) {
             function Component() {
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -5098,7 +5395,8 @@
                 key: "registerChild",
                 value: function() {
                     if ((0, _window.isXComponentWindow)()) {
-                        (0, _window.getComponentMeta)().tag === this.tag && (window.xchild = new _child.ChildComponent(this), 
+                        var componentMeta = (0, _window.getComponentMeta)();
+                        componentMeta.tag === this.tag && (window.xchild = new _child.ChildComponent(this), 
                         window.xprops = window.xchild.props);
                     }
                 }
@@ -5160,7 +5458,7 @@
                 value: function(item, env) {
                     if (item) {
                         if ("string" == typeof item) return item;
-                        if (env || (env = this.defaultEnv), env) return env && "object" === (void 0 === item ? "undefined" : _typeof(item)) && item[env] ? item[env] : void 0;
+                        if (env || (env = this.defaultEnv), env) return env && "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && item[env] ? item[env] : void 0;
                     }
                 }
             }, {
@@ -5196,7 +5494,7 @@
                 key: "child",
                 value: function(options) {
                     if (!window.xchild) throw new Error("Child not instantiated");
-                    return window.xchild.component, window.xchild;
+                    return window.xchild.component !== this, window.xchild;
                 }
             }, {
                 key: "attach",
@@ -5442,7 +5740,7 @@
                     _ref = _i.value;
                 }
                 var key = _ref, prop = options.props[key];
-                if (!prop || "object" !== (void 0 === prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
+                if (!prop || "object" !== ("undefined" == typeof prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
                 if (!prop.type) throw component.error("Expected prop.type");
                 if (_constants.PROP_TYPES_LIST.indexOf(prop.type) === -1) throw component.error("Expected prop.type to be one of " + _constants.PROP_TYPES_LIST.join(", "));
                 if (prop.required && prop.def) throw component.error("Required prop can not have a default value");
@@ -5545,7 +5843,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _base = __webpack_require__(15), _parent = __webpack_require__(21), _drivers = __webpack_require__(33), _lib = __webpack_require__(1);
+        }(), _base = __webpack_require__(15), _parent = __webpack_require__(21), _drivers = __webpack_require__(34), _lib = __webpack_require__(1);
         exports.DelegateComponent = function(_BaseComponent) {
             function DelegateComponent(component, source) {
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
@@ -5586,21 +5884,21 @@
             }, {
                 key: "getOverrides",
                 value: function(context) {
-                    for (var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _iterator2 = Object.keys(delegateOverrides), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                        var _ref2;
-                        if ("break" === function() {
-                            if (_isArray2) {
-                                if (_i2 >= _iterator2.length) return "break";
-                                _ref2 = _iterator2[_i2++];
-                            } else {
-                                if (_i2 = _iterator2.next(), _i2.done) return "break";
-                                _ref2 = _i2.value;
-                            }
-                            var key = _ref2;
-                            overrides[key] = function() {
-                                return _parent.ParentComponent.prototype[key].apply(self, arguments);
-                            };
-                        }()) break;
+                    for (var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function() {
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) return "break";
+                            _ref2 = _iterator2[_i2++];
+                        } else {
+                            if (_i2 = _iterator2.next(), _i2.done) return "break";
+                            _ref2 = _i2.value;
+                        }
+                        var key = _ref2;
+                        overrides[key] = function() {
+                            return _parent.ParentComponent.prototype[key].apply(self, arguments);
+                        };
+                    }, _iterator2 = Object.keys(delegateOverrides), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                        var _ref2, _ret = _loop();
+                        if ("break" === _ret) break;
                     }
                     return overrides;
                 }
@@ -5622,7 +5920,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _component = __webpack_require__(59);
+        var _component = __webpack_require__(60);
         Object.keys(_component).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5640,7 +5938,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(32);
+        var _child = __webpack_require__(33);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5652,8 +5950,8 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function normalizeProp(component, instance, props, key, value) {
-            var prop = component.props[key];
-            if (!(props.hasOwnProperty(key) && null !== value && void 0 !== value && "" !== value) && prop.def && (value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def), 
+            var prop = component.props[key], hasProp = props.hasOwnProperty(key) && null !== value && void 0 !== value && "" !== value;
+            if (!hasProp && prop.def && (value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def), 
             !value && prop.alias && props[prop.alias] && (value = props[prop.alias]), prop.decorate && (value = prop.decorate(value)), 
             prop.value && (value = prop.value), prop.getter) {
                 if (!value) return;
@@ -5738,7 +6036,7 @@
                             var result = void 0;
                             if ("boolean" == typeof value) result = "1"; else if ("string" == typeof value) result = value.toString(); else {
                                 if ("function" == typeof value) return;
-                                if ("object" === (void 0 === value ? "undefined" : _typeof(value))) {
+                                if ("object" === ("undefined" == typeof value ? "undefined" : _typeof(value))) {
                                     if ("json" !== prop.serialization) {
                                         result = (0, _lib.dotify)(value, key);
                                         for (var dotkey in result) params[dotkey] = result[dotkey];
@@ -5765,7 +6063,7 @@
         };
         exports.normalizeProp = normalizeProp, exports.normalizeProps = normalizeProps, 
         exports.propsToQuery = propsToQuery;
-        var _promise = __webpack_require__(3), _validate = __webpack_require__(34), _lib = __webpack_require__(1);
+        var _promise = __webpack_require__(3), _validate = __webpack_require__(35), _lib = __webpack_require__(1);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -5787,7 +6085,8 @@
                             if (_i = _iterator.next(), _i.done) break;
                             _ref = _i.value;
                         }
-                        scope[_ref] = "=";
+                        var key = _ref;
+                        scope[key] = "=";
                     }
                     return component.looseProps && (scope.props = "="), {
                         scope: scope,
@@ -5842,7 +6141,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _script = __webpack_require__(71);
+        var _script = __webpack_require__(72);
         Object.keys(_script).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5851,7 +6150,7 @@
                 }
             });
         });
-        var _react = __webpack_require__(70);
+        var _react = __webpack_require__(71);
         Object.keys(_react).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5860,7 +6159,7 @@
                 }
             });
         });
-        var _angular = __webpack_require__(67);
+        var _angular = __webpack_require__(68);
         Object.keys(_angular).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5869,7 +6168,7 @@
                 }
             });
         });
-        var _ember = __webpack_require__(68);
+        var _ember = __webpack_require__(69);
         Object.keys(_ember).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5933,7 +6232,8 @@
                             if (_i = _iterator.next(), _i.done) break;
                             _ref = _i.value;
                         }
-                        render(_ref);
+                        var element = _ref;
+                        render(element);
                     }
                 }
                 scan(), document.addEventListener("DOMContentLoaded", scan), window.addEventListener("load", scan), 
@@ -6006,8 +6306,14 @@
         var _promise = __webpack_require__(3);
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         function isElement(element) {
-            return element instanceof window.Element || "object" === (void 0 === element ? "undefined" : _typeof(element)) && 1 === element.nodeType && "object" === _typeof(element.style) && "object" === _typeof(element.ownerDocument);
+            return element instanceof window.Element || "object" === ("undefined" == typeof element ? "undefined" : _typeof(element)) && 1 === element.nodeType && "object" === _typeof(element.style) && "object" === _typeof(element.ownerDocument);
         }
         function getElement(id) {
             if (isElement(id)) return id;
@@ -6033,7 +6339,8 @@
                 if (options[key]) return key + "=" + options[key];
             }).filter(Boolean).join(","), win = window.open(url, options.name, params, !0);
             if (postRobot.winutil.isWindowClosed(win)) {
-                throw new _error.PopupOpenError("Can not open popup window - blocked");
+                var err = new _error.PopupOpenError("Can not open popup window - blocked");
+                throw err;
             }
             return win;
         }
@@ -6079,7 +6386,7 @@
             return str;
         }
         function createElement() {
-            var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, element = (arguments.length > 2 && void 0 !== arguments[2] && arguments[2], 
+            var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, element = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : null, 
             document.createElement(tag));
             if (options.style && (0, _util.extend)(element.style, options.style), options.html && (element.innerHTML = options.html), 
             options.class && (element.className = options.class.join(" ")), options.attributes) for (var _iterator2 = Object.keys(options.attributes), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
@@ -6170,9 +6477,8 @@
                 var start = element.getBoundingClientRect(), interval = void 0, timer = void 0;
                 interval = setInterval(function() {
                     var end = element.getBoundingClientRect();
-                    if (start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height) return clearTimeout(timer), 
-                    clearInterval(interval), resolve();
-                    start = end;
+                    return start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height ? (clearTimeout(timer), 
+                    clearInterval(interval), resolve()) : void (start = end);
                 }, 50), timer = setTimeout(function() {
                     clearInterval(interval), reject(new Error("Timed out waiting for element to stop animating after " + timeout + "ms"));
                 }, timeout);
@@ -6319,7 +6625,7 @@
                     var cssRules = stylesheets[i].cssRules;
                     if (cssRules) for (var j = 0; j < cssRules.length; j++) {
                         var cssRule = cssRules[j];
-                        if (cssRule && (cssRule.type === KEYFRAMES_RULE && cssRule.name === name)) return !0;
+                        if (cssRule && cssRule.type === KEYFRAMES_RULE && cssRule.name === name) return !0;
                     }
                 }
             } catch (err) {
@@ -6330,7 +6636,7 @@
         function animate(element, name) {
             var timeout = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3;
             return new _promise.SyncPromise(function(resolve, reject) {
-                if (!(element = getElement(element)) || !isValidAnimation(element, name)) return resolve();
+                if (element = getElement(element), !element || !isValidAnimation(element, name)) return resolve();
                 var hasStarted = !1, timer = void 0, startEvent = bindEvents(element, ANIMATION_START_EVENTS, function(event) {
                     event.target === element && event.animationName === name && (event.stopPropagation(), 
                     startEvent.cancel(), hasStarted = !0, timer = setTimeout(function() {
@@ -6423,12 +6729,7 @@
         exports.bindEvents = bindEvents, exports.setVendorCSS = setVendorCSS, exports.animate = animate, 
         exports.showElement = showElement, exports.hideElement = hideElement, exports.showAndAnimate = showAndAnimate, 
         exports.animateAndHide = animateAndHide, exports.addClass = addClass, exports.writeToWindow = writeToWindow;
-        var _src = __webpack_require__(5), postRobot = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_src), _promise = __webpack_require__(3), _fn = __webpack_require__(36), _util = __webpack_require__(22), _error = __webpack_require__(35), parseQuery = (exports.documentReady = new _promise.SyncPromise(function(resolve) {
+        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _fn = __webpack_require__(37), _util = __webpack_require__(22), _error = __webpack_require__(36), parseQuery = (exports.documentReady = new _promise.SyncPromise(function(resolve) {
             if ("complete" === window.document.readyState) return resolve(window.document);
             var interval = setInterval(function() {
                 if ("complete" === window.document.readyState) return clearInterval(interval), resolve(window.document);
@@ -6522,10 +6823,16 @@
         var _promise = __webpack_require__(3);
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(37);
+        var _interface = __webpack_require__(38);
         Object.keys(_interface).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -6534,12 +6841,7 @@
                 }
             });
         });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
+        var INTERFACE = _interopRequireWildcard(_interface);
         exports.default = INTERFACE;
     } ]);
 });
