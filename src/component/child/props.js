@@ -1,6 +1,42 @@
 
 import { getDomain } from '../../lib';
 
+export function normalizeChildProp(component, props, key, value) {
+
+    let prop = component.props[key];
+
+    if (!prop) {
+
+        if (component.looseProps) {
+            return value;
+        }
+
+        return;
+    }
+
+    if (typeof prop.childDef === 'function') {
+        if (!value) {
+            if (prop.getter) {
+                return function() {
+                    return Promise.resolve(prop.childDef.call());
+                };
+            } else {
+                return prop.childDef.call();
+            }
+        } else if (prop.getter) {
+            let val = value;
+            return function() {
+                return val.apply(this, arguments).then(res => {
+                    return res ? res : prop.childDef.call();
+                });
+            };
+        }
+    }
+
+    return value;
+}
+
+
 export function normalizeChildProps(component, props, origin) {
 
     let result = {};
@@ -10,38 +46,20 @@ export function normalizeChildProps(component, props, origin) {
         let prop = component.props[key];
         let value = props[key];
 
-        if (component.looseProps && !prop) {
-            result[key] = value;
-            continue;
+        if (prop.sameDomain && origin !== getDomain(window)) {
+            return;
         }
 
-        if (typeof prop.childDef === 'function') {
-            if (!value) {
-                if (prop.getter) {
-                    value = function() {
-                        return Promise.resolve(prop.childDef.call());
-                    };
-                } else {
-                    value = prop.childDef.call();
-                }
-            } else if (prop.getter) {
-                let val = value;
-                value = function() {
-                    return val.apply(this, arguments).then(res => {
-                        return res ? res : prop.childDef.call();
-                    });
-                };
-            }
-        }
+        result[key] = normalizeChildProp(component, props, key, value);
 
-        if (value && prop.sameDomain && origin !== getDomain(window)) {
-            value = null;
-        }
-
-        result[key] = value;
-
-        if (prop.alias && !result[prop.alias]) {
+        if (prop && prop.alias && !result[prop.alias]) {
             result[prop.alias] = value;
+        }
+    }
+
+    for (let key of Object.keys(component.props)) {
+        if (!props.hasOwnProperty(key)) {
+            result[key] = normalizeChildProp(component, props, key, props[key]);
         }
     }
 
