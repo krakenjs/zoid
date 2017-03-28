@@ -96,7 +96,7 @@ export function validate(component, options) { // eslint-ignore-line
             throw component.error(`Expected options.defaultEnv to be a string`);
         }
 
-        if (typeof options.url !== 'object') {
+        if (!options.buildUrl && typeof options.url !== 'object') {
             throw component.error(`Expected options.url to be an object mapping env->url`);
         }
 

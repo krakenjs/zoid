@@ -139,7 +139,7 @@ export class Component extends BaseComponent {
     listenDelegate() {
         postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
 
-            let domain = this.getDomain(null, { env: data.env });
+            let domain = this.getDomain(null, { env: data.env || this.defaultEnv });
 
             if (!domain) {
                 throw new Error(`Could not determine domain to allow remote render`);
