@@ -6,7 +6,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
+         addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow, toCSS,
          elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
@@ -505,6 +505,22 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
+    getInitialDimensions() {
+
+        let { width, height, x, y } = this.props.dimensions || this.component.dimensions || {};
+        let result = { x, y };
+
+        if (width) {
+            result.width = toCSS(width);
+        }
+
+        if (height) {
+            result.height = toCSS(height);
+        }
+
+        return result;
+    }
+
     /*  Watch For Close
         ---------------
 
@@ -696,17 +712,6 @@ export class ParentComponent extends BaseComponent {
                 }
             });
         }
-    }
-
-
-    /*  Restyle
-        -------
-
-        Restyle the child component window
-    */
-
-    restyle() {
-        return this.driver.restyle.call(this);
     }
 
 

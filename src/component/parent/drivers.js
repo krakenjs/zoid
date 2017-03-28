@@ -42,20 +42,26 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         element = this.element || element || document.body;
 
-        this.iframe = iframe(null, {
-            name: this.childWindowName,
-            scrolling: this.component.scrolling === false ? 'no' : 'yes'
-        }, element);
+        let { width, height } = this.getInitialDimensions();
 
+        let options = {
+
+            attributes: {
+                name: this.childWindowName,
+                scrolling: this.component.scrolling === false ? 'no' : 'yes'
+            },
+
+            style: {
+                width,
+                height
+            }
+        };
+
+        this.iframe = iframe(null, options, element);
         this.element = this.element || this.iframe;
+        this.window = this.iframe.contentWindow;
 
         hideElement(this.element);
-
-        let dimensions = this.props.dimensions || this.component.dimensions || {};
-        this.resize(dimensions.width, dimensions.height);
-        this.restyle();
-
-        this.window = this.iframe.contentWindow;
 
         this.clean.register('destroyWindow', () => {
 
@@ -88,9 +94,9 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         hide:                    DELEGATE.CALL_DELEGATE,
         show:                    DELEGATE.CALL_DELEGATE,
         resize:                  DELEGATE.CALL_DELEGATE,
-        restyle:                 DELEGATE.CALL_DELEGATE,
         loadUrl:                 DELEGATE.CALL_DELEGATE,
         hijackSubmit:            DELEGATE.CALL_DELEGATE,
+        getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
 
         open(original, override) {
             return function() {
@@ -124,10 +130,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         this.element.style.display = 'block';
     },
 
-    restyle() {
-        this.iframe.style.backgroundColor = 'transparent';
-    },
-
     loadUrl(url) {
         this.iframe.src = url;
     }
@@ -148,7 +150,7 @@ if (__POPUP_SUPPORT__) {
 
         open() {
 
-            let { width, height, x, y } = this.props.dimensions || this.component.dimensions || {};
+            let { width, height, x, y } = this.getInitialDimensions();
 
             width = normalizeDimension(width, window.innerWidth);
             height = normalizeDimension(height, window.innerHeight);
@@ -194,10 +196,6 @@ if (__POPUP_SUPPORT__) {
             throw new Error('Can not show popup');
         },
 
-        restyle() {
-            // pass
-        },
-
         delegateOverrides: {
 
             openContainer:          DELEGATE.CALL_DELEGATE,
@@ -220,7 +218,7 @@ if (__POPUP_SUPPORT__) {
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
             destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
-            restyle:                 DELEGATE.CALL_ORIGINAL
+            getInitialDimensions:    DELEGATE.CALL_ORIGINAL
         },
 
         loadUrl(url) {

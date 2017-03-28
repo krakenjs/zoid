@@ -126,18 +126,27 @@ export function popup(url, options) {
     Open an iframe with the specified container, url, and option property map
 */
 
-export function iframe(url, options, container) {
+export function iframe(url, options = {}, container) {
 
     container = getElement(container);
 
     let frame = document.createElement('iframe');
 
-    for (let key of Object.keys(options)) {
-        frame[key] = options[key];
+    if (options.attributes) {
+        for (let key of Object.keys(options.attributes)) {
+            frame[key] = options.attributes[key];
+        }
+    }
+
+    if (options.style) {
+        for (let key of Object.keys(options.style)) {
+            frame.style[key] = options.style[key];
+        }
     }
 
     frame.frameBorder = '0';
     frame.allowTransparency = 'true';
+    frame.style.backgroundColor = 'transparent';
 
     if (container) {
         container.appendChild(frame);
