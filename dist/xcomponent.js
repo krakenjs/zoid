@@ -2228,13 +2228,8 @@
                 }
             }, {
                 key: "getInitialDimensions",
-                value: function() {
-                    var _ref12 = this.props.dimensions || this.component.dimensions || {}, width = _ref12.width, height = _ref12.height, x = _ref12.x, y = _ref12.y, result = {
-                        x: x,
-                        y: y
-                    };
-                    return width && (result.width = (0, _lib.toCSS)(width)), height && (result.height = (0, 
-                    _lib.toCSS)(height)), result;
+                value: function(el) {
+                    return this.component.getInitialDimensions ? this.component.getInitialDimensions(this.props, el) : this.component.dimensions ? this.component.dimensions : {};
                 }
             }, {
                 key: "watchForClose",
@@ -2284,8 +2279,8 @@
             }, {
                 key: "listeners",
                 value: function() {
-                    var _ref13;
-                    return _ref13 = {}, _defineProperty(_ref13, _constants.POST_MESSAGE.INIT, function(source, data) {
+                    var _ref12;
+                    return _ref12 = {}, _defineProperty(_ref12, _constants.POST_MESSAGE.INIT, function(source, data) {
                         var _this12 = this;
                         return this.childExports = data.exports, this.onInit.resolve(this), this.timeout && clearTimeout(this.timeout), 
                         this.props.onEnter().then(function() {
@@ -2294,17 +2289,17 @@
                                 context: _this12.context
                             };
                         });
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.CLOSE, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.CLOSE, function(source, data) {
                         this.close(data.reason);
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.RESIZE, function(source, data) {
-                        if (this.driver.allowResize && this.component.autoResize) return this.resize(data.width, data.height);
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.HIDE, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.RESIZE, function(source, data) {
+                        if (this.driver.allowResize) return this.resize(data.width, data.height);
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.HIDE, function(source, data) {
                         this.hide();
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.SHOW, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.SHOW, function(source, data) {
                         this.show();
-                    }), _defineProperty(_ref13, _constants.POST_MESSAGE.ERROR, function(source, data) {
+                    }), _defineProperty(_ref12, _constants.POST_MESSAGE.ERROR, function(source, data) {
                         this.error(new Error(data.error));
-                    }), _ref13;
+                    }), _ref12;
                 }
             }, {
                 key: "resize",
@@ -2323,14 +2318,14 @@
             }, {
                 key: "hide",
                 value: function() {
-                    return this.container && (this.container.style.display = "none"), this.containerFrame && (this.containerFrame.style.display = "none"), 
-                    this.driver.hide.call(this);
+                    return this.container && (0, _lib.hideElement)(this.container), this.containerFrame && (0, 
+                    _lib.hideElement)(this.containerFrame), this.driver.hide.call(this);
                 }
             }, {
                 key: "show",
                 value: function() {
-                    return this.container && (this.container.style.display = "block"), this.containerFrame && (this.containerFrame.style.display = "block"), 
-                    this.driver.show.call(this);
+                    return this.container && (0, _lib.showElement)(this.container), this.containerFrame && (0, 
+                    _lib.showElement)(this.containerFrame), this.driver.show.call(this);
                 }
             }, {
                 key: "userClose",
@@ -2448,7 +2443,8 @@
                                 ANIMATION: _constants.ANIMATION_NAMES
                             });
                         }).then(function(html) {
-                            (0, _lib.writeToWindow)(_this17.window, html);
+                            var win = _this17.componentTemplateWindow || _this17.window;
+                            (0, _lib.writeToWindow)(win, html);
                         });
                     });
                 }
@@ -2493,8 +2489,9 @@
                                 class: [ _constants.CLASS_NAMES.XCOMPONENT, _constants.CLASS_NAMES.XCOMPONENT + "-" + _this18.component.tag, _constants.CLASS_NAMES.XCOMPONENT + "-" + _this18.context ]
                             }), (0, _lib.hideElement)(_this18.container), el.appendChild(_this18.container), 
                             _this18.driver.renderedIntoContainerTemplate) {
-                                if (_this18.element = _this18.container.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0], 
-                                !_this18.element) throw new Error("Could not find element to render component into");
+                                _this18.element = _this18.container.getElementsByClassName(_constants.CLASS_NAMES.ELEMENT)[0];
+                                var _getInitialDimensions = _this18.getInitialDimensions(el), width = _getInitialDimensions.width, height = _getInitialDimensions.height;
+                                if (_this18.resize(width, height), !_this18.element) throw new Error("Could not find element to render component into");
                                 (0, _lib.hideElement)(_this18.element);
                             }
                             var eventHandlers = [];
@@ -2504,15 +2501,15 @@
                                 return _this18.userClose();
                             })), _this18.clean.register("destroyContainerEvents", function() {
                                 for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref14;
+                                    var _ref13;
                                     if (_isArray3) {
                                         if (_i3 >= _iterator3.length) break;
-                                        _ref14 = _iterator3[_i3++];
+                                        _ref13 = _iterator3[_i3++];
                                     } else {
                                         if (_i3 = _iterator3.next(), _i3.done) break;
-                                        _ref14 = _i3.value;
+                                        _ref13 = _i3.value;
                                     }
-                                    var eventHandler = _ref14;
+                                    var eventHandler = _ref13;
                                     eventHandler.cancel();
                                 }
                             }), _this18.clean.register("destroyContainerTemplate", function() {
@@ -2521,6 +2518,7 @@
                                 delete _this18.containerFrame, delete _this18.container;
                             });
                         });
+                        if (_this18.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this18.context);
                     });
                 }
             }, {
@@ -3580,21 +3578,31 @@
             open: function(element) {
                 var _this = this;
                 if (element && !(0, _lib.getElement)(element)) throw this.component.error("Can not find element " + element);
-                element = this.element || element || document.body;
-                var _getInitialDimensions = this.getInitialDimensions(), width = _getInitialDimensions.width, height = _getInitialDimensions.height, options = {
+                var options = {
                     attributes: {
                         name: this.childWindowName,
                         scrolling: this.component.scrolling === !1 ? "no" : "yes"
                     },
                     style: {
-                        width: width,
-                        height: height
+                        width: "100%",
+                        height: "100%"
                     }
                 };
-                this.iframe = (0, _lib.iframe)(null, options, element), this.element = this.element || this.iframe, 
-                this.window = this.iframe.contentWindow, (0, _lib.hideElement)(this.element), this.clean.register("destroyWindow", function() {
-                    _this.window.close(), delete _this.window, _this.iframe && (_this.iframe.parentNode && _this.iframe.parentNode.removeChild(_this.iframe), 
-                    delete _this.iframe);
+                this.iframe = (0, _lib.iframe)(null, options, this.element), this.window = this.iframe.contentWindow, 
+                this.iframe.addEventListener("error", function(err) {
+                    return _this.error(err);
+                }), (0, _lib.hideElement)(this.element);
+                var sacrificialIframe = void 0;
+                this.component.sacrificialComponentTemplate && (sacrificialIframe = (0, _lib.iframe)(null, options, this.element), 
+                this.componentTemplateWindow = sacrificialIframe.contentWindow, (0, _lib.hideElement)(this.iframe), 
+                this.iframe.addEventListener("load", function() {
+                    setTimeout(function() {
+                        (0, _lib.hideElement)(sacrificialIframe), (0, _lib.destroyElement)(sacrificialIframe), 
+                        (0, _lib.showElement)(_this.iframe);
+                    }, 50);
+                })), this.clean.register("destroyWindow", function() {
+                    _this.window.close(), delete _this.window, sacrificialIframe && (0, _lib.destroyElement)(sacrificialIframe), 
+                    _this.iframe && ((0, _lib.destroyElement)(_this.iframe), delete _this.iframe);
                 });
             },
             delegateOverrides: {
@@ -3629,10 +3637,10 @@
                 _lib.toCSS)(height));
             },
             hide: function() {
-                this.element.style.display = "none";
+                (0, _lib.showElement)(this.element);
             },
             show: function() {
-                this.element.style.display = "block";
+                (0, _lib.hideElement)(this.element);
             },
             loadUrl: function(url) {
                 this.iframe.src = url;
@@ -3645,7 +3653,7 @@
             openOnClick: !0,
             errorOnCloseDuringInit: !1,
             open: function() {
-                var _this3 = this, _getInitialDimensions2 = this.getInitialDimensions(), width = _getInitialDimensions2.width, height = _getInitialDimensions2.height, x = _getInitialDimensions2.x, y = _getInitialDimensions2.y;
+                var _this3 = this, _getInitialDimensions = this.getInitialDimensions(), width = _getInitialDimensions.width, height = _getInitialDimensions.height, x = _getInitialDimensions.x, y = _getInitialDimensions.y;
                 width = (0, _lib.normalizeDimension)(width, window.innerWidth), height = (0, _lib.normalizeDimension)(height, window.innerHeight);
                 var pos = (0, _window.getPosition)({
                     width: width,
@@ -5377,24 +5385,27 @@
                 _this.addProp(options, "bridgeDomain"), _this.addProp(options, "contexts", {
                     iframe: !0,
                     popup: !1
-                }), _this.addProp(options, "defaultContext"), _this.addProp(options, "autoResize", !1), 
-                _this.addProp(options, "containerTemplate"), _this.addProp(options, "componentTemplate"), 
-                components[_this.tag] = _this, _this.registerDrivers(), _this.registerChild(), _this.listenDelegate(), 
-                _this;
+                }), _this.addProp(options, "defaultContext"), _this.addProp(options, "getInitialDimensions"), 
+                _this.addProp(options, "autoResize", !1), _this.addProp(options, "containerTemplate"), 
+                _this.addProp(options, "componentTemplate", function(_ref) {
+                    var CLASS = _ref.CLASS;
+                    return '<div class="' + CLASS.ELEMENT + '"></div>';
+                }), _this.addProp(options, "sacrificialComponentTemplate", !1), components[_this.tag] = _this, 
+                _this.registerDrivers(), _this.registerChild(), _this.listenDelegate(), _this;
             }
             return _inherits(Component, _BaseComponent), _createClass(Component, [ {
                 key: "registerDrivers",
                 value: function() {
                     for (var _iterator = Object.keys(drivers), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                        var _ref;
+                        var _ref2;
                         if (_isArray) {
                             if (_i >= _iterator.length) break;
-                            _ref = _iterator[_i++];
+                            _ref2 = _iterator[_i++];
                         } else {
                             if (_i = _iterator.next(), _i.done) break;
-                            _ref = _i.value;
+                            _ref2 = _i.value;
                         }
-                        var driverName = _ref, driver = drivers[driverName];
+                        var driverName = _ref2, driver = drivers[driverName];
                         driver.isActive() && driver.register(this);
                     }
                 }
@@ -5411,8 +5422,8 @@
                 key: "listenDelegate",
                 value: function() {
                     var _this2 = this;
-                    postRobot.on(_constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref2) {
-                        var source = _ref2.source, origin = _ref2.origin, data = _ref2.data, domain = _this2.getDomain(null, {
+                    postRobot.on(_constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
+                        var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this2.getDomain(null, {
                             env: data.env || _this2.defaultEnv
                         });
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
@@ -5433,15 +5444,15 @@
                         var domain = (0, _lib.getDomainFromUrl)(url);
                         if ("string" == typeof this.domain && domain === this.domain) return domain;
                         if (this.domain && "object" === _typeof(this.domain)) for (var _iterator2 = Object.keys(this.domain), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                            var _ref3;
+                            var _ref4;
                             if (_isArray2) {
                                 if (_i2 >= _iterator2.length) break;
-                                _ref3 = _iterator2[_i2++];
+                                _ref4 = _iterator2[_i2++];
                             } else {
                                 if (_i2 = _iterator2.next(), _i2.done) break;
-                                _ref3 = _i2.value;
+                                _ref4 = _i2.value;
                             }
-                            var env = _ref3;
+                            var env = _ref4;
                             if ("test" !== env && domain === this.domain[env]) return domain;
                         }
                     }
@@ -5650,11 +5661,6 @@
                 type: "string",
                 required: !1,
                 queryParam: !0
-            },
-            dimensions: {
-                type: "object",
-                required: !1,
-                sendToChild: !1
             },
             timeout: {
                 type: "number",
@@ -6676,10 +6682,13 @@
             });
         }
         function showElement(element) {
-            element.style.display = STYLE.DISPLAY.BLOCK;
+            element.style.display = "";
         }
         function hideElement(element) {
             element.style.display = STYLE.DISPLAY.NONE;
+        }
+        function destroyElement(element) {
+            element.parentNode && element.parentNode.removeChild(element);
         }
         function showAndAnimate(element, name) {
             var animation = animate(element, name);
@@ -6748,8 +6757,9 @@
         exports.changeStyle = changeStyle, exports.setOverflow = setOverflow, exports.trackDimensions = trackDimensions, 
         exports.onDimensionsChange = onDimensionsChange, exports.dimensionsMatchViewport = dimensionsMatchViewport, 
         exports.bindEvents = bindEvents, exports.setVendorCSS = setVendorCSS, exports.animate = animate, 
-        exports.showElement = showElement, exports.hideElement = hideElement, exports.showAndAnimate = showAndAnimate, 
-        exports.animateAndHide = animateAndHide, exports.addClass = addClass, exports.writeToWindow = writeToWindow;
+        exports.showElement = showElement, exports.hideElement = hideElement, exports.destroyElement = destroyElement, 
+        exports.showAndAnimate = showAndAnimate, exports.animateAndHide = animateAndHide, 
+        exports.addClass = addClass, exports.writeToWindow = writeToWindow;
         var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(3), _fn = __webpack_require__(37), _util = __webpack_require__(22), _error = __webpack_require__(36), parseQuery = (exports.documentReady = new _promise.SyncPromise(function(resolve) {
             if ("complete" === window.document.readyState) return resolve(window.document);
             var interval = setInterval(function() {
