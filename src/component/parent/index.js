@@ -662,7 +662,7 @@ export class ParentComponent extends BaseComponent {
 
             [ POST_MESSAGE.RESIZE ](source, data) {
 
-                if (this.driver.allowResize && this.component.autoResize) {
+                if (this.driver.allowResize) {
                     return this.resize(data.width, data.height);
                 }
             },
