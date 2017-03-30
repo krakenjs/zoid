@@ -1,7 +1,7 @@
 
 import * as postRobot from 'post-robot/src';
 
-import { iframe, popup, getElement, toCSS, hideElement, normalizeDimension } from '../../lib';
+import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -40,40 +40,52 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             throw this.component.error(`Can not find element ${element}`);
         }
 
-        element = this.element || element || document.body;
-
-        let { width, height } = this.getInitialDimensions();
-
         let options = {
-
             attributes: {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
             },
-
+            
             style: {
-                width,
-                height
+                width: '100%',
+                height: '100%'
             }
         };
 
-        this.iframe = iframe(null, options, element);
-        this.element = this.element || this.iframe;
+        this.iframe = iframe(null, options, this.element);
         this.window = this.iframe.contentWindow;
 
+        this.iframe.addEventListener('error', (err) => this.error(err));
+
         hideElement(this.element);
+
+        let sacrificialIframe;
+
+        if (this.component.sacrificialComponentTemplate) {
+            sacrificialIframe = iframe(null, options, this.element);
+            this.componentTemplateWindow = sacrificialIframe.contentWindow;
+            hideElement(this.iframe);
+
+            this.iframe.addEventListener('load', () => {
+                setTimeout(() => {
+                    hideElement(sacrificialIframe);
+                    destroyElement(sacrificialIframe);
+                    showElement(this.iframe);
+                }, 50);
+            });
+        }
 
         this.clean.register('destroyWindow', () => {
 
             this.window.close();
             delete this.window;
 
+            if (sacrificialIframe) {
+                destroyElement(sacrificialIframe);
+            }
+
             if (this.iframe) {
-
-                if (this.iframe.parentNode) {
-                    this.iframe.parentNode.removeChild(this.iframe);
-                }
-
+                destroyElement(this.iframe);
                 delete this.iframe;
             }
         });
@@ -123,11 +135,11 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     },
 
     hide() {
-        this.element.style.display = 'none';
+        showElement(this.element);
     },
 
     show() {
-        this.element.style.display = 'block';
+        hideElement(this.element);
     },
 
     loadUrl(url) {

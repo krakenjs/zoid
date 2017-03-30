@@ -44,12 +44,6 @@ export const internalProps = {
         queryParam: true
     },
 
-    dimensions: {
-        type: 'object',
-        required: false,
-        sendToChild: false
-    },
-
     // A millisecond timeout before onTimeout is called
 
     timeout: {

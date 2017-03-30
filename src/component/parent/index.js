@@ -5,8 +5,8 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide, hideElement, addClass,
-         addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow, toCSS,
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
+         showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
          elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
@@ -505,20 +505,17 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
-    getInitialDimensions() {
+    getInitialDimensions(el) {
 
-        let { width, height, x, y } = this.props.dimensions || this.component.dimensions || {};
-        let result = { x, y };
-
-        if (width) {
-            result.width = toCSS(width);
+        if (this.component.getInitialDimensions) {
+            return this.component.getInitialDimensions(this.props, el);
         }
 
-        if (height) {
-            result.height = toCSS(height);
+        if (this.component.dimensions) {
+            return this.component.dimensions;
         }
 
-        return result;
+        return {};
     }
 
     /*  Watch For Close
@@ -724,11 +721,11 @@ export class ParentComponent extends BaseComponent {
     hide() {
 
         if (this.container) {
-            this.container.style.display = 'none';
+            hideElement(this.container);
         }
 
         if (this.containerFrame) {
-            this.containerFrame.style.display = 'none';
+            hideElement(this.containerFrame);
         }
 
         return this.driver.hide.call(this);
@@ -737,11 +734,11 @@ export class ParentComponent extends BaseComponent {
     show() {
 
         if (this.container) {
-            this.container.style.display = 'block';
+            showElement(this.container);
         }
 
         if (this.containerFrame) {
-            this.containerFrame.style.display = 'block';
+            showElement(this.containerFrame);
         }
 
         return this.driver.show.call(this);
@@ -955,7 +952,9 @@ export class ParentComponent extends BaseComponent {
                     ANIMATION: ANIMATION_NAMES
                 });
             }).then(html => {
-                writeToWindow(this.window, html);
+
+                let win = this.componentTemplateWindow || this.window;
+                writeToWindow(win, html);
             });
         });
     }
@@ -983,6 +982,11 @@ export class ParentComponent extends BaseComponent {
         }).then(containerTemplate => {
 
             if (!containerTemplate) {
+
+                if (this.driver.renderedIntoContainerTemplate) {
+                    throw new Error(`containerTemplate needed to render ${this.context}`);
+                }
+
                 return;
             }
 
@@ -1050,6 +1054,9 @@ export class ParentComponent extends BaseComponent {
 
                 if (this.driver.renderedIntoContainerTemplate) {
                     this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
+
+                    let { width, height } = this.getInitialDimensions(el);
+                    this.resize(width, height);
 
                     if (!this.element) {
                         throw new Error('Could not find element to render component into');

@@ -714,15 +714,17 @@ const STYLE = {
 };
 
 export function showElement(element) {
-    element.style.display = STYLE.DISPLAY.BLOCK;
-    // element.style.visibility = STYLE.VISIBILITY.VISIBLE;
-    // element.style.opacity = '1';
+    element.style.display = '';
 }
 
 export function hideElement(element) {
     element.style.display = STYLE.DISPLAY.NONE;
-    // element.style.visibility = STYLE.VISIBILITY.HIDDEN;
-    // element.style.opacity = '0';
+}
+
+export function destroyElement(element) {
+    if (element.parentNode) {
+        element.parentNode.removeChild(element);
+    }
 }
 
 export function showAndAnimate(element, name) {

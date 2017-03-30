@@ -96,12 +96,15 @@ export class Component extends BaseComponent {
 
         // Auto Resize option
 
+        this.addProp(options, 'getInitialDimensions');
         this.addProp(options, 'autoResize', false);
 
         // Templates and styles for the parent page and the initial rendering of the component
 
         this.addProp(options, 'containerTemplate');
-        this.addProp(options, 'componentTemplate');
+        this.addProp(options, 'componentTemplate', ({ CLASS }) => `<div class="${ CLASS.ELEMENT }"></div>`);
+
+        this.addProp(options, 'sacrificialComponentTemplate', false);
 
         // A mapping of tag->component so we can reference components by string tag name
 
