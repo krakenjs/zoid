@@ -4812,7 +4812,7 @@
                     _ref = _i.value;
                 }
                 var _key = _ref, prop = component.props[_key], value = props[_key];
-                if (prop.sameDomain && origin !== (0, _lib.getDomain)(window)) return;
+                if (prop && prop.sameDomain && origin !== (0, _lib.getDomain)(window)) return;
                 result[_key] = normalizeChildProp(component, props, _key, value), prop && prop.alias && !result[prop.alias] && (result[prop.alias] = value);
             }
             if (required) for (var _iterator2 = Object.keys(component.props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
