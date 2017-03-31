@@ -46,7 +46,7 @@ export function normalizeChildProps(component, props, origin, required = true) {
         let prop = component.props[key];
         let value = props[key];
 
-        if (prop.sameDomain && origin !== getDomain(window)) {
+        if (prop && prop.sameDomain && origin !== getDomain(window)) {
             return;
         }
 
@@ -67,5 +67,3 @@ export function normalizeChildProps(component, props, origin, required = true) {
 
     return result;
 }
-
-
