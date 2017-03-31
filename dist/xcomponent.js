@@ -5386,12 +5386,12 @@
                     iframe: !0,
                     popup: !1
                 }), _this.addProp(options, "defaultContext"), _this.addProp(options, "getInitialDimensions"), 
-                _this.addProp(options, "autoResize", !1), _this.addProp(options, "containerTemplate"), 
-                _this.addProp(options, "componentTemplate", function(_ref) {
+                _this.addProp(options, "autoResize", !1), _this.addProp(options, "containerTemplate", function(_ref) {
                     var CLASS = _ref.CLASS;
                     return '<div class="' + CLASS.ELEMENT + '"></div>';
-                }), _this.addProp(options, "sacrificialComponentTemplate", !1), components[_this.tag] = _this, 
-                _this.registerDrivers(), _this.registerChild(), _this.listenDelegate(), _this;
+                }), _this.addProp(options, "componentTemplate"), _this.addProp(options, "sacrificialComponentTemplate", !1), 
+                components[_this.tag] = _this, _this.registerDrivers(), _this.registerChild(), _this.listenDelegate(), 
+                _this;
             }
             return _inherits(Component, _BaseComponent), _createClass(Component, [ {
                 key: "registerDrivers",
