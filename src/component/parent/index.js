@@ -398,7 +398,7 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`Can not determine domain for bridge`);
         }
 
-        if (postRobot.bridge.needsBridge({ window: this.window, domain: bridgeDomain })) {
+        if (postRobot.bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
             return postRobot.bridge.openBridge(bridgeUrl, bridgeDomain);
         }
     }
