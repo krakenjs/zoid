@@ -635,7 +635,7 @@ function isValidAnimation(element, name) {
 const ANIMATION_START_EVENTS = [ 'animationstart', 'webkitAnimationStart', 'oAnimationStart', 'MSAnimationStart' ];
 const ANIMATION_END_EVENTS   = [ 'animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd' ];
 
-export function animate(element, name, timeout = 1000) {
+export function animate(element, name, clean, timeout = 1000) {
     return new Promise((resolve, reject) => {
 
         element = getElement(element);
@@ -646,25 +646,32 @@ export function animate(element, name, timeout = 1000) {
 
         let hasStarted = false;
 
-        let timer;
+        let startTimeout;
+        let endTimeout;
+        let startEvent;
+        let endEvent;
 
-        let startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
+        startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
 
             if (event.target !== element || event.animationName !== name) {
                 return;
             }
+
+            clearTimeout(startTimeout);
 
             event.stopPropagation();
 
             startEvent.cancel();
             hasStarted = true;
 
-            timer = setTimeout(() => {
+            endTimeout = setTimeout(() => {
+                startEvent.cancel();
+                endEvent.cancel();
                 resolve();
             }, timeout);
         });
 
-        let endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
+        endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
 
             if (event.target !== element || event.animationName !== name) {
                 return;
@@ -679,7 +686,7 @@ export function animate(element, name, timeout = 1000) {
                 return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
             }
 
-            clearTimeout(timer);
+            clearTimeout(endTimeout);
 
             setVendorCSS(element, 'animationName', 'none');
 
@@ -688,15 +695,23 @@ export function animate(element, name, timeout = 1000) {
 
         setVendorCSS(element, 'animationName', name);
 
-        setTimeout(() => {
-            setTimeout(() => {
-                if (!hasStarted) {
-                    startEvent.cancel();
-                    endEvent.cancel();
-                    return resolve();
-                }
-            }, 200);
+        startTimeout = setTimeout(() => {
+            if (!hasStarted) {
+                startEvent.cancel();
+                endEvent.cancel();
+                return resolve();
+            }
         }, 200);
+
+        if (clean) {
+            clean(() => {
+                clearTimeout(startTimeout);
+                clearTimeout(endTimeout);
+                startEvent.cancel();
+                endEvent.cancel();
+                resolve();
+            });
+        }
     });
 }
 
@@ -727,14 +742,14 @@ export function destroyElement(element) {
     }
 }
 
-export function showAndAnimate(element, name) {
-    let animation = animate(element, name);
+export function showAndAnimate(element, name, clean) {
+    let animation = animate(element, name, clean);
     showElement(element);
     return animation;
 }
 
-export function animateAndHide(element, name) {
-    return animate(element, name).then(() => {
+export function animateAndHide(element, name, clean) {
+    return animate(element, name, clean).then(() => {
         hideElement(element);
     });
 }

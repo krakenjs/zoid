@@ -853,7 +853,7 @@ export class ParentComponent extends BaseComponent {
     showContainer() {
         if (this.container) {
             addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
-            return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER);
+            return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
         }
     }
 
@@ -867,7 +867,7 @@ export class ParentComponent extends BaseComponent {
         }).then(() => {
             if (this.element) {
                 addClass(this.element, CLASS_NAMES.SHOW_COMPONENT);
-                showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT);
+                return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
             }
         });
     }
@@ -880,7 +880,7 @@ export class ParentComponent extends BaseComponent {
             addClass(this.container, CLASS_NAMES.HIDE_CONTAINER);
             addClass(this.container, CLASS_NAMES.LOADING);
 
-            return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER);
+            return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
         }
     }
 
@@ -894,7 +894,7 @@ export class ParentComponent extends BaseComponent {
 
         if (this.element) {
             addClass(this.element, CLASS_NAMES.HIDE_COMPONENT);
-            return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT);
+            return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
         }
     }
 
