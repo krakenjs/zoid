@@ -2252,7 +2252,7 @@
                 key: "showContainer",
                 value: function() {
                     if (this.container) return (0, _lib.addClass)(this.container, _constants.CLASS_NAMES.SHOW_CONTAINER), 
-                    (0, _lib.showAndAnimate)(this.container, _constants.ANIMATION_NAMES.SHOW_CONTAINER);
+                    (0, _lib.showAndAnimate)(this.container, _constants.ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
                 }
             }, {
                 key: "showComponent",
@@ -2261,22 +2261,22 @@
                     return _promise.SyncPromise.try(function() {
                         if (_this16.props.onDisplay) return _this16.props.onDisplay();
                     }).then(function() {
-                        _this16.element && ((0, _lib.addClass)(_this16.element, _constants.CLASS_NAMES.SHOW_COMPONENT), 
-                        (0, _lib.showAndAnimate)(_this16.element, _constants.ANIMATION_NAMES.SHOW_COMPONENT));
+                        if (_this16.element) return (0, _lib.addClass)(_this16.element, _constants.CLASS_NAMES.SHOW_COMPONENT), 
+                        (0, _lib.showAndAnimate)(_this16.element, _constants.ANIMATION_NAMES.SHOW_COMPONENT, _this16.clean.register);
                     });
                 }
             }, {
                 key: "hideContainer",
                 value: function() {
                     if (this.container) return (0, _lib.addClass)(this.container, _constants.CLASS_NAMES.HIDE_CONTAINER), 
-                    (0, _lib.addClass)(this.container, _constants.CLASS_NAMES.LOADING), (0, _lib.animateAndHide)(this.container, _constants.ANIMATION_NAMES.HIDE_CONTAINER);
+                    (0, _lib.addClass)(this.container, _constants.CLASS_NAMES.LOADING), (0, _lib.animateAndHide)(this.container, _constants.ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
                 }
             }, {
                 key: "hideComponent",
                 value: function() {
                     if (this.container && (0, _lib.addClass)(this.container, _constants.CLASS_NAMES.LOADING), 
                     this.element) return (0, _lib.addClass)(this.element, _constants.CLASS_NAMES.HIDE_COMPONENT), 
-                    (0, _lib.animateAndHide)(this.element, _constants.ANIMATION_NAMES.HIDE_COMPONENT);
+                    (0, _lib.animateAndHide)(this.element, _constants.ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
                 }
             }, {
                 key: "focus",
@@ -6083,25 +6083,26 @@
             }
             return !1;
         }
-        function animate(element, name) {
-            var timeout = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3;
+        function animate(element, name, clean) {
+            var timeout = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1e3;
             return new _promise.SyncPromise(function(resolve, reject) {
                 if (!(element = getElement(element)) || !isValidAnimation(element, name)) return resolve();
-                var hasStarted = !1, timer = void 0, startEvent = bindEvents(element, ANIMATION_START_EVENTS, function(event) {
-                    event.target === element && event.animationName === name && (event.stopPropagation(), 
-                    startEvent.cancel(), hasStarted = !0, timer = setTimeout(function() {
-                        resolve();
+                var hasStarted = !1, startTimeout = void 0, endTimeout = void 0, startEvent = void 0, endEvent = void 0;
+                startEvent = bindEvents(element, ANIMATION_START_EVENTS, function(event) {
+                    event.target === element && event.animationName === name && (clearTimeout(startTimeout), 
+                    event.stopPropagation(), startEvent.cancel(), hasStarted = !0, endTimeout = setTimeout(function() {
+                        startEvent.cancel(), endEvent.cancel(), resolve();
                     }, timeout));
                 }), endEvent = bindEvents(element, ANIMATION_END_EVENTS, function(event) {
                     if (event.target === element && event.animationName === name) return event.stopPropagation(), 
-                    startEvent.cancel(), endEvent.cancel(), event.animationName !== name ? reject("Expected animation name to be " + name + ", found " + event.animationName) : (clearTimeout(timer), 
+                    startEvent.cancel(), endEvent.cancel(), event.animationName !== name ? reject("Expected animation name to be " + name + ", found " + event.animationName) : (clearTimeout(endTimeout), 
                     setVendorCSS(element, "animationName", "none"), resolve());
+                }), setVendorCSS(element, "animationName", name), startTimeout = setTimeout(function() {
+                    if (!hasStarted) return startEvent.cancel(), endEvent.cancel(), resolve();
+                }, 200), clean && clean(function() {
+                    clearTimeout(startTimeout), clearTimeout(endTimeout), startEvent.cancel(), endEvent.cancel(), 
+                    resolve();
                 });
-                setVendorCSS(element, "animationName", name), setTimeout(function() {
-                    setTimeout(function() {
-                        if (!hasStarted) return startEvent.cancel(), endEvent.cancel(), resolve();
-                    }, 200);
-                }, 200);
             });
         }
         function showElement(element) {
@@ -6113,12 +6114,12 @@
         function destroyElement(element) {
             element.parentNode && element.parentNode.removeChild(element);
         }
-        function showAndAnimate(element, name) {
-            var animation = animate(element, name);
+        function showAndAnimate(element, name, clean) {
+            var animation = animate(element, name, clean);
             return showElement(element), animation;
         }
-        function animateAndHide(element, name) {
-            return animate(element, name).then(function() {
+        function animateAndHide(element, name, clean) {
+            return animate(element, name, clean).then(function() {
                 hideElement(element);
             });
         }
