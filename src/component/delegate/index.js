@@ -10,7 +10,7 @@ export class DelegateComponent extends BaseComponent {
         super(component, options);
 
         this.component = component;
-        this.source = source;
+        this.clean.set('source', source);
 
         this.context = options.context;
 
@@ -53,8 +53,12 @@ export class DelegateComponent extends BaseComponent {
 
     watchForClose() {
         let closeListener = onCloseWindow(this.source, () => this.destroy());
+        let unloadListener = addEventListener(window, 'beforeunload', closeListener.cancel);
 
-        addEventListener(window, 'beforeunload', closeListener.cancel);
+        this.clean.register(() => {
+            closeListener.cancel();
+            unloadListener.cancel();
+        });
     }
 
     getOverrides(context) {

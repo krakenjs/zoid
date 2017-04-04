@@ -113,7 +113,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         open(original, override) {
             return function() {
                 return override.apply(this, arguments).then(() => {
-                    this.window = postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName);
+                    this.clean.set('window', postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName));
 
                     if (!this.window) {
                         throw new Error(`Unable to find parent component iframe window`);

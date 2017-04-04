@@ -171,7 +171,7 @@ export function onCloseWindow(win, callback) {
     let checkWindowClosed = () => {
 
         if (postRobot.winutil.isWindowClosed(win, false)) {
-            clearInterval(interval);
+            interval.cancel();
             return callback();
         }
     };
