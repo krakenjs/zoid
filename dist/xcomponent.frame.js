@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 69);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 68);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(44);
+        var _config = __webpack_require__(43);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -60,7 +60,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _dom = __webpack_require__(72);
+        var _dom = __webpack_require__(71);
         Object.keys(_dom).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -69,7 +69,7 @@
                 }
             });
         });
-        var _fn = __webpack_require__(34);
+        var _fn = __webpack_require__(33);
         Object.keys(_fn).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -78,7 +78,7 @@
                 }
             });
         });
-        var _promise = __webpack_require__(74);
+        var _promise = __webpack_require__(73);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -96,7 +96,7 @@
                 }
             });
         });
-        var _css = __webpack_require__(70);
+        var _css = __webpack_require__(69);
         Object.keys(_css).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -105,7 +105,7 @@
                 }
             });
         });
-        var _decorators = __webpack_require__(71);
+        var _decorators = __webpack_require__(70);
         Object.keys(_decorators).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -114,7 +114,7 @@
                 }
             });
         });
-        var _global = __webpack_require__(73);
+        var _global = __webpack_require__(72);
         Object.keys(_global).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -319,7 +319,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(28);
+        var _promise = __webpack_require__(27);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -355,7 +355,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(48);
+        var _methods = __webpack_require__(47);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -364,7 +364,7 @@
                 }
             });
         });
-        var _tick = __webpack_require__(29);
+        var _tick = __webpack_require__(28);
         Object.keys(_tick).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -373,7 +373,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(49);
+        var _ready = __webpack_require__(48);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -382,16 +382,7 @@
                 }
             });
         });
-        var _cleanup = __webpack_require__(26);
-        Object.keys(_cleanup).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _cleanup[key];
-                }
-            });
-        });
-        var _domain = __webpack_require__(27);
+        var _domain = __webpack_require__(26);
         Object.keys(_domain).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -486,7 +477,7 @@
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
         exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize;
-        var _src = __webpack_require__(12), _conf = __webpack_require__(0), util = exports.util = {
+        var _src = __webpack_require__(9), _conf = __webpack_require__(0), util = exports.util = {
             once: function(method) {
                 if (!method) return method;
                 var called = !1;
@@ -623,8 +614,8 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.global = void 0;
-        var _conf = __webpack_require__(0), _cleanup = __webpack_require__(26), global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
-        global.clean = global.clean || (0, _cleanup.cleanup)(global), global.registerSelf = function() {};
+        var _conf = __webpack_require__(0);
+        (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -649,6 +640,27 @@
             logUnloadSync: !1,
             logPerformance: !0
         }, exports.logLevels = [ "error", "warn", "info", "debug" ];
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _interface = __webpack_require__(38);
+        Object.keys(_interface).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _interface[key];
+                }
+            });
+        });
+        var INTERFACE = function(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }(_interface);
+        exports.default = INTERFACE;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function addPayloadBuilder(builder) {
@@ -826,7 +838,7 @@
         exports.print = print, exports.immediateFlush = immediateFlush, exports.log = log, 
         exports.prefix = prefix, exports.debug = debug, exports.info = info, exports.warn = warn, 
         exports.error = error, exports.track = track;
-        var _util = __webpack_require__(11), _builders = __webpack_require__(9), _config = __webpack_require__(8), buffer = exports.buffer = [], tracking = exports.tracking = {};
+        var _util = __webpack_require__(12), _builders = __webpack_require__(10), _config = __webpack_require__(8), buffer = exports.buffer = [], tracking = exports.tracking = {};
         Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
             console[method] = this.bind(console[method], console);
         }, Function.prototype.call);
@@ -917,28 +929,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(39);
-        Object.keys(_interface).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _interface[key];
-                }
-            });
-        });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
-        exports.default = INTERFACE;
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var _receive = __webpack_require__(45);
+        var _receive = __webpack_require__(44);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -983,7 +974,7 @@
             try {
                 if (win && win.location && win.location.href) return !0;
             } catch (err) {
-                return _global.global.clean.push(_global.global.domainMatches, {
+                return _global.global.domainMatches.push({
                     win: win,
                     match: !1
                 }), !1;
@@ -1326,7 +1317,7 @@
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
         exports.getWindowType = getWindowType, exports.isSameTopWindow = isSameTopWindow, 
         exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
-        var _src = __webpack_require__(12), _util = __webpack_require__(6), _global = __webpack_require__(7), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(9), _util = __webpack_require__(6), _global = __webpack_require__(7), _conf = __webpack_require__(0);
         _global.global.domainMatches = _global.global.domainMatches || new _src.WeakMap();
         var domainMatchTimeout = void 0;
     }, function(module, exports, __webpack_require__) {
@@ -1523,7 +1514,7 @@
             var newObj = {};
             if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
             return newObj.default = obj, newObj;
-        }(_src), _hiBase = __webpack_require__(43), _hiBase2 = function(obj) {
+        }(_src), _hiBase = __webpack_require__(42), _hiBase2 = function(obj) {
             return obj && obj.__esModule ? obj : {
                 default: obj
             };
@@ -1579,7 +1570,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(37);
+        var _interface = __webpack_require__(36);
         Object.keys(_interface).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1601,15 +1592,10 @@
             _global.global.initialized || ((0, _drivers.listenForMessages)(), (0, _lib.initOnReady)(), 
             (0, _lib.listenForMethods)()), _global.global.initialized = !0;
         }
-        function reset() {
-            return _global.global.clean.all().then(function() {
-                return _global.global.initialized = !1, init();
-            });
-        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.Promise = void 0, exports.init = init, exports.reset = reset;
-        var _public = __webpack_require__(52);
+        }), exports.Promise = void 0, exports.init = init;
+        var _public = __webpack_require__(51);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1678,7 +1664,8 @@
             logLevel: function(level, args) {
                 setTimeout(function() {
                     try {
-                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) return;
+                        var logLevel = window.LOG_LEVEL || _conf.CONFIG.LOG_LEVEL;
+                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) return;
                         if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
                         args.unshift("::"), args.unshift("" + (0, _windows.getWindowType)().toLowerCase()), 
                         args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
@@ -1793,7 +1780,7 @@
             };
         }();
         exports.destroyAll = destroyAll;
-        var _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(2), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(5), _drivers = __webpack_require__(31), _validate = __webpack_require__(32), _props = __webpack_require__(63), activeComponents = [];
+        var _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(2), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(5), _drivers = __webpack_require__(30), _validate = __webpack_require__(31), _props = __webpack_require__(62), activeComponents = [];
         _lib.global.props = _lib.global.props || {}, _lib.global.windows = _lib.global.windows || {};
         exports.ParentComponent = (_class = function(_BaseComponent) {
             function ParentComponent(component, context) {
@@ -2659,7 +2646,7 @@
             value: !0
         }), exports.reqTimer = exports.clientTimer = void 0, exports.now = now, exports.reqStartElapsed = reqStartElapsed, 
         exports.initHeartBeat = initHeartBeat, exports.initPerformance = initPerformance;
-        var _config = __webpack_require__(8), _logger = __webpack_require__(10), _builders = __webpack_require__(9), _util = __webpack_require__(11), enablePerformance = window && window.performance && performance.now && performance.timing && performance.timing.connectEnd && performance.timing.navigationStart && Math.abs(performance.now() - Date.now()) > 1e3 && performance.now() - (performance.timing.connectEnd - performance.timing.navigationStart) > 0, clientTimer = exports.clientTimer = timer(), reqTimer = exports.reqTimer = timer(reqStartElapsed());
+        var _config = __webpack_require__(8), _logger = __webpack_require__(11), _builders = __webpack_require__(10), _util = __webpack_require__(12), enablePerformance = window && window.performance && performance.now && performance.timing && performance.timing.connectEnd && performance.timing.navigationStart && Math.abs(performance.now() - Date.now()) > 1e3 && performance.now() - (performance.timing.connectEnd - performance.timing.navigationStart) > 0, clientTimer = exports.clientTimer = timer(), reqTimer = exports.reqTimer = timer(reqStartElapsed());
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -2810,7 +2797,7 @@
         }), exports.resetListeners = resetListeners, exports.addResponseListener = addResponseListener, 
         exports.getResponseListener = getResponseListener, exports.deleteResponseListener = deleteResponseListener, 
         exports.getRequestListener = getRequestListener, exports.addRequestListener = addRequestListener;
-        var _src = __webpack_require__(12), _global = __webpack_require__(7), _lib = __webpack_require__(4), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(9), _global = __webpack_require__(7), _lib = __webpack_require__(4), _conf = __webpack_require__(0);
         _global.global.responseListeners = _global.global.responseListeners || {}, _global.global.requestListeners = _global.global.requestListeners || {}, 
         _global.global.WINDOW_WILDCARD = _global.global.WINDOW_WILDCARD || new function() {}();
         var __DOMAIN_REGEX__ = "__domain_regex__";
@@ -2878,90 +2865,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(47);
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        function cleanup(obj) {
-            var tasks = [];
-            return {
-                getters: {
-                    array: function() {
-                        return [];
-                    },
-                    object: function() {
-                        return {};
-                    }
-                },
-                set: function(name, item) {
-                    return obj[name] = item, this.register(function() {
-                        delete obj[name];
-                    }), item;
-                },
-                push: function(collection, item) {
-                    return collection.push(item), this.register(function() {
-                        var index = collection.indexOf(item);
-                        index !== -1 && collection.splice(index, 1);
-                    }), item;
-                },
-                setItem: function(mapping, key, item) {
-                    return "function" == typeof mapping.set && "function" == typeof mapping.delete ? (mapping.set(key, item), 
-                    this.register(function() {
-                        mapping.delete(key);
-                    }), item) : (mapping[key] = item, this.register(function() {
-                        delete mapping[key];
-                    }), item);
-                },
-                register: function(name, method) {
-                    method || (method = name, name = void 0), tasks.push({
-                        complete: !1,
-                        name: name,
-                        run: function() {
-                            if (!this.complete) return this.complete = !0, method();
-                        }
-                    });
-                },
-                hasTasks: function() {
-                    return Boolean(tasks.filter(function(item) {
-                        return !item.complete;
-                    }).length);
-                },
-                all: function() {
-                    for (var results = []; tasks.length; ) results.push(tasks.pop().run());
-                    return _promise.SyncPromise.all(results).then(function() {});
-                },
-                run: function(name) {
-                    for (var results = [], toClean = [], _iterator = tasks, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                        var _ref;
-                        if (_isArray) {
-                            if (_i >= _iterator.length) break;
-                            _ref = _iterator[_i++];
-                        } else {
-                            if (_i = _iterator.next(), _i.done) break;
-                            _ref = _i.value;
-                        }
-                        var item = _ref;
-                        item.name === name && (toClean.push(item), results.push(item.run()));
-                    }
-                    for (var _iterator2 = toClean, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                        var _ref2;
-                        if (_isArray2) {
-                            if (_i2 >= _iterator2.length) break;
-                            _ref2 = _iterator2[_i2++];
-                        } else {
-                            if (_i2 = _iterator2.next(), _i2.done) break;
-                            _ref2 = _i2.value;
-                        }
-                        var _item = _ref2;
-                        tasks.splice(tasks.indexOf(_item), 1);
-                    }
-                    return _promise.SyncPromise.all(results).then(function() {});
-                }
-            };
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.cleanup = cleanup;
-        var _promise = __webpack_require__(2);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(46);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function matchDomain(domain, origin) {
@@ -2978,7 +2882,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.promise = exports.Promise = void 0;
-        var _promise = __webpack_require__(2), _tick = __webpack_require__(29), Promise = exports.Promise = _promise.SyncPromise, promise = exports.promise = {
+        var _promise = __webpack_require__(2), _tick = __webpack_require__(28), Promise = exports.Promise = _promise.SyncPromise, promise = exports.promise = {
             Promise: Promise,
             run: function(method) {
                 return Promise.resolve().then(method);
@@ -3088,7 +2992,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(2), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(5), _props = __webpack_require__(55);
+        }(), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _promise = __webpack_require__(2), _base = __webpack_require__(15), _window = __webpack_require__(16), _lib = __webpack_require__(1), _constants = __webpack_require__(5), _props = __webpack_require__(54);
         exports.ChildComponent = function(_BaseComponent) {
             function ChildComponent(component) {
                 _classCallCheck(this, ChildComponent);
@@ -3500,7 +3404,7 @@
                     return function() {
                         var _this2 = this;
                         return override.apply(this, arguments).then(function() {
-                            if (_this2.window = postRobot.winutil.findFrameByName((0, _window.getParentComponentWindow)(), _this2.childWindowName), 
+                            if (_this2.clean.set("window", postRobot.winutil.findFrameByName((0, _window.getParentComponentWindow)(), _this2.childWindowName)), 
                             !_this2.window) throw new Error("Unable to find parent component iframe window");
                         });
                     };
@@ -3691,7 +3595,7 @@
             value: !0
         }), exports.CONSTANTS = exports.postRobot = exports.containerTemplate = exports.componentTemplate = exports.destroyAll = exports.getByTag = void 0, 
         exports.create = create;
-        var _component = __webpack_require__(62);
+        var _component = __webpack_require__(61);
         Object.defineProperty(exports, "getByTag", {
             enumerable: !0,
             get: function() {
@@ -3713,7 +3617,7 @@
                 return _component.containerTemplate;
             }
         });
-        var _error = __webpack_require__(33);
+        var _error = __webpack_require__(32);
         Object.keys(_error).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3746,13 +3650,13 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.init = init;
-        var _config = __webpack_require__(8), _util = __webpack_require__(11), _performance = __webpack_require__(22), _logger = __webpack_require__(10), initiated = !1;
+        var _config = __webpack_require__(8), _util = __webpack_require__(12), _performance = __webpack_require__(22), _logger = __webpack_require__(11), initiated = !1;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _logger = __webpack_require__(10);
+        var _logger = __webpack_require__(11);
         Object.keys(_logger).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3761,7 +3665,7 @@
                 }
             });
         });
-        var _init = __webpack_require__(36);
+        var _init = __webpack_require__(35);
         Object.keys(_init).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3770,7 +3674,7 @@
                 }
             });
         });
-        var _transitions = __webpack_require__(38);
+        var _transitions = __webpack_require__(37);
         Object.keys(_transitions).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3779,7 +3683,7 @@
                 }
             });
         });
-        var _builders = __webpack_require__(9);
+        var _builders = __webpack_require__(10);
         Object.keys(_builders).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -3822,7 +3726,7 @@
             value: !0
         }), exports.startTransition = startTransition, exports.endTransition = endTransition, 
         exports.transition = transition;
-        var _performance = __webpack_require__(22), _logger = __webpack_require__(10), _builders = __webpack_require__(9), _util = __webpack_require__(11), _config = __webpack_require__(8), windowID = (0, 
+        var _performance = __webpack_require__(22), _logger = __webpack_require__(11), _builders = __webpack_require__(10), _util = __webpack_require__(12), _config = __webpack_require__(8), windowID = (0, 
         _util.uniqueID)(), pageID = (0, _util.uniqueID)(), currentState = _config.config.initial_state_name, startTime = void 0;
         (0, _builders.addPayloadBuilder)(function() {
             return {
@@ -3839,7 +3743,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _weakmap = __webpack_require__(42);
+        var _weakmap = __webpack_require__(41);
         Object.defineProperty(exports, "WeakMap", {
             enumerable: !0,
             get: function() {
@@ -3895,7 +3799,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _util = __webpack_require__(41), _native = __webpack_require__(40), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
+        }(), _util = __webpack_require__(40), _native = __webpack_require__(39), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
         exports.WeakMap = function() {
             function WeakMap() {
                 _classCallCheck(this, WeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
@@ -4122,7 +4026,7 @@
                 };
                 root.HI_BASE32_TEST && (exports.toUtf8String = toUtf8String), !root.HI_BASE32_TEST && NODE_JS ? module.exports = exports : root && (root.base32 = exports);
             }(void 0);
-        }).call(exports, __webpack_require__(54));
+        }).call(exports, __webpack_require__(53));
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function _defineProperty(obj, key, value) {
@@ -4169,7 +4073,7 @@
             var source = event.source, origin = event.origin, data = event.data, message = parseMessage(data);
             if (message && (0 !== message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) || (origin = message.sourceDomain), 
             _global.global.receivedMessages.indexOf(message.id) === -1)) {
-                _global.global.clean.push(_global.global.receivedMessages, message.id);
+                _global.global.receivedMessages.push(message.id);
                 var level = void 0;
                 if (level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
                 _lib.log.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]), 
@@ -4191,16 +4095,13 @@
             }, receiveMessage(event);
         }
         function listenForMessages() {
-            var listener = _lib.util.listen(window, "message", messageListener);
-            _global.global.clean.register("listener", function() {
-                listener.cancel();
-            });
+            _lib.util.listen(window, "message", messageListener);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(7), _types = __webpack_require__(46);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(7), _types = __webpack_require__(45);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -4308,12 +4209,12 @@
             return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
         function serializeMethod(destination, domain, method, name) {
-            var id = _util.util.uniqueID();
-            return _global.global.clean.setItem(_global.global.methods, id, {
-                destination: destination,
+            var id = _util.util.uniqueID(), methods = _global.global.methods.get(destination);
+            return methods || (methods = {}, _global.global.methods.set(destination, methods)), 
+            methods[id] = {
                 domain: domain,
                 method: method
-            }), {
+            }, {
                 __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
                 __id__: id,
                 __name__: name
@@ -4372,16 +4273,17 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _conf = __webpack_require__(0), _util = __webpack_require__(6), _domain = __webpack_require__(27), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(28), _global = __webpack_require__(7);
-        _global.global.methods = _global.global.methods || {};
+        var _src = __webpack_require__(9), _conf = __webpack_require__(0), _util = __webpack_require__(6), _domain = __webpack_require__(26), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(27), _global = __webpack_require__(7);
+        _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = _util.util.once(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
                 window: _conf.CONSTANTS.WILDCARD,
                 origin: _conf.CONSTANTS.WILDCARD
             }, function(_ref) {
-                var source = _ref.source, origin = _ref.origin, data = _ref.data, meth = _global.global.methods[data.id];
+                var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = _global.global.methods.get(source);
+                if (!methods) throw new Error("Could not find any methods this window has privileges to call");
+                var meth = methods[data.id];
                 if (!meth) throw new Error("Could not find method with id: " + data.id);
-                if (meth.destination !== source) throw new Error("Method window does not match");
                 if (!(0, _domain.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                 return _log.log.debug("Call local method", data.name, data.args), _promise.promise.run(function() {
                     return meth.method.apply({
@@ -4426,7 +4328,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(12), _conf = __webpack_require__(0), _windows = __webpack_require__(14), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(2), _global = __webpack_require__(7);
+        var _src = __webpack_require__(9), _conf = __webpack_require__(0), _windows = __webpack_require__(14), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(2), _global = __webpack_require__(7);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -4530,7 +4432,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.winutil = exports.util = exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(50);
+        var _client = __webpack_require__(49);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4539,7 +4441,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(53);
+        var _server = __webpack_require__(52);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4548,7 +4450,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(51);
+        var _config = __webpack_require__(50);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -4766,21 +4668,21 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _container = __webpack_require__(59);
+        }(), _container = __webpack_require__(58);
         Object.defineProperty(exports, "containerTemplate", {
             enumerable: !0,
             get: function() {
                 return _container.containerTemplate;
             }
         });
-        var _component = __webpack_require__(58);
+        var _component = __webpack_require__(57);
         Object.defineProperty(exports, "componentTemplate", {
             enumerable: !0,
             get: function() {
                 return _component.componentTemplate;
             }
         }), exports.getByTag = getByTag;
-        var _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(15), _child = __webpack_require__(30), _parent = __webpack_require__(20), _delegate = __webpack_require__(61), _props = __webpack_require__(57), _window = __webpack_require__(16), _constants = __webpack_require__(5), _validate2 = __webpack_require__(60), _drivers = __webpack_require__(66), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
+        var _src = __webpack_require__(3), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(17), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(15), _child = __webpack_require__(29), _parent = __webpack_require__(20), _delegate = __webpack_require__(60), _props = __webpack_require__(56), _window = __webpack_require__(16), _constants = __webpack_require__(5), _validate2 = __webpack_require__(59), _drivers = __webpack_require__(65), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
         exports.Component = (_class = function(_BaseComponent) {
             function Component() {
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -5266,13 +5168,13 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _base = __webpack_require__(15), _parent = __webpack_require__(20), _drivers = __webpack_require__(31), _lib = __webpack_require__(1);
+        }(), _base = __webpack_require__(15), _parent = __webpack_require__(20), _drivers = __webpack_require__(30), _lib = __webpack_require__(1);
         exports.DelegateComponent = function(_BaseComponent) {
             function DelegateComponent(component, source) {
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 _classCallCheck(this, DelegateComponent);
                 var _this = _possibleConstructorReturn(this, (DelegateComponent.__proto__ || Object.getPrototypeOf(DelegateComponent)).call(this, component, options));
-                _this.component = component, _this.source = source, _this.context = options.context, 
+                _this.component = component, _this.clean.set("source", source), _this.context = options.context, 
                 _this.props = options.props, _this.props = {
                     uid: options.props.uid,
                     dimensions: options.props.dimensions,
@@ -5301,8 +5203,10 @@
                 value: function() {
                     var _this2 = this, closeListener = (0, _lib.onCloseWindow)(this.source, function() {
                         return _this2.destroy();
+                    }), unloadListener = (0, _lib.addEventListener)(window, "beforeunload", closeListener.cancel);
+                    this.clean.register(function() {
+                        closeListener.cancel(), unloadListener.cancel();
                     });
-                    (0, _lib.addEventListener)(window, "beforeunload", closeListener.cancel);
                 }
             }, {
                 key: "getOverrides",
@@ -5343,7 +5247,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _component = __webpack_require__(56);
+        var _component = __webpack_require__(55);
         Object.keys(_component).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5361,7 +5265,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(30);
+        var _child = __webpack_require__(29);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5486,7 +5390,7 @@
         };
         exports.normalizeProp = normalizeProp, exports.normalizeProps = normalizeProps, 
         exports.propsToQuery = propsToQuery;
-        var _promise = __webpack_require__(2), _validate = __webpack_require__(32), _lib = __webpack_require__(1);
+        var _promise = __webpack_require__(2), _validate = __webpack_require__(31), _lib = __webpack_require__(1);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -5563,7 +5467,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _script = __webpack_require__(68);
+        var _script = __webpack_require__(67);
         Object.keys(_script).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5572,7 +5476,7 @@
                 }
             });
         });
-        var _react = __webpack_require__(67);
+        var _react = __webpack_require__(66);
         Object.keys(_react).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5581,7 +5485,7 @@
                 }
             });
         });
-        var _angular = __webpack_require__(64);
+        var _angular = __webpack_require__(63);
         Object.keys(_angular).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5590,7 +5494,7 @@
                 }
             });
         });
-        var _ember = __webpack_require__(65);
+        var _ember = __webpack_require__(64);
         Object.keys(_ember).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5668,7 +5572,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(35);
+        var _interface = __webpack_require__(34);
         Object.keys(_interface).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5813,7 +5717,7 @@
         function onCloseWindow(win, callback) {
             callback = (0, _fn.once)(callback);
             var interval = void 0, checkWindowClosed = function() {
-                if (postRobot.winutil.isWindowClosed(win, !1)) return clearInterval(interval), callback();
+                if (postRobot.winutil.isWindowClosed(win, !1)) return interval.cancel(), callback();
             };
             return interval = (0, _util.safeInterval)(checkWindowClosed, 50), checkWindowClosed(), 
             {
@@ -6189,7 +6093,7 @@
             var newObj = {};
             if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
             return newObj.default = obj, newObj;
-        }(_src), _promise = __webpack_require__(2), _fn = __webpack_require__(34), _util = __webpack_require__(21), _error = __webpack_require__(33), parseQuery = (exports.documentReady = new _promise.SyncPromise(function(resolve) {
+        }(_src), _promise = __webpack_require__(2), _fn = __webpack_require__(33), _util = __webpack_require__(21), _error = __webpack_require__(32), parseQuery = (exports.documentReady = new _promise.SyncPromise(function(resolve) {
             if ("complete" === window.document.readyState) return resolve(window.document);
             var interval = setInterval(function() {
                 if ("complete" === window.document.readyState) return clearInterval(interval), resolve(window.document);
