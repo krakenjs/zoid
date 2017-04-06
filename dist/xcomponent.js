@@ -3785,8 +3785,15 @@
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.CONSTANTS = exports.postRobot = exports.containerTemplate = exports.componentTemplate = exports.destroyAll = exports.getByTag = void 0, 
+        }), exports.CONSTANTS = exports.postRobot = exports.containerTemplate = exports.componentTemplate = exports.destroyAll = exports.getByTag = exports.getCurrentScriptDir = void 0, 
         exports.create = create;
+        var _lib = __webpack_require__(1);
+        Object.defineProperty(exports, "getCurrentScriptDir", {
+            enumerable: !0,
+            get: function() {
+                return _lib.getCurrentScriptDir;
+            }
+        });
         var _component = __webpack_require__(69);
         Object.defineProperty(exports, "getByTag", {
             enumerable: !0,
@@ -6525,6 +6532,10 @@
                 } catch (err2) {}
             }
         }
+        function getCurrentScriptDir() {
+            return console.warn("Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited"), 
+            document.currentScript ? document.currentScript.src.split("/").slice(0, -1).join("/") : ".";
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.parseQuery = exports.documentReady = void 0;
@@ -6573,7 +6584,7 @@
         exports.bindEvents = bindEvents, exports.setVendorCSS = setVendorCSS, exports.animate = animate, 
         exports.showElement = showElement, exports.hideElement = hideElement, exports.destroyElement = destroyElement, 
         exports.showAndAnimate = showAndAnimate, exports.animateAndHide = animateAndHide, 
-        exports.addClass = addClass, exports.writeToWindow = writeToWindow;
+        exports.addClass = addClass, exports.writeToWindow = writeToWindow, exports.getCurrentScriptDir = getCurrentScriptDir;
         var _src = __webpack_require__(5), postRobot = function(obj) {
             if (obj && obj.__esModule) return obj;
             var newObj = {};
