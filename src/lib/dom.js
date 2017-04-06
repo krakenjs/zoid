@@ -775,3 +775,13 @@ export function writeToWindow(win, html) {
         }
     }
 }
+
+export function getCurrentScriptDir() {
+    console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
+
+    if (document.currentScript) {
+        return document.currentScript.src.split('/').slice(0, -1).join('/');
+    }
+
+    return '.';
+}

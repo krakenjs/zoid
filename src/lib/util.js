@@ -347,4 +347,3 @@ export function getObjectID(obj) {
 
     return uid;
 }
-
