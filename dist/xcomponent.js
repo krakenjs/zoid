@@ -750,7 +750,7 @@
                 if (!(_config.logLevels.indexOf(level) > _config.logLevels.indexOf(logLevel))) {
                     payload = payload || {};
                     var args = [ event ];
-                    args.push(payload), (payload.error || payload.warning) && args.push("\n\n", payload.error || payload.warning);
+                    (0, _util.isIE)() && (payload = JSON.stringify(payload)), args.push(payload), (payload.error || payload.warning) && args.push("\n\n", payload.error || payload.warning);
                     try {
                         window.console[level] && window.console[level].apply ? window.console[level].apply(window.console, args) : window.console.log && window.console.log.apply && window.console.log.apply(window.console, args);
                     } catch (err) {}
@@ -974,11 +974,14 @@
                 return chars.charAt(Math.floor(Math.random() * chars.length));
             });
         }
+        function isIE() {
+            return Boolean(window.document.documentMode);
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.windowReady = void 0, exports.extend = extend, exports.isSameProtocol = isSameProtocol, 
         exports.isSameDomain = isSameDomain, exports.ajax = ajax, exports.promiseDebounce = promiseDebounce, 
-        exports.safeInterval = safeInterval, exports.uniqueID = uniqueID;
+        exports.safeInterval = safeInterval, exports.uniqueID = uniqueID, exports.isIE = isIE;
         var _promise = __webpack_require__(3);
         exports.windowReady = new _promise.SyncPromise(function(resolve) {
             "complete" === document.readyState && resolve(), window.addEventListener("load", resolve);
@@ -3968,16 +3971,22 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function isWindow(obj) {
-            if (windows.indexOf(obj) !== -1) return !0;
             try {
-                if (obj && obj.self === obj) return windows.push(obj), !0;
+                if (obj && obj.self === obj) return !0;
             } catch (err) {}
+            return !1;
+        }
+        function isClosedWindow(obj) {
+            try {
+                if (obj && obj !== window && obj.closed) return !0;
+            } catch (err) {
+                return !err || "Call was rejected by callee.\r\n" !== err.message;
+            }
             return !1;
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.isWindow = isWindow;
-        var windows = [];
+        }), exports.isWindow = isWindow, exports.isClosedWindow = isClosedWindow;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function _classCallCheck(instance, Constructor) {
@@ -4001,11 +4010,26 @@
         }(), _util = __webpack_require__(43), _native = __webpack_require__(42), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
         exports.WeakMap = function() {
             function WeakMap() {
-                _classCallCheck(this, WeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
-                (0, _native.hasNativeWeakMap)() && (this.weakmap = new window.WeakMap()), this.keys = [], 
-                this.values = [];
+                if (_classCallCheck(this, WeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
+                (0, _native.hasNativeWeakMap)()) try {
+                    this.weakmap = new window.WeakMap();
+                } catch (err) {}
+                this.keys = [], this.values = [];
             }
             return _createClass(WeakMap, [ {
+                key: "_cleanupClosedWindows",
+                value: function() {
+                    for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
+                        var value = keys[i];
+                        if ((0, _util.isClosedWindow)(value)) {
+                            if (weakmap) try {
+                                weakmap.delete(value);
+                            } catch (err) {}
+                            keys.splice(i, 1), this.values.splice(i, 1), i -= 1;
+                        }
+                    }
+                }
+            }, {
                 key: "set",
                 value: function(key, value) {
                     var weakmap = this.weakmap;
@@ -4015,6 +4039,7 @@
                         delete this.weakmap;
                     }
                     if ((0, _util.isWindow)(key)) {
+                        this._cleanupClosedWindows();
                         var keys = this.keys, values = this.values, index = keys.indexOf(key);
                         index === -1 ? (keys.push(key), values.push(value)) : values[index] = value;
                     } else {
@@ -4052,6 +4077,7 @@
                         delete this.weakmap;
                     }
                     if ((0, _util.isWindow)(key)) {
+                        this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
                         index !== -1 && (keys.splice(index, 1), this.values.splice(index, 1));
                     } else {
@@ -4068,7 +4094,7 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) return this.keys.indexOf(key) !== -1;
+                    if ((0, _util.isWindow)(key)) return this._cleanupClosedWindows(), this.keys.indexOf(key) !== -1;
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
                 }
