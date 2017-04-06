@@ -31,7 +31,7 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 76);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 77);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -60,7 +60,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _dom = __webpack_require__(79);
+        var _dom = __webpack_require__(80);
         Object.keys(_dom).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -78,7 +78,7 @@
                 }
             });
         });
-        var _promise = __webpack_require__(81);
+        var _promise = __webpack_require__(82);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -96,7 +96,7 @@
                 }
             });
         });
-        var _css = __webpack_require__(77);
+        var _css = __webpack_require__(78);
         Object.keys(_css).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -105,7 +105,7 @@
                 }
             });
         });
-        var _decorators = __webpack_require__(78);
+        var _decorators = __webpack_require__(79);
         Object.keys(_decorators).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -114,7 +114,7 @@
                 }
             });
         });
-        var _global = __webpack_require__(80);
+        var _global = __webpack_require__(81);
         Object.keys(_global).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5175,7 +5175,7 @@
                 return _component.componentTemplate;
             }
         }), exports.getByTag = getByTag;
-        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(18), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(16), _child = __webpack_require__(32), _parent = __webpack_require__(22), _delegate = __webpack_require__(68), _props = __webpack_require__(64), _window = __webpack_require__(17), _constants = __webpack_require__(6), _validate2 = __webpack_require__(67), _drivers = __webpack_require__(73), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
+        var _src = __webpack_require__(5), postRobot = _interopRequireWildcard(_src), _client = __webpack_require__(18), $logger = _interopRequireWildcard(_client), _base = __webpack_require__(16), _child = __webpack_require__(32), _parent = __webpack_require__(22), _delegate = __webpack_require__(68), _props = __webpack_require__(64), _window = __webpack_require__(17), _constants = __webpack_require__(6), _validate2 = __webpack_require__(67), _drivers = __webpack_require__(74), drivers = _interopRequireWildcard(_drivers), _lib = __webpack_require__(1), components = exports.components = {};
         exports.Component = (_class = function(_BaseComponent) {
             function Component() {
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -5211,9 +5211,15 @@
                             if (_i = _iterator.next(), _i.done) break;
                             _ref2 = _i.value;
                         }
-                        var driverName = _ref2, driver = drivers[driverName];
-                        driver.isActive() && driver.register(this);
+                        var driverName = _ref2, driver = drivers[driverName], glob = driver.global();
+                        glob && this.driver(driverName, glob);
                     }
+                }
+            }, {
+                key: "driver",
+                value: function(name, glob) {
+                    if (!drivers[name]) throw new Error("Could not find driver for framework: " + name);
+                    return drivers[name].register(this, glob);
                 }
             }, {
                 key: "registerChild",
@@ -5891,11 +5897,11 @@
         }), exports.angular = void 0;
         var _lib = __webpack_require__(1);
         exports.angular = {
-            isActive: function() {
-                return Boolean(window.angular);
+            global: function() {
+                return window.angular;
             },
-            register: function(component) {
-                window.angular.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function() {
+            register: function(component, ng) {
+                ng.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function() {
                     for (var scope = {}, _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref;
                         if (_isArray) {
@@ -5957,10 +5963,68 @@
         "use strict";
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
+        }
+        function _possibleConstructorReturn(self, call) {
+            if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+            return !call || "object" != typeof call && "function" != typeof call ? self : call;
+        }
+        function _inherits(subClass, superClass) {
+            if ("function" != typeof superClass && null !== superClass) throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+            subClass.prototype = Object.create(superClass && superClass.prototype, {
+                constructor: {
+                    value: subClass,
+                    enumerable: !1,
+                    writable: !0,
+                    configurable: !0
+                }
+            }), superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _script = __webpack_require__(75);
+        var _extends = Object.assign || function(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+            }
+            return target;
+        }, _createClass = function() {
+            function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                    var descriptor = props[i];
+                    descriptor.enumerable = descriptor.enumerable || !1, descriptor.configurable = !0, 
+                    "value" in descriptor && (descriptor.writable = !0), Object.defineProperty(target, descriptor.key, descriptor);
+                }
+            }
+            return function(Constructor, protoProps, staticProps) {
+                return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
+                Constructor;
+            };
+        }();
+        exports.glimmer = {
+            global: function() {},
+            register: function(component, GlimmerComponent) {
+                return function(_GlimmerComponent) {
+                    function _class() {
+                        return _classCallCheck(this, _class), _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+                    }
+                    return _inherits(_class, _GlimmerComponent), _createClass(_class, [ {
+                        key: "didInsertElement",
+                        value: function() {
+                            component.render(_extends({}, this.args), this.element);
+                        }
+                    } ]), _class;
+                }(GlimmerComponent);
+            }
+        };
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _script = __webpack_require__(76);
         Object.keys(_script).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5969,7 +6033,7 @@
                 }
             });
         });
-        var _react = __webpack_require__(74);
+        var _react = __webpack_require__(75);
         Object.keys(_react).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -5996,6 +6060,15 @@
                 }
             });
         });
+        var _glimmer = __webpack_require__(73);
+        Object.keys(_glimmer).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _glimmer[key];
+                }
+            });
+        });
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -6003,17 +6076,21 @@
         }), exports.react = void 0;
         var _lib = __webpack_require__(1);
         exports.react = {
-            isActive: function() {
-                return Boolean(window.React);
+            global: function() {
+                if (window.React && window.ReactDOM) return {
+                    React: window.React,
+                    ReactDOM: window.ReactDOM
+                };
             },
-            register: function(component) {
-                component.react = window.React.createClass({
+            register: function(component, _ref) {
+                var React = _ref.React, ReactDOM = _ref.ReactDOM;
+                return component.react = React.createClass({
                     render: function() {
-                        return window.React.createElement("div", null);
+                        return React.createElement("div", null);
                     },
                     componentDidMount: function() {
                         component.log("instantiate_react_component");
-                        var el = window.ReactDOM.findDOMNode(this), parent = component.init((0, _lib.extend)({}, this.props), null, el);
+                        var el = ReactDOM.findDOMNode(this), parent = component.init((0, _lib.extend)({}, this.props), null, el);
                         this.setState({
                             parent: parent
                         }), parent.render(el);
@@ -6021,7 +6098,7 @@
                     componentDidUpdate: function() {
                         this.state && this.state.parent && this.state.parent.updateProps((0, _lib.extend)({}, this.props));
                     }
-                });
+                }), component.react;
             }
         };
     }, function(module, exports, __webpack_require__) {
@@ -6030,7 +6107,7 @@
             value: !0
         });
         var htmlComponent = exports.htmlComponent = {
-            isActive: function() {
+            global: function() {
                 return !0;
             },
             register: function register(component) {
