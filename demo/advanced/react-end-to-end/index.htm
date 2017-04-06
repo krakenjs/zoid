@@ -16,6 +16,11 @@
 
     <script type="text/babel">
 
+        let MyLoginReactXComponent = MyLoginXComponent.driver('react', {
+            React: window.React,
+            ReactDOM: window.ReactDOM
+        });
+
         let App = React.createClass({
 
             getInitialState() {
@@ -37,7 +42,7 @@
 
                             ? <p>User logged in with email: { this.state.email }</p>
 
-                            : <MyLoginXComponent.react prefilledEmail={ this.state.prefilledEmail } onLogin={ onLogin } />
+                            : <MyLoginReactXComponent prefilledEmail={ this.state.prefilledEmail } onLogin={ onLogin } />
                         }
                     </div>
                 );

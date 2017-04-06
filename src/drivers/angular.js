@@ -79,5 +79,7 @@ export let angular = {
                 }
             };
         });
+
+        return component;
     }
 };

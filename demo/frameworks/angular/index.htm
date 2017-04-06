@@ -20,7 +20,9 @@
     <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>
 
     <script>
-        angular.module('app', ['my-login-component']).controller('appController', function($scope) {
+        var MyLoginAngularXComponent = MyLoginXComponent.driver('angular', window.angular);
+
+        angular.module('app', [ MyLoginAngularXComponent.tag ]).controller('appController', function($scope) {
 
             $scope.userLoggedIn = false;
             $scope.email = 'foo@bar.com';
