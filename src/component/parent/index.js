@@ -104,7 +104,9 @@ export class ParentComponent extends BaseComponent {
             });
 
             tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                return postRobot.bridge.linkUrl(this.window, domain);
+                if (postRobot.bridge) {
+                    return postRobot.bridge.linkUrl(this.window, domain);
+                }
             });
 
             tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
@@ -385,6 +387,14 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     openBridge() {
+
+        if (!this.driver.needsBridge) {
+            return;
+        }
+
+        if (!postRobot.bridge) {
+            return;
+        }
 
         let bridgeUrl = this.component.getBridgeUrl(this.props.env);
 
