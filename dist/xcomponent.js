@@ -5901,7 +5901,7 @@
                 return window.angular;
             },
             register: function(component, ng) {
-                ng.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function() {
+                return ng.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function() {
                     for (var scope = {}, _iterator = Object.keys(component.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref;
                         if (_isArray) {
@@ -5956,7 +5956,7 @@
                             });
                         }
                     };
-                });
+                }), component;
             }
         };
     }, function(module, exports, __webpack_require__) {
