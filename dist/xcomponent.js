@@ -1942,7 +1942,7 @@
                             return _this2.showComponent();
                         }), tasks.linkDomain = _promise.SyncPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref) {
                             var _ref2 = _slicedToArray(_ref, 1), domain = _ref2[0];
-                            return postRobot.bridge.linkUrl(_this2.window, domain);
+                            if (postRobot.bridge) return postRobot.bridge.linkUrl(_this2.window, domain);
                         }), tasks.listen = _promise.SyncPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref3) {
                             var _ref4 = _slicedToArray(_ref3, 1), domain = _ref4[0];
                             _this2.listen(_this2.window, domain);
@@ -2095,14 +2095,16 @@
             }, {
                 key: "openBridge",
                 value: function() {
-                    var bridgeUrl = this.component.getBridgeUrl(this.props.env);
-                    if (bridgeUrl) {
-                        var bridgeDomain = this.component.getBridgeDomain(this.props.env);
-                        if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
-                        return postRobot.bridge.needsBridge({
-                            win: this.window,
-                            domain: bridgeDomain
-                        }) ? postRobot.bridge.openBridge(bridgeUrl, bridgeDomain) : void 0;
+                    if (this.driver.needsBridge && postRobot.bridge) {
+                        var bridgeUrl = this.component.getBridgeUrl(this.props.env);
+                        if (bridgeUrl) {
+                            var bridgeDomain = this.component.getBridgeDomain(this.props.env);
+                            if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
+                            return postRobot.bridge.needsBridge({
+                                win: this.window,
+                                domain: bridgeDomain
+                            }) ? postRobot.bridge.openBridge(bridgeUrl, bridgeDomain) : void 0;
+                        }
                     }
                 }
             }, {
