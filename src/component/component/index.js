@@ -122,10 +122,19 @@ export class Component extends BaseComponent {
     registerDrivers() {
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
-            if (driver.isActive()) {
-                driver.register(this);
+            let glob = driver.global();
+            if (glob) {
+                this.driver(driverName, glob);
             }
         }
+    }
+
+    driver(name, glob) {
+        if (!drivers[name]) {
+            throw new Error(`Could not find driver for framework: ${name}`);
+        }
+
+        return drivers[name].register(this, glob);
     }
 
     registerChild() {

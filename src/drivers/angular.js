@@ -3,13 +3,13 @@ import { dasherizeToCamel, replaceObject } from '../lib';
 
 export let angular = {
 
-    isActive() {
-        return Boolean(window.angular);
+    global() {
+        return window.angular;
     },
 
-    register(component) {
+    register(component, ng) {
 
-        window.angular.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
+        ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
 
             let scope = {};
 

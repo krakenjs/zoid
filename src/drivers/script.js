@@ -1,7 +1,7 @@
 
 export let htmlComponent = {
 
-    isActive() {
+    global() {
         return true;
     },
 

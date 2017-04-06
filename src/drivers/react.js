@@ -3,22 +3,27 @@ import { extend } from '../lib';
 
 export let react = {
 
-    isActive() {
-        return Boolean(window.React);
+    global() {
+        if (window.React && window.ReactDOM) {
+            return {
+                React: window.React,
+                ReactDOM: window.ReactDOM
+            };
+        }
     },
 
-    register(component) {
+    register(component, { React, ReactDOM }) {
 
-        component.react = window.React.createClass({
+        component.react = React.createClass({
 
             render() {
-                return window.React.createElement('div', null);
+                return React.createElement('div', null);
             },
 
             componentDidMount() {
                 component.log(`instantiate_react_component`);
 
-                let el = window.ReactDOM.findDOMNode(this);
+                let el = ReactDOM.findDOMNode(this);
 
                 let parent = component.init(extend({}, this.props), null, el);
 
@@ -34,5 +39,7 @@ export let react = {
                 }
             }
         });
+
+        return component.react;
     }
 };
