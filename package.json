@@ -24,6 +24,10 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   ],
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "readmeFilename": "README.md",
   "devDependencies": {
     "babel-core": "^6.7.7",
