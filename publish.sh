@@ -2,6 +2,9 @@
 
 set -e;
 
+rm -rf node_modules/post-robot node_modules/sync-browser-mocks node_modules/beaver-logger node_modules/cross-domain-safe-weakmap
+npm install post-robot sync-browser-mocks beaver-logger cross-domain-safe-weakmap
+
 gulp build;
 
 git add dist;
