@@ -56,9 +56,19 @@ MyLoginComponent.render({
 Implement the component in the iframe:
 
 ```javascript
-onUserLogin(function(email) {
-    window.xprops.onLogin('foo@bar.com');
-});
+<input type="text" id="email"></input>
+<input type="password" id="password"></input>
+<button id="login">Log In</button>
+
+<script>
+    document.querySelector('#email').value = window.xprops.prefilledEmail;
+
+    document.querySelector('#login').addEventListener('click', function() {
+        if (validUser(document.querySelector('#email').value, document.querySelector('#password').value)) {
+            window.xprops.onLogin(document.querySelector('#email').value);
+        }
+    });
+</script>
 ```
 
 ### Useful Links
