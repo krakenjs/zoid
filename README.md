@@ -56,7 +56,8 @@ MyLoginComponent.render({
 Implement the component in the iframe:
 
 ```javascript
-<input type="text" id="email" /> <input type="password" id="password" />
+<input type="text" id="email" />
+<input type="password" id="password" />
 <button id="login">Log In</button>
 
 <script>
