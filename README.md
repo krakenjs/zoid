@@ -56,16 +56,19 @@ MyLoginComponent.render({
 Implement the component in the iframe:
 
 ```javascript
-<input type="text" id="email"></input>
-<input type="password" id="password"></input>
+<input type="text" id="email" /> <input type="password" id="password" />
 <button id="login">Log In</button>
 
 <script>
-    document.querySelector('#email').value = window.xprops.prefilledEmail;
+    var email = document.querySelector('#email');
+    var password = document.querySelector('#password');
+    var button = document.querySelector('#login');
 
-    document.querySelector('#login').addEventListener('click', function() {
-        if (validUser(document.querySelector('#email').value, document.querySelector('#password').value)) {
-            window.xprops.onLogin(document.querySelector('#email').value);
+    email.value = window.xprops.prefilledEmail;
+
+    button.addEventListener('click', function() {
+        if (validUser(email.value, password.value)) {
+            window.xprops.onLogin(email.value);
         }
     });
 </script>
