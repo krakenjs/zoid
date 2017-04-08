@@ -7,7 +7,7 @@ Take a look at the [demos](./demo/index.md) to see this example in action.
 
 ### As the component creator
 
-First I'd create a spec for the component's interface:
+First I'd create a spec for the component's interface. I should do this once -- once I've created the component, I can render it multiple times if I need to:
 
 ```javascript
 var MyLoginComponent = xcomponent.create({
@@ -27,7 +27,7 @@ var MyLoginComponent = xcomponent.create({
         height: 200
     },
 
-    // The properties they can (or must) pass down to my component
+    // The properties they can (or must) pass down to my component. This is optional.
 
     props: {
 
@@ -118,6 +118,8 @@ My life is even easier. I just need to drop in your component onto my page:
     }, '#container');
 </script>
 ```
+
+I can render a component as many times as I like on my page.
 
 This is even easier if you're using a supported framework like React, Ember or Angular -- xcomponent will automatically
 set up bindings for these frameworks:
