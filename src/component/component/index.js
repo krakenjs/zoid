@@ -41,6 +41,10 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'tag');
 
+        if (components[this.tag]) {
+            throw new Error(`Can not register multiple components with the same tag`);
+        }
+
         this.validate(options);
 
         // Name of the component, used for logging. Auto-generated from the tag name by default.
