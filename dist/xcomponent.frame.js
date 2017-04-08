@@ -164,7 +164,7 @@
             }
         }
         function dispatchError(err) {
-            if (dispatchedErrors.indexOf(err) === -1) {
+            if (-1 === dispatchedErrors.indexOf(err)) {
                 dispatchedErrors.push(err), setTimeout(function() {
                     throw err;
                 }, 1);
@@ -1008,7 +1008,7 @@
         function isAncestorParent(parent, child) {
             if (!parent || !child) return !1;
             var childParent = getParent(child);
-            return childParent ? childParent === parent : getParents(child).indexOf(parent) !== -1;
+            return childParent ? childParent === parent : -1 !== getParents(child).indexOf(parent);
         }
         function getFrames(win) {
             var result = [], frames = void 0;
@@ -1097,7 +1097,7 @@
                         _ref4 = _i5.value;
                     }
                     var frame = _ref4;
-                    result.indexOf(frame) === -1 && result.push(frame);
+                    -1 === result.indexOf(frame) && result.push(frame);
                 }
             }
             return result;
@@ -1165,14 +1165,14 @@
                 }
                 var childFrame = _ref6;
                 try {
-                    if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) return childFrame;
+                    if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                 } catch (err) {}
             }
             try {
-                if (winFrames.indexOf(win.frames[name]) !== -1) return win.frames[name];
+                if (-1 !== winFrames.indexOf(win.frames[name])) return win.frames[name];
             } catch (err) {}
             try {
-                if (winFrames.indexOf(win[name]) !== -1) return win[name];
+                if (-1 !== winFrames.indexOf(win[name])) return win[name];
             } catch (err) {}
         }
         function findChildFrameByName(win, name) {
@@ -1411,7 +1411,7 @@
                             return errored = !0, self.error(err);
                         }
                     };
-                    return doOnce !== !1 && (wrapper = (0, _lib.once)(wrapper)), wrapper;
+                    return !1 !== doOnce && (wrapper = (0, _lib.once)(wrapper)), wrapper;
                 }
             }, {
                 key: "listen",
@@ -1967,7 +1967,7 @@
                             _ref9 = _i.value;
                         }
                         var key = _ref9, prop = this.component.props[key];
-                        prop && prop.sendToChild === !1 || (result[key] = this.props[key]);
+                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
                     }
                     return result;
                 }
@@ -2401,7 +2401,7 @@
                 key: "error",
                 value: function(err) {
                     var _this21 = this;
-                    if (this.handledErrors = this.handledErrors || [], this.handledErrors.indexOf(err) === -1) return this.handledErrors.push(err), 
+                    if (this.handledErrors = this.handledErrors || [], -1 === this.handledErrors.indexOf(err)) return this.handledErrors.push(err), 
                     _promise.SyncPromise.try(function() {
                         return _this21.component.logError("error", {
                             error: err.stack || err.toString()
@@ -2832,7 +2832,7 @@
                     domain: domain
                 });
                 var level = void 0;
-                if (level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
+                if (level = -1 !== _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
                 _lib.log.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || _conf.CONSTANTS.WILDCARD, "\n\n", message ]), 
                 _conf.CONFIG.MOCK_MODE) return delete message.target, window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
                     origin: _lib.util.getDomain(window),
@@ -2876,7 +2876,7 @@
         function matchDomain(domain, origin) {
             return "string" == typeof domain ? !(0, _util.isRegex)(origin) && (!Array.isArray(origin) && (domain === _conf.CONSTANTS.WILDCARD || origin === domain)) : (0, 
             _util.isRegex)(domain) ? (0, _util.isRegex)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!(0, 
-            _util.isRegex)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
+            _util.isRegex)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : -1 !== domain.indexOf(origin)));
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -3325,7 +3325,7 @@
                         window.console[level] = function() {
                             try {
                                 var logLevel = window.LOG_LEVEL;
-                                if (!logLevel || logLevels.indexOf(logLevel) === -1) return _original.apply(this, arguments);
+                                if (!logLevel || -1 === logLevels.indexOf(logLevel)) return _original.apply(this, arguments);
                                 if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) return;
                                 return _original.apply(this, arguments);
                             } catch (err2) {}
@@ -3364,7 +3364,7 @@
                 var options = {
                     attributes: {
                         name: this.childWindowName,
-                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
+                        scrolling: !1 === this.component.scrolling ? "no" : "yes"
                     },
                     style: {
                         width: "100%",
@@ -3446,7 +3446,7 @@
                     } else if ("number" === prop.type && isNaN(parseInt(value, 10))) throw new Error("Prop is not a number: " + key);
                     "function" == typeof prop.validate && prop.validate(value, props);
                 }
-            } else if (required && prop.required !== !1 && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
+            } else if (required && !1 !== prop.required && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
         }
         function validateProps(component, props) {
             var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
@@ -3851,7 +3851,7 @@
                     if ((0, _util.isWindow)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                        index === -1 ? (keys.push(key), values.push(value)) : values[index] = value;
+                        -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
                     } else {
                         var name = this.name, entry = key[name];
                         entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
@@ -3871,7 +3871,7 @@
                     }
                     if ((0, _util.isWindow)(key)) {
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (index === -1) return;
+                        if (-1 === index) return;
                         return this.values[index];
                     }
                     var entry = key[this.name];
@@ -3889,7 +3889,7 @@
                     if ((0, _util.isWindow)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
-                        index !== -1 && (keys.splice(index, 1), this.values.splice(index, 1));
+                        -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
                     } else {
                         var entry = key[this.name];
                         entry && entry[0] === key && (entry[0] = entry[1] = void 0);
@@ -3904,7 +3904,7 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) return this._cleanupClosedWindows(), this.keys.indexOf(key) !== -1;
+                    if ((0, _util.isWindow)(key)) return this._cleanupClosedWindows(), -1 !== this.keys.indexOf(key);
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
                 }
@@ -4034,7 +4034,7 @@
                 }, decode = function(base32Str, asciiOnly) {
                     if (!asciiOnly) return toUtf8String(decodeAsBytes(base32Str));
                     var v1, v2, v3, v4, v5, v6, v7, v8, str = "", length = base32Str.indexOf("=");
-                    length == -1 && (length = base32Str.length);
+                    -1 == length && (length = base32Str.length);
                     for (var i = 0, count = length >> 3 << 3; i < count; ) v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)], 
                     v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)], v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)], 
                     v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)], v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)], 
@@ -4107,10 +4107,10 @@
             }
             var source = event.source, origin = event.origin, data = event.data, message = parseMessage(data);
             if (message && (0 !== message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) || (origin = message.sourceDomain), 
-            _global.global.receivedMessages.indexOf(message.id) === -1)) {
+            -1 === _global.global.receivedMessages.indexOf(message.id))) {
                 _global.global.receivedMessages.push(message.id);
                 var level = void 0;
-                if (level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
+                if (level = -1 !== _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
                 _lib.log.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]), 
                 (0, _lib.isWindowClosed)(source)) return _lib.log.debug("Source window is closed - can not send " + message.type + " " + message.name);
                 message.data && (message.data = (0, _lib.deserializeMethods)(source, origin, message.data)), 
@@ -4368,7 +4368,7 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function request(options) {
-            return _lib.promise.nodeify(new _lib.promise.Promise(function(resolve, reject) {
+            var prom = _lib.promise.run(function() {
                 if (!options.name) throw new Error("Expected options.name");
                 if (_conf.CONFIG.MOCK_MODE) options.window = window; else if ("string" == typeof options.window) {
                     var el = document.getElementById(options.window);
@@ -4386,26 +4386,31 @@
                 var hash = options.name + "_" + _lib.util.uniqueID();
                 if ((0, _drivers.addResponseListener)(hash, options), (0, _lib.isWindowClosed)(options.window)) throw new Error("Target window is closed");
                 var hasResult = !1;
-                return options.respond = function(err, result) {
-                    return err || (hasResult = !0), err ? reject(err) : resolve(result);
-                }, _lib.promise.run(function() {
+                return _lib.promise.run(function() {
                     if ((0, _lib.isAncestor)(window, options.window)) return (0, _lib.onWindowReady)(options.window);
                 }).then(function() {
-                    if ((0, _drivers.sendMessage)(options.window, {
-                        hash: hash,
-                        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-                        name: options.name,
-                        data: options.data,
-                        fireAndForget: options.fireAndForget
-                    }, options.domain).catch(reject), options.fireAndForget) return resolve();
-                    var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function(remaining) {
-                        return options.ack || (0, _lib.isWindowClosed)(options.window) ? ackTimeout.cancel() : remaining ? void 0 : reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
+                    return new _lib.promise.Promise(function(resolve, reject) {
+                        if (options.respond = function(err, result) {
+                            return err || (hasResult = !0), err ? reject(err) : resolve(result);
+                        }, (0, _drivers.sendMessage)(options.window, {
+                            hash: hash,
+                            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                            name: options.name,
+                            data: options.data,
+                            fireAndForget: options.fireAndForget
+                        }, options.domain).catch(reject), options.fireAndForget) return resolve();
+                        var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function(remaining) {
+                            return options.ack || (0, _lib.isWindowClosed)(options.window) ? ackTimeout.cancel() : remaining ? void 0 : reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
+                        });
+                        if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
+                            return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
+                        }, options.timeout);
                     });
-                    if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
-                        return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
-                    }, options.timeout);
-                }).catch(reject);
-            }), options.callback);
+                }).catch(function(err) {
+                    throw (0, _drivers.deleteResponseListener)(hash), err;
+                });
+            });
+            return _lib.promise.nodeify(prom, options.callback);
         }
         function _send(window, name, data, options, callback) {
             return callback || (options || "function" != typeof data ? "function" == typeof options && (callback = options, 
@@ -4723,7 +4728,8 @@
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
                 _classCallCheck(this, Component);
                 var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this, options));
-                return _this.addProp(options, "tag"), _this.validate(options), _this.addProp(options, "name", _this.tag.replace(/-/g, "_")), 
+                if (_this.addProp(options, "tag"), components[_this.tag]) throw new Error("Can not register multiple components with the same tag");
+                return _this.validate(options), _this.addProp(options, "name", _this.tag.replace(/-/g, "_")), 
                 _this.props = _extends({}, _props.internalProps, options.props || {}), options.props || (_this.looseProps = !0), 
                 _this.addProp(options, "dimensions", {
                     width: "300px",
@@ -5108,7 +5114,7 @@
                 var key = _ref, prop = options.props[key];
                 if (!prop || "object" !== (void 0 === prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
                 if (!prop.type) throw component.error("Expected prop.type");
-                if (_constants.PROP_TYPES_LIST.indexOf(prop.type) === -1) throw component.error("Expected prop.type to be one of " + _constants.PROP_TYPES_LIST.join(", "));
+                if (-1 === _constants.PROP_TYPES_LIST.indexOf(prop.type)) throw component.error("Expected prop.type to be one of " + _constants.PROP_TYPES_LIST.join(", "));
                 if (prop.required && prop.def) throw component.error("Required prop can not have a default value");
             }
         }
@@ -5130,13 +5136,13 @@
                         _ref2 = _i2.value;
                     }
                     var context = _ref2;
-                    if (_constants.CONTEXT_TYPES_LIST.indexOf(context) === -1) throw component.error("Unsupported context type: " + context);
+                    if (-1 === _constants.CONTEXT_TYPES_LIST.indexOf(context)) throw component.error("Unsupported context type: " + context);
                     (options.contexts[context] || void 0 === options.contexts[context]) && (anyEnabled = !0);
                 }
                 if (!anyEnabled) throw component.error("No context type is enabled");
             }
             if (options.defaultContext) {
-                if (_constants.CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) throw component.error("Unsupported context type: " + options.defaultContext);
+                if (-1 === _constants.CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw component.error("Unsupported context type: " + options.defaultContext);
                 if (options.contexts && !options.contexts[options.defaultContext]) throw component.error("Disallowed default context type: " + options.defaultContext);
             }
             if (!options.url && !options.buildUrl) throw component.error("Expected options.url to be passed");
@@ -6140,7 +6146,7 @@
             });
         }
         function addClass(element, name) {
-            element.classList ? element.classList.add(name) : element.className.split(/\s+/).indexOf(name) === -1 && (element.className += " " + name);
+            element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
         }
         function writeToWindow(win, html) {
             try {
@@ -6217,7 +6223,7 @@
         }), exports.parseQuery = (0, _fn.memoize)(function(queryString) {
             var params = {};
             if (!queryString) return params;
-            if (queryString.indexOf("=") === -1) throw new Error("Can not parse query string params: " + queryString);
+            if (-1 === queryString.indexOf("=")) throw new Error("Can not parse query string params: " + queryString);
             for (var _iterator6 = queryString.split("&"), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
                 var _ref8;
                 if (_isArray6) {
