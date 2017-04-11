@@ -45,7 +45,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
             },
-            
+
             style: {
                 width: '100%',
                 height: '100%'
@@ -164,8 +164,8 @@ if (__POPUP_SUPPORT__) {
 
             let { width, height, x, y } = this.getInitialDimensions();
 
-            width = normalizeDimension(width, window.innerWidth);
-            height = normalizeDimension(height, window.innerHeight);
+            width = normalizeDimension(width, window.outerWidth);
+            height = normalizeDimension(height, window.outerWidth);
 
             let pos = getPosition({ width, height, x, y });
 
