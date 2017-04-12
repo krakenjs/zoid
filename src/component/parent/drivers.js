@@ -78,6 +78,9 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         this.clean.register('destroyWindow', () => {
 
             this.window.close();
+
+            postRobot.cleanUpWindow(this.window);
+
             delete this.window;
 
             if (sacrificialIframe) {
@@ -186,6 +189,7 @@ if (__POPUP_SUPPORT__) {
             this.clean.register('destroyWindow', () => {
                 if (this.window) {
                     this.window.close();
+                    postRobot.cleanUpWindow(this.window);
                     delete this.window;
                 }
             });
