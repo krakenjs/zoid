@@ -1,8 +1,9 @@
 
-import xcomponent from 'src/index';
+import xcomponent from 'src/index'
+import { CONFIG } from 'post-robot/src';
 import './tests';
 
-xcomponent.postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
 
 window.console.karma = function() {
     let karma = window.karma || (window.top && window.top.karma) || (window.parent && window.parent.karma) || (window.opener && window.opener.karma);

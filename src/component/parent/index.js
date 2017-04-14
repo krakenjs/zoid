@@ -1,6 +1,7 @@
 
 import * as $logger from 'beaver-logger/client';
-import * as postRobot from 'post-robot/src';
+import { send, bridge } from 'post-robot/src';
+import { isSameDomain, isWindowClosed  } from 'post-robot/src/lib/windows';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
@@ -104,8 +105,8 @@ export class ParentComponent extends BaseComponent {
             });
 
             tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                if (postRobot.bridge) {
-                    return postRobot.bridge.linkUrl(this.window, domain);
+                if (bridge) {
+                    return bridge.linkUrl(this.window, domain);
                 }
             });
 
@@ -166,7 +167,7 @@ export class ParentComponent extends BaseComponent {
             throw this.component.error(`Must pass window to renderTo`);
         }
 
-        if (postRobot.winutil.isSameDomain(win)) {
+        if (isSameDomain(win)) {
             return;
         }
 
@@ -213,7 +214,7 @@ export class ParentComponent extends BaseComponent {
     buildChildWindowName({ renderTo = window } = {}) {
 
         let sameWindow = (renderTo === window);
-        let sameDomain = postRobot.winutil.isSameDomain(renderTo);
+        let sameDomain = isSameDomain(renderTo);
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
@@ -264,7 +265,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`send_to_parent_${name}`);
 
-        return postRobot.send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
+        return send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
     }
 
 
@@ -392,7 +393,7 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
-        if (!postRobot.bridge) {
+        if (!bridge) {
             return;
         }
 
@@ -408,8 +409,8 @@ export class ParentComponent extends BaseComponent {
             throw new Error(`Can not determine domain for bridge`);
         }
 
-        if (postRobot.bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
-            return postRobot.bridge.openBridge(bridgeUrl, bridgeDomain);
+        if (bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
+            return bridge.openBridge(bridgeUrl, bridgeDomain);
         }
     }
 
@@ -448,7 +449,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`delegate_${this.context}`);
 
-        let delegate = postRobot.send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
+        let delegate = send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
             context: this.context,
             env: this.props.env,
@@ -845,7 +846,7 @@ export class ParentComponent extends BaseComponent {
 
             // IE in metro mode -- child window needs to close itself, or close will hang
 
-            if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !postRobot.winutil.isWindowClosed(win)) {
+            if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
                 this.childExports.close().catch(noop);
             }
 

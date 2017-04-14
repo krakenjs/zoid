@@ -1,5 +1,5 @@
 
-import * as postRobot from 'post-robot/src';
+import { isWindowClosed } from 'post-robot/src/lib/windows';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';
@@ -110,7 +110,7 @@ export function popup(url, options) {
 
     let win = window.open(url, options.name, params, true);
 
-    if (postRobot.winutil.isWindowClosed(win)) {
+    if (isWindowClosed(win)) {
         let err = new PopupOpenError(`Can not open popup window - blocked`);
         throw err;
     }
@@ -170,7 +170,7 @@ export function onCloseWindow(win, callback) {
 
     let checkWindowClosed = () => {
 
-        if (postRobot.winutil.isWindowClosed(win, false)) {
+        if (isWindowClosed(win, false)) {
             interval.cancel();
             return callback();
         }

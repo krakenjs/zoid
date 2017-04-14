@@ -1,5 +1,5 @@
 
-import * as postRobot from 'post-robot/src';
+import { on } from 'post-robot/src';
 import * as $logger from 'beaver-logger/client';
 
 import { BaseComponent } from '../base';
@@ -153,7 +153,7 @@ export class Component extends BaseComponent {
     }
 
     listenDelegate() {
-        postRobot.on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
+        on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
 
             let domain = this.getDomain(null, { env: data.env || this.defaultEnv });
 

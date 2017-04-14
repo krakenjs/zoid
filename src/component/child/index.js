@@ -1,6 +1,7 @@
 
 import * as $logger from 'beaver-logger/client';
-import * as postRobot from 'post-robot/src';
+import { isSameDomain, getOpener, getAllFramesInWindow } from 'post-robot/src/lib/windows';
+import { send } from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
@@ -102,7 +103,7 @@ export class ChildComponent extends BaseComponent {
 
                 let parentComponentWindow = getParentComponentWindow();
 
-                if (!postRobot.winutil.isSameDomain(parentComponentWindow)) {
+                if (!isSameDomain(parentComponentWindow)) {
 
                     if (window.location.protocol === 'file:') {
                         throw new Error(`Can not get props from file:// domain`);
@@ -155,7 +156,7 @@ export class ChildComponent extends BaseComponent {
 
         this.component.log(`send_to_parent_${name}`);
 
-        return postRobot.send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
+        return send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
     }
 
 
@@ -209,15 +210,15 @@ export class ChildComponent extends BaseComponent {
 
     sendLogsToOpener() {
         try {
-            let opener = postRobot.winutil.getOpener(window);
+            let opener = getOpener(window);
 
             if (!opener || !window.console) {
                 return;
             }
 
-            for (let frame of postRobot.winutil.getAllFramesInWindow(opener)) {
+            for (let frame of getAllFramesInWindow(opener)) {
 
-                if (!postRobot.winutil.isSameDomain(frame) || !frame.console || frame === window) {
+                if (!isSameDomain(frame) || !frame.console || frame === window) {
                     continue;
                 }
 

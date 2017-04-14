@@ -1,5 +1,6 @@
 
-import * as postRobot from 'post-robot/src';
+import { cleanUpWindow } from 'post-robot/src';
+import { findFrameByName } from 'post-robot/src/lib/windows';
 
 import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE } from '../../constants';
@@ -79,7 +80,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
             this.window.close();
 
-            postRobot.cleanUpWindow(this.window);
+            cleanUpWindow(this.window);
 
             delete this.window;
 
@@ -116,7 +117,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         open(original, override) {
             return function() {
                 return override.apply(this, arguments).then(() => {
-                    this.clean.set('window', postRobot.winutil.findFrameByName(getParentComponentWindow(), this.childWindowName));
+                    this.clean.set('window', findFrameByName(getParentComponentWindow(), this.childWindowName));
 
                     if (!this.window) {
                         throw new Error(`Unable to find parent component iframe window`);
@@ -189,7 +190,7 @@ if (__POPUP_SUPPORT__) {
             this.clean.register('destroyWindow', () => {
                 if (this.window) {
                     this.window.close();
-                    postRobot.cleanUpWindow(this.window);
+                    cleanUpWindow(this.window);
                     delete this.window;
                 }
             });

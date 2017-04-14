@@ -1,5 +1,5 @@
 
-import * as postRobot from 'post-robot/src';
+import { getAncestor, findFrameByName } from 'post-robot/src/lib/windows';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';
@@ -104,7 +104,7 @@ export let getParentComponentWindow = memoize(() => {
         throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
-    let parentWindow = postRobot.winutil.getAncestor(window);
+    let parentWindow = getAncestor(window);
 
     if (!parentWindow) {
         throw new Error(`Can not find parent window`);
@@ -114,7 +114,7 @@ export let getParentComponentWindow = memoize(() => {
         return parentWindow;
 
     } else if (componentMeta.parent === WINDOW_REFERENCES.PARENT_PARENT) {
-        parentWindow = postRobot.winutil.getAncestor(parentWindow);
+        parentWindow = getAncestor(parentWindow);
 
         if (!parentWindow) {
             throw new Error(`Can not find parent component window`);
@@ -123,7 +123,7 @@ export let getParentComponentWindow = memoize(() => {
         return parentWindow;
     }
 
-    let parentFrame = postRobot.winutil.findFrameByName(parentWindow, componentMeta.parent);
+    let parentFrame = findFrameByName(parentWindow, componentMeta.parent);
 
     if (!parentFrame) {
         throw new Error(`Can not find frame with name: ${componentMeta.parent}`);
@@ -141,7 +141,7 @@ export let getParentRenderWindow = memoize(() => {
         throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
-    let parentWindow = postRobot.winutil.getAncestor(window);
+    let parentWindow = getAncestor(window);
 
     if (!parentWindow) {
         throw new Error(`Can not find parent window`);
@@ -151,7 +151,7 @@ export let getParentRenderWindow = memoize(() => {
         return parentWindow;
 
     } else if (componentMeta.renderParent === WINDOW_REFERENCES.PARENT_PARENT) {
-        parentWindow = postRobot.winutil.getAncestor(parentWindow);
+        parentWindow = getAncestor(parentWindow);
 
         if (!parentWindow) {
             throw new Error(`Can not find parent render window`);

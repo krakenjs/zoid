@@ -1,8 +1,6 @@
 
 import xcomponent from 'src/index';
 
-xcomponent.postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
-
 window.xcomponent = xcomponent;
 
 export let testComponent = xcomponent.create({
