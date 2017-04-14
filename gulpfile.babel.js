@@ -49,7 +49,10 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
                 test: /\.js$/,
                 beautify: !minify,
                 minimize: minify,
-                compress: { warnings: false },
+                compress: {
+                    warnings: false,
+                    sequences: minify
+                },
                 mangle: minify,
                 sourceMap: true
             })

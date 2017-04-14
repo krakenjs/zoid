@@ -63,7 +63,7 @@ module.exports = function(config) {
                         exclude: /(dist)/,
                         loader: 'babel-loader',
                         query: {
-                            presets: ['es2015'],
+                            presets: [ [ 'es2015', { modules: false } ] ],
                             plugins: [
                                 'transform-flow-strip-types',
                                 'transform-object-rest-spread',
