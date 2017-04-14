@@ -2668,9 +2668,6 @@
             for (var key in obj) void 0 !== obj[key] && null !== obj[key] && (obj[key] && "object" === _typeof(obj[key]) ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
             return newobj;
         }
-        function WeakMap() {
-            this.id = "__weakmap_" + uniqueID() + "__";
-        }
         function getObjectID(obj) {
             if (null === obj || void 0 === obj || "object" !== (void 0 === obj ? "undefined" : _typeof(obj)) && "function" != typeof obj) throw new Error("Invalid object");
             var uid = objectIDs.get(obj);
@@ -2690,29 +2687,8 @@
         exports.safeGet = safeGet, exports.capitalizeFirstLetter = capitalizeFirstLetter, 
         exports.get = get, exports.safeInterval = safeInterval, exports.safeTimeout = safeTimeout, 
         exports.each = each, exports.replaceObject = replaceObject, exports.copyProp = copyProp, 
-        exports.dotify = dotify, exports.getObjectID = getObjectID, WeakMap.prototype = {
-            set: function(item, value) {
-                if (null === item || void 0 === item || "object" !== (void 0 === item ? "undefined" : _typeof(item)) && "function" != typeof item) throw new Error("Invalid key for WeakMap");
-                var entry = item[this.id];
-                entry && entry[0] === item ? entry[1] = value : Object.defineProperty(item, this.id, {
-                    value: [ item, value ],
-                    writable: !0
-                });
-            },
-            get: function(item) {
-                var entry = item[this.id];
-                if (entry && entry[0] === item) return entry[1];
-            },
-            delete: function(item) {
-                var entry = item[this.id];
-                entry && entry[0] === item && (entry[0] = entry[1] = void 0);
-            },
-            has: function(item) {
-                var entry = item[this.id];
-                return entry && entry[0] === item;
-            }
-        };
-        var objectIDs = new WeakMap();
+        exports.dotify = dotify, exports.getObjectID = getObjectID;
+        var _src = __webpack_require__(5), objectIDs = new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function now() {

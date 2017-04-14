@@ -335,7 +335,7 @@
                 }
             });
         });
-        var _util = __webpack_require__(7);
+        var _util = __webpack_require__(8);
         Object.keys(_util).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -462,6 +462,27 @@
             CALL_ORIGINAL: "call_original",
             CALL_DELEGATE: "call_delegate"
         };
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _interface = __webpack_require__(38);
+        Object.keys(_interface).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _interface[key];
+                }
+            });
+        });
+        var INTERFACE = function(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }(_interface);
+        exports.default = INTERFACE;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function once(method) {
@@ -621,28 +642,7 @@
         exports.intervalTimeout = intervalTimeout, exports.getActualDomain = getActualDomain, 
         exports.getDomain = getDomain, exports.getDomainFromUrl = getDomainFromUrl, exports.safeGet = safeGet, 
         exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize;
-        var _src = __webpack_require__(8), _conf = __webpack_require__(0);
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var _interface = __webpack_require__(38);
-        Object.keys(_interface).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _interface[key];
-                }
-            });
-        });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
-        exports.default = INTERFACE;
+        var _src = __webpack_require__(7), _conf = __webpack_require__(0);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1326,7 +1326,7 @@
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
         exports.getWindowType = getWindowType, exports.isSameTopWindow = isSameTopWindow, 
         exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
-        var _src = __webpack_require__(8), _util = __webpack_require__(7), _global = __webpack_require__(3), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(7), _util = __webpack_require__(8), _global = __webpack_require__(3), _conf = __webpack_require__(0);
         _global.global.domainMatches = _global.global.domainMatches || new _src.WeakMap();
         var domainMatchTimeout = void 0;
     }, function(module, exports, __webpack_require__) {
@@ -1638,7 +1638,7 @@
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, _util = __webpack_require__(7), _windows = __webpack_require__(14), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
+        }, _util = __webpack_require__(8), _windows = __webpack_require__(14), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
         Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
             console[method] = this.bind(console[method], console);
         }, Function.prototype.call);
@@ -2552,9 +2552,6 @@
             for (var key in obj) void 0 !== obj[key] && null !== obj[key] && (obj[key] && "object" === _typeof(obj[key]) ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
             return newobj;
         }
-        function WeakMap() {
-            this.id = "__weakmap_" + uniqueID() + "__";
-        }
         function getObjectID(obj) {
             if (null === obj || void 0 === obj || "object" !== (void 0 === obj ? "undefined" : _typeof(obj)) && "function" != typeof obj) throw new Error("Invalid object");
             var uid = objectIDs.get(obj);
@@ -2574,29 +2571,8 @@
         exports.safeGet = safeGet, exports.capitalizeFirstLetter = capitalizeFirstLetter, 
         exports.get = get, exports.safeInterval = safeInterval, exports.safeTimeout = safeTimeout, 
         exports.each = each, exports.replaceObject = replaceObject, exports.copyProp = copyProp, 
-        exports.dotify = dotify, exports.getObjectID = getObjectID, WeakMap.prototype = {
-            set: function(item, value) {
-                if (null === item || void 0 === item || "object" !== (void 0 === item ? "undefined" : _typeof(item)) && "function" != typeof item) throw new Error("Invalid key for WeakMap");
-                var entry = item[this.id];
-                entry && entry[0] === item ? entry[1] = value : Object.defineProperty(item, this.id, {
-                    value: [ item, value ],
-                    writable: !0
-                });
-            },
-            get: function(item) {
-                var entry = item[this.id];
-                if (entry && entry[0] === item) return entry[1];
-            },
-            delete: function(item) {
-                var entry = item[this.id];
-                entry && entry[0] === item && (entry[0] = entry[1] = void 0);
-            },
-            has: function(item) {
-                var entry = item[this.id];
-                return entry && entry[0] === item;
-            }
-        };
-        var objectIDs = new WeakMap();
+        exports.dotify = dotify, exports.getObjectID = getObjectID;
+        var _src = __webpack_require__(7), objectIDs = new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function now() {
@@ -2816,7 +2792,7 @@
         }), exports.resetListeners = resetListeners, exports.addResponseListener = addResponseListener, 
         exports.getResponseListener = getResponseListener, exports.deleteResponseListener = deleteResponseListener, 
         exports.getRequestListener = getRequestListener, exports.addRequestListener = addRequestListener;
-        var _src = __webpack_require__(8), _global = __webpack_require__(3), _lib = __webpack_require__(5), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(7), _global = __webpack_require__(3), _lib = __webpack_require__(5), _conf = __webpack_require__(0);
         _global.global.responseListeners = _global.global.responseListeners || {}, _global.global.requestListeners = _global.global.requestListeners || {}, 
         _global.global.WINDOW_WILDCARD = _global.global.WINDOW_WILDCARD || new function() {}();
         var __DOMAIN_REGEX__ = "__domain_regex__";
@@ -2895,7 +2871,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.matchDomain = matchDomain;
-        var _util = __webpack_require__(7), _conf = __webpack_require__(0);
+        var _util = __webpack_require__(8), _conf = __webpack_require__(0);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -2960,7 +2936,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.nextTick = nextTick;
-        var _util = __webpack_require__(7), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + (0, 
+        var _util = __webpack_require__(8), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + (0, 
         _util.uniqueID)(), queue = [];
         window.addEventListener("message", function(event) {
             if (event.data === tickMessageName) {
@@ -4350,7 +4326,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _src = __webpack_require__(8), _conf = __webpack_require__(0), _util = __webpack_require__(7), _domain = __webpack_require__(26), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(27), _global = __webpack_require__(3);
+        var _src = __webpack_require__(7), _conf = __webpack_require__(0), _util = __webpack_require__(8), _domain = __webpack_require__(26), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(27), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -4406,7 +4382,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(8), _conf = __webpack_require__(0), _windows = __webpack_require__(14), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(2), _global = __webpack_require__(3);
+        var _src = __webpack_require__(7), _conf = __webpack_require__(0), _windows = __webpack_require__(14), _interface = __webpack_require__(18), _log = __webpack_require__(19), _promise = __webpack_require__(2), _global = __webpack_require__(3);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -4484,7 +4460,7 @@
             value: !0
         }), exports.send = void 0, exports.request = request, exports.sendToParent = sendToParent, 
         exports.client = client;
-        var _src = __webpack_require__(8), _conf = __webpack_require__(0), _drivers = __webpack_require__(13), _lib = __webpack_require__(5), _global = __webpack_require__(3);
+        var _src = __webpack_require__(7), _conf = __webpack_require__(0), _drivers = __webpack_require__(13), _lib = __webpack_require__(5), _global = __webpack_require__(3);
         _global.global.requestPromises = _global.global.requestPromises || new _src.WeakMap(), 
         exports.send = _send;
     }, function(module, exports, __webpack_require__) {
@@ -4547,7 +4523,7 @@
                 }
             });
         });
-        var _util = __webpack_require__(7);
+        var _util = __webpack_require__(8);
         Object.defineProperty(exports, "util", {
             enumerable: !0,
             get: function() {
