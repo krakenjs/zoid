@@ -77,7 +77,7 @@
     "yargs": "^4.7.1"
   },
   "dependencies": {
-    "beaver-logger": "^2",
+    "beaver-logger": "^3",
     "cross-domain-safe-weakmap": "^1.0.8",
     "hi-base32": "^0.1.1",
     "post-robot": "^5.0.0",
