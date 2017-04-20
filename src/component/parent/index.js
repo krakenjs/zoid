@@ -701,9 +701,13 @@ export class ParentComponent extends BaseComponent {
     */
 
     @promise
-    resize(width, height) {
+    resize(width, height, { waitForTransition = true } = {}) {
         this.component.log(`resize`, { height, width });
         this.driver.resize.call(this, width, height);
+
+        if (!waitForTransition) {
+            return;
+        }
 
         if (this.element || this.iframe) {
 
@@ -1067,7 +1071,7 @@ export class ParentComponent extends BaseComponent {
                     this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
 
                     let { width, height } = this.getInitialDimensions(el);
-                    this.resize(width, height);
+                    this.resize(width, height, { waitForTransition: false });
 
                     if (!this.element) {
                         throw new Error('Could not find element to render component into');
