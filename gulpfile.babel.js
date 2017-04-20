@@ -40,7 +40,9 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             new webpack.DefinePlugin(Object.assign({
                 __TEST__: false,
                 __POPUP_SUPPORT__: true,
-                __IE_POPUP_SUPPORT__: true
+                __IE_POPUP_SUPPORT__: true,
+                __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
+                __SEND_POPUP_LOGS_TO_OPENER__: false
             }, globals)),
             new webpack.SourceMapDevToolPlugin({
                 filename: '[file].map'

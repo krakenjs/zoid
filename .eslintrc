@@ -27,7 +27,9 @@
         "ReactDOM": true,
         "React": true,
         "angular": true,
-        "__POPUP_SUPPORT__": true
+        "__POPUP_SUPPORT__": true,
+        "__CHILD_WINDOW_ENFORCE_LOG_LEVEL__": true,
+        "__SEND_POPUP_LOGS_TO_OPENER__": true
     },
 
     "fix": true,

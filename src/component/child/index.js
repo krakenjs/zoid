@@ -209,49 +209,51 @@ export class ChildComponent extends BaseComponent {
 
 
     sendLogsToOpener() {
-        try {
-            let opener = getOpener(window);
+        if (__SEND_POPUP_LOGS_TO_OPENER__) {
+            try {
+                let opener = getOpener(window);
 
-            if (!opener || !window.console) {
-                return;
-            }
-
-            for (let frame of getAllFramesInWindow(opener)) {
-
-                if (!isSameDomain(frame) || !frame.console || frame === window) {
-                    continue;
+                if (!opener || !window.console) {
+                    return;
                 }
 
-                for (let level of [ 'log', 'debug', 'info', 'warn', 'error' ]) {
-                    let original = window.console[level];
+                for (let frame of getAllFramesInWindow(opener)) {
 
-                    if (!original) {
+                    if (!isSameDomain(frame) || !frame.console || frame === window) {
                         continue;
                     }
 
-                    try {
+                    for (let level of [ 'log', 'debug', 'info', 'warn', 'error' ]) {
+                        let original = window.console[level];
 
-                        window.console[level] = function() {
+                        if (!original) {
+                            continue;
+                        }
 
-                            try {
-                                return frame.console[level].apply(frame.console, arguments);
-                            } catch (err3) {
-                                // pass
-                            }
+                        try {
 
-                            return original.apply(this, arguments);
-                        };
+                            window.console[level] = function() {
 
-                    } catch (err2) {
-                        // pass
+                                try {
+                                    return frame.console[level].apply(frame.console, arguments);
+                                } catch (err3) {
+                                    // pass
+                                }
+
+                                return original.apply(this, arguments);
+                            };
+
+                        } catch (err2) {
+                            // pass
+                        }
                     }
+
+                    return;
                 }
 
-                return;
+            } catch (err) {
+                // pass
             }
-
-        } catch (err) {
-            // pass
         }
     }
 
@@ -483,52 +485,54 @@ export class ChildComponent extends BaseComponent {
     error(err) {
 
         this.component.logError(`error`, { error: err.stack || err.toString() });
-        
+
         return this.sendToParent(POST_MESSAGE.ERROR, {
             error: err.stack || err.toString()
         });
     }
 }
 
-if (isXComponentWindow() && window.console) {
-    let logLevels = $logger.logLevels;
+if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
 
-    for (let level of logLevels) {
+    if (isXComponentWindow() && window.console) {
+        let logLevels = $logger.logLevels;
 
-        try {
+        for (let level of logLevels) {
 
-            let original = window.console[level];
+            try {
 
-            if (!original || !original.apply) {
-                continue;
-            }
+                let original = window.console[level];
 
-            window.console[level] = function() {
-                try {
-                    let logLevel = window.LOG_LEVEL;
-
-                    if (!logLevel || logLevels.indexOf(logLevel) === -1) {
-                        return original.apply(this, arguments);
-                    }
-
-                    if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
-                        return;
-                    }
-
-                    return original.apply(this, arguments);
-
-                } catch (err2) {
-                    // pass
+                if (!original || !original.apply) {
+                    continue;
                 }
-            };
 
-            if (level === 'info') {
-                window.console.log = window.console[level];
+                window.console[level] = function() {
+                    try {
+                        let logLevel = window.LOG_LEVEL;
+
+                        if (!logLevel || logLevels.indexOf(logLevel) === -1) {
+                            return original.apply(this, arguments);
+                        }
+
+                        if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
+                            return;
+                        }
+
+                        return original.apply(this, arguments);
+
+                    } catch (err2) {
+                        // pass
+                    }
+                };
+
+                if (level === 'info') {
+                    window.console.log = window.console[level];
+                }
+
+            } catch (err) {
+                // pass
             }
-
-        } catch (err) {
-            // pass
         }
     }
 }
-
