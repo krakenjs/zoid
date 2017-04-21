@@ -6852,7 +6852,7 @@
             element.style.display = "";
         }
         function hideElement(element) {
-            element.style.display = STYLE.DISPLAY.NONE;
+            element.style.display = STYLE.DISPLAY.NONE + " " + STYLE.IMPORTANT;
         }
         function destroyElement(element) {
             element.parentNode && element.parentNode.removeChild(element);
@@ -6973,14 +6973,11 @@
             }
             return params;
         })), VENDOR_PREFIXES = [ "webkit", "moz", "ms", "o" ], CSSRule = window.CSSRule, KEYFRAMES_RULE = CSSRule.KEYFRAMES_RULE || CSSRule.WEBKIT_KEYFRAMES_RULE || CSSRule.MOZ_KEYFRAMES_RULE || CSSRule.O_KEYFRAMES_RULE || CSSRule.MS_KEYFRAMES_RULE, ANIMATION_START_EVENTS = [ "animationstart", "webkitAnimationStart", "oAnimationStart", "MSAnimationStart" ], ANIMATION_END_EVENTS = [ "animationend", "webkitAnimationEnd", "oAnimationEnd", "MSAnimationEnd" ], STYLE = {
-            VISIBILITY: {
-                VISIBLE: "visible",
-                HIDDEN: "hidden"
-            },
             DISPLAY: {
                 NONE: "none",
                 BLOCK: "block"
-            }
+            },
+            IMPORTANT: "!important"
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";

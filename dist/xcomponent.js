@@ -1171,7 +1171,7 @@
         }
         function getDomainFromUrl(url) {
             var domain = void 0;
-            if (!url.match(/^(https?|mock|file):\/\//)) return this.getDomain();
+            if (!url.match(/^(https?|mock|file):\/\//)) return getDomain();
             domain = url;
             domain = domain.split("/").slice(0, 3).join("/");
             return domain;
@@ -5590,7 +5590,7 @@
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
             if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through bridge disabled between same domain windows");
             if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win) !== !1) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
-            sendBridgeMessage(win, serializedMessage, domain);
+            return sendBridgeMessage(win, serializedMessage, domain);
         };
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage, domain) {
             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through global disabled between different domain windows");
@@ -7517,7 +7517,7 @@
             element.style.display = "";
         }
         function hideElement(element) {
-            element.style.display = STYLE.DISPLAY.NONE;
+            element.style.display = STYLE.DISPLAY.NONE + " " + STYLE.IMPORTANT;
         }
         function destroyElement(element) {
             element.parentNode && element.parentNode.removeChild(element);
@@ -7638,14 +7638,11 @@
             }
             return params;
         })), VENDOR_PREFIXES = [ "webkit", "moz", "ms", "o" ], CSSRule = window.CSSRule, KEYFRAMES_RULE = CSSRule.KEYFRAMES_RULE || CSSRule.WEBKIT_KEYFRAMES_RULE || CSSRule.MOZ_KEYFRAMES_RULE || CSSRule.O_KEYFRAMES_RULE || CSSRule.MS_KEYFRAMES_RULE, ANIMATION_START_EVENTS = [ "animationstart", "webkitAnimationStart", "oAnimationStart", "MSAnimationStart" ], ANIMATION_END_EVENTS = [ "animationend", "webkitAnimationEnd", "oAnimationEnd", "MSAnimationEnd" ], STYLE = {
-            VISIBILITY: {
-                VISIBLE: "visible",
-                HIDDEN: "hidden"
-            },
             DISPLAY: {
                 NONE: "none",
                 BLOCK: "block"
-            }
+            },
+            IMPORTANT: "!important"
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
