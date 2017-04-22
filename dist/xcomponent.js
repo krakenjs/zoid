@@ -382,7 +382,7 @@
             }
         }
         function dispatchError(err) {
-            if (dispatchedErrors.indexOf(err) === -1) {
+            if (-1 === dispatchedErrors.indexOf(err)) {
                 dispatchedErrors.push(err);
                 setTimeout(function() {
                     throw err;
@@ -597,7 +597,7 @@
         function isAncestorParent(parent, child) {
             if (!parent || !child) return !1;
             var childParent = getParent(child);
-            return childParent ? childParent === parent : getParents(child).indexOf(parent) !== -1;
+            return childParent ? childParent === parent : -1 !== getParents(child).indexOf(parent);
         }
         function getFrames(win) {
             var result = [], frames = void 0;
@@ -690,7 +690,7 @@
                         _ref4 = _i5.value;
                     }
                     var frame = _ref4;
-                    result.indexOf(frame) === -1 && result.push(frame);
+                    -1 === result.indexOf(frame) && result.push(frame);
                 }
             }
             return result;
@@ -761,14 +761,14 @@
                 }
                 var childFrame = _ref6;
                 try {
-                    if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) return childFrame;
+                    if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                 } catch (err) {}
             }
             try {
-                if (winFrames.indexOf(win.frames[name]) !== -1) return win.frames[name];
+                if (-1 !== winFrames.indexOf(win.frames[name])) return win.frames[name];
             } catch (err) {}
             try {
-                if (winFrames.indexOf(win[name]) !== -1) return win[name];
+                if (-1 !== winFrames.indexOf(win[name])) return win[name];
             } catch (err) {}
         }
         function findChildFrameByName(win, name) {
@@ -1759,7 +1759,7 @@
                             return self.error(err);
                         }
                     };
-                    doOnce !== !1 && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.n)(wrapper));
+                    !1 !== doOnce && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.n)(wrapper));
                     return wrapper;
                 }
             }, {
@@ -2532,7 +2532,7 @@
                             _ref9 = _i.value;
                         }
                         var key = _ref9, prop = this.component.props[key];
-                        prop && prop.sendToChild === !1 || (result[key] = this.props[key]);
+                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
                     }
                     return result;
                 }
@@ -3027,7 +3027,7 @@
                 value: function(err) {
                     var _this21 = this;
                     this.handledErrors = this.handledErrors || [];
-                    if (this.handledErrors.indexOf(err) === -1) {
+                    if (-1 === this.handledErrors.indexOf(err)) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             _this21.component.logError("error", {
@@ -3564,7 +3564,7 @@
                     domain: domain
                 });
                 var level = void 0;
-                level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                 __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || __WEBPACK_IMPORTED_MODULE_0__conf__.a.WILDCARD, "\n\n", message ]);
                 if (__WEBPACK_IMPORTED_MODULE_0__conf__.b.MOCK_MODE) {
                     delete message.target;
@@ -3608,7 +3608,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function matchDomain(domain, origin) {
-            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
+            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.c)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : -1 !== domain.indexOf(origin)));
         }
         var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0);
         __webpack_exports__.a = matchDomain;
@@ -4065,16 +4065,15 @@
                 var options = {
                     attributes: {
                         name: this.childWindowName,
-                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
+                        scrolling: !1 === this.component.scrolling ? "no" : "yes"
                     },
                     style: {
                         width: "100%",
                         height: "100%"
                     }
-                };
-                this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.F)(null, options, this.element);
-                this.window = this.iframe.contentWindow;
-                this.iframe.addEventListener("error", function(err) {
+                }, frame = this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.F)(null, options, this.element);
+                this.window = frame.contentWindow;
+                frame.addEventListener("error", function(err) {
                     return _this.error(err);
                 });
                 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.y)(this.element);
@@ -4082,12 +4081,12 @@
                 if (this.component.sacrificialComponentTemplate) {
                     sacrificialIframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.F)(null, options, this.element);
                     this.componentTemplateWindow = sacrificialIframe.contentWindow;
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.y)(this.iframe);
-                    this.iframe.addEventListener("load", function() {
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.y)(frame);
+                    frame.addEventListener("load", function() {
                         setTimeout(function() {
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.y)(sacrificialIframe);
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.K)(sacrificialIframe);
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.z)(_this.iframe);
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.z)(frame);
                         }, 50);
                     });
                 }
@@ -4359,7 +4358,7 @@
                     } else if ("number" === prop.type && isNaN(parseInt(value, 10))) throw new Error("Prop is not a number: " + key);
                     "function" == typeof prop.validate && prop.validate(value, props);
                 }
-            } else if (required && prop.required !== !1 && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
+            } else if (required && !1 !== prop.required && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
         }
         function validateProps(component, props) {
             var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
@@ -4667,6 +4666,7 @@
             }, {
                 key: "set",
                 value: function(key, value) {
+                    if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
                         weakmap.set(key, value);
@@ -4676,7 +4676,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                        if (index === -1) {
+                        if (-1 === index) {
                             keys.push(key);
                             values.push(value);
                         } else values[index] = value;
@@ -4691,6 +4691,7 @@
             }, {
                 key: "get",
                 value: function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
                         if (weakmap.has(key)) return weakmap.get(key);
@@ -4699,7 +4700,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (index === -1) return;
+                        if (-1 === index) return;
                         return this.values[index];
                     }
                     var entry = key[this.name];
@@ -4708,6 +4709,7 @@
             }, {
                 key: "delete",
                 value: function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
                         weakmap.delete(key);
@@ -4717,7 +4719,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (index !== -1) {
+                        if (-1 !== index) {
                             keys.splice(index, 1);
                             this.values.splice(index, 1);
                         }
@@ -4729,6 +4731,7 @@
             }, {
                 key: "has",
                 value: function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
                         return weakmap.has(key);
@@ -4737,7 +4740,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
-                        return this.keys.indexOf(key) !== -1;
+                        return -1 !== this.keys.indexOf(key);
                     }
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
@@ -4983,7 +4986,7 @@
                 }, decode = function(base32Str, asciiOnly) {
                     if (!asciiOnly) return toUtf8String(decodeAsBytes(base32Str));
                     var v1, v2, v3, v4, v5, v6, v7, v8, str = "", length = base32Str.indexOf("=");
-                    length == -1 && (length = base32Str.length);
+                    -1 == length && (length = base32Str.length);
                     for (var i = 0, count = length >> 3 << 3; i < count; ) {
                         v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
                         v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -5331,6 +5334,7 @@
             }
             domain && (domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.C)(domain));
             var win = windowOpen.call(this, url, name, options, last);
+            if (!win) return win;
             url && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__common__.h)(win);
             for (var _iterator = Object.keys(__WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByName), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref2;
@@ -5385,7 +5389,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function emulateIERestrictions(sourceWindow, targetWindow) {
-            if (!__WEBPACK_IMPORTED_MODULE_0__conf__.b.ALLOW_POSTMESSAGE_POPUP && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(sourceWindow, targetWindow) === !1) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
+            if (!__WEBPACK_IMPORTED_MODULE_0__conf__.b.ALLOW_POSTMESSAGE_POPUP && !1 === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
         }
         var __WEBPACK_IMPORTED_MODULE_0__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(2);
         __webpack_exports__.a = emulateIERestrictions;
@@ -5441,10 +5445,10 @@
             var source = event.source, origin = event.origin, data = event.data, message = parseMessage(data);
             if (message) {
                 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.FILE_PROTOCOL) || (origin = message.sourceDomain);
-                if (__WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id) === -1) {
+                if (-1 === __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id)) {
                     __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.push(message.id);
                     var level = void 0;
-                    level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                    level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                     __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]);
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(source)) return __WEBPACK_IMPORTED_MODULE_1__lib__.k.debug("Source window is closed - can not send " + message.type + " " + message.name);
                     message.data && (message.data = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.t)(source, origin, message.data));
@@ -5589,12 +5593,12 @@
         var sendBridgeMessage = __webpack_require__(21).sendBridgeMessage;
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
             if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through bridge disabled between same domain windows");
-            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win) !== !1) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
+            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
             return sendBridgeMessage(win, serializedMessage, domain);
         };
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage, domain) {
             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through global disabled between different domain windows");
-            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win) !== !1) throw new Error("Can only use global to communicate between two different windows, not between frames");
+            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
             var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_0__conf__.a.WINDOW_PROPS.POSTROBOT];
             if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
             return foreignGlobal.receiveMessage({
@@ -6600,7 +6604,7 @@
                 var key = _ref, prop = options.props[key];
                 if (!prop || "object" !== (void 0 === prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
                 if (!prop.type) throw component.error("Expected prop.type");
-                if (__WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type) === -1) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
+                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type)) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
                 if (prop.required && prop.def) throw component.error("Required prop can not have a default value");
             }
         }
@@ -6624,13 +6628,13 @@
                         _ref2 = _i2.value;
                     }
                     var context = _ref2;
-                    if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context) === -1) throw component.error("Unsupported context type: " + context);
+                    if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context)) throw component.error("Unsupported context type: " + context);
                     (options.contexts[context] || void 0 === options.contexts[context]) && (anyEnabled = !0);
                 }
                 if (!anyEnabled) throw component.error("No context type is enabled");
             }
             if (options.defaultContext) {
-                if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) throw component.error("Unsupported context type: " + options.defaultContext);
+                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw component.error("Unsupported context type: " + options.defaultContext);
                 if (options.contexts && !options.contexts[options.defaultContext]) throw component.error("Disallowed default context type: " + options.defaultContext);
             }
             if (!options.url && !options.buildUrl) throw component.error("Expected options.url to be passed");
@@ -7517,7 +7521,7 @@
             element.style.display = "";
         }
         function hideElement(element) {
-            element.style.display = STYLE.DISPLAY.NONE + " " + STYLE.IMPORTANT;
+            element.style.setProperty("display", STYLE.DISPLAY.NONE, STYLE.IMPORTANT);
         }
         function destroyElement(element) {
             element.parentNode && element.parentNode.removeChild(element);
@@ -7533,7 +7537,7 @@
             });
         }
         function addClass(element, name) {
-            element.classList ? element.classList.add(name) : element.className.split(/\s+/).indexOf(name) === -1 && (element.className += " " + name);
+            element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
         }
         function writeToWindow(win, html) {
             try {
@@ -7621,7 +7625,7 @@
         }), __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__fn__.c)(function(queryString) {
             var params = {};
             if (!queryString) return params;
-            if (queryString.indexOf("=") === -1) throw new Error("Can not parse query string params: " + queryString);
+            if (-1 === queryString.indexOf("=")) throw new Error("Can not parse query string params: " + queryString);
             for (var _iterator6 = queryString.split("&"), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
                 var _ref8;
                 if (_isArray6) {
@@ -7642,7 +7646,7 @@
                 NONE: "none",
                 BLOCK: "block"
             },
-            IMPORTANT: "!important"
+            IMPORTANT: "important"
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
