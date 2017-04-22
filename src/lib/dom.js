@@ -716,13 +716,13 @@ export function animate(element, name, clean, timeout = 1000) {
 }
 
 const STYLE = {
-    
+
     DISPLAY: {
         NONE: 'none',
         BLOCK: 'block'
     },
 
-    IMPORTANT: '!important'
+    IMPORTANT: 'important'
 };
 
 export function showElement(element) {
@@ -730,7 +730,7 @@ export function showElement(element) {
 }
 
 export function hideElement(element) {
-    element.style.display = `${STYLE.DISPLAY.NONE} ${STYLE.IMPORTANT}`;
+    element.style.setProperty('display', STYLE.DISPLAY.NONE, STYLE.IMPORTANT);
 }
 
 export function destroyElement(element) {
