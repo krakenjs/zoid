@@ -53,10 +53,10 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             }
         };
 
-        this.iframe = iframe(null, options, this.element);
-        this.window = this.iframe.contentWindow;
+        let frame = this.iframe = iframe(null, options, this.element);
+        this.window = frame.contentWindow;
 
-        this.iframe.addEventListener('error', (err) => this.error(err));
+        frame.addEventListener('error', (err) => this.error(err));
 
         hideElement(this.element);
 
@@ -65,13 +65,13 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         if (this.component.sacrificialComponentTemplate) {
             sacrificialIframe = iframe(null, options, this.element);
             this.componentTemplateWindow = sacrificialIframe.contentWindow;
-            hideElement(this.iframe);
+            hideElement(frame);
 
-            this.iframe.addEventListener('load', () => {
+            frame.addEventListener('load', () => {
                 setTimeout(() => {
                     hideElement(sacrificialIframe);
                     destroyElement(sacrificialIframe);
-                    showElement(this.iframe);
+                    showElement(frame);
                 }, 50);
             });
         }
