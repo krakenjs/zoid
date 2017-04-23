@@ -5822,6 +5822,7 @@
                 });
                 _this.addProp(options, "scrolling");
                 _this.addProp(options, "version", "latest");
+                _this.addProp(options, "defaultEnv");
                 _this.addProp(options, "buildUrl");
                 _this.addProp(options, "sandboxContainer", !1);
                 _this.addProp(options, "url");
