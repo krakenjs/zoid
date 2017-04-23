@@ -466,7 +466,8 @@ export class ParentComponent extends BaseComponent {
                     uid:        this.props.uid,
                     dimensions: this.props.dimensions,
                     onClose:    this.props.onClose,
-                    onDisplay:  this.props.onDisplay
+                    onDisplay:  this.props.onDisplay,
+                    logLevel:   this.props.logLevel
                 },
 
                 overrides: {

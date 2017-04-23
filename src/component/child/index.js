@@ -40,7 +40,7 @@ export class ChildComponent extends BaseComponent {
 
         this.setProps(this.getInitialProps(), getParentDomain());
 
-        setLogLevel(this.props.logLevel);
+        setLogLevel(this.props.logLevel || 'info');
 
         this.component.log(`init_child`);
 
