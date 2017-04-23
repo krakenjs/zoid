@@ -1,7 +1,5 @@
 
 import { on } from 'post-robot/src';
-import * as $logger from 'beaver-logger/client';
-
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
@@ -16,7 +14,7 @@ export { componentTemplate } from './templates/component';
 
 import * as drivers from '../../drivers';
 
-import { getDomainFromUrl, promise } from '../../lib';
+import { getDomainFromUrl, promise, info, error, warn } from '../../lib';
 
 export let components = {};
 
@@ -62,17 +60,13 @@ export class Component extends BaseComponent {
         if (!options.props) {
             this.looseProps = true;
         }
-
+        
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
         this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
         this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');
-
-        // The default environment we should render to if none is specified in the parent
-
-        this.addProp(options, 'defaultEnv');
 
         // A mapping of env->url, used to determine which url to load for which env
 
@@ -447,7 +441,7 @@ export class Component extends BaseComponent {
     */
 
     log(event, payload = {}) {
-        $logger.info(`xc_${this.name}_${event}`, payload);
+        info(this.name, event, payload);
     }
 
 
@@ -458,7 +452,7 @@ export class Component extends BaseComponent {
     */
 
     logWarning(event, payload) {
-        $logger.warn(`xc_${this.name}_${event}`, payload);
+        warn(this.name, event, payload);
     }
 
 
@@ -469,7 +463,7 @@ export class Component extends BaseComponent {
     */
 
     logError(event, payload) {
-        $logger.error(`xc_${this.name}_${event}`, payload);
+        error(this.name, event, payload);
     }
 }
 

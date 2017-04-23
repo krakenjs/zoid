@@ -7,7 +7,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -39,6 +39,8 @@ export class ChildComponent extends BaseComponent {
         this.onPropHandlers = [];
 
         this.setProps(this.getInitialProps(), getParentDomain());
+
+        setLogLevel(this.props.logLevel);
 
         this.component.log(`init_child`);
 
