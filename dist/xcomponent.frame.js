@@ -272,7 +272,7 @@
         function isAncestorParent(parent, child) {
             if (!parent || !child) return !1;
             var childParent = getParent(child);
-            return childParent ? childParent === parent : -1 !== getParents(child).indexOf(parent);
+            return childParent ? childParent === parent : getParents(child).indexOf(parent) !== -1;
         }
         function getFrames(win) {
             var result = [], frames = void 0;
@@ -365,7 +365,7 @@
                         _ref4 = _i5.value;
                     }
                     var frame = _ref4;
-                    -1 === result.indexOf(frame) && result.push(frame);
+                    result.indexOf(frame) === -1 && result.push(frame);
                 }
             }
             return result;
@@ -436,14 +436,14 @@
                 }
                 var childFrame = _ref6;
                 try {
-                    if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
+                    if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) return childFrame;
                 } catch (err) {}
             }
             try {
-                if (-1 !== winFrames.indexOf(win.frames[name])) return win.frames[name];
+                if (winFrames.indexOf(win.frames[name]) !== -1) return win.frames[name];
             } catch (err) {}
             try {
-                if (-1 !== winFrames.indexOf(win[name])) return win[name];
+                if (winFrames.indexOf(win[name]) !== -1) return win[name];
             } catch (err) {}
         }
         function findChildFrameByName(win, name) {
@@ -677,7 +677,7 @@
             }
         }
         function dispatchError(err) {
-            if (-1 === dispatchedErrors.indexOf(err)) {
+            if (dispatchedErrors.indexOf(err) === -1) {
                 dispatchedErrors.push(err);
                 setTimeout(function() {
                     throw err;
@@ -1716,7 +1716,7 @@
                             return self.error(err);
                         }
                     };
-                    !1 !== doOnce && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(wrapper));
+                    doOnce !== !1 && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(wrapper));
                     return wrapper;
                 }
             }, {
@@ -2342,7 +2342,7 @@
                             _ref9 = _i.value;
                         }
                         var key = _ref9, prop = this.component.props[key];
-                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
+                        prop && prop.sendToChild === !1 || (result[key] = this.props[key]);
                     }
                     return result;
                 }
@@ -2837,18 +2837,18 @@
                 value: function(err) {
                     var _this21 = this;
                     this.handledErrors = this.handledErrors || [];
-                    if (-1 === this.handledErrors.indexOf(err)) {
+                    if (this.handledErrors.indexOf(err) === -1) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             _this21.component.logError("error", {
                                 error: err.stack || err.toString()
                             });
                             _this21.onInit.reject(err);
-                            return _this21.props.onError(err);
-                        }).then(function() {
                             return _this21.destroy();
-                        }).catch(function(err2) {
-                            throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + err2.stack);
+                        }).then(function() {
+                            return _this21.props.onError(err);
+                        }).catch(function(errErr) {
+                            throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
                             throw err;
                         });
@@ -3365,7 +3365,7 @@
                     domain: domain
                 });
                 var level = void 0;
-                level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                 __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || __WEBPACK_IMPORTED_MODULE_0__conf__.a.WILDCARD, "\n\n", message ]);
                 if (__WEBPACK_IMPORTED_MODULE_0__conf__.b.MOCK_MODE) {
                     delete message.target;
@@ -3409,7 +3409,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function matchDomain(domain, origin) {
-            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : -1 !== domain.indexOf(origin)));
+            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
         }
         var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0);
         __webpack_exports__.a = matchDomain;
@@ -3867,7 +3867,7 @@
                 var options = {
                     attributes: {
                         name: this.childWindowName,
-                        scrolling: !1 === this.component.scrolling ? "no" : "yes"
+                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
                     },
                     style: {
                         width: "100%",
@@ -4092,7 +4092,7 @@
                     } else if ("number" === prop.type && isNaN(parseInt(value, 10))) throw new Error("Prop is not a number: " + key);
                     "function" == typeof prop.validate && prop.validate(value, props);
                 }
-            } else if (required && !1 !== prop.required && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
+            } else if (required && prop.required !== !1 && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
         }
         function validateProps(component, props) {
             var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
@@ -4410,7 +4410,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                        if (-1 === index) {
+                        if (index === -1) {
                             keys.push(key);
                             values.push(value);
                         } else values[index] = value;
@@ -4434,7 +4434,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (-1 === index) return;
+                        if (index === -1) return;
                         return this.values[index];
                     }
                     var entry = key[this.name];
@@ -4453,7 +4453,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (-1 !== index) {
+                        if (index !== -1) {
                             keys.splice(index, 1);
                             this.values.splice(index, 1);
                         }
@@ -4474,7 +4474,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
-                        return -1 !== this.keys.indexOf(key);
+                        return this.keys.indexOf(key) !== -1;
                     }
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
@@ -4720,7 +4720,7 @@
                 }, decode = function(base32Str, asciiOnly) {
                     if (!asciiOnly) return toUtf8String(decodeAsBytes(base32Str));
                     var v1, v2, v3, v4, v5, v6, v7, v8, str = "", length = base32Str.indexOf("=");
-                    -1 == length && (length = base32Str.length);
+                    length == -1 && (length = base32Str.length);
                     for (var i = 0, count = length >> 3 << 3; i < count; ) {
                         v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
                         v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -4849,10 +4849,10 @@
             var source = event.source, origin = event.origin, data = event.data, message = parseMessage(data);
             if (message) {
                 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.FILE_PROTOCOL) || (origin = message.sourceDomain);
-                if (-1 === __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id)) {
+                if (__WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id) === -1) {
                     __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.push(message.id);
                     var level = void 0;
-                    level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                    level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                     __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]);
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(source)) return __WEBPACK_IMPORTED_MODULE_1__lib__.k.debug("Source window is closed - can not send " + message.type + " " + message.name);
                     message.data && (message.data = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(source, origin, message.data));
@@ -5988,7 +5988,7 @@
                 var key = _ref, prop = options.props[key];
                 if (!prop || "object" !== (void 0 === prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
                 if (!prop.type) throw component.error("Expected prop.type");
-                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type)) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
+                if (__WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type) === -1) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
                 if (prop.required && prop.def) throw component.error("Required prop can not have a default value");
             }
         }
@@ -6012,13 +6012,13 @@
                         _ref2 = _i2.value;
                     }
                     var context = _ref2;
-                    if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context)) throw component.error("Unsupported context type: " + context);
+                    if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context) === -1) throw component.error("Unsupported context type: " + context);
                     (options.contexts[context] || void 0 === options.contexts[context]) && (anyEnabled = !0);
                 }
                 if (!anyEnabled) throw component.error("No context type is enabled");
             }
             if (options.defaultContext) {
-                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw component.error("Unsupported context type: " + options.defaultContext);
+                if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) throw component.error("Unsupported context type: " + options.defaultContext);
                 if (options.contexts && !options.contexts[options.defaultContext]) throw component.error("Disallowed default context type: " + options.defaultContext);
             }
             if (!options.url && !options.buildUrl) throw component.error("Expected options.url to be passed");
@@ -6905,7 +6905,7 @@
             });
         }
         function addClass(element, name) {
-            element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
+            element.classList ? element.classList.add(name) : element.className.split(/\s+/).indexOf(name) === -1 && (element.className += " " + name);
         }
         function writeToWindow(win, html) {
             try {
@@ -6993,7 +6993,7 @@
         }), __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__fn__.c)(function(queryString) {
             var params = {};
             if (!queryString) return params;
-            if (-1 === queryString.indexOf("=")) throw new Error("Can not parse query string params: " + queryString);
+            if (queryString.indexOf("=") === -1) throw new Error("Can not parse query string params: " + queryString);
             for (var _iterator6 = queryString.split("&"), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
                 var _ref8;
                 if (_isArray6) {
@@ -7031,7 +7031,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function setLogLevel(logLevel) {
-            if (-1 === __WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.a.indexOf(logLevel)) throw new Error("Invalid logLevel: " + logLevel);
+            if (__WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.a.indexOf(logLevel) === -1) throw new Error("Invalid logLevel: " + logLevel);
             __WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.b.logLevel = logLevel;
             __WEBPACK_IMPORTED_MODULE_0_post_robot_src__.a.LOG_LEVEL = logLevel;
             window.LOG_LEVEL = logLevel;
