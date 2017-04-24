@@ -1174,15 +1174,15 @@ export class ParentComponent extends BaseComponent {
             this.component.logError(`error`, { error: err.stack || err.toString() });
             this.onInit.reject(err);
 
-            return this.props.onError(err);
+            return this.destroy();
 
         }).then(() => {
 
-            return this.destroy();
+            return this.props.onError(err);
 
-        }).catch(err2 => {
+        }).catch(errErr => {
 
-            throw new Error(`An error was encountered while handling error:\n\n ${err.stack}\n\n${err2.stack}`);
+            throw new Error(`An error was encountered while handling error:\n\n ${err.stack}\n\n${errErr.stack}`);
 
         }).then(() => {
 
