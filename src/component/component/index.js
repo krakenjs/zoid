@@ -65,7 +65,7 @@ export class Component extends BaseComponent {
         if (!options.props) {
             this.looseProps = true;
         }
-        
+
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
         this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
@@ -74,6 +74,7 @@ export class Component extends BaseComponent {
         this.addProp(options, 'version', 'latest');
 
         // The default environment we should render to if none is specified in the parent
+
         this.addProp(options, 'defaultEnv');
 
         // A mapping of env->url, used to determine which url to load for which env
