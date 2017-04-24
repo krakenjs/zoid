@@ -2402,8 +2402,7 @@
                                 uid: this.props.uid,
                                 dimensions: this.props.dimensions,
                                 onClose: this.props.onClose,
-                                onDisplay: this.props.onDisplay,
-                                logLevel: this.props.logLevel
+                                onDisplay: this.props.onDisplay
                             },
                             overrides: {
                                 focus: function() {
