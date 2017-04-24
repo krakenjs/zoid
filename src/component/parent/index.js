@@ -40,6 +40,7 @@ export class ParentComponent extends BaseComponent {
         this.context = context;
         this.setProps(options.props || {});
 
+        // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
         setLogLevel(this.props.logLevel);
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });

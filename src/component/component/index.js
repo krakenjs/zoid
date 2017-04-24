@@ -14,7 +14,7 @@ export { componentTemplate } from './templates/component';
 
 import * as drivers from '../../drivers';
 
-import { getDomainFromUrl, promise, info, error, warn } from '../../lib';
+import { getDomainFromUrl, promise, info, error, warn, setLogLevel } from '../../lib';
 
 export let components = {};
 
@@ -38,6 +38,11 @@ export class Component extends BaseComponent {
         // e.g. <my-component>
 
         this.addProp(options, 'tag');
+
+        this.addProp(options, 'defaultLogLevel', 'info');
+
+        // initially set log level to default log level configured when creating component
+        setLogLevel(this.defaultLogLevel);
 
         if (components[this.tag]) {
             throw new Error(`Can not register multiple components with the same tag`);

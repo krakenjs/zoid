@@ -7,7 +7,7 @@ export function setLogLevel(logLevel) {
     }
     $logger.config.logLevel = logLevel;
     postRobot.CONFIG.LOG_LEVEL = logLevel;
-    window.LOG_LEVEL = logLevel; // TODO: confirm we want to do that?
+    window.LOG_LEVEL = logLevel;
 }
 
 export function info(name, event, payload = {}) {

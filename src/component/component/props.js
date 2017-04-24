@@ -124,7 +124,7 @@ export const internalProps = {
         required: false,
         queryParam: true,
         def() {
-            return 'info';
+            return this.defaultLogLevel;
         }
     }
 };
