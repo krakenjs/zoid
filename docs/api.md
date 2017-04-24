@@ -35,6 +35,23 @@ url: {
 }
 ```
 
+
+#### defaultLogLevel `string | Object<string>`
+
+The default logging level required for this component. Options are: 
+
+  - `'debug'`
+  - `'info'`
+  - `'warn'`
+  - `'error'`
+  
+```javascript
+defaultLogLevel: 'error'
+```
+
+Note that this value can be overriden by passing 'logLevel' as a prop when rendering the component.
+
+
 #### dimensions `{ width : string, height : string }`
 
 The dimensions for your component, in css-style units, with support for `px` or `%`.
