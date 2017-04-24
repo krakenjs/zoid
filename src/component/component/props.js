@@ -117,5 +117,14 @@ export const internalProps = {
             };
         },
         once: true
+    },
+
+    logLevel: {
+        type: 'string',
+        required: false,
+        queryParam: true,
+        def() {
+            return this.defaultLogLevel;
+        }
     }
 };

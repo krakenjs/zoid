@@ -197,3 +197,30 @@ export let testComponent5 = xcomponent.create({
         iframe: true
     }
 });
+
+
+export let testComponent_no_logLevel_configured = xcomponent.create({
+
+    tag: 'test-component-no-log-level',
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});
+
+export let testComponent_logLevel_configured = xcomponent.create({
+
+    tag: 'test-component-log-level',
+
+    defaultLogLevel: 'error',
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});

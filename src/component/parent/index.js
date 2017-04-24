@@ -8,7 +8,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
          showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow } from '../../lib';
+         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -39,6 +39,9 @@ export class ParentComponent extends BaseComponent {
         this.component = component;
         this.context = context;
         this.setProps(options.props || {});
+
+        // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
+        setLogLevel(this.props.logLevel);
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });
 
