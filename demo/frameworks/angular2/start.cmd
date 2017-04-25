@@ -1,0 +1,1 @@
+Chrome.exe %CD%/index.html --allow-file-access-from-files

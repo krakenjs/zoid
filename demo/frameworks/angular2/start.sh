@@ -1,0 +1,1 @@
+google-chrome $PWD/index.html --allow-file-access-from-files
