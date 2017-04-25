@@ -1,7 +1,7 @@
 //our root app component
-import {Component, NgModule, VERSION} from '@angular/core'
-import {BrowserModule} from '@angular/platform-browser'
-import 'xcomponent';
+import {Component, NgModule, VERSION} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import xcomponent from 'xcomponent';
 
 @Component({
   selector: 'my-app',
@@ -14,7 +14,7 @@ import 'xcomponent';
 export class App {
   name:string;
   constructor() {
-    this.name = `Angular! v${VERSION.full}`
+    this.name = `Angular! v${VERSION.full} and ${xcomponent.CONSTANTS.XCOMPONENT}`
   }
 }
 
