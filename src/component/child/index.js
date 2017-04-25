@@ -137,7 +137,7 @@ export class ChildComponent extends BaseComponent {
     setProps(props = {}, origin, required = true) {
         window.xprops = this.props = this.props || {};
         extend(this.props, normalizeChildProps(this.component, props, origin, required));
-        this.props.onError = (err) => this.error(err);
+        // this.props.onError = (err) => this.error(err);
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
