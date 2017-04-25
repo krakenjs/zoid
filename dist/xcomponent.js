@@ -2692,12 +2692,13 @@
                         });
                     });
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
-                    var unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "beforeunload", function() {
+                    var onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(function() {
                         _this10.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
                         closeWindowListener.cancel();
-                        if (_this10.driver.destroyOnUnload) return _this10.destroyComponent();
-                    });
+                        _this10.destroyComponent();
+                    }), beforeUnloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "beforeunload", onunload), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "unload", onunload);
+                    this.clean.register("destroyBeforeUnloadWindowListener", beforeUnloadWindowListener.cancel);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 }
             }, {
@@ -4079,7 +4080,6 @@
         var RENDER_DRIVERS = {};
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_3__constants__.CONTEXT_TYPES.IFRAME] = {
             renderedIntoContainerTemplate: !0,
-            destroyOnUnload: !1,
             allowResize: !0,
             openOnClick: !1,
             errorOnCloseDuringInit: !0,
@@ -4169,7 +4169,6 @@
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_3__constants__.CONTEXT_TYPES.POPUP] = {
             focusable: !0,
             renderedIntoContainerTemplate: !1,
-            destroyOnUnload: !0,
             allowResize: !1,
             openOnClick: !0,
             errorOnCloseDuringInit: !1,
