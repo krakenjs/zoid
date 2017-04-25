@@ -4235,12 +4235,17 @@
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        function isDefined(value) {
+            return null !== value && void 0 !== value && "" !== value;
+        }
+        function getDefault(component, prop, props) {
+            if (prop.def) return prop.def instanceof Function ? prop.def.call(component, props) : prop.def;
+        }
         function normalizeProp(component, instance, props, key, value) {
             var prop = component.props[key];
-            !(props.hasOwnProperty(key) && null !== value && void 0 !== value && "" !== value) && prop.def && (value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def);
+            prop.value ? value = prop.value : props.hasOwnProperty(key) && isDefined(value) || (value = getDefault(component, prop, props));
             !value && prop.alias && props[prop.alias] && (value = props[prop.alias]);
-            prop.decorate && (value = prop.decorate(value));
-            prop.value && (value = prop.value);
+            prop.decorate && (!isDefined(value) && prop.required || (value = prop.decorate(value)));
             if (prop.getter) {
                 if (!value) return;
                 if (value instanceof Function) value = value.bind(instance); else {
@@ -4317,7 +4322,10 @@
                     _ref2 = _i2.value;
                 }
                 var _key = _ref2;
-                props.hasOwnProperty(_key) || (result[_key] = normalizeProp(component, instance, props, _key, props[_key]));
+                if (!props.hasOwnProperty(_key)) {
+                    var normalizedProp = normalizeProp(component, instance, props, _key, props[_key]);
+                    void 0 !== normalizedProp && (result[_key] = normalizedProp);
+                }
             }
             return result;
         }
