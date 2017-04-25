@@ -1624,16 +1624,19 @@
             if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
         }
         function cleanup(obj) {
-            var tasks = [];
+            var tasks = [], cleaned = !1;
             return {
                 set: function(name, item) {
-                    obj[name] = item;
-                    this.register(function() {
-                        delete obj[name];
-                    });
-                    return item;
+                    if (!cleaned) {
+                        obj[name] = item;
+                        this.register(function() {
+                            delete obj[name];
+                        });
+                        return item;
+                    }
                 },
                 register: function(name, method) {
+                    if (cleaned) return method();
                     if (!method) {
                         method = name;
                         name = void 0;
@@ -1655,7 +1658,9 @@
                     }).length);
                 },
                 all: function() {
-                    for (var results = []; tasks.length; ) results.push(tasks.pop().run());
+                    var results = [];
+                    cleaned = !0;
+                    for (;tasks.length; ) results.push(tasks.pop().run());
                     return __WEBPACK_IMPORTED_MODULE_0_sync_browser_mocks_src_promise__.a.all(results).then(function() {});
                 },
                 run: function(name) {
@@ -3607,12 +3612,9 @@
             }, {
                 key: "setProps",
                 value: function() {
-                    var props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _this3 = this, origin = arguments[1], required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
+                    var props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, origin = arguments[1], required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
                     window.xprops = this.props = this.props || {};
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.h)(this.props, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__props__.a)(this.component, props, origin, required));
-                    this.props.onError = function(err) {
-                        return _this3.error(err);
-                    };
                     for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref3;
                         if (_isArray) {
@@ -3652,10 +3654,10 @@
             }, {
                 key: "watchForClose",
                 value: function() {
-                    var _this4 = this;
+                    var _this3 = this;
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)(), function() {
-                        _this4.component.log("parent_window_closed");
-                        if (_this4.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this4.destroy();
+                        _this3.component.log("parent_window_closed");
+                        if (_this3.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this3.destroy();
                     });
                 }
             }, {
@@ -3687,7 +3689,7 @@
             }, {
                 key: "watchForResize",
                 value: function() {
-                    var _this5 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
+                    var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
                     if ((width || height) && this.component.dimensions && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) {
                         var el = document.documentElement;
                         window.navigator.userAgent.match(/MSIE (9|10)\./) && (el = document.body);
@@ -3697,7 +3699,7 @@
                                 if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(el, {
                                     width: width,
                                     height: height
-                                })) return _this5.resizeToElement(el, {
+                                })) return _this4.resizeToElement(el, {
                                     width: width,
                                     height: height
                                 });
@@ -3707,7 +3709,7 @@
                                         width: width,
                                         height: height
                                     }).then(function(dimensions) {
-                                        return _this5.resizeToElement(el, {
+                                        return _this4.resizeToElement(el, {
                                             width: width,
                                             height: height
                                         });
@@ -3733,13 +3735,13 @@
             }, {
                 key: "resize",
                 value: function(width, height) {
-                    var _this6 = this;
+                    var _this5 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.resolve().then(function() {
-                        _this6.component.log("resize", {
+                        _this5.component.log("resize", {
                             width: width,
                             height: height
                         });
-                        if (_this6.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this6.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
+                        if (_this5.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this5.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
                             width: width,
                             height: height
                         });
@@ -3748,7 +3750,7 @@
             }, {
                 key: "resizeToElement",
                 value: function(el, _ref6) {
-                    var _this7 = this, width = _ref6.width, height = _ref6.height, history = [];
+                    var _this6 = this, width = _ref6.width, height = _ref6.height, history = [];
                     return function resize() {
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(el, {
@@ -3771,7 +3773,7 @@
                                 width: dimensions.width,
                                 height: dimensions.height
                             });
-                            return _this7.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
+                            return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
                                 if (tracker.check().changed) return resize();
                             });
                         });
