@@ -1,3 +1,7 @@
+<p align="center"><img width="35%"  src="https://cdn.rawgit.com/krakenjs/xcomponent/master/xc.svg"></p>
+
+----
+
 <img src="https://cdn.rawgit.com/krakenjs/xcomponent/master/xcomponent.svg">
 
 A cross-domain component toolkit, supporting:
