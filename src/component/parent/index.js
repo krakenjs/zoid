@@ -8,7 +8,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
          showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel } from '../../lib';
+         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel, once } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -560,17 +560,17 @@ export class ParentComponent extends BaseComponent {
         // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
 
-        let unloadWindowListener = addEventListener(window, 'beforeunload', () => {
+        let onunload = once(() => {
             this.component.log(`navigate_away`);
             $logger.flush();
-
             closeWindowListener.cancel();
-
-            if (this.driver.destroyOnUnload) {
-                return this.destroyComponent();
-            }
+            this.destroyComponent();
         });
 
+        let beforeUnloadWindowListener = addEventListener(window, 'beforeunload', onunload);
+        let unloadWindowListener = addEventListener(window, 'unload', onunload);
+
+        this.clean.register('destroyBeforeUnloadWindowListener', beforeUnloadWindowListener.cancel);
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
 
