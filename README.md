@@ -1,5 +1,4 @@
-xcomponent
-----------
+<img src="https://cdn.rawgit.com/krakenjs/xcomponent/master/xcomponent.svg">
 
 [Introducing xcomponent](https://medium.com/@bluepnume/introducing-xcomponent-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
 
