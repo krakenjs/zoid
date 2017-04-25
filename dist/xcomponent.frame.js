@@ -5949,7 +5949,7 @@
                 type: "function",
                 required: !1,
                 promisify: !0,
-                sendToChild: !1,
+                sendToChild: !0,
                 def: function() {
                     return function() {};
                 },
