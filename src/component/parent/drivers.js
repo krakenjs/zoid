@@ -30,7 +30,6 @@ export let RENDER_DRIVERS = {};
 RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
     renderedIntoContainerTemplate: true,
-    destroyOnUnload: false,
     allowResize: true,
     openOnClick: false,
     errorOnCloseDuringInit: true,
@@ -159,7 +158,6 @@ if (__POPUP_SUPPORT__) {
 
         focusable: true,
         renderedIntoContainerTemplate: false,
-        destroyOnUnload: true,
         allowResize: false,
         openOnClick: true,
         errorOnCloseDuringInit: false,

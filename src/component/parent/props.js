@@ -3,6 +3,17 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { validateProp } from './validate';
 import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
 
+function isDefined(value) {
+    return value !== null && value !== undefined && value !== '';
+}
+
+function getDefault(component, prop, props) {
+
+    if (prop.def) {
+        return (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
+    }
+}
+
 
 /*  Normalize Prop
     --------------
@@ -14,10 +25,10 @@ export function normalizeProp(component, instance, props, key, value) {
 
     let prop = component.props[key];
 
-    let hasProp = props.hasOwnProperty(key) && value !== null && value !== undefined && value !== '';
-
-    if (!hasProp && prop.def) {
-        value = (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
+    if (prop.value) {
+        value = prop.value;
+    } else if (!props.hasOwnProperty(key) || !isDefined(value)) {
+        value = getDefault(component, prop, props);
     }
 
     if (!value && prop.alias && props[prop.alias]) {
@@ -25,11 +36,9 @@ export function normalizeProp(component, instance, props, key, value) {
     }
 
     if (prop.decorate) {
-        value = prop.decorate(value);
-    }
-
-    if (prop.value) {
-        value = prop.value;
+        if (isDefined(value) || !prop.required) {
+            value = prop.decorate(value);
+        }
     }
 
     if (prop.getter) {
@@ -161,7 +170,12 @@ export function normalizeProps(component, instance, props, required = true) {
 
     for (let key of Object.keys(component.props)) {
         if (!props.hasOwnProperty(key)) {
-            result[key] = normalizeProp(component, instance, props, key, props[key]);
+
+            let normalizedProp = normalizeProp(component, instance, props, key, props[key]);
+
+            if (normalizedProp !== undefined) {
+                result[key] = normalizedProp;
+            }
         }
     }
 

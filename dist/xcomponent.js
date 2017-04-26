@@ -395,7 +395,7 @@
             }
         }
         function dispatchError(err) {
-            if (-1 === dispatchedErrors.indexOf(err)) {
+            if (dispatchedErrors.indexOf(err) === -1) {
                 dispatchedErrors.push(err);
                 setTimeout(function() {
                     throw err;
@@ -610,7 +610,7 @@
         function isAncestorParent(parent, child) {
             if (!parent || !child) return !1;
             var childParent = getParent(child);
-            return childParent ? childParent === parent : -1 !== getParents(child).indexOf(parent);
+            return childParent ? childParent === parent : getParents(child).indexOf(parent) !== -1;
         }
         function getFrames(win) {
             var result = [], frames = void 0;
@@ -703,7 +703,7 @@
                         _ref4 = _i5.value;
                     }
                     var frame = _ref4;
-                    -1 === result.indexOf(frame) && result.push(frame);
+                    result.indexOf(frame) === -1 && result.push(frame);
                 }
             }
             return result;
@@ -774,14 +774,14 @@
                 }
                 var childFrame = _ref6;
                 try {
-                    if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
+                    if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) return childFrame;
                 } catch (err) {}
             }
             try {
-                if (-1 !== winFrames.indexOf(win.frames[name])) return win.frames[name];
+                if (winFrames.indexOf(win.frames[name]) !== -1) return win.frames[name];
             } catch (err) {}
             try {
-                if (-1 !== winFrames.indexOf(win[name])) return win[name];
+                if (winFrames.indexOf(win[name]) !== -1) return win[name];
             } catch (err) {}
         }
         function findChildFrameByName(win, name) {
@@ -1683,16 +1683,19 @@
             if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
         }
         function cleanup(obj) {
-            var tasks = [];
+            var tasks = [], cleaned = !1;
             return {
                 set: function(name, item) {
-                    obj[name] = item;
-                    this.register(function() {
-                        delete obj[name];
-                    });
-                    return item;
+                    if (!cleaned) {
+                        obj[name] = item;
+                        this.register(function() {
+                            delete obj[name];
+                        });
+                        return item;
+                    }
                 },
                 register: function(name, method) {
+                    if (cleaned) return method();
                     if (!method) {
                         method = name;
                         name = void 0;
@@ -1714,7 +1717,9 @@
                     }).length);
                 },
                 all: function() {
-                    for (var results = []; tasks.length; ) results.push(tasks.pop().run());
+                    var results = [];
+                    cleaned = !0;
+                    for (;tasks.length; ) results.push(tasks.pop().run());
                     return __WEBPACK_IMPORTED_MODULE_0_sync_browser_mocks_src_promise__.a.all(results).then(function() {});
                 },
                 run: function(name) {
@@ -1775,7 +1780,7 @@
                             return self.error(err);
                         }
                     };
-                    !1 !== doOnce && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(wrapper));
+                    doOnce !== !1 && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(wrapper));
                     return wrapper;
                 }
             }, {
@@ -2555,7 +2560,7 @@
                             _ref9 = _i.value;
                         }
                         var key = _ref9, prop = this.component.props[key];
-                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
+                        prop && prop.sendToChild === !1 || (result[key] = this.props[key]);
                     }
                     return result;
                 }
@@ -2692,12 +2697,13 @@
                         });
                     });
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
-                    var unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "beforeunload", function() {
+                    var onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(function() {
                         _this10.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
                         closeWindowListener.cancel();
-                        if (_this10.driver.destroyOnUnload) return _this10.destroyComponent();
-                    });
+                        _this10.destroyComponent();
+                    }), beforeUnloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "beforeunload", onunload), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(window, "unload", onunload);
+                    this.clean.register("destroyBeforeUnloadWindowListener", beforeUnloadWindowListener.cancel);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 }
             }, {
@@ -3050,18 +3056,18 @@
                 value: function(err) {
                     var _this21 = this;
                     this.handledErrors = this.handledErrors || [];
-                    if (-1 === this.handledErrors.indexOf(err)) {
+                    if (this.handledErrors.indexOf(err) === -1) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             _this21.component.logError("error", {
                                 error: err.stack || err.toString()
                             });
                             _this21.onInit.reject(err);
-                            return _this21.props.onError(err);
-                        }).then(function() {
                             return _this21.destroy();
-                        }).catch(function(err2) {
-                            throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + err2.stack);
+                        }).then(function() {
+                            return _this21.props.onError(err);
+                        }).catch(function(errErr) {
+                            throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
                             throw err;
                         });
@@ -3587,7 +3593,7 @@
                     domain: domain
                 });
                 var level = void 0;
-                level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                 __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || __WEBPACK_IMPORTED_MODULE_0__conf__.a.WILDCARD, "\n\n", message ]);
                 if (__WEBPACK_IMPORTED_MODULE_0__conf__.b.MOCK_MODE) {
                     delete message.target;
@@ -3631,7 +3637,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function matchDomain(domain, origin) {
-            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : -1 !== domain.indexOf(origin)));
+            return "string" == typeof domain ? !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (!Array.isArray(origin) && (domain === __WEBPACK_IMPORTED_MODULE_1__conf__.a.WILDCARD || origin === domain)) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(domain) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
         }
         var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0);
         __webpack_exports__.a = matchDomain;
@@ -3828,12 +3834,9 @@
             }, {
                 key: "setProps",
                 value: function() {
-                    var props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _this3 = this, origin = arguments[1], required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
+                    var props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, origin = arguments[1], required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
                     window.xprops = this.props = this.props || {};
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.h)(this.props, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__props__.a)(this.component, props, origin, required));
-                    this.props.onError = function(err) {
-                        return _this3.error(err);
-                    };
                     for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref3;
                         if (_isArray) {
@@ -3873,10 +3876,10 @@
             }, {
                 key: "watchForClose",
                 value: function() {
-                    var _this4 = this;
+                    var _this3 = this;
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)(), function() {
-                        _this4.component.log("parent_window_closed");
-                        if (_this4.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this4.destroy();
+                        _this3.component.log("parent_window_closed");
+                        if (_this3.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this3.destroy();
                     });
                 }
             }, {
@@ -3908,7 +3911,7 @@
             }, {
                 key: "watchForResize",
                 value: function() {
-                    var _this5 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
+                    var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height;
                     if ((width || height) && this.component.dimensions && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) {
                         var el = document.documentElement;
                         window.navigator.userAgent.match(/MSIE (9|10)\./) && (el = document.body);
@@ -3918,7 +3921,7 @@
                                 if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(el, {
                                     width: width,
                                     height: height
-                                })) return _this5.resizeToElement(el, {
+                                })) return _this4.resizeToElement(el, {
                                     width: width,
                                     height: height
                                 });
@@ -3928,7 +3931,7 @@
                                         width: width,
                                         height: height
                                     }).then(function(dimensions) {
-                                        return _this5.resizeToElement(el, {
+                                        return _this4.resizeToElement(el, {
                                             width: width,
                                             height: height
                                         });
@@ -3954,13 +3957,13 @@
             }, {
                 key: "resize",
                 value: function(width, height) {
-                    var _this6 = this;
+                    var _this5 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.resolve().then(function() {
-                        _this6.component.log("resize", {
+                        _this5.component.log("resize", {
                             width: width,
                             height: height
                         });
-                        if (_this6.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this6.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
+                        if (_this5.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this5.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
                             width: width,
                             height: height
                         });
@@ -3969,7 +3972,7 @@
             }, {
                 key: "resizeToElement",
                 value: function(el, _ref6) {
-                    var _this7 = this, width = _ref6.width, height = _ref6.height, history = [];
+                    var _this6 = this, width = _ref6.width, height = _ref6.height, history = [];
                     return function resize() {
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(el, {
@@ -3992,7 +3995,7 @@
                                 width: dimensions.width,
                                 height: dimensions.height
                             });
-                            return _this7.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
+                            return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
                                 if (tracker.check().changed) return resize();
                             });
                         });
@@ -4079,7 +4082,6 @@
         var RENDER_DRIVERS = {};
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_3__constants__.CONTEXT_TYPES.IFRAME] = {
             renderedIntoContainerTemplate: !0,
-            destroyOnUnload: !1,
             allowResize: !0,
             openOnClick: !1,
             errorOnCloseDuringInit: !0,
@@ -4089,7 +4091,7 @@
                 var options = {
                     attributes: {
                         name: this.childWindowName,
-                        scrolling: !1 === this.component.scrolling ? "no" : "yes"
+                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
                     },
                     style: {
                         width: "100%",
@@ -4169,7 +4171,6 @@
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_3__constants__.CONTEXT_TYPES.POPUP] = {
             focusable: !0,
             renderedIntoContainerTemplate: !1,
-            destroyOnUnload: !0,
             allowResize: !1,
             openOnClick: !0,
             errorOnCloseDuringInit: !1,
@@ -4236,12 +4237,17 @@
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        function isDefined(value) {
+            return null !== value && void 0 !== value && "" !== value;
+        }
+        function getDefault(component, prop, props) {
+            if (prop.def) return prop.def instanceof Function ? prop.def.call(component, props) : prop.def;
+        }
         function normalizeProp(component, instance, props, key, value) {
             var prop = component.props[key];
-            !(props.hasOwnProperty(key) && null !== value && void 0 !== value && "" !== value) && prop.def && (value = prop.def instanceof Function ? prop.def.call(component, props) : prop.def);
+            prop.value ? value = prop.value : props.hasOwnProperty(key) && isDefined(value) || (value = getDefault(component, prop, props));
             !value && prop.alias && props[prop.alias] && (value = props[prop.alias]);
-            prop.decorate && (value = prop.decorate(value));
-            prop.value && (value = prop.value);
+            prop.decorate && (!isDefined(value) && prop.required || (value = prop.decorate(value)));
             if (prop.getter) {
                 if (!value) return;
                 if (value instanceof Function) value = value.bind(instance); else {
@@ -4318,7 +4324,10 @@
                     _ref2 = _i2.value;
                 }
                 var _key = _ref2;
-                props.hasOwnProperty(_key) || (result[_key] = normalizeProp(component, instance, props, _key, props[_key]));
+                if (!props.hasOwnProperty(_key)) {
+                    var normalizedProp = normalizeProp(component, instance, props, _key, props[_key]);
+                    void 0 !== normalizedProp && (result[_key] = normalizedProp);
+                }
             }
             return result;
         }
@@ -4382,7 +4391,7 @@
                     } else if ("number" === prop.type && isNaN(parseInt(value, 10))) throw new Error("Prop is not a number: " + key);
                     "function" == typeof prop.validate && prop.validate(value, props);
                 }
-            } else if (required && !1 !== prop.required && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
+            } else if (required && prop.required !== !1 && !prop.hasOwnProperty("def")) throw new Error("Prop is required: " + key);
         }
         function validateProps(component, props) {
             var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
@@ -4700,7 +4709,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                        if (-1 === index) {
+                        if (index === -1) {
                             keys.push(key);
                             values.push(value);
                         } else values[index] = value;
@@ -4724,7 +4733,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (-1 === index) return;
+                        if (index === -1) return;
                         return this.values[index];
                     }
                     var entry = key[this.name];
@@ -4743,7 +4752,7 @@
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
-                        if (-1 !== index) {
+                        if (index !== -1) {
                             keys.splice(index, 1);
                             this.values.splice(index, 1);
                         }
@@ -4764,7 +4773,7 @@
                     }
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(key)) {
                         this._cleanupClosedWindows();
-                        return -1 !== this.keys.indexOf(key);
+                        return this.keys.indexOf(key) !== -1;
                     }
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
@@ -5010,7 +5019,7 @@
                 }, decode = function(base32Str, asciiOnly) {
                     if (!asciiOnly) return toUtf8String(decodeAsBytes(base32Str));
                     var v1, v2, v3, v4, v5, v6, v7, v8, str = "", length = base32Str.indexOf("=");
-                    -1 == length && (length = base32Str.length);
+                    length == -1 && (length = base32Str.length);
                     for (var i = 0, count = length >> 3 << 3; i < count; ) {
                         v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
                         v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -5413,7 +5422,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function emulateIERestrictions(sourceWindow, targetWindow) {
-            if (!__WEBPACK_IMPORTED_MODULE_0__conf__.b.ALLOW_POSTMESSAGE_POPUP && !1 === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
+            if (!__WEBPACK_IMPORTED_MODULE_0__conf__.b.ALLOW_POSTMESSAGE_POPUP && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(sourceWindow, targetWindow) === !1) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
         }
         var __WEBPACK_IMPORTED_MODULE_0__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(2);
         __webpack_exports__.a = emulateIERestrictions;
@@ -5469,10 +5478,10 @@
             var source = event.source, origin = event.origin, data = event.data, message = parseMessage(data);
             if (message) {
                 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(__WEBPACK_IMPORTED_MODULE_0__conf__.a.FILE_PROTOCOL) || (origin = message.sourceDomain);
-                if (-1 === __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id)) {
+                if (__WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.indexOf(message.id) === -1) {
                     __WEBPACK_IMPORTED_MODULE_2__global__.a.receivedMessages.push(message.id);
                     var level = void 0;
-                    level = -1 !== __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
+                    level = __WEBPACK_IMPORTED_MODULE_0__conf__.c.indexOf(message.name) !== -1 || message.type === __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                     __WEBPACK_IMPORTED_MODULE_1__lib__.k.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]);
                     if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(source)) return __WEBPACK_IMPORTED_MODULE_1__lib__.k.debug("Source window is closed - can not send " + message.type + " " + message.name);
                     message.data && (message.data = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.t)(source, origin, message.data));
@@ -5617,12 +5626,12 @@
         var sendBridgeMessage = __webpack_require__(21).sendBridgeMessage;
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
             if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through bridge disabled between same domain windows");
-            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
+            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win) !== !1) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
             return sendBridgeMessage(win, serializedMessage, domain);
         };
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_0__conf__.a.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage, domain) {
             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(win)) throw new Error("Post message through global disabled between different domain windows");
-            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
+            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.r)(window, win) !== !1) throw new Error("Can only use global to communicate between two different windows, not between frames");
             var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_0__conf__.a.WINDOW_PROPS.POSTROBOT];
             if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
             return foreignGlobal.receiveMessage({
@@ -6589,7 +6598,7 @@
                 type: "function",
                 required: !1,
                 promisify: !0,
-                sendToChild: !1,
+                sendToChild: !0,
                 def: function() {
                     return function() {};
                 },
@@ -6638,7 +6647,7 @@
                 var key = _ref, prop = options.props[key];
                 if (!prop || "object" !== (void 0 === prop ? "undefined" : _typeof(prop))) throw component.error("Expected options.props." + key + " to be an object");
                 if (!prop.type) throw component.error("Expected prop.type");
-                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type)) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
+                if (__WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.indexOf(prop.type) === -1) throw component.error("Expected prop.type to be one of " + __WEBPACK_IMPORTED_MODULE_0__constants__.PROP_TYPES_LIST.join(", "));
                 if (prop.required && prop.def) throw component.error("Required prop can not have a default value");
             }
         }
@@ -6662,13 +6671,13 @@
                         _ref2 = _i2.value;
                     }
                     var context = _ref2;
-                    if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context)) throw component.error("Unsupported context type: " + context);
+                    if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(context) === -1) throw component.error("Unsupported context type: " + context);
                     (options.contexts[context] || void 0 === options.contexts[context]) && (anyEnabled = !0);
                 }
                 if (!anyEnabled) throw component.error("No context type is enabled");
             }
             if (options.defaultContext) {
-                if (-1 === __WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw component.error("Unsupported context type: " + options.defaultContext);
+                if (__WEBPACK_IMPORTED_MODULE_0__constants__.CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) throw component.error("Unsupported context type: " + options.defaultContext);
                 if (options.contexts && !options.contexts[options.defaultContext]) throw component.error("Disallowed default context type: " + options.defaultContext);
             }
             if (!options.url && !options.buildUrl) throw component.error("Expected options.url to be passed");
@@ -7571,7 +7580,7 @@
             });
         }
         function addClass(element, name) {
-            element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
+            element.classList ? element.classList.add(name) : element.className.split(/\s+/).indexOf(name) === -1 && (element.className += " " + name);
         }
         function writeToWindow(win, html) {
             try {
@@ -7659,7 +7668,7 @@
         }), __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__fn__.c)(function(queryString) {
             var params = {};
             if (!queryString) return params;
-            if (-1 === queryString.indexOf("=")) throw new Error("Can not parse query string params: " + queryString);
+            if (queryString.indexOf("=") === -1) throw new Error("Can not parse query string params: " + queryString);
             for (var _iterator6 = queryString.split("&"), _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
                 var _ref8;
                 if (_isArray6) {
@@ -7697,7 +7706,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function setLogLevel(logLevel) {
-            if (-1 === __WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.a.indexOf(logLevel)) throw new Error("Invalid logLevel: " + logLevel);
+            if (__WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.a.indexOf(logLevel) === -1) throw new Error("Invalid logLevel: " + logLevel);
             __WEBPACK_IMPORTED_MODULE_1_beaver_logger_client__.b.logLevel = logLevel;
             __WEBPACK_IMPORTED_MODULE_0_post_robot_src__.a.LOG_LEVEL = logLevel;
             window.LOG_LEVEL = logLevel;

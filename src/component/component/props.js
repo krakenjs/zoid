@@ -110,7 +110,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         promisify: true,
-        sendToChild: false,
+        sendToChild: true,
         def() {
             return function() {
                 // pass
