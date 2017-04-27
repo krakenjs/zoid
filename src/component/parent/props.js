@@ -37,7 +37,7 @@ export function normalizeProp(component, instance, props, key, value) {
 
     if (prop.decorate) {
         if (isDefined(value) || !prop.required) {
-            value = prop.decorate(value);
+            value = prop.decorate(value, props);
         }
     }
 
