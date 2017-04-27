@@ -3958,7 +3958,7 @@
             var prop = component.props[key];
             prop.value ? value = prop.value : props.hasOwnProperty(key) && isDefined(value) || (value = getDefault(component, prop, props));
             !value && prop.alias && props[prop.alias] && (value = props[prop.alias]);
-            prop.decorate && (!isDefined(value) && prop.required || (value = prop.decorate(value)));
+            prop.decorate && (!isDefined(value) && prop.required || (value = prop.decorate(value, props)));
             if (prop.getter) {
                 if (!value) return;
                 if (value instanceof Function) value = value.bind(instance); else {
