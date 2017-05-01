@@ -1101,11 +1101,11 @@ export class ParentComponent extends BaseComponent {
 
                 this.clean.register('destroyContainerTemplate', () => {
 
-                    if (this.containerFrame) {
+                    if (this.containerFrame && this.containerFrame.parentNode) {
                         this.containerFrame.parentNode.removeChild(this.containerFrame);
                     }
 
-                    if (this.container) {
+                    if (this.container && this.container.parentNode) {
                         this.container.parentNode.removeChild(this.container);
                     }
 
