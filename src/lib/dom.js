@@ -63,6 +63,10 @@ export let documentReady = new Promise(resolve => {
     }, 10);
 });
 
+export function isDocumentReady() {
+    return window.document.readyState === 'complete';
+}
+
 export function elementReady(id) {
     return new Promise((resolve, reject) => {
 
@@ -72,7 +76,7 @@ export function elementReady(id) {
             return resolve(el);
         }
 
-        if (window.document.readyState === 'complete') {
+        if (isDocumentReady()) {
             return reject(new Error(`Document is ready and element ${id} does not exist`));
         }
 
@@ -85,7 +89,7 @@ export function elementReady(id) {
                 return resolve(el);
             }
 
-            if (window.document.readyState === 'complete') {
+            if (isDocumentReady()) {
                 clearInterval(interval);
                 return reject(new Error(`Document is ready and element ${id} does not exist`));
             }

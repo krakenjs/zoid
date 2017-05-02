@@ -7,7 +7,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor, setLogLevel } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel, getElement } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -302,12 +302,27 @@ export class ChildComponent extends BaseComponent {
             height = true;
         }
 
-        return { width, height };
+        let element;
+
+        if (autoResize.element) {
+            element = getElement(autoResize.element);
+        }
+
+        if (!element) {
+            // Believe me, I struggled. There's no other way.
+            if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
+                element = document.body;
+            } else {
+                element = document.documentElement;
+            }
+        }
+
+        return { width, height, element };
     }
 
     watchForResize() {
 
-        let { width, height } = this.getAutoResize();
+        let { width, height, element } = this.getAutoResize();
 
         if (!width && !height) {
             return;
@@ -321,13 +336,6 @@ export class ChildComponent extends BaseComponent {
             return;
         }
 
-        let el = document.documentElement;
-
-        // Believe me, I struggled. There's no other way.
-        if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-            el = document.body;
-        }
-
         if (this.watchingForResize) {
             return;
         }
@@ -336,15 +344,15 @@ export class ChildComponent extends BaseComponent {
 
         return Promise.try(() => {
 
-            if (!dimensionsMatchViewport(el, { width, height })) {
-                return this.resizeToElement(el, { width, height });
+            if (!dimensionsMatchViewport(element, { width, height })) {
+                return this.resizeToElement(element, { width, height });
             }
 
         }).then(() => {
 
             return cycle(() => {
-                return onDimensionsChange(el, { width, height }).then(dimensions => {
-                    return this.resizeToElement(el, { width, height });
+                return onDimensionsChange(element, { width, height }).then(dimensions => {
+                    return this.resizeToElement(element, { width, height });
                 });
             });
         });
