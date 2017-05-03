@@ -2084,7 +2084,13 @@
             return ParentComponent;
         });
         __webpack_exports__.a = destroyAll;
-        var _class, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _class, _extends = Object.assign || function(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+            }
+            return target;
+        }, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -2722,12 +2728,13 @@
             }, {
                 key: "renderTemplate",
                 value: function(renderer) {
-                    return renderer({
+                    var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                    return renderer(_extends({
                         id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + this.props.uid,
                         props: renderer.__xdomain__ ? null : this.props,
                         CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
                         ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
-                    });
+                    }, options));
                 }
             }, {
                 key: "openContainerFrame",
@@ -2751,68 +2758,71 @@
             }, {
                 key: "openContainer",
                 value: function(element) {
-                    var _this18 = this;
-                    return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this18.getContainerTemplate();
-                    }).then(function(containerTemplate) {
-                        if (containerTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return _this18.renderTemplate(containerTemplate);
-                        }).then(function(html) {
-                            var el = void 0;
-                            if (element) {
-                                el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
-                                if (!el) throw new Error("Could not find element: " + element);
-                            } else el = document.body;
-                            if (_this18.component.sandboxContainer) {
-                                _this18.containerFrame = _this18.openContainerFrame(el);
-                                el = _this18.containerFrame.contentWindow.document.body;
-                            }
-                            _this18.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
-                                html: html,
-                                attributes: {
-                                    id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid
-                                },
-                                class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.context ]
-                            });
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.container);
-                            el.appendChild(_this18.container);
-                            if (_this18.driver.renderedIntoContainerTemplate) {
-                                _this18.element = _this18.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
-                                var _ref14 = _this18.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
-                                (width || height) && _this18.resize(width, height, {
-                                    waitForTransition: !1
-                                });
-                                if (!_this18.element) throw new Error("Could not find element to render component into");
-                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.element);
-                            }
-                            var eventHandlers = [];
-                            _this18.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                return _this18.focus();
-                            }));
-                            eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                return _this18.userClose();
-                            }));
-                            _this18.clean.register("destroyContainerEvents", function() {
-                                for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref15;
-                                    if (_isArray3) {
-                                        if (_i3 >= _iterator3.length) break;
-                                        _ref15 = _iterator3[_i3++];
-                                    } else {
-                                        _i3 = _iterator3.next();
-                                        if (_i3.done) break;
-                                        _ref15 = _i3.value;
-                                    }
-                                    _ref15.cancel();
+                    var _this18 = this, el = void 0;
+                    if (element) {
+                        el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
+                        if (!el) throw new Error("Could not find element: " + element);
+                    } else el = document.body;
+                    return this.getContainerTemplate().then(function(containerTemplate) {
+                        if (containerTemplate) {
+                            var containerWidth = el.offsetWidth, containerHeight = el.offsetHeight;
+                            return _this18.renderTemplate(containerTemplate, {
+                                dimensions: {
+                                    width: containerWidth,
+                                    height: containerHeight
                                 }
+                            }).then(function(html) {
+                                if (_this18.component.sandboxContainer) {
+                                    _this18.containerFrame = _this18.openContainerFrame(el);
+                                    el = _this18.containerFrame.contentWindow.document.body;
+                                }
+                                _this18.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
+                                    html: html,
+                                    attributes: {
+                                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid
+                                    },
+                                    class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.context ]
+                                });
+                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.container);
+                                el.appendChild(_this18.container);
+                                if (_this18.driver.renderedIntoContainerTemplate) {
+                                    _this18.element = _this18.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
+                                    var _ref14 = _this18.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
+                                    (width || height) && _this18.resize(width, height, {
+                                        waitForTransition: !1
+                                    });
+                                    if (!_this18.element) throw new Error("Could not find element to render component into");
+                                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.element);
+                                }
+                                var eventHandlers = [];
+                                _this18.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this18.focus();
+                                }));
+                                eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this18.userClose();
+                                }));
+                                _this18.clean.register("destroyContainerEvents", function() {
+                                    for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                                        var _ref15;
+                                        if (_isArray3) {
+                                            if (_i3 >= _iterator3.length) break;
+                                            _ref15 = _iterator3[_i3++];
+                                        } else {
+                                            _i3 = _iterator3.next();
+                                            if (_i3.done) break;
+                                            _ref15 = _i3.value;
+                                        }
+                                        _ref15.cancel();
+                                    }
+                                });
+                                _this18.clean.register("destroyContainerTemplate", function() {
+                                    _this18.containerFrame && _this18.containerFrame.parentNode && _this18.containerFrame.parentNode.removeChild(_this18.containerFrame);
+                                    _this18.container && _this18.container.parentNode && _this18.container.parentNode.removeChild(_this18.container);
+                                    delete _this18.containerFrame;
+                                    delete _this18.container;
+                                });
                             });
-                            _this18.clean.register("destroyContainerTemplate", function() {
-                                _this18.containerFrame && _this18.containerFrame.parentNode && _this18.containerFrame.parentNode.removeChild(_this18.containerFrame);
-                                _this18.container && _this18.container.parentNode && _this18.container.parentNode.removeChild(_this18.container);
-                                delete _this18.containerFrame;
-                                delete _this18.container;
-                            });
-                        });
+                        }
                         if (_this18.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this18.context);
                     });
                 }
@@ -2892,6 +2902,7 @@
         _applyDecoratedDescriptor(_class.prototype, "getComponentTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "getComponentTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "createComponentTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.K, __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "createComponentTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "getContainerTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "getContainerTemplate"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "renderTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "renderTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "openContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.K, __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "openContainer"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "error", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "error"), _class.prototype), 
         _class);
@@ -3700,7 +3711,7 @@
                 key: "watchForResize",
                 value: function() {
                     var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                    if ((width || height) && this.component.dimensions && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
+                    if ((width || height) && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(element, {
@@ -5583,10 +5594,7 @@
                 _this.addProp(options, "name", _this.tag.replace(/-/g, "_"));
                 _this.props = _extends({}, __WEBPACK_IMPORTED_MODULE_5__props__.a, options.props || {});
                 options.props || (_this.looseProps = !0);
-                _this.addProp(options, "dimensions", {
-                    width: "300px",
-                    height: "150px"
-                });
+                _this.addProp(options, "dimensions");
                 _this.addProp(options, "scrolling");
                 _this.addProp(options, "version", "latest");
                 _this.addProp(options, "defaultEnv");
