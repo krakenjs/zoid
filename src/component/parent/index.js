@@ -1073,8 +1073,10 @@ export class ParentComponent extends BaseComponent {
                 if (this.driver.renderedIntoContainerTemplate) {
                     this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
 
-                    let { width, height } = this.getInitialDimensions(el);
-                    this.resize(width, height, { waitForTransition: false });
+                    let { width, height } = this.getInitialDimensions(el) || {};
+                    if (width || height) {
+                        this.resize(width, height, { waitForTransition: false });
+                    }
 
                     if (!this.element) {
                         throw new Error('Could not find element to render component into');
