@@ -106,7 +106,9 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         resize:                  DELEGATE.CALL_DELEGATE,
         loadUrl:                 DELEGATE.CALL_DELEGATE,
         hijackSubmit:            DELEGATE.CALL_DELEGATE,
+
         getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
+        renderTemplate:          DELEGATE.CALL_ORIGINAL,
 
         open(original, override) {
             return function() {
@@ -228,7 +230,8 @@ if (__POPUP_SUPPORT__) {
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
             destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
-            getInitialDimensions:    DELEGATE.CALL_ORIGINAL
+            getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
+            renderTemplate:          DELEGATE.CALL_ORIGINAL
         },
 
         loadUrl(url) {

@@ -963,12 +963,8 @@ export class ParentComponent extends BaseComponent {
             }
 
             return Promise.try(() => {
-                return componentTemplate({
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    props: this.props,
-                    CLASS: CLASS_NAMES,
-                    ANIMATION: ANIMATION_NAMES
-                });
+                return this.renderTemplate(componentTemplate);
+
             }).then(html => {
 
                 let win = this.componentTemplateWindow || this.window;
@@ -990,6 +986,15 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the element
     */
 
+    renderTemplate(renderer) {
+        return renderer({
+            id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+            props: renderer.__xdomain__ ? null : this.props,
+            CLASS: CLASS_NAMES,
+            ANIMATION: ANIMATION_NAMES
+        });
+    }
+
     @memoized
     @promise
     openContainer(element) {
@@ -1008,13 +1013,11 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
+
+
             return Promise.try(() => {
-                return containerTemplate({
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    props: this.props,
-                    CLASS: CLASS_NAMES,
-                    ANIMATION: ANIMATION_NAMES
-                });
+                return this.renderTemplate(containerTemplate);
+
             }).then(html => {
 
                 let el;
