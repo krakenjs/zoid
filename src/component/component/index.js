@@ -108,7 +108,17 @@ export class Component extends BaseComponent {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.addProp(options, 'containerTemplate', ({ CLASS }) => `<div class="${ CLASS.ELEMENT }"></div>`);
+        this.addProp(options, 'containerTemplate', ({ id, CLASS }) => `
+            <style>
+                #${id} iframe {
+                    height: 100%;
+                    width: 100%;
+                }
+            </style>
+
+            <div class="${ CLASS.ELEMENT }"></div>
+        `);
+
         this.addProp(options, 'componentTemplate');
 
         this.addProp(options, 'sacrificialComponentTemplate', false);

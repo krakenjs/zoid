@@ -44,11 +44,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             attributes: {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            },
-
-            style: {
-                width: '100%',
-                height: '100%'
             }
         };
 
