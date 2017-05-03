@@ -995,6 +995,28 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    openContainerFrame(el) {
+
+        let frame = iframe(null, {
+            name: `__xcomponent_container_${uniqueID()}__`,
+            scrolling: 'no'
+        }, el);
+
+        frame.style.display = 'block';
+        frame.style.position = 'fixed';
+        frame.style.top = '0';
+        frame.style.left = '0';
+        frame.style.width = '100%';
+        frame.style.height = '100%';
+        frame.style.zIndex = '2147483647';
+
+        frame.contentWindow.document.open();
+        frame.contentWindow.document.write(`<body></body>`);
+        frame.contentWindow.document.close();
+
+        return frame;
+    }
+
     @memoized
     @promise
     openContainer(element) {
@@ -1033,24 +1055,7 @@ export class ParentComponent extends BaseComponent {
                 }
 
                 if (this.component.sandboxContainer) {
-
-                    this.containerFrame = iframe(null, {
-                        name: `__xcomponent_container_${uniqueID()}__`,
-                        scrolling: 'no'
-                    }, el);
-
-                    this.containerFrame.style.display = 'block';
-                    this.containerFrame.style.position = 'fixed';
-                    this.containerFrame.style.top = '0';
-                    this.containerFrame.style.left = '0';
-                    this.containerFrame.style.width = '100%';
-                    this.containerFrame.style.height = '100%';
-                    this.containerFrame.style.zIndex = '2147483647';
-
-                    this.containerFrame.contentWindow.document.open();
-                    this.containerFrame.contentWindow.document.write(`<body></body>`);
-                    this.containerFrame.contentWindow.document.close();
-
+                    this.containerFrame = this.openContainerFrame(el);
                     el = this.containerFrame.contentWindow.document.body;
                 }
 
