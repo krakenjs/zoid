@@ -2707,12 +2707,7 @@
                         return _this17.getComponentTemplate();
                     }).then(function(componentTemplate) {
                         if (componentTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return componentTemplate({
-                                id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.props.uid,
-                                props: _this17.props,
-                                CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
-                                ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
-                            });
+                            return _this17.renderTemplate(componentTemplate);
                         }).then(function(html) {
                             var win = _this17.componentTemplateWindow || _this17.window;
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.F)(win, html);
@@ -2725,6 +2720,35 @@
                     return this.component.containerTemplate;
                 }
             }, {
+                key: "renderTemplate",
+                value: function(renderer) {
+                    return renderer({
+                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + this.props.uid,
+                        props: renderer.__xdomain__ ? null : this.props,
+                        CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
+                        ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
+                    });
+                }
+            }, {
+                key: "openContainerFrame",
+                value: function(el) {
+                    var frame = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.G)(null, {
+                        name: "__xcomponent_container_" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)() + "__",
+                        scrolling: "no"
+                    }, el);
+                    frame.style.display = "block";
+                    frame.style.position = "fixed";
+                    frame.style.top = "0";
+                    frame.style.left = "0";
+                    frame.style.width = "100%";
+                    frame.style.height = "100%";
+                    frame.style.zIndex = "2147483647";
+                    frame.contentWindow.document.open();
+                    frame.contentWindow.document.write("<body></body>");
+                    frame.contentWindow.document.close();
+                    return frame;
+                }
+            }, {
                 key: "openContainer",
                 value: function(element) {
                     var _this18 = this;
@@ -2732,12 +2756,7 @@
                         return _this18.getContainerTemplate();
                     }).then(function(containerTemplate) {
                         if (containerTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return containerTemplate({
-                                id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid,
-                                props: _this18.props,
-                                CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
-                                ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
-                            });
+                            return _this18.renderTemplate(containerTemplate);
                         }).then(function(html) {
                             var el = void 0;
                             if (element) {
@@ -2745,20 +2764,7 @@
                                 if (!el) throw new Error("Could not find element: " + element);
                             } else el = document.body;
                             if (_this18.component.sandboxContainer) {
-                                _this18.containerFrame = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.G)(null, {
-                                    name: "__xcomponent_container_" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)() + "__",
-                                    scrolling: "no"
-                                }, el);
-                                _this18.containerFrame.style.display = "block";
-                                _this18.containerFrame.style.position = "fixed";
-                                _this18.containerFrame.style.top = "0";
-                                _this18.containerFrame.style.left = "0";
-                                _this18.containerFrame.style.width = "100%";
-                                _this18.containerFrame.style.height = "100%";
-                                _this18.containerFrame.style.zIndex = "2147483647";
-                                _this18.containerFrame.contentWindow.document.open();
-                                _this18.containerFrame.contentWindow.document.write("<body></body>");
-                                _this18.containerFrame.contentWindow.document.close();
+                                _this18.containerFrame = _this18.openContainerFrame(el);
                                 el = _this18.containerFrame.contentWindow.document.body;
                             }
                             _this18.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
@@ -3918,6 +3924,7 @@
                 loadUrl: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_DELEGATE,
                 hijackSubmit: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_DELEGATE,
                 getInitialDimensions: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_ORIGINAL,
+                renderTemplate: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_ORIGINAL,
                 open: function(original, override) {
                     return function() {
                         var _this2 = this;
@@ -4792,7 +4799,7 @@
                     _ref = _i.value;
                 }
                 var promise = _ref;
-                promise.reject(new Error("Window cleaned up"));
+                promise.reject(new Error("No response from window - cleaned up"));
             }
             __WEBPACK_IMPORTED_MODULE_0__global__.a.popupWindowsByWin && __WEBPACK_IMPORTED_MODULE_0__global__.a.popupWindowsByWin.delete(win);
             __WEBPACK_IMPORTED_MODULE_0__global__.a.remoteWindows && __WEBPACK_IMPORTED_MODULE_0__global__.a.remoteWindows.delete(win);
@@ -5044,6 +5051,7 @@
                 });
             }
             wrapper.__name__ = obj.__name__;
+            wrapper.__xdomain__ = !0;
             wrapper.source = source;
             wrapper.origin = origin;
             return wrapper;
