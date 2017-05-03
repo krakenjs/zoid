@@ -986,12 +986,14 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the element
     */
 
-    renderTemplate(renderer) {
+    @promise
+    renderTemplate(renderer, options = {}) {
         return renderer({
             id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
             props: renderer.__xdomain__ ? null : this.props,
             CLASS: CLASS_NAMES,
-            ANIMATION: ANIMATION_NAMES
+            ANIMATION: ANIMATION_NAMES,
+            ...options
         });
     }
 
@@ -1020,14 +1022,22 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     openContainer(element) {
-        return Promise.try(() => {
 
-            return this.getContainerTemplate();
+        let el;
 
-        }).then(containerTemplate => {
+        if (element) {
+            el = getElement(element);
+
+            if (!el) {
+                throw new Error(`Could not find element: ${element}`);
+            }
+        } else {
+            el = document.body;
+        }
+
+        return this.getContainerTemplate().then(containerTemplate => {
 
             if (!containerTemplate) {
-
                 if (this.driver.renderedIntoContainerTemplate) {
                     throw new Error(`containerTemplate needed to render ${this.context}`);
                 }
@@ -1035,24 +1045,16 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
+            let containerWidth = el.offsetWidth;
+            let containerHeight = el.offsetHeight;
 
-
-            return Promise.try(() => {
-                return this.renderTemplate(containerTemplate);
+            return this.renderTemplate(containerTemplate, {
+                dimensions: {
+                    width: containerWidth,
+                    height: containerHeight
+                }
 
             }).then(html => {
-
-                let el;
-
-                if (element) {
-                    el = getElement(element);
-
-                    if (!el) {
-                        throw new Error(`Could not find element: ${element}`);
-                    }
-                } else {
-                    el = document.body;
-                }
 
                 if (this.component.sandboxContainer) {
                     this.containerFrame = this.openContainerFrame(el);
