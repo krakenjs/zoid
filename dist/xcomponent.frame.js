@@ -2772,8 +2772,8 @@
                             el.appendChild(_this18.container);
                             if (_this18.driver.renderedIntoContainerTemplate) {
                                 _this18.element = _this18.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
-                                var _getInitialDimensions = _this18.getInitialDimensions(el), width = _getInitialDimensions.width, height = _getInitialDimensions.height;
-                                _this18.resize(width, height, {
+                                var _ref14 = _this18.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
+                                (width || height) && _this18.resize(width, height, {
                                     waitForTransition: !1
                                 });
                                 if (!_this18.element) throw new Error("Could not find element to render component into");
@@ -2788,16 +2788,16 @@
                             }));
                             _this18.clean.register("destroyContainerEvents", function() {
                                 for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref14;
+                                    var _ref15;
                                     if (_isArray3) {
                                         if (_i3 >= _iterator3.length) break;
-                                        _ref14 = _iterator3[_i3++];
+                                        _ref15 = _iterator3[_i3++];
                                     } else {
                                         _i3 = _iterator3.next();
                                         if (_i3.done) break;
-                                        _ref14 = _i3.value;
+                                        _ref15 = _i3.value;
                                     }
-                                    _ref14.cancel();
+                                    _ref15.cancel();
                                 }
                             });
                             _this18.clean.register("destroyContainerTemplate", function() {
@@ -3870,10 +3870,6 @@
                     attributes: {
                         name: this.childWindowName,
                         scrolling: this.component.scrolling === !1 ? "no" : "yes"
-                    },
-                    style: {
-                        width: "100%",
-                        height: "100%"
                     }
                 }, frame = this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.G)(null, options, this.element);
                 this.window = frame.contentWindow;
@@ -5599,7 +5595,7 @@
                 _this.addProp(options, "getInitialDimensions");
                 _this.addProp(options, "autoResize", !1);
                 _this.addProp(options, "containerTemplate", function(_ref) {
-                    return '<div class="' + _ref.CLASS.ELEMENT + '"></div>';
+                    return "\n            <style>\n                #" + _ref.id + ' iframe {\n                    height: 100%;\n                    width: 100%;\n                }\n            </style>\n\n            <div class="' + _ref.CLASS.ELEMENT + '"></div>\n        ';
                 });
                 _this.addProp(options, "componentTemplate");
                 _this.addProp(options, "sacrificialComponentTemplate", !1);
@@ -6766,6 +6762,14 @@
         function onDimensionsChange(el, _ref12) {
             var _ref12$width = _ref12.width, width = void 0 === _ref12$width || _ref12$width, _ref12$height = _ref12.height, height = void 0 === _ref12$height || _ref12$height, _ref12$delay = _ref12.delay, delay = void 0 === _ref12$delay ? 50 : _ref12$delay, _ref12$threshold = _ref12.threshold, threshold = void 0 === _ref12$threshold ? 0 : _ref12$threshold;
             return new __WEBPACK_IMPORTED_MODULE_1_sync_browser_mocks_src_promise__.a(function(resolve) {
+                function onWindowResize() {
+                    var _tracker$check2 = tracker.check(), changed = _tracker$check2.changed, dimensions = _tracker$check2.dimensions;
+                    if (changed) {
+                        tracker.reset();
+                        window.removeEventListener("resize", onWindowResize);
+                        return resolver(dimensions);
+                    }
+                }
                 var tracker = trackDimensions(el, {
                     width: width,
                     height: height,
@@ -6781,6 +6785,7 @@
                         return resolver(dimensions);
                     }
                 }, delay);
+                window.addEventListener("resize", onWindowResize);
             });
         }
         function dimensionsMatchViewport(el, _ref13) {
