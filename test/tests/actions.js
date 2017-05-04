@@ -7,7 +7,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -25,7 +25,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderIframe({
 
-            onRender() {
+            onEnter() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -43,7 +43,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 this.window.focus = done;
                 this.focus();
             }

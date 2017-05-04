@@ -10,7 +10,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -25,7 +25,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -42,7 +42,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 }, 'body');
@@ -112,7 +112,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         this.close();
                     },
 
@@ -136,7 +136,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
                         var winClose = this.window.close;
                         this.window.close = function() {
@@ -165,7 +165,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
                         var winClose = this.window.close;
                         this.window.close = function() {
@@ -194,7 +194,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
                         this.window.focus = function() {
                             window.xprops.foo();

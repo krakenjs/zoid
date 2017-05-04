@@ -70,6 +70,7 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
             let tasks = {
+                onRender: this.props.onRender(),
                 getDomain: this.getDomain()
             };
 
@@ -135,9 +136,6 @@ export class ParentComponent extends BaseComponent {
 
             return Promise.hash(tasks);
 
-        }).then(() => {
-
-            return this.props.onRender();
         });
     }
 
