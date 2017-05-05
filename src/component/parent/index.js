@@ -136,6 +136,8 @@ export class ParentComponent extends BaseComponent {
 
             return Promise.hash(tasks);
 
+        }).then(() => {
+            return this.props.onEnter();
         });
     }
 
@@ -651,12 +653,10 @@ export class ParentComponent extends BaseComponent {
                     clearTimeout(this.timeout);
                 }
 
-                return this.props.onEnter().then(() => {
-                    return {
-                        props: this.getPropsForChild(),
-                        context: this.context
-                    };
-                });
+                return {
+                    props: this.getPropsForChild(),
+                    context: this.context
+                };
             },
 
 
