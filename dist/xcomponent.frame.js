@@ -2173,6 +2173,7 @@
                             loadUrl: loadUrl
                         });
                         var tasks = {
+                            onRender: _this2.props.onRender(),
                             getDomain: _this2.getDomain()
                         };
                         tasks.elementReady = __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
@@ -2219,7 +2220,7 @@
                         }
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.hash(tasks);
                     }).then(function() {
-                        return _this2.props.onRender();
+                        return _this2.props.onEnter();
                     });
                 }
             }, {
@@ -2537,16 +2538,13 @@
                 value: function() {
                     var _ref12;
                     return _ref12 = {}, _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.INIT, function(source, data) {
-                        var _this12 = this;
                         this.childExports = data.exports;
                         this.onInit.resolve(this);
                         this.timeout && clearTimeout(this.timeout);
-                        return this.props.onEnter().then(function() {
-                            return {
-                                props: _this12.getPropsForChild(),
-                                context: _this12.context
-                            };
-                        });
+                        return {
+                            props: this.getPropsForChild(),
+                            context: this.context
+                        };
                     }), _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CLOSE, function(source, data) {
                         this.close(data.reason);
                     }), _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, function(source, data) {
@@ -2598,28 +2596,28 @@
             }, {
                 key: "close",
                 value: function() {
-                    var _this13 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this12 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        _this13.component.log("close", {
+                        _this12.component.log("close", {
                             reason: reason
                         });
-                        return _this13.props.onClose(reason);
+                        return _this12.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this13.closeComponent(), _this13.closeContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this12.closeComponent(), _this12.closeContainer() ]);
                     }).then(function() {
-                        return _this13.destroy();
+                        return _this12.destroy();
                     });
                 }
             }, {
                 key: "closeContainer",
                 value: function() {
-                    var _this14 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this13 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this14.props.onClose(reason);
+                        return _this13.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this14.closeComponent(reason), _this14.hideContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this13.closeComponent(reason), _this13.hideContainer() ]);
                     }).then(function() {
-                        return _this14.destroyContainer();
+                        return _this13.destroyContainer();
                     });
                 }
             }, {
@@ -2631,20 +2629,20 @@
             }, {
                 key: "closeComponent",
                 value: function() {
-                    var _this15 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this14 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     this.clean.run("destroyCloseWindowListener");
                     this.clean.run("destroyUnloadWindowListener");
                     var win = this.window;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this15.cancelContainerEvents();
+                        return _this14.cancelContainerEvents();
                     }).then(function() {
-                        return _this15.props.onClose(reason);
+                        return _this14.props.onClose(reason);
                     }).then(function() {
-                        return _this15.hideComponent();
+                        return _this14.hideComponent();
                     }).then(function() {
-                        return _this15.destroyComponent();
+                        return _this14.destroyComponent();
                     }).then(function() {
-                        _this15.childExports && _this15.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src_lib_windows__.isWindowClosed)(win) && _this15.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.w);
+                        _this14.childExports && _this14.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src_lib_windows__.isWindowClosed)(win) && _this14.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.w);
                     });
                 }
             }, {
@@ -2665,13 +2663,13 @@
             }, {
                 key: "showComponent",
                 value: function() {
-                    var _this16 = this;
+                    var _this15 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        if (_this16.props.onDisplay) return _this16.props.onDisplay();
+                        if (_this15.props.onDisplay) return _this15.props.onDisplay();
                     }).then(function() {
-                        if (_this16.element) {
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(_this16.element, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.SHOW_COMPONENT);
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.D)(_this16.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this16.clean.register);
+                        if (_this15.element) {
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(_this15.element, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.SHOW_COMPONENT);
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.D)(_this15.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this15.clean.register);
                         }
                     });
                 }
@@ -2708,14 +2706,14 @@
             }, {
                 key: "createComponentTemplate",
                 value: function() {
-                    var _this17 = this;
+                    var _this16 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this17.getComponentTemplate();
+                        return _this16.getComponentTemplate();
                     }).then(function(componentTemplate) {
                         if (componentTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return _this17.renderTemplate(componentTemplate);
+                            return _this16.renderTemplate(componentTemplate);
                         }).then(function(html) {
-                            var win = _this17.componentTemplateWindow || _this17.window;
+                            var win = _this16.componentTemplateWindow || _this16.window;
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.F)(win, html);
                         });
                     });
@@ -2758,7 +2756,7 @@
             }, {
                 key: "openContainer",
                 value: function(element) {
-                    var _this18 = this, el = void 0;
+                    var _this17 = this, el = void 0;
                     if (element) {
                         el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
                         if (!el) throw new Error("Could not find element: " + element);
@@ -2766,42 +2764,42 @@
                     return this.getContainerTemplate().then(function(containerTemplate) {
                         if (containerTemplate) {
                             var containerWidth = el.offsetWidth, containerHeight = el.offsetHeight;
-                            return _this18.renderTemplate(containerTemplate, {
+                            return _this17.renderTemplate(containerTemplate, {
                                 dimensions: {
                                     width: containerWidth,
                                     height: containerHeight
                                 }
                             }).then(function(html) {
-                                if (_this18.component.sandboxContainer) {
-                                    _this18.containerFrame = _this18.openContainerFrame(el);
-                                    el = _this18.containerFrame.contentWindow.document.body;
+                                if (_this17.component.sandboxContainer) {
+                                    _this17.containerFrame = _this17.openContainerFrame(el);
+                                    el = _this17.containerFrame.contentWindow.document.body;
                                 }
-                                _this18.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
+                                _this17.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
                                     html: html,
                                     attributes: {
-                                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid
+                                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.props.uid
                                     },
-                                    class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.context ]
+                                    class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.context ]
                                 });
-                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.container);
-                                el.appendChild(_this18.container);
-                                if (_this18.driver.renderedIntoContainerTemplate) {
-                                    _this18.element = _this18.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
-                                    var _ref14 = _this18.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
-                                    (width || height) && _this18.resize(width, height, {
+                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this17.container);
+                                el.appendChild(_this17.container);
+                                if (_this17.driver.renderedIntoContainerTemplate) {
+                                    _this17.element = _this17.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
+                                    var _ref14 = _this17.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
+                                    (width || height) && _this17.resize(width, height, {
                                         waitForTransition: !1
                                     });
-                                    if (!_this18.element) throw new Error("Could not find element to render component into");
-                                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.element);
+                                    if (!_this17.element) throw new Error("Could not find element to render component into");
+                                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this17.element);
                                 }
                                 var eventHandlers = [];
-                                _this18.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                    return _this18.focus();
+                                _this17.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this17.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this17.focus();
                                 }));
-                                eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                    return _this18.userClose();
+                                eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this17.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this17.userClose();
                                 }));
-                                _this18.clean.register("destroyContainerEvents", function() {
+                                _this17.clean.register("destroyContainerEvents", function() {
                                     for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                                         var _ref15;
                                         if (_isArray3) {
@@ -2815,15 +2813,15 @@
                                         _ref15.cancel();
                                     }
                                 });
-                                _this18.clean.register("destroyContainerTemplate", function() {
-                                    _this18.containerFrame && _this18.containerFrame.parentNode && _this18.containerFrame.parentNode.removeChild(_this18.containerFrame);
-                                    _this18.container && _this18.container.parentNode && _this18.container.parentNode.removeChild(_this18.container);
-                                    delete _this18.containerFrame;
-                                    delete _this18.container;
+                                _this17.clean.register("destroyContainerTemplate", function() {
+                                    _this17.containerFrame && _this17.containerFrame.parentNode && _this17.containerFrame.parentNode.removeChild(_this17.containerFrame);
+                                    _this17.container && _this17.container.parentNode && _this17.container.parentNode.removeChild(_this17.container);
+                                    delete _this17.containerFrame;
+                                    delete _this17.container;
                                 });
                             });
                         }
-                        if (_this18.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this18.context);
+                        if (_this17.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this17.context);
                     });
                 }
             }, {
@@ -2834,41 +2832,41 @@
             }, {
                 key: "destroy",
                 value: function() {
-                    var _this19 = this;
+                    var _this18 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        if (_this19.clean.hasTasks()) {
-                            _this19.component.log("destroy");
+                        if (_this18.clean.hasTasks()) {
+                            _this18.component.log("destroy");
                             __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
-                            return _this19.clean.all();
+                            return _this18.clean.all();
                         }
                     });
                 }
             }, {
                 key: "tryInit",
                 value: function(method) {
-                    var _this20 = this;
+                    var _this19 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(method).catch(function(err) {
-                        _this20.onInit.reject(err);
+                        _this19.onInit.reject(err);
                         throw err;
                     }).then(function() {
-                        return _this20.onInit;
+                        return _this19.onInit;
                     });
                 }
             }, {
                 key: "error",
                 value: function(err) {
-                    var _this21 = this;
+                    var _this20 = this;
                     this.handledErrors = this.handledErrors || [];
                     if (this.handledErrors.indexOf(err) === -1) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            _this21.component.logError("error", {
+                            _this20.component.logError("error", {
                                 error: err.stack || err.toString()
                             });
-                            _this21.onInit.reject(err);
-                            return _this21.destroy();
+                            _this20.onInit.reject(err);
+                            return _this20.destroy();
                         }).then(function() {
-                            return _this21.props.onError(err);
+                            return _this20.props.onError(err);
                         }).catch(function(errErr) {
                             throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
