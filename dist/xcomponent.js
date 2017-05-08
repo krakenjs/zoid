@@ -583,16 +583,16 @@
             }
             return !0;
         }
-        function getOpener(win) {
+        function getParent(win) {
             if (win) try {
-                return win.opener;
+                if (win.parent && win.parent !== win) return win.parent;
             } catch (err) {
                 return;
             }
         }
-        function getParent(win) {
-            if (win) try {
-                if (win.parent && win.parent !== win) return win.parent;
+        function getOpener(win) {
+            if (win && !getParent(win)) try {
+                return win.opener;
             } catch (err) {
                 return;
             }
@@ -755,7 +755,11 @@
             } catch (err) {
                 return !err || "Call was rejected by callee.\r\n" !== err.message;
             }
-            return !!(allowMock && isSameDomain(win) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.d)(win, "mockclosed"));
+            if (allowMock && isSameDomain(win) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.d)(win, "mockclosed")) return !0;
+            try {
+                if (!win.parent || !win.top) return !0;
+            } catch (err) {}
+            return !1;
         }
         function getUserAgent(win) {
             win = win || window;
@@ -940,8 +944,8 @@
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_1__util__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_2__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(0);
         __webpack_exports__.isSameDomain = isSameDomain;
         __webpack_exports__.isActuallySameDomain = isActuallySameDomain;
-        __webpack_exports__.getOpener = getOpener;
         __webpack_exports__.getParent = getParent;
+        __webpack_exports__.getOpener = getOpener;
         __webpack_exports__.getParents = getParents;
         __webpack_exports__.isAncestorParent = isAncestorParent;
         __webpack_exports__.getFrames = getFrames;
@@ -3693,20 +3697,6 @@
                     callback(err);
                 });
             },
-            deNodeify: function(method) {
-                for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) args[_key - 1] = arguments[_key];
-                return new Promise(function(resolve, reject) {
-                    try {
-                        return args.length < method.length ? method.apply(void 0, args.concat([ function(err, result) {
-                            return err ? reject(err) : resolve(result);
-                        } ])) : promise.run(function() {
-                            return method.apply(void 0, args);
-                        }).then(resolve, reject);
-                    } catch (err) {
-                        return reject(err);
-                    }
-                });
-            },
             map: function(items, method) {
                 for (var results = [], i = 0; i < items.length; i++) !function(i) {
                     results.push(promise.run(function() {
@@ -5575,7 +5565,7 @@
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.d)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
                 var data = message.data;
-                return __WEBPACK_IMPORTED_MODULE_1__lib__.i.deNodeify(options.handler, {
+                return options.handler({
                     source: source,
                     origin: origin,
                     data: data
@@ -5801,7 +5791,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function request(options) {
-            var prom = __WEBPACK_IMPORTED_MODULE_3__lib__.i.run(function() {
+            return __WEBPACK_IMPORTED_MODULE_3__lib__.i.run(function() {
                 if (!options.name) throw new Error("Expected options.name");
                 if (__WEBPACK_IMPORTED_MODULE_1__conf__.b.MOCK_MODE) options.window = window; else if ("string" == typeof options.window) {
                     var el = document.getElementById(options.window);
@@ -5868,29 +5858,17 @@
                 requestPromises.push(requestPromise);
                 return requestPromise;
             });
-            return __WEBPACK_IMPORTED_MODULE_3__lib__.i.nodeify(prom, options.callback);
         }
-        function _send(window, name, data, options, callback) {
-            if (!callback) if (options || "function" != typeof data) {
-                if ("function" == typeof options) {
-                    callback = options;
-                    options = {};
-                }
-            } else {
-                callback = data;
-                options = {};
-                data = {};
-            }
+        function _send(window, name, data, options) {
             options = options || {};
             options.window = window;
             options.name = name;
             options.data = data;
-            options.callback = callback;
             return request(options);
         }
-        function sendToParent(name, data, options, callback) {
+        function sendToParent(name, data, options) {
             var win = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.B)();
-            return win ? _send(win, name, data, options, callback) : new __WEBPACK_IMPORTED_MODULE_3__lib__.i.Promise(function(resolve, reject) {
+            return win ? _send(win, name, data, options) : new __WEBPACK_IMPORTED_MODULE_3__lib__.i.Promise(function(resolve, reject) {
                 return reject(new Error("Window does not have a parent"));
             });
         }
@@ -5898,8 +5876,8 @@
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
             if (!options.window) throw new Error("Expected options.window");
             return {
-                send: function(name, data, callback) {
-                    return _send(options.window, name, data, options, callback);
+                send: function(name, data) {
+                    return _send(options.window, name, data, options);
                 }
             };
         }
