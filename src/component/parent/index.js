@@ -392,10 +392,6 @@ export class ParentComponent extends BaseComponent {
     @promise
     openBridge() {
 
-        if (!this.driver.needsBridge) {
-            return;
-        }
-
         if (!bridge) {
             return;
         }
