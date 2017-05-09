@@ -12,7 +12,7 @@ window.MyLoginButtonComponent = xcomponent.create({
     // The size of the component on their page
 
     dimensions: {
-        width: 250,
-        height: 100
+        width: '250px',
+        height: '100px'
     }
 });

@@ -245,16 +245,16 @@
             }
             return !0;
         }
-        function getOpener(win) {
+        function getParent(win) {
             if (win) try {
-                return win.opener;
+                if (win.parent && win.parent !== win) return win.parent;
             } catch (err) {
                 return;
             }
         }
-        function getParent(win) {
-            if (win) try {
-                if (win.parent && win.parent !== win) return win.parent;
+        function getOpener(win) {
+            if (win && !getParent(win)) try {
+                return win.opener;
             } catch (err) {
                 return;
             }
@@ -417,7 +417,11 @@
             } catch (err) {
                 return !err || "Call was rejected by callee.\r\n" !== err.message;
             }
-            return !!(allowMock && isSameDomain(win) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.d)(win, "mockclosed"));
+            if (allowMock && isSameDomain(win) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.d)(win, "mockclosed")) return !0;
+            try {
+                if (!win.parent || !win.top) return !0;
+            } catch (err) {}
+            return !1;
         }
         function getUserAgent(win) {
             win = win || window;
@@ -602,8 +606,8 @@
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1__util__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2__global__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(0);
         __webpack_exports__.isSameDomain = isSameDomain;
         __webpack_exports__.isActuallySameDomain = isActuallySameDomain;
-        __webpack_exports__.getOpener = getOpener;
         __webpack_exports__.getParent = getParent;
+        __webpack_exports__.getOpener = getOpener;
         __webpack_exports__.getParents = getParents;
         __webpack_exports__.isAncestorParent = isAncestorParent;
         __webpack_exports__.getFrames = getFrames;
@@ -2084,7 +2088,13 @@
             return ParentComponent;
         });
         __webpack_exports__.a = destroyAll;
-        var _class, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _class, _extends = Object.assign || function(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+            }
+            return target;
+        }, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -2167,6 +2177,7 @@
                             loadUrl: loadUrl
                         });
                         var tasks = {
+                            onRender: _this2.props.onRender(),
                             getDomain: _this2.getDomain()
                         };
                         tasks.elementReady = __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
@@ -2213,7 +2224,7 @@
                         }
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.hash(tasks);
                     }).then(function() {
-                        return _this2.props.onRender();
+                        return _this2.props.onEnter();
                     });
                 }
             }, {
@@ -2366,7 +2377,7 @@
             }, {
                 key: "openBridge",
                 value: function() {
-                    if (this.driver.needsBridge && __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.d) {
+                    if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.d) {
                         var bridgeUrl = this.component.getBridgeUrl(this.props.env);
                         if (bridgeUrl) {
                             var bridgeDomain = this.component.getBridgeDomain(this.props.env);
@@ -2531,16 +2542,13 @@
                 value: function() {
                     var _ref12;
                     return _ref12 = {}, _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.INIT, function(source, data) {
-                        var _this12 = this;
                         this.childExports = data.exports;
                         this.onInit.resolve(this);
                         this.timeout && clearTimeout(this.timeout);
-                        return this.props.onEnter().then(function() {
-                            return {
-                                props: _this12.getPropsForChild(),
-                                context: _this12.context
-                            };
-                        });
+                        return {
+                            props: this.getPropsForChild(),
+                            context: this.context
+                        };
                     }), _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CLOSE, function(source, data) {
                         this.close(data.reason);
                     }), _defineProperty(_ref12, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, function(source, data) {
@@ -2592,28 +2600,28 @@
             }, {
                 key: "close",
                 value: function() {
-                    var _this13 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this12 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        _this13.component.log("close", {
+                        _this12.component.log("close", {
                             reason: reason
                         });
-                        return _this13.props.onClose(reason);
+                        return _this12.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this13.closeComponent(), _this13.closeContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this12.closeComponent(), _this12.closeContainer() ]);
                     }).then(function() {
-                        return _this13.destroy();
+                        return _this12.destroy();
                     });
                 }
             }, {
                 key: "closeContainer",
                 value: function() {
-                    var _this14 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this13 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this14.props.onClose(reason);
+                        return _this13.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this14.closeComponent(reason), _this14.hideContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ _this13.closeComponent(reason), _this13.hideContainer() ]);
                     }).then(function() {
-                        return _this14.destroyContainer();
+                        return _this13.destroyContainer();
                     });
                 }
             }, {
@@ -2625,20 +2633,20 @@
             }, {
                 key: "closeComponent",
                 value: function() {
-                    var _this15 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this14 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     this.clean.run("destroyCloseWindowListener");
                     this.clean.run("destroyUnloadWindowListener");
                     var win = this.window;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this15.cancelContainerEvents();
+                        return _this14.cancelContainerEvents();
                     }).then(function() {
-                        return _this15.props.onClose(reason);
+                        return _this14.props.onClose(reason);
                     }).then(function() {
-                        return _this15.hideComponent();
+                        return _this14.hideComponent();
                     }).then(function() {
-                        return _this15.destroyComponent();
+                        return _this14.destroyComponent();
                     }).then(function() {
-                        _this15.childExports && _this15.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src_lib_windows__.isWindowClosed)(win) && _this15.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.w);
+                        _this14.childExports && _this14.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src_lib_windows__.isWindowClosed)(win) && _this14.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.w);
                     });
                 }
             }, {
@@ -2659,13 +2667,13 @@
             }, {
                 key: "showComponent",
                 value: function() {
-                    var _this16 = this;
+                    var _this15 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        if (_this16.props.onDisplay) return _this16.props.onDisplay();
+                        if (_this15.props.onDisplay) return _this15.props.onDisplay();
                     }).then(function() {
-                        if (_this16.element) {
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(_this16.element, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.SHOW_COMPONENT);
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.D)(_this16.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this16.clean.register);
+                        if (_this15.element) {
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(_this15.element, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.SHOW_COMPONENT);
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.D)(_this15.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this15.clean.register);
                         }
                     });
                 }
@@ -2702,19 +2710,14 @@
             }, {
                 key: "createComponentTemplate",
                 value: function() {
-                    var _this17 = this;
+                    var _this16 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this17.getComponentTemplate();
+                        return _this16.getComponentTemplate();
                     }).then(function(componentTemplate) {
                         if (componentTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return componentTemplate({
-                                id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.props.uid,
-                                props: _this17.props,
-                                CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
-                                ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
-                            });
+                            return _this16.renderTemplate(componentTemplate);
                         }).then(function(html) {
-                            var win = _this17.componentTemplateWindow || _this17.window;
+                            var win = _this16.componentTemplateWindow || _this16.window;
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.F)(win, html);
                         });
                     });
@@ -2725,89 +2728,104 @@
                     return this.component.containerTemplate;
                 }
             }, {
+                key: "renderTemplate",
+                value: function(renderer) {
+                    var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                    return renderer(_extends({
+                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + this.props.uid,
+                        props: renderer.__xdomain__ ? null : this.props,
+                        CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
+                        ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
+                    }, options));
+                }
+            }, {
+                key: "openContainerFrame",
+                value: function(el) {
+                    var frame = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.G)(null, {
+                        name: "__xcomponent_container_" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)() + "__",
+                        scrolling: "no"
+                    }, el);
+                    frame.style.display = "block";
+                    frame.style.position = "fixed";
+                    frame.style.top = "0";
+                    frame.style.left = "0";
+                    frame.style.width = "100%";
+                    frame.style.height = "100%";
+                    frame.style.zIndex = "2147483647";
+                    frame.contentWindow.document.open();
+                    frame.contentWindow.document.write("<body></body>");
+                    frame.contentWindow.document.close();
+                    return frame;
+                }
+            }, {
                 key: "openContainer",
                 value: function(element) {
-                    var _this18 = this;
-                    return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        return _this18.getContainerTemplate();
-                    }).then(function(containerTemplate) {
-                        if (containerTemplate) return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            return containerTemplate({
-                                id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid,
-                                props: _this18.props,
-                                CLASS: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES,
-                                ANIMATION: __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES
-                            });
-                        }).then(function(html) {
-                            var el = void 0;
-                            if (element) {
-                                el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
-                                if (!el) throw new Error("Could not find element: " + element);
-                            } else el = document.body;
-                            if (_this18.component.sandboxContainer) {
-                                _this18.containerFrame = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.G)(null, {
-                                    name: "__xcomponent_container_" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)() + "__",
-                                    scrolling: "no"
-                                }, el);
-                                _this18.containerFrame.style.display = "block";
-                                _this18.containerFrame.style.position = "fixed";
-                                _this18.containerFrame.style.top = "0";
-                                _this18.containerFrame.style.left = "0";
-                                _this18.containerFrame.style.width = "100%";
-                                _this18.containerFrame.style.height = "100%";
-                                _this18.containerFrame.style.zIndex = "2147483647";
-                                _this18.containerFrame.contentWindow.document.open();
-                                _this18.containerFrame.contentWindow.document.write("<body></body>");
-                                _this18.containerFrame.contentWindow.document.close();
-                                el = _this18.containerFrame.contentWindow.document.body;
-                            }
-                            _this18.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
-                                html: html,
-                                attributes: {
-                                    id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.props.uid
-                                },
-                                class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this18.context ]
-                            });
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.container);
-                            el.appendChild(_this18.container);
-                            if (_this18.driver.renderedIntoContainerTemplate) {
-                                _this18.element = _this18.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
-                                var _getInitialDimensions = _this18.getInitialDimensions(el), width = _getInitialDimensions.width, height = _getInitialDimensions.height;
-                                _this18.resize(width, height, {
-                                    waitForTransition: !1
-                                });
-                                if (!_this18.element) throw new Error("Could not find element to render component into");
-                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this18.element);
-                            }
-                            var eventHandlers = [];
-                            _this18.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                return _this18.focus();
-                            }));
-                            eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
-                                return _this18.userClose();
-                            }));
-                            _this18.clean.register("destroyContainerEvents", function() {
-                                for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref14;
-                                    if (_isArray3) {
-                                        if (_i3 >= _iterator3.length) break;
-                                        _ref14 = _iterator3[_i3++];
-                                    } else {
-                                        _i3 = _iterator3.next();
-                                        if (_i3.done) break;
-                                        _ref14 = _i3.value;
-                                    }
-                                    _ref14.cancel();
+                    var _this17 = this, el = void 0;
+                    if (element) {
+                        el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
+                        if (!el) throw new Error("Could not find element: " + element);
+                    } else el = document.body;
+                    return this.getContainerTemplate().then(function(containerTemplate) {
+                        if (containerTemplate) {
+                            var containerWidth = el.offsetWidth, containerHeight = el.offsetHeight;
+                            return _this17.renderTemplate(containerTemplate, {
+                                dimensions: {
+                                    width: containerWidth,
+                                    height: containerHeight
                                 }
+                            }).then(function(html) {
+                                if (_this17.component.sandboxContainer) {
+                                    _this17.containerFrame = _this17.openContainerFrame(el);
+                                    el = _this17.containerFrame.contentWindow.document.body;
+                                }
+                                _this17.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)("div", {
+                                    html: html,
+                                    attributes: {
+                                        id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.props.uid
+                                    },
+                                    class: [ __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.component.tag, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + _this17.context ]
+                                });
+                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this17.container);
+                                el.appendChild(_this17.container);
+                                if (_this17.driver.renderedIntoContainerTemplate) {
+                                    _this17.element = _this17.container.getElementsByClassName(__WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.ELEMENT)[0];
+                                    var _ref14 = _this17.getInitialDimensions(el) || {}, width = _ref14.width, height = _ref14.height;
+                                    (width || height) && _this17.resize(width, height, {
+                                        waitForTransition: !1
+                                    });
+                                    if (!_this17.element) throw new Error("Could not find element to render component into");
+                                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(_this17.element);
+                                }
+                                var eventHandlers = [];
+                                _this17.driver.focusable && eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this17.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.FOCUS, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this17.focus();
+                                }));
+                                eventHandlers.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.I)(_this17.container, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.CLOSE, __WEBPACK_IMPORTED_MODULE_7__constants__.EVENT_NAMES.CLICK, function(event) {
+                                    return _this17.userClose();
+                                }));
+                                _this17.clean.register("destroyContainerEvents", function() {
+                                    for (var _iterator3 = eventHandlers, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                                        var _ref15;
+                                        if (_isArray3) {
+                                            if (_i3 >= _iterator3.length) break;
+                                            _ref15 = _iterator3[_i3++];
+                                        } else {
+                                            _i3 = _iterator3.next();
+                                            if (_i3.done) break;
+                                            _ref15 = _i3.value;
+                                        }
+                                        _ref15.cancel();
+                                    }
+                                });
+                                _this17.clean.register("destroyContainerTemplate", function() {
+                                    _this17.containerFrame && _this17.containerFrame.parentNode && _this17.containerFrame.parentNode.removeChild(_this17.containerFrame);
+                                    _this17.container && _this17.container.parentNode && _this17.container.parentNode.removeChild(_this17.container);
+                                    delete _this17.containerFrame;
+                                    delete _this17.container;
+                                });
                             });
-                            _this18.clean.register("destroyContainerTemplate", function() {
-                                _this18.containerFrame && _this18.containerFrame.parentNode && _this18.containerFrame.parentNode.removeChild(_this18.containerFrame);
-                                _this18.container && _this18.container.parentNode && _this18.container.parentNode.removeChild(_this18.container);
-                                delete _this18.containerFrame;
-                                delete _this18.container;
-                            });
-                        });
-                        if (_this18.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this18.context);
+                        }
+                        if (_this17.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this17.context);
                     });
                 }
             }, {
@@ -2818,41 +2836,41 @@
             }, {
                 key: "destroy",
                 value: function() {
-                    var _this19 = this;
+                    var _this18 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                        if (_this19.clean.hasTasks()) {
-                            _this19.component.log("destroy");
+                        if (_this18.clean.hasTasks()) {
+                            _this18.component.log("destroy");
                             __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
-                            return _this19.clean.all();
+                            return _this18.clean.all();
                         }
                     });
                 }
             }, {
                 key: "tryInit",
                 value: function(method) {
-                    var _this20 = this;
+                    var _this19 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(method).catch(function(err) {
-                        _this20.onInit.reject(err);
+                        _this19.onInit.reject(err);
                         throw err;
                     }).then(function() {
-                        return _this20.onInit;
+                        return _this19.onInit;
                     });
                 }
             }, {
                 key: "error",
                 value: function(err) {
-                    var _this21 = this;
+                    var _this20 = this;
                     this.handledErrors = this.handledErrors || [];
                     if (this.handledErrors.indexOf(err) === -1) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            _this21.component.logError("error", {
+                            _this20.component.logError("error", {
                                 error: err.stack || err.toString()
                             });
-                            _this21.onInit.reject(err);
-                            return _this21.destroy();
+                            _this20.onInit.reject(err);
+                            return _this20.destroy();
                         }).then(function() {
-                            return _this21.props.onError(err);
+                            return _this20.props.onError(err);
                         }).catch(function(errErr) {
                             throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
@@ -2886,6 +2904,7 @@
         _applyDecoratedDescriptor(_class.prototype, "getComponentTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "getComponentTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "createComponentTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.K, __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "createComponentTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "getContainerTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "getContainerTemplate"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "renderTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "renderTemplate"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "openContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.K, __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "openContainer"), _class.prototype), 
         _applyDecoratedDescriptor(_class.prototype, "error", [ __WEBPACK_IMPORTED_MODULE_6__lib__.J ], Object.getOwnPropertyDescriptor(_class.prototype, "error"), _class.prototype), 
         _class);
@@ -3456,20 +3475,6 @@
                     callback(err);
                 });
             },
-            deNodeify: function(method) {
-                for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) args[_key - 1] = arguments[_key];
-                return new Promise(function(resolve, reject) {
-                    try {
-                        return args.length < method.length ? method.apply(void 0, args.concat([ function(err, result) {
-                            return err ? reject(err) : resolve(result);
-                        } ])) : promise.run(function() {
-                            return method.apply(void 0, args);
-                        }).then(resolve, reject);
-                    } catch (err) {
-                        return reject(err);
-                    }
-                });
-            },
             map: function(items, method) {
                 for (var results = [], i = 0; i < items.length; i++) !function(i) {
                     results.push(promise.run(function() {
@@ -3694,7 +3699,7 @@
                 key: "watchForResize",
                 value: function() {
                     var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                    if ((width || height) && this.component.dimensions && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
+                    if ((width || height) && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(element, {
@@ -3870,10 +3875,6 @@
                     attributes: {
                         name: this.childWindowName,
                         scrolling: this.component.scrolling === !1 ? "no" : "yes"
-                    },
-                    style: {
-                        width: "100%",
-                        height: "100%"
                     }
                 }, frame = this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.G)(null, options, this.element);
                 this.window = frame.contentWindow;
@@ -3922,6 +3923,8 @@
                 loadUrl: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_DELEGATE,
                 hijackSubmit: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_DELEGATE,
                 getInitialDimensions: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_ORIGINAL,
+                renderTemplate: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_ORIGINAL,
+                openContainerFrame: __WEBPACK_IMPORTED_MODULE_3__constants__.DELEGATE.CALL_ORIGINAL,
                 open: function(original, override) {
                     return function() {
                         var _this2 = this;
@@ -4796,7 +4799,7 @@
                     _ref = _i.value;
                 }
                 var promise = _ref;
-                promise.reject(new Error("Window cleaned up"));
+                promise.reject(new Error("No response from window - cleaned up"));
             }
             __WEBPACK_IMPORTED_MODULE_0__global__.a.popupWindowsByWin && __WEBPACK_IMPORTED_MODULE_0__global__.a.popupWindowsByWin.delete(win);
             __WEBPACK_IMPORTED_MODULE_0__global__.a.remoteWindows && __WEBPACK_IMPORTED_MODULE_0__global__.a.remoteWindows.delete(win);
@@ -4935,7 +4938,7 @@
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.d)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
                 var data = message.data;
-                return __WEBPACK_IMPORTED_MODULE_1__lib__.i.deNodeify(options.handler, {
+                return options.handler({
                     source: source,
                     origin: origin,
                     data: data
@@ -5048,6 +5051,7 @@
                 });
             }
             wrapper.__name__ = obj.__name__;
+            wrapper.__xdomain__ = !0;
             wrapper.source = source;
             wrapper.origin = origin;
             return wrapper;
@@ -5138,7 +5142,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function request(options) {
-            var prom = __WEBPACK_IMPORTED_MODULE_3__lib__.i.run(function() {
+            return __WEBPACK_IMPORTED_MODULE_3__lib__.i.run(function() {
                 if (!options.name) throw new Error("Expected options.name");
                 if (__WEBPACK_IMPORTED_MODULE_1__conf__.b.MOCK_MODE) options.window = window; else if ("string" == typeof options.window) {
                     var el = document.getElementById(options.window);
@@ -5205,29 +5209,17 @@
                 requestPromises.push(requestPromise);
                 return requestPromise;
             });
-            return __WEBPACK_IMPORTED_MODULE_3__lib__.i.nodeify(prom, options.callback);
         }
-        function _send(window, name, data, options, callback) {
-            if (!callback) if (options || "function" != typeof data) {
-                if ("function" == typeof options) {
-                    callback = options;
-                    options = {};
-                }
-            } else {
-                callback = data;
-                options = {};
-                data = {};
-            }
+        function _send(window, name, data, options) {
             options = options || {};
             options.window = window;
             options.name = name;
             options.data = data;
-            options.callback = callback;
             return request(options);
         }
-        function sendToParent(name, data, options, callback) {
+        function sendToParent(name, data, options) {
             var win = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.z)();
-            return win ? _send(win, name, data, options, callback) : new __WEBPACK_IMPORTED_MODULE_3__lib__.i.Promise(function(resolve, reject) {
+            return win ? _send(win, name, data, options) : new __WEBPACK_IMPORTED_MODULE_3__lib__.i.Promise(function(resolve, reject) {
                 return reject(new Error("Window does not have a parent"));
             });
         }
@@ -5235,8 +5227,8 @@
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
             if (!options.window) throw new Error("Expected options.window");
             return {
-                send: function(name, data, callback) {
-                    return _send(options.window, name, data, options, callback);
+                send: function(name, data) {
+                    return _send(options.window, name, data, options);
                 }
             };
         }
@@ -5578,10 +5570,7 @@
                 _this.addProp(options, "name", _this.tag.replace(/-/g, "_"));
                 _this.props = _extends({}, __WEBPACK_IMPORTED_MODULE_5__props__.a, options.props || {});
                 options.props || (_this.looseProps = !0);
-                _this.addProp(options, "dimensions", {
-                    width: "300px",
-                    height: "150px"
-                });
+                _this.addProp(options, "dimensions");
                 _this.addProp(options, "scrolling");
                 _this.addProp(options, "version", "latest");
                 _this.addProp(options, "defaultEnv");
@@ -5599,7 +5588,7 @@
                 _this.addProp(options, "getInitialDimensions");
                 _this.addProp(options, "autoResize", !1);
                 _this.addProp(options, "containerTemplate", function(_ref) {
-                    return '<div class="' + _ref.CLASS.ELEMENT + '"></div>';
+                    return "\n            <style>\n                #" + _ref.id + ' iframe {\n                    height: 100%;\n                    width: 100%;\n                }\n            </style>\n\n            <div class="' + _ref.CLASS.ELEMENT + '"></div>\n        ';
                 });
                 _this.addProp(options, "componentTemplate");
                 _this.addProp(options, "sacrificialComponentTemplate", !1);
@@ -6766,6 +6755,14 @@
         function onDimensionsChange(el, _ref12) {
             var _ref12$width = _ref12.width, width = void 0 === _ref12$width || _ref12$width, _ref12$height = _ref12.height, height = void 0 === _ref12$height || _ref12$height, _ref12$delay = _ref12.delay, delay = void 0 === _ref12$delay ? 50 : _ref12$delay, _ref12$threshold = _ref12.threshold, threshold = void 0 === _ref12$threshold ? 0 : _ref12$threshold;
             return new __WEBPACK_IMPORTED_MODULE_1_sync_browser_mocks_src_promise__.a(function(resolve) {
+                function onWindowResize() {
+                    var _tracker$check2 = tracker.check(), changed = _tracker$check2.changed, dimensions = _tracker$check2.dimensions;
+                    if (changed) {
+                        tracker.reset();
+                        window.removeEventListener("resize", onWindowResize);
+                        return resolver(dimensions);
+                    }
+                }
                 var tracker = trackDimensions(el, {
                     width: width,
                     height: height,
@@ -6781,6 +6778,7 @@
                         return resolver(dimensions);
                     }
                 }, delay);
+                window.addEventListener("resize", onWindowResize);
             });
         }
         function dimensionsMatchViewport(el, _ref13) {

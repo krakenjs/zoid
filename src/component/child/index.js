@@ -328,10 +328,6 @@ export class ChildComponent extends BaseComponent {
             return;
         }
 
-        if (!this.component.dimensions) {
-            return;
-        }
-
         if (this.context === CONTEXT_TYPES.POPUP) {
             return;
         }

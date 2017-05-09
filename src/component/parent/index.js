@@ -70,6 +70,7 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
             let tasks = {
+                onRender: this.props.onRender(),
                 getDomain: this.getDomain()
             };
 
@@ -136,8 +137,7 @@ export class ParentComponent extends BaseComponent {
             return Promise.hash(tasks);
 
         }).then(() => {
-
-            return this.props.onRender();
+            return this.props.onEnter();
         });
     }
 
@@ -391,10 +391,6 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     openBridge() {
-
-        if (!this.driver.needsBridge) {
-            return;
-        }
 
         if (!bridge) {
             return;
@@ -653,12 +649,10 @@ export class ParentComponent extends BaseComponent {
                     clearTimeout(this.timeout);
                 }
 
-                return this.props.onEnter().then(() => {
-                    return {
-                        props: this.getPropsForChild(),
-                        context: this.context
-                    };
-                });
+                return {
+                    props: this.getPropsForChild(),
+                    context: this.context
+                };
             },
 
 
@@ -963,12 +957,8 @@ export class ParentComponent extends BaseComponent {
             }
 
             return Promise.try(() => {
-                return componentTemplate({
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    props: this.props,
-                    CLASS: CLASS_NAMES,
-                    ANIMATION: ANIMATION_NAMES
-                });
+                return this.renderTemplate(componentTemplate);
+
             }).then(html => {
 
                 let win = this.componentTemplateWindow || this.window;
@@ -990,17 +980,58 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the element
     */
 
+    @promise
+    renderTemplate(renderer, options = {}) {
+        return renderer({
+            id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
+            props: renderer.__xdomain__ ? null : this.props,
+            CLASS: CLASS_NAMES,
+            ANIMATION: ANIMATION_NAMES,
+            ...options
+        });
+    }
+
+    openContainerFrame(el) {
+
+        let frame = iframe(null, {
+            name: `__xcomponent_container_${uniqueID()}__`,
+            scrolling: 'no'
+        }, el);
+
+        frame.style.display = 'block';
+        frame.style.position = 'fixed';
+        frame.style.top = '0';
+        frame.style.left = '0';
+        frame.style.width = '100%';
+        frame.style.height = '100%';
+        frame.style.zIndex = '2147483647';
+
+        frame.contentWindow.document.open();
+        frame.contentWindow.document.write(`<body></body>`);
+        frame.contentWindow.document.close();
+
+        return frame;
+    }
+
     @memoized
     @promise
     openContainer(element) {
-        return Promise.try(() => {
 
-            return this.getContainerTemplate();
+        let el;
 
-        }).then(containerTemplate => {
+        if (element) {
+            el = getElement(element);
+
+            if (!el) {
+                throw new Error(`Could not find element: ${element}`);
+            }
+        } else {
+            el = document.body;
+        }
+
+        return this.getContainerTemplate().then(containerTemplate => {
 
             if (!containerTemplate) {
-
                 if (this.driver.renderedIntoContainerTemplate) {
                     throw new Error(`containerTemplate needed to render ${this.context}`);
                 }
@@ -1008,46 +1039,19 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
-            return Promise.try(() => {
-                return containerTemplate({
-                    id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-                    props: this.props,
-                    CLASS: CLASS_NAMES,
-                    ANIMATION: ANIMATION_NAMES
-                });
-            }).then(html => {
+            let containerWidth = el.offsetWidth;
+            let containerHeight = el.offsetHeight;
 
-                let el;
-
-                if (element) {
-                    el = getElement(element);
-
-                    if (!el) {
-                        throw new Error(`Could not find element: ${element}`);
-                    }
-                } else {
-                    el = document.body;
+            return this.renderTemplate(containerTemplate, {
+                dimensions: {
+                    width: containerWidth,
+                    height: containerHeight
                 }
 
+            }).then(html => {
+
                 if (this.component.sandboxContainer) {
-
-                    this.containerFrame = iframe(null, {
-                        name: `__xcomponent_container_${uniqueID()}__`,
-                        scrolling: 'no'
-                    }, el);
-
-                    this.containerFrame.style.display = 'block';
-                    this.containerFrame.style.position = 'fixed';
-                    this.containerFrame.style.top = '0';
-                    this.containerFrame.style.left = '0';
-                    this.containerFrame.style.width = '100%';
-                    this.containerFrame.style.height = '100%';
-                    this.containerFrame.style.zIndex = '2147483647';
-
-                    this.containerFrame.contentWindow.document.open();
-                    this.containerFrame.contentWindow.document.write(`<body></body>`);
-                    this.containerFrame.contentWindow.document.close();
-
+                    this.containerFrame = this.openContainerFrame(el);
                     el = this.containerFrame.contentWindow.document.body;
                 }
 
@@ -1073,8 +1077,10 @@ export class ParentComponent extends BaseComponent {
                 if (this.driver.renderedIntoContainerTemplate) {
                     this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
 
-                    let { width, height } = this.getInitialDimensions(el);
-                    this.resize(width, height, { waitForTransition: false });
+                    let { width, height } = this.getInitialDimensions(el) || {};
+                    if (width || height) {
+                        this.resize(width, height, { waitForTransition: false });
+                    }
 
                     if (!this.element) {
                         throw new Error('Could not find element to render component into');

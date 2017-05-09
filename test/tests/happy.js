@@ -6,14 +6,14 @@ describe('xcomponent happy cases', () => {
     it('should enter a component rendered as an iframe', done => {
 
         testComponent.renderIframe({
-            onRender: done
+            onEnter: done
         });
     });
 
     it.skip('should enter a component rendered as an iframe with the correct dimensions', done => {
 
         testComponent.renderIframe({
-            onRender() {
+            onEnter() {
                 if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
                 } else {
@@ -33,7 +33,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent.renderPopup({
-            onRender() {
+            onEnter() {
                 done();
 
                 /* For some reason karma/phantomjs don't respect the passed dimensions, so can't check them this way
@@ -54,7 +54,7 @@ describe('xcomponent happy cases', () => {
     it.skip('should enter a component rendered as an iframe with no dimensions', done => {
 
         testComponent4.renderIframe({
-            onRender() {
+            onEnter() {
                 if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
                     throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
                 } else {
@@ -74,7 +74,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent4.renderPopup({
-            onRender() {
+            onEnter() {
                 done();
 
                 /* Chrome opens up a new window with different dimensions to the parent, so this doesn't work
@@ -110,7 +110,7 @@ describe('xcomponent happy cases', () => {
     it('should enter a component rendered as an iframe', done => {
 
         testComponent.renderIframe({
-            onRender: done
+            onEnter: done
         }, document.body);
     });
 
@@ -132,7 +132,7 @@ describe('xcomponent happy cases', () => {
     it('should enter a component rendered as a popup', done => {
 
         testComponent.renderPopup({
-            onRender: done
+            onEnter: done
         });
     });
 
@@ -177,7 +177,7 @@ describe('xcomponent happy cases', () => {
     it('should try to render by passing in an element', done => {
 
         testComponent.render({
-            onRender: done
+            onEnter: done
         }, document.body);
     });
 
@@ -187,7 +187,7 @@ describe('xcomponent happy cases', () => {
         testComponent.defaultContext = 'iframe';
 
         testComponent.render({
-            onRender() {
+            onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
@@ -200,7 +200,7 @@ describe('xcomponent happy cases', () => {
         testComponent.defaultContext = 'popup';
 
         testComponent.render({
-            onRender() {
+            onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
@@ -219,7 +219,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent.render({
-            onRender() {
+            onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
@@ -239,7 +239,7 @@ describe('xcomponent happy cases', () => {
         };
 
         testComponent.render({
-            onRender() {
+            onEnter() {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();

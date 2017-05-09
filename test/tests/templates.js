@@ -6,7 +6,7 @@ describe('xcomponent templates and styles', () => {
     it('should focus an xcomponent popup on click of the overlay', done => {
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
 
                 this.window.focus = function() {
                     done();
@@ -22,7 +22,7 @@ describe('xcomponent templates and styles', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -41,7 +41,7 @@ describe('xcomponent templates and styles', () => {
 
         testComponent.renderIframe({
 
-            onRender() {
+            onEnter() {
                 let close = this.window.close;
 
                 this.window.close = function() {

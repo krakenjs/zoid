@@ -544,6 +544,17 @@ export function onDimensionsChange(el, { width = true, height = true, delay = 50
                 return resolver(dimensions);
             }
         }, delay);
+
+        function onWindowResize() {
+            let { changed, dimensions } = tracker.check();
+            if (changed) {
+                tracker.reset();
+                window.removeEventListener('resize', onWindowResize);
+                return resolver(dimensions);
+            }
+        }
+
+        window.addEventListener('resize', onWindowResize);
     });
 }
 
