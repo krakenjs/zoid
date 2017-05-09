@@ -8,7 +8,7 @@ import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
          showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel, once } from '../../lib';
+         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel, once, getElementName } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -424,7 +424,8 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     open(element) {
-        this.component.log(`open_${this.context}`, { element, windowName: this.childWindowName });
+
+        this.component.log(`open_${this.context}`, { element: getElementName(element), windowName: this.childWindowName });
 
         this.driver.open.call(this, element);
     }

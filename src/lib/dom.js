@@ -797,3 +797,24 @@ export function getCurrentScriptDir() {
 
     return '.';
 }
+
+export function getElementName(element) {
+
+    if (typeof element === 'string') {
+        return element;
+    }
+
+    if (!element || !element.tagName) {
+        return '<unknown>';
+    }
+
+    let name = element.tagName.toLowerCase();
+
+    if (element.id) {
+        name += `#${element.id}`;
+    } else if (element.className) {
+        name += `.${element.className.split(' ').join('.')}`;
+    }
+
+    return name;
+}
