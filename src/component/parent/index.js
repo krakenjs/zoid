@@ -6,9 +6,12 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
-         showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel, once, getElementName } from '../../lib';
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady,
+         noop, showAndAnimate, animateAndHide, showElement, hideElement,
+         addClass, addEventToClass, extend, serializeFunctions, extendUrl,
+         iframe, setOverflow, delay, elementStoppedMoving, getElement, memoized,
+         promise, getDomain, global, writeToWindow, setLogLevel, once,
+         getElementName } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -84,13 +87,11 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            if (this.driver.openOnClick) {
-                tasks.open = this.open(element, this.context);
-            } else {
-                tasks.open = Promise.all([ tasks.openContainer, tasks.elementReady ]).then(() => {
+            tasks.open = this.driver.openOnClick
+                ? this.open(element, this.context)
+                : tasks.openContainer.then(() => {
                     return this.open(element, this.context);
                 });
-            }
 
             tasks.openBridge = tasks.open.then(() => {
                 return this.openBridge(this.context);
@@ -866,7 +867,9 @@ export class ParentComponent extends BaseComponent {
     showContainer() {
         if (this.container) {
             addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
-            return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
+            return delay().then(() => {
+                return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
+            });
         }
     }
 
@@ -880,7 +883,9 @@ export class ParentComponent extends BaseComponent {
         }).then(() => {
             if (this.element) {
                 addClass(this.element, CLASS_NAMES.SHOW_COMPONENT);
-                return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
+                return delay().then(() => {
+                    return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
+                });
             }
         });
     }

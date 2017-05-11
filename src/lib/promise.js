@@ -64,7 +64,7 @@ export function getter(method, { name = 'property', timeout = 10000 } = {}) {
     };
 }
 
-export function delay(time) {
+export function delay(time = 1) {
     return new Promise(resolve => {
         setTimeout(resolve, time);
     });
