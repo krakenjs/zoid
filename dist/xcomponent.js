@@ -5103,6 +5103,12 @@
         }).call(exports, __webpack_require__(64));
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        function deleteTunnelWindow(id) {
+            try {
+                __WEBPACK_IMPORTED_MODULE_2__global__.a.tunnelWindows[id] && delete __WEBPACK_IMPORTED_MODULE_2__global__.a.tunnelWindows[id].source;
+            } catch (err) {}
+            delete __WEBPACK_IMPORTED_MODULE_2__global__.a.tunnelWindows[id];
+        }
         function cleanTunnelWindows() {
             for (var tunnelWindows = __WEBPACK_IMPORTED_MODULE_2__global__.a.tunnelWindows, _iterator = Object.keys(tunnelWindows), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref;
@@ -5115,10 +5121,13 @@
                     _ref = _i.value;
                 }
                 var key = _ref, tunnelWindow = tunnelWindows[key];
-                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(tunnelWindow.source)) {
-                    delete tunnelWindow.source;
-                    delete tunnelWindows[key];
+                try {
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.v)(tunnelWindow.source);
+                } catch (err) {
+                    deleteTunnelWindow(key);
+                    continue;
                 }
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(tunnelWindow.source) && deleteTunnelWindow(key);
             }
         }
         function addTunnelWindow(data) {
@@ -5144,6 +5153,12 @@
                 name: data.name,
                 sendMessage: function() {
                     var tunnelWindow = getTunnelWindow(id);
+                    try {
+                        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.v)(tunnelWindow && tunnelWindow.source);
+                    } catch (err) {
+                        deleteTunnelWindow(id);
+                        return;
+                    }
                     if (tunnelWindow && tunnelWindow.source && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.m)(tunnelWindow.source)) {
                         try {
                             tunnelWindow.canary();
@@ -5172,6 +5187,11 @@
                             source: window,
                             canary: function() {},
                             sendMessage: function(message) {
+                                try {
+                                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.v)(window);
+                                } catch (err) {
+                                    return;
+                                }
                                 window && !window.closed && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__drivers__.g)({
                                     data: message,
                                     origin: this.origin,
