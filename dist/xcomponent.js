@@ -459,7 +459,7 @@
         SyncPromise.prototype.reject = function(error) {
             if (this.resolved || this.rejected) return this;
             if (isPromise(error)) throw new Error("Can not reject promise with another promise");
-            error instanceof Error || (error = new Error("Expected reject to be called with Error, got " + error));
+            error || (error = new Error("Expected reject to be called with Error, got " + error));
             this.rejected = !0;
             this.value = error;
             this.dispatch();
@@ -3822,6 +3822,11 @@
                 key: "init",
                 value: function() {
                     return this.onInit;
+                }
+            }, {
+                key: "getParentDomain",
+                value: function() {
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.a)();
                 }
             }, {
                 key: "onProps",
