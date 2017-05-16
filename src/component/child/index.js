@@ -81,6 +81,9 @@ export class ChildComponent extends BaseComponent {
         return this.onInit;
     }
 
+    getParentDomain() {
+        return getParentDomain();
+    }
 
     onProps(handler) {
         this.onPropHandlers.push(handler);
