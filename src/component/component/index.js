@@ -70,7 +70,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'dimensions');
         this.addProp(options, 'scrolling');
-
+     
+        this.addProp(options, 'destroyBeforeNavigatingAway', 'true');
         this.addProp(options, 'version', 'latest');
 
         // The default environment we should render to if none is specified in the parent
