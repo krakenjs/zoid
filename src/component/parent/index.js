@@ -559,15 +559,15 @@ export class ParentComponent extends BaseComponent {
         // and close the child manually if that happens.
         if (this.component.destroyBeforeNavigatingAway) {
             let onunload = once(() => {
-              this.component.log(`navigate_away`);
-              $logger.flush();
-              closeWindowListener.cancel();
-              this.destroyComponent();
+                this.component.log(`navigate_away`);
+                $logger.flush();
+                closeWindowListener.cancel();
+                this.destroyComponent();
             });
-            
+
             let beforeUnloadWindowListener = addEventListener(window, 'beforeunload', onunload);
             let unloadWindowListener = addEventListener(window, 'unload', onunload);
-            
+
             this.clean.register('destroyBeforeUnloadWindowListener', beforeUnloadWindowListener.cancel);
             this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
         }
