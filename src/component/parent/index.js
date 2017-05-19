@@ -377,16 +377,9 @@ export class ParentComponent extends BaseComponent {
     updateProps(props = {}) {
         this.setProps(props, false);
 
-        if (this.propUpdater) {
-            return this.propUpdater;
-        }
-
-        this.propUpdater = this.onInit.then(() => {
-            delete this.propUpdater;
+        return this.onInit.then(() => {
             return this.childExports.updateProps(this.getPropsForChild());
         });
-
-        return this.propUpdater;
     }
 
 

@@ -137,6 +137,8 @@ export class Component extends BaseComponent {
     }
 
     registerDrivers() {
+        this.driverCache = {};
+
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
             let glob = driver.global();
@@ -151,7 +153,11 @@ export class Component extends BaseComponent {
             throw new Error(`Could not find driver for framework: ${name}`);
         }
 
-        return drivers[name].register(this, glob);
+        if (!this.driverCache[name]) {
+            this.driverCache[name] = drivers[name].register(this, glob);
+        }
+
+        return this.driverCache[name];
     }
 
     registerChild() {
