@@ -2604,12 +2604,9 @@
                 value: function() {
                     var _this7 = this, props = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
                     this.setProps(props, !1);
-                    if (this.propUpdater) return this.propUpdater;
-                    this.propUpdater = this.onInit.then(function() {
-                        delete _this7.propUpdater;
+                    return this.onInit.then(function() {
                         return _this7.childExports.updateProps(_this7.getPropsForChild());
                     });
-                    return this.propUpdater;
                 }
             }, {
                 key: "openBridge",
@@ -6309,6 +6306,7 @@
             _createClass(Component, [ {
                 key: "registerDrivers",
                 value: function() {
+                    this.driverCache = {};
                     for (var _iterator = Object.keys(__WEBPACK_IMPORTED_MODULE_11__drivers__), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref2;
                         if (_isArray) {
@@ -6327,7 +6325,8 @@
                 key: "driver",
                 value: function(name, glob) {
                     if (!__WEBPACK_IMPORTED_MODULE_11__drivers__[name]) throw new Error("Could not find driver for framework: " + name);
-                    return __WEBPACK_IMPORTED_MODULE_11__drivers__[name].register(this, glob);
+                    this.driverCache[name] || (this.driverCache[name] = __WEBPACK_IMPORTED_MODULE_11__drivers__[name].register(this, glob));
+                    return this.driverCache[name];
                 }
             }, {
                 key: "registerChild",
