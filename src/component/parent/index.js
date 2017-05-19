@@ -550,19 +550,20 @@ export class ParentComponent extends BaseComponent {
 
         // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
         // and close the child manually if that happens.
+        if (this.component.destroyBeforeNavigatingAway) {
+            let onunload = once(() => {
+                this.component.log(`navigate_away`);
+                $logger.flush();
+                closeWindowListener.cancel();
+                this.destroyComponent();
+            });
 
-        let onunload = once(() => {
-            this.component.log(`navigate_away`);
-            $logger.flush();
-            closeWindowListener.cancel();
-            this.destroyComponent();
-        });
+            let beforeUnloadWindowListener = addEventListener(window, 'beforeunload', onunload);
+            let unloadWindowListener = addEventListener(window, 'unload', onunload);
 
-        let beforeUnloadWindowListener = addEventListener(window, 'beforeunload', onunload);
-        let unloadWindowListener = addEventListener(window, 'unload', onunload);
-
-        this.clean.register('destroyBeforeUnloadWindowListener', beforeUnloadWindowListener.cancel);
-        this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
+            this.clean.register('destroyBeforeUnloadWindowListener', beforeUnloadWindowListener.cancel);
+            this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
+        }
     }
 
 
