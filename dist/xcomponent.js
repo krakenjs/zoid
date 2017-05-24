@@ -5439,12 +5439,11 @@
                 var winName = _ref2;
                 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.m)(__WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByName[winName].win) && delete __WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByName[winName];
             }
-            if (name) {
-                var winOptions = {
-                    name: name,
-                    domain: domain,
-                    win: win
-                };
+            if (name && win) {
+                var winOptions = __WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByWin.get(win) || __WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByName[name] || {};
+                winOptions.name = winOptions.name || name;
+                winOptions.win = winOptions.win || win;
+                winOptions.domain = winOptions.domain || domain;
                 __WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByWin.set(win, winOptions);
                 __WEBPACK_IMPORTED_MODULE_3__global__.a.popupWindowsByName[name] = winOptions;
             }
@@ -5629,10 +5628,12 @@
                     data: data
                 });
             }, function(err) {
+                var stack = err.stack, errmessage = err.message, error = void 0;
+                error = stack ? errmessage && stack.indexOf(errmessage) === -1 ? errmessage + "\n" + stack : stack : errmessage;
                 return respond({
                     type: __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_TYPE.RESPONSE,
                     ack: __WEBPACK_IMPORTED_MODULE_0__conf__.a.POST_MESSAGE_ACK.ERROR,
-                    error: err.stack ? err.message + "\n" + err.stack : err.toString()
+                    error: error
                 });
             }) ]).catch(function(err) {
                 if (options && options.handleError) return options.handleError(err);
@@ -6273,7 +6274,10 @@
                 _this.addProp(options, "name", _this.tag.replace(/-/g, "_"));
                 _this.props = _extends({}, __WEBPACK_IMPORTED_MODULE_5__props__.a, options.props || {});
                 options.props || (_this.looseProps = !0);
-                _this.addProp(options, "dimensions");
+                _this.addProp(options, "dimensions", {
+                    width: "300px",
+                    height: "150px"
+                });
                 _this.addProp(options, "scrolling");
                 _this.addProp(options, "version", "latest");
                 _this.addProp(options, "defaultEnv");
