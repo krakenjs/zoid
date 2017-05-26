@@ -70,6 +70,17 @@ dimensions: {
 }
 ```
 
+#### allowedParentDomains `Array<string> | Array<RegEx>`
+
+An array of reqular expresions to be used to validate parent domain against. If provided, and parent domain doesn't match any item, communication from child to parent will be prevented. 
+  
+```javascript
+allowedParentDomains: [ 
+    /^localhost$/,
+    /^http:\/\/www\.mydomain\.com$/
+  ]
+```
+
 #### props `Object<string, Object>`
 
 A mapping of prop name to prop settings. Used to do run-time validation and prop normalization.
