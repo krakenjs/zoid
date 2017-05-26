@@ -42,9 +42,9 @@ export class ChildComponent extends BaseComponent {
 
         // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
         setLogLevel(this.props.logLevel);
-        
+
         this.component.log(`init_child`);
-        
+
         this.setWindows();
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
