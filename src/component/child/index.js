@@ -7,7 +7,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady, each } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -43,8 +43,6 @@ export class ChildComponent extends BaseComponent {
         // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
         setLogLevel(this.props.logLevel);
 
-        this.component.log(`init_child`);
-
         this.setWindows();
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -53,29 +51,50 @@ export class ChildComponent extends BaseComponent {
         //
         // - What context are we
         // - What props has the parent specified
+        if (this.validateAllowedParentDomains()) {
+            this.component.log(`init_child`);
+            this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
 
-        this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
+                exports: this.exports()
 
-            exports: this.exports()
+            }).then(({ origin, data }) => {
 
-        }).then(({ origin, data }) => {
+                this.context = data.context;
 
-            this.context = data.context;
+                window.xprops = this.props = {};
+                this.setProps(data.props, origin);
 
-            window.xprops = this.props = {};
-            this.setProps(data.props, origin);
+                this.watchForResize();
 
-            this.watchForResize();
+                return this;
 
-            return this;
+            }).catch(err => {
 
-        }).catch(err => {
-
-            this.error(err);
-            throw err;
-        });
+                this.error(err);
+                throw err;
+            });
+        }
+        else {
+            this.component.logError(`component is refusing communication with current domain. Not sending init_child`);
+        }
     }
 
+    validateAllowedParentDomains() {
+        if (this.component.allowedParentDomains && this.component.allowedParentDomains.length && this.component.allowedParentDomains.length > 0) {
+            let parentDomain = this.getParentDomain();
+            let isAllowed = false;
+            each(this.component.allowedParentDomains, (parentDomainToMatch) => {
+                if (isAllowed) {
+                    return;
+                }
+                const expression = new RegExp(parentDomainToMatch);
+                isAllowed = expression.test(parentDomain);
+            });
+            return isAllowed;
+        } else {
+            return true;
+        }
+    }
 
     init() {
         return this.onInit;

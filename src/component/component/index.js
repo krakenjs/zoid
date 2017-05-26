@@ -41,6 +41,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'defaultLogLevel', 'info');
 
+        this.addProp(options, 'allowedParentDomains', []);
+
         // initially set log level to default log level configured when creating component
         setLogLevel(this.defaultLogLevel);
 
