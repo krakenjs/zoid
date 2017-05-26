@@ -42,7 +42,9 @@ export class ChildComponent extends BaseComponent {
 
         // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
         setLogLevel(this.props.logLevel);
-
+        
+        this.component.log(`init_child`);
+        
         this.setWindows();
 
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
@@ -51,48 +53,47 @@ export class ChildComponent extends BaseComponent {
         //
         // - What context are we
         // - What props has the parent specified
-        if (this.validateAllowedParentDomains()) {
-            this.component.log(`init_child`);
-            this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
+        this.validateParentCommunication();
 
-                exports: this.exports()
+        this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
 
-            }).then(({ origin, data }) => {
+            exports: this.exports()
 
-                this.context = data.context;
+        }).then(({ origin, data }) => {
 
-                window.xprops = this.props = {};
-                this.setProps(data.props, origin);
+            this.context = data.context;
 
-                this.watchForResize();
+            window.xprops = this.props = {};
+            this.setProps(data.props, origin);
 
-                return this;
+            this.watchForResize();
 
-            }).catch(err => {
+            return this;
 
-                this.error(err);
-                throw err;
-            });
-        }
-        else {
-            this.component.logError(`component is refusing communication with current domain. Not sending init_child`);
-        }
+        }).catch(err => {
+
+            this.error(err);
+            throw err;
+        });
     }
 
-    validateAllowedParentDomains() {
+    validateParentCommunication() {
+        let isAllowed = false;
         if (this.component.allowedParentDomains && this.component.allowedParentDomains.length && this.component.allowedParentDomains.length > 0) {
             let parentDomain = this.getParentDomain();
-            let isAllowed = false;
             each(this.component.allowedParentDomains, (parentDomainToMatch) => {
                 if (isAllowed) {
                     return;
                 }
-                const expression = new RegExp(parentDomainToMatch);
+                const expression = (parentDomainToMatch instanceof RegExp) ? parentDomainToMatch : new RegExp(parentDomainToMatch);
                 isAllowed = expression.test(parentDomain);
             });
-            return isAllowed;
         } else {
-            return true;
+            isAllowed  = true;
+        }
+
+        if (!isAllowed) {
+            this.preventCommunication = true;
         }
     }
 
@@ -173,6 +174,11 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParent(name, data) {
+        
+        if (this.preventCommunication === true) {
+            return Promise.reject(`component doesn't allow communicating with parent with domain: ${getParentDomain()}`);
+        }
+
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {

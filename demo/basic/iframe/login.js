@@ -9,5 +9,5 @@ window.MyLoginXComponent = xcomponent.create({
 
     url: xcomponent.getCurrentScriptDir() + '/login.htm',
 	
-	allowedParentDomains: [ /d(b+)d/g ]
+	allowedParentDomains: [ /^file2:\/\// ]
 });
