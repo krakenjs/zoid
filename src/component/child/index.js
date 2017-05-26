@@ -7,7 +7,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor, setLogLevel, getElement } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 
@@ -81,6 +81,9 @@ export class ChildComponent extends BaseComponent {
         return this.onInit;
     }
 
+    getParentDomain() {
+        return getParentDomain();
+    }
 
     onProps(handler) {
         this.onPropHandlers.push(handler);
@@ -339,6 +342,10 @@ export class ChildComponent extends BaseComponent {
         this.watchingForResize = true;
 
         return Promise.try(() => {
+
+            return documentReady;
+
+        }).then(() => {
 
             if (!dimensionsMatchViewport(element, { width, height })) {
                 return this.resizeToElement(element, { width, height });

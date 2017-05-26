@@ -666,6 +666,14 @@ export function animate(element, name, clean, timeout = 1000) {
         let startEvent;
         let endEvent;
 
+        function cleanUp() {
+            setVendorCSS(element, 'animationName', '');
+            clearTimeout(startTimeout);
+            clearTimeout(endTimeout);
+            startEvent.cancel();
+            endEvent.cancel();
+        }
+
         startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
 
             if (event.target !== element || event.animationName !== name) {
@@ -680,8 +688,7 @@ export function animate(element, name, clean, timeout = 1000) {
             hasStarted = true;
 
             endTimeout = setTimeout(() => {
-                startEvent.cancel();
-                endEvent.cancel();
+                cleanUp();
                 resolve();
             }, timeout);
         });
@@ -692,18 +699,11 @@ export function animate(element, name, clean, timeout = 1000) {
                 return;
             }
 
-            event.stopPropagation();
-
-            startEvent.cancel();
-            endEvent.cancel();
+            cleanUp();
 
             if (event.animationName !== name) {
                 return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
             }
-
-            clearTimeout(endTimeout);
-
-            setVendorCSS(element, 'animationName', 'none');
 
             return resolve();
         });
@@ -712,20 +712,13 @@ export function animate(element, name, clean, timeout = 1000) {
 
         startTimeout = setTimeout(() => {
             if (!hasStarted) {
-                startEvent.cancel();
-                endEvent.cancel();
+                cleanUp();
                 return resolve();
             }
         }, 200);
 
         if (clean) {
-            clean(() => {
-                clearTimeout(startTimeout);
-                clearTimeout(endTimeout);
-                startEvent.cancel();
-                endEvent.cancel();
-                resolve();
-            });
+            clean(cleanUp);
         }
     });
 }
@@ -796,4 +789,25 @@ export function getCurrentScriptDir() {
     }
 
     return '.';
+}
+
+export function getElementName(element) {
+
+    if (typeof element === 'string') {
+        return element;
+    }
+
+    if (!element || !element.tagName) {
+        return '<unknown>';
+    }
+
+    let name = element.tagName.toLowerCase();
+
+    if (element.id) {
+        name += `#${element.id}`;
+    } else if (element.className) {
+        name += `.${element.className.split(' ').join('.')}`;
+    }
+
+    return name;
 }

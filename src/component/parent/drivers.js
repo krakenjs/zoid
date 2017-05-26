@@ -135,11 +135,11 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         }
     },
 
-    hide() {
+    show() {
         showElement(this.element);
     },
 
-    show() {
+    hide() {
         hideElement(this.element);
     },
 

@@ -68,7 +68,7 @@ export class Component extends BaseComponent {
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions');
+        this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
         this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');
@@ -137,6 +137,8 @@ export class Component extends BaseComponent {
     }
 
     registerDrivers() {
+        this.driverCache = {};
+
         for (let driverName of Object.keys(drivers)) {
             let driver = drivers[driverName];
             let glob = driver.global();
@@ -151,7 +153,11 @@ export class Component extends BaseComponent {
             throw new Error(`Could not find driver for framework: ${name}`);
         }
 
-        return drivers[name].register(this, glob);
+        if (!this.driverCache[name]) {
+            this.driverCache[name] = drivers[name].register(this, glob);
+        }
+
+        return this.driverCache[name];
     }
 
     registerChild() {

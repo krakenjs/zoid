@@ -6,9 +6,12 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady, noop, showAndAnimate, animateAndHide,
-         showElement, hideElement, addClass, addEventToClass, extend, serializeFunctions, extendUrl, iframe, setOverflow,
-         elementStoppedMoving, getElement, memoized, promise, getDomain, global, writeToWindow, setLogLevel, once } from '../../lib';
+import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady,
+         noop, showAndAnimate, animateAndHide, showElement, hideElement,
+         addClass, addEventToClass, extend, serializeFunctions, extendUrl,
+         iframe, setOverflow, delay, elementStoppedMoving, getElement, memoized,
+         promise, getDomain, global, writeToWindow, setLogLevel, once,
+         getElementName } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -84,13 +87,11 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            if (this.driver.openOnClick) {
-                tasks.open = this.open(element, this.context);
-            } else {
-                tasks.open = Promise.all([ tasks.openContainer, tasks.elementReady ]).then(() => {
+            tasks.open = this.driver.openOnClick
+                ? this.open(element, this.context)
+                : tasks.openContainer.then(() => {
                     return this.open(element, this.context);
                 });
-            }
 
             tasks.openBridge = tasks.open.then(() => {
                 return this.openBridge(this.context);
@@ -376,16 +377,9 @@ export class ParentComponent extends BaseComponent {
     updateProps(props = {}) {
         this.setProps(props, false);
 
-        if (this.propUpdater) {
-            return this.propUpdater;
-        }
-
-        this.propUpdater = this.onInit.then(() => {
-            delete this.propUpdater;
+        return this.onInit.then(() => {
             return this.childExports.updateProps(this.getPropsForChild());
         });
-
-        return this.propUpdater;
     }
 
 
@@ -424,7 +418,8 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     open(element) {
-        this.component.log(`open_${this.context}`, { element, windowName: this.childWindowName });
+
+        this.component.log(`open_${this.context}`, { element: getElementName(element), windowName: this.childWindowName });
 
         this.driver.open.call(this, element);
     }
@@ -553,7 +548,7 @@ export class ParentComponent extends BaseComponent {
 
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
 
-        // Our child has no way of knowing if we navigated off the page. So we have to listen for beforeunload
+        // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
 
         let onunload = once(() => {
@@ -563,10 +558,8 @@ export class ParentComponent extends BaseComponent {
             this.destroyComponent();
         });
 
-        let beforeUnloadWindowListener = addEventListener(window, 'beforeunload', onunload);
         let unloadWindowListener = addEventListener(window, 'unload', onunload);
 
-        this.clean.register('destroyBeforeUnloadWindowListener', beforeUnloadWindowListener.cancel);
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
 
@@ -865,7 +858,9 @@ export class ParentComponent extends BaseComponent {
     showContainer() {
         if (this.container) {
             addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
-            return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
+            return delay().then(() => {
+                return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
+            });
         }
     }
 
@@ -879,7 +874,9 @@ export class ParentComponent extends BaseComponent {
         }).then(() => {
             if (this.element) {
                 addClass(this.element, CLASS_NAMES.SHOW_COMPONENT);
-                return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
+                return delay().then(() => {
+                    return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
+                });
             }
         });
     }
