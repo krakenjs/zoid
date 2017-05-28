@@ -80,13 +80,16 @@ export class ChildComponent extends BaseComponent {
     validateParentCommunication() {
         let isAllowed = false;
         if (this.component.allowedParentDomains && this.component.allowedParentDomains.length && this.component.allowedParentDomains.length > 0) {
-            let parentDomain = this.getParentDomain();
+            const parentDomain = this.getParentDomain();
             each(this.component.allowedParentDomains, (parentDomainToMatch) => {
                 if (isAllowed) {
                     return;
                 }
-                const expression = (parentDomainToMatch instanceof RegExp) ? parentDomainToMatch : new RegExp(parentDomainToMatch);
-                isAllowed = expression.test(parentDomain);
+                if (parentDomainToMatch instanceof RegExp) {
+                    isAllowed = parentDomainToMatch.test(parentDomain);
+                } else {
+                    isAllowed = parentDomainToMatch.toLowerCase() === parentDomain.toLowerCase();
+                }
             });
         } else {
             isAllowed  = true;

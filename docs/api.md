@@ -70,13 +70,13 @@ dimensions: {
 }
 ```
 
-#### allowedParentDomains `Array<string> | Array<RegEx>`
+#### allowedParentDomains `Array<string | RegEx>`
 
-An array of reqular expresions to be used to validate parent domain against. If provided, and parent domain doesn't match any item, communication from child to parent will be prevented. 
+An array of strings or reqular expresions to be used to validate parent domain against. If provided, and parent domain doesn't match any item, communication from child to parent will be prevented. 
   
 ```javascript
 allowedParentDomains: [ 
-    /^localhost$/,
+    "http://localhost",
     /^http:\/\/www\.mydomain\.com$/
   ]
 ```
