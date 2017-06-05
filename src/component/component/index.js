@@ -110,9 +110,14 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'containerTemplate', ({ id, CLASS }) => `
             <style>
-                #${id} iframe {
+                #${id} .${ CLASS.ELEMENT } {
                     height: 150px;
                     width: 300px;
+                }
+
+                #${id} .${ CLASS.ELEMENT } iframe {
+                    height: 100%;
+                    width: 100%;
                 }
             </style>
 
