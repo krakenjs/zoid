@@ -5622,7 +5622,8 @@
                 _this.addProp(options, "getInitialDimensions");
                 _this.addProp(options, "autoResize", !1);
                 _this.addProp(options, "containerTemplate", function(_ref) {
-                    return "\n            <style>\n                #" + _ref.id + ' iframe {\n                    height: 150px;\n                    width: 300px;\n                }\n            </style>\n\n            <div class="' + _ref.CLASS.ELEMENT + '"></div>\n        ';
+                    var id = _ref.id, CLASS = _ref.CLASS;
+                    return "\n            <style>\n                #" + id + " ." + CLASS.ELEMENT + " {\n                    height: 150px;\n                    width: 300px;\n                }\n\n                #" + id + " ." + CLASS.ELEMENT + ' iframe {\n                    height: 100%;\n                    width: 100%;\n                }\n            </style>\n\n            <div class="' + CLASS.ELEMENT + '"></div>\n        ';
                 });
                 _this.addProp(options, "componentTemplate");
                 _this.addProp(options, "sacrificialComponentTemplate", !1);
