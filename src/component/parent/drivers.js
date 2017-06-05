@@ -43,7 +43,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         let options = {
             attributes: {
                 name: this.childWindowName,
-                scrolling: this.component.scrolling === false ? 'no' : 'yes'
+                scrolling: this.component.scrolling ? 'yes' : 'no'
             }
         };
 

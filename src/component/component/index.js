@@ -68,7 +68,7 @@ export class Component extends BaseComponent {
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
+        this.addProp(options, 'dimensions');
         this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');
@@ -111,8 +111,8 @@ export class Component extends BaseComponent {
         this.addProp(options, 'containerTemplate', ({ id, CLASS }) => `
             <style>
                 #${id} iframe {
-                    height: 100%;
-                    width: 100%;
+                    height: 150px;
+                    width: 300px;
                 }
             </style>
 
