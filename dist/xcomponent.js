@@ -4128,7 +4128,7 @@
                 var options = {
                     attributes: {
                         name: this.childWindowName,
-                        scrolling: this.component.scrolling === !1 ? "no" : "yes"
+                        scrolling: this.component.scrolling ? "yes" : "no"
                     }
                 }, frame = this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.J)(null, options, this.element);
                 this.window = frame.contentWindow;
@@ -6274,10 +6274,7 @@
                 _this.addProp(options, "name", _this.tag.replace(/-/g, "_"));
                 _this.props = _extends({}, __WEBPACK_IMPORTED_MODULE_5__props__.a, options.props || {});
                 options.props || (_this.looseProps = !0);
-                _this.addProp(options, "dimensions", {
-                    width: "300px",
-                    height: "150px"
-                });
+                _this.addProp(options, "dimensions");
                 _this.addProp(options, "scrolling");
                 _this.addProp(options, "version", "latest");
                 _this.addProp(options, "defaultEnv");
@@ -6295,7 +6292,7 @@
                 _this.addProp(options, "getInitialDimensions");
                 _this.addProp(options, "autoResize", !1);
                 _this.addProp(options, "containerTemplate", function(_ref) {
-                    return "\n            <style>\n                #" + _ref.id + ' iframe {\n                    height: 100%;\n                    width: 100%;\n                }\n            </style>\n\n            <div class="' + _ref.CLASS.ELEMENT + '"></div>\n        ';
+                    return "\n            <style>\n                #" + _ref.id + ' iframe {\n                    height: 150px;\n                    width: 300px;\n                }\n            </style>\n\n            <div class="' + _ref.CLASS.ELEMENT + '"></div>\n        ';
                 });
                 _this.addProp(options, "componentTemplate");
                 _this.addProp(options, "sacrificialComponentTemplate", !1);
