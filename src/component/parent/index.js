@@ -1,7 +1,7 @@
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed  } from 'post-robot/src/lib/windows';
+import { isSameDomain, isWindowClosed  } from 'cross-domain-utils/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';

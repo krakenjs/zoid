@@ -1,6 +1,6 @@
 
 import { cleanUpWindow } from 'post-robot/src';
-import { findFrameByName } from 'post-robot/src/lib/windows';
+import { findFrameByName } from 'cross-domain-utils/src';
 
 import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE } from '../../constants';

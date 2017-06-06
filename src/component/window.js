@@ -1,5 +1,5 @@
 
-import { getAncestor, findFrameByName } from 'post-robot/src/lib/windows';
+import { getAncestor, findFrameByName } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';

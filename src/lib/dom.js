@@ -1,5 +1,5 @@
 
-import { isWindowClosed } from 'post-robot/src/lib/windows';
+import { isWindowClosed } from 'cross-domain-utils/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';

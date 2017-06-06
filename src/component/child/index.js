@@ -1,6 +1,6 @@
 
 import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow } from 'post-robot/src/lib/windows';
+import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
