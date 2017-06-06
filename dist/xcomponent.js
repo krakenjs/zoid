@@ -4225,7 +4225,6 @@
                     height: height,
                     top: pos.y,
                     left: pos.x,
-                    location: 1,
                     status: 1,
                     toolbar: 0,
                     menubar: 0,
