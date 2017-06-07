@@ -2,8 +2,8 @@
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
-import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
-import { CONTEXT_TYPES, DELEGATE } from '../../constants';
+import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose } from '../../lib';
+import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
@@ -50,6 +50,17 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         let frame = this.iframe = iframe(null, options, this.element);
         this.window = frame.contentWindow;
 
+        let detectClose = () => {
+            return Promise.try(() => {
+                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+            }).finally(() => {
+                return this.destroy();
+            });
+        };
+
+        let iframeWatcher = watchElementForClose(this.iframe, detectClose);
+        let elementWatcher = watchElementForClose(this.element, detectClose);
+
         frame.addEventListener('error', (err) => this.error(err));
 
         hideElement(this.element);
@@ -72,7 +83,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         this.clean.register('destroyWindow', () => {
 
-            this.window.close();
+            iframeWatcher.cancel();
+            elementWatcher.cancel();
 
             cleanUpWindow(this.window);
 

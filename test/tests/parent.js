@@ -138,11 +138,14 @@ describe('xcomponent render to parent', () => {
 
                     onEnter: function() {
 
-                        var winClose = this.window.close;
-                        this.window.close = function() {
-                            winClose.apply(this, arguments);
-                            window.xprops.foo();
-                        };
+                        var win = this.window;
+
+                        var interval = setInterval(function() {
+                            if (win.closed) {
+                                clearInterval(interval);
+                                window.xprops.foo();
+                            }
+                        }, 20);
 
                         return window.xprops.childEntered();
                     }

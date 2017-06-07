@@ -1,4 +1,5 @@
 
+import { onCloseWindow } from 'src/lib';
 import { testComponent } from '../component';
 
 describe('xcomponent templates and styles', () => {
@@ -42,13 +43,10 @@ describe('xcomponent templates and styles', () => {
         testComponent.renderIframe({
 
             onEnter() {
-                let close = this.window.close;
-
-                this.window.close = function() {
-                    close.apply(this, arguments);
+                onCloseWindow(this.window, () => {
                     done();
-                };
-
+                });
+                
                 this.container.querySelector('.xcomponent-close').click();
             }
 
