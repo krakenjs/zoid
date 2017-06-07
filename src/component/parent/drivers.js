@@ -1,4 +1,5 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
