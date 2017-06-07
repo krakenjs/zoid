@@ -2886,11 +2886,11 @@
                             _this21.onInit.reject(err);
                             return _this21.destroy();
                         }).then(function() {
-                            return _this21.props.onError(err);
+                            if (_this21.props.onError) return _this21.props.onError(err);
                         }).catch(function(errErr) {
                             throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
-                            throw err;
+                            if (!_this21.props.onError) throw err;
                         });
                     }
                 }
@@ -5976,7 +5976,8 @@
                 sendToChild: !1,
                 def: function() {
                     return function(err) {
-                        return this.props.onError(err);
+                        if (this.props.onError) return this.props.onError(err);
+                        throw err;
                     };
                 }
             },
@@ -5985,9 +5986,6 @@
                 required: !1,
                 promisify: !0,
                 sendToChild: !0,
-                def: function() {
-                    return function() {};
-                },
                 once: !0
             },
             logLevel: {
