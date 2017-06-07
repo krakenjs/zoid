@@ -2883,9 +2883,6 @@
                     if (this.handledErrors.indexOf(err) === -1) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
-                            _this21.component.logError("error", {
-                                error: err.stack || err.toString()
-                            });
                             _this21.onInit.reject(err);
                             return _this21.destroy();
                         }).then(function() {
