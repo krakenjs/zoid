@@ -1179,7 +1179,9 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            return this.props.onError(err);
+            if (this.props.onError) {
+                return this.props.onError(err);
+            }
 
         }).catch(errErr => {
 
@@ -1187,7 +1189,9 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            throw err;
+            if (!this.props.onError) {
+                throw err;
+            }
         });
     }
 }
