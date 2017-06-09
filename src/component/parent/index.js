@@ -1,7 +1,7 @@
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed  } from 'post-robot/src/lib/windows';
+import { isSameDomain, isWindowClosed  } from 'cross-domain-utils/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { BaseComponent } from '../base';
@@ -1173,15 +1173,15 @@ export class ParentComponent extends BaseComponent {
         this.handledErrors.push(err);
 
         return Promise.try(() => {
-
-            this.component.logError(`error`, { error: err.stack || err.toString() });
             this.onInit.reject(err);
 
             return this.destroy();
 
         }).then(() => {
 
-            return this.props.onError(err);
+            if (this.props.onError) {
+                return this.props.onError(err);
+            }
 
         }).catch(errErr => {
 
@@ -1189,7 +1189,9 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            throw err;
+            if (!this.props.onError) {
+                throw err;
+            }
         });
     }
 }

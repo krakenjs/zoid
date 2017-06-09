@@ -1,9 +1,10 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { cleanUpWindow } from 'post-robot/src';
-import { findFrameByName } from 'post-robot/src/lib/windows';
+import { findFrameByName } from 'cross-domain-utils/src';
 
-import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
-import { CONTEXT_TYPES, DELEGATE } from '../../constants';
+import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose } from '../../lib';
+import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
@@ -43,12 +44,23 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         let options = {
             attributes: {
                 name: this.childWindowName,
-                scrolling: this.component.scrolling === false ? 'no' : 'yes'
+                scrolling: this.component.scrolling ? 'yes' : 'no'
             }
         };
 
         let frame = this.iframe = iframe(null, options, this.element);
         this.window = frame.contentWindow;
+
+        let detectClose = () => {
+            return Promise.try(() => {
+                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+            }).finally(() => {
+                return this.destroy();
+            });
+        };
+
+        let iframeWatcher = watchElementForClose(this.iframe, detectClose);
+        let elementWatcher = watchElementForClose(this.element, detectClose);
 
         frame.addEventListener('error', (err) => this.error(err));
 
@@ -72,7 +84,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         this.clean.register('destroyWindow', () => {
 
-            this.window.close();
+            iframeWatcher.cancel();
+            elementWatcher.cancel();
 
             cleanUpWindow(this.window);
 
@@ -175,7 +188,6 @@ if (__POPUP_SUPPORT__) {
                 height,
                 top: pos.y,
                 left: pos.x,
-                location: 1,
                 status: 1,
                 toolbar: 0,
                 menubar: 0,

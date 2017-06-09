@@ -79,7 +79,11 @@
   "dependencies": {
     "beaver-logger": "^3",
     "cross-domain-safe-weakmap": "^1.0.8",
+<<<<<<< HEAD
     "cross-domain-utils": "^1.0.4",
+=======
+    "cross-domain-utils": "^1.0.3",
+>>>>>>> 48c70a99e0bbfe9edd10e6021e03fbc585233d74
     "hi-base32": "^0.1.1",
     "post-robot": "^6.0.0",
     "sync-browser-mocks": "^1.0.4"
