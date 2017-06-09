@@ -10,6 +10,7 @@ import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, t
          cycle, getDomain, globalFor, setLogLevel, getElement, documentReady, each } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
+import { matchDomain } from 'cross-domain-utils/src';
 
 
 /*  Child Component
@@ -27,6 +28,10 @@ export class ChildComponent extends BaseComponent {
     constructor(component) {
         super(component);
         this.component = component;
+        
+        if (!this.hasValidParentDomain()) {
+            return this.error(new Error(`Can not be rendered by domain: ${this.getParentDomain()}`));
+        }
 
         this.sendLogsToOpener();
 
@@ -53,8 +58,6 @@ export class ChildComponent extends BaseComponent {
         //
         // - What context are we
         // - What props has the parent specified
-        this.validateParentCommunication();
-
         this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
 
             exports: this.exports()
@@ -77,27 +80,22 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
-    validateParentCommunication() {
-        let isAllowed = false;
-        if (this.component.allowedParentDomains && this.component.allowedParentDomains.length && this.component.allowedParentDomains.length > 0) {
-            const parentDomain = this.getParentDomain();
+    hasValidParentDomain() {
+        const parentDomain = this.getParentDomain();
+        if (typeof this.component.allowedParentDomains === 'string') {
+            return matchDomain(this.component.allowedParentDomains, parentDomain);
+        }
+        if (Array.isArray(this.component.allowedParentDomains)) {
+            let result = false;
             each(this.component.allowedParentDomains, (parentDomainToMatch) => {
-                if (isAllowed) {
+                if (result) {
                     return;
                 }
-                if (parentDomainToMatch instanceof RegExp) {
-                    isAllowed = parentDomainToMatch.test(parentDomain);
-                } else {
-                    isAllowed = parentDomainToMatch.toLowerCase() === parentDomain.toLowerCase();
-                }
+                result = matchDomain(parentDomainToMatch, parentDomain);
             });
-        } else {
-            isAllowed  = true;
+            return result;
         }
-
-        if (!isAllowed) {
-            this.preventCommunication = true;
-        }
+        return false;
     }
 
     init() {

@@ -9,3 +9,4 @@ export * from './options';
 export * from './parent';
 export * from './validation';
 export * from './logging';
+export * from './parentDomainCheck';

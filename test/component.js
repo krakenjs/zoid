@@ -224,3 +224,65 @@ export let testComponent_logLevel_configured = xcomponent.create({
 
     defaultEnv: 'dev'
 });
+
+
+export let testComponent_parentDomain_string = xcomponent.create({
+
+    tag: 'test-component-parent-domain-string',
+
+    allowedParentDomains: 'http://www.somedomain.com',
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});
+
+export let testComponent_parentDomain_array_of_strings = xcomponent.create({
+
+    tag: 'test-component-parent-domain-array-of-strings',
+
+    allowedParentDomains: ['http://www.somedomain.com', 'http://www.otherdomain.com'],
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});
+
+
+export let testComponent_parentDomain_array_of_strings_match_wildcard = xcomponent.create({
+
+    tag: 'test-component-parent-domain-array-of-strings-match-wildcard',
+
+    allowedParentDomains: ['*'],
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});
+
+
+export let testComponent_parentDomain_array_of_regex = xcomponent.create({
+
+    tag: 'test-component-parent-domain-array-of-regex',
+
+    allowedParentDomains: [/^http\:\/\/www.somedomain.com$/, /^http\:\/\/www.otherdomain.com$/],
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true',
+        custom: '/base/test/child.htm?customenv=true'
+    },
+
+    defaultEnv: 'dev'
+});
+
+
+

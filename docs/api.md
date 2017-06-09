@@ -70,9 +70,9 @@ dimensions: {
 }
 ```
 
-#### allowedParentDomains `Array<string | RegEx>`
+#### allowedParentDomains `string | Array<string | RegEx>`
 
-An array of strings or reqular expresions to be used to validate parent domain against. If provided, and parent domain doesn't match any item, communication from child to parent will be prevented. 
+A string, array of strings or reqular expresions to be used to validate parent domain. If parent domain doesn't match any item, communication from child to parent will be prevented. The default value is '*' which match any domain.
   
 ```javascript
 allowedParentDomains: [ 
