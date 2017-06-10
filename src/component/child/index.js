@@ -7,7 +7,7 @@ import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady, each } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
@@ -81,21 +81,7 @@ export class ChildComponent extends BaseComponent {
     }
 
     hasValidParentDomain() {
-        const parentDomain = this.getParentDomain();
-        if (typeof this.component.allowedParentDomains === 'string') {
-            return matchDomain(this.component.allowedParentDomains, parentDomain);
-        }
-        if (Array.isArray(this.component.allowedParentDomains)) {
-            let result = false;
-            each(this.component.allowedParentDomains, (parentDomainToMatch) => {
-                if (result) {
-                    return;
-                }
-                result = matchDomain(parentDomainToMatch, parentDomain);
-            });
-            return result;
-        }
-        return false;
+        return matchDomain(this.component.allowedParentDomains, this.getParentDomain());
     }
 
     init() {
