@@ -127,7 +127,7 @@ export class ParentComponent extends BaseComponent {
                 }
             });
 
-            tasks.listen = Promise.all([ tasks.getDomain, tasks.open, tasks.validateRenderAllowed ]).then(([ domain ]) => {
+            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 this.listen(this.window, domain);
             });
 
@@ -138,7 +138,7 @@ export class ParentComponent extends BaseComponent {
             if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate, tasks.validateRenderAllowed ]).then(([ url ]) => {
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 
