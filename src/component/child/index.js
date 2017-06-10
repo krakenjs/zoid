@@ -59,6 +59,7 @@ export class ChildComponent extends BaseComponent {
         //
         // - What context are we
         // - What props has the parent specified
+
         this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
 
             exports: this.exports()
@@ -161,7 +162,6 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParent(name, data) {
-
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
