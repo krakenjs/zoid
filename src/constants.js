@@ -85,3 +85,5 @@ export const DELEGATE = {
     CALL_ORIGINAL: 'call_original',
     CALL_DELEGATE: 'call_delegate'
 };
+
+export const WILDCARD = '*';

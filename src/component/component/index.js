@@ -6,7 +6,7 @@ import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
-import { CONTEXT_TYPES, POST_MESSAGE } from '../../constants';
+import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { validate } from './validate';
 
 export { containerTemplate } from './templates/container';
@@ -40,6 +40,8 @@ export class Component extends BaseComponent {
         this.addProp(options, 'tag');
 
         this.addProp(options, 'defaultLogLevel', 'info');
+
+        this.addProp(options, 'allowedParentDomains', WILDCARD);
 
         // initially set log level to default log level configured when creating component
         setLogLevel(this.defaultLogLevel);
