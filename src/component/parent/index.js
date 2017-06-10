@@ -18,6 +18,8 @@ import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
+import { matchDomain } from 'cross-domain-utils/src';
+import { RenderError } from '../../error';
 
 let activeComponents = [];
 
@@ -77,6 +79,14 @@ export class ParentComponent extends BaseComponent {
                 getDomain: this.getDomain()
             };
 
+            tasks.validateRenderAllowed = tasks.getDomain.then(domain => {
+                if (!matchDomain(this.component.allowedParentDomains, domain)) {
+                    const error = new RenderError(`Can not be rendered by domain: ${domain}`);
+                    this.error(error);
+                    return Promise.reject(error);
+                }
+            });
+
             tasks.elementReady = Promise.try(() => {
                 if (element) {
                     return this.elementReady(element);
@@ -87,11 +97,13 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            tasks.open = this.driver.openOnClick
-                ? this.open(element, this.context)
-                : tasks.openContainer.then(() => {
-                    return this.open(element, this.context);
-                });
+            tasks.open = tasks.validateRenderAllowed.then(() => { 
+                return this.driver.openOnClick
+                    ? this.open(element, this.context)
+                    : tasks.openContainer.then(() => {
+                        return this.open(element, this.context);
+                    });
+            });
 
             tasks.openBridge = tasks.open.then(() => {
                 return this.openBridge(this.context);
@@ -115,7 +127,7 @@ export class ParentComponent extends BaseComponent {
                 }
             });
 
-            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.listen = Promise.all([ tasks.getDomain, tasks.open, tasks.validateRenderAllowed ]).then(([ domain ]) => {
                 this.listen(this.window, domain);
             });
 
@@ -126,7 +138,7 @@ export class ParentComponent extends BaseComponent {
             if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
+                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate, tasks.validateRenderAllowed ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 

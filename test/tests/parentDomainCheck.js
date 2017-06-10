@@ -9,6 +9,8 @@ import { testComponent_parentDomains_string,
         testComponent_parentDomains_string_match_wildcard
     } from '../component';
 
+import { RenderError } from '../../src/error';
+
 describe('parent domain check', () => {
 
     describe('should not throw error when: ', () => {
@@ -57,24 +59,27 @@ describe('parent domain check', () => {
 
     describe('should throw error when: ', () => {
         it('allowedParentDomains is specified as string and parent domain does not match', done => {
-            testComponent_parentDomains_string.renderIframe().catch(err => {
-                assert.isTrue(err instanceof Error);
+            testComponent_parentDomains_string.renderIframe()
+            .catch(err => {
+                assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
                 done();
             });
         });
 
         it('allowedParentDomains is specified as array of strings and parent domain does not match', done => {
-            testComponent_parentDomains_array_of_strings.renderIframe().catch(err => {
-                assert.isTrue(err instanceof Error);
+            testComponent_parentDomains_array_of_strings.renderIframe()
+            .catch(err => {
+                assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
                 done();
             });
         });
 
         it('allowedParentDomains is specified as array of regex expressions and parent domain does not match', done => {
-            testComponent_parentDomains_array_of_regex.renderIframe().catch(err => {
-                assert.isTrue(err instanceof Error);
+            testComponent_parentDomains_array_of_regex.renderIframe()
+            .catch(err => {
+                assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
                 done();
             });

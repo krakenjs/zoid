@@ -11,6 +11,7 @@ import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, t
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
+import { RenderError } from '../../error';
 
 
 /*  Child Component
@@ -30,7 +31,7 @@ export class ChildComponent extends BaseComponent {
         this.component = component;
         
         if (!this.hasValidParentDomain()) {
-            return this.error(new Error(`Can not be rendered by domain: ${this.getParentDomain()}`));
+            return this.error(new RenderError(`Can not be rendered by domain: ${this.getParentDomain()}`));
         }
 
         this.sendLogsToOpener();
