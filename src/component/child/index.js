@@ -161,10 +161,6 @@ export class ChildComponent extends BaseComponent {
     */
 
     sendToParent(name, data) {
-        
-        if (this.preventCommunication === true) {
-            return Promise.reject(`component doesn't allow communicating with parent with domain: ${getParentDomain()}`);
-        }
 
         let parentWindow = getParentComponentWindow();
 
