@@ -121,7 +121,7 @@ describe('xcomponent error cases', () => {
             onEnter() {
                 setTimeout(() => {
                     this.iframe.parentNode.removeChild(this.iframe);
-                });
+                }, 10);
             },
 
             onClose() {

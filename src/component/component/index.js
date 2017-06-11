@@ -6,7 +6,7 @@ import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
-import { CONTEXT_TYPES, POST_MESSAGE } from '../../constants';
+import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { validate } from './validate';
 
 export { containerTemplate } from './templates/container';
@@ -41,6 +41,8 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'defaultLogLevel', 'info');
 
+        this.addProp(options, 'allowedParentDomains', WILDCARD);
+
         // initially set log level to default log level configured when creating component
         setLogLevel(this.defaultLogLevel);
 
@@ -68,7 +70,7 @@ export class Component extends BaseComponent {
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions', { width: '300px', height: '150px' });
+        this.addProp(options, 'dimensions');
         this.addProp(options, 'scrolling');
 
         this.addProp(options, 'version', 'latest');
@@ -110,7 +112,12 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'containerTemplate', ({ id, CLASS }) => `
             <style>
-                #${id} iframe {
+                #${id} .${ CLASS.ELEMENT } {
+                    height: 150px;
+                    width: 300px;
+                }
+
+                #${id} .${ CLASS.ELEMENT } iframe {
                     height: 100%;
                     width: 100%;
                 }

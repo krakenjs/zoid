@@ -1,5 +1,5 @@
 
-import { isWindowClosed } from 'post-robot/src/lib/windows';
+import { isWindowClosed } from 'cross-domain-utils/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';
@@ -810,4 +810,36 @@ export function getElementName(element) {
     }
 
     return name;
+}
+
+export function isElementClosed(el) {
+    if (!el || !el.parentNode) {
+        return true;
+    }
+    return false;
+}
+
+export function watchElementForClose(element, handler) {
+    handler = once(handler);
+
+    let interval;
+
+    if (isElementClosed(element)) {
+        handler();
+    } else {
+        interval = safeInterval(() => {
+            if (isElementClosed(element)) {
+                interval.cancel();
+                handler();
+            }
+        }, 50);
+    }
+
+    return {
+        cancel() {
+            if (interval) {
+                interval.cancel();
+            }
+        }
+    };
 }

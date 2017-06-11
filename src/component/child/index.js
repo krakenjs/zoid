@@ -1,6 +1,6 @@
 
 import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow } from 'post-robot/src/lib/windows';
+import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
@@ -10,6 +10,8 @@ import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, t
          cycle, getDomain, globalFor, setLogLevel, getElement, documentReady } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
+import { matchDomain } from 'cross-domain-utils/src';
+import { RenderError } from '../../error';
 
 
 /*  Child Component
@@ -27,6 +29,10 @@ export class ChildComponent extends BaseComponent {
     constructor(component) {
         super(component);
         this.component = component;
+        
+        if (!this.hasValidParentDomain()) {
+            return this.error(new RenderError(`Can not be rendered by domain: ${this.getParentDomain()}`));
+        }
 
         this.sendLogsToOpener();
 
@@ -76,6 +82,9 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
+    hasValidParentDomain() {
+        return matchDomain(this.component.allowedParentDomains, this.getParentDomain());
+    }
 
     init() {
         return this.onInit;
@@ -140,7 +149,6 @@ export class ChildComponent extends BaseComponent {
     setProps(props = {}, origin, required = true) {
         window.xprops = this.props = this.props || {};
         extend(this.props, normalizeChildProps(this.component, props, origin, required));
-        // this.props.onError = (err) => this.error(err);
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }

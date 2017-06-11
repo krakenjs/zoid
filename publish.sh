@@ -12,8 +12,8 @@ if ! git diff-index --quiet --cached HEAD; then
     exit 1;
 fi;
 
-rm -rf node_modules/post-robot node_modules/sync-browser-mocks node_modules/beaver-logger node_modules/cross-domain-safe-weakmap;
-npm install post-robot sync-browser-mocks beaver-logger cross-domain-safe-weakmap;
+rm -rf node_modules/post-robot node_modules/sync-browser-mocks node_modules/beaver-logger node_modules/cross-domain-safe-weakmap node_modules/cross-domain-utils;
+npm install post-robot sync-browser-mocks beaver-logger cross-domain-safe-weakmap cross-domain-utils;
 
 git checkout dist
 gulp build;

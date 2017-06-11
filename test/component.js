@@ -224,3 +224,71 @@ export let testComponent_logLevel_configured = xcomponent.create({
 
     defaultEnv: 'dev'
 });
+
+
+export let testComponent_parentDomains_string = xcomponent.create({
+    tag: 'test-component-parent-domains-string',
+
+    allowedParentDomains: 'http://www.somedomain.com',
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+export let testComponent_parentDomains_array_of_strings = xcomponent.create({
+    tag: 'test-component-parent-domain-array-of-strings',
+
+    allowedParentDomains: ['http://www.somedomain.com', 'http://www.otherdomain.com'],
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+
+export let testComponent_parentDomains_array_of_regex = xcomponent.create({
+    tag: 'test-component-parent-domains-array-of-regex',
+
+    allowedParentDomains: [/^http\:\/\/www.somedomain.com$/, /^http\:\/\/www.otherdomain.com$/],
+    
+    url: '/base/test/child.htm?devenv=true',
+});
+
+export let testComponent_parentDomains_string_match = xcomponent.create({
+    tag: 'test-component-parent-domains-string-match',
+
+    allowedParentDomains: 'http://localhost:9876',
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+export let testComponent_parentDomains_array_of_strings_match = xcomponent.create({
+    tag: 'test-component-parent-domains-array-of-strings-match',
+
+    allowedParentDomains: ['http://www.somedomain.com', 'http://localhost:9876'],
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+export let testComponent_parentDomains_array_of_strings_match_wildcard = xcomponent.create({
+    tag: 'test-component-parent-domains-array-of-strings-match-wildcard',
+
+    allowedParentDomains: ['http://www.somedomain.com', '*'],
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+
+export let testComponent_parentDomains_string_match_wildcard = xcomponent.create({
+    tag: 'test-component-parent-domains-string-match-wildcard',
+
+    allowedParentDomains: '*',
+
+    url: '/base/test/child.htm?devenv=true',
+});
+
+
+export let testComponent_parentDomains_array_of_regex_match = xcomponent.create({
+    tag: 'test-component-parent-domains-array-of-regex-match',
+
+    allowedParentDomains: [/^http\:\/\/www.somedomain.com$/, /^http\:\/\/localhost\:9876$/],
+    
+    url: '/base/test/child.htm?devenv=true',
+});
