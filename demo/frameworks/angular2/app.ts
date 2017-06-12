@@ -1,26 +1,36 @@
 //our root app component
-import {Component, NgModule, VERSION} from '@angular/core';
+import {Component, NgModule, VERSION, ViewChild} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
-import xcomponent from 'xcomponent';
+
+declare const xcomponent:any;
+declare const MyLoginXComponent:any;
+const MyLoginXComponentInfo = MyLoginXComponent
+  .driver('angular2', { Component, NgModule, ViewChild, BrowserModule})
+  .driverResults;
+
 
 @Component({
   selector: 'my-app',
   template: `
     <div>
       <h2>Hello {{name}}</h2>
+      <my-login-component></my-login-component>
     </div>
   `,
 })
 export class App {
   name:string;
   constructor() {
-    this.name = `Angular! v${VERSION.full} and ${xcomponent.CONSTANTS.XCOMPONENT}`
+    this.name = `Angular! v${VERSION.full} and ${xcomponent.CONSTANTS.XCOMPONENT}`;
   }
 }
 
 @NgModule({
-  imports: [ BrowserModule ],
+  imports: [ BrowserModule, MyLoginXComponentInfo.module ],
   declarations: [ App ],
   bootstrap: [ App ]
 })
-export class AppModule {}
+export class AppModule {
+  constructor () {
+  }
+}
