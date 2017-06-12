@@ -8,33 +8,30 @@ export let angular2 = {
         {
             Component: window.ng.core.Component,
             NgModule: window.ng.core.NgModule,
-            ViewChild: window.ng.core.ViewChild,
+            ElementRef: window.ng.core.ElementRef,
             BrowserModule: window.ng.platformBrowser.BrowserModule
         } 
         : false;
     },
 
     register(xcomponent, configs) {
-        const { Component, NgModule, ViewChild, BrowserModule } = configs;
+        const { Component, NgModule, BrowserModule, ElementRef } = configs;
         // const camelCaseTag = dasherizeToCamel(xcomponent.tag);
         
         const Angular2Component = 
             Component({
                     selector: xcomponent.tag,
                     template: `
-                        <div #domAccessor>
-                            inside ng2 xcomponent
-                        </div>
+                        <div></div>
                     `
             })
             .Class({
-                constructor: function() {
-
-                },
+                constructor: [ElementRef, function(elementRef) {
+                    const parent = xcomponent.init({}, null, elementRef.nativeElement);
+                    parent.render(elementRef.nativeElement);
+                }],
                 ngOnInit: function () {
-                },
-                ngAfterViewInit: function () {
-                    const dom = ViewChild('domAccessor');
+
                 }
             });
 

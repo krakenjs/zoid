@@ -1,11 +1,11 @@
 //our root app component
-import {Component, NgModule, VERSION, ViewChild} from '@angular/core';
+import {Component, NgModule, VERSION, ElementRef} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 declare const xcomponent:any;
 declare const MyLoginXComponent:any;
 const MyLoginXComponentInfo = MyLoginXComponent
-  .driver('angular2', { Component, NgModule, ViewChild, BrowserModule})
+  .driver('angular2', { Component, NgModule, ElementRef ,BrowserModule})
   .driverResults;
 
 
