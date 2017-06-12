@@ -78,7 +78,7 @@ export const internalProps = {
         sendToChild: false
     },
 
-    // When the user closes the component. Defaults to onError if no handler passed.
+    // When the user closes the component.
 
     onClose: {
         type: 'function',
@@ -99,7 +99,10 @@ export const internalProps = {
         sendToChild: false,
         def() {
             return function(err) {
-                return this.props.onError(err);
+                if (this.props.onError) {
+                    return this.props.onError(err);
+                }
+                throw err;
             };
         }
     },
@@ -110,12 +113,7 @@ export const internalProps = {
         type: 'function',
         required: false,
         promisify: true,
-        sendToChild: false,
-        def() {
-            return function() {
-                // pass
-            };
-        },
+        sendToChild: true,
         once: true
     },
 

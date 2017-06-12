@@ -1,9 +1,10 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { cleanUpWindow } from 'post-robot/src';
-import { findFrameByName } from 'post-robot/src/lib/windows';
+import { findFrameByName } from 'cross-domain-utils/src';
 
-import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension } from '../../lib';
-import { CONTEXT_TYPES, DELEGATE } from '../../constants';
+import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose } from '../../lib';
+import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
@@ -30,7 +31,6 @@ export let RENDER_DRIVERS = {};
 RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
     renderedIntoContainerTemplate: true,
-    destroyOnUnload: false,
     allowResize: true,
     openOnClick: false,
     errorOnCloseDuringInit: true,
@@ -44,17 +44,23 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         let options = {
             attributes: {
                 name: this.childWindowName,
-                scrolling: this.component.scrolling === false ? 'no' : 'yes'
-            },
-
-            style: {
-                width: '100%',
-                height: '100%'
+                scrolling: this.component.scrolling ? 'yes' : 'no'
             }
         };
 
         let frame = this.iframe = iframe(null, options, this.element);
         this.window = frame.contentWindow;
+
+        let detectClose = () => {
+            return Promise.try(() => {
+                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+            }).finally(() => {
+                return this.destroy();
+            });
+        };
+
+        let iframeWatcher = watchElementForClose(this.iframe, detectClose);
+        let elementWatcher = watchElementForClose(this.element, detectClose);
 
         frame.addEventListener('error', (err) => this.error(err));
 
@@ -78,7 +84,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         this.clean.register('destroyWindow', () => {
 
-            this.window.close();
+            iframeWatcher.cancel();
+            elementWatcher.cancel();
 
             cleanUpWindow(this.window);
 
@@ -112,7 +119,10 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         resize:                  DELEGATE.CALL_DELEGATE,
         loadUrl:                 DELEGATE.CALL_DELEGATE,
         hijackSubmit:            DELEGATE.CALL_DELEGATE,
+
         getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
+        renderTemplate:          DELEGATE.CALL_ORIGINAL,
+        openContainerFrame:      DELEGATE.CALL_ORIGINAL,
 
         open(original, override) {
             return function() {
@@ -138,11 +148,11 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         }
     },
 
-    hide() {
+    show() {
         showElement(this.element);
     },
 
-    show() {
+    hide() {
         hideElement(this.element);
     },
 
@@ -159,7 +169,6 @@ if (__POPUP_SUPPORT__) {
 
         focusable: true,
         renderedIntoContainerTemplate: false,
-        destroyOnUnload: true,
         allowResize: false,
         openOnClick: true,
         errorOnCloseDuringInit: false,
@@ -179,7 +188,6 @@ if (__POPUP_SUPPORT__) {
                 height,
                 top: pos.y,
                 left: pos.x,
-                location: 1,
                 status: 1,
                 toolbar: 0,
                 menubar: 0,
@@ -235,7 +243,9 @@ if (__POPUP_SUPPORT__) {
             createComponentTemplate: DELEGATE.CALL_ORIGINAL,
             destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
-            getInitialDimensions:    DELEGATE.CALL_ORIGINAL
+            getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
+            renderTemplate:          DELEGATE.CALL_ORIGINAL,
+            openContainerFrame:      DELEGATE.CALL_ORIGINAL
         },
 
         loadUrl(url) {

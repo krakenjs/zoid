@@ -1,5 +1,5 @@
 
-import { isWindowClosed } from 'post-robot/src/lib/windows';
+import { isWindowClosed } from 'cross-domain-utils/src';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 
 import { once, noop, memoize, debounce } from './fn';
@@ -63,6 +63,10 @@ export let documentReady = new Promise(resolve => {
     }, 10);
 });
 
+export function isDocumentReady() {
+    return window.document.readyState === 'complete';
+}
+
 export function elementReady(id) {
     return new Promise((resolve, reject) => {
 
@@ -72,7 +76,7 @@ export function elementReady(id) {
             return resolve(el);
         }
 
-        if (window.document.readyState === 'complete') {
+        if (isDocumentReady()) {
             return reject(new Error(`Document is ready and element ${id} does not exist`));
         }
 
@@ -85,7 +89,7 @@ export function elementReady(id) {
                 return resolve(el);
             }
 
-            if (window.document.readyState === 'complete') {
+            if (isDocumentReady()) {
                 clearInterval(interval);
                 return reject(new Error(`Document is ready and element ${id} does not exist`));
             }
@@ -540,6 +544,17 @@ export function onDimensionsChange(el, { width = true, height = true, delay = 50
                 return resolver(dimensions);
             }
         }, delay);
+
+        function onWindowResize() {
+            let { changed, dimensions } = tracker.check();
+            if (changed) {
+                tracker.reset();
+                window.removeEventListener('resize', onWindowResize);
+                return resolver(dimensions);
+            }
+        }
+
+        window.addEventListener('resize', onWindowResize);
     });
 }
 
@@ -651,6 +666,14 @@ export function animate(element, name, clean, timeout = 1000) {
         let startEvent;
         let endEvent;
 
+        function cleanUp() {
+            setVendorCSS(element, 'animationName', '');
+            clearTimeout(startTimeout);
+            clearTimeout(endTimeout);
+            startEvent.cancel();
+            endEvent.cancel();
+        }
+
         startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
 
             if (event.target !== element || event.animationName !== name) {
@@ -665,8 +688,7 @@ export function animate(element, name, clean, timeout = 1000) {
             hasStarted = true;
 
             endTimeout = setTimeout(() => {
-                startEvent.cancel();
-                endEvent.cancel();
+                cleanUp();
                 resolve();
             }, timeout);
         });
@@ -677,18 +699,11 @@ export function animate(element, name, clean, timeout = 1000) {
                 return;
             }
 
-            event.stopPropagation();
-
-            startEvent.cancel();
-            endEvent.cancel();
+            cleanUp();
 
             if (event.animationName !== name) {
                 return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
             }
-
-            clearTimeout(endTimeout);
-
-            setVendorCSS(element, 'animationName', 'none');
 
             return resolve();
         });
@@ -697,20 +712,13 @@ export function animate(element, name, clean, timeout = 1000) {
 
         startTimeout = setTimeout(() => {
             if (!hasStarted) {
-                startEvent.cancel();
-                endEvent.cancel();
+                cleanUp();
                 return resolve();
             }
         }, 200);
 
         if (clean) {
-            clean(() => {
-                clearTimeout(startTimeout);
-                clearTimeout(endTimeout);
-                startEvent.cancel();
-                endEvent.cancel();
-                resolve();
-            });
+            clean(cleanUp);
         }
     });
 }
@@ -781,4 +789,57 @@ export function getCurrentScriptDir() {
     }
 
     return '.';
+}
+
+export function getElementName(element) {
+
+    if (typeof element === 'string') {
+        return element;
+    }
+
+    if (!element || !element.tagName) {
+        return '<unknown>';
+    }
+
+    let name = element.tagName.toLowerCase();
+
+    if (element.id) {
+        name += `#${element.id}`;
+    } else if (element.className) {
+        name += `.${element.className.split(' ').join('.')}`;
+    }
+
+    return name;
+}
+
+export function isElementClosed(el) {
+    if (!el || !el.parentNode) {
+        return true;
+    }
+    return false;
+}
+
+export function watchElementForClose(element, handler) {
+    handler = once(handler);
+
+    let interval;
+
+    if (isElementClosed(element)) {
+        handler();
+    } else {
+        interval = safeInterval(() => {
+            if (isElementClosed(element)) {
+                interval.cancel();
+                handler();
+            }
+        }, 50);
+    }
+
+    return {
+        cancel() {
+            if (interval) {
+                interval.cancel();
+            }
+        }
+    };
 }

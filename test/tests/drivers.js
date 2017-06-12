@@ -6,7 +6,7 @@ angular.bootstrap(document.body, ['app']);
 
 describe('xcomponent drivers', () => {
 
-    it('should enter a component rendered with react and call onRender', done => {
+    it('should enter a component rendered with react and call onEnter', done => {
 
         let Main = window.React.createClass({
 
@@ -16,7 +16,7 @@ describe('xcomponent drivers', () => {
                     'div',
                     null,
                     React.createElement(testComponent.react, {
-                        onRender() {
+                        onEnter() {
                             this.close().then(done);
                         }
                     })
@@ -60,7 +60,7 @@ describe('xcomponent drivers', () => {
         ReactDOM.render(React.createElement(Main, null), container);
     });
 
-    it('should enter a component rendered with angular and call onRender', done => {
+    it('should enter a component rendered with angular and call onEnter', done => {
 
         let injector = angular.element(document.body).injector();
         let $compile = injector.get('$compile');
@@ -68,12 +68,12 @@ describe('xcomponent drivers', () => {
 
         let $scope = $rootScope.$new();
 
-        $scope.onRender = function() {
+        $scope.onEnter = function() {
             this.close().then(done);
         };
 
         $compile(`
-            <test-component on-enter="onRender"></test-component>
+            <test-component on-enter="onEnter"></test-component>
         `)($scope, element => {
             document.body.appendChild(element[0]);
         });
@@ -103,7 +103,7 @@ describe('xcomponent drivers', () => {
         });
     });
 
-    it('should enter a component rendered with a script tag and call onRender', done => {
+    it('should enter a component rendered with a script tag and call onEnter', done => {
 
         let container = document.createElement('div');
         document.body.appendChild(container);
@@ -115,7 +115,7 @@ describe('xcomponent drivers', () => {
         container.innerHTML = `
             <script type="application/x-component" data-component="test-component">
                 {
-                    onRender: window.done
+                    onEnter: window.done
                 }
             </script>
         `;

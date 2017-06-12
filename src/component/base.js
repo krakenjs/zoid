@@ -8,10 +8,16 @@ import { once, copyProp } from '../lib';
 function cleanup(obj) {
 
     let tasks = [];
+    let cleaned = false;
 
     return {
 
         set(name, item) {
+
+            if (cleaned) {
+                return;
+            }
+
             obj[name] = item;
             this.register(() => {
                 delete obj[name];
@@ -20,6 +26,10 @@ function cleanup(obj) {
         },
 
         register(name, method) {
+
+            if (cleaned) {
+                return method();
+            }
 
             if (!method) {
                 method = name;
@@ -50,6 +60,8 @@ function cleanup(obj) {
 
         all() {
             let results = [];
+
+            cleaned = true;
 
             while (tasks.length) {
                 results.push(tasks.pop().run());

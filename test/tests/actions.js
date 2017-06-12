@@ -1,4 +1,5 @@
 
+import { onCloseWindow } from 'src/lib';
 import { testComponent } from '../component';
 
 describe('xcomponent actions', () => {
@@ -7,7 +8,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 let close = this.window.close;
 
                 this.window.close = function() {
@@ -25,13 +26,10 @@ describe('xcomponent actions', () => {
 
         testComponent.renderIframe({
 
-            onRender() {
-                let close = this.window.close;
-
-                this.window.close = function() {
-                    close.apply(this, arguments);
+            onEnter() {
+                onCloseWindow(this.window, () => {
                     done();
-                };
+                });
 
                 this.close();
             }
@@ -43,7 +41,7 @@ describe('xcomponent actions', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 this.window.focus = done;
                 this.focus();
             }

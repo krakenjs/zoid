@@ -53,7 +53,7 @@ export class DelegateComponent extends BaseComponent {
 
     watchForClose() {
         let closeListener = onCloseWindow(this.source, () => this.destroy());
-        let unloadListener = addEventListener(window, 'beforeunload', closeListener.cancel);
+        let unloadListener = addEventListener(window, 'unload', closeListener.cancel);
 
         this.clean.register(() => {
             closeListener.cancel();

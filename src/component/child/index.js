@@ -1,15 +1,17 @@
 
 import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow } from 'post-robot/src/lib/windows';
+import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, getDomain, globalFor, setLogLevel } from '../../lib';
+         cycle, getDomain, globalFor, setLogLevel, getElement, documentReady } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
+import { matchDomain } from 'cross-domain-utils/src';
+import { RenderError } from '../../error';
 
 
 /*  Child Component
@@ -27,6 +29,10 @@ export class ChildComponent extends BaseComponent {
     constructor(component) {
         super(component);
         this.component = component;
+        
+        if (!this.hasValidParentDomain()) {
+            return this.error(new RenderError(`Can not be rendered by domain: ${this.getParentDomain()}`));
+        }
 
         this.sendLogsToOpener();
 
@@ -76,11 +82,17 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
+    hasValidParentDomain() {
+        return matchDomain(this.component.allowedParentDomains, this.getParentDomain());
+    }
 
     init() {
         return this.onInit;
     }
 
+    getParentDomain() {
+        return getParentDomain();
+    }
 
     onProps(handler) {
         this.onPropHandlers.push(handler);
@@ -137,7 +149,6 @@ export class ChildComponent extends BaseComponent {
     setProps(props = {}, origin, required = true) {
         window.xprops = this.props = this.props || {};
         extend(this.props, normalizeChildProps(this.component, props, origin, required));
-        this.props.onError = (err) => this.error(err);
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
@@ -302,30 +313,34 @@ export class ChildComponent extends BaseComponent {
             height = true;
         }
 
-        return { width, height };
+        let element;
+
+        if (autoResize.element) {
+            element = getElement(autoResize.element);
+        }
+
+        if (!element) {
+            // Believe me, I struggled. There's no other way.
+            if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
+                element = document.body;
+            } else {
+                element = document.documentElement;
+            }
+        }
+
+        return { width, height, element };
     }
 
     watchForResize() {
 
-        let { width, height } = this.getAutoResize();
+        let { width, height, element } = this.getAutoResize();
 
         if (!width && !height) {
             return;
         }
 
-        if (!this.component.dimensions) {
-            return;
-        }
-
         if (this.context === CONTEXT_TYPES.POPUP) {
             return;
-        }
-
-        let el = document.documentElement;
-
-        // Believe me, I struggled. There's no other way.
-        if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-            el = document.body;
         }
 
         if (this.watchingForResize) {
@@ -336,15 +351,19 @@ export class ChildComponent extends BaseComponent {
 
         return Promise.try(() => {
 
-            if (!dimensionsMatchViewport(el, { width, height })) {
-                return this.resizeToElement(el, { width, height });
+            return documentReady;
+
+        }).then(() => {
+
+            if (!dimensionsMatchViewport(element, { width, height })) {
+                return this.resizeToElement(element, { width, height });
             }
 
         }).then(() => {
 
             return cycle(() => {
-                return onDimensionsChange(el, { width, height }).then(dimensions => {
-                    return this.resizeToElement(el, { width, height });
+                return onDimensionsChange(element, { width, height }).then(dimensions => {
+                    return this.resizeToElement(element, { width, height });
                 });
             });
         });

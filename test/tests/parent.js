@@ -10,7 +10,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -25,7 +25,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 });
@@ -42,7 +42,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         return window.xprops.foo();
                     }
                 }, 'body');
@@ -112,7 +112,7 @@ describe('xcomponent render to parent', () => {
 
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
-                    onRender: function() {
+                    onEnter: function() {
                         this.close();
                     },
 
@@ -136,13 +136,16 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderIframeTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
-                        var winClose = this.window.close;
-                        this.window.close = function() {
-                            winClose.apply(this, arguments);
-                            window.xprops.foo();
-                        };
+                        var win = this.window;
+
+                        var interval = setInterval(function() {
+                            if (win.closed) {
+                                clearInterval(interval);
+                                window.xprops.foo();
+                            }
+                        }, 20);
 
                         return window.xprops.childEntered();
                     }
@@ -165,7 +168,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
                         var winClose = this.window.close;
                         this.window.close = function() {
@@ -194,7 +197,7 @@ describe('xcomponent render to parent', () => {
             run: `
                 xcomponent.getByTag('test-component2').renderPopupTo(window.parent, {
 
-                    onRender: function() {
+                    onEnter: function() {
 
                         this.window.focus = function() {
                             window.xprops.foo();

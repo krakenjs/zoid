@@ -17,7 +17,7 @@ describe('xcomponent error cases', () => {
         };
 
         testComponent.renderPopup({
-            onRender: done
+            onEnter: done
 
         }).catch(err => {
             assert.isTrue(err instanceof xcomponent.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
@@ -102,7 +102,7 @@ describe('xcomponent error cases', () => {
 
         testComponent.renderPopup({
 
-            onRender() {
+            onEnter() {
                 setTimeout(() => {
                     this.window.close();
                 });
@@ -118,10 +118,10 @@ describe('xcomponent error cases', () => {
 
         testComponent.renderIframe({
 
-            onRender() {
+            onEnter() {
                 setTimeout(() => {
                     this.iframe.parentNode.removeChild(this.iframe);
-                });
+                }, 10);
             },
 
             onClose() {
