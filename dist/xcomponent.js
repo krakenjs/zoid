@@ -42,14 +42,6 @@
         return __webpack_require__(__webpack_require__.s = 78);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
-        function setWindowMatch(win, match) {
-            global.domainMatches = global.domainMatches || new _src.WeakMap();
-            global.domainMatches.set(win, match);
-            domainMatchTimeout || (domainMatchTimeout = setTimeout(function() {
-                global.domainMatches = new _src.WeakMap();
-                domainMatchTimeout = null;
-            }, 1));
-        }
         function getActualDomain(win) {
             var location = win.location;
             if (!location) throw new Error("Can not read window location");
@@ -66,24 +58,21 @@
             return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
         }
         function isActuallySameDomain(win) {
-            if (global.domainMatches.has(win)) {
-                if (global.domainMatches.get(win)) return !0;
-            }
-            var match = !1;
             try {
-                getActualDomain(win) === getActualDomain(window) && (match = !0);
+                var desc = Object.getOwnPropertyDescriptor(win, "location");
+                if (desc && desc.enumerable === !1) return !1;
             } catch (err) {}
-            match || setWindowMatch(win, match);
-            return match;
+            try {
+                if (getActualDomain(win) === getActualDomain(window)) return !0;
+            } catch (err) {}
+            return !1;
         }
         function isSameDomain(win) {
-            if (global.domainMatches.has(win)) return global.domainMatches.get(win);
-            var match = !1;
+            if (!isActuallySameDomain(win)) return !1;
             try {
-                getDomain(window) === getDomain(win) && (match = !0);
+                if (getDomain(window) === getDomain(win)) return !0;
             } catch (err) {}
-            setWindowMatch(win, match);
-            return match;
+            return !1;
         }
         function getParent(win) {
             if (win) try {
@@ -452,9 +441,7 @@
         exports.isFullpage = isFullpage;
         exports.isSameTopWindow = isSameTopWindow;
         exports.matchDomain = matchDomain;
-        var _src = __webpack_require__(6), _util = __webpack_require__(46), global = window.__crossDomainUtils__ = window.__crossDomainUtils__ || {};
-        global.domainMatches = global.domainMatches || new _src.WeakMap();
-        var domainMatchTimeout = void 0, CONSTANTS = {
+        var _util = __webpack_require__(46), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
             WILDCARD: "*"
@@ -945,14 +932,10 @@
         global.registerSelf = function() {};
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        Object.defineProperty(__webpack_exports__, "__esModule", {
-            value: !0
-        });
         var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(28);
-        __webpack_require__.d(__webpack_exports__, "WeakMap", function() {
+        __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__interface__.WeakMap;
         });
-        __webpack_exports__.default = __WEBPACK_IMPORTED_MODULE_0__interface__;
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         Object.defineProperty(__webpack_exports__, "__esModule", {
@@ -1282,7 +1265,7 @@
             return "[object RegExp]" === Object.prototype.toString.call(item);
         }
         function weakMapMemoize(method) {
-            var weakmap = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+            var weakmap = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
             return function(arg) {
                 var result = weakmap.get(arg);
                 if (void 0 !== result) return result;
@@ -2115,7 +2098,7 @@
                 }
             }, 10);
         });
-        __WEBPACK_IMPORTED_MODULE_4__global__.a.remoteWindows = __WEBPACK_IMPORTED_MODULE_4__global__.a.remoteWindows || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        __WEBPACK_IMPORTED_MODULE_4__global__.a.remoteWindows = __WEBPACK_IMPORTED_MODULE_4__global__.a.remoteWindows || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
         __WEBPACK_IMPORTED_MODULE_4__global__.a.receiveMessage = function(event) {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__drivers__.g)(event);
         };
@@ -2382,8 +2365,9 @@
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 _classCallCheck(this, ParentComponent);
                 var _this = _possibleConstructorReturn(this, (ParentComponent.__proto__ || Object.getPrototypeOf(ParentComponent)).call(this, component, options));
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__validate__.a)(component, options);
                 _this.component = component;
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__validate__.a)(component, options);
+                _this.validateParentDomain();
                 _this.context = context;
                 _this.setProps(options.props || {});
                 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.c)(_this.props.logLevel);
@@ -2412,27 +2396,17 @@
                             element: element,
                             loadUrl: loadUrl
                         });
-                        var tasks = {
-                            onRender: _this2.props.onRender(),
-                            getDomain: _this2.getDomain()
-                        };
-                        tasks.validateRenderAllowed = tasks.getDomain.then(function(domain) {
-                            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.matchDomain)(_this2.component.allowedParentDomains, domain)) {
-                                var error = new __WEBPACK_IMPORTED_MODULE_11__error__.c("Can not be rendered by domain: " + domain);
-                                _this2.error(error);
-                                return __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.reject(error);
-                            }
-                        });
+                        var tasks = {};
+                        tasks.onRender = _this2.props.onRender();
+                        tasks.getDomain = _this2.getDomain();
                         tasks.elementReady = __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.try(function() {
                             if (element) return _this2.elementReady(element);
                         });
                         tasks.openContainer = tasks.elementReady.then(function() {
                             return _this2.openContainer(element);
                         });
-                        tasks.open = tasks.validateRenderAllowed.then(function() {
-                            return _this2.driver.openOnClick ? _this2.open(element, _this2.context) : tasks.openContainer.then(function() {
-                                return _this2.open(element, _this2.context);
-                            });
+                        tasks.open = _this2.driver.openOnClick ? _this2.open(element, _this2.context) : tasks.openContainer.then(function() {
+                            return _this2.open(element, _this2.context);
                         });
                         tasks.openBridge = tasks.open.then(function() {
                             return _this2.openBridge(_this2.context);
@@ -2459,7 +2433,7 @@
                         });
                         if (loadUrl) {
                             tasks.buildUrl = _this2.buildUrl();
-                            tasks.loadUrl = __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(function(_ref5) {
+                            tasks.loadUrl = __WEBPACK_IMPORTED_MODULE_3_sync_browser_mocks_src_promise__.a.all([ tasks.buildUrl, tasks.validateParentDomain, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(function(_ref5) {
                                 var _ref6 = _slicedToArray(_ref5, 1), url = _ref6[0];
                                 return _this2.loadUrl(url);
                             });
@@ -2471,6 +2445,12 @@
                     }).then(function() {
                         return _this2.props.onEnter();
                     });
+                }
+            }, {
+                key: "validateParentDomain",
+                value: function() {
+                    var domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.d)();
+                    if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.matchDomain)(this.component.allowedParentDomains, domain)) throw new __WEBPACK_IMPORTED_MODULE_11__error__.c("Can not be rendered by domain: " + domain);
                 }
             }, {
                 key: "renderTo",
@@ -3254,7 +3234,7 @@
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, objectIDs = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        }, objectIDs = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         Object.defineProperty(__webpack_exports__, "__esModule", {
@@ -3558,7 +3538,7 @@
                     if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain + " for specified window") : win ? new Error("Request listener already exists for " + name + " for specified window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain) : new Error("Request listener already exists for " + name);
                     var requestListeners = __WEBPACK_IMPORTED_MODULE_2__global__.a.requestListeners, nameListeners = requestListeners[name];
                     if (!nameListeners) {
-                        nameListeners = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+                        nameListeners = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
                         requestListeners[name] = nameListeners;
                     }
                     var winListeners = nameListeners.get(win);
@@ -5431,7 +5411,7 @@
             };
         }();
         __WEBPACK_IMPORTED_MODULE_4__global__.a.bridges = __WEBPACK_IMPORTED_MODULE_4__global__.a.bridges || {};
-        __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByWin = __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByWin || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByWin = __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByWin || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
         __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByName = __WEBPACK_IMPORTED_MODULE_4__global__.a.popupWindowsByName || {};
         var windowOpen = window.open;
         window.open = function(url, name, options, last) {
@@ -5802,7 +5782,7 @@
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
-        __WEBPACK_IMPORTED_MODULE_7__global__.a.methods = __WEBPACK_IMPORTED_MODULE_7__global__.a.methods || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        __WEBPACK_IMPORTED_MODULE_7__global__.a.methods = __WEBPACK_IMPORTED_MODULE_7__global__.a.methods || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
         var listenForMethods = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__util__.e)(function() {
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.on)(__WEBPACK_IMPORTED_MODULE_2__conf__.a.POST_MESSAGE_NAMES.METHOD, {
                 window: __WEBPACK_IMPORTED_MODULE_2__conf__.a.WILDCARD,
@@ -5864,7 +5844,7 @@
         __webpack_require__(1)), __WEBPACK_IMPORTED_MODULE_3__interface__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_4__log__ = __webpack_require__(23), __WEBPACK_IMPORTED_MODULE_5_sync_browser_mocks_src_promise__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_6__global__ = __webpack_require__(5);
         __webpack_exports__.a = initOnReady;
         __webpack_exports__.b = onWindowReady;
-        __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function request(options) {
@@ -5966,7 +5946,7 @@
         __webpack_exports__.b = request;
         __webpack_exports__.c = sendToParent;
         __webpack_exports__.d = client;
-        __WEBPACK_IMPORTED_MODULE_5__global__.a.requestPromises = __WEBPACK_IMPORTED_MODULE_5__global__.a.requestPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.WeakMap();
+        __WEBPACK_IMPORTED_MODULE_5__global__.a.requestPromises = __WEBPACK_IMPORTED_MODULE_5__global__.a.requestPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function enableMockMode() {
