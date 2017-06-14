@@ -6916,7 +6916,7 @@
                     return {
                         scope: scope,
                         restrict: "E",
-                        controller: function($scope, $element) {
+                        controller: [ "$scope", "$element", function($scope, $element) {
                             function safeApply(fn) {
                                 if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
                                     $scope.$apply();
@@ -6958,7 +6958,7 @@
                             $scope.$watch(function() {
                                 parent.updateProps(getProps());
                             });
-                        }
+                        } ]
                     };
                 });
                 return component;
