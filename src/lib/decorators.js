@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise'; 
 
 export function memoized(target, name, descriptor) {
     let method = descriptor.value;
@@ -20,7 +20,7 @@ export function promise(target, name, descriptor) {
     let method = descriptor.value;
 
     descriptor.value = function() {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
             return method.apply(this, arguments);
         });
     };

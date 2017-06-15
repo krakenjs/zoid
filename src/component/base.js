@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { on } from 'post-robot/src';
 
 import { once, copyProp } from '../lib';
@@ -67,7 +67,7 @@ function cleanup(obj) {
                 results.push(tasks.pop().run());
             }
 
-            return Promise.all(results).then(() => {
+            return ZalgoPromise.all(results).then(() => {
                 return;
             });
         },
@@ -81,7 +81,7 @@ function cleanup(obj) {
                 }
             }
 
-            return Promise.all(results).then(() => {
+            return ZalgoPromise.all(results).then(() => {
                 return;
             });
         }

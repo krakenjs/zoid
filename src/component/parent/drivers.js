@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise'; 
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
@@ -52,7 +52,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         this.window = frame.contentWindow;
 
         let detectClose = () => {
-            return Promise.try(() => {
+            return ZalgoPromise.try(() => {
                 return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
             }).finally(() => {
                 return this.destroy();

@@ -82,6 +82,6 @@
     "cross-domain-utils": "^1.0.5",
     "hi-base32": "^0.1.1",
     "post-robot": "^6.0.0",
-    "sync-browser-mocks": "^1.0.4"
+    "zalgo-promise": "^1.0.4"
   }
 }

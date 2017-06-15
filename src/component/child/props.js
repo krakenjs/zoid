@@ -1,4 +1,6 @@
 
+import { ZalgoPromise } from 'zalgo-promise'; 
+
 import { getDomain } from '../../lib';
 
 export function normalizeChildProp(component, props, key, value) {
@@ -18,7 +20,7 @@ export function normalizeChildProp(component, props, key, value) {
         if (!value) {
             if (prop.getter) {
                 return function() {
-                    return Promise.resolve(prop.childDef.call());
+                    return ZalgoPromise.resolve(prop.childDef.call());
                 };
             } else {
                 return prop.childDef.call();
