@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 
 import { once, copyProp } from '../lib';

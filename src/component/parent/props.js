@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise'; 
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 import { validateProp } from './validate';
 import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
 

@@ -3,7 +3,7 @@ import * as $logger from 'beaver-logger/client';
 import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
-import { ZalgoPromise } from 'zalgo-promise'; 
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,

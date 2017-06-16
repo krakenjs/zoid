@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise'; 
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 

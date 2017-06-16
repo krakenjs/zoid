@@ -1,6 +1,6 @@
 
 import { isWindowClosed } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise'; 
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 
 import { once, noop, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';

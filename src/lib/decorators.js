@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise'; 
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 
 export function memoized(target, name, descriptor) {
     let method = descriptor.value;
