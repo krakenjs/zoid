@@ -1,7 +1,5 @@
 /* eslint-disable new-cap, object-shorthand */
 
-import { replaceObject } from '../lib';
-
 export let angular2 = {
 
     global() {
@@ -11,13 +9,14 @@ export let angular2 = {
             NgModule: window.ng.core.NgModule,
             ElementRef: window.ng.core.ElementRef,
             BrowserModule: window.ng.platformBrowser.BrowserModule,
-            NgZone: window.ng.core.NgZone
+            NgZone: window.ng.core.NgZone,
+            EventEmitter:  window.ng.core.EventEmitter
         } 
         : false;
     },
 
     register(xcomponent, configs) {
-        const { Component, NgModule, BrowserModule, ElementRef, NgZone } = configs;
+        const { Component, NgModule, BrowserModule, ElementRef, NgZone, EventEmitter } = configs;
         
         const getBindingMetadata = () => {
             const inputs = [];
@@ -37,24 +36,22 @@ export let angular2 = {
         const bindingMetadata = getBindingMetadata();
 
         function getProps(component) {
-            const allPropKeys = [...bindingMetadata.inputs, ...bindingMetadata.outputs];
-            const props = allPropKeys.reduce((accumulator, propKey) => {
+            const inputProps = bindingMetadata.inputs.reduce((accumulator, propKey) => {
                 const addition = { };
                 addition[propKey] = component[propKey];
                 return Object.assign({}, accumulator, addition);
             }, {});
-            const replacedProps = replaceObject(props, (value, key, fullKey) => {
-                if (typeof value === 'function') {
-                    return function() {
-                        let result;
-                        component.zone.run(() => {
-                            result = value.apply(this, arguments);
-                        });
-                        return result;
-                    };
-                }
-            });
-            return replacedProps;
+
+            const outputProps = bindingMetadata.outputs.reduce((accumulator, propKey) => {
+                const addition = { };
+                addition[propKey] = function () {
+                    component.zone.run(() => {
+                        component[propKey].emit(...arguments);
+                    });
+                };
+                return Object.assign({}, accumulator, addition);
+            }, {});
+            return Object.assign({}, outputProps, inputProps);
         }
 
 
@@ -71,6 +68,9 @@ export let angular2 = {
                 constructor: [ElementRef, NgZone, function(elementRef, zone) { 
                     this.elementRef = elementRef;
                     this.zone = zone;
+                    bindingMetadata.outputs.forEach((outputKey) => {
+                        this[outputKey] = new EventEmitter();
+                    });
                 }],
                 ngOnInit: function () {
                     const parent = xcomponent.init(getProps(this), null, this.elementRef.nativeElement);

@@ -18,7 +18,7 @@ window.MyLoginXComponent = xcomponent.create({
 
         onLogin: {
             type: 'function',
-            required: false
+            required: true
         }
     }
 });
