@@ -1,0 +1,7 @@
+<div>
+    <h3>Log in on xyz.com</h3>
+    <div id="container">
+        <my-login-component (onLogin)="onLogin($event)" [prefilledEmail]="prefilledEmail"></my-login-component>
+    </div>
+    <div id="result" *ngIf="email">User logged in with email: {{email}}</div>
+</div>

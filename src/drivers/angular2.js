@@ -17,7 +17,12 @@ export let angular2 = {
 
     register(xcomponent, configs) {
         const { Component, NgModule, BrowserModule, ElementRef, NgZone, EventEmitter } = configs;
-        
+        // TODO: workout if looseProps is possible
+        if (xcomponent.looseProps) {
+            xcomponent.logWarning('Angular driver does not yet support looseProps components');
+            xcomponent.driverOutput = { };
+            return xcomponent;
+        }
         const getBindingMetadata = () => {
             const inputs = [];
             const outputs = [];
@@ -90,7 +95,8 @@ export let angular2 = {
             }
         });
         
-        xcomponent.driverResults = {
+        // TODO: workout how to expose Angular2Module in umd mode        
+        xcomponent.driverOutput = {
             module: Angular2Module
         };
 
