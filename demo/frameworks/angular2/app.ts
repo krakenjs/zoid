@@ -1,11 +1,11 @@
 //our root app component
-import {Component, NgModule, VERSION, ElementRef} from '@angular/core';
+import {Component, NgModule, VERSION, ElementRef, NgZone} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 declare const xcomponent:any;
 declare const MyLoginXComponent:any;
 const MyLoginXComponentInfo = MyLoginXComponent
-  .driver('angular2', { Component, NgModule, ElementRef ,BrowserModule})
+  .driver('angular2', { Component, NgModule, ElementRef, BrowserModule, NgZone})
   .driverResults;
 
 
@@ -13,15 +13,18 @@ const MyLoginXComponentInfo = MyLoginXComponent
   selector: 'my-app',
   template: `
     <div>
-      <h2>Hello {{name}}</h2>
-      <my-login-component></my-login-component>
+      <h2>Hello</h2>
+      <my-login-component [prefilledEmail]="prefilledEmail"></my-login-component>
     </div>
   `,
 })
 export class App {
-  name:string;
+  prefilledEmail:string;
   constructor() {
-    this.name = `Angular! v${VERSION.full} and ${xcomponent.CONSTANTS.XCOMPONENT}`;
+    this.prefilledEmail = 'ahmed@yahoo.com';
+  }
+  public onLogin (){
+    window.alert('logged in!');
   }
 }
 
