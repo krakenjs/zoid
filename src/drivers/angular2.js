@@ -46,7 +46,7 @@ export let angular2 = {
                 const addition = { };
                 addition[propKey] = function () {
                     component.zone.run(() => {
-                        component[propKey].emit(...arguments);
+                        component[propKey].emit(arguments[0]); // TODO: emit only accepts one argument, think how to handle more than one.
                     });
                 };
                 return Object.assign({}, accumulator, addition);
