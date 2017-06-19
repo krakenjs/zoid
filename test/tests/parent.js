@@ -33,7 +33,7 @@ describe('xcomponent render to parent', () => {
         }, document.body);
     });
 
-    it('should render a component to the parent as an iframe', done => {
+    it.only('should render a component to the parent as an iframe again', done => {
 
         testComponent.renderIframe({
             foo() {

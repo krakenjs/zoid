@@ -109,9 +109,16 @@ describe('xcomponent happy cases', () => {
 
     it('should enter a component rendered as an iframe', done => {
 
-        testComponent.renderIframe({
-            onEnter: done
-        }, document.body);
+        try {
+            testComponent.renderIframe({
+                onEnter: done
+            }, document.body)
+        } catch (err) {
+            console.log(err);
+            done(err);
+        }
+        
+        
     });
 
     it('should enter a component rendered as an iframe and call a prop', done => {

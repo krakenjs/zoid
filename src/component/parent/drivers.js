@@ -110,6 +110,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
         createComponentTemplate: DELEGATE.CALL_DELEGATE,
         elementReady:            DELEGATE.CALL_DELEGATE,
+        validateContainer:       DELEGATE.CALL_DELEGATE,
         showContainer:           DELEGATE.CALL_DELEGATE,
         showComponent:           DELEGATE.CALL_DELEGATE,
         hideContainer:           DELEGATE.CALL_DELEGATE,

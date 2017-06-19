@@ -1,7 +1,7 @@
 
 import xcomponent from 'src/index';
 
-import { testComponent, testComponent3 } from '../component';
+import { testComponent, testComponent3, testComponent_invalid_element } from '../component';
 
 describe('xcomponent error cases', () => {
 
@@ -128,5 +128,13 @@ describe('xcomponent error cases', () => {
                 done();
             }
         });
+    });
+
+    it('should throw error when using invalid element', done => {
+
+        let invalid = document.createElement('button');
+        testComponent_invalid_element.render({}, invalid)
+        .catch(err => done());
+        
     });
 });

@@ -1,3 +1,19 @@
+export function validateContainer(element) {
+
+    let invalidTags = ['button'];
+
+    if (!element || typeof element !== 'object' || !element instanceof HTMLElement) {
+        throw new Error(`Element must be an instance of HTMLElement: ${JSON.stringify(element)}`);
+    }
+
+    if (invalidTags.indexOf(element.tagName.toLowerCase()) !== -1) {
+        throw new Error(`${element.tagName.toLowerCase()} is an invalid container element.`);
+    }
+
+    return element;
+
+}
+
 
 export function validateProp(prop, key, value, props, required = true) {
 

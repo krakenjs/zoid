@@ -15,7 +15,7 @@ import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady,
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
-import { validate, validateProps } from './validate';
+import { validate, validateProps, validateContainer } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
@@ -75,7 +75,7 @@ export class ParentComponent extends BaseComponent {
     render(element, loadUrl = true) {
         return this.tryInit(() => {
 
-            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
+            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });            
 
             let tasks = {};
 
@@ -87,6 +87,14 @@ export class ParentComponent extends BaseComponent {
                 if (element) {
                     return this.elementReady(element);
                 }
+            });
+
+            tasks.validateContainer = tasks.elementReady.then(() => {
+            
+                if (element) {
+                    return validateContainer(element);
+                }
+
             });
 
             tasks.openContainer = tasks.elementReady.then(() => {
