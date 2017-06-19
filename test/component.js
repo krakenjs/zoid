@@ -292,3 +292,15 @@ export let testComponent_parentDomains_array_of_regex_match = xcomponent.create(
     
     url: '/base/test/child.htm?devenv=true',
 });
+
+export let testComponent_invalid_element = xcomponent.create({
+    tag: 'invalid-test-element',
+    containerTemplate: xcomponent.containerTemplate,
+
+    url: {
+        dev: '/base/test/child.htm?devenv=true'
+    },
+
+    defaultEnv: 'dev',
+}, 'invalid-test-element');
+
