@@ -2,7 +2,7 @@
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed  } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
@@ -303,6 +303,9 @@ export class ParentComponent extends BaseComponent {
         this.props = this.props || {};
         props.version = this.component.version;
         validateProps(this.component, props, required);
+        if (this.component.validate) {
+            this.component.validate(this.component, props);
+        }
         extend(this.props, normalizeProps(this.component, this, props));
     }
 
