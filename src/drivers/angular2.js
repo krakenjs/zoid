@@ -15,48 +15,47 @@ export let angular2 = {
         : false;
     },
 
-    register(xcomponent, configs) {
-        const { Component, NgModule, BrowserModule, ElementRef, NgZone, EventEmitter } = configs;
+    register(xcomponent, { Component, NgModule, BrowserModule, ElementRef, NgZone, EventEmitter }) {
+        
         // TODO: workout if looseProps is possible
         if (xcomponent.looseProps) {
             xcomponent.logWarning('Angular driver does not yet support looseProps components');
             xcomponent.driverOutput = { };
             return xcomponent;
         }
+        
         const getBindingMetadata = () => {
             const inputs = [];
-            const outputs = [];
             for (let key of Object.keys(xcomponent.props)) {
-                const prop = xcomponent.props[key];
-                if (typeof prop.type === 'string' && prop.type.toLowerCase() === 'function') {
-                    outputs.push(key);
-                }
-                else {
-                    inputs.push(key);
-                }
+                inputs.push(key);
             }
-            return { inputs, outputs };
+            return { inputs };
         };
 
         const bindingMetadata = getBindingMetadata();
 
         function getProps(component) {
-            const inputProps = bindingMetadata.inputs.reduce((accumulator, propKey) => {
+            return bindingMetadata.inputs.reduce((accumulator, propKey) => {
                 const addition = { };
-                addition[propKey] = component[propKey];
+                if (!component.hasOwnProperty(propKey)) {
+                    return accumulator;
+                }
+                const prop = component[propKey];
+                if (typeof prop === 'function') {
+                    addition[propKey] = function () {
+                        let self = this;
+                        let args = arguments;
+                        let retValue;
+                        component.zone.run(() => {
+                            retValue = prop.apply(self, args);
+                        });
+                        return retValue;
+                    };
+                } else {
+                    addition[propKey] = prop;
+                }
                 return Object.assign({}, accumulator, addition);
             }, {});
-
-            const outputProps = bindingMetadata.outputs.reduce((accumulator, propKey) => {
-                const addition = { };
-                addition[propKey] = function () {
-                    component.zone.run(() => {
-                        component[propKey].emit(arguments[0]); // TODO: emit only accepts one argument, think how to handle more than one.
-                    });
-                };
-                return Object.assign({}, accumulator, addition);
-            }, {});
-            return Object.assign({}, outputProps, inputProps);
         }
 
 
@@ -66,16 +65,12 @@ export let angular2 = {
                 template: `
                     <div></div>
                 `,
-                inputs: bindingMetadata.inputs,
-                outputs: bindingMetadata.outputs
+                inputs: bindingMetadata.inputs
             })
             .Class({
                 constructor: [ElementRef, NgZone, function(elementRef, zone) { 
                     this.elementRef = elementRef;
                     this.zone = zone;
-                    bindingMetadata.outputs.forEach((outputKey) => {
-                        this[outputKey] = new EventEmitter();
-                    });
                 }],
                 ngOnInit: function () {
                     const parent = xcomponent.init(getProps(this), null, this.elementRef.nativeElement);

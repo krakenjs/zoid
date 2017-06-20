@@ -12,6 +12,7 @@ export class AppComponent {
   
   constructor() {
     this.prefilledEmail = 'foo@bar.com';
+    this.onLogin = this.onLogin.bind(this);
   }
 
   public onLogin (email){

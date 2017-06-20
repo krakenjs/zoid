@@ -5,7 +5,7 @@
     <script src="https://npmcdn.com/core-js@2.4.1/client/shim.min.js"></script>
     <script src="https://npmcdn.com/zone.js@0.8.12?main=browser"></script>
     <script src="https://npmcdn.com/reflect-metadata@0.1.10"></script>
-    <script src="https://unpkg.com/rxjs@5.4.1/bundles/Rx.min.js"></script>
+    <script src="https://npmcdn.com/rxjs@5.4.1/bundles/Rx.min.js"></script>
     <script src="https://npmcdn.com/@angular/core@4.2.3/bundles/core.umd.js"></script>
     <script src="https://npmcdn.com/@angular/common@4.2.3/bundles/common.umd.js"></script>
     <script src="https://npmcdn.com/@angular/compiler@4.2.3/bundles/compiler.umd.js"></script>
@@ -27,7 +27,7 @@
                         <div>
                             <h3>Log in on xyz.com</h3>
                             <div id="container">
-                                <my-login-component (onLogin)="onLogin($event)" [prefilledEmail]="prefilledEmail"></my-login-component>
+                                <my-login-component [onLogin]="onLogin" [prefilledEmail]="prefilledEmail"></my-login-component>
                             </div>
                             <div id="result" *ngIf="email">User logged in with email: {{email}}</div>
                         </div>
