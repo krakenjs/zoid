@@ -1,3 +1,4 @@
+import { omit, replaceObject } from '../lib';
 /* eslint-disable new-cap, object-shorthand */
 
 export let angular2 = {
@@ -8,14 +9,13 @@ export let angular2 = {
             Component: window.ng.core.Component,
             NgModule: window.ng.core.NgModule,
             ElementRef: window.ng.core.ElementRef,
-            BrowserModule: window.ng.platformBrowser.BrowserModule,
             NgZone: window.ng.core.NgZone,
-            EventEmitter:  window.ng.core.EventEmitter
+            BrowserModule: window.ng.platformBrowser.BrowserModule
         } 
         : false;
     },
 
-    register(xcomponent, { Component, NgModule, BrowserModule, ElementRef, NgZone, EventEmitter }) {
+    register(xcomponent, { Component, NgModule, ElementRef, NgZone, BrowserModule }) {
         
         // TODO: workout if looseProps is possible
         if (xcomponent.looseProps) {
@@ -35,29 +35,19 @@ export let angular2 = {
         const bindingMetadata = getBindingMetadata();
 
         function getProps(component) {
-            return bindingMetadata.inputs.reduce((accumulator, propKey) => {
-                const addition = { };
-                if (!component.hasOwnProperty(propKey)) {
-                    return accumulator;
-                }
-                const prop = component[propKey];
-                if (typeof prop === 'function') {
-                    addition[propKey] = function () {
-                        let self = this;
-                        let args = arguments;
-                        let retValue;
-                        component.zone.run(() => {
-                            retValue = prop.apply(self, args);
+            const props = omit(component, ['$xContext']);
+            return replaceObject(props, (value, key, fullKey) => {
+                if (typeof value === 'function') {
+                    return function () {
+                        let result;
+                        component.$xContext.zone.run(() => {
+                            result = value(...arguments);
                         });
-                        return retValue;
+                        return result;
                     };
-                } else {
-                    addition[propKey] = prop;
                 }
-                return Object.assign({}, accumulator, addition);
-            }, {});
+            });
         }
-
 
         const Angular2Component = 
             Component({
@@ -69,12 +59,18 @@ export let angular2 = {
             })
             .Class({
                 constructor: [ElementRef, NgZone, function(elementRef, zone) { 
-                    this.elementRef = elementRef;
-                    this.zone = zone;
+                    this.$xContext = {};
+                    this.$xContext.elementRef = elementRef;
+                    this.$xContext.zone = zone;
                 }],
                 ngOnInit: function () {
-                    const parent = xcomponent.init(getProps(this), null, this.elementRef.nativeElement);
-                    parent.render(this.elementRef.nativeElement);
+                    const targetElement = this.$xContext.elementRef.nativeElement;
+                    const parent = xcomponent.init(getProps(this), null, targetElement);
+                    parent.render(targetElement);
+                    this.$xContext.parent = parent;
+                },
+                OnChanges: function(changes) {
+                    this.$xContext.parent.updateProps(getProps(this));
                 }
             });
 
@@ -90,8 +86,7 @@ export let angular2 = {
             }
         });
         
-        // TODO: workout how to expose Angular2Module in umd mode        
-        xcomponent.driverOutput = {
+        xcomponent.driverResults.angular2 = {
             module: Angular2Module
         };
 

@@ -137,7 +137,7 @@ export class Component extends BaseComponent {
         // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
         // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
         // This makes us a little more pluggable and loosely coupled.
-
+        this.driverResults = {};
         this.registerDrivers();
         this.registerChild();
         this.listenDelegate();
@@ -147,6 +147,7 @@ export class Component extends BaseComponent {
         this.driverCache = {};
 
         for (let driverName of Object.keys(drivers)) {
+            this.driverResults[driverName] = {};
             let driver = drivers[driverName];
             let glob = driver.global();
             if (glob) {

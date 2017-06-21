@@ -304,3 +304,9 @@ export function getObjectID(obj) {
 
     return uid;
 }
+
+export const omit = (obj, keysToOmit = []) => {
+    return Object.keys(obj)
+    .filter((key) => keysToOmit.indexOf(key) < 0)
+    .reduce((newObj, key) => Object.assign(newObj, { [key]: obj[key] }), {});
+};
