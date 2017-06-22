@@ -25,7 +25,7 @@ export let angular2 = {
         }
         
         const getBindingMetadata = () => {
-            const inputs = [];
+            const inputs = [ 'props' ];
             for (let key of Object.keys(xcomponent.props)) {
                 inputs.push(key);
             }
@@ -35,7 +35,7 @@ export let angular2 = {
         const bindingMetadata = getBindingMetadata();
 
         function getProps(component) {
-            const props = omit(component, ['$xContext']);
+            const props = component.props || omit(component, ['$xContext']);
             return replaceObject(props, (value, key, fullKey) => {
                 if (typeof value === 'function') {
                     return function () {
@@ -59,9 +59,10 @@ export let angular2 = {
             })
             .Class({
                 constructor: [ElementRef, NgZone, function(elementRef, zone) { 
-                    this.$xContext = {};
-                    this.$xContext.elementRef = elementRef;
-                    this.$xContext.zone = zone;
+                    this.$xContext = {
+                        elementRef,
+                        zone
+                    };
                 }],
                 ngOnInit: function () {
                     const targetElement = this.$xContext.elementRef.nativeElement;
