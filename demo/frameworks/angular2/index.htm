@@ -51,16 +51,17 @@
 
         
         // module
-        (function (app, MyLoginXComponentModule) {
-            app.AppModule = function AppModule() {}
-            app.AppModule.annotations = [
-                new ng.core.NgModule({
-                imports: [ng.platformBrowser.BrowserModule, MyLoginXComponentModule],
+        (function (app) {
+            app.AppModule = ng.core.NgModule({
+                imports: [ng.platformBrowser.BrowserModule,
+                    MyLoginXComponent.driverResults.angular2.module],
                 declarations: [app.AppComponent],
                 bootstrap: [app.AppComponent]
-                })
-            ]
-        })(window.app || (window.app = {}), window.MyLoginXComponent.driverResults.angular2.module);
+            })
+            .Class({
+                constructor: function () { }
+            });
+        })(window.app || (window.app = {}));
         
 
         // bootstrap
