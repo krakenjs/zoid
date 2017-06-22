@@ -18,9 +18,13 @@ export let angular2 = {
     register(xcomponent, { Component, NgModule, ElementRef, NgZone, BrowserModule }) {
         
         const getBindingMetadata = () => {
-            const inputs = [ 'props' ];
-            for (let key of Object.keys(xcomponent.props)) {
-                inputs.push(key);
+            const inputs = [];
+            if (xcomponent.looseProps) {
+                inputs.push('props');
+            } else {
+                for (let key of Object.keys(xcomponent.props)) {
+                    inputs.push(key);
+                }
             }
             return { inputs };
         };
