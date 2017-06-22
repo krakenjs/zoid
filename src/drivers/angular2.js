@@ -38,7 +38,7 @@ export let angular2 = {
                     return function () {
                         let result;
                         component.$xContext.zone.run(() => {
-                            result = value(...arguments);
+                            result = value.apply(this, arguments);
                         });
                         return result;
                     };
