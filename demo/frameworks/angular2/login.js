@@ -7,18 +7,5 @@ window.MyLoginXComponent = xcomponent.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: xcomponent.getCurrentScriptDir() + '/login.htm',
-
-    props: {
-
-        prefilledEmail: {
-            type: 'string',
-            required: false
-        },
-
-        onLogin: {
-            type: 'function',
-            required: true
-        }
-    }
+    url: xcomponent.getCurrentScriptDir() + '/login.htm'
 });

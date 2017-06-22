@@ -17,13 +17,6 @@ export let angular2 = {
 
     register(xcomponent, { Component, NgModule, ElementRef, NgZone, BrowserModule }) {
         
-        // TODO: workout if looseProps is possible
-        if (xcomponent.looseProps) {
-            xcomponent.logWarning('Angular driver does not yet support looseProps components');
-            xcomponent.driverOutput = { };
-            return xcomponent;
-        }
-        
         const getBindingMetadata = () => {
             const inputs = [ 'props' ];
             for (let key of Object.keys(xcomponent.props)) {
