@@ -29,7 +29,6 @@ export let angular2 = {
             return { inputs };
         };
 
-        const bindingMetadata = getBindingMetadata();
 
         function getProps(component) {
             const props = component.props || omit(component, ['$xContext']);
@@ -45,6 +44,8 @@ export let angular2 = {
                 }
             });
         }
+
+        const bindingMetadata = getBindingMetadata();
 
         const Angular2Component = 
             Component({
@@ -67,8 +68,10 @@ export let angular2 = {
                     parent.render(targetElement);
                     this.$xContext.parent = parent;
                 },
-                OnChanges: function(changes) {
-                    this.$xContext.parent.updateProps(getProps(this));
+                ngOnChanges: function() {
+                    if (this.$xContext.parent) {
+                        this.$xContext.parent.updateProps(getProps(this));
+                    }
                 }
             });
 
