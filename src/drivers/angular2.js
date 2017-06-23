@@ -1,5 +1,8 @@
 import { omit, replaceObject } from '../lib';
+import { CONTEXT_TYPES } from './../constants';
+
 /* eslint-disable new-cap, object-shorthand */
+
 
 export let angular2 = {
 
@@ -15,7 +18,21 @@ export let angular2 = {
         : false;
     },
 
-    register(xcomponent, { Component, NgModule, ElementRef, NgZone, BrowserModule }) {
+    register(xcomponent, { Component, NgModule, ElementRef, NgZone, BrowserModule }, isRegisteredAutomatically = false) {
+        
+        try {
+            xcomponent.validateRenderContext(CONTEXT_TYPES.IFRAME);
+        } 
+        catch (error) {
+            if (!isRegisteredAutomatically) {
+                throw error;
+            } else {
+                xcomponent.log('skipping initializing angular2 component as IFrame is not supported context');
+            }
+            return xcomponent;
+        }
+
+        xcomponent.log('initializing angular2 component');
         
         const getBindingMetadata = () => {
             const inputs = [];
