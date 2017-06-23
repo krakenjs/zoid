@@ -143,6 +143,17 @@ export class Component extends BaseComponent {
         this.listenDelegate();
     }
 
+    canBeRenderedByDriver(driverName) {
+        // currently all drivers only render in IFrame
+        try {
+            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+            return true;
+        } 
+        catch (e) {
+            return false;
+        } 
+    }
+
     registerDrivers() {
         this.driverCache = {};
 
@@ -150,7 +161,7 @@ export class Component extends BaseComponent {
             this.driverResults[driverName] = {};
             let driver = drivers[driverName];
             let glob = driver.global();
-            if (glob) {
+            if (glob && this.canBeRenderedByDriver(driverName)) {
                 this.driver(driverName, glob);
             }
         }
