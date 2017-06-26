@@ -3238,7 +3238,6 @@
         function addRequestListener(_ref5, listener) {
             var name = _ref5.name, win = _ref5.win, domain = _ref5.domain;
             if (!name || "string" != typeof name) throw new Error("Name required to add request listener");
-            console.warn("adding request listener:", name);
             if (Array.isArray(win)) {
                 for (var listenersCollection = [], _iterator2 = win, _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                     var _ref6;
