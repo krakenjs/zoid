@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 import { validateProp } from './validate';
 import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
 
@@ -51,7 +51,7 @@ export function normalizeProp(component, instance, props, key, value) {
             value = value.bind(instance);
         } else {
             let val = value;
-            value = () => val || Promise.resolve(val);
+            value = () => val || ZalgoPromise.resolve(val);
         }
 
         value = getter(value, { name: key, timeout: prop.timeout });
@@ -203,7 +203,7 @@ export function propsToQuery(propsDef, props) {
 
     let params = {};
 
-    return Promise.all(Object.keys(props).map(key => {
+    return ZalgoPromise.all(Object.keys(props).map(key => {
 
         let prop = propsDef[key];
 
@@ -217,7 +217,7 @@ export function propsToQuery(propsDef, props) {
             queryParam = prop.queryParam;
         }
 
-        return Promise.resolve().then(() => {
+        return ZalgoPromise.resolve().then(() => {
 
             let value = props[key];
 

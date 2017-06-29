@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 
 import { testComponent } from '../component';
 
@@ -119,7 +119,7 @@ describe('xcomponent options', () => {
         testComponent.renderIframe({
 
             denodeifyFunction(val) {
-                return Promise.resolve(`${val}bar`);
+                return ZalgoPromise.resolve(`${val}bar`);
             },
 
             complete(result) {

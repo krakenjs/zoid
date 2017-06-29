@@ -26,7 +26,7 @@ export let angular = {
 
                 restrict: 'E',
 
-                controller: ($scope, $element) => {
+                controller: ['$scope', '$element', ($scope, $element) => {
 
                     if (component.looseProps && !$scope.props) {
                         throw new Error(`For angular bindings to work, prop definitions must be passed to xcomponent.create`);
@@ -76,7 +76,7 @@ export let angular = {
                     $scope.$watch(() => {
                         parent.updateProps(getProps());
                     });
-                }
+                }]
             };
         });
 

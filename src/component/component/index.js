@@ -129,6 +129,7 @@ export class Component extends BaseComponent {
         this.addProp(options, 'componentTemplate');
 
         this.addProp(options, 'sacrificialComponentTemplate', false);
+        this.addProp(options, 'validate');
 
         // A mapping of tag->component so we can reference components by string tag name
 
