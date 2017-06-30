@@ -1,4 +1,4 @@
-import { omit, replaceObject } from '../lib';
+import { replaceObject } from '../lib';
 /* eslint-disable new-cap, object-shorthand */
 
 
@@ -20,26 +20,12 @@ export let angular2 = {
 
         xcomponent.log('initializing angular2 component');
         
-        const getBindingMetadata = () => {
-            const inputs = [];
-            if (xcomponent.looseProps) {
-                inputs.push('props');
-            } else {
-                for (let key of Object.keys(xcomponent.props)) {
-                    inputs.push(key);
-                }
-            }
-            return { inputs };
-        };
-
-
         function getProps(component) {
-            const props = component.props || omit(component, ['$xContext']);
-            return replaceObject(props, (value, key, fullKey) => {
+            return replaceObject(component.props, (value, key, fullKey) => {
                 if (typeof value === 'function') {
                     return function () {
                         let result;
-                        component.$xContext.zone.run(() => {
+                        component.zone.run(() => {
                             result = value.apply(this, arguments);
                         });
                         return result;
@@ -48,32 +34,28 @@ export let angular2 = {
             });
         }
 
-        const bindingMetadata = getBindingMetadata();
-
         const Angular2Component = 
             Component({
                 selector: xcomponent.tag,
                 template: `
                     <div></div>
                 `,
-                inputs: bindingMetadata.inputs
+                inputs: ['props']
             })
             .Class({
                 constructor: [ElementRef, NgZone, function(elementRef, zone) { 
-                    this.$xContext = {
-                        elementRef,
-                        zone
-                    };
+                    this.elementRef = elementRef;
+                    this.zone = zone;
                 }],
                 ngOnInit: function () {
-                    const targetElement = this.$xContext.elementRef.nativeElement;
+                    const targetElement = this.elementRef.nativeElement;
                     const parent = xcomponent.init(getProps(this), null, targetElement);
                     parent.render(targetElement);
-                    this.$xContext.parent = parent;
+                    this.parent = parent;
                 },
                 ngOnChanges: function() {
-                    if (this.$xContext.parent) {
-                        this.$xContext.parent.updateProps(getProps(this));
+                    if (this.parent) {
+                        this.parent.updateProps(getProps(this));
                     }
                 }
             });

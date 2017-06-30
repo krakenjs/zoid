@@ -19,9 +19,8 @@
     <my-app>Loading...</my-app>
     <script>
 
-        // component
-        (function(app) {
-            app.AppComponent =
+        (function() {
+            const appComponent =
                 ng.core.Component({
                 selector: 'my-app',
                 template: `
@@ -46,31 +45,24 @@
                         };
                     }
             });
-        })(window.app || (window.app = {}));
 
-        
-        // module
-        (function (app) {
-            app.AppModule = ng.core.NgModule({
+            const appModule = ng.core.NgModule({
                 imports: [ng.platformBrowser.BrowserModule,
                     MyLoginXComponent.driverResults.angular2.module],
-                declarations: [app.AppComponent],
-                bootstrap: [app.AppComponent]
+                declarations: [appComponent],
+                bootstrap: [appComponent]
             })
             .Class({
                 constructor: function () { }
             });
-        })(window.app || (window.app = {}));
-        
 
-        // bootstrap
-        (function(app) {
             document.addEventListener('DOMContentLoaded', function() {
                 ng.platformBrowserDynamic
                     .platformBrowserDynamic()
-                    .bootstrapModule(app.AppModule);
+                    .bootstrapModule(appModule);
             });
-        })(window.app || (window.app = {}));
+
+        })();
 
     </script>
 
