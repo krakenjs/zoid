@@ -16,11 +16,7 @@ export let angular2 = {
             return replaceObject(component.props, (value, key, fullKey) => {
                 if (typeof value === 'function') {
                     return function () {
-                        let result;
-                        component.zone.run(() => {
-                            result = value.apply(this, arguments);
-                        });
-                        return result;
+                        return component.zone.run(() => value.apply(this, arguments));
                     };
                 }
             });
