@@ -27,7 +27,7 @@
                         <div>
                             <h3>Log in on xyz.com</h3>
                             <div id="container">
-                                <my-login-component [props]="props"></my-login-component>
+                                <my-login-component [props]="{ onLogin: onLogin, prefilledEmail: prefilledEmail }"></my-login-component>
                             </div>
                             <div id="result" *ngIf="email">User logged in with email: {{email}}</div>
                         </div>
@@ -35,14 +35,11 @@
                 })
                 .Class({
                     constructor: function() {
-                        const component = this;
-                        this.props = {
-                            prefilledEmail: 'foo@bar.com',
-                            onLogin : function (email){
-                                console.log('User logged in with email:', email);
-                                component.email = email;
-                            },
-                        };
+                        this.prefilledEmail = 'foo@bar.com';
+                        this.onLogin = (function (email){
+                            console.log('User logged in with email:', email);
+                            this.email = email;
+                        }).bind(this);
                     }
             });
 
