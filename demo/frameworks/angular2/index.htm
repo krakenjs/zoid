@@ -20,6 +20,9 @@
     <script>
 
         (function() {
+            
+            const MyLoginXComponentModule = MyLoginXComponent.driver('angular2', ng.core);
+
             const appComponent =
                 ng.core.Component({
                 selector: 'my-app',
@@ -44,8 +47,7 @@
             });
 
             const appModule = ng.core.NgModule({
-                imports: [ng.platformBrowser.BrowserModule,
-                    MyLoginXComponent.driverResults.angular2.module],
+                imports: [ng.platformBrowser.BrowserModule, MyLoginXComponentModule],
                 declarations: [appComponent],
                 bootstrap: [appComponent]
             })
