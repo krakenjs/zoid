@@ -1,6 +1,6 @@
 
 import { isWindowClosed } from 'cross-domain-utils/src';
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 
 import { once, noop, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
@@ -49,7 +49,7 @@ export function getElement(id) {
 }
 
 
-export let documentReady = new Promise(resolve => {
+export let documentReady = new ZalgoPromise(resolve => {
 
     if (window.document.readyState === 'complete') {
         return resolve(window.document);
@@ -68,7 +68,7 @@ export function isDocumentReady() {
 }
 
 export function elementReady(id) {
-    return new Promise((resolve, reject) => {
+    return new ZalgoPromise((resolve, reject) => {
 
         let el = getElement(id);
 
@@ -401,7 +401,7 @@ export function extendUrl(url, options = {}) {
 
 
 export function elementStoppedMoving(element, timeout = 5000) {
-    return new Promise((resolve, reject) => {
+    return new ZalgoPromise((resolve, reject) => {
         element = getElement(element);
 
         let start = element.getBoundingClientRect();
@@ -466,7 +466,7 @@ export function getCurrentDimensions(el) {
 }
 
 export function changeStyle(el, styles) {
-    return new Promise(resolve => {
+    return new ZalgoPromise(resolve => {
 
         for (let key of Object.keys(styles)) {
             el.style[key] = styles[key];
@@ -526,7 +526,7 @@ export function trackDimensions(el, { width = true, height = true, threshold = 0
 
 export function onDimensionsChange(el, { width = true, height = true, delay = 50, threshold = 0 }) {
 
-    return new Promise(resolve => {
+    return new ZalgoPromise(resolve => {
 
         let tracker = trackDimensions(el, { width, height, threshold });
 
@@ -651,7 +651,7 @@ const ANIMATION_START_EVENTS = [ 'animationstart', 'webkitAnimationStart', 'oAni
 const ANIMATION_END_EVENTS   = [ 'animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd' ];
 
 export function animate(element, name, clean, timeout = 1000) {
-    return new Promise((resolve, reject) => {
+    return new ZalgoPromise((resolve, reject) => {
 
         element = getElement(element);
 

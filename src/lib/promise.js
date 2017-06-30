@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 
 
 /*  DeNodeify
@@ -16,10 +16,10 @@ export function denodeify(method) {
         let args = Array.prototype.slice.call(arguments);
 
         if (args.length >= method.length) {
-            return Promise.resolve(method.apply(self, args));
+            return ZalgoPromise.resolve(method.apply(self, args));
         }
 
-        return new Promise((resolve, reject) => {
+        return new ZalgoPromise((resolve, reject) => {
             args.push((err, result) => {
 
                 if (err && !(err instanceof Error)) {
@@ -34,7 +34,7 @@ export function denodeify(method) {
 }
 
 export function promisify(method) {
-    let prom = Promise.resolve();
+    let prom = ZalgoPromise.resolve();
 
     return function() {
         return prom.then(() => {
@@ -46,7 +46,7 @@ export function promisify(method) {
 export function getter(method, { name = 'property', timeout = 10000 } = {}) {
 
     return function() {
-        return new Promise((resolve, reject) => {
+        return new ZalgoPromise((resolve, reject) => {
             let result = method.call(this, resolve, reject);
 
             if (result && typeof result.then === 'function') {
@@ -65,11 +65,11 @@ export function getter(method, { name = 'property', timeout = 10000 } = {}) {
 }
 
 export function delay(time = 1) {
-    return new Promise(resolve => {
+    return new ZalgoPromise(resolve => {
         setTimeout(resolve, time);
     });
 }
 
 export function cycle(method) {
-    return Promise.try(method).then(() => cycle(method));
+    return ZalgoPromise.try(method).then(() => cycle(method));
 }

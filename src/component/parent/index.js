@@ -2,7 +2,7 @@
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed  } from 'cross-domain-utils/src';
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
@@ -39,9 +39,12 @@ export class ParentComponent extends BaseComponent {
 
     constructor(component, context, options = {}) {
         super(component, options);
-        validate(component, options);
 
         this.component = component;
+
+        validate(component, options);
+        this.validateParentDomain();
+
         this.context = context;
         this.setProps(options.props || {});
 
@@ -57,10 +60,10 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`construct_parent`);
 
-        this.onInit = new Promise();
+        this.onInit = new ZalgoPromise();
 
         this.clean.register(() => {
-            this.onInit = new Promise();
+            this.onInit = new ZalgoPromise();
         });
 
         this.onInit.catch(err => {
@@ -74,20 +77,13 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
 
-            let tasks = {
-                onRender: this.props.onRender(),
-                getDomain: this.getDomain()
-            };
+            let tasks = {};
 
-            tasks.validateRenderAllowed = tasks.getDomain.then(domain => {
-                if (!matchDomain(this.component.allowedParentDomains, domain)) {
-                    const error = new RenderError(`Can not be rendered by domain: ${domain}`);
-                    this.error(error);
-                    return Promise.reject(error);
-                }
-            });
+            tasks.onRender = this.props.onRender();
 
-            tasks.elementReady = Promise.try(() => {
+            tasks.getDomain = this.getDomain();
+
+            tasks.elementReady = ZalgoPromise.try(() => {
                 if (element) {
                     return this.elementReady(element);
                 }
@@ -97,13 +93,11 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            tasks.open = tasks.validateRenderAllowed.then(() => { 
-                return this.driver.openOnClick
-                    ? this.open(element, this.context)
-                    : tasks.openContainer.then(() => {
-                        return this.open(element, this.context);
-                    });
-            });
+            tasks.open = this.driver.openOnClick
+                ? this.open(element, this.context)
+                : tasks.openContainer.then(() => {
+                    return this.open(element, this.context);
+                });
 
             tasks.openBridge = tasks.open.then(() => {
                 return this.openBridge(this.context);
@@ -121,13 +115,13 @@ export class ParentComponent extends BaseComponent {
                 return this.showComponent();
             });
 
-            tasks.linkDomain = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 if (bridge) {
                     return bridge.linkUrl(this.window, domain);
                 }
             });
 
-            tasks.listen = Promise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 this.listen(this.window, domain);
             });
 
@@ -138,7 +132,14 @@ export class ParentComponent extends BaseComponent {
             if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
-                tasks.loadUrl = Promise.all([ tasks.buildUrl, tasks.linkDomain, tasks.listen, tasks.openBridge, tasks.createComponentTemplate ]).then(([ url ]) => {
+                tasks.loadUrl = ZalgoPromise.all([
+                    tasks.buildUrl,
+                    tasks.validateParentDomain,
+                    tasks.linkDomain,
+                    tasks.listen,
+                    tasks.openBridge,
+                    tasks.createComponentTemplate
+                ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
 
@@ -147,11 +148,18 @@ export class ParentComponent extends BaseComponent {
                 });
             }
 
-            return Promise.hash(tasks);
+            return ZalgoPromise.hash(tasks);
 
         }).then(() => {
             return this.props.onEnter();
         });
+    }
+
+    validateParentDomain() {
+        let domain = getDomain();
+        if (!matchDomain(this.component.allowedParentDomains, domain)) {
+            throw new RenderError(`Can not be rendered by domain: ${domain}`);
+        }
     }
 
     renderTo(win, element) {
@@ -295,6 +303,9 @@ export class ParentComponent extends BaseComponent {
         this.props = this.props || {};
         props.version = this.component.version;
         validateProps(this.component, props, required);
+        if (this.component.validate) {
+            this.component.validate(this.component, props);
+        }
         extend(this.props, normalizeProps(this.component, this, props));
     }
 
@@ -308,7 +319,7 @@ export class ParentComponent extends BaseComponent {
 
     buildUrl() {
 
-        return Promise.hash({
+        return ZalgoPromise.hash({
             url:   this.props.url,
             query: propsToQuery(this.component.props, this.props)
 
@@ -320,7 +331,7 @@ export class ParentComponent extends BaseComponent {
                 return url;
             }
 
-            return Promise.try(() => {
+            return ZalgoPromise.try(() => {
 
                 return url || this.component.getUrl(this.props.env, this.props);
 
@@ -336,7 +347,7 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     getDomain() {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
             return this.props.url;
 
         }).then(url => {
@@ -348,7 +359,7 @@ export class ParentComponent extends BaseComponent {
             }
 
             if (this.component.buildUrl) {
-                return Promise.try(() => this.component.buildUrl(this.props)).then(builtUrl => {
+                return ZalgoPromise.try(() => this.component.buildUrl(this.props)).then(builtUrl => {
                     return this.component.getDomain(builtUrl, this.props);
                 });
             }
@@ -551,7 +562,7 @@ export class ParentComponent extends BaseComponent {
                 this.onInit.reject(new Error(`Detected close during init`));
             }
 
-            return Promise.try(() => {
+            return ZalgoPromise.try(() => {
                 return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
             }).finally(() => {
                 return this.destroy();
@@ -776,7 +787,7 @@ export class ParentComponent extends BaseComponent {
 
     @memoized
     close(reason = CLOSE_REASONS.PARENT_CALL) {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
 
             this.component.log(`close`, { reason });
 
@@ -784,7 +795,7 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
-            return Promise.all([
+            return ZalgoPromise.all([
                 this.closeComponent(),
                 this.closeContainer()
             ]);
@@ -798,13 +809,13 @@ export class ParentComponent extends BaseComponent {
 
     @memoized
     closeContainer(reason = CLOSE_REASONS.PARENT_CALL) {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
 
             return this.props.onClose(reason);
 
         }).then(() => {
 
-            return Promise.all([
+            return ZalgoPromise.all([
                 this.closeComponent(reason),
                 this.hideContainer()
             ]);
@@ -832,7 +843,7 @@ export class ParentComponent extends BaseComponent {
 
         let win = this.window;
 
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
 
             return this.cancelContainerEvents();
 
@@ -879,7 +890,7 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     showComponent() {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
             if (this.props.onDisplay) {
                 return this.props.onDisplay();
             }
@@ -955,7 +966,7 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     createComponentTemplate() {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
 
             return this.getComponentTemplate();
 
@@ -965,7 +976,7 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
-            return Promise.try(() => {
+            return ZalgoPromise.try(() => {
                 return this.renderTemplate(componentTemplate);
 
             }).then(html => {
@@ -1145,7 +1156,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     destroy() {
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
             if (this.clean.hasTasks()) {
                 this.component.log(`destroy`);
                 $logger.flush();
@@ -1156,7 +1167,7 @@ export class ParentComponent extends BaseComponent {
 
 
     tryInit(method) {
-        return Promise.try(method).catch(err => {
+        return ZalgoPromise.try(method).catch(err => {
 
             this.onInit.reject(err);
             throw err;
@@ -1184,7 +1195,7 @@ export class ParentComponent extends BaseComponent {
 
         this.handledErrors.push(err);
 
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
             this.onInit.reject(err);
 
             return this.destroy();
@@ -1215,5 +1226,5 @@ export function destroyAll() {
         results.push(activeComponents[0].destroy());
     }
 
-    return Promise.all(results);
+    return ZalgoPromise.all(results);
 }

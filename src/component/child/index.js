@@ -3,7 +3,7 @@ import * as $logger from 'beaver-logger/client';
 import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise/src'; 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
@@ -349,7 +349,7 @@ export class ChildComponent extends BaseComponent {
 
         this.watchingForResize = true;
 
-        return Promise.try(() => {
+        return ZalgoPromise.try(() => {
 
             return documentReady;
 
@@ -393,7 +393,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     resize(width, height) {
-        return Promise.resolve().then(() => {
+        return ZalgoPromise.resolve().then(() => {
 
             this.component.log(`resize`, { width, height });
 
@@ -411,7 +411,7 @@ export class ChildComponent extends BaseComponent {
         let history = [];
 
         let resize = () => {
-            return Promise.try(() => {
+            return ZalgoPromise.try(() => {
 
                 let tracker = trackDimensions(el, { width, height });
                 let { dimensions } = tracker.check();
