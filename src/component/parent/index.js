@@ -1013,24 +1013,22 @@ export class ParentComponent extends BaseComponent {
 
     openContainerFrame(el) {
 
-        let frame = iframe(null, {
-            name: `__xcomponent_container_${uniqueID()}__`,
-            scrolling: 'no'
+        return iframe(null, {
+            attributes: {
+                name: `__xcomponent_container_${uniqueID()}__`,
+                scrolling: 'no'
+            },
+            style: {
+                display: 'block',
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                zIndex: '2147483647'
+            },
+            html: `<body></body>`
         }, el);
-
-        frame.style.display = 'block';
-        frame.style.position = 'fixed';
-        frame.style.top = '0';
-        frame.style.left = '0';
-        frame.style.width = '100%';
-        frame.style.height = '100%';
-        frame.style.zIndex = '2147483647';
-
-        frame.contentWindow.document.open();
-        frame.contentWindow.document.write(`<body></body>`);
-        frame.contentWindow.document.close();
-
-        return frame;
     }
 
     @memoized
