@@ -47,7 +47,10 @@ export class ChildComponent extends BaseComponent {
         this.setProps(this.getInitialProps(), getParentDomain());
 
         // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
-        setLogLevel(this.props.logLevel);
+
+        if (this.props.logLevel) {
+            setLogLevel(this.props.logLevel);
+        }
 
         this.component.log(`init_child`);
 
