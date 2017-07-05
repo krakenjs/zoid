@@ -9,9 +9,6 @@ import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { validate } from './validate';
 
-export { containerTemplate } from './templates/container';
-export { componentTemplate } from './templates/component';
-
 import * as drivers from '../../drivers';
 
 import { getDomainFromUrl, promise, info, error, warn, setLogLevel } from '../../lib';

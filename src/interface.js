@@ -7,7 +7,7 @@ export function create(options) {
 
 export { getCurrentScriptDir } from './lib';
 
-export { getByTag, destroyAll, componentTemplate, containerTemplate } from './component';
+export { getByTag, destroyAll } from './component';
 
 import * as _postRobot from 'post-robot/src';
 export let postRobot = _postRobot;
