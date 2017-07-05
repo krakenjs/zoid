@@ -1,6 +1,6 @@
 
 import { isWindowClosed } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { once, noop, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
@@ -18,7 +18,6 @@ function isElement(element) {
 
     return false;
 }
-
 
 /*  Get Element
     -----------
@@ -123,6 +122,20 @@ export function popup(url, options) {
 }
 
 
+export function writeToWindow(win, html) {
+    try {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+    } catch (err) {
+        try {
+            win.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
+        } catch (err2) {
+            // pass
+        }
+    }
+}
+
 
 /*  Iframe
     ------
@@ -154,6 +167,10 @@ export function iframe(url, options = {}, container) {
 
     if (container) {
         container.appendChild(frame);
+    }
+
+    if (options.html) {
+        writeToWindow(frame.contentWindow, options.html);
     }
 
     return frame;
@@ -767,20 +784,6 @@ export function addClass(element, name) {
     }
 }
 
-export function writeToWindow(win, html) {
-    try {
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-    } catch (err) {
-        try {
-            win.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
-        } catch (err2) {
-            // pass
-        }
-    }
-}
-
 export function getCurrentScriptDir() {
     console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
 
@@ -842,4 +845,39 @@ export function watchElementForClose(element, handler) {
             }
         }
     };
+}
+
+export function getHttpType(contentType, url) {
+    return new ZalgoPromise((resolve, reject) => {
+
+        let req = new window.XMLHttpRequest();
+
+        req.open('GET', url);
+        req.setRequestHeader('Accept', contentType);
+        req.send(null);
+
+        req.onload = () => {
+            resolve(req.responseText);
+        };
+
+        req.onerror = () => {
+            return reject(new Error(`prefetch failed`));
+        };
+    });
+}
+
+export function getHTML(url) {
+    return getHttpType('text/html', url);
+}
+
+export function getCSS(url) {
+    return getHttpType('text/css', url);
+}
+
+export function getScript(url) {
+    return getHttpType('*/*', url);
+}
+
+export function prefetchPage(url) {
+    return getHTML(url);
 }

@@ -57,6 +57,7 @@ export const internalProps = {
         required: false,
         noop: true,
         promisify: true,
+        memoize: true,
         sendToChild: false
     },
 

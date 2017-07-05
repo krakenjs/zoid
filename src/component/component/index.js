@@ -444,6 +444,36 @@ export class Component extends BaseComponent {
         return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
     }
 
+    prerender(props, element) {
+        let instance = new ParentComponent(this, this.getRenderContext(element), { props });
+        instance.prefetch();
+        return {
+            render(innerProps, innerElement) {
+                if (innerProps) {
+                    instance.updateProps(innerProps);
+                }
+
+                return instance.render(innerElement);
+            },
+
+            renderTo(win, innerProps, innerElement) {
+                if (innerProps) {
+                    instance.updateProps(innerProps);
+                }
+
+                return instance.renderTo(win, innerElement);
+            },
+
+            get html() {
+                return instance.html;
+            },
+
+            set html(value) {
+                instance.html = value;
+            }
+        };
+    }
+
 
     /*  Get By Tag
         ----------

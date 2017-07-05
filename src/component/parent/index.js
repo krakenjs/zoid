@@ -11,7 +11,7 @@ import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady,
          addClass, addEventToClass, extend, serializeFunctions, extendUrl,
          iframe, setOverflow, delay, elementStoppedMoving, getElement, memoized,
          promise, getDomain, global, writeToWindow, setLogLevel, once,
-         getElementName } from '../../lib';
+         getElementName, prefetchPage } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -107,13 +107,15 @@ export class ParentComponent extends BaseComponent {
                 return this.showContainer();
             });
 
-            tasks.createComponentTemplate = tasks.open.then(() => {
-                return this.createComponentTemplate();
-            });
+            if (!this.html) {
+                tasks.createComponentTemplate = tasks.open.then(() => {
+                    return this.createComponentTemplate();
+                });
 
-            tasks.showComponent = tasks.createComponentTemplate.then(() => {
-                return this.showComponent();
-            });
+                tasks.showComponent = tasks.createComponentTemplate.then(() => {
+                    return this.showComponent();
+                });
+            }
 
             tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 if (bridge) {
@@ -129,14 +131,19 @@ export class ParentComponent extends BaseComponent {
                 return this.watchForClose();
             });
 
-            if (loadUrl) {
+            if (this.html) {
+                tasks.loadHTML = tasks.open.then(() => {
+                    return this.loadHTML();
+                });
+
+            } else if (loadUrl) {
                 tasks.buildUrl = this.buildUrl();
 
                 tasks.loadUrl = ZalgoPromise.all([
                     tasks.buildUrl,
-                    tasks.validateParentDomain,
                     tasks.linkDomain,
                     tasks.listen,
+                    tasks.open,
                     tasks.openBridge,
                     tasks.createComponentTemplate
                 ]).then(([ url ]) => {
@@ -182,6 +189,38 @@ export class ParentComponent extends BaseComponent {
             this.delegate(win, this.context);
 
             return this.render(element, this.context);
+        });
+    }
+
+    @memoized
+    @promise
+    prefetch() {
+        this.html = this.buildUrl().then(url => {
+            return prefetchPage(url).then(html => {
+
+                let host = `${url.split('/').slice(0, 3).join('/')}`;
+                let uri = `/${url.split('/').slice(3).join('/')}`;
+
+                return `
+                    <base href="${host}">
+
+                    ${html}
+
+                    <script>
+                        if (window.history && window.history.pushState) {
+                            window.history.pushState({}, '', '${uri}');
+                        }
+                    </script>
+                `;
+            });
+        });
+    }
+
+    @memoized
+    @promise
+    loadHTML() {
+        return this.html.then(html => {
+            return writeToWindow(this.window, html);
         });
     }
 
@@ -317,6 +356,8 @@ export class ParentComponent extends BaseComponent {
         itself based on whatever props the merchant provides.
     */
 
+    @memoized
+    @promise
     buildUrl() {
 
         return ZalgoPromise.hash({
@@ -879,12 +920,18 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     showContainer() {
-        if (this.container) {
-            addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
-            return delay().then(() => {
-                return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
-            });
-        }
+        return ZalgoPromise.try(() => {
+            if (this.props.onDisplay) {
+                return this.props.onDisplay();
+            }
+        }).then(() => {
+            if (this.container) {
+                addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
+                return delay().then(() => {
+                    return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
+                });
+            }
+        });
     }
 
     @memoized
