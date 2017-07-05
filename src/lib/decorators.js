@@ -1,10 +1,10 @@
 
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 export function memoized(target, name, descriptor) {
     let method = descriptor.value;
 
-    descriptor.value = function() {
+    descriptor.value = function memoizedFunction() {
 
         this.__memoized__ = this.__memoized__ || {};
 
@@ -14,14 +14,16 @@ export function memoized(target, name, descriptor) {
 
         return this.__memoized__[name];
     };
+
+    descriptor.value.displayName = `${name}:memoized`;
 }
 
 export function promise(target, name, descriptor) {
     let method = descriptor.value;
 
-    descriptor.value = function() {
-        return ZalgoPromise.try(() => {
-            return method.apply(this, arguments);
-        });
+    descriptor.value = function promisifiedFunction() {
+        return ZalgoPromise.try(method, this, arguments);
     };
+
+    descriptor.value.displayName = `${name}:promisified`;
 }
