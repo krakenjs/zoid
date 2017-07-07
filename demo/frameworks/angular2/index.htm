@@ -1,0 +1,68 @@
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+    <link rel="stylesheet" href="../../common/index.css" />
+    <script src="https://npmcdn.com/core-js@2.4.1/client/shim.min.js"></script>
+    <script src="https://npmcdn.com/zone.js@0.8.12?main=browser"></script>
+    <script src="https://npmcdn.com/reflect-metadata@0.1.10"></script>
+    <script src="https://npmcdn.com/rxjs@5.4.1/bundles/Rx.min.js"></script>
+    <script src="https://npmcdn.com/@angular/core@4.2.3/bundles/core.umd.js"></script>
+    <script src="https://npmcdn.com/@angular/common@4.2.3/bundles/common.umd.js"></script>
+    <script src="https://npmcdn.com/@angular/compiler@4.2.3/bundles/compiler.umd.js"></script>
+    <script src="https://npmcdn.com/@angular/platform-browser@4.2.3/bundles/platform-browser.umd.js"></script>
+    <script src="https://npmcdn.com/@angular/platform-browser-dynamic@4.2.3/bundles/platform-browser-dynamic.umd.js"></script>
+    <script src="../../../dist/xcomponent.js"></script>
+    <script src="./login.js"></script>
+</head>
+
+<body>
+    <my-app>Loading...</my-app>
+    <script>
+
+        (function() {
+            
+            const MyLoginXComponentModule = MyLoginXComponent.driver('angular2', ng.core);
+
+            const appComponent =
+                ng.core.Component({
+                selector: 'my-app',
+                template: `
+                        <div>
+                            <h3>Log in on xyz.com</h3>
+                            <div id="container">
+                                <my-login-component [props]="{ onLogin: onLogin, prefilledEmail: prefilledEmail }"></my-login-component>
+                            </div>
+                            <div id="result" *ngIf="email">User logged in with email: {{email}}</div>
+                        </div>
+                    `,
+                })
+                .Class({
+                    constructor: function() {
+                        this.prefilledEmail = 'foo@bar.com';
+                        this.onLogin = (function (email){
+                            console.log('User logged in with email:', email);
+                            this.email = email;
+                        }).bind(this);
+                    }
+            });
+
+            const appModule = ng.core.NgModule({
+                imports: [ng.platformBrowser.BrowserModule, MyLoginXComponentModule],
+                declarations: [appComponent],
+                bootstrap: [appComponent]
+            })
+            .Class({
+                constructor: function () { }
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                ng.platformBrowserDynamic
+                    .platformBrowserDynamic()
+                    .bootstrapModule(appModule);
+            });
+
+        })();
+
+    </script>
+
+</body>
