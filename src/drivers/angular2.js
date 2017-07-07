@@ -25,9 +25,7 @@ export let angular2 = {
         const Angular2Component = 
             Component({
                 selector: xcomponent.tag,
-                template: `
-                    <div></div>
-                `,
+                template: '<div></div>',
                 inputs: ['props']
             })
             .Class({
