@@ -26,7 +26,9 @@ let NgCore = {
     ElementRef: {
         nativeElement: 'nativeElement value'
     },
-    NgZone: {}
+    NgZone: {
+        run: sinon.spy((func) => func())
+    }
 };
 
 const registerDriver = () => angular2.register(unInitializedXcomponent, NgCore);
@@ -53,27 +55,27 @@ describe('angular 2 driver', () => {
         assert.isFalse(angular2.global());
     });
 
-    it('should logs out initialization message', () => {
-        assert.isTrue(unInitializedXcomponent.log.calledWith('initializing angular2 component'));
+    it('should log out initialization message', () => {
+        sinon.assert.calledWith(unInitializedXcomponent.log, 'initializing angular2 component');
     });
 
-    it('should creat component with xcomponent tag', () => {
+    it('should create component with xcomponent tag', () => {
         sinon.assert.calledWithMatch(NgCore.Component, { selector: unInitializedXcomponent.tag });
     });
 
-    it('should creat component with empty div template', () => {
+    it('should create component with empty div template', () => {
         sinon.assert.calledWithMatch(NgCore.Component, { template: '<div></div>' });
     });
 
-    it('should creat component with props input', () => {
+    it('should create component with props input', () => {
         sinon.assert.calledWithMatch(NgCore.Component, { inputs: ['props'] });
     });
 
-    it('should creat module that declares the component', () => {
+    it('should create module that declares the component', () => {
         sinon.assert.calledWithMatch(NgCore.NgModule, { declarations: ['ng-component value'] });
     });
 
-    it('should creat module that exports the component', () => {
+    it('should create module that exports the component', () => {
         sinon.assert.calledWithMatch(NgCore.NgModule, { exports: ['ng-component value'] });
     });
 
@@ -86,7 +88,9 @@ describe('angular 2 driver', () => {
         beforeEach(() => {
             componentClass = componentClassSpy.lastCall.args[0];
         });
-        
+        afterEach(() => {
+            componentClass = undefined;
+        });
         describe('constructor', () => {
             it('receives elementRef as a DI token', () => {
                 assert.isTrue(componentClass.constructor[0] === NgCore.ElementRef);
@@ -128,6 +132,10 @@ describe('angular 2 driver', () => {
                     .bind(component)();
             });
 
+            afterEach(() => {
+                component = undefined;
+            });
+
             it('initilize xcomponent using provided props', () => {                
                 sinon.assert.calledWith(unInitializedXcomponent.init, component.props, null, 'nativeElement value');
             });
@@ -140,16 +148,51 @@ describe('angular 2 driver', () => {
                 assert.isTrue(component.parent === initializedXcomponent);
             });
 
+        });
+
+        describe('ngOnChanges', () => {
+            let component;
+            beforeEach(() => {
+                component =  { 
+                    props: {
+                        prefilledEmail: 'a@b.com'
+                    } 
+                };
+                componentClass.constructor[componentClass.constructor.length - 1]
+                    .bind(component)(NgCore.ElementRef, NgCore.NgZone);
+                componentClass.ngOnInit
+                    .bind(component)();
+            });
+
             afterEach(() => {
                 component = undefined;
             });
 
+            it('updates props in xcomponent', () => {                
+                component.props.prefilledEmail = 'b@b.com';
+                componentClass.ngOnChanges
+                    .bind(component)();
+                sinon.assert.calledWithMatch(initializedXcomponent.updateProps, { prefilledEmail : 'b@b.com' });
+            });
         });
 
-        // TBC: ngOnChanges
-        
-        afterEach(() => {
-            componentClass = undefined;
+        it('passed functions trigger change detection when called from xcomponent', () => {
+            let component;
+            component =  { 
+                props: {
+                    onLogin: (email) => {
+                        component.email = email;
+                    }
+                } 
+            };
+            componentClass.constructor[componentClass.constructor.length - 1]
+                .bind(component)(NgCore.ElementRef, NgCore.NgZone);
+            componentClass.ngOnInit
+                .bind(component)();
+            const propsPassedToXcomponent = unInitializedXcomponent.init.lastCall.args[0];
+            propsPassedToXcomponent.onLogin('c@b.com');
+            assert.isTrue(component.email === 'c@b.com');
+            sinon.assert.calledOnce(NgCore.NgZone.run);
         });
     });
 
