@@ -141,10 +141,12 @@ describe('angular 2 driver', () => {
             });
 
             afterEach(() => {
-                component = null;
+                component = undefined;
             });
 
         });
+
+        // TBC: ngOnChanges
         
         afterEach(() => {
             componentClass = undefined;
