@@ -1,19 +1,19 @@
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed  } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, getDistanceFromTop } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, createElement, uniqueID, elementReady,
+import { onCloseWindow, addEventListener, uniqueID, elementReady, writeElementToWindow,
          noop, showAndAnimate, animateAndHide, showElement, hideElement,
-         addClass, addEventToClass, extend, serializeFunctions, extendUrl,
-         iframe, setOverflow, delay, elementStoppedMoving, getElement, memoized,
+         addClass, extend, serializeFunctions, extendUrl, jsxDom,
+         setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
          promise, getDomain, global, writeToWindow, setLogLevel, once,
-         getElementName, prefetchPage } from '../../lib';
+         getElementName, prefetchPage, getDOMElement } from '../../lib';
 
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, EVENT_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
 import { validate, validateProps } from './validate';
 import { propsToQuery } from './props';
@@ -141,6 +141,7 @@ export class ParentComponent extends BaseComponent {
 
                 tasks.loadUrl = ZalgoPromise.all([
                     tasks.buildUrl,
+                    tasks.open,
                     tasks.linkDomain,
                     tasks.listen,
                     tasks.open,
@@ -162,6 +163,13 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
+    @memoized
+    getOutlet() {
+        this.outlet = document.createElement('div');
+        addClass(this.outlet, CLASS_NAMES.OUTLET);
+        return this.outlet;
+    }
+
     validateParentDomain() {
         let domain = getDomain();
         if (!matchDomain(this.component.allowedParentDomains, domain)) {
@@ -174,6 +182,10 @@ export class ParentComponent extends BaseComponent {
 
             if (win === window) {
                 return this.render(element);
+            }
+
+            if (!isSameTopWindow(window, win)) {
+                throw new Error(`Can only renderTo an adjacent frame`);
             }
 
             if (element && typeof element !== 'string') {
@@ -256,60 +268,62 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    renderedIntoSandboxFrame() {
 
-        if (!this.driver.renderedIntoContainerTemplate) {
-            return false;
+    getComponentParentRef(renderToWindow = window) {
+
+        if (this.context === CONTEXT_TYPES.POPUP) {
+            return { ref: WINDOW_REFERENCES.OPENER };
         }
 
-        if (!this.component.sandboxContainer) {
-            return false;
+        if (renderToWindow === window) {
+
+            if (isTop(window)) {
+                return { ref: WINDOW_REFERENCES.TOP };
+            }
+
+            return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
         }
 
-        if (this.component.containerTemplate) {
-            return true;
-        }
+        let uid = uniqueID();
+        global.windows[uid] = window;
 
-        return false;
+        return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
+    getRenderParentRef(renderToWindow = window) {
+
+        if (renderToWindow === window) {
+            return this.getComponentParentRef(renderToWindow);
+        }
+
+        let uid = uniqueID();
+        global.windows[uid] = renderToWindow;
+
+        return { ref: WINDOW_REFERENCES.GLOBAL, uid };
+    }
 
     buildChildWindowName({ renderTo = window } = {}) {
 
-        let sameWindow = (renderTo === window);
         let sameDomain = isSameDomain(renderTo);
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
         let sProps = serializeFunctions(this.getPropsForChild());
 
-        let defaultParent = this.renderedIntoSandboxFrame()
-            ? WINDOW_REFERENCES.PARENT_PARENT
-            : WINDOW_REFERENCES.DIRECT_PARENT;
-
-        let parent = sameWindow
-            ? defaultParent
-            : window.name;
-
-        let renderParent = sameWindow
-            ? defaultParent
-            : WINDOW_REFERENCES.PARENT_UID;
+        let componentParent = this.getComponentParentRef(renderTo);
+        let renderParent    = this.getRenderParentRef(renderTo);
 
         let secureProps = !sameDomain;
 
         let props = secureProps
-            ? { type: INITIAL_PROPS.UID }
+            ? { type: INITIAL_PROPS.UID, uid }
             : { type: INITIAL_PROPS.RAW, value: sProps };
 
         if (props.type === INITIAL_PROPS.UID) {
             global.props[uid] = sProps;
         }
 
-        if (renderParent === WINDOW_REFERENCES.PARENT_UID) {
-            global.windows[uid] = renderTo;
-        }
-
-        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, parent, renderParent, props });
+        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props });
     }
 
 
@@ -485,7 +499,7 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`open_${this.context}`, { element: getElementName(element), windowName: this.childWindowName });
 
-        this.driver.open.call(this, element);
+        return this.driver.open.call(this, element);
     }
 
     get driver() {
@@ -507,6 +521,21 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`delegate_${this.context}`);
 
+        let props = {
+            uid:        this.props.uid,
+            dimensions: this.props.dimensions,
+            onClose:    this.props.onClose,
+            onDisplay:  this.props.onDisplay
+        };
+
+        for (let propName of Object.keys(this.component.props)) {
+            let prop = this.component.props[propName];
+
+            if (prop.allowDelegate) {
+                props[propName] = this.props[propName];
+            }
+        }
+
         let delegate = send(win, `${POST_MESSAGE.DELEGATE}_${this.component.name}`, {
 
             context: this.context,
@@ -518,19 +547,15 @@ export class ParentComponent extends BaseComponent {
 
                 childWindowName: this.childWindowName,
 
-                props: {
-                    uid:        this.props.uid,
-                    dimensions: this.props.dimensions,
-                    onClose:    this.props.onClose,
-                    onDisplay:  this.props.onDisplay
-                },
+                props,
 
                 overrides: {
                     focus:                () => this.focus(),
                     userClose:            () => this.userClose(),
                     getDomain:            () => this.getDomain(),
-                    getContainerTemplate: () => this.getContainerTemplate(),
-                    getComponentTemplate: () => this.getComponentTemplate()
+
+                    error: (err) => this.error(err),
+                    on: (eventName, handler) => this.on(eventName, handler)
                 }
             }
 
@@ -793,10 +818,6 @@ export class ParentComponent extends BaseComponent {
             hideElement(this.container);
         }
 
-        if (this.containerFrame) {
-            hideElement(this.containerFrame);
-        }
-
         return this.driver.hide.call(this);
     }
 
@@ -804,10 +825,6 @@ export class ParentComponent extends BaseComponent {
 
         if (this.container) {
             showElement(this.container);
-        }
-
-        if (this.containerFrame) {
-            showElement(this.containerFrame);
         }
 
         return this.driver.show.call(this);
@@ -832,6 +849,7 @@ export class ParentComponent extends BaseComponent {
 
             this.component.log(`close`, { reason });
 
+            this.event.triggerOnce(EVENTS.CLOSE);
             return this.props.onClose(reason);
 
         }).then(() => {
@@ -852,6 +870,7 @@ export class ParentComponent extends BaseComponent {
     closeContainer(reason = CLOSE_REASONS.PARENT_CALL) {
         return ZalgoPromise.try(() => {
 
+            this.event.triggerOnce(EVENTS.CLOSE);
             return this.props.onClose(reason);
 
         }).then(() => {
@@ -890,6 +909,7 @@ export class ParentComponent extends BaseComponent {
 
         }).then(() => {
 
+            this.event.triggerOnce(EVENTS.CLOSE);
             return this.props.onClose(reason);
 
         }).then(() => {
@@ -926,10 +946,7 @@ export class ParentComponent extends BaseComponent {
             }
         }).then(() => {
             if (this.container) {
-                addClass(this.container, CLASS_NAMES.SHOW_CONTAINER);
-                return delay().then(() => {
-                    return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
-                });
+                return showAndAnimate(this.container, ANIMATION_NAMES.SHOW_CONTAINER, this.clean.register);
             }
         });
     }
@@ -943,10 +960,7 @@ export class ParentComponent extends BaseComponent {
             }
         }).then(() => {
             if (this.element) {
-                addClass(this.element, CLASS_NAMES.SHOW_COMPONENT);
-                return delay().then(() => {
-                    return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
-                });
+                return showAndAnimate(this.element, ANIMATION_NAMES.SHOW_COMPONENT, this.clean.register);
             }
         });
     }
@@ -955,10 +969,6 @@ export class ParentComponent extends BaseComponent {
     @promise
     hideContainer() {
         if (this.container) {
-
-            addClass(this.container, CLASS_NAMES.HIDE_CONTAINER);
-            addClass(this.container, CLASS_NAMES.LOADING);
-
             return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
         }
     }
@@ -966,13 +976,7 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     hideComponent() {
-
-        if (this.container) {
-            addClass(this.container, CLASS_NAMES.LOADING);
-        }
-
         if (this.element) {
-            addClass(this.element, CLASS_NAMES.HIDE_COMPONENT);
             return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
         }
     }
@@ -998,12 +1002,6 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    @promise
-    getComponentTemplate() {
-        return this.component.componentTemplate;
-    }
-
-
     /*  Create Component Template
         -------------------------
 
@@ -1013,31 +1011,19 @@ export class ParentComponent extends BaseComponent {
     @memoized
     @promise
     createComponentTemplate() {
-        return ZalgoPromise.try(() => {
 
-            return this.getComponentTemplate();
+        if (!this.component.componentTemplate) {
+            return;
+        }
 
-        }).then(componentTemplate => {
-
-            if (!componentTemplate) {
-                return;
-            }
-
-            return ZalgoPromise.try(() => {
-                return this.renderTemplate(componentTemplate);
-
-            }).then(html => {
-
-                let win = this.componentTemplateWindow || this.window;
-                writeToWindow(win, html);
-            });
+        let win = this.componentTemplateWindow || this.window;
+        let html = this.renderTemplate(this.component.componentTemplate, {
+            document: win.document
         });
-    }
 
+        let el = getDOMElement(html, win.document);
 
-    @promise
-    getContainerTemplate() {
-        return this.component.containerTemplate;
+        writeElementToWindow(win, el);
     }
 
 
@@ -1047,35 +1033,26 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the element
     */
 
-    @promise
     renderTemplate(renderer, options = {}) {
         return renderer({
-            id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`,
-            props: renderer.__xdomain__ ? null : this.props,
-            CLASS: CLASS_NAMES,
+            id:        `${CLASS_NAMES.XCOMPONENT}-${this.component.tag}-${this.props.uid}`,
+            props:     renderer.__xdomain__ ? null : this.props,
+            tag:       this.component.tag,
+            context:   this.context,
+            outlet:    this.getOutlet(),
+            CLASS:     CLASS_NAMES,
             ANIMATION: ANIMATION_NAMES,
+            CONTEXT:   CONTEXT_TYPES,
+            EVENT:     EVENTS,
+            actions: {
+                close: () => this.userClose(),
+                focus: () => this.focus()
+            },
+            on: (eventName, handler) => this.on(eventName, handler),
+            jsxDom,
+            document,
             ...options
         });
-    }
-
-    openContainerFrame(el) {
-
-        return iframe(null, {
-            attributes: {
-                name: `__xcomponent_container_${uniqueID()}__`,
-                scrolling: 'no'
-            },
-            style: {
-                display: 'block',
-                position: 'fixed',
-                top: '0',
-                left: '0',
-                width: '100%',
-                height: '100%',
-                zIndex: '2147483647'
-            },
-            html: `<body></body>`
-        }, el);
     }
 
     @memoized
@@ -1094,98 +1071,50 @@ export class ParentComponent extends BaseComponent {
             el = document.body;
         }
 
-        return this.getContainerTemplate().then(containerTemplate => {
-
-            if (!containerTemplate) {
-                if (this.driver.renderedIntoContainerTemplate) {
-                    throw new Error(`containerTemplate needed to render ${this.context}`);
-                }
-
-                return;
+        if (!this.component.containerTemplate) {
+            if (this.driver.renderedIntoContainerTemplate) {
+                throw new Error(`containerTemplate needed to render ${this.context}`);
             }
 
-            let containerWidth = el.offsetWidth;
-            let containerHeight = el.offsetHeight;
+            return;
+        }
 
-            return this.renderTemplate(containerTemplate, {
-                dimensions: {
-                    width: containerWidth,
-                    height: containerHeight
-                }
+        let containerWidth = el.offsetWidth;
+        let containerHeight = el.offsetHeight;
 
-            }).then(html => {
+        let html = this.renderTemplate(this.component.containerTemplate, {
+            dimensions: {
+                width: containerWidth,
+                height: containerHeight
+            }
+        });
 
-                if (this.component.sandboxContainer) {
-                    this.containerFrame = this.openContainerFrame(el);
-                    el = this.containerFrame.contentWindow.document.body;
-                }
+        this.container = getDOMElement(html);
+        hideElement(this.container);
+        appendChild(el, this.container);
 
-                this.container = createElement('div', {
+        if (this.driver.renderedIntoContainerTemplate) {
+            this.element = this.getOutlet();
 
-                    html,
+            let { width, height } = this.getInitialDimensions(el) || {};
+            if (width || height) {
+                this.resize(width, height, { waitForTransition: false });
+            }
 
-                    attributes: {
-                        id: `${CLASS_NAMES.XCOMPONENT}-${this.props.uid}`
-                    },
+            if (!this.element) {
+                throw new Error('Could not find element to render component into');
+            }
 
-                    class: [
-                        CLASS_NAMES.XCOMPONENT,
-                        `${CLASS_NAMES.XCOMPONENT}-${this.component.tag}`,
-                        `${CLASS_NAMES.XCOMPONENT}-${this.context}`
-                    ]
-                });
+            hideElement(this.element);
+        }
 
-                hideElement(this.container);
+        this.clean.register('destroyContainerTemplate', () => {
 
-                el.appendChild(this.container);
+            if (this.container && this.container.parentNode) {
+                this.container.parentNode.removeChild(this.container);
+            }
 
-                if (this.driver.renderedIntoContainerTemplate) {
-                    this.element = this.container.getElementsByClassName(CLASS_NAMES.ELEMENT)[0];
-
-                    let { width, height } = this.getInitialDimensions(el) || {};
-                    if (width || height) {
-                        this.resize(width, height, { waitForTransition: false });
-                    }
-
-                    if (!this.element) {
-                        throw new Error('Could not find element to render component into');
-                    }
-
-                    hideElement(this.element);
-                }
-
-                let eventHandlers = [];
-
-                if (this.driver.focusable) {
-                    eventHandlers.push(addEventToClass(this.container, CLASS_NAMES.FOCUS, EVENT_NAMES.CLICK, event => this.focus()));
-                }
-
-                eventHandlers.push(addEventToClass(this.container, CLASS_NAMES.CLOSE, EVENT_NAMES.CLICK, event => this.userClose()));
-
-                this.clean.register('destroyContainerEvents', () => {
-                    for (let eventHandler of eventHandlers) {
-                        eventHandler.cancel();
-                    }
-                });
-
-                // let overflow = setOverflow(document.documentElement, 'hidden');
-
-                this.clean.register('destroyContainerTemplate', () => {
-
-                    if (this.containerFrame && this.containerFrame.parentNode) {
-                        this.containerFrame.parentNode.removeChild(this.containerFrame);
-                    }
-
-                    if (this.container && this.container.parentNode) {
-                        this.container.parentNode.removeChild(this.container);
-                    }
-
-                    delete this.containerFrame;
-                    delete this.container;
-
-                    // overflow.reset();
-                });
-            });
+            delete this.container;
         });
     }
 

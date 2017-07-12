@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { testComponent } from '../component';
 

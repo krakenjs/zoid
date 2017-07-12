@@ -8,6 +8,7 @@ import { internalProps } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { validate } from './validate';
+import { defaultContainerTemplate, defaultComponentTemplate } from './templates';
 
 import * as drivers from '../../drivers';
 
@@ -80,8 +81,6 @@ export class Component extends BaseComponent {
 
         this.addProp(options, 'buildUrl');
 
-        this.addProp(options, 'sandboxContainer', false);
-
         this.addProp(options, 'url');
         this.addProp(options, 'domain');
 
@@ -107,23 +106,8 @@ export class Component extends BaseComponent {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        this.addProp(options, 'containerTemplate', ({ id, CLASS }) => `
-            <style>
-                #${id} .${ CLASS.ELEMENT } {
-                    height: 150px;
-                    width: 300px;
-                }
-
-                #${id} .${ CLASS.ELEMENT } iframe {
-                    height: 100%;
-                    width: 100%;
-                }
-            </style>
-
-            <div class="${ CLASS.ELEMENT }"></div>
-        `);
-
-        this.addProp(options, 'componentTemplate');
+        this.addProp(options, 'containerTemplate', defaultContainerTemplate);
+        this.addProp(options, 'componentTemplate', defaultComponentTemplate);
 
         this.addProp(options, 'sacrificialComponentTemplate', false);
         this.addProp(options, 'validate');
@@ -227,13 +211,13 @@ export class Component extends BaseComponent {
 
     getDomain(url, props = {}) {
 
-        let domain = this.getValidDomain(url);
+        let domain = this.getForEnv(this.domain, props.env);
 
         if (domain) {
             return domain;
         }
 
-        domain = this.getForEnv(this.domain, props.env);
+        domain = this.getValidDomain(url);
 
         if (domain) {
             return domain;

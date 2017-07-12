@@ -18,7 +18,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
         module: {
             rules: [
                 {
-                    test: /\.js$/,
+                    test: /\.jsx?$/,
                     loader: 'babel-loader'
                 }
             ]
@@ -28,7 +28,8 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
                 'node_modules',
                 'src',
                 'client'
-            ]
+            ],
+            extensions: [ '.js', '.jsx' ]
         },
         output: {
             filename: filename,

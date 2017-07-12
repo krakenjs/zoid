@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
@@ -48,29 +48,17 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             }
         };
 
-        let frame = this.iframe = iframe(null, options, this.element);
-        this.window = frame.contentWindow;
-
-        let detectClose = () => {
-            return ZalgoPromise.try(() => {
-                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
-            }).finally(() => {
-                return this.destroy();
-            });
-        };
-
-        let iframeWatcher = watchElementForClose(this.iframe, detectClose);
-        let elementWatcher = watchElementForClose(this.element, detectClose);
-
-        frame.addEventListener('error', (err) => this.error(err));
-
-        hideElement(this.element);
+        let frame = this.iframe = iframe(options, this.element);
 
         let sacrificialIframe;
 
         if (this.component.sacrificialComponentTemplate) {
-            sacrificialIframe = iframe(null, options, this.element);
-            this.componentTemplateWindow = sacrificialIframe.contentWindow;
+
+            sacrificialIframe = iframe({
+                ...options,
+                name: `__sacrificial__${ options.name }`
+            }, this.element);
+
             hideElement(frame);
 
             frame.addEventListener('load', () => {
@@ -82,23 +70,47 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             });
         }
 
-        this.clean.register('destroyWindow', () => {
+        return ZalgoPromise.all([
 
-            iframeWatcher.cancel();
-            elementWatcher.cancel();
+            frame.awaitWindow,
+            sacrificialIframe && sacrificialIframe.awaitWindow
 
-            cleanUpWindow(this.window);
+        ]).then(([ frameWindow, sacrificialFrameWindow ]) => {
 
-            delete this.window;
+            this.window = frameWindow;
+            this.componentTemplateWindow = sacrificialFrameWindow;
 
-            if (sacrificialIframe) {
-                destroyElement(sacrificialIframe);
-            }
+            let detectClose = () => {
+                return ZalgoPromise.try(() => {
+                    return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+                }).finally(() => {
+                    return this.destroy();
+                });
+            };
 
-            if (this.iframe) {
-                destroyElement(this.iframe);
-                delete this.iframe;
-            }
+            let iframeWatcher = watchElementForClose(this.iframe, detectClose);
+            let elementWatcher = watchElementForClose(this.element, detectClose);
+
+            hideElement(this.element);
+
+            this.clean.register('destroyWindow', () => {
+
+                iframeWatcher.cancel();
+                elementWatcher.cancel();
+
+                cleanUpWindow(this.window);
+
+                delete this.window;
+
+                if (sacrificialIframe) {
+                    destroyElement(sacrificialIframe);
+                }
+
+                if (this.iframe) {
+                    destroyElement(this.iframe);
+                    delete this.iframe;
+                }
+            });
         });
     },
 
@@ -123,6 +135,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
         renderTemplate:          DELEGATE.CALL_ORIGINAL,
         openContainerFrame:      DELEGATE.CALL_ORIGINAL,
+        getOutlet:               DELEGATE.CALL_ORIGINAL,
 
         open(original, override) {
             return function() {
@@ -245,7 +258,8 @@ if (__POPUP_SUPPORT__) {
             resize:                  DELEGATE.CALL_ORIGINAL,
             getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
             renderTemplate:          DELEGATE.CALL_ORIGINAL,
-            openContainerFrame:      DELEGATE.CALL_ORIGINAL
+            openContainerFrame:      DELEGATE.CALL_ORIGINAL,
+            getOutlet:               DELEGATE.CALL_ORIGINAL
         },
 
         loadUrl(url) {

@@ -1,5 +1,5 @@
 
-import { getAncestor, findFrameByName } from 'cross-domain-utils/src';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, isSameDomain, getAncestor } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
 import { memoize, uniqueID, getDomain } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';
@@ -72,7 +72,7 @@ export let getComponentMeta = memoize(() => {
     try {
         componentMeta = JSON.parse(base32.decode(encodedOptions.toUpperCase()));
     } catch (err) {
-        return;
+        throw new Error(`Can not decode component-meta`);
     }
 
     componentMeta.name = name;
@@ -90,6 +90,44 @@ export let isXComponentWindow = memoize(() => {
     return Boolean(getComponentMeta());
 });
 
+function getGlobal(win) {
+    if (isSameDomain(win)) {
+        return win[__XCOMPONENT__];
+    }
+}
+
+function getWindowByRef({ ref, uid, distance }) {
+
+    if (ref === WINDOW_REFERENCES.OPENER) {
+        return getOpener(window);
+    }
+
+    if (ref === WINDOW_REFERENCES.TOP) {
+        return getTop(window);
+    }
+
+    if (ref === WINDOW_REFERENCES.PARENT) {
+
+        if (distance) {
+            return getNthParentFromTop(window, distance);
+        }
+
+        return getParent(window);
+    }
+
+    if (ref === WINDOW_REFERENCES.GLOBAL) {
+        for (let frame of getAllFramesInWindow(getAncestor(window))) {
+            let global = getGlobal(frame);
+
+            if (global && global.windows && global.windows[uid]) {
+                return global.windows[uid];
+            }
+        }
+    }
+
+    throw new Error(`Unable to find window by ref`);
+}
+
 /*  Get Parent Component Window
     ---------------------------
 
@@ -104,32 +142,7 @@ export let getParentComponentWindow = memoize(() => {
         throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
-    let parentWindow = getAncestor(window);
-
-    if (!parentWindow) {
-        throw new Error(`Can not find parent window`);
-    }
-
-    if (componentMeta.parent === WINDOW_REFERENCES.DIRECT_PARENT) {
-        return parentWindow;
-
-    } else if (componentMeta.parent === WINDOW_REFERENCES.PARENT_PARENT) {
-        parentWindow = getAncestor(parentWindow);
-
-        if (!parentWindow) {
-            throw new Error(`Can not find parent component window`);
-        }
-
-        return parentWindow;
-    }
-
-    let parentFrame = findFrameByName(parentWindow, componentMeta.parent);
-
-    if (!parentFrame) {
-        throw new Error(`Can not find frame with name: ${componentMeta.parent}`);
-    }
-
-    return parentFrame;
+    return getWindowByRef(componentMeta.componentParent);
 });
 
 
@@ -141,36 +154,7 @@ export let getParentRenderWindow = memoize(() => {
         throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
     }
 
-    let parentWindow = getAncestor(window);
-
-    if (!parentWindow) {
-        throw new Error(`Can not find parent window`);
-    }
-
-    if (componentMeta.renderParent === WINDOW_REFERENCES.DIRECT_PARENT) {
-        return parentWindow;
-
-    } else if (componentMeta.renderParent === WINDOW_REFERENCES.PARENT_PARENT) {
-        parentWindow = getAncestor(parentWindow);
-
-        if (!parentWindow) {
-            throw new Error(`Can not find parent render window`);
-        }
-
-        return parentWindow;
-
-    } else if (componentMeta.renderParent === WINDOW_REFERENCES.PARENT_UID) {
-
-        parentWindow = getParentComponentWindow()[__XCOMPONENT__].windows[componentMeta.uid];
-
-        if (!parentWindow) {
-            throw new Error(`Can not find parent render window`);
-        }
-
-        return parentWindow;
-    }
-
-    throw new Error(`Unrecognized renderParent reference: ${componentMeta.renderParent}`);
+    return getWindowByRef(componentMeta.renderParent);
 });
 
 

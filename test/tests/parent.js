@@ -128,7 +128,7 @@ describe('xcomponent render to parent', () => {
 
         testComponent.renderIframe({
             childEntered() {
-                document.querySelector('.xcomponent-test-component2 .xcomponent-close').click();
+                document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close').click();
             },
 
             foo: () => done(),
@@ -160,7 +160,7 @@ describe('xcomponent render to parent', () => {
         testComponent.renderIframe({
 
             childEntered() {
-                document.querySelector('.xcomponent-test-component2 .xcomponent-close').click();
+                document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close').click();
             },
 
             foo: () => done(),
@@ -189,7 +189,7 @@ describe('xcomponent render to parent', () => {
         testComponent.renderIframe({
 
             childEntered() {
-                document.querySelector('.xcomponent-test-component2 .xcomponent-focus').click();
+                document.querySelector('.xcomponent-tag-test-component2').click();
             },
 
             foo: () => done(),

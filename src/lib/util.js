@@ -304,3 +304,121 @@ export function getObjectID(obj) {
 
     return uid;
 }
+
+export function regex(pattern, string, start = 0) {
+
+    if (typeof pattern === 'string') {
+        pattern = new RegExp(pattern);
+    }
+
+    let result = string.slice(start).match(pattern);
+
+    if (!result) {
+        return;
+    }
+
+    return {
+        text: result[0],
+        groups: result.slice(1),
+        start: start + result.index,
+        end: start + result.index + result[0].length,
+        length: result[0].length,
+
+        replace(text) {
+            return `${ result[0].slice(0, start + result.index) }${ text }${ result[0].slice(result.index + result[0].length) }`;
+        }
+    };
+}
+
+export function regexAll(pattern, string) {
+
+    let matches = [];
+    let start = 0;
+
+    while (true) {
+        let match = regex(pattern, string, start);
+
+        if (!match) {
+            return matches;
+        }
+
+        matches.push(match);
+        start = match.end;
+    }
+}
+
+export function count(str, substr) {
+
+    let startIndex = 0;
+    let itemCount = 0;
+
+    while (true) {
+        let index = str.indexOf(substr, startIndex);
+
+        if (index === -1) {
+            return itemCount;
+        }
+
+        startIndex = index;
+        itemCount += 1;
+    }
+}
+
+export function eventEmitter() {
+
+    let triggered = {};
+    let handlers = {};
+
+    return {
+
+        on(eventName, handler) {
+
+            let handlerList = handlers[eventName] = handlers[eventName] || [];
+
+            handlerList.push(handler);
+
+            let cancelled = false;
+
+            return {
+                cancel() {
+                    if (!cancelled) {
+                        cancelled = true;
+                        handlerList.splice(handlerList.indexOf(handler), 1);
+                    }
+
+                }
+            };
+        },
+
+        once(eventName, handler) {
+
+            let listener = this.on(eventName, () => {
+                listener.cancel();
+                handler();
+            });
+
+            return listener;
+        },
+
+        trigger(eventName) {
+
+            let handlerList = handlers[eventName];
+
+            if (handlerList) {
+                for (let handler of handlerList) {
+                    handler();
+                }
+            }
+        },
+
+        triggerOnce(eventName) {
+
+            if (triggered[eventName]) {
+                return;
+            }
+
+            triggered[eventName] = true;
+            this.trigger(eventName);
+        }
+    };
+}

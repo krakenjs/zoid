@@ -2,7 +2,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 
-import { once, copyProp } from '../lib';
+import { once, copyProp, eventEmitter } from '../lib';
 
 
 function cleanup(obj) {
@@ -27,13 +27,13 @@ function cleanup(obj) {
 
         register(name, method) {
 
-            if (cleaned) {
-                return method();
-            }
-
             if (!method) {
                 method = name;
                 name = undefined;
+            }
+
+            if (cleaned) {
+                return method();
             }
 
             tasks.push({
@@ -101,12 +101,16 @@ export class BaseComponent {
 
     constructor() {
         this.clean = cleanup(this);
+        this.event = eventEmitter();
     }
 
     addProp(options, name, def) {
         copyProp(options, this, name, def);
     }
 
+    on(eventName, handler) {
+        return this.event.on(eventName, handler);
+    }
 
     /*  Try Catch
         ---------

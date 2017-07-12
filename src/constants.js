@@ -32,9 +32,10 @@ export const INITIAL_PROPS = {
 };
 
 export const WINDOW_REFERENCES = {
-    DIRECT_PARENT: `__direct_parent__`,
-    PARENT_PARENT: `__parent_parent__`,
-    PARENT_UID:    `__parent_uid__`
+    OPENER: `opener`,
+    TOP:    `top`,
+    PARENT: `parent`,
+    GLOBAL: `global`
 };
 
 export const PROP_TYPES_LIST = values(PROP_TYPES);
@@ -46,18 +47,15 @@ export const CONTEXT_TYPES = {
 
 export const CLASS_NAMES = {
     XCOMPONENT: `${XCOMPONENT}`,
-    COMPONENT:  `${XCOMPONENT}-component`,
-    CLOSE:      `${XCOMPONENT}-close`,
-    FOCUS:      `${XCOMPONENT}-focus`,
-    ELEMENT:    `${XCOMPONENT}-element`,
-    IFRAME:     `${XCOMPONENT}-iframe`,
-    POPUP:      `${XCOMPONENT}-popup`,
-    LOADING:    `${XCOMPONENT}-loading`,
+    OUTLET:     `${XCOMPONENT}-outlet`
+};
 
-    SHOW_CONTAINER: `${XCOMPONENT}-show-container`,
-    SHOW_COMPONENT: `${XCOMPONENT}-show-component`,
-    HIDE_CONTAINER: `${XCOMPONENT}-hide-container`,
-    HIDE_COMPONENT: `${XCOMPONENT}-hide-component`
+export const EVENTS = {
+    CLOSE: `${XCOMPONENT}-close`
+};
+
+export const ATTRIBUTES = {
+    IFRAME_PLACEHOLDER: `data-xcomponent-${XCOMPONENT}-placeholder`
 };
 
 export const ANIMATION_NAMES = {

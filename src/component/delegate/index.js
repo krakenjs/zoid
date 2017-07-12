@@ -23,11 +23,19 @@ export class DelegateComponent extends BaseComponent {
             onDisplay:  options.props.onDisplay
         };
 
+        for (let propName of Object.keys(this.component.props)) {
+            let prop = this.component.props[propName];
+
+            if (prop.allowDelegate) {
+                this.props[propName] = options.props[propName];
+            }
+        }
+
         this.focus     = options.overrides.focus;
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;
-        this.getContainerTemplate = options.overrides.getContainerTemplate;
-        this.getComponentTemplate = options.overrides.getComponentTemplate;
+        this.error     = options.overrides.error;
+        this.on        = options.overrides.on;
 
         let delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
 

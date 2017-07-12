@@ -53,17 +53,18 @@ module.exports = function(config) {
                 modules: [
                     __dirname,
                     'node_modules'
-                ]
+                ],
+                extensions: [ '.js', '.jsx' ]
             },
 
             module: {
                 rules: [
                     {
-                        test: /\.js$/,
+                        test: /\.jsx?$/,
                         exclude: /(dist)/,
                         loader: 'babel-loader',
                         query: {
-                            presets: [ [ 'es2015', { modules: false } ] ],
+                            presets: [ [ 'es2015', { modules: false } ], 'react' ],
                             plugins: [
                                 'transform-flow-strip-types',
                                 'transform-object-rest-spread',
@@ -72,6 +73,7 @@ module.exports = function(config) {
                                 'transform-es3-member-expression-literals',
                                 ['transform-es2015-for-of', {loose: true}],
                                 'transform-decorators-legacy',
+                                [ "babel-plugin-transform-react-jsx", { "pragma": "jsxDom" } ],
                                 [ '__coverage__', { only: `${__dirname}/src` } ]
                             ]
                         }

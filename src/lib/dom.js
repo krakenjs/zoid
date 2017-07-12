@@ -6,6 +6,10 @@ import { once, noop, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 import { PopupOpenError } from '../error';
 
+export function appendChild(container, child) {
+    container.appendChild(child);
+}
+
 function isElement(element) {
 
     if (element instanceof window.Element) {
@@ -17,6 +21,10 @@ function isElement(element) {
     }
 
     return false;
+}
+
+export function querySelectorAll(el, selector) {
+    return Array.prototype.slice.call(el.querySelectorAll(selector));
 }
 
 /*  Get Element
@@ -136,6 +144,99 @@ export function writeToWindow(win, html) {
     }
 }
 
+export function writeElementToWindow(win, el) {
+
+    let doc        = win.document;
+    let docElement = doc.documentElement;
+    let body       = doc.body;
+
+    if (!docElement) {
+        docElement = doc.createElement('html');
+        doc.appendChild(docElement);
+    }
+
+    if (!body) {
+        body = doc.createElement('body');
+        docElement.appendChild(body);
+    }
+
+    appendChild(body, el);
+}
+
+export function setStyle(el, styleText) {
+    if (el.styleSheet) {
+        el.styleSheet.cssText = styleText;
+    } else {
+        el.appendChild(document.createTextNode(styleText));
+    }
+}
+
+/*  Create Element
+    --------------
+
+    Create an element with style, html, classes, attributes etc. and append it to the specified container
+*/
+
+export function createElement(tag = 'div', options = {}, container = null) {
+
+    tag = tag.toLowerCase();
+    let element = document.createElement(tag);
+
+    if (options.style) {
+        extend(element.style, options.style);
+    }
+
+    if (options.class) {
+        element.className = options.class.join(' ');
+    }
+
+    if (options.attributes) {
+        for (let key of Object.keys(options.attributes)) {
+            element.setAttribute(key, options.attributes[key]);
+        }
+    }
+
+    if (options.styleSheet) {
+        setStyle(element, options.styleSheet);
+    }
+
+    if (container) {
+        appendChild(container, element);
+    }
+
+    if (options.html) {
+        if (tag === 'iframe') {
+            if (!container || !element.contentWindow) {
+                throw new Error(`Iframe html can not be written unless container provided and iframe in DOM`);
+            }
+
+            writeToWindow(element.contentWindow, options.html);
+
+        } else {
+            element.innerHTML = options.html;
+        }
+    }
+
+    return element;
+}
+
+
+export function awaitFrameWindow(frame) {
+    return new ZalgoPromise((resolve, reject) => {
+        frame.addEventListener('load', () => resolve(frame.contentWindow));
+        frame.addEventListener('error', (err) => {
+            return frame.contentWindow ? resolve(frame.contentWindow) : reject(err);
+        });
+    }).then(win => {
+
+        if (!win) {
+            throw new Error(`Could not find window in iframe`);
+        }
+
+        return win;
+    });
+}
+
 
 /*  Iframe
     ------
@@ -143,34 +244,32 @@ export function writeToWindow(win, html) {
     Open an iframe with the specified container, url, and option property map
 */
 
-export function iframe(url, options = {}, container) {
+export function iframe(options = {}, container) {
 
     container = getElement(container);
 
-    let frame = document.createElement('iframe');
+    let attributes = options.attributes || {};
+    let style = options.style || {};
 
-    if (options.attributes) {
-        for (let key of Object.keys(options.attributes)) {
-            frame[key] = options.attributes[key];
-        }
-    }
+    let frame = createElement('iframe', {
+        attributes: {
+            frameBorder: '0',
+            allowTransparency: 'true',
+            ...attributes
+        },
+        style: {
+            backgroundColor: 'transparent',
+            ...style
+        },
+        html: options.html
+    });
 
-    if (options.style) {
-        for (let key of Object.keys(options.style)) {
-            frame.style[key] = options.style[key];
-        }
-    }
+    frame.awaitWindow = awaitFrameWindow(frame);
 
-    frame.frameBorder = '0';
-    frame.allowTransparency = 'true';
-    frame.style.backgroundColor = 'transparent';
+    container.appendChild(frame);
 
-    if (container) {
-        container.appendChild(frame);
-    }
-
-    if (options.html) {
-        writeToWindow(frame.contentWindow, options.html);
+    if (options.url) {
+        iframe.src = options.url;
     }
 
     return frame;
@@ -241,77 +340,6 @@ export function scanForJavascript(str) {
     }
 
     return str;
-}
-
-
-/*  Create Element
-    --------------
-
-    Create an element with style, html, classes, attributes etc. and append it to the specified container
-*/
-
-export function createElement(tag = 'div', options = {}, container = null) {
-    let element = document.createElement(tag);
-
-    if (options.style) {
-        extend(element.style, options.style);
-    }
-
-    if (options.html) {
-        element.innerHTML = options.html;
-    }
-
-    if (options.class) {
-        element.className = options.class.join(' ');
-    }
-
-    if (options.attributes) {
-        for (let key of Object.keys(options.attributes)) {
-            element.setAttribute(key, options.attributes[key]);
-        }
-    }
-
-    if (options.styleSheet) {
-        if (element.styleSheet) {
-            element.styleSheet.cssText = options.styleSheet;
-        } else {
-            element.appendChild(document.createTextNode(options.styleSheet));
-        }
-    }
-
-    return element;
-}
-
-/*  Add Event To Class
-    ------------------
-
-    Find all elements with a class and add an event handler
-*/
-
-export function addEventToClass(element, className, eventName, handler) {
-
-    let handlers = [];
-
-    for (let el of Array.prototype.slice.call(element.getElementsByClassName(className))) {
-
-        let eventHandler = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            handler();
-        };
-
-        handlers.push({ el, eventHandler });
-
-        el.addEventListener(eventName, eventHandler);
-    }
-
-    return {
-        cancel() {
-            for (let { el, eventHandler} of handlers) {
-                el.removeEventListener(eventName, eventHandler);
-            }
-        }
-    };
 }
 
 export let parseQuery = memoize(queryString => {
@@ -880,4 +908,108 @@ export function getScript(url) {
 
 export function prefetchPage(url) {
     return getHTML(url);
+}
+
+export function getDOMElement(item, doc = document) {
+    if (item && item.ownerDocument) {
+        return item;
+    } else if (typeof item === 'string') {
+        let div = doc.createElement('div');
+        div.innerHTML = item;
+
+        if (div.children.length !== 1) {
+            throw new Error(`Expected 1 child from html, found ${div.children.length}`);
+        }
+
+        let el = div.children[0];
+
+        for (let script of querySelectorAll(el, 'script')) {
+            let newScript = doc.createElement('script');
+            newScript.text = script.textContent;
+            script.parentNode.replaceChild(newScript, script);
+        }
+
+        return el;
+
+    } else {
+        throw new Error(`Expected HTMLElement or string, got ${typeof item}`);
+    }
+}
+
+const JSX_EVENTS = {
+    onClick: 'click'
+};
+
+export function jsxDom(name, props, content) {
+
+    name = name.toLowerCase();
+
+    let doc = window.document;
+
+    let el = doc.createElement(name);
+
+    for (let prop in props) {
+        if (prop in JSX_EVENTS) {
+            el.addEventListener(JSX_EVENTS[prop], props[prop]);
+        } else {
+            el.setAttribute(prop, props[prop]);
+        }
+    }
+
+    if (name === 'style') {
+
+        if (typeof content !== 'string') {
+            throw new Error(`Expected ${name} tag content to be string, got ${typeof content}`);
+        }
+
+        if (arguments.length > 3) {
+            throw new Error(`Expected only text content for ${name} tag`);
+        }
+
+        setStyle(el, content);
+
+    } else if (name === 'iframe') {
+
+        if (arguments.length > 3) {
+            throw new Error(`Expected only single child node for iframe`);
+        }
+
+        el.addEventListener('load', () => {
+            let win = el.contentWindow;
+
+            if (!win) {
+                throw new Error(`Expected frame to have contentWindow`);
+            }
+
+            if (typeof content === 'string') {
+                writeToWindow(win, content);
+            } else {
+                writeElementToWindow(win, content);
+            }
+        });
+
+    } else if (name === 'script') {
+
+        if (typeof content !== 'string') {
+            throw new Error(`Expected ${name} tag content to be string, got ${typeof content}`);
+        }
+
+        if (arguments.length > 3) {
+            throw new Error(`Expected only text content for ${name} tag`);
+        }
+
+        // $FlowFixMe
+        el.text = content;
+
+    } else {
+        for (let i = 2; i < arguments.length; i++) {
+            if (typeof arguments[i] === 'string') {
+                el.textContent = arguments[i];
+            } else {
+                appendChild(el, arguments[i]);
+            }
+        }
+    }
+
+    return el;
 }

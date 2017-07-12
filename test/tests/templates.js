@@ -13,7 +13,7 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                this.container.querySelector('.xcomponent-overlay').click();
+                this.container.click();
             }
 
         });
@@ -46,7 +46,7 @@ describe('xcomponent templates and styles', () => {
                 onCloseWindow(this.window, () => {
                     done();
                 });
-                
+
                 this.container.querySelector('.xcomponent-close').click();
             }
 
