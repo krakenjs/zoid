@@ -2592,9 +2592,10 @@
                 value: function() {
                     if (this.component.componentTemplate) {
                         var win = this.componentTemplateWindow || this.window, html = this.renderTemplate(this.component.componentTemplate, {
+                            jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K.bind(win.document),
                             document: win.document
-                        }), el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.K)(html, win.document);
-                        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(win, el);
+                        }), el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(html, win.document);
+                        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.M)(win, el);
                     }
                 }
             }, {
@@ -2622,7 +2623,7 @@
                         on: function(eventName, handler) {
                             return _this18.on(eventName, handler);
                         },
-                        jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.M,
+                        jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K,
                         document: document
                     }, options));
                 }
@@ -2641,7 +2642,7 @@
                                 height: containerHeight
                             }
                         });
-                        this.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.K)(html);
+                        this.container = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(html);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.G)(this.container);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.N)(el, this.container);
                         if (this.driver.renderedIntoContainerTemplate) {
@@ -6806,7 +6807,8 @@
             appendChild(body, el);
         }
         function setStyle(el, styleText) {
-            el.styleSheet ? el.styleSheet.cssText = styleText : el.appendChild(document.createTextNode(styleText));
+            var doc = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : window.document;
+            el.styleSheet ? el.styleSheet.cssText = styleText : el.appendChild(doc.createTextNode(styleText));
         }
         function createElement() {
             var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, container = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : null;
@@ -7222,12 +7224,12 @@
         }
         function jsxDom(name, props, content) {
             name = name.toLowerCase();
-            var doc = window.document, el = doc.createElement(name);
+            var doc = this && this.createElement ? this : window.document, el = doc.createElement(name);
             for (var prop in props) prop in JSX_EVENTS ? el.addEventListener(JSX_EVENTS[prop], props[prop]) : el.setAttribute(prop, props[prop]);
             if ("style" === name) {
                 if ("string" != typeof content) throw new Error("Expected " + name + " tag content to be string, got " + (void 0 === content ? "undefined" : _typeof(content)));
                 if (arguments.length > 3) throw new Error("Expected only text content for " + name + " tag");
-                setStyle(el, content);
+                setStyle(el, content, doc);
             } else if ("iframe" === name) {
                 if (arguments.length > 3) throw new Error("Expected only single child node for iframe");
                 el.addEventListener("load", function() {
@@ -7249,7 +7251,7 @@
         });
         __webpack_exports__.n = elementReady;
         __webpack_exports__.k = writeToWindow;
-        __webpack_exports__.w = writeElementToWindow;
+        __webpack_exports__.x = writeElementToWindow;
         __webpack_exports__.z = iframe;
         __webpack_exports__.c = onCloseWindow;
         __webpack_exports__.o = addEventListener;
@@ -7271,8 +7273,8 @@
         __webpack_exports__.m = getElementName;
         __webpack_exports__.B = watchElementForClose;
         __webpack_exports__.j = prefetchPage;
-        __webpack_exports__.v = getDOMElement;
-        __webpack_exports__.x = jsxDom;
+        __webpack_exports__.w = getDOMElement;
+        __webpack_exports__.v = jsxDom;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2__fn__ = __webpack_require__(35), __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(23), _slicedToArray = (__webpack_require__(18), 
         function() {
             function sliceIterator(arr, i) {
