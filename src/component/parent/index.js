@@ -1018,6 +1018,7 @@ export class ParentComponent extends BaseComponent {
 
         let win = this.componentTemplateWindow || this.window;
         let html = this.renderTemplate(this.component.componentTemplate, {
+            jsxDom: jsxDom.bind(win.document),
             document: win.document
         });
 

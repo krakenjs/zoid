@@ -163,11 +163,11 @@ export function writeElementToWindow(win, el) {
     appendChild(body, el);
 }
 
-export function setStyle(el, styleText) {
+export function setStyle(el, styleText, doc = window.document) {
     if (el.styleSheet) {
         el.styleSheet.cssText = styleText;
     } else {
-        el.appendChild(document.createTextNode(styleText));
+        el.appendChild(doc.createTextNode(styleText));
     }
 }
 
@@ -944,7 +944,9 @@ export function jsxDom(name, props, content) {
 
     name = name.toLowerCase();
 
-    let doc = window.document;
+    let doc = (this && this.createElement)
+        ? this
+        : window.document;
 
     let el = doc.createElement(name);
 
@@ -966,7 +968,7 @@ export function jsxDom(name, props, content) {
             throw new Error(`Expected only text content for ${name} tag`);
         }
 
-        setStyle(el, content);
+        setStyle(el, content, doc);
 
     } else if (name === 'iframe') {
 
