@@ -163,3 +163,11 @@ worry about iframes or post-messages.
 
   Yes. `react-frame-component` allows you to render html into a sandboxed iframe on the same domain. `xcomponent` is geared
   around sharing functionality from one domain to another, in a cross-domain iframe.
+
+## Browser Suppport
+
+- Internet Explorer 9+
+- Chrome 27+
+- Firefox 30+
+- Safari 5.1+
+- Opera 23+
