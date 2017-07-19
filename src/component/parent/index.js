@@ -1019,6 +1019,7 @@ export class ParentComponent extends BaseComponent {
         let win = this.componentTemplateWindow || this.window;
         let html = this.renderTemplate(this.component.componentTemplate, {
             jsxDom: jsxDom.bind(win.document),
+            htmlDom: text => getDOMElement(text, win.document),
             document: win.document
         });
 
@@ -1051,6 +1052,7 @@ export class ParentComponent extends BaseComponent {
             },
             on: (eventName, handler) => this.on(eventName, handler),
             jsxDom,
+            htmlDom: getDOMElement,
             document,
             ...options
         });
