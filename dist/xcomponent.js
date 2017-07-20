@@ -1264,9 +1264,11 @@
                 }
                 var req = new XRequest("MSXML2.XMLHTTP.3.0");
                 req.open(method.toUpperCase(), url, async);
-                req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-                req.setRequestHeader("Content-type", "application/json");
-                for (var headerName in headers) headers.hasOwnProperty(headerName) && req.setRequestHeader(headerName, headers[headerName]);
+                if ("function" == typeof req.setRequestHeader) {
+                    req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                    req.setRequestHeader("Content-type", "application/json");
+                    for (var headerName in headers) headers.hasOwnProperty(headerName) && req.setRequestHeader(headerName, headers[headerName]);
+                }
                 req.onreadystatechange = function() {
                     req.readyState > 3 && resolve();
                 };
@@ -2789,6 +2791,9 @@
                     if (this.component.componentTemplate) {
                         var win = this.componentTemplateWindow || this.window, html = this.renderTemplate(this.component.componentTemplate, {
                             jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K.bind(win.document),
+                            htmlDom: function(text) {
+                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(text, win.document);
+                            },
                             document: win.document
                         }), el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(html, win.document);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.M)(win, el);
@@ -2820,6 +2825,7 @@
                             return _this18.on(eventName, handler);
                         },
                         jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K,
+                        htmlDom: __WEBPACK_IMPORTED_MODULE_6__lib__.L,
                         document: document
                     }, options));
                 }
