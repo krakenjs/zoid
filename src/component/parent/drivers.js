@@ -3,7 +3,9 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
-import { iframe, popup, getElement, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose } from '../../lib';
+import { iframe, popup, getElement, toCSS, showElement, hideElement,
+         destroyElement, normalizeDimension, watchElementForClose,
+         awaitFrameWindow, awaitFrameLoad } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -35,15 +37,23 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     openOnClick: false,
     errorOnCloseDuringInit: true,
 
-    open(element) {
+    open(element, url) {
 
         if (element && !getElement(element)) {
             throw this.component.error(`Can not find element ${element}`);
         }
 
         let options = {
+            url,
             attributes: {
                 name: this.childWindowName,
+                scrolling: this.component.scrolling ? 'yes' : 'no'
+            }
+        };
+
+        let sacrificialOptions = {
+            attributes: {
+                name: `__sacrificial__${ this.childWindowName }`,
                 scrolling: this.component.scrolling ? 'yes' : 'no'
             }
         };
@@ -54,26 +64,21 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         if (this.component.sacrificialComponentTemplate) {
 
-            sacrificialIframe = iframe({
-                ...options,
-                name: `__sacrificial__${ options.name }`
-            }, this.element);
+            sacrificialIframe = this.sacrificialIframe = iframe(sacrificialOptions, this.element);
 
             hideElement(frame);
 
-            frame.addEventListener('load', () => {
-                setTimeout(() => {
-                    hideElement(sacrificialIframe);
-                    destroyElement(sacrificialIframe);
-                    showElement(frame);
-                }, 50);
+            awaitFrameLoad(frame).then(() => {
+                hideElement(sacrificialIframe);
+                destroyElement(sacrificialIframe);
+                showElement(frame);
             });
         }
 
         return ZalgoPromise.all([
 
-            frame.awaitWindow,
-            sacrificialIframe && sacrificialIframe.awaitWindow
+            awaitFrameWindow(frame),
+            sacrificialIframe && awaitFrameWindow(sacrificialIframe)
 
         ]).then(([ frameWindow, sacrificialFrameWindow ]) => {
 
@@ -186,7 +191,7 @@ if (__POPUP_SUPPORT__) {
         openOnClick: true,
         errorOnCloseDuringInit: false,
 
-        open() {
+        open(element, url = '') {
 
             let { width, height, x, y } = this.getInitialDimensions();
 
@@ -195,7 +200,7 @@ if (__POPUP_SUPPORT__) {
 
             let pos = getPosition({ width, height, x, y });
 
-            this.window = popup('', {
+            this.window = popup(url, {
                 name: this.childWindowName,
                 width,
                 height,

@@ -11,7 +11,7 @@ import { onCloseWindow, addEventListener, uniqueID, elementReady, writeElementTo
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
          promise, getDomain, global, writeToWindow, setLogLevel, once,
-         getElementName, prefetchPage, getDOMElement } from '../../lib';
+         getElementName, prefetchPage, getDOMElement, awaitFrameLoad } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -93,18 +93,40 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            tasks.open = this.driver.openOnClick
-                ? this.open(element, this.context)
-                : tasks.openContainer.then(() => {
-                    return this.open(element, this.context);
-                });
-
-            tasks.openBridge = tasks.open.then(() => {
-                return this.openBridge(this.context);
-            });
+            if (loadUrl) {
+                tasks.buildUrl = this.buildUrl();
+            }
 
             tasks.showContainer = tasks.openContainer.then(() => {
                 return this.showContainer();
+            });
+
+            let immediateUrl;
+
+            if (loadUrl && this.component.sacrificialComponentTemplate) {
+                tasks.buildUrl.then(url => {
+                    immediateUrl = url;
+                });
+            }
+
+            tasks.open = this.driver.openOnClick
+                ? this.open(element)
+                : tasks.openContainer.then(() => {
+                    return this.open(element, immediateUrl);
+                });
+
+            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                this.listen(this.window, domain);
+            });
+
+            tasks.watchForClose = tasks.open.then(() => {
+                return this.watchForClose();
+            });
+
+            tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                if (bridge) {
+                    return bridge.linkUrl(this.window, domain);
+                }
             });
 
             if (!this.html) {
@@ -117,18 +139,8 @@ export class ParentComponent extends BaseComponent {
                 });
             }
 
-            tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                if (bridge) {
-                    return bridge.linkUrl(this.window, domain);
-                }
-            });
-
-            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                this.listen(this.window, domain);
-            });
-
-            tasks.watchForClose = tasks.open.then(() => {
-                return this.watchForClose();
+            tasks.openBridge = tasks.open.then(() => {
+                return this.openBridge(this.context);
             });
 
             if (this.html) {
@@ -137,8 +149,6 @@ export class ParentComponent extends BaseComponent {
                 });
 
             } else if (loadUrl) {
-                tasks.buildUrl = this.buildUrl();
-
                 tasks.loadUrl = ZalgoPromise.all([
                     tasks.buildUrl,
                     tasks.open,
@@ -495,11 +505,15 @@ export class ParentComponent extends BaseComponent {
 
     @memoized
     @promise
-    open(element) {
+    open(element, url) {
 
         this.component.log(`open_${this.context}`, { element: getElementName(element), windowName: this.childWindowName });
 
-        return this.driver.open.call(this, element);
+        if (url) {
+            this.urlLoaded = true;
+        }
+
+        return this.driver.open.call(this, element, url);
     }
 
     get driver() {
@@ -662,6 +676,10 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     loadUrl(url) {
+        if (this.urlLoaded) {
+            return;
+        }
+
         this.component.log(`load_url`);
 
         if (window.location.href.split('#')[0] === url.split('#')[0]) {
@@ -1016,16 +1034,32 @@ export class ParentComponent extends BaseComponent {
             return;
         }
 
-        let win = this.componentTemplateWindow || this.window;
-        let html = this.renderTemplate(this.component.componentTemplate, {
-            jsxDom: jsxDom.bind(win.document),
-            htmlDom: text => getDOMElement(text, win.document),
-            document: win.document
+        return ZalgoPromise.try(() => {
+
+            let frame = this.sacrificialIframe || this.iframe;
+
+            if (frame) {
+                return awaitFrameLoad(frame);
+            }
+
+        }).then(() => {
+
+            let win = this.componentTemplateWindow || this.window;
+
+            if (!isSameDomain(win)) {
+                return;
+            }
+
+            let html = this.renderTemplate(this.component.componentTemplate, {
+                jsxDom: jsxDom.bind(win.document),
+                htmlDom: text => getDOMElement(text, win.document),
+                document: win.document
+            });
+
+            let el = getDOMElement(html, win.document);
+
+            writeElementToWindow(win, el);
         });
-
-        let el = getDOMElement(html, win.document);
-
-        writeElementToWindow(win, el);
     }
 
 
@@ -1036,7 +1070,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     renderTemplate(renderer, options = {}) {
-        return renderer({
+        return renderer.call(this, {
             id:        `${CLASS_NAMES.XCOMPONENT}-${this.component.tag}-${this.props.uid}`,
             props:     renderer.__xdomain__ ? null : this.props,
             tag:       this.component.tag,

@@ -1,6 +1,7 @@
 
 import { isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { once, noop, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
@@ -220,20 +221,39 @@ export function createElement(tag = 'div', options = {}, container = null) {
     return element;
 }
 
+let awaitFrameLoadPromises = new WeakMap();
+
+export function awaitFrameLoad(frame) {
+
+    if (awaitFrameLoadPromises.has(frame)) {
+        return awaitFrameLoadPromises.get(frame);
+    }
+
+    let promise = new ZalgoPromise((resolve, reject) => {
+        frame.addEventListener('load', () => resolve(frame));
+        frame.addEventListener('error', (err) => {
+            return frame.contentWindow ? resolve(frame) : reject(err);
+        });
+    });
+
+    awaitFrameLoadPromises.set(frame, promise);
+
+    return promise;
+}
 
 export function awaitFrameWindow(frame) {
-    return new ZalgoPromise((resolve, reject) => {
-        frame.addEventListener('load', () => resolve(frame.contentWindow));
-        frame.addEventListener('error', (err) => {
-            return frame.contentWindow ? resolve(frame.contentWindow) : reject(err);
-        });
-    }).then(win => {
 
-        if (!win) {
+    if (frame.contentWindow) {
+        return ZalgoPromise.resolve(frame.contentWindow);
+    }
+
+    return awaitFrameLoad(frame).then(loadedFrame => {
+
+        if (!loadedFrame.contentWindow) {
             throw new Error(`Could not find window in iframe`);
         }
 
-        return win;
+        return loadedFrame.contentWindow;
     });
 }
 
@@ -264,13 +284,13 @@ export function iframe(options = {}, container) {
         html: options.html
     });
 
-    frame.awaitWindow = awaitFrameWindow(frame);
+    if (options.url) {
+        frame.setAttribute('src', options.url);
+    }
+
+    awaitFrameLoad(frame);
 
     container.appendChild(frame);
-
-    if (options.url) {
-        iframe.src = options.url;
-    }
 
     return frame;
 }
