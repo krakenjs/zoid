@@ -1,5 +1,5 @@
 
-import { isWindowClosed } from 'cross-domain-utils/src';
+import { isWindowClosed, linkFrameWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
@@ -230,7 +230,10 @@ export function awaitFrameLoad(frame) {
     }
 
     let promise = new ZalgoPromise((resolve, reject) => {
-        frame.addEventListener('load', () => resolve(frame));
+        frame.addEventListener('load', () => {
+            linkFrameWindow(frame);
+            resolve(frame);
+        });
         frame.addEventListener('error', (err) => {
             return frame.contentWindow ? resolve(frame) : reject(err);
         });
@@ -291,6 +294,8 @@ export function iframe(options = {}, container) {
     awaitFrameLoad(frame);
 
     container.appendChild(frame);
+
+    linkFrameWindow(frame);
 
     return frame;
 }
