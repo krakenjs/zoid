@@ -5,7 +5,7 @@ import { findFrameByName } from 'cross-domain-utils/src';
 
 import { iframe, popup, getElement, toCSS, showElement, hideElement,
          destroyElement, normalizeDimension, watchElementForClose,
-         awaitFrameWindow, awaitFrameLoad } from '../../lib';
+         awaitFrameWindow, awaitFrameLoad, once } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 
@@ -68,11 +68,14 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
             hideElement(frame);
 
-            awaitFrameLoad(frame).then(() => {
+            let switchFrames = once(() => {
                 hideElement(sacrificialIframe);
                 destroyElement(sacrificialIframe);
                 showElement(frame);
             });
+
+            awaitFrameLoad(frame, switchFrames);
+            this.onInit.then(switchFrames);
         }
 
         return ZalgoPromise.all([
