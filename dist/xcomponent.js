@@ -4035,11 +4035,13 @@
                 if (this.component.sacrificialComponentTemplate) {
                     sacrificialIframe = this.sacrificialIframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.R)(sacrificialOptions, this.element);
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(frame);
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(frame).then(function() {
+                    var switchFrames = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.r)(function() {
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(sacrificialIframe);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.S)(sacrificialIframe);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(frame);
                     });
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(frame, switchFrames);
+                    this.onInit.then(switchFrames);
                 }
                 return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.all([ __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.T)(frame), sacrificialIframe && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.T)(sacrificialIframe) ]).then(function(_ref) {
                     var _ref2 = _slicedToArray(_ref, 2), frameWindow = _ref2[0], sacrificialFrameWindow = _ref2[1];
