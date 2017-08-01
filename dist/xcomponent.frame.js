@@ -468,13 +468,13 @@
         __webpack_require__.d(__webpack_exports__, "k", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.e;
         });
-        __webpack_require__.d(__webpack_exports__, "l", function() {
+        __webpack_require__.d(__webpack_exports__, "m", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.f;
         });
         __webpack_require__.d(__webpack_exports__, "n", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.g;
         });
-        __webpack_require__.d(__webpack_exports__, "o", function() {
+        __webpack_require__.d(__webpack_exports__, "u", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.h;
         });
         __webpack_require__.d(__webpack_exports__, "v", function() {
@@ -483,7 +483,7 @@
         __webpack_require__.d(__webpack_exports__, "w", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.j;
         });
-        __webpack_require__.d(__webpack_exports__, "x", function() {
+        __webpack_require__.d(__webpack_exports__, "y", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.k;
         });
         __webpack_require__.d(__webpack_exports__, "z", function() {
@@ -492,7 +492,7 @@
         __webpack_require__.d(__webpack_exports__, "A", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.m;
         });
-        __webpack_require__.d(__webpack_exports__, "B", function() {
+        __webpack_require__.d(__webpack_exports__, "C", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.n;
         });
         __webpack_require__.d(__webpack_exports__, "D", function() {
@@ -550,20 +550,20 @@
         __webpack_require__.d(__webpack_exports__, "f", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.e;
         });
-        __webpack_require__.d(__webpack_exports__, "r", function() {
+        __webpack_require__.d(__webpack_exports__, "q", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.a;
         });
-        __webpack_require__.d(__webpack_exports__, "t", function() {
+        __webpack_require__.d(__webpack_exports__, "s", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.c;
         });
-        __webpack_require__.d(__webpack_exports__, "y", function() {
+        __webpack_require__.d(__webpack_exports__, "x", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.f;
         });
-        __webpack_require__.d(__webpack_exports__, "C", function() {
+        __webpack_require__.d(__webpack_exports__, "B", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.b;
         });
         var __WEBPACK_IMPORTED_MODULE_2__promise__ = __webpack_require__(80);
-        __webpack_require__.d(__webpack_exports__, "m", function() {
+        __webpack_require__.d(__webpack_exports__, "l", function() {
             return __WEBPACK_IMPORTED_MODULE_2__promise__.a;
         });
         __webpack_require__.d(__webpack_exports__, "W", function() {
@@ -585,13 +585,13 @@
         __webpack_require__.d(__webpack_exports__, "h", function() {
             return __WEBPACK_IMPORTED_MODULE_3__util__.d;
         });
-        __webpack_require__.d(__webpack_exports__, "p", function() {
+        __webpack_require__.d(__webpack_exports__, "o", function() {
             return __WEBPACK_IMPORTED_MODULE_3__util__.i;
         });
-        __webpack_require__.d(__webpack_exports__, "q", function() {
+        __webpack_require__.d(__webpack_exports__, "p", function() {
             return __WEBPACK_IMPORTED_MODULE_3__util__.j;
         });
-        __webpack_require__.d(__webpack_exports__, "s", function() {
+        __webpack_require__.d(__webpack_exports__, "r", function() {
             return __WEBPACK_IMPORTED_MODULE_3__util__.k;
         });
         __webpack_require__.d(__webpack_exports__, "Z", function() {
@@ -624,7 +624,7 @@
         __webpack_require__.d(__webpack_exports__, "e", function() {
             return __WEBPACK_IMPORTED_MODULE_6__global__.a;
         });
-        __webpack_require__.d(__webpack_exports__, "u", function() {
+        __webpack_require__.d(__webpack_exports__, "t", function() {
             return __WEBPACK_IMPORTED_MODULE_6__global__.b;
         });
         var __WEBPACK_IMPORTED_MODULE_7__logger__ = __webpack_require__(79);
@@ -1549,12 +1549,12 @@
             function BaseComponent() {
                 _classCallCheck(this, BaseComponent);
                 this.clean = cleanup(this);
-                this.event = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.p)();
+                this.event = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)();
             }
             _createClass(BaseComponent, [ {
                 key: "addProp",
                 value: function(options, name, def) {
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.q)(options, this, name, def);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.p)(options, this, name, def);
                 }
             }, {
                 key: "on",
@@ -1572,7 +1572,7 @@
                             return self.error(err);
                         }
                     };
-                    !1 !== doOnce && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.r)(wrapper));
+                    !1 !== doOnce && (wrapper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.q)(wrapper));
                     return wrapper;
                 }
             }, {
@@ -1633,7 +1633,7 @@
         }
         function buildChildWindowName(name, version) {
             var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
-            options.id = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)();
+            options.id = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.r)();
             options.domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.d)(window);
             var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = __WEBPACK_IMPORTED_MODULE_1_hi_base32___default.a.encode(JSON.stringify(options)).replace(/\=/g, "").toLowerCase();
             if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
@@ -1642,9 +1642,6 @@
         }
         function getParentDomain() {
             return getComponentMeta().domain;
-        }
-        function getGlobal(win) {
-            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.k)(win)) return win[__WEBPACK_IMPORTED_MODULE_3__constants__.__XCOMPONENT__];
         }
         function getWindowByRef(_ref) {
             var ref = _ref.ref, uid = _ref.uid, distance = _ref.distance;
@@ -1661,7 +1658,7 @@
                     if (_i.done) break;
                     _ref2 = _i.value;
                 }
-                var frame = _ref2, global = getGlobal(frame);
+                var frame = _ref2, global = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.e)(frame);
                 if (global && global.windows && global.windows[uid]) return global.windows[uid];
             }
             throw new Error("Unable to find window by ref");
@@ -1705,7 +1702,7 @@
                 if (Symbol.iterator in Object(arr)) return sliceIterator(arr, i);
                 throw new TypeError("Invalid attempt to destructure non-iterable instance");
             };
-        }(), getComponentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(function() {
+        }(), getComponentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(function() {
             if (window.name) {
                 var _window$name$split = window.name.split("__"), _window$name$split2 = _slicedToArray(_window$name$split, 4), xcomp = _window$name$split2[0], name = _window$name$split2[1], version = _window$name$split2[2], encodedOptions = _window$name$split2[3];
                 if (xcomp === __WEBPACK_IMPORTED_MODULE_3__constants__.XCOMPONENT) {
@@ -1720,13 +1717,13 @@
                     return componentMeta;
                 }
             }
-        }), isXComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(function() {
+        }), isXComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(function() {
             return Boolean(getComponentMeta());
-        }), getParentComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(function() {
+        }), getParentComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(function() {
             var componentMeta = getComponentMeta();
             if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
             return getWindowByRef(componentMeta.componentParent);
-        }), getParentRenderWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(function() {
+        }), getParentRenderWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(function() {
             var componentMeta = getComponentMeta();
             if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
             return getWindowByRef(componentMeta.renderParent);
@@ -2003,8 +2000,8 @@
                 return Constructor;
             };
         }(), activeComponents = [];
-        __WEBPACK_IMPORTED_MODULE_6__lib__.u.props = __WEBPACK_IMPORTED_MODULE_6__lib__.u.props || {};
-        __WEBPACK_IMPORTED_MODULE_6__lib__.u.windows = __WEBPACK_IMPORTED_MODULE_6__lib__.u.windows || {};
+        __WEBPACK_IMPORTED_MODULE_6__lib__.t.props = __WEBPACK_IMPORTED_MODULE_6__lib__.t.props || {};
+        __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows = __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows || {};
         var ParentComponent = (_class = function(_BaseComponent) {
             function ParentComponent(component, context) {
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
@@ -2103,7 +2100,7 @@
                 key: "getOutlet",
                 value: function() {
                     this.outlet = document.createElement("div");
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.v)(this.outlet, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.OUTLET);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(this.outlet, __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.OUTLET);
                     return this.outlet;
                 }
             }, {
@@ -2136,7 +2133,7 @@
                 key: "prefetch",
                 value: function() {
                     this.html = this.buildUrl().then(function(url) {
-                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(url).then(function(html) {
+                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.v)(url).then(function(html) {
                             return '\n                    <base href="' + url.split("/").slice(0, 3).join("/") + '">\n\n                    ' + html + "\n\n                    <script>\n                        if (window.history && window.history.pushState) {\n                            window.history.pushState({}, '', '/" + url.split("/").slice(3).join("/") + "');\n                        }\n                    <\/script>\n                ";
                         });
                     });
@@ -2146,7 +2143,7 @@
                 value: function() {
                     var _this4 = this;
                     return this.html.then(function(html) {
-                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.x)(_this4.window, html);
+                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(_this4.window, html);
                     });
                 }
             }, {
@@ -2181,8 +2178,8 @@
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.PARENT,
                         distance: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.s)(window)
                     };
-                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)();
-                    __WEBPACK_IMPORTED_MODULE_6__lib__.u.windows[uid] = window;
+                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)();
+                    __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid] = window;
                     return {
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.GLOBAL,
                         uid: uid
@@ -2193,8 +2190,8 @@
                 value: function() {
                     var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                     if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
-                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)();
-                    __WEBPACK_IMPORTED_MODULE_6__lib__.u.windows[uid] = renderToWindow;
+                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)();
+                    __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid] = renderToWindow;
                     return {
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.GLOBAL,
                         uid: uid
@@ -2203,14 +2200,14 @@
             }, {
                 key: "buildChildWindowName",
                 value: function() {
-                    var _ref7 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref7$renderTo = _ref7.renderTo, renderTo = void 0 === _ref7$renderTo ? window : _ref7$renderTo, sameDomain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.k)(renderTo), uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)(), tag = this.component.tag, sProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.y)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
+                    var _ref7 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref7$renderTo = _ref7.renderTo, renderTo = void 0 === _ref7$renderTo ? window : _ref7$renderTo, sameDomain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.k)(renderTo), uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)(), tag = this.component.tag, sProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.x)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
                         type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID,
                         uid: uid
                     } : {
                         type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.RAW,
                         value: sProps
                     };
-                    props.type === __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID && (__WEBPACK_IMPORTED_MODULE_6__lib__.u.props[uid] = sProps);
+                    props.type === __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID && (__WEBPACK_IMPORTED_MODULE_6__lib__.t.props[uid] = JSON.stringify(sProps));
                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.e)(this.component.name, this.component.version, {
                         uid: uid,
                         tag: tag,
@@ -2251,7 +2248,7 @@
                             return url || _this6.component.getUrl(_this6.props.env, _this6.props);
                         }).then(function(finalUrl) {
                             query[__WEBPACK_IMPORTED_MODULE_7__constants__.XCOMPONENT] = "1";
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.z)(finalUrl, {
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.y)(finalUrl, {
                                 query: query
                             });
                         });
@@ -2321,7 +2318,7 @@
                 key: "open",
                 value: function(element, url) {
                     this.component.log("open_" + this.context, {
-                        element: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(element),
+                        element: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.z)(element),
                         windowName: this.childWindowName
                     });
                     url && (this.urlLoaded = !0);
@@ -2330,7 +2327,7 @@
             }, {
                 key: "elementReady",
                 value: function(element) {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.B)(element).then(__WEBPACK_IMPORTED_MODULE_6__lib__.C);
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(element).then(__WEBPACK_IMPORTED_MODULE_6__lib__.B);
                 }
             }, {
                 key: "delegate",
@@ -2427,7 +2424,7 @@
             }, {
                 key: "watchForClose",
                 value: function() {
-                    var _this11 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(this.window, function() {
+                    var _this11 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(this.window, function() {
                         _this11.component.log("detect_close_child");
                         _this11.driver.errorOnCloseDuringInit && _this11.onInit.reject(new Error("Detected close during init"));
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
@@ -2437,7 +2434,7 @@
                         });
                     });
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
-                    var onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)(function() {
+                    var onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
                         _this11.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
                         closeWindowListener.cancel();
@@ -2450,8 +2447,8 @@
                 value: function(url) {
                     if (!this.urlLoaded) {
                         this.component.log("load_url");
-                        window.location.href.split("#")[0] === url.split("#")[0] && (url = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.z)(url, {
-                            query: _defineProperty({}, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)(), "1")
+                        window.location.href.split("#")[0] === url.split("#")[0] && (url = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.y)(url, {
+                            query: _defineProperty({}, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)(), "1")
                         }));
                         return this.driver.loadUrl.call(this, url);
                     }
@@ -2590,7 +2587,7 @@
                     }).then(function() {
                         return _this15.destroyComponent();
                     }).then(function() {
-                        _this15.childExports && _this15.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win) && _this15.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.C);
+                        _this15.childExports && _this15.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win) && _this15.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.B);
                     });
                 }
             }, {
@@ -2693,7 +2690,7 @@
                 value: function(element) {
                     var _this20 = this, el = void 0;
                     if (element) {
-                        el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(element);
+                        el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(element);
                         if (!el) throw new Error("Could not find element: " + element);
                     } else el = document.body;
                     if (this.component.containerTemplate) {
@@ -3525,7 +3522,7 @@
                                 if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
                                 throw new Error("Parent component window is on a different domain - expected " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.d)() + " - can not retrieve props");
                             }
-                            props = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.e)(parentComponentWindow).props[componentMeta.uid];
+                            props = JSON.parse(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.e)(parentComponentWindow).props[componentMeta.uid]);
                         }
                         if (!props) throw new Error("Initial props not found");
                         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.f)(props, function(_ref2) {
@@ -3560,9 +3557,10 @@
             }, {
                 key: "sendToParent",
                 value: function(name, data) {
-                    if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)()) throw new Error("Can not find parent component window to message");
+                    var parentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)();
+                    if (!parentWindow) throw new Error("Can not find parent component window to message");
                     this.component.log("send_to_parent_" + name);
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src__.send)(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)(), name, data, {
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_post_robot_src__.send)(parentWindow, name, data, {
                         domain: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.a)()
                     });
                 }
@@ -3584,9 +3582,8 @@
                 key: "watchForClose",
                 value: function() {
                     var _this3 = this;
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)(), function() {
-                        _this3.component.log("parent_window_closed");
-                        if (_this3.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this3.destroy();
+                    window.addEventListener("unload", function() {
+                        return _this3.userClose();
                     });
                 }
             }, {
@@ -3611,7 +3608,7 @@
                         height = !0;
                     }
                     var element = void 0;
-                    autoResize.element && (element = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(autoResize.element));
+                    autoResize.element && (element = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(autoResize.element));
                     element || (element = window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement);
                     return {
                         width: width,
@@ -3626,9 +3623,9 @@
                     if ((width || height) && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            return __WEBPACK_IMPORTED_MODULE_6__lib__.k;
+                            return __WEBPACK_IMPORTED_MODULE_6__lib__.j;
                         }).then(function() {
-                            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(element, {
+                            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(element, {
                                 width: width,
                                 height: height
                             })) return _this4.resizeToElement(element, {
@@ -3636,8 +3633,8 @@
                                 height: height
                             });
                         }).then(function() {
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(function() {
-                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.n)(element, {
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(function() {
+                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(element, {
                                     width: width,
                                     height: height
                                 }).then(function(dimensions) {
@@ -3684,7 +3681,7 @@
                     var _this6 = this, width = _ref6.width, height = _ref6.height, history = [];
                     return function resize() {
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(el, {
+                            for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.n)(el, {
                                 width: width,
                                 height: height
                             }), _tracker$check = tracker.check(), dimensions = _tracker$check.dimensions, _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
@@ -3814,7 +3811,7 @@
             errorOnCloseDuringInit: !0,
             open: function(element, url) {
                 var _this = this;
-                if (element && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.j)(element)) throw this.component.error("Can not find element " + element);
+                if (element && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.i)(element)) throw this.component.error("Can not find element " + element);
                 var options = {
                     url: url,
                     attributes: {
@@ -3830,7 +3827,7 @@
                 if (this.component.sacrificialComponentTemplate) {
                     sacrificialIframe = this.sacrificialIframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.R)(sacrificialOptions, this.element);
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(frame);
-                    var switchFrames = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.r)(function() {
+                    var switchFrames = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.q)(function() {
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(sacrificialIframe);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.S)(sacrificialIframe);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(frame);
@@ -3942,7 +3939,7 @@
                     });
                 };
                 if (prop.memoize) {
-                    var _val = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(value);
+                    var _val = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(value);
                     value = function() {
                         return _val();
                     };
@@ -3959,10 +3956,10 @@
                         component.log("call_prop_" + key);
                         return original.apply(this, arguments);
                     };
-                    prop.once && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.r)(value));
-                    prop.memoize && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.t)(value));
+                    prop.once && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.q)(value));
+                    prop.memoize && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.s)(value));
                 } else if (!value && prop.noop) {
-                    value = __WEBPACK_IMPORTED_MODULE_2__lib__.C;
+                    value = __WEBPACK_IMPORTED_MODULE_2__lib__.B;
                     prop.denodeify && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.X)(value));
                     prop.promisify && (value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.Y)(value));
                 }
@@ -6112,7 +6109,7 @@
             uid: {
                 type: "string",
                 def: function() {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.s)();
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.r)();
                 },
                 queryParam: !0
             },
@@ -6393,7 +6390,7 @@
             _createClass(DelegateComponent, [ {
                 key: "watchForClose",
                 value: function() {
-                    var _this2 = this, closeListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.i)(this.source, function() {
+                    var _this2 = this, closeListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.C)(this.source, function() {
                         return _this2.destroy();
                     }), unloadListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.D)(window, "unload", closeListener.cancel);
                     this.clean.register(function() {
@@ -6942,14 +6939,15 @@
             return frame;
         }
         function onCloseWindow(win, callback) {
+            var int = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 3e3;
             callback = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__fn__.a)(callback);
             var interval = void 0, checkWindowClosed = function() {
-                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.a)(win, !1)) {
+                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.a)(win)) {
                     interval.cancel();
                     return callback();
                 }
             };
-            interval = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.e)(checkWindowClosed, 50);
+            interval = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.e)(checkWindowClosed, int);
             checkWindowClosed();
             return {
                 cancel: function() {
@@ -7318,36 +7316,36 @@
             return el;
         }
         __webpack_exports__.z = appendChild;
-        __webpack_exports__.d = getElement;
-        __webpack_require__.d(__webpack_exports__, "e", function() {
+        __webpack_exports__.c = getElement;
+        __webpack_require__.d(__webpack_exports__, "d", function() {
             return documentReady;
         });
-        __webpack_exports__.n = elementReady;
-        __webpack_exports__.k = writeToWindow;
+        __webpack_exports__.m = elementReady;
+        __webpack_exports__.j = writeToWindow;
         __webpack_exports__.y = writeElementToWindow;
         __webpack_exports__.v = awaitFrameLoad;
         __webpack_exports__.C = awaitFrameWindow;
         __webpack_exports__.A = iframe;
-        __webpack_exports__.c = onCloseWindow;
+        __webpack_exports__.n = onCloseWindow;
         __webpack_exports__.o = addEventListener;
         __webpack_exports__.b = getDomain;
         __webpack_exports__.E = getDomainFromUrl;
-        __webpack_exports__.l = extendUrl;
+        __webpack_exports__.k = extendUrl;
         __webpack_exports__.q = elementStoppedMoving;
         __webpack_exports__.p = setOverflow;
-        __webpack_exports__.h = trackDimensions;
-        __webpack_exports__.g = onDimensionsChange;
-        __webpack_exports__.f = dimensionsMatchViewport;
+        __webpack_exports__.g = trackDimensions;
+        __webpack_exports__.f = onDimensionsChange;
+        __webpack_exports__.e = dimensionsMatchViewport;
         __webpack_exports__.s = showElement;
         __webpack_exports__.r = hideElement;
         __webpack_exports__.B = destroyElement;
         __webpack_exports__.t = showAndAnimate;
         __webpack_exports__.u = animateAndHide;
-        __webpack_exports__.i = addClass;
+        __webpack_exports__.h = addClass;
         __webpack_exports__.a = getCurrentScriptDir;
-        __webpack_exports__.m = getElementName;
+        __webpack_exports__.l = getElementName;
         __webpack_exports__.D = watchElementForClose;
-        __webpack_exports__.j = prefetchPage;
+        __webpack_exports__.i = prefetchPage;
         __webpack_exports__.x = getDOMElement;
         __webpack_exports__.w = jsxDom;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_cross_domain_safe_weakmap_src__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_3__fn__ = __webpack_require__(35), __WEBPACK_IMPORTED_MODULE_4__util__ = __webpack_require__(23), _slicedToArray = (__webpack_require__(18), 
