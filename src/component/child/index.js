@@ -276,15 +276,8 @@ export class ChildComponent extends BaseComponent {
         }
     }
 
-
-    /*  Watch For Close
-        ---------------
-
-        Watch both the parent window and the parent component window, if they close, close this window too.
-    */
-
     watchForClose() {
-        window.addEventListener('unload', () => this.userClose());
+        window.addEventListener('unload', () => this.checkClose());
     }
 
     enableAutoResize({ width = true, height = true } = {}) {
@@ -467,6 +460,12 @@ export class ChildComponent extends BaseComponent {
         // Ask our parent window to close us
 
         this.sendToParent(POST_MESSAGE.CLOSE, { reason }, {
+            fireAndForget: true
+        });
+    }
+
+    checkClose() {
+        this.sendToParent(POST_MESSAGE.CHECK_CLOSE, {}, {
             fireAndForget: true
         });
     }

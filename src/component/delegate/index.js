@@ -1,8 +1,9 @@
 
+import { onCloseWindow } from 'cross-domain-utils/src';
+
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS } from '../parent/drivers';
-import { onCloseWindow, addEventListener } from '../../lib';
 
 export class DelegateComponent extends BaseComponent {
 
@@ -60,13 +61,7 @@ export class DelegateComponent extends BaseComponent {
     }
 
     watchForClose() {
-        let closeListener = onCloseWindow(this.source, () => this.destroy());
-        let unloadListener = addEventListener(window, 'unload', closeListener.cancel);
-
-        this.clean.register(() => {
-            closeListener.cancel();
-            unloadListener.cancel();
-        });
+        onCloseWindow(this.source, 3000).then(() => this.destroy());
     }
 
     getOverrides(context) {

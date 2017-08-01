@@ -3,7 +3,7 @@ import { isWindowClosed, linkFrameWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
-import { once, noop, memoize, debounce } from './fn';
+import { once, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
 import { PopupOpenError } from '../error';
 
@@ -299,38 +299,6 @@ export function iframe(options = {}, container) {
 
     return frame;
 }
-
-
-/*  On Close Window
-    ---------------
-
-    Wait for the specified window to close or cease to exist, then call the callback
-*/
-
-export function onCloseWindow(win, callback, int = 3000) {
-
-    callback = once(callback);
-
-    let interval;
-
-    let checkWindowClosed = () => {
-        if (isWindowClosed(win)) {
-            interval.cancel();
-            return callback();
-        }
-    };
-
-    interval = safeInterval(checkWindowClosed, int);
-    checkWindowClosed();
-
-    return {
-        cancel() {
-            interval.cancel();
-            callback = noop;
-        }
-    };
-}
-
 
 /*  Add Event Listener
     ------------------

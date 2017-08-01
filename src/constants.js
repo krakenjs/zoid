@@ -10,6 +10,7 @@ export const POST_MESSAGE = {
     PROPS: `${XCOMPONENT}_props`,
     PROP_CALLBACK: `${XCOMPONENT}_prop_callback`,
     CLOSE: `${XCOMPONENT}_close`,
+    CHECK_CLOSE: `${XCOMPONENT}_check_close`,
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
     DELEGATE: `${XCOMPONENT}_delegate`,

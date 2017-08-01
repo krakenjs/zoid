@@ -1,12 +1,12 @@
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, getDistanceFromTop } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, getDistanceFromTop, onCloseWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { onCloseWindow, addEventListener, uniqueID, elementReady, writeElementToWindow,
+import { addEventListener, uniqueID, elementReady, writeElementToWindow,
          noop, showAndAnimate, animateAndHide, showElement, hideElement,
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
@@ -634,8 +634,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     watchForClose() {
-
-        let closeWindowListener = onCloseWindow(this.window, () => {
+        onCloseWindow(this.window, 3000).then(() => {
             this.component.log(`detect_close_child`);
 
             if (this.driver.errorOnCloseDuringInit) {
@@ -649,15 +648,12 @@ export class ParentComponent extends BaseComponent {
             });
         });
 
-        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
-
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
 
         let onunload = once(() => {
             this.component.log(`navigate_away`);
             $logger.flush();
-            closeWindowListener.cancel();
             this.destroyComponent();
         });
 
@@ -763,6 +759,10 @@ export class ParentComponent extends BaseComponent {
                 this.close(data.reason);
             },
 
+            [ POST_MESSAGE.CHECK_CLOSE ](source, data) {
+                this.checkClose();
+            },
+
             // Iframes can't resize themselves, so they need the parent to take care of it for them.
 
             [ POST_MESSAGE.RESIZE ](source, data) {
@@ -849,6 +849,19 @@ export class ParentComponent extends BaseComponent {
     }
 
 
+    checkClose() {
+        if (this.window && isWindowClosed(this.window)) {
+            this.userClose();
+        } else {
+            setTimeout(() => {
+                if (this.window && isWindowClosed(this.window)) {
+                    this.userClose();
+                }
+            }, 10);
+        }
+    }
+
+
     userClose() {
         return this.close(CLOSE_REASONS.USER_CLOSED);
     }
@@ -916,7 +929,6 @@ export class ParentComponent extends BaseComponent {
     @memoized
     closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
 
-        this.clean.run('destroyCloseWindowListener');
         this.clean.run('destroyUnloadWindowListener');
 
         let win = this.window;
