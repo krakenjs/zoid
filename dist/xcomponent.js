@@ -4040,7 +4040,7 @@
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.S)(sacrificialIframe);
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(frame);
                     });
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(frame, switchFrames);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(frame).then(switchFrames);
                     this.onInit.then(switchFrames);
                 }
                 return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.all([ __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.T)(frame), sacrificialIframe && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.T)(sacrificialIframe) ]).then(function(_ref) {
