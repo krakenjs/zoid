@@ -29,7 +29,7 @@ describe('xcomponent actions', () => {
             onEnter() {
                 onCloseWindow(this.window, () => {
                     done();
-                });
+                }, 50);
 
                 this.close();
             }

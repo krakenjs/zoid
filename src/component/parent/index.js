@@ -330,7 +330,7 @@ export class ParentComponent extends BaseComponent {
             : { type: INITIAL_PROPS.RAW, value: sProps };
 
         if (props.type === INITIAL_PROPS.UID) {
-            global.props[uid] = sProps;
+            global.props[uid] = JSON.stringify(sProps);
         }
 
         return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props });

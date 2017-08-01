@@ -6,7 +6,7 @@ import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, onCloseWindow, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
+import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
          cycle, globalFor, setLogLevel, getElement, documentReady, getDomain } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
@@ -130,7 +130,7 @@ export class ChildComponent extends BaseComponent {
                     throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
                 }
 
-                props = globalFor(parentComponentWindow).props[componentMeta.uid];
+                props = JSON.parse(globalFor(parentComponentWindow).props[componentMeta.uid]);
 
             } else {
                 throw new Error(`Unrecognized props type: ${props.type}`);
@@ -175,7 +175,7 @@ export class ChildComponent extends BaseComponent {
 
         this.component.log(`send_to_parent_${name}`);
 
-        return send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
+        return send(parentWindow, name, data, { domain: getParentDomain() });
     }
 
 
@@ -284,18 +284,7 @@ export class ChildComponent extends BaseComponent {
     */
 
     watchForClose() {
-
-        onCloseWindow(getParentComponentWindow(), () => {
-
-            this.component.log(`parent_window_closed`);
-
-            // We only need to close ourselves if we're a popup -- otherwise our parent window closing will automatically
-            // close us, if we're an iframe
-
-            if (this.context === CONTEXT_TYPES.POPUP) {
-                return this.destroy();
-            }
-        });
+        window.addEventListener('unload', () => this.userClose());
     }
 
     enableAutoResize({ width = true, height = true } = {}) {

@@ -1,8 +1,8 @@
 
-import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, isSameDomain, getAncestor } from 'cross-domain-utils/src';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
-import { memoize, uniqueID, getDomain } from '../lib';
-import { XCOMPONENT, WINDOW_REFERENCES, __XCOMPONENT__ } from '../constants';
+import { memoize, uniqueID, getDomain, globalFor } from '../lib';
+import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 
 
 function normalize(str) {
@@ -90,12 +90,6 @@ export let isXComponentWindow = memoize(() => {
     return Boolean(getComponentMeta());
 });
 
-function getGlobal(win) {
-    if (isSameDomain(win)) {
-        return win[__XCOMPONENT__];
-    }
-}
-
 function getWindowByRef({ ref, uid, distance }) {
 
     if (ref === WINDOW_REFERENCES.OPENER) {
@@ -117,7 +111,7 @@ function getWindowByRef({ ref, uid, distance }) {
 
     if (ref === WINDOW_REFERENCES.GLOBAL) {
         for (let frame of getAllFramesInWindow(getAncestor(window))) {
-            let global = getGlobal(frame);
+            let global = globalFor(frame);
 
             if (global && global.windows && global.windows[uid]) {
                 return global.windows[uid];

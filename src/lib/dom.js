@@ -307,21 +307,20 @@ export function iframe(options = {}, container) {
     Wait for the specified window to close or cease to exist, then call the callback
 */
 
-export function onCloseWindow(win, callback) {
+export function onCloseWindow(win, callback, int = 3000) {
 
     callback = once(callback);
 
     let interval;
 
     let checkWindowClosed = () => {
-
-        if (isWindowClosed(win, false)) {
+        if (isWindowClosed(win)) {
             interval.cancel();
             return callback();
         }
     };
 
-    interval = safeInterval(checkWindowClosed, 50);
+    interval = safeInterval(checkWindowClosed, int);
     checkWindowClosed();
 
     return {

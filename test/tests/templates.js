@@ -45,7 +45,7 @@ describe('xcomponent templates and styles', () => {
             onEnter() {
                 onCloseWindow(this.window, () => {
                     done();
-                });
+                }, 50);
 
                 this.container.querySelector('.xcomponent-close').click();
             }
