@@ -74,7 +74,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
                 showElement(frame);
             });
 
-            awaitFrameLoad(frame, switchFrames);
+            awaitFrameLoad(frame).then(switchFrames);
             this.onInit.then(switchFrames);
         }
 
