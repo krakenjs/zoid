@@ -869,15 +869,11 @@ export class ParentComponent extends BaseComponent {
 
 
     checkClose() {
-        if (this.window && isWindowClosed(this.window)) {
+        let closeWindowListener = onCloseWindow(this.window, () => {
             this.userClose();
-        } else {
-            setTimeout(() => {
-                if (this.window && isWindowClosed(this.window)) {
-                    this.userClose();
-                }
-            }, 10);
-        }
+        }, 50, 500);
+
+        this.clean.register(closeWindowListener.cancel);
     }
 
 
