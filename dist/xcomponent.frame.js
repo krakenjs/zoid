@@ -2192,6 +2192,9 @@
                     };
                     var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)();
                     __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid] = window;
+                    this.clean.register(function() {
+                        delete __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid];
+                    });
                     return {
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.GLOBAL,
                         uid: uid
@@ -2204,6 +2207,9 @@
                     if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
                     var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)();
                     __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid] = renderToWindow;
+                    this.clean.register(function() {
+                        delete __WEBPACK_IMPORTED_MODULE_6__lib__.t.windows[uid];
+                    });
                     return {
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.GLOBAL,
                         uid: uid
@@ -2219,7 +2225,12 @@
                         type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.RAW,
                         value: sProps
                     };
-                    props.type === __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID && (__WEBPACK_IMPORTED_MODULE_6__lib__.t.props[uid] = JSON.stringify(sProps));
+                    if (props.type === __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID) {
+                        __WEBPACK_IMPORTED_MODULE_6__lib__.t.props[uid] = sProps;
+                        this.clean.register(function() {
+                            delete __WEBPACK_IMPORTED_MODULE_6__lib__.t.props[uid];
+                        });
+                    }
                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.e)(this.component.name, this.component.version, {
                         uid: uid,
                         tag: tag,
@@ -3542,7 +3553,7 @@
                                 if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
                                 throw new Error("Parent component window is on a different domain - expected " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.d)() + " - can not retrieve props");
                             }
-                            props = JSON.parse(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.e)(parentComponentWindow).props[componentMeta.uid]);
+                            props = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.e)(parentComponentWindow).props[componentMeta.uid];
                         }
                         if (!props) throw new Error("Initial props not found");
                         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.f)(props, function(_ref2) {
