@@ -419,10 +419,10 @@
         function matchDomain(pattern, origin) {
             if ("string" == typeof pattern) {
                 if ("string" == typeof origin) return pattern === CONSTANTS.WILDCARD || origin === pattern;
-                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__util__.a)(origin)) return !1;
+                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.a)(origin)) return !1;
                 if (Array.isArray(origin)) return !1;
             }
-            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__util__.a)(pattern) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__util__.a)(origin) ? pattern.toString() === origin.toString() : !Array.isArray(origin) && Boolean(origin.match(pattern)) : !!Array.isArray(pattern) && (Array.isArray(origin) ? JSON.stringify(pattern) === JSON.stringify(origin) : !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__util__.a)(origin) && pattern.some(function(subpattern) {
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.a)(pattern) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.a)(origin) ? pattern.toString() === origin.toString() : !Array.isArray(origin) && Boolean(origin.match(pattern)) : !!Array.isArray(pattern) && (Array.isArray(origin) ? JSON.stringify(pattern) === JSON.stringify(origin) : !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__.a)(origin) && pattern.some(function(subpattern) {
                 return matchDomain(subpattern, origin);
             }));
         }
@@ -433,18 +433,20 @@
             domain = domain.split("/").slice(0, 3).join("/");
             return domain;
         }
-        function onCloseWindow(win) {
-            var delay = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1e3, promises = closeWindowPromises.get(win) || {};
-            if (promises[delay]) return promises[delay];
-            var promise = new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve) {
-                !function check() {
-                    if (isWindowClosed(win)) return resolve();
-                    setTimeout(check, delay);
-                }();
-            });
-            promises[delay] = promise;
-            closeWindowPromises.set(win, promises);
-            return promise;
+        function onCloseWindow(win, callback) {
+            var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, timeout = void 0;
+            !function check() {
+                if (isWindowClosed(win)) {
+                    timeout && clearTimeout(timeout);
+                    return callback();
+                }
+                timeout = setTimeout(check, delay);
+            }();
+            return {
+                cancel: function() {
+                    timeout && clearTimeout(timeout);
+                }
+            };
         }
         __webpack_exports__.i = getActualDomain;
         __webpack_exports__.g = getDomain;
@@ -472,11 +474,11 @@
         __webpack_exports__.d = matchDomain;
         __webpack_exports__.m = getDomainFromUrl;
         __webpack_exports__.y = onCloseWindow;
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(44), CONSTANTS = {
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_1__util__ = __webpack_require__(44), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
             WILDCARD: "*"
-        }, iframeWindows = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a(), closeWindowPromises = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
+        }, iframeWindows = new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         var __WEBPACK_IMPORTED_MODULE_0__promise__ = __webpack_require__(65);
@@ -2646,8 +2648,7 @@
             }, {
                 key: "watchForClose",
                 value: function() {
-                    var _this11 = this;
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.y)(this.window, 3e3).then(function() {
+                    var _this11 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.y)(this.window, function() {
                         _this11.component.log("detect_close_child");
                         _this11.driver.errorOnCloseDuringInit && _this11.onInit.reject(new Error("Detected close during init"));
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
@@ -2655,13 +2656,14 @@
                         }).finally(function() {
                             return _this11.destroy();
                         });
-                    });
-                    var onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
+                    }, 3e3), onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
                         _this11.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
                         _this11.destroyComponent();
+                        closeWindowListener.cancel();
                     }), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(window, "unload", onunload);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
+                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 }
             }, {
                 key: "loadUrl",
@@ -7087,10 +7089,10 @@
             _createClass(DelegateComponent, [ {
                 key: "watchForClose",
                 value: function() {
-                    var _this2 = this;
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.y)(this.source, 3e3).then(function() {
+                    var _this2 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.y)(this.source, function() {
                         return _this2.destroy();
-                    });
+                    }, 3e3);
+                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 }
             }, {
                 key: "getOverrides",
