@@ -297,6 +297,10 @@ export class ParentComponent extends BaseComponent {
         let uid = uniqueID();
         global.windows[uid] = window;
 
+        this.clean.register(() => {
+            delete global.windows[uid];
+        });
+
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
@@ -308,6 +312,10 @@ export class ParentComponent extends BaseComponent {
 
         let uid = uniqueID();
         global.windows[uid] = renderToWindow;
+
+        this.clean.register(() => {
+            delete global.windows[uid];
+        });
 
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
@@ -330,7 +338,11 @@ export class ParentComponent extends BaseComponent {
             : { type: INITIAL_PROPS.RAW, value: sProps };
 
         if (props.type === INITIAL_PROPS.UID) {
-            global.props[uid] = JSON.stringify(sProps);
+            global.props[uid] = sProps;
+
+            this.clean.register(() => {
+                delete global.props[uid];
+            });
         }
 
         return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props });

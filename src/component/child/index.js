@@ -130,7 +130,7 @@ export class ChildComponent extends BaseComponent {
                     throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
                 }
 
-                props = JSON.parse(globalFor(parentComponentWindow).props[componentMeta.uid]);
+                props = globalFor(parentComponentWindow).props[componentMeta.uid];
 
             } else {
                 throw new Error(`Unrecognized props type: ${props.type}`);
