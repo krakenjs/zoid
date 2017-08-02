@@ -60,6 +60,8 @@ export class ParentComponent extends BaseComponent {
 
         this.component.log(`construct_parent`);
 
+        this.watchForUnload();
+
         this.onInit = new ZalgoPromise();
 
         this.clean.register(() => {
@@ -660,6 +662,11 @@ export class ParentComponent extends BaseComponent {
             });
         }, 3000);
 
+        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+    }
+
+    watchForUnload() {
+
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
 
@@ -667,13 +674,11 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`navigate_away`);
             $logger.flush();
             this.destroyComponent();
-            closeWindowListener.cancel();
         });
 
         let unloadWindowListener = addEventListener(window, 'unload', onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
-        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 
 
@@ -943,8 +948,6 @@ export class ParentComponent extends BaseComponent {
     @memoized
     closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
 
-        this.clean.run('destroyUnloadWindowListener');
-
         let win = this.window;
 
         return ZalgoPromise.try(() => {
@@ -976,6 +979,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     destroyComponent() {
+        this.clean.run('destroyUnloadWindowListener');
         this.clean.run('destroyCloseWindowListener');
         this.clean.run('destroyContainerEvents');
         this.clean.run('destroyWindow');
