@@ -43,9 +43,9 @@ describe('xcomponent templates and styles', () => {
         testComponent.renderIframe({
 
             onEnter() {
-                onCloseWindow(this.window, 50).then(() => {
+                onCloseWindow(this.window, () => {
                     done();
-                });
+                }, 50);
 
                 this.container.querySelector('.xcomponent-close').click();
             }

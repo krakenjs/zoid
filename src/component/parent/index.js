@@ -646,7 +646,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     watchForClose() {
-        onCloseWindow(this.window, 3000).then(() => {
+        let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
 
             if (this.driver.errorOnCloseDuringInit) {
@@ -658,7 +658,7 @@ export class ParentComponent extends BaseComponent {
             }).finally(() => {
                 return this.destroy();
             });
-        });
+        }, 3000);
 
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
@@ -667,11 +667,13 @@ export class ParentComponent extends BaseComponent {
             this.component.log(`navigate_away`);
             $logger.flush();
             this.destroyComponent();
+            closeWindowListener.cancel();
         });
 
         let unloadWindowListener = addEventListener(window, 'unload', onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
+        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 
 

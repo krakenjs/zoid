@@ -61,7 +61,8 @@ export class DelegateComponent extends BaseComponent {
     }
 
     watchForClose() {
-        onCloseWindow(this.source, 3000).then(() => this.destroy());
+        let closeWindowListener = onCloseWindow(this.source, () => this.destroy(), 3000);
+        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 
     getOverrides(context) {

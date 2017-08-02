@@ -27,9 +27,9 @@ describe('xcomponent actions', () => {
         testComponent.renderIframe({
 
             onEnter() {
-                onCloseWindow(this.window, 50).then(() => {
+                onCloseWindow(this.window, () => {
                     done();
-                });
+                }, 50);
 
                 this.close();
             }
