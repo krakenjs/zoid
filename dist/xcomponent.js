@@ -2231,6 +2231,7 @@
                 });
                 _this.registerActiveComponent();
                 _this.component.log("construct_parent");
+                _this.watchForUnload();
                 _this.onInit = new __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a();
                 _this.clean.register(function() {
                     _this.onInit = new __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a();
@@ -2656,14 +2657,18 @@
                         }).finally(function() {
                             return _this11.destroy();
                         });
-                    }, 3e3), onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
-                        _this11.component.log("navigate_away");
+                    }, 3e3);
+                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                }
+            }, {
+                key: "watchForUnload",
+                value: function() {
+                    var _this12 = this, onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
+                        _this12.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
-                        _this11.destroyComponent();
-                        closeWindowListener.cancel();
+                        _this12.destroyComponent();
                     }), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(window, "unload", onunload);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
-                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 }
             }, {
                 key: "loadUrl",
@@ -2684,19 +2689,19 @@
             }, {
                 key: "runTimeout",
                 value: function() {
-                    var _this12 = this;
+                    var _this13 = this;
                     if (this.props.timeout) {
                         this.timeout = setTimeout(function() {
-                            _this12.component.log("timed_out", {
-                                timeout: _this12.props.timeout
+                            _this13.component.log("timed_out", {
+                                timeout: _this13.props.timeout
                             });
-                            var error = _this12.component.error("Loading component timed out after " + _this12.props.timeout + " milliseconds");
-                            _this12.onInit.reject(error);
-                            _this12.props.onTimeout(error);
+                            var error = _this13.component.error("Loading component timed out after " + _this13.props.timeout + " milliseconds");
+                            _this13.onInit.reject(error);
+                            _this13.props.onTimeout(error);
                         }, this.props.timeout);
                         this.clean.register(function() {
-                            clearTimeout(_this12.timeout);
-                            delete _this12.timeout;
+                            clearTimeout(_this13.timeout);
+                            delete _this13.timeout;
                         });
                     }
                 }
@@ -2758,9 +2763,9 @@
             }, {
                 key: "checkClose",
                 value: function() {
-                    var _this13 = this;
+                    var _this14 = this;
                     this.window && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(this.window) ? this.userClose() : setTimeout(function() {
-                        _this13.window && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(_this13.window) && _this13.userClose();
+                        _this14.window && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(_this14.window) && _this14.userClose();
                     }, 10);
                 }
             }, {
@@ -2771,30 +2776,30 @@
             }, {
                 key: "close",
                 value: function() {
-                    var _this14 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this15 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        _this14.component.log("close", {
+                        _this15.component.log("close", {
                             reason: reason
                         });
-                        _this14.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
-                        return _this14.props.onClose(reason);
+                        _this15.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
+                        return _this15.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ _this14.closeComponent(), _this14.closeContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ _this15.closeComponent(), _this15.closeContainer() ]);
                     }).then(function() {
-                        return _this14.destroy();
+                        return _this15.destroy();
                     });
                 }
             }, {
                 key: "closeContainer",
                 value: function() {
-                    var _this15 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
+                    var _this16 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        _this15.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
-                        return _this15.props.onClose(reason);
+                        _this16.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
+                        return _this16.props.onClose(reason);
                     }).then(function() {
-                        return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ _this15.closeComponent(reason), _this15.hideContainer() ]);
+                        return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ _this16.closeComponent(reason), _this16.hideContainer() ]);
                     }).then(function() {
-                        return _this15.destroyContainer();
+                        return _this16.destroyContainer();
                     });
                 }
             }, {
@@ -2806,25 +2811,24 @@
             }, {
                 key: "closeComponent",
                 value: function() {
-                    var _this16 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL;
-                    this.clean.run("destroyUnloadWindowListener");
-                    var win = this.window;
+                    var _this17 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : __WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.PARENT_CALL, win = this.window;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        return _this16.cancelContainerEvents();
+                        return _this17.cancelContainerEvents();
                     }).then(function() {
-                        _this16.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
-                        return _this16.props.onClose(reason);
+                        _this17.event.triggerOnce(__WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS.CLOSE);
+                        return _this17.props.onClose(reason);
                     }).then(function() {
-                        return _this16.hideComponent();
+                        return _this17.hideComponent();
                     }).then(function() {
-                        return _this16.destroyComponent();
+                        return _this17.destroyComponent();
                     }).then(function() {
-                        _this16.childExports && _this16.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win) && _this16.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.B);
+                        _this17.childExports && _this17.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win) && _this17.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.B);
                     });
                 }
             }, {
                 key: "destroyComponent",
                 value: function() {
+                    this.clean.run("destroyUnloadWindowListener");
                     this.clean.run("destroyCloseWindowListener");
                     this.clean.run("destroyContainerEvents");
                     this.clean.run("destroyWindow");
@@ -2832,21 +2836,21 @@
             }, {
                 key: "showContainer",
                 value: function() {
-                    var _this17 = this;
+                    var _this18 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        if (_this17.props.onDisplay) return _this17.props.onDisplay();
+                        if (_this18.props.onDisplay) return _this18.props.onDisplay();
                     }).then(function() {
-                        if (_this17.container) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)(_this17.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_CONTAINER, _this17.clean.register);
+                        if (_this18.container) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)(_this18.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_CONTAINER, _this18.clean.register);
                     });
                 }
             }, {
                 key: "showComponent",
                 value: function() {
-                    var _this18 = this;
+                    var _this19 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        if (_this18.props.onDisplay) return _this18.props.onDisplay();
+                        if (_this19.props.onDisplay) return _this19.props.onDisplay();
                     }).then(function() {
-                        if (_this18.element) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)(_this18.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this18.clean.register);
+                        if (_this19.element) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.H)(_this19.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this19.clean.register);
                     });
                 }
             }, {
@@ -2869,14 +2873,14 @@
             }, {
                 key: "createComponentTemplate",
                 value: function() {
-                    var _this19 = this;
+                    var _this20 = this;
                     if (this.component.componentTemplate) return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        var frame = _this19.sacrificialIframe || _this19.iframe;
+                        var frame = _this20.sacrificialIframe || _this20.iframe;
                         if (frame) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.J)(frame);
                     }).then(function() {
-                        var win = _this19.componentTemplateWindow || _this19.window;
+                        var win = _this20.componentTemplateWindow || _this20.window;
                         if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.j)(win)) {
-                            var html = _this19.renderTemplate(_this19.component.componentTemplate, {
+                            var html = _this20.renderTemplate(_this20.component.componentTemplate, {
                                 jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K.bind(win.document),
                                 htmlDom: function(text) {
                                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(text, win.document);
@@ -2890,7 +2894,7 @@
             }, {
                 key: "renderTemplate",
                 value: function(renderer) {
-                    var _this20 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                    var _this21 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                     return renderer.call(this, _extends({
                         id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + this.component.tag + "-" + this.props.uid,
                         props: renderer.__xdomain__ ? null : this.props,
@@ -2903,14 +2907,14 @@
                         EVENT: __WEBPACK_IMPORTED_MODULE_7__constants__.EVENTS,
                         actions: {
                             close: function() {
-                                return _this20.userClose();
+                                return _this21.userClose();
                             },
                             focus: function() {
-                                return _this20.focus();
+                                return _this21.focus();
                             }
                         },
                         on: function(eventName, handler) {
-                            return _this20.on(eventName, handler);
+                            return _this21.on(eventName, handler);
                         },
                         jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.K,
                         htmlDom: __WEBPACK_IMPORTED_MODULE_6__lib__.L,
@@ -2920,7 +2924,7 @@
             }, {
                 key: "openContainer",
                 value: function(element) {
-                    var _this21 = this, el = void 0;
+                    var _this22 = this, el = void 0;
                     if (element) {
                         el = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(element);
                         if (!el) throw new Error("Could not find element: " + element);
@@ -2945,8 +2949,8 @@
                             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.F)(this.element);
                         }
                         this.clean.register("destroyContainerTemplate", function() {
-                            _this21.container && _this21.container.parentNode && _this21.container.parentNode.removeChild(_this21.container);
-                            delete _this21.container;
+                            _this22.container && _this22.container.parentNode && _this22.container.parentNode.removeChild(_this22.container);
+                            delete _this22.container;
                         });
                     } else if (this.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + this.context);
                 }
@@ -2958,42 +2962,42 @@
             }, {
                 key: "destroy",
                 value: function() {
-                    var _this22 = this;
+                    var _this23 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        if (_this22.clean.hasTasks()) {
-                            _this22.component.log("destroy");
+                        if (_this23.clean.hasTasks()) {
+                            _this23.component.log("destroy");
                             __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
-                            return _this22.clean.all();
+                            return _this23.clean.all();
                         }
                     });
                 }
             }, {
                 key: "tryInit",
                 value: function(method) {
-                    var _this23 = this;
+                    var _this24 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(method).catch(function(err) {
-                        _this23.onInit.reject(err);
+                        _this24.onInit.reject(err);
                         throw err;
                     }).then(function() {
-                        return _this23.onInit;
+                        return _this24.onInit;
                     });
                 }
             }, {
                 key: "error",
                 value: function(err) {
-                    var _this24 = this;
+                    var _this25 = this;
                     this.handledErrors = this.handledErrors || [];
                     if (-1 === this.handledErrors.indexOf(err)) {
                         this.handledErrors.push(err);
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            _this24.onInit.reject(err);
-                            return _this24.destroy();
+                            _this25.onInit.reject(err);
+                            return _this25.destroy();
                         }).then(function() {
-                            if (_this24.props.onError) return _this24.props.onError(err);
+                            if (_this25.props.onError) return _this25.props.onError(err);
                         }).catch(function(errErr) {
                             throw new Error("An error was encountered while handling error:\n\n " + err.stack + "\n\n" + errErr.stack);
                         }).then(function() {
-                            if (!_this24.props.onError) throw err;
+                            if (!_this25.props.onError) throw err;
                         });
                     }
                 }
