@@ -434,13 +434,16 @@
             return domain;
         }
         function onCloseWindow(win, callback) {
-            var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, timeout = void 0;
+            var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, maxtime = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1 / 0, timeout = void 0;
             !function check() {
                 if (isWindowClosed(win)) {
                     timeout && clearTimeout(timeout);
                     return callback();
                 }
-                timeout = setTimeout(check, delay);
+                if (maxtime <= 0) clearTimeout(timeout); else {
+                    maxtime -= delay;
+                    timeout = setTimeout(check, delay);
+                }
             }();
             return {
                 cancel: function() {
@@ -2763,10 +2766,10 @@
             }, {
                 key: "checkClose",
                 value: function() {
-                    var _this14 = this;
-                    this.window && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(this.window) ? this.userClose() : setTimeout(function() {
-                        _this14.window && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(_this14.window) && _this14.userClose();
-                    }, 10);
+                    var _this14 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.y)(this.window, function() {
+                        _this14.userClose();
+                    }, 50, 500);
+                    this.clean.register(closeWindowListener.cancel);
                 }
             }, {
                 key: "userClose",
