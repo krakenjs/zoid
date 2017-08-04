@@ -5,7 +5,3 @@ body {
 h3 {
     margin: 50px;
 }
-
-#container, #loginContainer, #container div {
-    display: inline-block;
-}
