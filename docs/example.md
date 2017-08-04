@@ -3,7 +3,7 @@
 Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
 that the user has logged in, without exposing any of the users credentials to the parent window.
 
-Take a look at the [demos](./demo/index.md) to see this example in action.
+Take a look at the [demos](http://krakenjs.com/xcomponent/demo/index.htm) to see this example in action.
 
 ### As the component creator
 
