@@ -69,9 +69,11 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             hideElement(frame);
 
             let switchFrames = once(() => {
-                hideElement(sacrificialIframe);
-                destroyElement(sacrificialIframe);
-                showElement(frame);
+                setTimeout(() => {
+                    hideElement(sacrificialIframe);
+                    showElement(frame);
+                    destroyElement(sacrificialIframe);
+                }, 20);
             });
 
             awaitFrameLoad(frame).then(switchFrames);
