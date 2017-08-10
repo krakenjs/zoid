@@ -120,7 +120,13 @@ export function popup(url, options) {
         }
     }).filter(Boolean).join(',');
 
-    let win = window.open(url, options.name, params, true);
+    let win;
+
+    try {
+        win = window.open(url, options.name, params, true);
+    } catch (err) {
+        throw new PopupOpenError(`Can not open popup window - ${ err.stack || err.message }`);
+    }
 
     if (isWindowClosed(win)) {
         let err = new PopupOpenError(`Can not open popup window - blocked`);
