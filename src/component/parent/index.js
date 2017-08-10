@@ -11,7 +11,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
          promise, getDomain, global, writeToWindow, setLogLevel, once,
-         getElementName, prefetchPage, getDOMElement, awaitFrameLoad } from '../../lib';
+         getElementName, prefetchPage, awaitFrameLoad } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -1076,15 +1076,12 @@ export class ParentComponent extends BaseComponent {
                 return;
             }
 
-            let html = this.renderTemplate(this.component.componentTemplate, {
+            let component = this.renderTemplate(this.component.componentTemplate, {
                 jsxDom: jsxDom.bind(win.document),
-                htmlDom: text => getDOMElement(text, win.document),
                 document: win.document
             });
 
-            let el = getDOMElement(html, win.document);
-
-            writeElementToWindow(win, el);
+            writeElementToWindow(win, component);
         });
     }
 
@@ -1112,7 +1109,6 @@ export class ParentComponent extends BaseComponent {
             },
             on: (eventName, handler) => this.on(eventName, handler),
             jsxDom,
-            htmlDom: getDOMElement,
             document,
             ...options
         });
@@ -1145,14 +1141,14 @@ export class ParentComponent extends BaseComponent {
         let containerWidth = el.offsetWidth;
         let containerHeight = el.offsetHeight;
 
-        let html = this.renderTemplate(this.component.containerTemplate, {
+        let container = this.renderTemplate(this.component.containerTemplate, {
             dimensions: {
                 width: containerWidth,
                 height: containerHeight
             }
         });
 
-        this.container = getDOMElement(html);
+        this.container = container;
         hideElement(this.container);
         appendChild(el, this.container);
 

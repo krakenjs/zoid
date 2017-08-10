@@ -147,21 +147,21 @@ export function writeToWindow(win, html) {
 
 export function writeElementToWindow(win, el) {
 
-    let doc        = win.document;
-    let docElement = doc.documentElement;
-    let body       = doc.body;
+    let tag = el.tagName.toLowerCase();
 
-    if (!docElement) {
-        docElement = doc.createElement('html');
-        doc.appendChild(docElement);
+    if (tag !== 'html') {
+        throw new Error(`Expected element to be html, got ${ tag }`);
     }
 
-    if (!body) {
-        body = doc.createElement('body');
-        docElement.appendChild(body);
+    let documentElement = win.document.documentElement;
+
+    while (documentElement.children && documentElement.children.length) {
+        documentElement.removeChild(documentElement.children[0]);
     }
 
-    appendChild(body, el);
+    while (el.children.length) {
+        documentElement.appendChild(el.children[0]);
+    }
 }
 
 export function setStyle(el, styleText, doc = window.document) {
@@ -902,35 +902,17 @@ export function prefetchPage(url) {
     return getHTML(url);
 }
 
-export function getDOMElement(item, doc = document) {
-    if (item && item.ownerDocument) {
-        return item;
-    } else if (typeof item === 'string') {
-        let div = doc.createElement('div');
-        div.innerHTML = item;
-
-        if (div.children.length !== 1) {
-            throw new Error(`Expected 1 child from html, found ${div.children.length}`);
-        }
-
-        let el = div.children[0];
-
-        for (let script of querySelectorAll(el, 'script')) {
-            let newScript = doc.createElement('script');
-            newScript.text = script.textContent;
-            script.parentNode.replaceChild(newScript, script);
-        }
-
-        return el;
-
-    } else {
-        throw new Error(`Expected HTMLElement or string, got ${typeof item}`);
-    }
-}
-
 const JSX_EVENTS = {
     onClick: 'click'
 };
+
+export function fixScripts(el, doc = window.document) {
+    for (let script of querySelectorAll(el, 'script')) {
+        let newScript = doc.createElement('script');
+        newScript.text = script.textContent;
+        script.parentNode.replaceChild(newScript, script);
+    }
+}
 
 export function jsxDom(name, props, content) {
 
@@ -945,6 +927,9 @@ export function jsxDom(name, props, content) {
     for (let prop in props) {
         if (prop in JSX_EVENTS) {
             el.addEventListener(JSX_EVENTS[prop], props[prop]);
+        } else if (prop === 'innerHTML') {
+            el.innerHTML = props[prop];
+            fixScripts(el, doc);
         } else {
             el.setAttribute(prop, props[prop]);
         }
