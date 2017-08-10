@@ -8,6 +8,7 @@ import { iframe, popup, getElement, toCSS, showElement, hideElement,
          awaitFrameWindow, awaitFrameLoad, once } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
+import { PopupOpenError } from '../../error';
 
 /*  Render Drivers
     --------------
@@ -205,18 +206,27 @@ if (__POPUP_SUPPORT__) {
 
             let pos = getPosition({ width, height, x, y });
 
-            this.window = popup(url, {
-                name: this.childWindowName,
-                width,
-                height,
-                top: pos.y,
-                left: pos.x,
-                status: 1,
-                toolbar: 0,
-                menubar: 0,
-                resizable: 1,
-                scrollbars: 1
-            });
+            try {
+                this.window = popup(url, {
+                    name: this.childWindowName,
+                    width,
+                    height,
+                    top: pos.y,
+                    left: pos.x,
+                    status: 1,
+                    toolbar: 0,
+                    menubar: 0,
+                    resizable: 1,
+                    scrollbars: 1
+                });
+            } catch (err) {
+
+                if (err instanceof PopupOpenError) {
+                    this.component.logError(`popup_open_error`);
+                }
+
+                throw err;
+            }
 
             this.clean.register('destroyWindow', () => {
                 if (this.window) {
