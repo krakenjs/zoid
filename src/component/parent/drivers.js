@@ -36,7 +36,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     renderedIntoContainerTemplate: true,
     allowResize: true,
     openOnClick: false,
-    errorOnCloseDuringInit: true,
 
     open(element, url) {
 
@@ -195,7 +194,6 @@ if (__POPUP_SUPPORT__) {
         renderedIntoContainerTemplate: false,
         allowResize: false,
         openOnClick: true,
-        errorOnCloseDuringInit: false,
 
         open(element, url = '') {
 

@@ -651,10 +651,6 @@ export class ParentComponent extends BaseComponent {
         let closeWindowListener = onCloseWindow(this.window, () => {
             this.component.log(`detect_close_child`);
 
-            if (this.driver.errorOnCloseDuringInit) {
-                this.onInit.reject(new Error(`Detected close during init`));
-            }
-
             return ZalgoPromise.try(() => {
                 return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
             }).finally(() => {
