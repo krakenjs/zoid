@@ -2477,7 +2477,6 @@
                 value: function() {
                     var _this11 = this, closeWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.u)(this.window, function() {
                         _this11.component.log("detect_close_child");
-                        _this11.driver.errorOnCloseDuringInit && _this11.onInit.reject(new Error("Detected close during init"));
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                             return _this11.props.onClose(__WEBPACK_IMPORTED_MODULE_7__constants__.CLOSE_REASONS.CLOSE_DETECTED);
                         }).finally(function() {
@@ -3874,7 +3873,6 @@
             renderedIntoContainerTemplate: !0,
             allowResize: !0,
             openOnClick: !1,
-            errorOnCloseDuringInit: !0,
             open: function(element, url) {
                 var _this = this;
                 if (element && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.i)(element)) throw this.component.error("Can not find element " + element);
