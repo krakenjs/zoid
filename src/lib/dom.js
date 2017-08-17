@@ -290,7 +290,8 @@ export function iframe(options = {}, container) {
             backgroundColor: 'transparent',
             ...style
         },
-        html: options.html
+        html: options.html,
+        class: options.class
     });
 
     if (options.url) {
@@ -773,11 +774,25 @@ const STYLE = {
         BLOCK: 'block'
     },
 
+    VISIBILITY: {
+        VISIBLE: 'visible',
+        HIDDEN: 'hidden'
+    },
+
     IMPORTANT: 'important'
 };
 
+export function makeElementVisible(element) {
+    element.style.setProperty('visibility', '');
+}
+
+export function makeElementInvisible(element) {
+    element.style.setProperty('visibility', STYLE.VISIBILITY.HIDDEN, STYLE.IMPORTANT);
+}
+
+
 export function showElement(element) {
-    element.style.display = '';
+    element.style.setProperty('display', '');
 }
 
 export function hideElement(element) {

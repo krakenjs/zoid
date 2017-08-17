@@ -47,8 +47,9 @@ export const CONTEXT_TYPES = {
 };
 
 export const CLASS_NAMES = {
-    XCOMPONENT: `${XCOMPONENT}`,
-    OUTLET:     `${XCOMPONENT}-outlet`
+    XCOMPONENT:        `${XCOMPONENT}`,
+    OUTLET:            `${XCOMPONENT}-outlet`,
+    SACRIFICIAL_FRAME: `${XCOMPONENT}-sacrificial-frame`
 };
 
 export const EVENTS = {

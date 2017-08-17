@@ -5,8 +5,8 @@ import { findFrameByName } from 'cross-domain-utils/src';
 
 import { iframe, popup, getElement, toCSS, showElement, hideElement,
          destroyElement, normalizeDimension, watchElementForClose,
-         awaitFrameWindow, awaitFrameLoad, once } from '../../lib';
-import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS } from '../../constants';
+         awaitFrameWindow, awaitFrameLoad, once, makeElementVisible, makeElementInvisible } from '../../lib';
+import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 import { PopupOpenError } from '../../error';
 
@@ -55,7 +55,10 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             attributes: {
                 name: `__sacrificial__${ this.childWindowName }`,
                 scrolling: this.component.scrolling ? 'yes' : 'no'
-            }
+            },
+            class: [
+                CLASS_NAMES.SACRIFICIAL_FRAME
+            ]
         };
 
         let frame = this.iframe = iframe(options, this.element);
@@ -66,14 +69,14 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
             sacrificialIframe = this.sacrificialIframe = iframe(sacrificialOptions, this.element);
 
-            hideElement(frame);
+            makeElementInvisible(frame);
 
             let switchFrames = once(() => {
-                setTimeout(() => {
-                    hideElement(sacrificialIframe);
-                    showElement(frame);
-                    destroyElement(sacrificialIframe);
-                }, 20);
+
+                makeElementVisible(frame);
+                makeElementInvisible(sacrificialIframe);
+
+                destroyElement(sacrificialIframe);
             });
 
             awaitFrameLoad(frame).then(switchFrames);
