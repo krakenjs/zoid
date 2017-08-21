@@ -25,17 +25,9 @@ window.MyLoginXComponent = xcomponent.create({
             return actions.focus();
         }
 
-        return jsxDom('div', {
-            id,
-            onClick: focus,
-            'class': `${CLASS.XCOMPONENT} ${CLASS.XCOMPONENT}-tag-${tag} ${CLASS.XCOMPONENT}-context-${context} ${CLASS.XCOMPONENT}-focus`
-        },
+        return jsxDom('div', { id, onClick: focus, 'class': `${CLASS.XCOMPONENT} ${CLASS.XCOMPONENT}-tag-${tag} ${CLASS.XCOMPONENT}-context-${context} ${CLASS.XCOMPONENT}-focus` },
 
-            jsxDom('a', {
-                    href: '#',
-                    onClick: close,
-                    'class': `${CLASS.XCOMPONENT}-close`
-            }),
+            jsxDom('a', { href: '#', onClick: close, 'class': `${CLASS.XCOMPONENT}-close` }),
 
             outlet,
 
@@ -67,14 +59,34 @@ window.MyLoginXComponent = xcomponent.create({
                         -ms-transform: translate3d(-50%, -50%, 0);
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} {
+                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} .${CLASS.OUTLET} {
                         height: 150px;
                         width: 300px;
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} iframe {
+                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} .${CLASS.OUTLET} iframe {
                         height: 100%;
                         width: 100%;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        transition: opacity .2s ease-in-out;
+                    }
+
+                    #${ id } > .${ CLASS.OUTLET } > iframe.${ CLASS.VISIBLE } {
+                        opacity: 1;
+                    }
+
+                    #${ id } > .${ CLASS.OUTLET } > iframe.${ CLASS.INVISIBLE } {
+                        opacity: 0;
+                    }
+
+                    #${ id } > .${ CLASS.OUTLET } > iframe.${ CLASS.COMPONENT_FRAME } {
+                        z-index: 200;
+                    }
+
+                    #${ id } > .${ CLASS.OUTLET } > iframe.${ CLASS.PRERENDER_FRAME } {
+                        z-index: 100;
                     }
 
                     #${id} .${CLASS.XCOMPONENT}-close {
