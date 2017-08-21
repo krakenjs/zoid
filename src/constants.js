@@ -13,6 +13,7 @@ export const POST_MESSAGE = {
     CHECK_CLOSE: `${XCOMPONENT}_check_close`,
     REDIRECT: `${XCOMPONENT}_redirect`,
     RESIZE: `${XCOMPONENT}_resize`,
+    ONRESIZE: `${XCOMPONENT}_onresize`,
     DELEGATE: `${XCOMPONENT}_delegate`,
     ERROR: `${XCOMPONENT}_error`,
     HIDE: `${XCOMPONENT}_hide`,

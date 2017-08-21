@@ -56,6 +56,8 @@ export class ChildComponent extends BaseComponent {
 
         this.setWindows();
 
+        this.listenForResize();
+
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -82,6 +84,12 @@ export class ChildComponent extends BaseComponent {
 
             this.error(err);
             throw err;
+        });
+    }
+
+    listenForResize() {
+        window.addEventListener('resize', () => {
+            this.sendToParent(POST_MESSAGE.ONRESIZE);
         });
     }
 

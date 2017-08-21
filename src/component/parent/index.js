@@ -787,6 +787,10 @@ export class ParentComponent extends BaseComponent {
                 }
             },
 
+            [ POST_MESSAGE.ONRESIZE ](source, data) {
+                this.event.trigger('resize');
+            },
+
 
             [ POST_MESSAGE.HIDE ](source, data) {
                 this.hide();
