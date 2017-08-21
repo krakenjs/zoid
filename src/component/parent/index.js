@@ -1142,6 +1142,7 @@ export class ParentComponent extends BaseComponent {
         let containerHeight = el.offsetHeight;
 
         let container = this.renderTemplate(this.component.containerTemplate, {
+            container: el,
             dimensions: {
                 width: containerWidth,
                 height: containerHeight
