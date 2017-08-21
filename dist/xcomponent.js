@@ -878,6 +878,7 @@
             CHECK_CLOSE: XCOMPONENT + "_check_close",
             REDIRECT: XCOMPONENT + "_redirect",
             RESIZE: XCOMPONENT + "_resize",
+            ONRESIZE: XCOMPONENT + "_onresize",
             DELEGATE: XCOMPONENT + "_delegate",
             ERROR: XCOMPONENT + "_error",
             HIDE: XCOMPONENT + "_hide",
@@ -2754,6 +2755,8 @@
                         this.checkClose();
                     }), _defineProperty(_ref13, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, function(source, data) {
                         if (this.driver.allowResize) return this.resize(data.width, data.height);
+                    }), _defineProperty(_ref13, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ONRESIZE, function(source, data) {
+                        this.event.trigger("resize");
                     }), _defineProperty(_ref13, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.HIDE, function(source, data) {
                         this.hide();
                     }), _defineProperty(_ref13, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.SHOW, function(source, data) {
@@ -2958,6 +2961,7 @@
                     } else el = document.body;
                     if (this.component.containerTemplate) {
                         var containerWidth = el.offsetWidth, containerHeight = el.offsetHeight, container = this.renderTemplate(this.component.containerTemplate, {
+                            container: el,
                             dimensions: {
                                 width: containerWidth,
                                 height: containerHeight
@@ -3433,7 +3437,8 @@
             },
             SERIALIZATION_TYPES: {
                 METHOD: "postrobot_method",
-                ERROR: "postrobot_error"
+                ERROR: "postrobot_error",
+                PROMISE: "postrobot_promise"
             },
             SEND_STRATEGIES: {
                 POST_MESSAGE: "postrobot_post_message",
@@ -3735,6 +3740,7 @@
                 _this.props.logLevel && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.c)(_this.props.logLevel);
                 _this.component.log("init_child");
                 _this.setWindows();
+                _this.listenForResize();
                 _this.onInit = _this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.INIT, {
                     exports: _this.exports()
                 }).then(function(_ref) {
@@ -3752,6 +3758,14 @@
             }
             _inherits(ChildComponent, _BaseComponent);
             _createClass(ChildComponent, [ {
+                key: "listenForResize",
+                value: function() {
+                    var _this2 = this;
+                    window.addEventListener("resize", function() {
+                        _this2.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ONRESIZE);
+                    });
+                }
+            }, {
                 key: "hasValidParentDomain",
                 value: function() {
                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.f)(this.component.allowedParentDomains, this.getParentDomain());
@@ -3784,7 +3798,7 @@
             }, {
                 key: "getInitialProps",
                 value: function() {
-                    var _this2 = this, componentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.d)();
+                    var _this3 = this, componentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.d)();
                     if (componentMeta) {
                         var props = componentMeta.props;
                         if (props.type === __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.RAW) props = props.value; else {
@@ -3799,8 +3813,8 @@
                         if (!props) throw new Error("Initial props not found");
                         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.f)(props, function(_ref2) {
                             var fullKey = _ref2.fullKey, self = _ref2.self, args = _ref2.args;
-                            return _this2.onInit.then(function() {
-                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)(_this2.props, fullKey).apply(self, args);
+                            return _this3.onInit.then(function() {
+                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)(_this3.props, fullKey).apply(self, args);
                             });
                         });
                     }
@@ -3853,9 +3867,9 @@
             }, {
                 key: "watchForClose",
                 value: function() {
-                    var _this3 = this;
+                    var _this4 = this;
                     window.addEventListener("unload", function() {
-                        return _this3.checkClose();
+                        return _this4.checkClose();
                     });
                 }
             }, {
@@ -3891,7 +3905,7 @@
             }, {
                 key: "watchForResize",
                 value: function() {
-                    var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
+                    var _this5 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
                     if ((width || height) && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
@@ -3900,7 +3914,7 @@
                             if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(element, {
                                 width: width,
                                 height: height
-                            })) return _this4.resizeToElement(element, {
+                            })) return _this5.resizeToElement(element, {
                                 width: width,
                                 height: height
                             });
@@ -3910,7 +3924,7 @@
                                     width: width,
                                     height: height
                                 }).then(function(dimensions) {
-                                    return _this4.resizeToElement(element, {
+                                    return _this5.resizeToElement(element, {
                                         width: width,
                                         height: height
                                     });
@@ -3935,13 +3949,13 @@
             }, {
                 key: "resize",
                 value: function(width, height) {
-                    var _this5 = this;
+                    var _this6 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve().then(function() {
-                        _this5.component.log("resize", {
+                        _this6.component.log("resize", {
                             width: width,
                             height: height
                         });
-                        if (_this5.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this5.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
+                        if (_this6.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this6.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
                             width: width,
                             height: height
                         });
@@ -3950,7 +3964,7 @@
             }, {
                 key: "resizeToElement",
                 value: function(el, _ref6) {
-                    var _this6 = this, width = _ref6.width, height = _ref6.height, history = [];
+                    var _this7 = this, width = _ref6.width, height = _ref6.height, history = [];
                     return function resize() {
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                             for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.n)(el, {
@@ -3973,7 +3987,7 @@
                                 width: dimensions.width,
                                 height: dimensions.height
                             });
-                            return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
+                            return _this7.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
                                 if (tracker.check().changed) return resize();
                             });
                         });
@@ -5699,11 +5713,19 @@
                 __message__: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.b)(err)
             };
         }
+        function serializePromise(destination, domain, promise, name) {
+            return {
+                __type__: __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.PROMISE,
+                __then__: serializeMethod(destination, domain, function(resolve, reject) {
+                    return promise.then(resolve, reject);
+                }, name + ".then")
+            };
+        }
         function serializeMethods(destination, domain, obj) {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.g)({
                 obj: obj
             }, function(item, key) {
-                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : void 0;
+                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a.isPromise(item) ? serializePromise(destination, domain, item, key.toString()) : void 0;
             }).obj;
         }
         function deserializeMethod(source, origin, obj) {
@@ -5735,11 +5757,16 @@
         function deserializeError(source, origin, obj) {
             return new Error(obj.__message__);
         }
+        function deserializePromise(source, origin, prom) {
+            return new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(function(resolve, reject) {
+                return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+            });
+        }
         function deserializeMethods(source, origin, obj) {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.g)({
                 obj: obj
             }, function(item, key) {
-                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : void 0;
+                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
             }).obj;
         }
         __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -6349,6 +6376,11 @@
                         return results;
                     });
                 }
+            }, {
+                key: "isPromise",
+                value: function(value) {
+                    return !!(value && value instanceof ZalgoPromise) || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(value);
+                }
             } ]);
             return ZalgoPromise;
         }();
@@ -6357,13 +6389,14 @@
         function isPromise(item) {
             try {
                 if (!item) return !1;
+                if (window.Promise && item instanceof window.Promise) return !0;
                 if (window.Window && item instanceof window.Window) return !1;
                 if (window.constructor && item instanceof window.constructor) return !1;
                 if (toString) {
                     var name = toString.call(item);
                     if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
                 }
-                if (item && item.then instanceof Function) return !0;
+                if (item.then instanceof Function) return !0;
             } catch (err) {
                 return !1;
             }
