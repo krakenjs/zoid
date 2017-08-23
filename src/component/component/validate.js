@@ -118,8 +118,8 @@ export function validate(component, options) { // eslint-ignore-line
         }
     }
 
-    if (options.componentTemplate && typeof options.componentTemplate !== 'function') {
-        throw component.error(`Expected options.componentTemplate to be a function`);
+    if (options.prerenderTemplate && typeof options.prerenderTemplate !== 'function') {
+        throw component.error(`Expected options.prerenderTemplate to be a function`);
     }
 
     if (options.containerTemplate && typeof options.containerTemplate !== 'function') {

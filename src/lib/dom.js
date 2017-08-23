@@ -825,6 +825,14 @@ export function addClass(element, name) {
     }
 }
 
+export function removeClass(element, name) {
+    if (element.classList) {
+        element.classList.remove(name);
+    } else if (element.className.split(/\s+/).indexOf(name) !== -1) {
+        element.className = element.className.replace(name, '');
+    }
+}
+
 export function getCurrentScriptDir() {
     console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
 

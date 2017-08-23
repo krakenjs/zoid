@@ -50,7 +50,10 @@ export const CONTEXT_TYPES = {
 export const CLASS_NAMES = {
     XCOMPONENT:        `${XCOMPONENT}`,
     OUTLET:            `${XCOMPONENT}-outlet`,
-    SACRIFICIAL_FRAME: `${XCOMPONENT}-sacrificial-frame`
+    COMPONENT_FRAME:   `${XCOMPONENT}-component-frame`,
+    PRERENDER_FRAME:   `${XCOMPONENT}-prerender-frame`,
+    VISIBLE:           `${XCOMPONENT}-visible`,
+    INVISIBLE:         `${XCOMPONENT}-invisible`
 };
 
 export const EVENTS = {

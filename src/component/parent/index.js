@@ -11,7 +11,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
          promise, getDomain, global, writeToWindow, setLogLevel, once,
-         getElementName, prefetchPage, awaitFrameLoad } from '../../lib';
+         prefetchPage, awaitFrameLoad } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
 import { RENDER_DRIVERS } from './drivers';
@@ -103,18 +103,18 @@ export class ParentComponent extends BaseComponent {
                 return this.showContainer();
             });
 
-            let immediateUrl;
+            tasks.openPrerender = tasks.openContainer.then(() => {
+                return this.openPrerender();
+            });
 
-            if (loadUrl && this.component.sacrificialComponentTemplate) {
-                tasks.buildUrl.then(url => {
-                    immediateUrl = url;
-                });
-            }
+            tasks.switchPrerender = ZalgoPromise.all([ tasks.openPrerender, this.onInit ]).then(() => {
+                return this.switchPrerender();
+            });
 
             tasks.open = this.driver.openOnClick
-                ? this.open(element)
+                ? this.open()
                 : tasks.openContainer.then(() => {
-                    return this.open(element, immediateUrl);
+                    return this.open();
                 });
 
             tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
@@ -132,11 +132,11 @@ export class ParentComponent extends BaseComponent {
             });
 
             if (!this.html) {
-                tasks.createComponentTemplate = tasks.open.then(() => {
-                    return this.createComponentTemplate();
+                tasks.createPrerenderTemplate = tasks.openPrerender.then(() => {
+                    return this.createPrerenderTemplate();
                 });
 
-                tasks.showComponent = tasks.createComponentTemplate.then(() => {
+                tasks.showComponent = tasks.createPrerenderTemplate.then(() => {
                     return this.showComponent();
                 });
             }
@@ -158,7 +158,7 @@ export class ParentComponent extends BaseComponent {
                     tasks.listen,
                     tasks.open,
                     tasks.openBridge,
-                    tasks.createComponentTemplate
+                    tasks.createPrerenderTemplate
                 ]).then(([ url ]) => {
                     return this.loadUrl(url);
                 });
@@ -519,15 +519,25 @@ export class ParentComponent extends BaseComponent {
 
     @memoized
     @promise
-    open(element, url) {
+    open() {
+        this.component.log(`open_${this.context}`, { windowName: this.childWindowName });
+        return this.driver.open.call(this);
+    }
 
-        this.component.log(`open_${this.context}`, { element: getElementName(element), windowName: this.childWindowName });
-
-        if (url) {
-            this.urlLoaded = true;
+    @memoized
+    @promise
+    openPrerender(url) {
+        if (this.driver.prerenderWindow && this.component.prerenderTemplate) {
+            return this.driver.openPrerender.call(this);
         }
+    }
 
-        return this.driver.open.call(this, element, url);
+    @memoized
+    @promise
+    switchPrerender(url) {
+        if (this.driver.prerenderWindow && this.component.prerenderTemplate) {
+            return this.driver.switchPrerender.call(this);
+        }
     }
 
     get driver() {
@@ -687,10 +697,6 @@ export class ParentComponent extends BaseComponent {
 
     @promise
     loadUrl(url) {
-        if (this.urlLoaded) {
-            return;
-        }
-
         this.component.log(`load_url`);
 
         if (window.location.href.split('#')[0] === url.split('#')[0]) {
@@ -1054,34 +1060,26 @@ export class ParentComponent extends BaseComponent {
 
     @memoized
     @promise
-    createComponentTemplate() {
+    createPrerenderTemplate() {
 
-        if (!this.component.componentTemplate) {
+        if (!this.component.prerenderTemplate) {
             return;
         }
 
         return ZalgoPromise.try(() => {
 
-            let frame = this.sacrificialIframe || this.iframe;
-
-            if (frame) {
-                return awaitFrameLoad(frame);
+            if (this.prerenderIframe) {
+                return awaitFrameLoad(this.prerenderIframe).then(() => this.prerenderWindow);
+            } else {
+                return this.window;
             }
 
-        }).then(() => {
+        }).then(win => {
 
-            let win = this.componentTemplateWindow || this.window;
-
-            if (!isSameDomain(win)) {
-                return;
-            }
-
-            let component = this.renderTemplate(this.component.componentTemplate, {
+            writeElementToWindow(win, this.renderTemplate(this.component.prerenderTemplate, {
                 jsxDom: jsxDom.bind(win.document),
                 document: win.document
-            });
-
-            writeElementToWindow(win, component);
+            }));
         });
     }
 

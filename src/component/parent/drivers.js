@@ -3,9 +3,9 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName } from 'cross-domain-utils/src';
 
-import { iframe, popup, getElement, toCSS, showElement, hideElement,
+import { iframe, popup, toCSS, showElement, hideElement,
          destroyElement, normalizeDimension, watchElementForClose,
-         awaitFrameWindow, awaitFrameLoad, once, makeElementVisible, makeElementInvisible } from '../../lib';
+         awaitFrameWindow, addClass, removeClass } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 import { PopupOpenError } from '../../error';
@@ -36,62 +36,25 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     renderedIntoContainerTemplate: true,
     allowResize: true,
     openOnClick: false,
+    prerenderWindow: true,
 
-    open(element, url) {
+    open(url) {
 
-        if (element && !getElement(element)) {
-            throw this.component.error(`Can not find element ${element}`);
-        }
-
-        let options = {
+        this.iframe = iframe({
             url,
             attributes: {
                 name: this.childWindowName,
                 scrolling: this.component.scrolling ? 'yes' : 'no'
-            }
-        };
-
-        let sacrificialOptions = {
-            attributes: {
-                name: `__sacrificial__${ this.childWindowName }`,
-                scrolling: this.component.scrolling ? 'yes' : 'no'
             },
             class: [
-                CLASS_NAMES.SACRIFICIAL_FRAME
+                CLASS_NAMES.COMPONENT_FRAME,
+                CLASS_NAMES.INVISIBLE
             ]
-        };
+        }, this.element);
 
-        let frame = this.iframe = iframe(options, this.element);
-
-        let sacrificialIframe;
-
-        if (this.component.sacrificialComponentTemplate) {
-
-            sacrificialIframe = this.sacrificialIframe = iframe(sacrificialOptions, this.element);
-
-            makeElementInvisible(frame);
-
-            let switchFrames = once(() => {
-
-                makeElementVisible(frame);
-                makeElementInvisible(sacrificialIframe);
-
-                destroyElement(sacrificialIframe);
-            });
-
-            awaitFrameLoad(frame).then(switchFrames);
-            this.onInit.then(switchFrames);
-        }
-
-        return ZalgoPromise.all([
-
-            awaitFrameWindow(frame),
-            sacrificialIframe && awaitFrameWindow(sacrificialIframe)
-
-        ]).then(([ frameWindow, sacrificialFrameWindow ]) => {
+        return awaitFrameWindow(this.iframe).then(frameWindow => {
 
             this.window = frameWindow;
-            this.componentTemplateWindow = sacrificialFrameWindow;
 
             let detectClose = () => {
                 return ZalgoPromise.try(() => {
@@ -115,10 +78,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
                 delete this.window;
 
-                if (sacrificialIframe) {
-                    destroyElement(sacrificialIframe);
-                }
-
                 if (this.iframe) {
                     destroyElement(this.iframe);
                     delete this.iframe;
@@ -127,13 +86,55 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         });
     },
 
+    openPrerender() {
+
+        this.prerenderIframe = iframe({
+            attributes: {
+                name: `__prerender__${ this.childWindowName }`,
+                scrolling: this.component.scrolling ? 'yes' : 'no'
+            },
+            class: [
+                CLASS_NAMES.PRERENDER_FRAME,
+                CLASS_NAMES.VISIBLE
+            ]
+        }, this.element);
+
+        return awaitFrameWindow(this.prerenderIframe).then(prerenderFrameWindow => {
+
+            this.prerenderWindow = prerenderFrameWindow;
+
+            this.clean.register('destroyPrerender', () => {
+
+                if (this.prerenderIframe) {
+                    destroyElement(this.prerenderIframe);
+                    delete this.prerenderIframe;
+                }
+            });
+        });
+    },
+
+    switchPrerender() {
+
+        addClass(this.prerenderIframe, CLASS_NAMES.INVISIBLE);
+        removeClass(this.prerenderIframe, CLASS_NAMES.VISIBLE);
+
+        addClass(this.iframe, CLASS_NAMES.VISIBLE);
+        removeClass(this.iframe, CLASS_NAMES.INVISIBLE);
+
+        setTimeout(() => {
+            if (this.prerenderIframe) {
+                destroyElement(this.prerenderIframe);
+            }
+        }, 1000);
+    },
+
     delegateOverrides: {
 
         openContainer:           DELEGATE.CALL_DELEGATE,
         destroyComponent:        DELEGATE.CALL_DELEGATE,
         destroyContainer:        DELEGATE.CALL_DELEGATE,
         cancelContainerEvents:   DELEGATE.CALL_DELEGATE,
-        createComponentTemplate: DELEGATE.CALL_DELEGATE,
+        createPrerenderTemplate: DELEGATE.CALL_DELEGATE,
         elementReady:            DELEGATE.CALL_DELEGATE,
         showContainer:           DELEGATE.CALL_DELEGATE,
         showComponent:           DELEGATE.CALL_DELEGATE,
@@ -144,6 +145,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         resize:                  DELEGATE.CALL_DELEGATE,
         loadUrl:                 DELEGATE.CALL_DELEGATE,
         hijackSubmit:            DELEGATE.CALL_DELEGATE,
+        openPrerender:           DELEGATE.CALL_DELEGATE,
+        switchPrerender:         DELEGATE.CALL_DELEGATE,
 
         getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
         renderTemplate:          DELEGATE.CALL_ORIGINAL,
@@ -197,6 +200,7 @@ if (__POPUP_SUPPORT__) {
         renderedIntoContainerTemplate: false,
         allowResize: false,
         openOnClick: true,
+        prerenderWindow: false,
 
         open(element, url = '') {
 
@@ -274,7 +278,7 @@ if (__POPUP_SUPPORT__) {
 
             open:                    DELEGATE.CALL_ORIGINAL,
             loadUrl:                 DELEGATE.CALL_ORIGINAL,
-            createComponentTemplate: DELEGATE.CALL_ORIGINAL,
+            createPrerenderTemplate: DELEGATE.CALL_ORIGINAL,
             destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
             getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
