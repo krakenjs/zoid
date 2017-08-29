@@ -12,3 +12,5 @@ export * from './validation';
 export * from './logging';
 export * from './parentDomainCheck';
 export * from './angular2';
+export * from './vue';
+
