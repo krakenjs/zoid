@@ -276,10 +276,10 @@ export function copyProp(source, target, name, def) {
 export function dotify(obj, prefix = '', newobj = {}) {
     prefix = prefix ? `${prefix}.` : prefix;
     for (let key in obj) {
-        if (obj[key] === undefined || obj[key] === null) {
+        if (obj[key] === undefined || obj[key] === null || typeof obj[key] === 'function') {
             continue;
-        } else if (obj[key] && typeof obj[key] === 'object') {
-            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
+        } else if (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(val => typeof val !== 'object')) {
+            newobj[`${prefix}${key}`] = obj[key].join(',');
         } else {
             newobj[`${prefix}${key}`] = obj[key].toString();
         }
