@@ -67,8 +67,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             let iframeWatcher = watchElementForClose(this.iframe, detectClose);
             let elementWatcher = watchElementForClose(this.element, detectClose);
 
-            hideElement(this.element);
-
             this.clean.register('destroyWindow', () => {
 
                 iframeWatcher.cancel();

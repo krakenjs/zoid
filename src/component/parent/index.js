@@ -1153,6 +1153,7 @@ export class ParentComponent extends BaseComponent {
 
         if (this.driver.renderedIntoContainerTemplate) {
             this.element = this.getOutlet();
+            hideElement(this.element);
 
             let { width, height } = this.getInitialDimensions(el) || {};
             if (width || height) {
