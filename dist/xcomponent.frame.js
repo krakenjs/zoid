@@ -177,37 +177,6 @@
             }
             return result;
         }
-        function getAllFramesInWindow(win) {
-            var result = getAllChildFrames(win);
-            result.push(win);
-            for (var _iterator3 = getParents(win), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                var _ref3;
-                if (_isArray3) {
-                    if (_i4 >= _iterator3.length) break;
-                    _ref3 = _iterator3[_i4++];
-                } else {
-                    _i4 = _iterator3.next();
-                    if (_i4.done) break;
-                    _ref3 = _i4.value;
-                }
-                var parent = _ref3;
-                result.push(parent);
-                for (var _iterator4 = getFrames(parent), _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                    var _ref4;
-                    if (_isArray4) {
-                        if (_i5 >= _iterator4.length) break;
-                        _ref4 = _iterator4[_i5++];
-                    } else {
-                        _i5 = _iterator4.next();
-                        if (_i5.done) break;
-                        _ref4 = _i5.value;
-                    }
-                    var frame = _ref4;
-                    -1 === result.indexOf(frame) && result.push(frame);
-                }
-            }
-            return result;
-        }
         function getTop(win) {
             if (win) {
                 try {
@@ -215,28 +184,32 @@
                 } catch (err) {}
                 if (getParent(win) === win) return win;
                 try {
-                    if (isAncestorParent(window, win)) return window.top;
+                    if (isAncestorParent(window, win) && window.top) return window.top;
                 } catch (err) {}
                 try {
-                    if (isAncestorParent(win, window)) return window.top;
+                    if (isAncestorParent(win, window) && window.top) return window.top;
                 } catch (err) {}
-                for (var _iterator5 = getAllChildFrames(win), _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
-                    var _ref5;
-                    if (_isArray5) {
-                        if (_i6 >= _iterator5.length) break;
-                        _ref5 = _iterator5[_i6++];
+                for (var _iterator3 = getAllChildFrames(win), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                    var _ref3;
+                    if (_isArray3) {
+                        if (_i4 >= _iterator3.length) break;
+                        _ref3 = _iterator3[_i4++];
                     } else {
-                        _i6 = _iterator5.next();
-                        if (_i6.done) break;
-                        _ref5 = _i6.value;
+                        _i4 = _iterator3.next();
+                        if (_i4.done) break;
+                        _ref3 = _i4.value;
                     }
-                    var frame = _ref5;
+                    var frame = _ref3;
                     try {
                         if (frame.top) return frame.top;
                     } catch (err) {}
                     if (getParent(frame) === frame) return frame;
                 }
             }
+        }
+        function getAllFramesInWindow(win) {
+            var top = getTop(win);
+            return getAllChildFrames(top).concat(top);
         }
         function isTop(win) {
             return win === getTop(win);
@@ -284,9 +257,9 @@
                 iframeFrames.splice(i, 1);
                 iframeWindows.splice(i, 1);
             }
-            for (var _i7 = 0; _i7 < iframeWindows.length; _i7++) if (isWindowClosed(iframeWindows[_i7])) {
-                iframeFrames.splice(_i7, 1);
-                iframeWindows.splice(_i7, 1);
+            for (var _i5 = 0; _i5 < iframeWindows.length; _i5++) if (isWindowClosed(iframeWindows[_i5])) {
+                iframeFrames.splice(_i5, 1);
+                iframeWindows.splice(_i5, 1);
             }
         }
         function linkFrameWindow(frame) {
@@ -297,17 +270,17 @@
             } catch (err) {}
         }
         function getFrameByName(win, name) {
-            for (var winFrames = getFrames(win), _iterator6 = winFrames, _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
-                var _ref6;
-                if (_isArray6) {
-                    if (_i8 >= _iterator6.length) break;
-                    _ref6 = _iterator6[_i8++];
+            for (var winFrames = getFrames(win), _iterator4 = winFrames, _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                var _ref4;
+                if (_isArray4) {
+                    if (_i6 >= _iterator4.length) break;
+                    _ref4 = _iterator4[_i6++];
                 } else {
-                    _i8 = _iterator6.next();
-                    if (_i8.done) break;
-                    _ref6 = _i8.value;
+                    _i6 = _iterator4.next();
+                    if (_i6.done) break;
+                    _ref4 = _i6.value;
                 }
-                var childFrame = _ref6;
+                var childFrame = _ref4;
                 try {
                     if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                 } catch (err) {}
@@ -322,17 +295,17 @@
         function findChildFrameByName(win, name) {
             var frame = getFrameByName(win, name);
             if (frame) return frame;
-            for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
-                var _ref7;
-                if (_isArray7) {
-                    if (_i9 >= _iterator7.length) break;
-                    _ref7 = _iterator7[_i9++];
+            for (var _iterator5 = getFrames(win), _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                var _ref5;
+                if (_isArray5) {
+                    if (_i7 >= _iterator5.length) break;
+                    _ref5 = _iterator5[_i7++];
                 } else {
-                    _i9 = _iterator7.next();
-                    if (_i9.done) break;
-                    _ref7 = _i9.value;
+                    _i7 = _iterator5.next();
+                    if (_i7.done) break;
+                    _ref5 = _i7.value;
                 }
-                var childFrame = _ref7, namedFrame = findChildFrameByName(childFrame, name);
+                var childFrame = _ref5, namedFrame = findChildFrameByName(childFrame, name);
                 if (namedFrame) return namedFrame;
             }
         }
@@ -353,17 +326,17 @@
             if (actualParent) return actualParent === parent;
             if (child === parent) return !1;
             if (getTop(child) === child) return !1;
-            for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
-                var _ref9;
-                if (_isArray9) {
-                    if (_i11 >= _iterator9.length) break;
-                    _ref9 = _iterator9[_i11++];
+            for (var _iterator7 = getFrames(parent), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
+                var _ref7;
+                if (_isArray7) {
+                    if (_i9 >= _iterator7.length) break;
+                    _ref7 = _iterator7[_i9++];
                 } else {
-                    _i11 = _iterator9.next();
-                    if (_i11.done) break;
-                    _ref9 = _i11.value;
+                    _i9 = _iterator7.next();
+                    if (_i9.done) break;
+                    _ref7 = _i9.value;
                 }
-                if (_ref9 === child) return !0;
+                if (_ref7 === child) return !0;
             }
             return !1;
         }
@@ -374,27 +347,27 @@
             return Boolean(getParent(window));
         }
         function anyMatch(collection1, collection2) {
-            for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i12 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
-                var _ref10;
-                if (_isArray10) {
-                    if (_i12 >= _iterator10.length) break;
-                    _ref10 = _iterator10[_i12++];
+            for (var _iterator8 = collection1, _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
+                var _ref8;
+                if (_isArray8) {
+                    if (_i10 >= _iterator8.length) break;
+                    _ref8 = _iterator8[_i10++];
                 } else {
-                    _i12 = _iterator10.next();
-                    if (_i12.done) break;
-                    _ref10 = _i12.value;
+                    _i10 = _iterator8.next();
+                    if (_i10.done) break;
+                    _ref8 = _i10.value;
                 }
-                for (var item1 = _ref10, _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i13 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator](); ;) {
-                    var _ref11;
-                    if (_isArray11) {
-                        if (_i13 >= _iterator11.length) break;
-                        _ref11 = _iterator11[_i13++];
+                for (var item1 = _ref8, _iterator9 = collection2, _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
+                    var _ref9;
+                    if (_isArray9) {
+                        if (_i11 >= _iterator9.length) break;
+                        _ref9 = _iterator9[_i11++];
                     } else {
-                        _i13 = _iterator11.next();
-                        if (_i13.done) break;
-                        _ref11 = _i13.value;
+                        _i11 = _iterator9.next();
+                        if (_i11.done) break;
+                        _ref9 = _i11.value;
                     }
-                    if (item1 === _ref11) return !0;
+                    if (item1 === _ref9) return !0;
                 }
             }
         }
@@ -463,8 +436,8 @@
         __webpack_exports__.a = isSameDomain;
         __webpack_exports__.p = getParent;
         __webpack_exports__.m = getOpener;
-        __webpack_exports__.q = getAllFramesInWindow;
         __webpack_exports__.n = getTop;
+        __webpack_exports__.q = getAllFramesInWindow;
         __webpack_exports__.s = isTop;
         __webpack_exports__.b = isWindowClosed;
         __webpack_exports__.d = linkFrameWindow;
@@ -906,17 +879,17 @@
         __webpack_require__.d(__webpack_exports__, "g", function() {
             return __WEBPACK_IMPORTED_MODULE_1__log__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__methods__ = __webpack_require__(47);
+        var __WEBPACK_IMPORTED_MODULE_2__serialize__ = __webpack_require__(48);
         __webpack_require__.d(__webpack_exports__, "b", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__methods__.a;
+            return __WEBPACK_IMPORTED_MODULE_2__serialize__.a;
         });
         __webpack_require__.d(__webpack_exports__, "f", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__methods__.b;
+            return __WEBPACK_IMPORTED_MODULE_2__serialize__.b;
         });
         __webpack_require__.d(__webpack_exports__, "k", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__methods__.c;
+            return __WEBPACK_IMPORTED_MODULE_2__serialize__.c;
         });
-        var __WEBPACK_IMPORTED_MODULE_3__ready__ = __webpack_require__(48);
+        var __WEBPACK_IMPORTED_MODULE_3__ready__ = __webpack_require__(47);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_3__ready__.a;
         });
@@ -2775,6 +2748,7 @@
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.L)(el, this.container);
                         if (this.driver.renderedIntoContainerTemplate) {
                             this.element = this.getOutlet();
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.E)(this.element);
                             var _ref15 = this.getInitialDimensions(el) || {}, width = _ref15.width, height = _ref15.height;
                             (width || height) && this.resize(width, height, {
                                 waitForTransition: !1
@@ -2942,7 +2916,9 @@
         function dotify(obj) {
             var prefix = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "", newobj = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
             prefix = prefix ? prefix + "." : prefix;
-            for (var key in obj) void 0 !== obj[key] && null !== obj[key] && (obj[key] && "object" === _typeof(obj[key]) ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
+            for (var key in obj) void 0 !== obj[key] && null !== obj[key] && "function" != typeof obj[key] && (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(function(val) {
+                return "object" !== (void 0 === val ? "undefined" : _typeof(val));
+            }) ? newobj["" + prefix + key] = obj[key].join(",") : newobj["" + prefix + key] = obj[key].toString());
             return newobj;
         }
         function getObjectID(obj) {
@@ -3234,7 +3210,9 @@
             SERIALIZATION_TYPES: {
                 METHOD: "postrobot_method",
                 ERROR: "postrobot_error",
-                PROMISE: "postrobot_promise"
+                PROMISE: "postrobot_promise",
+                ZALGO_PROMISE: "postrobot_zalgo_promise",
+                REGEX: "regex"
             },
             SEND_STRATEGIES: {
                 POST_MESSAGE: "postrobot_post_message",
@@ -3372,7 +3350,7 @@
             });
             win && win !== __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD || (win = __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD);
             domain = domain || __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD;
-            if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain + " for specified window") : win ? new Error("Request listener already exists for " + name + " for specified window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain) : new Error("Request listener already exists for " + name);
+            if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for specified window") : win ? new Error("Request listener already exists for " + name + " for specified window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
             var requestListeners = __WEBPACK_IMPORTED_MODULE_3__global__.a.requestListeners, nameListeners = requestListeners[name];
             if (!nameListeners) {
                 nameListeners = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
@@ -3893,7 +3871,6 @@
                             return _this.destroy();
                         });
                     }, iframeWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.Q)(_this.iframe, detectClose), elementWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.Q)(_this.element, detectClose);
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.E)(_this.element);
                     _this.clean.register("destroyWindow", function() {
                         iframeWatcher.cancel();
                         elementWatcher.cancel();
@@ -4456,6 +4433,7 @@
                         delete this.weakmap;
                     }
                     if (!this.isSafeToReadWrite(key)) {
+                        this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
                         if (-1 === index) return;
                         return this.values[index];
@@ -4936,7 +4914,7 @@
         }, RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
             var options = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__listeners__.a)(message.hash);
             if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.f)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain);
+            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.f)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
             options.ack = !0;
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_TYPE.REQUEST, function(source, origin, message) {
             function respond(data) {
@@ -4955,7 +4933,7 @@
                 type: __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_TYPE.ACK
             }), __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(function() {
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.f)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
+                if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.f)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                 var data = message.data;
                 return options.handler({
                     source: source,
@@ -5017,6 +4995,41 @@
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        function initOnReady() {
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.READY, {
+                window: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
+                domain: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD
+            }, function(event) {
+                var win = event.source, promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
+                if (promise) promise.resolve(event); else {
+                    promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a().resolve(event);
+                    __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise);
+                }
+            });
+            var parent = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.e)();
+            parent && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.send)(parent, __WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.READY, {}, {
+                domain: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
+                timeout: 1 / 0
+            }).catch(function(err) {
+                __WEBPACK_IMPORTED_MODULE_5__log__.a.debug(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__util__.b)(err));
+            });
+        }
+        function onWindowReady(win) {
+            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
+            if (promise) return promise;
+            promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a();
+            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise);
+            setTimeout(function() {
+                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
+            }, timeout);
+            return promise;
+        }
+        __webpack_exports__.a = initOnReady;
+        __webpack_exports__.b = onWindowReady;
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__interface__ = __webpack_require__(15), __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__global__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_7__util__ = __webpack_require__(16);
+        __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
+    }, function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
         function isSerialized(item, type) {
             return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
@@ -5050,11 +5063,25 @@
                 }, name + ".then")
             };
         }
+        function serializeZalgoPromise(destination, domain, promise, name) {
+            return {
+                __type__: __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ZALGO_PROMISE,
+                __then__: serializeMethod(destination, domain, function(resolve, reject) {
+                    return promise.then(resolve, reject);
+                }, name + ".then")
+            };
+        }
+        function serializeRegex(regex) {
+            return {
+                __type__: __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.REGEX,
+                __source__: regex.source
+            };
+        }
         function serializeMethods(destination, domain, obj) {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.g)({
                 obj: obj
             }, function(item, key) {
-                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a.isPromise(item) ? serializePromise(destination, domain, item, key.toString()) : void 0;
+                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : window.Promise && item instanceof window.Promise ? serializePromise(destination, domain, item, key.toString()) : __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a.isPromise(item) ? serializeZalgoPromise(destination, domain, item, key.toString()) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.a)(item) ? serializeRegex(item) : void 0;
             }).obj;
         }
         function deserializeMethod(source, origin, obj) {
@@ -5086,16 +5113,24 @@
         function deserializeError(source, origin, obj) {
             return new Error(obj.__message__);
         }
-        function deserializePromise(source, origin, prom) {
+        function deserializeZalgoPromise(source, origin, prom) {
             return new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(function(resolve, reject) {
                 return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
             });
+        }
+        function deserializePromise(source, origin, prom) {
+            return window.Promise ? new window.Promise(function(resolve, reject) {
+                return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+            }) : deserializeZalgoPromise(source, origin, prom);
+        }
+        function deserializeRegex(source, origin, item) {
+            return new RegExp(item.__source__);
         }
         function deserializeMethods(source, origin, obj) {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.g)({
                 obj: obj
             }, function(item, key) {
-                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
+                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.REGEX) ? deserializeRegex(source, origin, item) : void 0;
             }).obj;
         }
         __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -5135,41 +5170,6 @@
                 });
             });
         });
-    }, function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        function initOnReady() {
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.READY, {
-                window: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
-                domain: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD
-            }, function(event) {
-                var win = event.source, promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
-                if (promise) promise.resolve(event); else {
-                    promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a().resolve(event);
-                    __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise);
-                }
-            });
-            var parent = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.e)();
-            parent && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.send)(parent, __WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.READY, {}, {
-                domain: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
-                timeout: 1 / 0
-            }).catch(function(err) {
-                __WEBPACK_IMPORTED_MODULE_5__log__.a.debug(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__util__.b)(err));
-            });
-        }
-        function onWindowReady(win) {
-            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
-            if (promise) return promise;
-            promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a();
-            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise);
-            setTimeout(function() {
-                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
-            }, timeout);
-            return promise;
-        }
-        __webpack_exports__.a = initOnReady;
-        __webpack_exports__.b = onWindowReady;
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__interface__ = __webpack_require__(15), __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__global__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_7__util__ = __webpack_require__(16);
-        __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function request(options) {
@@ -5382,23 +5382,29 @@
             options.handler = handler || options.handler;
             return listen(options);
         }
-        function once(name, options, handler) {
+        function once(name) {
+            var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, handler = arguments[2];
             if ("function" == typeof options) {
                 handler = options;
                 options = {};
             }
             options = options || {};
-            options.name = name;
-            options.handler = handler || options.handler;
-            options.once = !0;
-            var prom = new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                options.handler = options.handler || function(event) {
-                    return resolve(event);
+            handler = handler || options.handler;
+            var errorHandler = options.errorHandler, promise = new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
+                options = options || {};
+                options.name = name;
+                options.once = !0;
+                options.handler = function(event) {
+                    resolve(event);
+                    if (handler) return handler(event);
                 };
-                options.errorHandler = options.errorHandler || reject;
-            }), myListener = listen(options);
-            prom.cancel = myListener.cancel;
-            return prom;
+                options.errorHandler = function(err) {
+                    reject(err);
+                    if (errorHandler) return errorHandler(err);
+                };
+            }), onceListener = listen(options);
+            promise.cancel = onceListener.cancel;
+            return promise;
         }
         function listener() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -5568,7 +5574,7 @@
                                 if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
                                     result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
                                     result.errorHandled = !0;
-                                } else __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(result) ? result.then(function(res) {
+                                } else __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
                                     promise.resolve(res);
                                 }, function(err) {
                                     promise.reject(err);
@@ -5613,6 +5619,19 @@
                     });
                 }
             }, {
+                key: "timeout",
+                value: function(time, err) {
+                    var _this4 = this;
+                    if (this.resolved || this.rejected) return this;
+                    var timeout = setTimeout(function() {
+                        _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
+                    }, time);
+                    return this.then(function(result) {
+                        clearTimeout(timeout);
+                        return result;
+                    });
+                }
+            }, {
                 key: "toPromise",
                 value: function() {
                     if (!window.Promise) throw new Error("Could not find window.Promise");
@@ -5621,7 +5640,9 @@
             } ], [ {
                 key: "resolve",
                 value: function(value) {
-                    return value instanceof ZalgoPromise || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(value) ? value : new ZalgoPromise().resolve(value);
+                    return value instanceof ZalgoPromise ? value : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(value) ? new ZalgoPromise(function(resolve, reject) {
+                        return value.then(resolve, reject);
+                    }) : new ZalgoPromise().resolve(value);
                 }
             }, {
                 key: "reject",
@@ -5724,7 +5745,7 @@
                     var name = toString.call(item);
                     if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
                 }
-                if (item.then instanceof Function) return !0;
+                if ("function" == typeof item.then) return !0;
             } catch (err) {
                 return !1;
             }
