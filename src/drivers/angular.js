@@ -9,7 +9,7 @@ export let angular = {
 
     register(component, ng) {
 
-        ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
+        let module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
 
             let scope = {};
 
@@ -80,6 +80,6 @@ export let angular = {
             };
         });
 
-        return component;
+        return module;
     }
 };
