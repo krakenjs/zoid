@@ -127,6 +127,10 @@ export class Component extends BaseComponent {
         this.driverCache = {};
 
         for (let driverName of Object.keys(drivers)) {
+            if (driverName.indexOf('_') === 0) {
+                continue;
+            }
+
             let driver = drivers[driverName];
             let glob = driver.global();
             if (glob) {
