@@ -280,6 +280,8 @@ export function dotify(obj, prefix = '', newobj = {}) {
             continue;
         } else if (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(val => typeof val !== 'object')) {
             newobj[`${prefix}${key}`] = obj[key].join(',');
+        } else if (obj[key] && typeof obj[key] === 'object') {
+            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
         } else {
             newobj[`${prefix}${key}`] = obj[key].toString();
         }
