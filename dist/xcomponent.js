@@ -3160,7 +3160,7 @@
             prefix = prefix ? prefix + "." : prefix;
             for (var key in obj) void 0 !== obj[key] && null !== obj[key] && "function" != typeof obj[key] && (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(function(val) {
                 return "object" !== (void 0 === val ? "undefined" : _typeof(val));
-            }) ? newobj["" + prefix + key] = obj[key].join(",") : newobj["" + prefix + key] = obj[key].toString());
+            }) ? newobj["" + prefix + key] = obj[key].join(",") : obj[key] && "object" === _typeof(obj[key]) ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
             return newobj;
         }
         function getObjectID(obj) {
@@ -6204,7 +6204,10 @@
                 staticProps && defineProperties(Constructor, staticProps);
                 return Constructor;
             };
-        }(), ZalgoPromise = function() {
+        }(), global = window.__zalgopromise__ = window.__zalgopromise__ || {
+            flushPromises: [],
+            activeCount: 0
+        }, ZalgoPromise = function() {
             function ZalgoPromise(handler) {
                 var _this = this;
                 _classCallCheck(this, ZalgoPromise);
@@ -6274,6 +6277,7 @@
                     var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
                     if (!dispatching && (resolved || rejected)) {
                         this.dispatching = !0;
+                        global.activeCount += 1;
                         for (var i = 0; i < handlers.length; i++) {
                             (function(i) {
                                 var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
@@ -6306,6 +6310,8 @@
                         }
                         handlers.length = 0;
                         this.dispatching = !1;
+                        global.activeCount -= 1;
+                        0 === global.activeCount && ZalgoPromise.flushQueue();
                     }
                 }
             }, {
@@ -6452,6 +6458,32 @@
                 key: "isPromise",
                 value: function(value) {
                     return !!(value && value instanceof ZalgoPromise) || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(value);
+                }
+            }, {
+                key: "flush",
+                value: function() {
+                    var promise = new ZalgoPromise();
+                    global.flushPromises.push(promise);
+                    0 === global.activeCount && ZalgoPromise.flushQueue();
+                    return promise;
+                }
+            }, {
+                key: "flushQueue",
+                value: function() {
+                    var promisesToFlush = global.flushPromises;
+                    global.flushPromises = [];
+                    for (var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref;
+                        if (_isArray) {
+                            if (_i >= _iterator.length) break;
+                            _ref = _iterator[_i++];
+                        } else {
+                            _i = _iterator.next();
+                            if (_i.done) break;
+                            _ref = _i.value;
+                        }
+                        _ref.resolve();
+                    }
                 }
             } ]);
             return ZalgoPromise;
@@ -6660,8 +6692,11 @@
                             if (_i.done) break;
                             _ref = _i.value;
                         }
-                        var driverName = _ref, driver = __WEBPACK_IMPORTED_MODULE_10__drivers__[driverName], glob = driver.global();
-                        glob && this.driver(driverName, glob);
+                        var driverName = _ref;
+                        if (0 !== driverName.indexOf("_")) {
+                            var driver = __WEBPACK_IMPORTED_MODULE_10__drivers__[driverName], glob = driver.global();
+                            glob && this.driver(driverName, glob);
+                        }
                     }
                 }
             }, {
