@@ -75,10 +75,7 @@ dimensions: {
 When set to `true`, makes the xcomponent parent iframe resize automatically when the child component size changes
 
 ```javascript
-dimensions: {
-    width: '300px',
-    height: '200px'
-}
+autoResize: true
 ```
 
 #### allowedParentDomains `string | Array<string | RegEx>`
