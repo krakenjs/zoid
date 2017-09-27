@@ -70,6 +70,17 @@ dimensions: {
 }
 ```
 
+#### autoResize `boolean`
+
+When set to `true`, makes the xcomponent parent iframe resize automatically when the child component size changes
+
+```javascript
+dimensions: {
+    width: '300px',
+    height: '200px'
+}
+```
+
 #### allowedParentDomains `string | Array<string | RegEx>`
 
 A string, array of strings or reqular expresions to be used to validate parent domain. If parent domain doesn't match any item, communication from child to parent will be prevented. The default value is '*' which match any domain.
