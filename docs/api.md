@@ -70,12 +70,19 @@ dimensions: {
 }
 ```
 
-#### autoResize `boolean`
+#### autoResize `boolean | Object<String, Boolean>`
 
-When set to `true`, makes the xcomponent parent iframe resize automatically when the child component size changes
+When set to `true`, makes the xcomponent parent iframe resize automatically when the child component size changes.
+You can also decide whether you want autoresizing for `width` or `height`
 
 ```javascript
 autoResize: true
+```
+```javascript
+autoResize: {
+    width: true,
+    height: false,
+}
 ```
 
 #### allowedParentDomains `string | Array<string | RegEx>`
