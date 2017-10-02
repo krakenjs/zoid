@@ -1,3 +1,4 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
@@ -7,7 +8,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
     Replace ? and & with encoded values. Allows other values (to create more readable urls than encodeUriComponent)
 */
 
-export function urlEncode(str) {
+export function urlEncode(str : string) : string {
     return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23');
 }
 
@@ -18,7 +19,7 @@ export function urlEncode(str) {
     Convert camelCaseText to dasherized-text
 */
 
-export function camelToDasherize(string) {
+export function camelToDasherize(string : string) : string {
     return string.replace(/([A-Z])/g, (g) => {
         return `-${g.toLowerCase()}`;
     });
@@ -31,7 +32,7 @@ export function camelToDasherize(string) {
     Convert dasherized-text to camelCaseText
 */
 
-export function dasherizeToCamel(string) {
+export function dasherizeToCamel(string : string) : string {
     return string.replace(/-([a-z])/g, (g) => {
         return g[1].toUpperCase();
     });
@@ -44,7 +45,7 @@ export function dasherizeToCamel(string) {
     Extend one object with another
 */
 
-export function extend(obj, source) {
+export function extend(obj : Object, source : ?Object) : Object {
     if (!source) {
         return obj;
     }
@@ -65,7 +66,7 @@ export function extend(obj, source) {
     Get all of the values from an object as an array
 */
 
-export function values(obj) {
+export function values(obj : Object) : Array<mixed> {
     let results = [];
 
     for (let key in obj) {
@@ -84,7 +85,7 @@ export function values(obj) {
     Generate a unique, random hex id
 */
 
-export function uniqueID() {
+export function uniqueID() : string {
 
     let chars = '0123456789abcdef';
 
@@ -99,7 +100,7 @@ export function uniqueID() {
     JSON Stringify with added support for functions
 */
 
-export function stringifyWithFunctions(obj) {
+export function stringifyWithFunctions(obj : Object) : string {
     return JSON.stringify(obj, (key, val) => {
         if (typeof val === 'function') {
             return val.toString();
@@ -115,7 +116,7 @@ export function stringifyWithFunctions(obj) {
     Get a property without throwing error
 */
 
-export function safeGet(obj, prop) {
+export function safeGet(obj : Object, prop : string) : mixed {
 
     let result;
 
@@ -133,7 +134,7 @@ export function safeGet(obj, prop) {
    -----------------------
 */
 
-export function capitalizeFirstLetter(string) {
+export function capitalizeFirstLetter(string : string) : string {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
@@ -144,22 +145,22 @@ export function capitalizeFirstLetter(string) {
     Recursively gets a deep path from an object, returning a default value if any level is not found
 */
 
-export function get(item, path, def) {
+export function get(item : Object, path : string, def : mixed) : mixed {
 
     if (!path) {
         return def;
     }
 
-    path = path.split('.');
+    let pathParts = path.split('.');
 
     // Loop through each section of our key path
 
-    for (let i = 0; i < path.length; i++) {
+    for (let i = 0; i < pathParts.length; i++) {
 
         // If we have an object, we can get the key
 
         if (typeof item === 'object' && item !== null) {
-            item = item[path[i]];
+            item = item[pathParts[i]];
 
         // Otherwise, we should return the default (undefined if not provided)
         } else {
@@ -179,7 +180,7 @@ export function get(item, path, def) {
     Implement setInterval using setTimeout, to avoid stacking up calls from setInterval
 */
 
-export function safeInterval(method, time) {
+export function safeInterval(method : Function, time : number) : CancelableType {
 
     let timeout;
 
@@ -203,7 +204,7 @@ export function safeInterval(method, time) {
     Run timeouts at 100ms intervals so we can account for busy browsers
 */
 
-export function safeTimeout(method, time) {
+export function safeTimeout(method : Function, time : number) {
 
     let interval = safeInterval(() => {
         time -= 100;
@@ -215,7 +216,7 @@ export function safeTimeout(method, time) {
 }
 
 
-export function each(item, callback) {
+export function each(item : Array<mixed> | Object, callback : Function) {
 
     if (!item) {
         return;
@@ -239,7 +240,7 @@ export function each(item, callback) {
 
 
 
-export function replaceObject(obj, callback, parentKey = '') {
+export function replaceObject<T : Object | Array<mixed>>(obj : T, callback : Function, parentKey : string = '') : T {
 
     let newobj = obj instanceof Array ? [] : {};
 
@@ -258,12 +259,13 @@ export function replaceObject(obj, callback, parentKey = '') {
         }
     });
 
+    // $FlowFixMe
     return newobj;
 }
 
 
 
-export function copyProp(source, target, name, def) {
+export function copyProp(source : Object, target : Object, name : string, def : mixed) {
     if (source.hasOwnProperty(name)) {
         let descriptor = Object.getOwnPropertyDescriptor(source, name);
         Object.defineProperty(target, name, descriptor);
@@ -273,7 +275,7 @@ export function copyProp(source, target, name, def) {
     }
 }
 
-export function dotify(obj, prefix = '', newobj = {}) {
+export function dotify(obj : Object, prefix : string = '', newobj : Object = {}) : { [string] : string } {
     prefix = prefix ? `${prefix}.` : prefix;
     for (let key in obj) {
         if (obj[key] === undefined || obj[key] === null || typeof obj[key] === 'function') {
@@ -291,9 +293,9 @@ export function dotify(obj, prefix = '', newobj = {}) {
 
 let objectIDs = new WeakMap();
 
-export function getObjectID(obj) {
+export function getObjectID(obj : Object) : string {
 
-    if (obj === null || obj === undefined || typeof obj !== 'object' && typeof obj !== 'function') {
+    if (obj === null || obj === undefined || (typeof obj !== 'object' && typeof obj !== 'function')) {
         throw new Error(`Invalid object`);
     }
 
@@ -307,7 +309,16 @@ export function getObjectID(obj) {
     return uid;
 }
 
-export function regex(pattern, string, start = 0) {
+type RegexResultType = {
+    text : string,
+    groups : Array<string>,
+    start : number,
+    end : number,
+    length : number,
+    replace : (text : string) => string
+};
+
+export function regex(pattern : string | RegExp, string : string, start : number = 0) : ?RegexResultType {
 
     if (typeof pattern === 'string') {
         pattern = new RegExp(pattern);
@@ -319,20 +330,29 @@ export function regex(pattern, string, start = 0) {
         return;
     }
 
-    return {
-        text: result[0],
-        groups: result.slice(1),
-        start: start + result.index,
-        end: start + result.index + result[0].length,
-        length: result[0].length,
+    // $FlowFixMe
+    let index : number = result.index;
+    let match = result[0];
 
-        replace(text) {
-            return `${ result[0].slice(0, start + result.index) }${ text }${ result[0].slice(result.index + result[0].length) }`;
+    return {
+        text: match,
+        groups: result.slice(1),
+        start: start + index,
+        end: start + index + match.length,
+        length: match.length,
+
+        replace(text : string) : string {
+
+            if (!match) {
+                return '';
+            }
+
+            return `${ match.slice(0, start + index) }${ text }${ match.slice(index + match.length) }`;
         }
     };
 }
 
-export function regexAll(pattern, string) {
+export function regexAll(pattern : string | RegExp, string : string) : Array<RegexResultType> {
 
     let matches = [];
     let start = 0;
@@ -341,15 +361,17 @@ export function regexAll(pattern, string) {
         let match = regex(pattern, string, start);
 
         if (!match) {
-            return matches;
+            break;
         }
 
         matches.push(match);
         start = match.end;
     }
+
+    return matches;
 }
 
-export function count(str, substr) {
+export function count(str : string, substr : string) : number {
 
     let startIndex = 0;
     let itemCount = 0;
@@ -358,22 +380,60 @@ export function count(str, substr) {
         let index = str.indexOf(substr, startIndex);
 
         if (index === -1) {
-            return itemCount;
+            break;
         }
 
         startIndex = index;
         itemCount += 1;
     }
+
+    return itemCount;
 }
 
-export function eventEmitter() {
+export function stringify(item : mixed) : string {
+    if (typeof item === 'string') {
+        return item;
+    }
+
+    if (item && typeof item.toString === 'function') {
+        return item.toString();
+    }
+
+    return Object.prototype.toString.call(item);
+}
+
+export function stringifyError(err : mixed) : string {
+    if (err) {
+        // $FlowFixMe
+        let { stack, message } = err;
+
+        if (typeof stack === 'string') {
+            return stack;
+        }
+
+        if (typeof message === 'string') {
+            return message;
+        }
+    }
+
+    return stringify(err);
+}
+
+export type EventEmitterType = {
+    on : (eventName : string, handler : Function) => CancelableType,
+    once : (eventName : string, handler : Function) => CancelableType,
+    trigger : (eventName : string) => void,
+    triggerOnce : (eventName : string) => void
+};
+
+export function eventEmitter() : EventEmitterType {
 
     let triggered = {};
     let handlers = {};
 
     return {
 
-        on(eventName, handler) {
+        on(eventName : string, handler : Function) : CancelableType {
 
             let handlerList = handlers[eventName] = handlers[eventName] || [];
 
@@ -392,7 +452,7 @@ export function eventEmitter() {
             };
         },
 
-        once(eventName, handler) {
+        once(eventName : string, handler : Function) : CancelableType {
 
             let listener = this.on(eventName, () => {
                 listener.cancel();
@@ -402,7 +462,7 @@ export function eventEmitter() {
             return listener;
         },
 
-        trigger(eventName) {
+        trigger(eventName : string) {
 
             let handlerList = handlers[eventName];
 
@@ -413,7 +473,7 @@ export function eventEmitter() {
             }
         },
 
-        triggerOnce(eventName) {
+        triggerOnce(eventName : string) {
 
             if (triggered[eventName]) {
                 return;

@@ -1,3 +1,4 @@
+/* @flow */
 
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
@@ -5,8 +6,8 @@ import { memoize, uniqueID, getDomain, globalFor } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 
 
-function normalize(str) {
-    return str && str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
+function normalize(str : string) : string {
+    return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
 }
 
 
@@ -22,7 +23,7 @@ function normalize(str) {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(name, version, options = {}) {
+export function buildChildWindowName(name : string, version : string, options : Object = {}) : string {
 
     options.id = uniqueID();
     options.domain = getDomain(window);
@@ -47,6 +48,19 @@ export function buildChildWindowName(name, version, options = {}) {
     ].join('__');
 }
 
+export let isXComponentWindow = memoize(() => {
+    if (!window.name) {
+        return false;
+    }
+
+    let [ xcomp ] = window.name.split('__');
+
+    if (xcomp !== XCOMPONENT) {
+        return false;
+    }
+
+    return true;
+});
 
 /*  Parse Window Name
     -----------------
@@ -58,13 +72,13 @@ export function buildChildWindowName(name, version, options = {}) {
 export let getComponentMeta = memoize(() => {
 
     if (!window.name) {
-        return;
+        throw new Error(`Can not get component meta without window name`);
     }
 
     let [ xcomp, name, version, encodedOptions ] = window.name.split('__');
 
     if (xcomp !== XCOMPONENT) {
-        return;
+        throw new Error(`Window not rendered by xcomponent - got ${ xcomp }`);
     }
 
     let componentMeta;
@@ -81,22 +95,19 @@ export let getComponentMeta = memoize(() => {
     return componentMeta;
 });
 
-export function getParentDomain() {
+export function getParentDomain() : string {
     return getComponentMeta().domain; // How does this work for renderTo..?
 }
 
-
-export let isXComponentWindow = memoize(() => {
-    return Boolean(getComponentMeta());
-});
-
-function getWindowByRef({ ref, uid, distance }) {
+function getWindowByRef({ ref, uid, distance } : { ref : string, uid : string, distance : number }) : CrossDomainWindowType {
 
     if (ref === WINDOW_REFERENCES.OPENER) {
+        // $FlowFixMe
         return getOpener(window);
     }
 
     if (ref === WINDOW_REFERENCES.TOP) {
+        // $FlowFixMe
         return getTop(window);
     }
 
@@ -106,6 +117,7 @@ function getWindowByRef({ ref, uid, distance }) {
             return getNthParentFromTop(window, distance);
         }
 
+        // $FlowFixMe
         return getParent(window);
     }
 
@@ -164,31 +176,26 @@ export let getParentRenderWindow = memoize(() => {
     I'd love to do this with pure css, but alas... popup windows :(
 */
 
-export function getPosition(options) {
+export function getPosition({ width, height } : DimensionsType) : PositionType {
 
-    let width = options.width;
-    let height = options.height;
-    let left;
-    let top;
+    let x = 0;
+    let y = 0;
 
     if (width) {
         if (window.outerWidth) {
-            left = Math.round((window.outerWidth - width) / 2) + window.screenX;
+            x = Math.round((window.outerWidth - width) / 2) + window.screenX;
         } else if (window.screen.width) {
-            left = Math.round((window.screen.width - width) / 2);
+            x = Math.round((window.screen.width - width) / 2);
         }
     }
 
     if (height) {
         if (window.outerHeight) {
-            top = Math.round((window.outerHeight - height) / 2) + window.screenY;
+            y = Math.round((window.outerHeight - height) / 2) + window.screenY;
         } else if (window.screen.height) {
-            top = Math.round((window.screen.height - height) / 2);
+            y = Math.round((window.screen.height - height) / 2);
         }
     }
 
-    return {
-        x: left,
-        y: top
-    };
+    return { x, y };
 }

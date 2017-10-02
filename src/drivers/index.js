@@ -1,3 +1,4 @@
+/* @flow */
 
 export * from './script';
 export * from './react';

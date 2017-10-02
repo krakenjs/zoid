@@ -1,3 +1,4 @@
+/* @flow */
 
 import * as INTERFACE from './interface';
 export * from './interface';

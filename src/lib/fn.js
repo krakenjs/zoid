@@ -1,3 +1,4 @@
+/* @flow */
 
 import { getObjectID, replaceObject } from './util';
 
@@ -19,14 +20,19 @@ export function noop() {
     Create a wrapper function which only allows the inner function to run once, otherwise is a noop
 */
 
-export function once(method) {
-    let called = false;
+export function once<T, A : mixed>(method : (...args : Array<A>) => T) : (...args : Array<A>) => T {
 
-    return function () {
-        if (!called) {
-            called = true;
-            return method.apply(this, arguments);
+    let called = false;
+    let result;
+
+    return function(...args : Array<A>) : T {
+        if (called) {
+            return result;
         }
+
+        called = true;
+        result = method.apply(this, arguments);
+        return result;
     };
 }
 
@@ -37,11 +43,11 @@ export function once(method) {
     Create a wrapper function which caches the result of the first call, then for subsequent calls returns the cached value
 */
 
-export function memoize(method) {
+export function memoize<T, A : mixed>(method : (...args : Array<A>) => T) : (...args : Array<A>) => T {
 
     let results = {};
 
-    return function() {
+    return function(...args : Array<A>) : T {
 
         let cacheKey;
 
@@ -67,7 +73,7 @@ export function memoize(method) {
     };
 }
 
-export function debounce(method, time = 100) {
+export function debounce<T>(method : (...args : Array<mixed>) => T, time : number = 100) : (...args : Array<mixed>) => void {
 
     let timeout;
 
@@ -80,7 +86,7 @@ export function debounce(method, time = 100) {
     };
 }
 
-export function serializeFunctions(obj) {
+export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
     return replaceObject(obj, (value, key, fullKey) => {
         if (value instanceof Function) {
             return {
@@ -90,10 +96,10 @@ export function serializeFunctions(obj) {
     });
 }
 
-export function deserializeFunctions(obj, handler) {
+export function deserializeFunctions<T : Object | Array<mixed>>(obj : T, handler : Function) : T {
     return replaceObject(obj, (value, key, fullKey) => {
         if (value && value.__type__ === '__function__') {
-            return function() {
+            return function() : mixed {
                 return handler({ key, fullKey, self: this, args: arguments });
             };
         }

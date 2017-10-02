@@ -34,7 +34,7 @@ let NgCore = {
 const registerDriver = () => angular2.register(unInitializedXcomponent, NgCore);
 
 describe('angular 2 driver', () => {
-    
+
     let ngModule;
 
     beforeEach(() => {
@@ -50,9 +50,9 @@ describe('angular 2 driver', () => {
         NgCore.NgModule.restore();
         ngModule = undefined;
     });
-    
-    it('should not enable automatic driver registeration', () => {
-        assert.isFalse(angular2.global());
+
+    it('should not enable automatic driver registration', () => {
+        assert.isUndefined(angular2.global());
     });
 
     it('should log out initialization message', () => {
@@ -98,7 +98,7 @@ describe('angular 2 driver', () => {
 
             it('receives ngZone as a DI token', () => {
                 assert.isTrue(componentClass.constructor[1] === NgCore.NgZone);
-                
+
             });
 
             it('holds a reference to DOM element ', () => {
@@ -106,7 +106,7 @@ describe('angular 2 driver', () => {
                 componentClass.constructor[componentClass.constructor.length - 1]
                     .bind(component)('elementRef');
                 assert.isTrue(component.elementRef === 'elementRef');
-                
+
             });
 
             it('holds a reference to ngZone ', () => {
@@ -121,10 +121,10 @@ describe('angular 2 driver', () => {
             let component;
 
             beforeEach(() => {
-                component =  { 
+                component =  {
                     props: {
                         prefilledEmail: 'a@b.com'
-                    } 
+                    }
                 };
                 componentClass.constructor[componentClass.constructor.length - 1]
                     .bind(component)(NgCore.ElementRef, NgCore.NgZone);
@@ -136,15 +136,15 @@ describe('angular 2 driver', () => {
                 component = undefined;
             });
 
-            it('initilize xcomponent using provided props', () => {                
+            it('initilize xcomponent using provided props', () => {
                 sinon.assert.calledWith(unInitializedXcomponent.init, component.props, null, 'nativeElement value');
             });
 
-            it('render xcomponent into target element', () => {                
+            it('render xcomponent into target element', () => {
                 sinon.assert.calledWith(initializedXcomponent.render, 'nativeElement value');
             });
 
-            it('saves a reference to parent xcomponent', () => {                
+            it('saves a reference to parent xcomponent', () => {
                 assert.isTrue(component.parent === initializedXcomponent);
             });
 
@@ -153,10 +153,10 @@ describe('angular 2 driver', () => {
         describe('ngOnChanges', () => {
             let component;
             beforeEach(() => {
-                component =  { 
+                component =  {
                     props: {
                         prefilledEmail: 'a@b.com'
-                    } 
+                    }
                 };
                 componentClass.constructor[componentClass.constructor.length - 1]
                     .bind(component)(NgCore.ElementRef, NgCore.NgZone);
@@ -168,7 +168,7 @@ describe('angular 2 driver', () => {
                 component = undefined;
             });
 
-            it('updates props in xcomponent', () => {                
+            it('updates props in xcomponent', () => {
                 component.props.prefilledEmail = 'b@b.com';
                 componentClass.ngOnChanges
                     .bind(component)();
@@ -178,12 +178,12 @@ describe('angular 2 driver', () => {
 
         it('passed functions trigger change detection when called from xcomponent', () => {
             let component;
-            component =  { 
+            component =  {
                 props: {
                     onLogin: (email) => {
                         component.email = email;
                     }
-                } 
+                }
             };
             componentClass.constructor[componentClass.constructor.length - 1]
                 .bind(component)(NgCore.ElementRef, NgCore.NgZone);

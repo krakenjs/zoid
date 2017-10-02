@@ -1,35 +1,56 @@
+/* @flow */
+
 import { replaceObject } from '../lib';
+import { type Component, type ComponentDriverType } from '../component/component';
+
 /* eslint-disable new-cap, object-shorthand */
 
+type Angular2Injection = {};
 
-export let angular2 = {
+type Angular2Component = {};
+
+type Angular2Module = {};
+
+type Angular2 = {
+    Component : ({ selector : string, template : string, inputs : Array<string> }) => {
+        Class : ({ constructor : Array<Angular2Injection | Function>, ngOnInit : () => void, ngOnChanges : () => void }) => Angular2Component
+    },
+    NgModule : ({ declarations : Array<Angular2Component>, exports : Array<Angular2Component> }) => {
+        Class : ({ constructor : () => void }) => Angular2Module
+    },
+    ElementRef : Angular2Injection,
+    NgZone : Angular2Injection
+};
+
+
+export let angular2 : ComponentDriverType<*, Angular2> = {
 
     global() {
-        return false;
+
     },
 
-    register(xcomponent, { Component, NgModule, ElementRef, NgZone }) {
+    register(xcomponent : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
 
         xcomponent.log('initializing angular2 component');
-        
-        function getProps(component) {
-            return replaceObject(component.props, (value, key, fullKey) => {
+
+        let getProps = (component) => {
+            return replaceObject({ ...component.internalProps, ...component.props }, (value, key, fullKey) => {
                 if (typeof value === 'function') {
-                    return function () {
+                    return function() : void {
                         return component.zone.run(() => value.apply(this, arguments));
                     };
                 }
             });
-        }
+        };
 
-        const Angular2Component = 
-            Component({
+        const ComponentInstance =
+            AngularComponent({
                 selector: xcomponent.tag,
                 template: '<div></div>',
                 inputs: ['props']
             })
             .Class({
-                constructor: [ElementRef, NgZone, function(elementRef, zone) { 
+                constructor: [ElementRef, NgZone, function(elementRef, zone) {
                     this.elementRef = elementRef;
                     this.zone = zone;
                 }],
@@ -47,16 +68,16 @@ export let angular2 = {
             });
 
 
-        const Angular2Module = NgModule({
-            declarations: [Angular2Component],
-            exports: [Angular2Component]
+        const ModuleInstance = NgModule({
+            declarations: [ComponentInstance],
+            exports: [ComponentInstance]
         })
         .Class({
             constructor: function () {
-                
+
             }
         });
 
-        return Angular2Module;
+        return ModuleInstance;
     }
 };

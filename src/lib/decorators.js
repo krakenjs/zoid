@@ -1,10 +1,11 @@
+/* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-export function memoized(target, name, descriptor) {
+export function memoized<T : mixed>(target : Object, name : string, descriptor : Object) {
     let method = descriptor.value;
 
-    descriptor.value = function memoizedFunction() {
+    descriptor.value = function memoizedFunction() : T {
 
         this.__memoized__ = this.__memoized__ || {};
 
@@ -18,10 +19,10 @@ export function memoized(target, name, descriptor) {
     descriptor.value.displayName = `${name}:memoized`;
 }
 
-export function promise(target, name, descriptor) {
+export function promise<T : mixed>(target : Object, name : string, descriptor : Object) {
     let method = descriptor.value;
 
-    descriptor.value = function promisifiedFunction() {
+    descriptor.value = function promisifiedFunction() : ZalgoPromise<T> {
         return ZalgoPromise.try(method, this, arguments);
     };
 

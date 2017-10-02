@@ -1,11 +1,13 @@
-
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+/* @flow */
 
 import { getDomain } from '../../lib';
 
-export function normalizeChildProp(component, props, key, value) {
+import { type Component } from '../component';
+import { type BuiltInPropsType } from '../component/props';
 
-    let prop = component.props[key];
+export function normalizeChildProp<T : mixed, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : T  {
+
+    let prop = component.getProp(key);
 
     if (!prop) {
 
@@ -13,39 +15,24 @@ export function normalizeChildProp(component, props, key, value) {
             return value;
         }
 
-        return;
+        throw new Error(`Unrecognized prop: ${ key }`);
     }
 
-    if (typeof prop.childDef === 'function') {
-        if (!value) {
-            if (prop.getter) {
-                return function() {
-                    return ZalgoPromise.resolve(prop.childDef.call());
-                };
-            } else {
-                return prop.childDef.call();
-            }
-        } else if (prop.getter) {
-            let val = value;
-            return function() {
-                return val.apply(this, arguments).then(res => {
-                    return res ? res : prop.childDef.call();
-                });
-            };
-        }
+    if (typeof prop.childDecorate === 'function') {
+        value = prop.childDecorate(value);
     }
 
     return value;
 }
 
 
-export function normalizeChildProps(component, props, origin, required = true) {
+export function normalizeChildProps<P>(component : Component<P>, props : (BuiltInPropsType & P), origin : string, required : boolean = true) : (BuiltInPropsType & P) {
 
     let result = {};
 
     for (let key of Object.keys(props)) {
 
-        let prop = component.props[key];
+        let prop = component.getProp(key);
         let value = props[key];
 
         if (prop && prop.sameDomain && origin !== getDomain(window)) {
@@ -60,12 +47,13 @@ export function normalizeChildProps(component, props, origin, required = true) {
     }
 
     if (required) {
-        for (let key of Object.keys(component.props)) {
+        for (let key of component.getPropNames()) {
             if (!props.hasOwnProperty(key)) {
                 result[key] = normalizeChildProp(component, props, key, props[key]);
             }
         }
     }
 
+    // $FlowFixMe
     return result;
 }

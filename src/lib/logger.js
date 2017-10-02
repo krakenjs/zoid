@@ -1,7 +1,9 @@
+/* @flow */
+
 import * as postRobot from 'post-robot/src';
 import * as $logger from 'beaver-logger/client';
 
-export function setLogLevel(logLevel) {
+export function setLogLevel(logLevel : string) {
     if ($logger.logLevels.indexOf(logLevel) === -1) {
         throw new Error(`Invalid logLevel: ${logLevel}`);
     }
@@ -10,7 +12,7 @@ export function setLogLevel(logLevel) {
     window.LOG_LEVEL = logLevel;
 }
 
-export function info(name, event, payload = {}) {
+export function info(name : string, event : string, payload : Object = {}) {
     $logger.info(`xc_${name}_${event}`, payload);
 }
 
@@ -21,7 +23,7 @@ export function info(name, event, payload = {}) {
     Log a warning
 */
 
-export function warn(name, event, payload) {
+export function warn(name : string, event : string, payload : Object = {}) {
     $logger.warn(`xc_${name}_${event}`, payload);
 }
 
@@ -32,6 +34,6 @@ export function warn(name, event, payload) {
     Log an error
 */
 
-export function error(name, event, payload) {
+export function error(name : string, event : string, payload : Object = {}) {
     $logger.error(`xc_${name}_${event}`, payload);
 }

@@ -1,4 +1,5 @@
 
+
 import xcomponent from 'src/index'
 import { CONFIG } from 'post-robot/src';
 import './tests';

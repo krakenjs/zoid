@@ -1,7 +1,8 @@
 
-import { testComponent_parentDomains_string, 
-        testComponent_parentDomains_array_of_strings, 
-        testComponent_parentDomains_array_of_regex, 
+
+import { testComponent_parentDomains_string,
+        testComponent_parentDomains_array_of_strings,
+        testComponent_parentDomains_array_of_regex,
         testComponent_parentDomains_string_match,
         testComponent_parentDomains_array_of_regex_match,
         testComponent_parentDomains_array_of_strings_match,
@@ -14,7 +15,7 @@ import { RenderError } from '../../src/error';
 describe('parent domain check', () => {
 
     describe('should not throw error when: ', () => {
-        
+
         it('allowedParentDomains is a wildcard', done => {
             testComponent_parentDomains_string_match_wildcard.renderIframe({
                 onEnter: () => {
@@ -85,5 +86,5 @@ describe('parent domain check', () => {
             });
         });
     });
-    
+
 });

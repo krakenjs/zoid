@@ -1,5 +1,9 @@
+/* @flow */
+/* @jsx jsxDom */
 
-export function defaultPrerenderTemplate({ jsxDom }) {
+import { type RenderOptionsType } from '../../parent';
+
+export function defaultPrerenderTemplate({ jsxDom } : RenderOptionsType) : HTMLElement {
     return (
         <html>
             <head>

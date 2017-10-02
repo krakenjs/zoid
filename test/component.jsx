@@ -1,4 +1,5 @@
 
+
 import xcomponent from 'src/index';
 
 window.xcomponent = xcomponent;

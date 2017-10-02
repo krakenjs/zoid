@@ -1,3 +1,4 @@
+/* @flow */
 
 import * as $logger from 'beaver-logger/client';
 import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
@@ -6,13 +7,20 @@ import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
-import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-         cycle, globalFor, setLogLevel, getElement, documentReady, getDomain } from '../../lib';
+import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
+         cycle, globalFor, setLogLevel, getElement, documentReady, getDomain, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
 import { RenderError } from '../../error';
 
+import { type Component } from '../component';
+import { type BuiltInPropsType } from '../component/props';
+
+export type ChildExportsType<P> = {
+    updateProps : (props : (BuiltInPropsType & P)) => ZalgoPromise<void>,
+    close : () => ZalgoPromise<void>
+};
 
 /*  Child Component
     ---------------
@@ -24,14 +32,24 @@ import { RenderError } from '../../error';
     utilize.
 */
 
-export class ChildComponent extends BaseComponent {
+export class ChildComponent<P> extends BaseComponent<P> {
 
-    constructor(component) {
-        super(component);
+    component : Component<P>
+    props : BuiltInPropsType & P
+    context : string
+
+    onPropHandlers : Array<(BuiltInPropsType & P) => void>
+    onInit : ZalgoPromise<ChildComponent<P>>
+    watchingForResize : boolean
+    autoResize : { width : boolean, height : boolean, element? : string }
+
+    constructor(component : Component<P>) {
+        super();
         this.component = component;
 
         if (!this.hasValidParentDomain()) {
-            return this.error(new RenderError(`Can not be rendered by domain: ${this.getParentDomain()}`));
+            this.error(new RenderError(`Can not be rendered by domain: ${ this.getParentDomain() }`));
+            return;
         }
 
         this.sendLogsToOpener();
@@ -72,8 +90,6 @@ export class ChildComponent extends BaseComponent {
         }).then(({ origin, data }) => {
 
             this.context = data.context;
-
-            window.xprops = this.props = {};
             this.setProps(data.props, origin);
 
             this.watchForResize();
@@ -93,74 +109,85 @@ export class ChildComponent extends BaseComponent {
         });
     }
 
-    hasValidParentDomain() {
+    hasValidParentDomain() : boolean {
         return matchDomain(this.component.allowedParentDomains, this.getParentDomain());
     }
 
-    init() {
+    init() : ZalgoPromise<ChildComponent<P>> {
         return this.onInit;
     }
 
-    getParentDomain() {
+    getParentDomain() : string {
         return getParentDomain();
     }
 
-    onProps(handler) {
+    onProps(handler : Function) {
         this.onPropHandlers.push(handler);
     }
 
-    getParentComponentWindow() {
+    getParentComponentWindow() : WindowType {
         return getParentComponentWindow();
     }
 
-    getParentRenderWindow() {
+    getParentRenderWindow() : WindowType {
         return getParentRenderWindow();
     }
 
-    getInitialProps() {
+    getInitialProps() : (BuiltInPropsType & P) {
         let componentMeta = getComponentMeta();
 
-        if (componentMeta) {
-            let props = componentMeta.props;
+        let props = componentMeta.props;
 
-            if (props.type === INITIAL_PROPS.RAW) {
-                props = props.value;
-            } else if (props.type === INITIAL_PROPS.UID) {
+        if (props.type === INITIAL_PROPS.RAW) {
+            props = props.value;
+        } else if (props.type === INITIAL_PROPS.UID) {
 
-                let parentComponentWindow = getParentComponentWindow();
+            let parentComponentWindow = getParentComponentWindow();
 
-                if (!isSameDomain(parentComponentWindow)) {
+            if (!isSameDomain(parentComponentWindow)) {
 
-                    if (window.location.protocol === 'file:') {
-                        throw new Error(`Can not get props from file:// domain`);
-                    }
-
-                    throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
+                if (window.location.protocol === 'file:') {
+                    throw new Error(`Can not get props from file:// domain`);
                 }
 
-                props = globalFor(parentComponentWindow).props[componentMeta.uid];
-
-            } else {
-                throw new Error(`Unrecognized props type: ${props.type}`);
+                throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
             }
 
-            if (!props) {
-                throw new Error(`Initial props not found`);
+            let global = globalFor(parentComponentWindow);
+
+            if (!global) {
+                throw new Error(`Can not find global for parent component - can not retrieve props`);
             }
 
-            return deserializeFunctions(props, ({ fullKey, self, args }) => {
-                return this.onInit.then(() => {
-                    return get(this.props, fullKey).apply(self, args);
-                });
-            });
+            props = global.props[componentMeta.uid];
+
+        } else {
+            throw new Error(`Unrecognized props type: ${props.type}`);
         }
+
+        if (!props) {
+            throw new Error(`Initial props not found`);
+        }
+
+        return deserializeFunctions(props, ({ fullKey, self, args }) => {
+            return this.onInit.then(() => {
+                let func = get(this.props, fullKey);
+
+                if (typeof func !== 'function') {
+                    throw new Error(`Expected ${ typeof func } to be function`);
+                }
+
+                return func.apply(self, args);
+            });
+        });
     }
 
 
-    setProps(props = {}, origin, required = true) {
+    setProps(props : (BuiltInPropsType & P), origin : string, required : boolean = true) {
+        // $FlowFixMe
         this.props = this.props || {};
-        props = normalizeChildProps(this.component, props, origin, required);
-        extend(this.props, props);
+        let normalizedProps = normalizeChildProps(this.component, props, origin, required);
+        extend(this.props, normalizedProps);
         window.xprops = this.props;
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
@@ -174,7 +201,7 @@ export class ChildComponent extends BaseComponent {
         Send a post message to our parent window.
     */
 
-    sendToParent(name, data) {
+    sendToParent(name : string, data : ?Object = {}) : ZalgoPromise<{ origin : string, source : WindowType, data : Object }> {
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
@@ -200,7 +227,7 @@ export class ChildComponent extends BaseComponent {
         // Ensure we do not try to .attach() multiple times for the same component on the same page
 
         if (window.__activeXComponent__) {
-            throw this.component.error(`Can not attach multiple components to the same window`);
+            throw this.component.createError(`Can not attach multiple components to the same window`);
         }
 
         window.__activeXComponent__ = this;
@@ -208,13 +235,13 @@ export class ChildComponent extends BaseComponent {
         // Get the direct parent window
 
         if (!getParentComponentWindow()) {
-            throw this.component.error(`Can not find parent window`);
+            throw this.component.createError(`Can not find parent window`);
         }
 
         let componentMeta = getComponentMeta();
 
         if (componentMeta.tag !== this.component.tag) {
-            throw this.component.error(`Parent is ${componentMeta.tag} - can not attach ${this.component.tag}`);
+            throw this.component.createError(`Parent is ${componentMeta.tag} - can not attach ${this.component.tag}`);
         }
 
         // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
@@ -259,10 +286,12 @@ export class ChildComponent extends BaseComponent {
 
                         try {
 
-                            window.console[level] = function() {
+                            window.console[level] = function() : void {
 
                                 try {
-                                    return frame.console[level].apply(frame.console, arguments);
+                                    if (frame) {
+                                        return frame.console[level].apply(frame.console, arguments);
+                                    }
                                 } catch (err3) {
                                     // pass
                                 }
@@ -288,12 +317,12 @@ export class ChildComponent extends BaseComponent {
         window.addEventListener('unload', () => this.checkClose());
     }
 
-    enableAutoResize({ width = true, height = true } = {}) {
+    enableAutoResize({ width = true, height = true } : { width : boolean, height : boolean } = {}) {
         this.autoResize = { width, height };
         this.watchForResize();
     }
 
-    getAutoResize() {
+    getAutoResize() : { width : boolean, height : boolean, element : HTMLElement } {
 
         let width = false;
         let height = false;
@@ -312,21 +341,17 @@ export class ChildComponent extends BaseComponent {
 
         if (autoResize.element) {
             element = getElement(autoResize.element);
+        } else if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
+            element = document.body;
+        } else {
+            element = document.documentElement;
         }
 
-        if (!element) {
-            // Believe me, I struggled. There's no other way.
-            if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-                element = document.body;
-            } else {
-                element = document.documentElement;
-            }
-        }
-
+        // $FlowFixMe
         return { width, height, element };
     }
 
-    watchForResize() {
+    watchForResize() : ?ZalgoPromise<void> {
 
         let { width, height, element } = this.getAutoResize();
 
@@ -350,7 +375,9 @@ export class ChildComponent extends BaseComponent {
 
         }).then(() => {
 
+            // $FlowFixMe
             if (!dimensionsMatchViewport(element, { width, height })) {
+                // $FlowFixMe
                 return this.resizeToElement(element, { width, height });
             }
 
@@ -358,6 +385,7 @@ export class ChildComponent extends BaseComponent {
 
             return cycle(() => {
                 return onDimensionsChange(element, { width, height }).then(dimensions => {
+                    // $FlowFixMe
                     return this.resizeToElement(element, { width, height });
                 });
             });
@@ -365,17 +393,17 @@ export class ChildComponent extends BaseComponent {
     }
 
 
-    exports() {
+    exports() : ChildExportsType<P> {
 
         let self = this;
 
         return {
-            updateProps(props) {
-                return self.setProps(props, this.origin, false);
+            updateProps(props : (BuiltInPropsType & P)) : ZalgoPromise<void> {
+                return ZalgoPromise.try(() => self.setProps(props, this.origin, false));
             },
 
-            close() {
-                return self.destroy();
+            close() : ZalgoPromise<void> {
+                return ZalgoPromise.try(() => self.destroy());
             }
         };
     }
@@ -387,27 +415,28 @@ export class ChildComponent extends BaseComponent {
         Resize the child window. Must be done on a user action like a click if we're in a popup
     */
 
-    resize(width, height) {
+    resize(width : ?number, height : ?number) : ZalgoPromise<void> {
         return ZalgoPromise.resolve().then(() => {
 
-            this.component.log(`resize`, { width, height });
+            this.component.log(`resize`, { width: stringify(width), height: stringify(height) });
 
             if (this.context === CONTEXT_TYPES.POPUP) {
-                return; // window.resizeTo(width, height);
+                return;
             }
 
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height });
+            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height }).then(noop);
         });
     }
 
 
-    resizeToElement(el, { width, height }) {
+    resizeToElement(el : HTMLElement, { width, height } : DimensionsType) : ZalgoPromise<void> {
 
         let history = [];
 
         let resize = () => {
             return ZalgoPromise.try(() => {
 
+                // $FlowFixMe
                 let tracker = trackDimensions(el, { width, height });
                 let { dimensions } = tracker.check();
 
@@ -442,15 +471,15 @@ export class ChildComponent extends BaseComponent {
         Hide the window and any parent template
     */
 
-    hide() {
-        return this.sendToParent(POST_MESSAGE.HIDE);
+    hide() : ZalgoPromise<void> {
+        return this.sendToParent(POST_MESSAGE.HIDE).then(noop);
     }
 
-    show() {
-        return this.sendToParent(POST_MESSAGE.SHOW);
+    show() : ZalgoPromise<void> {
+        return this.sendToParent(POST_MESSAGE.SHOW).then(noop);
     }
 
-    userClose() {
+    userClose() : void {
         return this.close(CLOSE_REASONS.USER_CLOSED);
     }
 
@@ -461,21 +490,17 @@ export class ChildComponent extends BaseComponent {
         Close the child window
     */
 
-    close(reason = CLOSE_REASONS.CHILD_CALL) {
+    close(reason : string = CLOSE_REASONS.CHILD_CALL) {
 
         this.component.log(`close_child`);
 
         // Ask our parent window to close us
 
-        this.sendToParent(POST_MESSAGE.CLOSE, { reason }, {
-            fireAndForget: true
-        });
+        this.sendToParent(POST_MESSAGE.CLOSE, { reason });
     }
 
     checkClose() {
-        this.sendToParent(POST_MESSAGE.CHECK_CLOSE, {}, {
-            fireAndForget: true
-        });
+        this.sendToParent(POST_MESSAGE.CHECK_CLOSE);
     }
 
 
@@ -505,13 +530,15 @@ export class ChildComponent extends BaseComponent {
         Send an error back to the parent
     */
 
-    error(err) {
+    error(err : mixed) : ZalgoPromise<void> {
 
-        this.component.logError(`error`, { error: err.stack || err.toString() });
+        let stringifiedError = stringifyError(err);
+
+        this.component.logError(`error`, { error: stringifiedError });
 
         return this.sendToParent(POST_MESSAGE.ERROR, {
-            error: err.stack || err.toString()
-        });
+            error: stringifiedError
+        }).then(noop);
     }
 }
 
@@ -530,7 +557,7 @@ if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
                     continue;
                 }
 
-                window.console[level] = function() {
+                window.console[level] = function() : void {
                     try {
                         let logLevel = window.LOG_LEVEL;
 

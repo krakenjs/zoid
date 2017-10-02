@@ -1,9 +1,30 @@
+/* @flow */
 
 import { extend } from '../lib';
+import { type Component, type ComponentDriverType } from '../component/component';
 
-export let react = {
+declare class ReactClassType {
 
-    global() {
+}
+
+type ReactElementType = {
+
+};
+
+type ReactType = {
+    createClass : ({ render : ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void }) => (typeof ReactClassType),
+    createElement : (string, ?{ [string] : mixed }, ...children : Array<ReactElementType>) => ReactElementType
+};
+
+type ReactDomType = {
+    findDOMNode : (ReactElementType) => HTMLElement
+};
+
+type ReactLibraryType = { React : ReactType, ReactDOM : ReactDomType };
+
+export let react : ComponentDriverType<*, ReactLibraryType> = {
+
+    global() : ?ReactLibraryType {
         if (window.React && window.ReactDOM) {
             return {
                 React: window.React,
@@ -12,11 +33,12 @@ export let react = {
         }
     },
 
-    register(component, { React, ReactDOM }) {
+    register(component : Component<*>, { React, ReactDOM } : ReactLibraryType) : (typeof ReactClassType) {
 
+        // $FlowFixMe
         component.react = React.createClass({
 
-            render() {
+            render() : ReactElementType {
                 return React.createElement('div', null);
             },
 

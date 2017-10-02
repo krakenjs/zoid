@@ -1,20 +1,20 @@
+/* @flow */
 
 import { on } from 'post-robot/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
-import { ParentComponent } from '../parent';
-import { DelegateComponent } from '../delegate';
-import { internalProps } from './props';
+import { ParentComponent, type RenderOptionsType } from '../parent';
+import { DelegateComponent, type DelegateOptionsType } from '../delegate';
+import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropDefinitionType, type PropDefinitionTypeEnum, type PropTypeEnum } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 
 import * as drivers from '../../drivers';
-
-import { getDomainFromUrl, promise, info, error, warn, setLogLevel } from '../../lib';
-
-export let components = {};
+import { getDomainFromUrl, info, error, warn, setLogLevel, memoize } from '../../lib';
 
 
 /*  Component
@@ -27,10 +27,83 @@ export let components = {};
     contains all of the configuration needed for them to set themselves up.
 */
 
-export class Component extends BaseComponent {
+export type ComponentOptionsType<P> = {
 
-    constructor(options = {}) {
-        super(options);
+    tag : string,
+
+    url? : EnvString,
+    buildUrl? : (BuiltInPropsType & P) => string | ZalgoPromise<string>,
+
+    domain? : EnvString,
+    bridgeUrl? : EnvString,
+    bridgeDomain? : EnvString,
+
+    props? : UserPropsDefinitionType<P>,
+
+    dimensions? : CssDimensionsType,
+    scrolling? : boolean,
+    autoResize? : boolean | { width? : boolean, height? : boolean, element? : string },
+
+    defaultLogLevel? : string,
+    allowedParentDomains? : StringMatcherType,
+
+    version? : string,
+    defaultEnv? : string,
+
+
+    contexts? : { iframe? : boolean, popup? : boolean },
+    defaultContext? : string,
+
+    containerTemplate? : (RenderOptionsType) => HTMLElement,
+    prerenderTemplate? : (RenderOptionsType) => HTMLElement,
+
+    validate? : (Component<P>, PropsType) => void // eslint-disable-line no-use-before-define
+};
+
+export type ComponentDriverType<P, T : mixed> = {
+    global : () => ?T,
+    register : (Component<P>, T) => mixed
+};
+
+export class Component<P> extends BaseComponent<P> {
+
+    name : string
+    looseProps : boolean
+
+    tag : string
+    url : EnvString
+
+    domain : EnvString
+    bridgeUrl : EnvString
+    bridgeDomain : EnvString
+
+    props : UserPropsDefinitionType<P>
+    builtinProps : BuiltInPropsDefinitionType<P>
+
+    dimensions : CssDimensionsType
+    scrolling : boolean
+    autoResize : ?(boolean | { width? : boolean, height? : boolean, element? : string })
+
+    defaultLogLevel : string
+    allowedParentDomains : StringMatcherType
+
+    version : string
+    defaultEnv : string
+    buildUrl : (BuiltInPropsType & P) => string | ZalgoPromise<string>
+
+    contexts : { iframe? : boolean, popup? : boolean }
+    defaultContext : string
+
+    containerTemplate : (RenderOptionsType) => HTMLElement
+    prerenderTemplate : (RenderOptionsType) => HTMLElement
+
+    validate : (Component<P>, (PropsType & P)) => void
+
+    driverCache : { [string] : mixed }
+
+    constructor(options : ComponentOptionsType<P>) {
+        super();
+        validate(options);
 
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
@@ -44,11 +117,9 @@ export class Component extends BaseComponent {
         // initially set log level to default log level configured when creating component
         setLogLevel(this.defaultLogLevel);
 
-        if (components[this.tag]) {
+        if (Component.components[this.tag]) {
             throw new Error(`Can not register multiple components with the same tag`);
         }
-
-        this.validate(options);
 
         // Name of the component, used for logging. Auto-generated from the tag name by default.
 
@@ -57,10 +128,8 @@ export class Component extends BaseComponent {
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
 
-        this.props = {
-            ...internalProps,
-            ...(options.props || {})
-        };
+        this.builtinProps = getInternalProps();
+        this.props = options.props || {};
 
         if (!options.props) {
             this.looseProps = true;
@@ -101,7 +170,6 @@ export class Component extends BaseComponent {
 
         // Auto Resize option
 
-        this.addProp(options, 'getInitialDimensions');
         this.addProp(options, 'autoResize', false);
 
         // Templates and styles for the parent page and the initial rendering of the component
@@ -113,7 +181,7 @@ export class Component extends BaseComponent {
 
         // A mapping of tag->component so we can reference components by string tag name
 
-        components[this.tag] = this;
+        Component.components[this.tag] = this;
 
         // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
         // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
@@ -121,6 +189,24 @@ export class Component extends BaseComponent {
         this.registerDrivers();
         this.registerChild();
         this.listenDelegate();
+    }
+
+    @memoize
+    getPropNames() : Array<string> {
+        let props = Object.keys(this.props);
+
+        for (let key of Object.keys(this.builtinProps)) {
+            if (props.indexOf(key) === -1) {
+                props.push(key);
+            }
+        }
+
+        return props;
+    }
+
+    getProp<T : PropTypeEnum, S : PropDefinitionTypeEnum>(name : string) : PropDefinitionType<T, P, S> {
+        // $FlowFixMe
+        return this.props[name] || this.builtinProps[name];
     }
 
     registerDrivers() {
@@ -139,13 +225,13 @@ export class Component extends BaseComponent {
         }
     }
 
-    driver(name, glob) {
+    driver(name : string, dep : mixed) : mixed {
         if (!drivers[name]) {
             throw new Error(`Could not find driver for framework: ${name}`);
         }
 
         if (!this.driverCache[name]) {
-            this.driverCache[name] = drivers[name].register(this, glob);
+            this.driverCache[name] = drivers[name].register(this, dep);
         }
 
         return this.driverCache[name];
@@ -165,7 +251,7 @@ export class Component extends BaseComponent {
     listenDelegate() {
         on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
 
-            let domain = this.getDomain(null, { env: data.env || this.defaultEnv });
+            let domain = this.getDomain(null, data.env || this.defaultEnv);
 
             if (!domain) {
                 throw new Error(`Could not determine domain to allow remote render`);
@@ -185,7 +271,7 @@ export class Component extends BaseComponent {
     }
 
 
-    getValidDomain(url) {
+    getValidDomain(url : ?string) : ?string {
 
         if (!url) {
             return;
@@ -212,9 +298,9 @@ export class Component extends BaseComponent {
     }
 
 
-    getDomain(url, props = {}) {
+    getDomain(url : ?string, env : string) : ?string {
 
-        let domain = this.getForEnv(this.domain, props.env);
+        let domain = this.getForEnv(this.domain, env);
 
         if (domain) {
             return domain;
@@ -226,7 +312,7 @@ export class Component extends BaseComponent {
             return domain;
         }
 
-        let envUrl = this.getForEnv(this.url, props.env);
+        let envUrl = this.getForEnv(this.url, env);
 
         if (envUrl) {
             return getDomainFromUrl(envUrl);
@@ -237,11 +323,11 @@ export class Component extends BaseComponent {
         }
     }
 
-    getBridgeUrl(env) {
+    getBridgeUrl(env : string) : ?string {
         return this.getForEnv(this.bridgeUrl, env);
     }
 
-    getForEnv(item, env) {
+    getForEnv(item : string | Object, env : ?string) : ?string {
 
         if (!item) {
             return;
@@ -264,7 +350,7 @@ export class Component extends BaseComponent {
         }
     }
 
-    getBridgeDomain(env) {
+    getBridgeDomain(env : string) : ?string {
 
         let bridgeDomain = this.getForEnv(this.bridgeDomain, env);
 
@@ -279,7 +365,7 @@ export class Component extends BaseComponent {
         }
     }
 
-    getUrl(env, props) {
+    getUrl(env : string, props : BuiltInPropsType & P) : ?(string | ZalgoPromise<string>) {
 
         let url = this.getForEnv(this.url, env);
 
@@ -292,58 +378,17 @@ export class Component extends BaseComponent {
         }
     }
 
-    isXComponent() {
+    isXComponent() : boolean {
         return isXComponentWindow();
     }
 
-    isChild() {
+    isChild() : boolean {
         return isXComponentWindow() && getComponentMeta().tag === this.tag;
     }
 
 
-    /*  Parent
-        ------
-
-        Get an instance of the parent for this component (lives on the parent page which contains the component)
-    */
-
-    parent(options) {
-        return new ParentComponent(this, null, options);
-    }
-
-
-    /*  Child
-        -----
-
-        Get an instance of the child for this component (lives on the child component page which lives in the parent)
-    */
-
-    child(options) {
-
-        if (!window.xchild) {
-            throw new Error(`Child not instantiated`);
-        }
-
-        if (window.xchild.component !== this) {
-            // throw new Error(`Child instantiated from a different component: ${window.xchild.tag}`);
-        }
-
-        return window.xchild;
-    }
-
-
-    /*  Attach
-        ------
-
-        Shortcut to instantiate a child in a child component window
-    */
-
-    attach(options) {
-        return this.child(options);
-    }
-
-    error(message, tag) {
-        return new Error(`[${this.tag || tag}] ${message}`);
+    createError(message : string, tag : ?string) : Error {
+        return new Error(`[${ tag || this.tag  }] ${message}`);
     }
 
 
@@ -353,24 +398,23 @@ export class Component extends BaseComponent {
         Shortcut to instantiate a component on a parent page, with props
     */
 
-    init(props, context, element) {
+    init(props : (PropsType & P), context : ?string, element : ElementRefType) : ParentComponent<P> {
         context = this.getRenderContext(element);
         return new ParentComponent(this, context, { props });
     }
 
 
-    delegate(source, options = {}) {
+    delegate(source : WindowType, options : DelegateOptionsType) : DelegateComponent<P> {
         return new DelegateComponent(this, source, options);
     }
 
-    validateRenderContext(context) {
+    validateRenderContext(context : string) {
         if (!this.contexts[context]) {
             throw new Error(`[${this.tag}] Can not render to ${context}`);
         }
-
     }
 
-    getRenderContext(element) {
+    getRenderContext(element : ElementRefType) : string {
 
         if (element) {
             this.validateRenderContext(CONTEXT_TYPES.IFRAME);
@@ -393,45 +437,56 @@ export class Component extends BaseComponent {
         Shortcut to render a parent component
     */
 
-    @promise
-    render(props, element) {
-        return new ParentComponent(this, this.getRenderContext(element), { props }).render(element || document.body);
+    render(props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            return new ParentComponent(this, this.getRenderContext(element), { props }).render(element || document.body);
+        });
     }
 
-    @promise
-    renderIframe(props, element = document.body) {
-        this.validateRenderContext(CONTEXT_TYPES.IFRAME);
-        return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).render(element);
+    renderIframe(props : (PropsType & P), element : ?(ElementRefType) = document.body) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            if (!element) {
+                throw new Error(`Expected element to be passed`);
+            }
+
+            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+            return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).render(element);
+        });
     }
 
-    @promise
-    renderPopup(props) {
-        this.validateRenderContext(CONTEXT_TYPES.POPUP);
-        return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).render();
+    renderPopup(props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            this.validateRenderContext(CONTEXT_TYPES.POPUP);
+            return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).render();
+        });
     }
 
-    @promise
-    renderTo(win, props, element) {
-        return new ParentComponent(this, this.getRenderContext(element), { props }).renderTo(win, element);
+    renderTo(win : WindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            return new ParentComponent(this, this.getRenderContext(element), { props }).renderTo(win, element);
+        });
     }
 
-    @promise
-    renderIframeTo(win, props, element) {
-        this.validateRenderContext(CONTEXT_TYPES.IFRAME);
-        return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).renderTo(win, element);
+    renderIframeTo(win : WindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
+            return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).renderTo(win, element);
+        });
     }
 
-    @promise
-    renderPopupTo(win, props) {
-        this.validateRenderContext(CONTEXT_TYPES.POPUP);
-        return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
+    renderPopupTo(win : WindowType, props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
+        return ZalgoPromise.try(() => {
+            this.validateRenderContext(CONTEXT_TYPES.POPUP);
+            return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
+        });
     }
 
-    prerender(props, element) {
+    prerender(props : (PropsType & P), element : ElementRefType) : { render : ((PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>>, renderTo : (any, (PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>> } {
         let instance = new ParentComponent(this, this.getRenderContext(element), { props });
         instance.prefetch();
+
         return {
-            render(innerProps, innerElement) {
+            render(innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
                 if (innerProps) {
                     instance.updateProps(innerProps);
                 }
@@ -439,7 +494,7 @@ export class Component extends BaseComponent {
                 return instance.render(innerElement);
             },
 
-            renderTo(win, innerProps, innerElement) {
+            renderTo(win : WindowType, innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
                 if (innerProps) {
                     instance.updateProps(innerProps);
                 }
@@ -447,7 +502,7 @@ export class Component extends BaseComponent {
                 return instance.renderTo(win, innerElement);
             },
 
-            get html() {
+            get html() : ?ZalgoPromise<string> {
                 return instance.html;
             },
 
@@ -457,36 +512,13 @@ export class Component extends BaseComponent {
         };
     }
 
-
-    /*  Get By Tag
-        ----------
-
-        Get a component instance by tag name
-    */
-
-    getByTag(tag) {
-        return components[tag];
-    }
-
-
-    /*  Validate
-        --------
-
-        Validate any options passed into Component
-    */
-
-    validate(options) {
-        return validate(this, options);
-    }
-
-
     /*  Log
         ---
 
         Log an event using the component name
     */
 
-    log(event, payload = {}) {
+    log(event : string, payload : { [ string ] : string } = {}) {
         info(this.name, event, payload);
     }
 
@@ -497,7 +529,7 @@ export class Component extends BaseComponent {
         Log a warning
     */
 
-    logWarning(event, payload) {
+    logWarning(event : string, payload : { [ string ] : string }) {
         warn(this.name, event, payload);
     }
 
@@ -508,12 +540,13 @@ export class Component extends BaseComponent {
         Log an error
     */
 
-    logError(event, payload) {
+    logError(event : string, payload : { [ string ] : string }) {
         error(this.name, event, payload);
     }
-}
 
+    static components : { [string] : Component<*> } = {}
 
-export function getByTag(tag) {
-    return components[tag];
+    static getByTag<T>(tag : string) : Component<T> {
+        return Component.components[tag];
+    }
 }

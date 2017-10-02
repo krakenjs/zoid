@@ -1,4 +1,5 @@
 
+
 import { testComponent, testComponent4 } from '../component';
 
 describe('xcomponent happy cases', () => {
@@ -26,7 +27,7 @@ describe('xcomponent happy cases', () => {
     it.skip('should enter a component rendered as a popup with the correct dimensions', done => {
 
         let open = window.open;
-        window.open = function(url, name, options) {
+        window.open = function(url, name, options) : any {
             assert.isTrue(options.indexOf(`width=${testComponent.dimensions.width}`) !== -1, 'Expected width passed to window.open to be correct');
             assert.isTrue(options.indexOf(`height=${testComponent.dimensions.height}`) !== -1, 'Expected height passed to window.open to be correct');
             return open.apply(this, arguments);
@@ -67,7 +68,7 @@ describe('xcomponent happy cases', () => {
     it.skip('should enter a component rendered as a popup with no dimensions', done => {
 
         let open = window.open;
-        window.open = function(url, name, options) {
+        window.open = function(url, name, options) : any {
             assert.isTrue(options.indexOf(`width=`) === -1, 'Expected width not to be passed to window.open');
             assert.isTrue(options.indexOf(`height=`) === -1, 'Expected height not to be passed to window.open');
             return open.apply(this, arguments);
@@ -156,7 +157,7 @@ describe('xcomponent happy cases', () => {
         testComponent.renderIframe({
 
             foo() {
-                return this.updateProps({
+                this.updateProps({
                     foo(bar) {
                         assert.equal(bar, 'bar');
                         done();

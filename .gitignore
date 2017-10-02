@@ -29,4 +29,5 @@ node_modules
 #IDE
 .idea/*
 
+flow-typed
 .DS_Store

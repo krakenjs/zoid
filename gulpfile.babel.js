@@ -2,12 +2,13 @@
 let gulp = require('gulp');
 let webpack = require('webpack');
 let gulpWebpack = require('webpack-stream');
+let gulpFlowtype = require('gulp-flowtype');
 let eslint = require('gulp-eslint');
 let Server = require('karma').Server;
 let argv = require('yargs').argv;
 let UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-gulp.task('test', ['lint', 'karma']);
+gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['test', 'webpack']);
 
 let MODULE_NAME = 'xcomponent';
@@ -118,7 +119,14 @@ gulp.task('lint', function() {
   .pipe(eslint.failAfterError());
 });
 
-gulp.task('karma', ['lint'], function (done) {
+gulp.task('typecheck', [ 'lint' ], function() {
+    return gulp.src([ 'src/**/*.js', 'test/**/*.js' ])
+        .pipe(gulpFlowtype({
+            abort: true
+        }))
+});
+
+gulp.task('karma', function (done) {
 
     let server = new Server({
     configFile: __dirname + '/karma.conf.js',

@@ -1,4 +1,5 @@
 
+
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { testComponent } from '../component';
@@ -43,7 +44,7 @@ describe('xcomponent options', () => {
 
         testComponent.renderIframe({
 
-            memoizedFunction() {
+            memoizedFunction: () => {
                 x += 1;
                 return x;
             },
@@ -70,13 +71,13 @@ describe('xcomponent options', () => {
 
         testComponent.renderIframe({
 
-            onceFunction() {
+            onceFunction: () => {
                 x += 1;
                 return x;
             },
 
             complete(result) {
-                assert.equal(result, undefined, 'Expected result to have only been returned once');
+                assert.equal(x, 1, 'Expected result to have only been returned once');
                 done();
             },
 
@@ -118,7 +119,7 @@ describe('xcomponent options', () => {
 
         testComponent.renderIframe({
 
-            denodeifyFunction(val) {
+            denodeifyFunction: (val) => {
                 return ZalgoPromise.resolve(`${val}bar`);
             },
 

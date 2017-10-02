@@ -1,4 +1,3 @@
-
 import xcomponent from 'src/index';
 
 import { testComponent, testComponent3 } from '../component';
@@ -75,7 +74,7 @@ describe('xcomponent error cases', () => {
 
     it('should try to render a component with a specified element when iframe mode is not supported', done => {
 
-        testComponent3.render(document.body).catch(() => {
+        testComponent3.render({}, document.body).catch(() => {
             done();
         });
     });

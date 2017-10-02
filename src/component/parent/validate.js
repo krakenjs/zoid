@@ -1,5 +1,9 @@
+/* @flow */
 
-export function validateProp(prop, key, value, props, required = true) {
+import { type Component } from '../component';
+import { type PropDefinitionType, type PropsType, type PropDefinitionTypeEnum, type PropTypeEnum } from '../component/props';
+
+export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : ?T, props : (PropsType & P), required : boolean = true) {
 
     let hasProp = value !== null && value !== undefined && value !== '';
 
@@ -11,7 +15,7 @@ export function validateProp(prop, key, value, props, required = true) {
         return;
     }
 
-    if (value.then && prop.promise) {
+    if (value && typeof value.then === 'function' && prop.promise) {
         return;
     }
 
@@ -24,10 +28,7 @@ export function validateProp(prop, key, value, props, required = true) {
     } else if (prop.type === 'string') {
 
         if (typeof value !== 'string') {
-
-            if (!(prop.getter && (value instanceof Function || (value && value.then)))) {
-                throw new Error(`Prop is not of type string: ${key}`);
-            }
+            throw new Error(`Prop is not of type string: ${key}`);
         }
 
     } else if (prop.type === 'object') {
@@ -47,7 +48,7 @@ export function validateProp(prop, key, value, props, required = true) {
         }
     }
 
-    if (typeof prop.validate === 'function') {
+    if (typeof prop.validate === 'function' && value) {
         prop.validate(value, props);
     }
 }
@@ -60,14 +61,20 @@ export function validateProp(prop, key, value, props, required = true) {
     double check the values are what we expect, based on the props spec defined in the original component.
 */
 
-export function validateProps(component, props, required = true) {
+export function validateProps<P>(component : Component<P>, props : PropsType, required : boolean = true) {
 
     props = props || {};
 
+    if (props.env && typeof component.url === 'object' && !component.url[props.env]) {
+        throw new Error(`Invalid env: ${props.env}`);
+    }
+
     // Set aliases
 
-    for (let key of Object.keys(component.props)) {
-        let prop = component.props[key];
+    for (let key of component.getPropNames()) {
+
+        // $FlowFixMe
+        let prop = component.getProp(key);
 
         if (prop.alias && props.hasOwnProperty(prop.alias)) {
 
@@ -84,7 +91,7 @@ export function validateProps(component, props, required = true) {
 
     if (!component.looseProps) {
         for (let key of Object.keys(props)) {
-            if (!component.props.hasOwnProperty(key)) {
+            if (component.getPropNames().indexOf(key) === -1) {
                 throw component.error(`Invalid prop: ${key}`);
             }
         }
@@ -94,7 +101,8 @@ export function validateProps(component, props, required = true) {
 
     for (let key of Object.keys(props)) {
 
-        let prop = component.props[key];
+        // $FlowFixMe
+        let prop : PropDefinitionType<*, P> = component.getProp(key);
         let value = props[key];
 
         if (prop) {
@@ -102,29 +110,14 @@ export function validateProps(component, props, required = true) {
         }
     }
 
-    for (let key of Object.keys(component.props)) {
+    for (let key of component.getPropNames()) {
 
-        let prop = component.props[key];
+        // $FlowFixMe
+        let prop : PropDefinitionType<*, P, *> = component.getProp(key);
         let value = props[key];
 
         if (!props.hasOwnProperty(key)) {
             validateProp(prop, key, value, props, required);
         }
-    }
-}
-
-
-/*  Validate
-    --------
-
-    Validate parent component options
-*/
-
-export function validate(component, options) {
-
-    let props = options.props || {};
-
-    if (props.env && typeof component.url === 'object' && !component.url[props.env]) {
-        throw new Error(`Invalid env: ${props.env}`);
     }
 }

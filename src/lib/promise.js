@@ -1,5 +1,6 @@
+/* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src'; 
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 
 /*  DeNodeify
@@ -8,9 +9,9 @@ import { ZalgoPromise } from 'zalgo-promise/src';
     Turns a method from a function which accepts a callback, into a function which returns a promise.
 */
 
-export function denodeify(method) {
+export function denodeify<T>(method : (...args : Array<mixed>) => T) : (...args : Array<mixed>) => ZalgoPromise<T> {
 
-    return function() {
+    return function() : ZalgoPromise<T> {
 
         let self = this;
         let args = Array.prototype.slice.call(arguments);
@@ -28,48 +29,25 @@ export function denodeify(method) {
 
                 return err ? reject(err) : resolve(result);
             });
-            return method.apply(self, args);
+            method.apply(self, args);
         });
     };
 }
 
-export function promisify(method) {
-    let prom = ZalgoPromise.resolve();
-
-    return function() {
-        return prom.then(() => {
+export function promisify<T>(method : (...args : Array<mixed>) => T | ZalgoPromise<T>) : (...args : Array<mixed>) => ZalgoPromise<T> {
+    return function() : ZalgoPromise<T> {
+        return ZalgoPromise.try(() => {
             return method.apply(this, arguments);
         });
     };
 }
 
-export function getter(method, { name = 'property', timeout = 10000 } = {}) {
-
-    return function() {
-        return new ZalgoPromise((resolve, reject) => {
-            let result = method.call(this, resolve, reject);
-
-            if (result && typeof result.then === 'function') {
-                return result.then(resolve, reject);
-            }
-
-            if (result !== undefined) {
-                return resolve(result);
-            }
-
-            setTimeout(() => {
-                reject(`Timed out waiting ${timeout}ms for ${name} getter`);
-            }, timeout);
-        });
-    };
-}
-
-export function delay(time = 1) {
+export function delay(time : number = 1) : ZalgoPromise<void> {
     return new ZalgoPromise(resolve => {
         setTimeout(resolve, time);
     });
 }
 
-export function cycle(method) {
+export function cycle(method : Function) : ZalgoPromise<void> {
     return ZalgoPromise.try(method).then(() => cycle(method));
 }

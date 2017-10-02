@@ -1,21 +1,30 @@
+/* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 
-import { once, copyProp, eventEmitter } from '../lib';
+import { copyProp, eventEmitter, type EventEmitterType, stringifyError } from '../lib';
+import { type Component } from './component';
 
+type CleanupType = {
+    set : <T : mixed >(string, T) => T,
+    register : (string | Function, ?Function) => void,
+    hasTasks : () => boolean,
+    all : () => ZalgoPromise<void>,
+    run : (string) => ZalgoPromise<void>
+};
 
-function cleanup(obj) {
+function cleanup(obj : Object) : CleanupType {
 
     let tasks = [];
     let cleaned = false;
 
     return {
 
-        set(name, item) {
+        set<T : mixed>(name : string, item : T) : T {
 
             if (cleaned) {
-                return;
+                return item;
             }
 
             obj[name] = item;
@@ -25,15 +34,20 @@ function cleanup(obj) {
             return item;
         },
 
-        register(name, method) {
+        register(name : string | Function, method : ?Function) {
 
-            if (!method) {
+            if (typeof name === 'function') {
                 method = name;
-                name = undefined;
+                name = '<anonymous-cleanup-handler>';
+            }
+
+            if (typeof method !== 'function') {
+                throw new Error(`Expected to be passed function to clean.register`);
             }
 
             if (cleaned) {
-                return method();
+                method();
+                return;
             }
 
             tasks.push({
@@ -49,16 +63,18 @@ function cleanup(obj) {
 
                     this.complete = true;
 
-                    return method();
+                    if (method) {
+                        method();
+                    }
                 }
             });
         },
 
-        hasTasks() {
+        hasTasks() : boolean {
             return Boolean(tasks.filter(item => !item.complete).length);
         },
 
-        all() {
+        all() : ZalgoPromise<void> {
             let results = [];
 
             cleaned = true;
@@ -67,12 +83,10 @@ function cleanup(obj) {
                 results.push(tasks.pop().run());
             }
 
-            return ZalgoPromise.all(results).then(() => {
-                return;
-            });
+            return ZalgoPromise.all(results).then(() => { /* pass */ });
         },
 
-        run(name) {
+        run(name : string) : ZalgoPromise<void> {
             let results = [];
 
             for (let item of tasks) {
@@ -97,53 +111,32 @@ function cleanup(obj) {
     a separate library.
 */
 
-export class BaseComponent {
+export class BaseComponent<P> {
+
+    clean : CleanupType
+    event : EventEmitterType
+    component : Component<P>
 
     constructor() {
         this.clean = cleanup(this);
         this.event = eventEmitter();
     }
 
-    addProp(options, name, def) {
+    addProp(options : Object, name : string, def : mixed) {
         copyProp(options, this, name, def);
     }
 
-    on(eventName, handler) {
+    on(eventName : string, handler : () => void) : CancelableType {
         return this.event.on(eventName, handler);
     }
 
-    /*  Try Catch
-        ---------
-
-        Returns a new method which wraps the original call in a try/catch, otherwise delegates to this.onError
-    */
-
-    tryCatch(method, doOnce) {
-
-        let self = this;
-        let errored = false;
-
-        let wrapper = function wrapper() {
-
-            if (errored) {
-                return;
-            }
-
-            try {
-                return method.apply(this, arguments);
-            } catch (err) {
-                errored = true;
-                return self.error(err);
-            }
-        };
-
-        if (doOnce !== false) {
-            wrapper = once(wrapper);
-        }
-
-        return wrapper;
+    listeners() {
+        throw new Error(`Expected listeners to be implemented`);
     }
 
+    error(err : mixed) : ZalgoPromise<void> {
+        throw new Error(`Expected error to be implemented - got ${ stringifyError(err) }`);
+    }
 
     /*  Listen
         ------
@@ -154,10 +147,10 @@ export class BaseComponent {
         All post-messaging is done using post-robot.
     */
 
-    listen(win, domain) {
+    listen(win : CrossDomainWindowType, domain : string) {
 
         if (!win) {
-            throw this.component.error(`window to listen to not set`);
+            throw this.component.createError(`window to listen to not set`);
         }
 
         if (!domain) {
@@ -174,12 +167,12 @@ export class BaseComponent {
 
             let name = listenerName.replace(/^xcomponent_/, '');
 
-            let listener = on(listenerName, { window: win, domain, errorHandler: err => this.error(err) }, ({ source, data }) => {
+            let listener = on(listenerName, { window: win, domain, errorHandler: err => { this.error(err); } }, ({ source, data }) => {
                 this.component.log(`listener_${name}`);
                 return listeners[listenerName].call(this, source, data);
             });
 
-            let errorListener = on(listenerName, { window: win, errorHandler: err => this.error(err) }, ({ origin, data }) => {
+            let errorListener = on(listenerName, { window: win, errorHandler: err => { this.error(err); } }, ({ origin, data }) => {
                 this.component.logError(`unexpected_listener_${name}`, { origin, domain });
                 this.error(new Error(`Unexpected ${name} message from domain ${origin} -- expected message from ${domain}`));
             });

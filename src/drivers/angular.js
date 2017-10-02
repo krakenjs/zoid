@@ -1,19 +1,33 @@
+/* @flow */
 
 import { dasherizeToCamel, replaceObject } from '../lib';
+import { type Component, type ComponentDriverType } from '../component/component';
 
-export let angular = {
+type AngularModule = {
+    directive : (string, () => {
+        scope : { [string] : '=' | '@' },
+        restrict : string,
+        controller : Array<string | Function>
+    }) => AngularModule
+};
 
-    global() {
+type Angular = {
+    module : (string, Array<string>) => AngularModule
+};
+
+export let angular : ComponentDriverType<*, Angular> = {
+
+    global() : ?Angular {
         return window.angular;
     },
 
-    register(component, ng) {
+    register(component : Component<*>, ng : Angular) : AngularModule {
 
         let module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
 
             let scope = {};
 
-            for (let key of Object.keys(component.props)) {
+            for (let key of component.getPropNames()) {
                 scope[key] = '=';
             }
 
@@ -44,7 +58,7 @@ export let angular = {
                         }
                     }
 
-                    function getProps() {
+                    let getProps = () => {
 
                         let scopeProps;
 
@@ -59,7 +73,7 @@ export let angular = {
 
                         scopeProps = replaceObject(scopeProps, (value, key, fullKey) => {
                             if (typeof value === 'function') {
-                                return function() {
+                                return function() : mixed {
                                     let result = value.apply(this, arguments);
                                     safeApply();
                                     return result;
@@ -68,7 +82,7 @@ export let angular = {
                         });
 
                         return scopeProps;
-                    }
+                    };
 
                     let parent = component.init(getProps(), null, $element[0]);
                     parent.render($element[0]);

@@ -1,0 +1,19 @@
+[ignore]
+.*/node_modules/gulp-flowtype
+.*/node_modules/babel-plugin-flow-runtime
+.*/node_modules/flow-runtime
+.*/node_modules/cross-domain-safe-weakmap/dist
+.*/node_modules/cross-domain-safe-weakmap/test
+.*/node_modules/cross-domain-utils/dist
+.*/node_modules/cross-domain-utils/test
+test
+[include]
+[libs]
+flow-typed
+src/types.js
+[options]
+module.name_mapper='^src\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
+unsafe.enable_getters_and_setters=true
+experimental.const_params=false
+esproposal.export_star_as=enable
+esproposal.decorators=ignore

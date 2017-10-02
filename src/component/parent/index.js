@@ -1,3 +1,4 @@
+/* @flow */
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
@@ -10,21 +11,44 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
          noop, showAndAnimate, animateAndHide, showElement, hideElement,
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-         promise, getDomain, global, writeToWindow, setLogLevel, once,
-         prefetchPage, awaitFrameLoad } from '../../lib';
+         getDomain, global, writeToWindow, setLogLevel, once,
+         prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
-import { RENDER_DRIVERS } from './drivers';
-import { validate, validateProps } from './validate';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
+import { RENDER_DRIVERS, type ContextDriverType } from './drivers';
+import { validateProps } from './validate';
 import { propsToQuery } from './props';
 import { normalizeProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
 import { RenderError } from '../../error';
 
-let activeComponents = [];
+import { type Component } from '../component';
+import { type PropsType, type BuiltInPropsType } from '../component/props';
+import { type ChildExportsType } from '../child';
 
 global.props = global.props || {};
 global.windows = global.windows || {};
+
+export type RenderOptionsType = {
+    id : string,
+    props : PropsType,
+    tag : string,
+    context : string,
+    outlet : HTMLElement,
+    CLASS : typeof CLASS_NAMES,
+    ANIMATION : typeof ANIMATION_NAMES,
+    CONTEXT : typeof CONTEXT_TYPES,
+    EVENT : typeof EVENTS,
+    actions : {
+        close : (string) => ZalgoPromise<void>,
+        focus : () => ZalgoPromise<void>
+    },
+    on : (string, () => void) => CancelableType,
+    jsxDom : Jsx<HTMLElement>,
+    document : Document,
+    container : HTMLElement,
+    dimensions : DimensionsType
+};
 
 
 /*  Parent Component
@@ -35,21 +59,40 @@ global.windows = global.windows || {};
     It handles opening the necessary windows/iframes, launching the component's url, and listening for messages back from the component.
 */
 
-export class ParentComponent extends BaseComponent {
+export class ParentComponent<P> extends BaseComponent<P> {
 
-    constructor(component, context, options = {}) {
-        super(component, options);
+    html : ?ZalgoPromise<string>
+    context : string
+    props : BuiltInPropsType & P
+    childWindowName : string
+    onInit : ZalgoPromise<ParentComponent<P>>
+    window : CrossDomainWindowType
+    handledErrors : Array<mixed>
+
+    container : HTMLElement
+    element : HTMLElement
+    outlet : HTMLElement;
+    iframe : HTMLIFrameElement
+
+    prerenderIframe : HTMLIFrameElement
+    prerenderWindow : SameDomainWindowType
+
+    childExports : ?ChildExportsType<P>
+    timeout : ?number
+
+    constructor(component : Component<P>, context : string, { props } : { props : (PropsType & P) }) {
+        super();
 
         this.component = component;
 
-        validate(component, options);
         this.validateParentDomain();
 
         this.context = context;
-        this.setProps(options.props || {});
+        this.setProps(props);
 
-        // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
-        setLogLevel(this.props.logLevel);
+        if (this.props.logLevel) {
+            setLogLevel(this.props.logLevel);
+        }
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });
 
@@ -73,11 +116,10 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    @promise
-    render(element, loadUrl = true) {
+    render(element : ElementRefType, loadUrl : boolean = true) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
 
-            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl });
+            this.component.log(`render_${this.context}`, { context: this.context, element, loadUrl: stringify(loadUrl) });
 
             let tasks = {};
 
@@ -95,10 +137,6 @@ export class ParentComponent extends BaseComponent {
                 return this.openContainer(element);
             });
 
-            if (loadUrl) {
-                tasks.buildUrl = this.buildUrl();
-            }
-
             tasks.showContainer = tasks.openContainer.then(() => {
                 return this.showContainer();
             });
@@ -113,9 +151,7 @@ export class ParentComponent extends BaseComponent {
 
             tasks.open = this.driver.openOnClick
                 ? this.open()
-                : tasks.openContainer.then(() => {
-                    return this.open();
-                });
+                : tasks.openContainer.then(() => this.open());
 
             tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 this.listen(this.window, domain);
@@ -142,7 +178,7 @@ export class ParentComponent extends BaseComponent {
             }
 
             tasks.openBridge = tasks.open.then(() => {
-                return this.openBridge(this.context);
+                return this.openBridge();
             });
 
             if (this.html) {
@@ -151,6 +187,8 @@ export class ParentComponent extends BaseComponent {
                 });
 
             } else if (loadUrl) {
+                tasks.buildUrl = this.buildUrl();
+
                 tasks.loadUrl = ZalgoPromise.all([
                     tasks.buildUrl,
                     tasks.open,
@@ -176,7 +214,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     @memoized
-    getOutlet() {
+    getOutlet() : HTMLElement {
         this.outlet = document.createElement('div');
         addClass(this.outlet, CLASS_NAMES.OUTLET);
         return this.outlet;
@@ -189,7 +227,7 @@ export class ParentComponent extends BaseComponent {
         }
     }
 
-    renderTo(win, element) {
+    renderTo(win : CrossDomainWindowType, element : ?string) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
 
             if (win === window) {
@@ -206,52 +244,58 @@ export class ParentComponent extends BaseComponent {
 
             this.checkAllowRenderTo(win);
 
-            this.component.log(`render_${this.context}_to_win`, { element, context: this.context });
+            this.component.log(`render_${this.context}_to_win`, { element : stringify(element), context: this.context });
 
             this.childWindowName = this.buildChildWindowName({ renderTo: win });
 
-            this.delegate(win, this.context);
+            this.delegate(win);
 
-            return this.render(element, this.context);
+            return this.render(element);
         });
     }
 
     @memoized
-    @promise
-    prefetch() {
-        this.html = this.buildUrl().then(url => {
-            return prefetchPage(url).then(html => {
+    prefetch() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.html = this.buildUrl().then(url => {
+                return prefetchPage(url).then(html => {
 
-                let host = `${url.split('/').slice(0, 3).join('/')}`;
-                let uri = `/${url.split('/').slice(3).join('/')}`;
+                    let host = `${url.split('/').slice(0, 3).join('/')}`;
+                    let uri = `/${url.split('/').slice(3).join('/')}`;
 
-                return `
-                    <base href="${host}">
+                    return `
+                        <base href="${host}">
 
-                    ${html}
+                        ${html}
 
-                    <script>
-                        if (window.history && window.history.pushState) {
-                            window.history.pushState({}, '', '${uri}');
-                        }
-                    </script>
-                `;
+                        <script>
+                            if (window.history && window.history.pushState) {
+                                window.history.pushState({}, '', '${uri}');
+                            }
+                        </script>
+                    `;
+                });
             });
         });
     }
 
     @memoized
-    @promise
-    loadHTML() {
-        return this.html.then(html => {
-            return writeToWindow(this.window, html);
+    loadHTML() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            if (!this.html) {
+                throw new Error(`Html not prefetched`);
+            }
+
+            return this.html.then(html => {
+                return writeToWindow(this.window, html);
+            });
         });
     }
 
-    checkAllowRenderTo(win) {
+    checkAllowRenderTo(win : CrossDomainWindowType) {
 
         if (!win) {
-            throw this.component.error(`Must pass window to renderTo`);
+            throw this.component.createError(`Must pass window to renderTo`);
         }
 
         if (isSameDomain(win)) {
@@ -259,7 +303,7 @@ export class ParentComponent extends BaseComponent {
         }
 
         let origin = getDomain();
-        let domain = this.component.getDomain(null, this.props);
+        let domain = this.component.getDomain(null, this.props.env);
 
         if (!domain) {
             throw new Error(`Could not determine domain to allow remote render`);
@@ -273,15 +317,15 @@ export class ParentComponent extends BaseComponent {
     }
 
     registerActiveComponent() {
-        activeComponents.push(this);
+        ParentComponent.activeComponents.push(this);
 
         this.clean.register(() => {
-            activeComponents.splice(activeComponents.indexOf(this), 1);
+            ParentComponent.activeComponents.splice(ParentComponent.activeComponents.indexOf(this), 1);
         });
     }
 
 
-    getComponentParentRef(renderToWindow = window) {
+    getComponentParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
 
         if (this.context === CONTEXT_TYPES.POPUP) {
             return { ref: WINDOW_REFERENCES.OPENER };
@@ -306,7 +350,7 @@ export class ParentComponent extends BaseComponent {
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
-    getRenderParentRef(renderToWindow = window) {
+    getRenderParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
 
         if (renderToWindow === window) {
             return this.getComponentParentRef(renderToWindow);
@@ -322,7 +366,7 @@ export class ParentComponent extends BaseComponent {
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
-    buildChildWindowName({ renderTo = window } = {}) {
+    buildChildWindowName({ renderTo = window } : { renderTo : CrossDomainWindowType } = {}) : string {
 
         let sameDomain = isSameDomain(renderTo);
 
@@ -357,7 +401,7 @@ export class ParentComponent extends BaseComponent {
         Send a post message to our parent window.
     */
 
-    sendToParent(name, data) {
+    sendToParent(name : string, data : Object) : ZalgoPromise<{ origin : string, source : WindowType, data : Object }> {
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
@@ -376,13 +420,16 @@ export class ParentComponent extends BaseComponent {
         Normalize props and generate the url we'll use to render the component
     */
 
-    setProps(props = {}, required = true) {
-        this.props = this.props || {};
-        props.version = this.component.version;
+    setProps(props : (PropsType & P), required : boolean = true) {
+
         validateProps(this.component, props, required);
         if (this.component.validate) {
             this.component.validate(this.component, props);
         }
+
+        // $FlowFixMe
+        this.props = this.props || {};
+
         extend(this.props, normalizeProps(this.component, this, props));
     }
 
@@ -395,14 +442,13 @@ export class ParentComponent extends BaseComponent {
     */
 
     @memoized
-    @promise
-    buildUrl() {
+    buildUrl() : ZalgoPromise<string> {
+        return ZalgoPromise.all([
 
-        return ZalgoPromise.hash({
-            url:   this.props.url,
-            query: propsToQuery(this.component.props, this.props)
+            this.props.url,
+            propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
 
-        }).then(({ url, query }) => {
+        ]).then(([ url, query ]) => {
 
             // Do not extend the url if it is for a different domain
 
@@ -423,15 +469,13 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-
-    @promise
-    getDomain() {
+    getDomain() : ZalgoPromise<string> {
         return ZalgoPromise.try(() => {
             return this.props.url;
 
         }).then(url => {
 
-            let domain = this.component.getDomain(url, this.props);
+            let domain = this.component.getDomain(url, this.props.env);
 
             if (domain) {
                 return domain;
@@ -439,7 +483,7 @@ export class ParentComponent extends BaseComponent {
 
             if (this.component.buildUrl) {
                 return ZalgoPromise.try(() => this.component.buildUrl(this.props)).then(builtUrl => {
-                    return this.component.getDomain(builtUrl, this.props);
+                    return this.component.getDomain(builtUrl, this.props.env);
                 });
             }
 
@@ -453,18 +497,19 @@ export class ParentComponent extends BaseComponent {
         });
     }
 
-    getPropsForChild() {
+    getPropsForChild() : (BuiltInPropsType & P) {
 
         let result = {};
 
         for (let key of Object.keys(this.props)) {
-            let prop = this.component.props[key];
+            let prop = this.component.getProp(key);
 
             if (!prop || prop.sendToChild !== false) {
                 result[key] = this.props[key];
             }
         }
 
+        // $FlowFixMe
         return result;
     }
 
@@ -475,38 +520,41 @@ export class ParentComponent extends BaseComponent {
         Send new props down to the child
     */
 
-    @promise
-    updateProps(props = {}) {
+    updateProps(props : (PropsType & P)) : ZalgoPromise<void> {
         this.setProps(props, false);
 
         return this.onInit.then(() => {
-            return this.childExports.updateProps(this.getPropsForChild());
+            if (this.childExports) {
+                return this.childExports.updateProps(this.getPropsForChild());
+            } else {
+                throw new Error(`Child exports were not available`);
+            }
         });
     }
 
 
-    @promise
-    openBridge() {
+    openBridge() : ZalgoPromise<?HTMLIFrameElement> {
+        return ZalgoPromise.try(() => {
+            if (!bridge) {
+                return;
+            }
 
-        if (!bridge) {
-            return;
-        }
+            let bridgeUrl = this.component.getBridgeUrl(this.props.env);
 
-        let bridgeUrl = this.component.getBridgeUrl(this.props.env);
+            if (!bridgeUrl) {
+                return;
+            }
 
-        if (!bridgeUrl) {
-            return;
-        }
+            let bridgeDomain = this.component.getBridgeDomain(this.props.env);
 
-        let bridgeDomain = this.component.getBridgeDomain(this.props.env);
+            if (!bridgeDomain) {
+                throw new Error(`Can not determine domain for bridge`);
+            }
 
-        if (!bridgeDomain) {
-            throw new Error(`Can not determine domain for bridge`);
-        }
-
-        if (bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
-            return bridge.openBridge(bridgeUrl, bridgeDomain);
-        }
+            if (bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
+                return bridge.openBridge(bridgeUrl, bridgeDomain);
+            }
+        });
     }
 
 
@@ -518,29 +566,32 @@ export class ParentComponent extends BaseComponent {
     */
 
     @memoized
-    @promise
-    open() {
-        this.component.log(`open_${this.context}`, { windowName: this.childWindowName });
-        return this.driver.open.call(this);
+    open() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.component.log(`open_${this.context}`, { windowName: this.childWindowName });
+            return this.driver.open.call(this);
+        });
     }
 
     @memoized
-    @promise
-    openPrerender(url) {
-        if (this.driver.prerenderWindow && this.component.prerenderTemplate) {
-            return this.driver.openPrerender.call(this);
-        }
+    openPrerender() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            if (this.component.prerenderTemplate) {
+                return this.driver.openPrerender.call(this);
+            }
+        });
     }
 
     @memoized
-    @promise
-    switchPrerender(url) {
-        if (this.driver.prerenderWindow && this.component.prerenderTemplate) {
-            return this.driver.switchPrerender.call(this);
-        }
+    switchPrerender() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            if (this.prerenderWindow && this.driver.switchPrerender) {
+                return this.driver.switchPrerender.call(this);
+            }
+        });
     }
 
-    get driver() {
+    get driver() : ContextDriverType {
 
         if (!this.context) {
             throw new Error('Context not set');
@@ -549,13 +600,13 @@ export class ParentComponent extends BaseComponent {
         return RENDER_DRIVERS[this.context];
     }
 
-    elementReady(element) {
+    elementReady(element : ElementRefType) : ZalgoPromise<void> {
         return elementReady(element).then(noop);
     }
 
 
 
-    delegate(win) {
+    delegate(win : CrossDomainWindowType) {
 
         this.component.log(`delegate_${this.context}`);
 
@@ -566,8 +617,8 @@ export class ParentComponent extends BaseComponent {
             onDisplay:  this.props.onDisplay
         };
 
-        for (let propName of Object.keys(this.component.props)) {
-            let prop = this.component.props[propName];
+        for (let propName of this.component.getPropNames()) {
+            let prop = this.component.getProp(propName);
 
             if (prop.allowDelegate) {
                 props[propName] = this.props[propName];
@@ -604,7 +655,7 @@ export class ParentComponent extends BaseComponent {
 
         }).catch(err => {
 
-            throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${err.stack}`);
+            throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${ stringifyError(err) }`);
         });
 
         let overrides = this.driver.delegateOverrides;
@@ -616,9 +667,11 @@ export class ParentComponent extends BaseComponent {
                 continue;
             }
 
+            // $FlowFixMe
             let original = this[key];
 
-            this[key] = function() {
+            // $FlowFixMe
+            this[key] = function() : ZalgoPromise<mixed> {
                 return delegate.then(data => {
 
                     let override = data.overrides[key];
@@ -635,19 +688,6 @@ export class ParentComponent extends BaseComponent {
                 });
             };
         }
-    }
-
-    getInitialDimensions(el) {
-
-        if (this.component.getInitialDimensions) {
-            return this.component.getInitialDimensions(this.props, el);
-        }
-
-        if (this.component.dimensions) {
-            return this.component.dimensions;
-        }
-
-        return {};
     }
 
     /*  Watch For Close
@@ -695,23 +735,24 @@ export class ParentComponent extends BaseComponent {
         where opening the child window and loading the url happen at different points.
     */
 
-    @promise
-    loadUrl(url) {
-        this.component.log(`load_url`);
+    loadUrl(url : string) : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.component.log(`load_url`);
 
-        if (window.location.href.split('#')[0] === url.split('#')[0]) {
-            url = extendUrl(url, {
-                query: {
-                    [ uniqueID() ]: '1'
-                }
-            });
-        }
+            if (window.location.href.split('#')[0] === url.split('#')[0]) {
+                url = extendUrl(url, {
+                    query: {
+                        [ uniqueID() ]: '1'
+                    }
+                });
+            }
 
-        return this.driver.loadUrl.call(this, url);
+            return this.driver.loadUrl.call(this, url);
+        });
     }
 
 
-    hijack(targetElement) {
+    hijack(targetElement : HTMLFormElement | HTMLAnchorElement) {
         targetElement.target = this.childWindowName;
     }
 
@@ -728,7 +769,7 @@ export class ParentComponent extends BaseComponent {
 
                 this.component.log(`timed_out`, { timeout: this.props.timeout });
 
-                let error = this.component.error(`Loading component timed out after ${this.props.timeout} milliseconds`);
+                let error = this.component.createError(`Loading component timed out after ${this.props.timeout} milliseconds`);
 
                 this.onInit.reject(error);
                 this.props.onTimeout(error);
@@ -749,14 +790,14 @@ export class ParentComponent extends BaseComponent {
         Post-robot listeners to the child component window
     */
 
-    listeners() {
+    listeners() : { [string] : (any, Object) => mixed } {
         return {
 
             // The child rendered, and the component called .attach()
             // We have no way to know when the child has set up its listeners for the first time, so we have to listen
             // for this message to be sure so we can continue doing anything from the parent
 
-            [ POST_MESSAGE.INIT ](source, data) {
+            [ POST_MESSAGE.INIT ](source : CrossDomainWindowType, data : Object) : { props : BuiltInPropsType & P, context : string } {
 
                 this.childExports = data.exports;
 
@@ -776,40 +817,41 @@ export class ParentComponent extends BaseComponent {
             // The child has requested that we close it. Since iframes can't close themselves, we need
             // this logic to exist in the parent window
 
-            [ POST_MESSAGE.CLOSE ](source, data) {
+            [ POST_MESSAGE.CLOSE ](source : CrossDomainWindowType, data : Object) {
                 this.close(data.reason);
             },
 
-            [ POST_MESSAGE.CHECK_CLOSE ](source, data) {
+            [ POST_MESSAGE.CHECK_CLOSE ](source : CrossDomainWindowType, data : Object) {
                 this.checkClose();
             },
 
             // Iframes can't resize themselves, so they need the parent to take care of it for them.
 
-            [ POST_MESSAGE.RESIZE ](source, data) {
-
-                if (this.driver.allowResize) {
-                    return this.resize(data.width, data.height);
-                }
+            [ POST_MESSAGE.RESIZE ](source : CrossDomainWindowType, data : Object) : ZalgoPromise<void> {
+                return ZalgoPromise.try(() => {
+                    if (this.driver.allowResize) {
+                        return this.resize(data.width, data.height);
+                    }
+                });
             },
 
-            [ POST_MESSAGE.ONRESIZE ](source, data) {
+            [ POST_MESSAGE.ONRESIZE ](source : CrossDomainWindowType, data : Object) {
                 this.event.trigger('resize');
             },
 
 
-            [ POST_MESSAGE.HIDE ](source, data) {
+            [ POST_MESSAGE.HIDE ](source : CrossDomainWindowType, data : Object) {
                 this.hide();
             },
 
-            [ POST_MESSAGE.SHOW ](source, data) {
+            [ POST_MESSAGE.SHOW ](source : CrossDomainWindowType, data : Object) {
                 this.show();
             },
 
 
             // The child encountered an error
 
-            [ POST_MESSAGE.ERROR ](source, data) {
+            [ POST_MESSAGE.ERROR ](source : CrossDomainWindowType, data : Object) {
                 this.error(new Error(data.error));
             }
         };
@@ -822,30 +864,31 @@ export class ParentComponent extends BaseComponent {
         Resize the child component window
     */
 
-    @promise
-    resize(width, height, { waitForTransition = true } = {}) {
-        this.component.log(`resize`, { height, width });
-        this.driver.resize.call(this, width, height);
+    resize(width : number | string, height : number | string, { waitForTransition = true } : { waitForTransition : boolean } = {}) : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.component.log(`resize`, { height : stringify(height), width: stringify(width) });
+            this.driver.resize.call(this, width, height);
 
-        if (!waitForTransition) {
-            return;
-        }
-
-        if (this.element || this.iframe) {
-
-            let overflow;
-
-            if (this.element) {
-                overflow = setOverflow(this.element, 'hidden');
+            if (!waitForTransition) {
+                return;
             }
 
-            return elementStoppedMoving(this.element || this.iframe).then(() => {
+            if (this.element || this.iframe) {
 
-                if (overflow) {
-                    overflow.reset();
+                let overflow;
+
+                if (this.element) {
+                    overflow = setOverflow(this.element, 'hidden');
                 }
-            });
-        }
+
+                return elementStoppedMoving(this.element || this.iframe).then(() => {
+
+                    if (overflow) {
+                        overflow.reset();
+                    }
+                });
+            }
+        });
     }
 
 
@@ -855,7 +898,7 @@ export class ParentComponent extends BaseComponent {
         Hide the component and any parent template
     */
 
-    hide() {
+    hide() : void {
 
         if (this.container) {
             hideElement(this.container);
@@ -864,7 +907,7 @@ export class ParentComponent extends BaseComponent {
         return this.driver.hide.call(this);
     }
 
-    show() {
+    show() : void {
 
         if (this.container) {
             showElement(this.container);
@@ -883,7 +926,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    userClose() {
+    userClose() : ZalgoPromise<void> {
         return this.close(CLOSE_REASONS.USER_CLOSED);
     }
 
@@ -896,7 +939,7 @@ export class ParentComponent extends BaseComponent {
     */
 
     @memoized
-    close(reason = CLOSE_REASONS.PARENT_CALL) {
+    close(reason : string = CLOSE_REASONS.PARENT_CALL) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
 
             this.component.log(`close`, { reason });
@@ -919,7 +962,7 @@ export class ParentComponent extends BaseComponent {
 
 
     @memoized
-    closeContainer(reason = CLOSE_REASONS.PARENT_CALL) {
+    closeContainer(reason : string = CLOSE_REASONS.PARENT_CALL) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
 
             this.event.triggerOnce(EVENTS.CLOSE);
@@ -940,15 +983,16 @@ export class ParentComponent extends BaseComponent {
 
 
     @memoized
-    @promise
-    destroyContainer() {
-        this.clean.run('destroyContainerEvents');
-        this.clean.run('destroyContainerTemplate');
+    destroyContainer() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.clean.run('destroyContainerEvents');
+            this.clean.run('destroyContainerTemplate');
+        });
     }
 
 
     @memoized
-    closeComponent(reason = CLOSE_REASONS.PARENT_CALL) {
+    closeComponent(reason : string = CLOSE_REASONS.PARENT_CALL) : ZalgoPromise<void> {
 
         let win = this.window;
 
@@ -976,7 +1020,6 @@ export class ParentComponent extends BaseComponent {
             if (this.childExports && this.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
                 this.childExports.close().catch(noop);
             }
-
         });
     }
 
@@ -988,8 +1031,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     @memoized
-    @promise
-    showContainer() {
+    showContainer() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (this.props.onDisplay) {
                 return this.props.onDisplay();
@@ -1002,8 +1044,7 @@ export class ParentComponent extends BaseComponent {
     }
 
     @memoized
-    @promise
-    showComponent() {
+    showComponent() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (this.props.onDisplay) {
                 return this.props.onDisplay();
@@ -1016,19 +1057,25 @@ export class ParentComponent extends BaseComponent {
     }
 
     @memoized
-    @promise
-    hideContainer() {
-        if (this.container) {
-            return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
-        }
+    hideContainer() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            if (this.container) {
+                return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
+            } else {
+                return ZalgoPromise.resolve();
+            }
+        });
     }
 
     @memoized
-    @promise
-    hideComponent() {
-        if (this.element) {
-            return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
-        }
+    hideComponent() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            if (this.element) {
+                return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
+            } else {
+                return ZalgoPromise.resolve();
+            }
+        });
     }
 
 
@@ -1059,27 +1106,27 @@ export class ParentComponent extends BaseComponent {
     */
 
     @memoized
-    @promise
-    createPrerenderTemplate() {
-
-        if (!this.component.prerenderTemplate) {
-            return;
-        }
-
+    createPrerenderTemplate() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-
-            if (this.prerenderIframe) {
-                return awaitFrameLoad(this.prerenderIframe).then(() => this.prerenderWindow);
-            } else {
-                return this.window;
+            if (!this.component.prerenderTemplate) {
+                return ZalgoPromise.resolve();
             }
 
-        }).then(win => {
+            return ZalgoPromise.try(() => {
 
-            writeElementToWindow(win, this.renderTemplate(this.component.prerenderTemplate, {
-                jsxDom: jsxDom.bind(win.document),
-                document: win.document
-            }));
+                if (this.prerenderIframe) {
+                    return awaitFrameLoad(this.prerenderIframe).then(() => this.prerenderWindow);
+                } else {
+                    return this.prerenderWindow;
+                }
+
+            }).then(win => {
+
+                writeElementToWindow(win, this.renderTemplate(this.component.prerenderTemplate, {
+                    jsxDom: jsxDom.bind(win.document),
+                    document: win.document
+                }));
+            });
         });
     }
 
@@ -1090,7 +1137,13 @@ export class ParentComponent extends BaseComponent {
         Create a template and stylesheet for the parent template behind the element
     */
 
-    renderTemplate(renderer, options = {}) {
+    renderTemplate(renderer : (RenderOptionsType) => HTMLElement, options : Object = {}) : HTMLElement {
+
+        let {
+            width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
+            height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
+        } = (this.component.dimensions || {});
+
         return renderer.call(this, {
             id:        `${CLASS_NAMES.XCOMPONENT}-${this.component.tag}-${this.props.uid}`,
             props:     renderer.__xdomain__ ? null : this.props,
@@ -1108,72 +1161,61 @@ export class ParentComponent extends BaseComponent {
             on: (eventName, handler) => this.on(eventName, handler),
             jsxDom,
             document,
+            dimensions: { width, height },
             ...options
         });
     }
 
     @memoized
-    @promise
-    openContainer(element) {
+    openContainer(element : ?HTMLElement) : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            let el;
 
-        let el;
-
-        if (element) {
-            el = getElement(element);
+            if (element) {
+                el = getElement(element);
+            } else {
+                el = document.body;
+            }
 
             if (!el) {
-                throw new Error(`Could not find element: ${element}`);
+                throw new Error(`Could not find element to open container into`);
             }
-        } else {
-            el = document.body;
-        }
 
-        if (!this.component.containerTemplate) {
+            if (!this.component.containerTemplate) {
+                if (this.driver.renderedIntoContainerTemplate) {
+                    throw new Error(`containerTemplate needed to render ${this.context}`);
+                }
+
+                return;
+            }
+
+            let container = this.renderTemplate(this.component.containerTemplate, {
+                container: el
+            });
+
+            this.container = container;
+            hideElement(this.container);
+            appendChild(el, this.container);
+
             if (this.driver.renderedIntoContainerTemplate) {
-                throw new Error(`containerTemplate needed to render ${this.context}`);
+                this.element = this.getOutlet();
+                hideElement(this.element);
+
+                if (!this.element) {
+                    throw new Error('Could not find element to render component into');
+                }
+
+                hideElement(this.element);
             }
 
-            return;
-        }
+            this.clean.register('destroyContainerTemplate', () => {
 
-        let containerWidth = el.offsetWidth;
-        let containerHeight = el.offsetHeight;
+                if (this.container && this.container.parentNode) {
+                    this.container.parentNode.removeChild(this.container);
+                }
 
-        let container = this.renderTemplate(this.component.containerTemplate, {
-            container: el,
-            dimensions: {
-                width: containerWidth,
-                height: containerHeight
-            }
-        });
-
-        this.container = container;
-        hideElement(this.container);
-        appendChild(el, this.container);
-
-        if (this.driver.renderedIntoContainerTemplate) {
-            this.element = this.getOutlet();
-            hideElement(this.element);
-
-            let { width, height } = this.getInitialDimensions(el) || {};
-            if (width || height) {
-                this.resize(width, height, { waitForTransition: false });
-            }
-
-            if (!this.element) {
-                throw new Error('Could not find element to render component into');
-            }
-
-            hideElement(this.element);
-        }
-
-        this.clean.register('destroyContainerTemplate', () => {
-
-            if (this.container && this.container.parentNode) {
-                this.container.parentNode.removeChild(this.container);
-            }
-
-            delete this.container;
+                delete this.container;
+            });
         });
     }
 
@@ -1188,7 +1230,7 @@ export class ParentComponent extends BaseComponent {
         Close the component and clean up any listeners and state
     */
 
-    destroy() {
+    destroy() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (this.clean.hasTasks()) {
                 this.component.log(`destroy`);
@@ -1199,7 +1241,7 @@ export class ParentComponent extends BaseComponent {
     }
 
 
-    tryInit(method) {
+    tryInit(method : () => mixed) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(method).catch(err => {
 
             this.onInit.reject(err);
@@ -1218,17 +1260,18 @@ export class ParentComponent extends BaseComponent {
         Handle an error
     */
 
-    @promise
-    error(err) {
-        this.handledErrors = this.handledErrors || [];
-
-        if (this.handledErrors.indexOf(err) !== -1) {
-            return;
-        }
-
-        this.handledErrors.push(err);
-
+    error(err : mixed) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
+
+            this.handledErrors = this.handledErrors || [];
+
+            if (this.handledErrors.indexOf(err) !== -1) {
+                // $FlowFixMe
+                return;
+            }
+
+            this.handledErrors.push(err);
+
             this.onInit.reject(err);
 
             return this.destroy();
@@ -1241,7 +1284,7 @@ export class ParentComponent extends BaseComponent {
 
         }).catch(errErr => {
 
-            throw new Error(`An error was encountered while handling error:\n\n ${err.stack}\n\n${errErr.stack}`);
+            throw new Error(`An error was encountered while handling error:\n\n ${ stringifyError(err) }\n\n${ stringifyError(errErr) }`);
 
         }).then(() => {
 
@@ -1250,14 +1293,16 @@ export class ParentComponent extends BaseComponent {
             }
         });
     }
-}
 
-export function destroyAll() {
-    let results = [];
+    static activeComponents : Array<ParentComponent<*>> = []
 
-    while (activeComponents.length) {
-        results.push(activeComponents[0].destroy());
+    static destroyAll() : ZalgoPromise<void> {
+        let results = [];
+
+        while (ParentComponent.activeComponents.length) {
+            results.push(ParentComponent.activeComponents[0].destroy());
+        }
+
+        return ZalgoPromise.all(results).then(noop);
     }
-
-    return ZalgoPromise.all(results);
 }

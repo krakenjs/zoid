@@ -1,17 +1,16 @@
+/* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src'; 
-import { validateProp } from './validate';
-import { noop, denodeify, once, memoize, promisify, getter, dotify } from '../../lib';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-function isDefined(value) {
+import { noop, denodeify, once, memoize, promisify, dotify } from '../../lib';
+
+import { type Component } from '../component';
+import { type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropTypeEnum, type PropDefinitionType, type PropDefinitionTypeEnum } from '../component/props';
+
+import { type ParentComponent } from './index';
+
+function isDefined(value : ?mixed) : boolean {
     return value !== null && value !== undefined && value !== '';
-}
-
-function getDefault(component, prop, props) {
-
-    if (prop.def) {
-        return (prop.def instanceof Function) ? prop.def.call(component, props) : prop.def;
-    }
 }
 
 
@@ -21,101 +20,67 @@ function getDefault(component, prop, props) {
     Turn prop into normalized value, using defaults, function options, etc.
 */
 
-export function normalizeProp(component, instance, props, key, value) {
+export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), key : string, value : ?T) : ?(ZalgoPromise<T> | T) {
 
-    let prop = component.props[key];
+    let prop = component.getProp(key);
+
+    let resultValue;
 
     if (prop.value) {
-        value = prop.value;
-    } else if (!props.hasOwnProperty(key) || !isDefined(value)) {
-        value = getDefault(component, prop, props);
+        resultValue = prop.value;
+    } else if (prop.def && (!props.hasOwnProperty(key) || !isDefined(value))) {
+        resultValue = prop.def.call(component, props);
+    } else {
+        resultValue = value;
     }
 
-    if (!value && prop.alias && props[prop.alias]) {
-        value = props[prop.alias];
+    if (!resultValue && prop.alias && props[prop.alias]) {
+        resultValue = props[prop.alias];
     }
 
-    if (prop.decorate) {
-        if (isDefined(value) || !prop.required) {
-            value = prop.decorate(value, props);
-        }
-    }
+    let decorated = false;
 
-    if (prop.getter) {
-
-        if (!value) {
-            return;
-        }
-
-        if (value instanceof Function) {
-            value = value.bind(instance);
-        } else {
-            let val = value;
-            value = () => val || ZalgoPromise.resolve(val);
-        }
-
-        value = getter(value, { name: key, timeout: prop.timeout });
-
-        let _value = value;
-
-        value = function() {
-            component.log(`call_getter_${key}`);
-
-            return _value.apply(this, arguments).then(result => {
-                component.log(`return_getter_${key}`);
-                validateProp(prop, key, result, props);
-                return result;
-            });
-        };
-
-        if (prop.memoize) {
-            let val = memoize(value);
-            value = () => val();
-        }
-
-        return value;
+    if (prop.decorate && resultValue !== null && resultValue !== undefined) {
+        resultValue = prop.decorate(resultValue, props);
+        decorated = true;
     }
 
     if (prop.type === 'boolean') {
-
-        value = Boolean(value);
+        // $FlowFixMe
+        resultValue = Boolean(resultValue);
 
     } else if (prop.type === 'function') {
 
-        if (!value) {
+        if (!resultValue && prop.noop) {
+            // $FlowFixMe
+            resultValue = noop;
 
-            // If prop.noop is set, make the function a noop
-
-            if (!value && prop.noop) {
-                value = noop;
-
-                if (prop.denodeify) {
-                    value = denodeify(value);
-                }
-
-                if (prop.promisify) {
-                    value = promisify(value);
-                }
+            if (!decorated && prop.decorate) {
+                resultValue = prop.decorate(resultValue, props);
             }
+        }
 
-        } else {
+        if (resultValue && typeof resultValue === 'function') {
 
-            value = value.bind(instance);
+            resultValue = resultValue.bind(instance);
 
             // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
 
             if (prop.denodeify) {
-                value = denodeify(value);
+                // $FlowFixMe
+                resultValue = denodeify(resultValue);
             }
 
             if (prop.promisify) {
-                value = promisify(value);
+                // $FlowFixMe
+                resultValue = promisify(resultValue);
             }
 
             // Wrap the function in order to log when it is called
 
-            let original = value;
-            value = function() {
+            let original = resultValue;
+            // $FlowFixMe
+            resultValue = function() : mixed {
                 component.log(`call_prop_${key}`);
                 return original.apply(this, arguments);
             };
@@ -123,13 +88,15 @@ export function normalizeProp(component, instance, props, key, value) {
             // If prop.once is set, ensure the function can only be called once
 
             if (prop.once) {
-                value = once(value);
+                // $FlowFixMe
+                resultValue = once(resultValue);
             }
 
-            // If prop.memoize is set, ensure the function is memoized (first return value is cached and returned for any future calls)
+            // If prop.memoize is set, ensure the function is memoized (first return resultValue is cached and returned for any future calls)
 
             if (prop.memoize) {
-                value = memoize(value);
+                // $FlowFixMe
+                resultValue = memoize(resultValue);
             }
         }
 
@@ -140,12 +107,14 @@ export function normalizeProp(component, instance, props, key, value) {
         // pass
 
     } else if (prop.type === 'number') {
-        if (value !== undefined) {
-            value = parseInt(value, 10);
+        if (resultValue !== undefined) {
+            // $FlowFixMe
+            resultValue = parseInt(resultValue, 10);
         }
     }
 
-    return value;
+    // $FlowFixMe
+    return resultValue;
 }
 
 
@@ -155,22 +124,28 @@ export function normalizeProp(component, instance, props, key, value) {
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function normalizeProps(component, instance, props, required = true) {
+export function normalizeProps<P>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), required : boolean = true) : (BuiltInPropsType & P) {
 
-    props = props || {};
     let result = {};
 
+    // $FlowFixMe
+    props = props || {};
+
+    result.version = component.version;
+
     for (let key of Object.keys(props)) {
-        if (component.props.hasOwnProperty(key)) {
+        if (component.getPropNames().indexOf(key) !== -1) {
+            // $FlowFixMe
             result[key] = normalizeProp(component, instance, props, key, props[key]);
         } else {
             result[key] = props[key];
         }
     }
 
-    for (let key of Object.keys(component.props)) {
+    for (let key of component.getPropNames()) {
         if (!props.hasOwnProperty(key)) {
 
+            // $FlowFixMe
             let normalizedProp = normalizeProp(component, instance, props, key, props[key]);
 
             if (normalizedProp !== undefined) {
@@ -179,6 +154,7 @@ export function normalizeProps(component, instance, props, required = true) {
         }
     }
 
+    // $FlowFixMe
     return result;
 }
 
@@ -199,7 +175,29 @@ export function normalizeProps(component, instance, props, required = true) {
     number -> string
 */
 
-export function propsToQuery(propsDef, props) {
+function getQueryParam<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : T) : ZalgoPromise<string> {
+    return ZalgoPromise.try(() => {
+        if (typeof prop.queryParam === 'function') {
+            return prop.queryParam(value);
+        } else if (typeof prop.queryParam === 'string') {
+            return prop.queryParam;
+        } else {
+            return key;
+        }
+    });
+}
+
+function getQueryValue<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : T) : ZalgoPromise<mixed> {
+    return ZalgoPromise.try(() => {
+        if (typeof prop.queryValue === 'function') {
+            return prop.queryValue(value);
+        } else {
+            return value;
+        }
+    });
+}
+
+export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props : (BuiltInPropsType & P)) : { [string] : string } {
 
     let params = {};
 
@@ -209,12 +207,6 @@ export function propsToQuery(propsDef, props) {
 
         if (!prop) {
             return;
-        }
-
-        let queryParam = key;
-
-        if (typeof prop.queryParam === 'string') {
-            queryParam = prop.queryParam;
         }
 
         return ZalgoPromise.resolve().then(() => {
@@ -229,12 +221,6 @@ export function propsToQuery(propsDef, props) {
                 return;
             }
 
-            if (prop.getter) {
-                return value.call().then(result => {
-                    return result;
-                });
-            }
-
             return value;
 
         }).then(value => {
@@ -243,37 +229,39 @@ export function propsToQuery(propsDef, props) {
                 return;
             }
 
-            if (typeof prop.queryParam === 'function') {
-                queryParam = prop.queryParam(value);
-            }
+            ZalgoPromise.all([
+                getQueryParam(prop, key, value),
+                getQueryValue(prop, key, value)
+            ]).then(([ queryParam, queryValue ]) => {
 
-            let result;
+                let result;
 
-            if (typeof value === 'boolean') {
-                result = '1';
-            } else if (typeof value === 'string') {
-                result = value.toString();
-            } else if (typeof value === 'function') {
-                return;
-            } else if (typeof value === 'object') {
+                if (typeof queryValue === 'boolean') {
+                    result = '1';
+                } else if (typeof queryValue === 'string') {
+                    result = queryValue.toString();
+                } else if (typeof queryValue === 'function') {
+                    return;
+                } else if (typeof queryValue === 'object') {
 
-                if (prop.serialization === 'json') {
-                    result = JSON.stringify(value);
-                } else {
-                    result = dotify(value, key);
+                    if (prop.serialization === 'json') {
+                        result = JSON.stringify(queryValue);
+                    } else {
+                        result = dotify(queryValue, key);
 
-                    for (let dotkey in result) {
-                        params[dotkey] = result[dotkey];
+                        for (let dotkey in result) {
+                            params[dotkey] = result[dotkey];
+                        }
+
+                        return;
                     }
 
-                    return;
+                } else if (typeof queryValue === 'number') {
+                    result = queryValue.toString();
                 }
 
-            } else if (typeof value === 'number') {
-                result = value.toString();
-            }
-
-            params[queryParam] = result;
+                params[queryParam] = result;
+            });
         });
 
     })).then(() => {

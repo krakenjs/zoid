@@ -1,21 +1,54 @@
+/* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
+import { type ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
-import { RENDER_DRIVERS } from '../parent/drivers';
+import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
+import { type Component } from '../component';
 
-export class DelegateComponent extends BaseComponent {
+export type DelegatePropsType = {
+    uid : string,
+    dimensions : DimensionsType,
+    onClose : () => ?ZalgoPromise<void>,
+    onDisplay : () => ?ZalgoPromise<void>
+};
 
-    constructor(component, source, options = {}) {
-        super(component, options);
+export type DelegateOptionsType = {
+    context : string,
+    props : DelegatePropsType,
+    childWindowName : string,
+    overrides : {
+        focus : () => ZalgoPromise<void>,
+        userClose : (string) => ZalgoPromise<void>,
+        getDomain : () => ZalgoPromise<string>,
+        error : (mixed) => ZalgoPromise<void>,
+        on : (string, () => void) => CancelableType
+    }
+};
+
+export class DelegateComponent<P> extends BaseComponent<P> {
+
+    source : CrossDomainWindowType
+    context : string
+    props : DelegatePropsType
+
+    focus : () => ZalgoPromise<void>
+    userClose : (string) => ZalgoPromise<void>
+    getDomain : () => ZalgoPromise<string>
+    error : (mixed) => ZalgoPromise<void>
+    on : (string, () => void) => CancelableType
+
+    childWindowName : string
+
+    constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
+        super();
 
         this.component = component;
         this.clean.set('source', source);
 
         this.context = options.context;
-
-        this.props = options.props;
 
         this.props = {
             uid:        options.props.uid,
@@ -24,8 +57,9 @@ export class DelegateComponent extends BaseComponent {
             onDisplay:  options.props.onDisplay
         };
 
-        for (let propName of Object.keys(this.component.props)) {
-            let prop = this.component.props[propName];
+        for (let propName of component.getPropNames()) {
+            // $FlowFixMe
+            let prop = this.component.getProp(propName);
 
             if (prop.allowDelegate) {
                 this.props[propName] = options.props[propName];
@@ -41,6 +75,7 @@ export class DelegateComponent extends BaseComponent {
         let delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
 
         for (let key of Object.keys(delegateOverrides)) {
+            // $FlowFixMe
             this[key] = ParentComponent.prototype[key];
         }
 
@@ -51,7 +86,7 @@ export class DelegateComponent extends BaseComponent {
         this.watchForClose();
     }
 
-    get driver() {
+    get driver() : ContextDriverType {
 
         if (!this.context) {
             throw new Error('Context not set');
@@ -65,7 +100,7 @@ export class DelegateComponent extends BaseComponent {
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 
-    getOverrides(context) {
+    getOverrides(context : string) : { [string] : mixed } {
 
         let delegateOverrides = RENDER_DRIVERS[context].delegateOverrides;
 
@@ -74,7 +109,8 @@ export class DelegateComponent extends BaseComponent {
         let self = this;
 
         for (let key of Object.keys(delegateOverrides)) {
-            overrides[key] = function() {
+            overrides[key] = function() : mixed {
+                // $FlowFixMe
                 return ParentComponent.prototype[key].apply(self, arguments);
             };
         }
@@ -82,7 +118,7 @@ export class DelegateComponent extends BaseComponent {
         return overrides;
     }
 
-    destroy() {
+    destroy() : ZalgoPromise<void> {
         return this.clean.all();
     }
 }

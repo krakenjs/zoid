@@ -1,3 +1,4 @@
+/* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
 import { testComponent } from '../component';

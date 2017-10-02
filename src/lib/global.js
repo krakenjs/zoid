@@ -1,8 +1,9 @@
+/* @flow */
 
 import { isSameDomain } from 'cross-domain-utils/src';
 import { __XCOMPONENT__ } from '../constants';
 
-export function globalFor(win) {
+export function globalFor(win : WindowType) : ?Object {
 
     if (!isSameDomain(win)) {
         return;
@@ -15,4 +16,14 @@ export function globalFor(win) {
     return win[__XCOMPONENT__];
 }
 
-export let global = globalFor(window);
+export function localGlobal() : Object {
+    let global = globalFor(window);
+
+    if (!global) {
+        throw new Error(`Could not get local global`);
+    }
+
+    return global;
+}
+
+export let global = localGlobal();

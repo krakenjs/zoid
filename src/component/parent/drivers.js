@@ -1,3 +1,4 @@
+/* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
@@ -6,9 +7,31 @@ import { findFrameByName } from 'cross-domain-utils/src';
 import { iframe, popup, toCSS, showElement, hideElement,
          destroyElement, normalizeDimension, watchElementForClose,
          awaitFrameWindow, addClass, removeClass } from '../../lib';
-import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES } from '../../constants';
+import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 import { PopupOpenError } from '../../error';
+
+
+export type ContextDriverType = {
+
+    focusable : boolean,
+    renderedIntoContainerTemplate : boolean,
+    allowResize : boolean,
+    openOnClick : boolean,
+
+    open : (?string) => ZalgoPromise<void>,
+    resize : (number | string, number | string) => void,
+    show : () => void,
+    hide : () => void,
+    loadUrl : (string) => void,
+
+    delegateOverrides : {
+        [string] : string | Function
+    },
+
+    openPrerender : () => ZalgoPromise<void>,
+    switchPrerender? : () => void
+};
 
 /*  Render Drivers
     --------------
@@ -26,19 +49,19 @@ import { PopupOpenError } from '../../error';
     series of if-popup-then-else-if-iframe code.
 */
 
-export let RENDER_DRIVERS = {};
+export let RENDER_DRIVERS : { [string] : ContextDriverType } = {};
 
     // Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
     // to feel like a native element on the page.
 
 RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
+    focusable: false,
     renderedIntoContainerTemplate: true,
     allowResize: true,
     openOnClick: false,
-    prerenderWindow: true,
 
-    open(url) {
+    open(url : ?string) : ZalgoPromise<void> {
 
         this.iframe = iframe({
             url,
@@ -57,7 +80,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             this.window = frameWindow;
 
             let detectClose = () => {
-                return ZalgoPromise.try(() => {
+                ZalgoPromise.try(() => {
                     return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
                 }).finally(() => {
                     return this.destroy();
@@ -84,7 +107,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         });
     },
 
-    openPrerender() {
+    openPrerender() : ZalgoPromise<void> {
 
         this.prerenderIframe = iframe({
             attributes: {
@@ -146,13 +169,12 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         openPrerender:           DELEGATE.CALL_DELEGATE,
         switchPrerender:         DELEGATE.CALL_DELEGATE,
 
-        getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
         renderTemplate:          DELEGATE.CALL_ORIGINAL,
         openContainerFrame:      DELEGATE.CALL_ORIGINAL,
         getOutlet:               DELEGATE.CALL_ORIGINAL,
 
-        open(original, override) {
-            return function() {
+        open(original : () => ZalgoPromise<void>, override : () => ZalgoPromise<void>) : () => ZalgoPromise<void> {
+            return function() : ZalgoPromise<void> {
                 return override.apply(this, arguments).then(() => {
                     this.clean.set('window', findFrameByName(getParentComponentWindow(), this.childWindowName));
 
@@ -164,7 +186,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         }
     },
 
-    resize(width, height) {
+    resize(width : number | string, height : number | string) {
 
         if (width) {
             this.element.style.width  = toCSS(width);
@@ -183,8 +205,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         hideElement(this.element);
     },
 
-    loadUrl(url) {
-        this.iframe.src = url;
+    loadUrl(url : string) {
+        this.iframe.setAttribute('src', url);
     }
 };
 
@@ -198,55 +220,65 @@ if (__POPUP_SUPPORT__) {
         renderedIntoContainerTemplate: false,
         allowResize: false,
         openOnClick: true,
-        prerenderWindow: false,
 
-        open(element, url = '') {
+        open(url : ?string = '') : ZalgoPromise<void> {
+            return ZalgoPromise.try(() => {
 
-            let { width, height, x, y } = this.getInitialDimensions();
+                let {
+                    width = DEFAULT_DIMENSIONS.WIDTH,
+                    height = DEFAULT_DIMENSIONS.HEIGHT
+                } = this.component.dimensions || {};
 
-            width = normalizeDimension(width, window.outerWidth);
-            height = normalizeDimension(height, window.outerWidth);
+                width = normalizeDimension(width, window.outerWidth);
+                height = normalizeDimension(height, window.outerWidth);
 
-            let pos = getPosition({ width, height, x, y });
+                let { x, y } = getPosition({ width, height });
 
-            try {
-                this.window = popup(url, {
-                    name: this.childWindowName,
-                    width,
-                    height,
-                    top: pos.y,
-                    left: pos.x,
-                    status: 1,
-                    toolbar: 0,
-                    menubar: 0,
-                    resizable: 1,
-                    scrollbars: 1
+                try {
+                    this.window = popup(url || '', {
+                        name: this.childWindowName,
+                        width,
+                        height,
+                        top: y,
+                        left: x,
+                        status: 1,
+                        toolbar: 0,
+                        menubar: 0,
+                        resizable: 1,
+                        scrollbars: 1
+                    });
+                } catch (err) {
+
+                    if (err instanceof PopupOpenError) {
+                        this.component.logError(`popup_open_error`);
+                    }
+
+                    throw err;
+                }
+
+                this.prerenderWindow = this.window;
+
+                this.clean.register('destroyWindow', () => {
+                    if (this.window) {
+                        this.window.close();
+                        cleanUpWindow(this.window);
+                        delete this.window;
+                        delete this.prerenderWindow;
+                    }
                 });
-            } catch (err) {
 
-                if (err instanceof PopupOpenError) {
-                    this.component.logError(`popup_open_error`);
-                }
-
-                throw err;
-            }
-
-            this.clean.register('destroyWindow', () => {
-                if (this.window) {
-                    this.window.close();
-                    cleanUpWindow(this.window);
-                    delete this.window;
-                }
+                this.resize(width, height);
             });
-
-            this.resize(width, height);
         },
 
-        resize(width, height) {
+        openPrerender() : ZalgoPromise<void> {
+            return ZalgoPromise.try(() => {
 
-            if (width && height) {
-                // this.window.resizeTo(width, height);
-            }
+            });
+        },
+
+        resize(width : number | string, height : number | string) {
+
         },
 
         hide() {
@@ -279,13 +311,12 @@ if (__POPUP_SUPPORT__) {
             createPrerenderTemplate: DELEGATE.CALL_ORIGINAL,
             destroyComponent:        DELEGATE.CALL_ORIGINAL,
             resize:                  DELEGATE.CALL_ORIGINAL,
-            getInitialDimensions:    DELEGATE.CALL_ORIGINAL,
             renderTemplate:          DELEGATE.CALL_ORIGINAL,
             openContainerFrame:      DELEGATE.CALL_ORIGINAL,
             getOutlet:               DELEGATE.CALL_ORIGINAL
         },
 
-        loadUrl(url) {
+        loadUrl(url : string) {
             this.window.location = url;
         }
     };

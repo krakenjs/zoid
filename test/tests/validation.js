@@ -1,4 +1,5 @@
 
+
 import xcomponent from 'src/index';
 
 import { testComponent, testComponent5 } from '../component';

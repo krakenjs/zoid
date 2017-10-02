@@ -1,4 +1,5 @@
 
+
 import { testComponent_logLevel_configured, testComponent_no_logLevel_configured } from '../component';
 
 describe('xcomponent console logging', () => {
@@ -56,5 +57,5 @@ describe('xcomponent console logging', () => {
             });
         });
     });
-    
+
 });

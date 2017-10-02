@@ -1,30 +1,31 @@
+/* @flow */
 
 import { isWindowClosed, linkFrameWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { once, memoize, debounce } from './fn';
-import { extend, safeInterval, urlEncode, capitalizeFirstLetter } from './util';
+import { extend, safeInterval, urlEncode, capitalizeFirstLetter, stringify } from './util';
 import { PopupOpenError } from '../error';
 
-export function appendChild(container, child) {
+export function appendChild(container : HTMLElement, child : HTMLElement) {
     container.appendChild(child);
 }
 
-function isElement(element) {
+function isElement(element : mixed) : boolean {
 
     if (element instanceof window.Element) {
         return true;
     }
 
-    if (typeof element === 'object' && element.nodeType === 1 && typeof element.style === 'object' && typeof element.ownerDocument === 'object') {
+    if (element !== null && typeof element === 'object' && element.nodeType === 1 && typeof element.style === 'object' && typeof element.ownerDocument === 'object') {
         return true;
     }
 
     return false;
 }
 
-export function querySelectorAll(el, selector) {
+export function querySelectorAll(el : HTMLElement, selector : string) : Array<window.HTMLElement> {
     return Array.prototype.slice.call(el.querySelectorAll(selector));
 }
 
@@ -37,9 +38,10 @@ export function querySelectorAll(el, selector) {
     - CSS Query selector
 */
 
-export function getElement(id) {
+export function getElementSafe(id : ElementRefType) : ?HTMLElement {
 
     if (isElement(id)) {
+        // $FlowFixMe
         return id;
     }
 
@@ -51,9 +53,24 @@ export function getElement(id) {
         }
 
         if (document.querySelector) {
-            return document.querySelector(id);
+            element = document.querySelector(id);
+        }
+
+        if (element) {
+            return element;
         }
     }
+}
+
+export function getElement(id : ElementRefType) : HTMLElement {
+
+    let element = getElementSafe(id);
+
+    if (element) {
+        return element;
+    }
+
+    throw new Error(`Can not find element: ${ stringify(id) }`);
 }
 
 
@@ -71,26 +88,27 @@ export let documentReady = new ZalgoPromise(resolve => {
     }, 10);
 });
 
-export function isDocumentReady() {
+export function isDocumentReady() : boolean {
     return window.document.readyState === 'complete';
 }
 
-export function elementReady(id) {
+export function elementReady(id : ElementRefType) : ZalgoPromise<window.HTMLElement> {
     return new ZalgoPromise((resolve, reject) => {
 
-        let el = getElement(id);
+        let name = stringify(id);
+        let el = getElementSafe(id);
 
         if (el) {
             return resolve(el);
         }
 
         if (isDocumentReady()) {
-            return reject(new Error(`Document is ready and element ${id} does not exist`));
+            return reject(new Error(`Document is ready and element ${ name } does not exist`));
         }
 
         let interval = setInterval(() => {
 
-            el = getElement(id);
+            el = getElementSafe(id);
 
             if (el) {
                 clearInterval(interval);
@@ -99,7 +117,7 @@ export function elementReady(id) {
 
             if (isDocumentReady()) {
                 clearInterval(interval);
-                return reject(new Error(`Document is ready and element ${id} does not exist`));
+                return reject(new Error(`Document is ready and element ${ name } does not exist`));
             }
         }, 10);
     });
@@ -112,11 +130,11 @@ export function elementReady(id) {
     Open a popup window with the specified option map
 */
 
-export function popup(url, options) {
+export function popup(url : string, options : { [ string ] : mixed }) : WindowType {
 
     let params = Object.keys(options).map((key) => {
         if (options[key]) {
-            return `${key}=${options[key]}`;
+            return `${ key }=${ stringify(options[key]) }`;
         }
     }).filter(Boolean).join(',');
 
@@ -137,7 +155,7 @@ export function popup(url, options) {
 }
 
 
-export function writeToWindow(win, html) {
+export function writeToWindow(win : WindowType, html : string) {
     try {
         win.document.open();
         win.document.write(html);
@@ -151,7 +169,7 @@ export function writeToWindow(win, html) {
     }
 }
 
-export function writeElementToWindow(win, el) {
+export function writeElementToWindow(win : WindowType, el : HTMLElement) {
 
     let tag = el.tagName.toLowerCase();
 
@@ -170,8 +188,9 @@ export function writeElementToWindow(win, el) {
     }
 }
 
-export function setStyle(el, styleText, doc = window.document) {
+export function setStyle(el : HTMLElement, styleText : string, doc : DocumentType = window.document) {
     if (el.styleSheet) {
+        // $FlowFixMe
         el.styleSheet.cssText = styleText;
     } else {
         el.appendChild(doc.createTextNode(styleText));
@@ -184,7 +203,15 @@ export function setStyle(el, styleText, doc = window.document) {
     Create an element with style, html, classes, attributes etc. and append it to the specified container
 */
 
-export function createElement(tag = 'div', options = {}, container = null) {
+export type ElementOptionsType = {
+    style? : { [ string ] : string },
+    class? : ?Array<string>,
+    attributes? : { [ string ] : string },
+    styleSheet? : ?string,
+    html? : ?string
+};
+
+export function createElement(tag : string = 'div', options : ElementOptionsType = {}, container : ?HTMLElement) : HTMLElement {
 
     tag = tag.toLowerCase();
     let element = document.createElement(tag);
@@ -227,12 +254,15 @@ export function createElement(tag = 'div', options = {}, container = null) {
     return element;
 }
 
-let awaitFrameLoadPromises = new WeakMap();
+let awaitFrameLoadPromises : WeakMap<HTMLIFrameElement, ZalgoPromise<HTMLIFrameElement>> = new WeakMap();
 
-export function awaitFrameLoad(frame) {
+export function awaitFrameLoad(frame : HTMLIFrameElement) : ZalgoPromise<HTMLIFrameElement> {
 
     if (awaitFrameLoadPromises.has(frame)) {
-        return awaitFrameLoadPromises.get(frame);
+        let promise = awaitFrameLoadPromises.get(frame);
+        if (promise) {
+            return promise;
+        }
     }
 
     let promise = new ZalgoPromise((resolve, reject) => {
@@ -240,8 +270,13 @@ export function awaitFrameLoad(frame) {
             linkFrameWindow(frame);
             resolve(frame);
         });
-        frame.addEventListener('error', (err) => {
-            return frame.contentWindow ? resolve(frame) : reject(err);
+
+        frame.addEventListener('error', (err : Event) => {
+            if (frame.contentWindow) {
+                resolve(frame);
+            } else {
+                reject(err);
+            }
         });
     });
 
@@ -250,7 +285,7 @@ export function awaitFrameLoad(frame) {
     return promise;
 }
 
-export function awaitFrameWindow(frame) {
+export function awaitFrameWindow(frame : HTMLIFrameElement) : ZalgoPromise<HTMLIFrameElement> {
 
     if (frame.contentWindow) {
         return ZalgoPromise.resolve(frame.contentWindow);
@@ -273,9 +308,18 @@ export function awaitFrameWindow(frame) {
     Open an iframe with the specified container, url, and option property map
 */
 
-export function iframe(options = {}, container) {
+export type IframeElementOptionsType = {
+    style? : { [ string ] : string },
+    class? : ?Array<string>,
+    attributes? : { [ string ] : string },
+    styleSheet? : ?string,
+    html? : ?string,
+    url? : ?string
+};
 
-    container = getElement(container);
+export function iframe(options : IframeElementOptionsType = {}, container : HTMLElement) : HTMLIFrameElement {
+
+    let el = getElement(container);
 
     let attributes = options.attributes || {};
     let style = options.style || {};
@@ -294,16 +338,16 @@ export function iframe(options = {}, container) {
         class: options.class
     });
 
+    // $FlowFixMe
+    awaitFrameLoad(frame);
+
+    el.appendChild(frame);
+
     if (options.url) {
         frame.setAttribute('src', options.url);
     }
 
-    awaitFrameLoad(frame);
-
-    container.appendChild(frame);
-
-    linkFrameWindow(frame);
-
+    // $FlowFixMe
     return frame;
 }
 
@@ -313,7 +357,7 @@ export function iframe(options = {}, container) {
     Add DOM Event listener with cancel
 */
 
-export function addEventListener(obj, event, handler) {
+export function addEventListener(obj : HTMLElement, event : string, handler : (event : Event) => void) : CancelableType {
     obj.addEventListener(event, handler);
     return {
         cancel() {
@@ -328,7 +372,7 @@ export function addEventListener(obj, event, handler) {
     Check if the string contains anything which could conceivably be run as javascript if the string is set to innerHTML
 */
 
-export function scanForJavascript(str) {
+export function scanForJavascript(str : string) : string {
 
     if (!str) {
         return str;
@@ -341,7 +385,7 @@ export function scanForJavascript(str) {
     return str;
 }
 
-export let parseQuery = memoize(queryString => {
+export let parseQuery = memoize((queryString : string) : { [ string ] : string } => {
 
     let params = {};
 
@@ -365,12 +409,12 @@ export let parseQuery = memoize(queryString => {
 });
 
 
-export function getQueryParam(name) {
+export function getQueryParam(name : string) : ?string {
     return parseQuery(window.location.search.slice(1))[name];
 }
 
 
-export function getDomain(win) {
+export function getDomain(win : WindowType) : string {
 
     win = win || window;
 
@@ -381,7 +425,7 @@ export function getDomain(win) {
     return `${win.location.protocol}//${win.location.host}`;
 }
 
-export function getDomainFromUrl(url) {
+export function getDomainFromUrl(url : string) : string {
 
     let domain;
 
@@ -396,7 +440,7 @@ export function getDomainFromUrl(url) {
     return domain;
 }
 
-export function formatQuery(obj = {}) {
+export function formatQuery(obj : { [ string ] : string } = {}) : string {
 
     return Object.keys(obj).filter(key => {
         return typeof obj[key] === 'string';
@@ -405,7 +449,7 @@ export function formatQuery(obj = {}) {
     }).join('&');
 }
 
-export function extendQuery(originalQuery, props = {}) {
+export function extendQuery(originalQuery : string, props : { [ string ] : string } = {}) : string {
 
     if (!props || !Object.keys(props).length) {
         return originalQuery;
@@ -417,7 +461,7 @@ export function extendQuery(originalQuery, props = {}) {
     });
 }
 
-export function extendUrl(url, options = {}) {
+export function extendUrl(url : string, options : { query? : { [ string ] : string }, hash? : { [ string ] : string } } = {}) : string {
 
     let query = options.query || {};
     let hash = options.hash || {};
@@ -444,17 +488,17 @@ export function extendUrl(url, options = {}) {
 }
 
 
-export function elementStoppedMoving(element, timeout = 5000) {
+export function elementStoppedMoving(element : ElementRefType, timeout : number = 5000) : ZalgoPromise<void> {
     return new ZalgoPromise((resolve, reject) => {
-        element = getElement(element);
+        let el = getElement(element);
 
-        let start = element.getBoundingClientRect();
+        let start = el.getBoundingClientRect();
 
         let interval;
         let timer;
 
         interval = setInterval(() => {
-            let end = element.getBoundingClientRect();
+            let end = el.getBoundingClientRect();
 
             if (start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height) {
                 clearTimeout(timer);
@@ -474,7 +518,7 @@ export function elementStoppedMoving(element, timeout = 5000) {
 }
 
 
-export function getOpener(win) {
+export function getOpener(win : WindowType) : WindowType {
 
     if (!win) {
         return;
@@ -487,7 +531,7 @@ export function getOpener(win) {
     }
 }
 
-export function getParent(win) {
+export function getParent(win : WindowType) : WindowType {
 
     if (!win) {
         return;
@@ -502,17 +546,18 @@ export function getParent(win) {
     }
 }
 
-export function getCurrentDimensions(el) {
+export function getCurrentDimensions(el : HTMLElement) : { width : number, height : number } {
     return {
         width: el.offsetWidth,
         height: el.offsetHeight
     };
 }
 
-export function changeStyle(el, styles) {
+export function changeStyle(el : HTMLElement, styles : { [ string ] : string }) : ZalgoPromise<void> {
     return new ZalgoPromise(resolve => {
 
         for (let key of Object.keys(styles)) {
+            // $FlowFixMe
             el.style[key] = styles[key];
         }
 
@@ -520,11 +565,11 @@ export function changeStyle(el, styles) {
     });
 }
 
-export function setOverflow(el, value = 'auto') {
+export function setOverflow(el : HTMLElement, value : string = 'auto') : { reset : () => void } {
 
     let { overflow, overflowX, overflowY } = el.style;
 
-    el.style.overflow = el.style.overflowX = el.overflowY = value;
+    el.style.overflow = el.style.overflowX = el.style.overflowY = value;
 
     return {
         reset() {
@@ -535,7 +580,7 @@ export function setOverflow(el, value = 'auto') {
     };
 }
 
-function dimensionsDiff(one, two, { width = true, height = true, threshold = 0 }) {
+function dimensionsDiff(one : { width : number, height : number }, two : { width : number, height : number }, { width = true, height = true, threshold = 0 } : { width : boolean, height : boolean, threshold : number }) : boolean {
 
     if (width && Math.abs(one.width - two.width) > threshold) {
         return true;
@@ -548,12 +593,12 @@ function dimensionsDiff(one, two, { width = true, height = true, threshold = 0 }
     return false;
 }
 
-export function trackDimensions(el, { width = true, height = true, threshold = 0 }) {
+export function trackDimensions(el : HTMLElement, { width = true, height = true, threshold = 0 } : { width : boolean, height : boolean, threshold : number }) : { check : () => { changed : boolean, dimensions : { width : number, height : number } }, reset : () => void } {
 
     let currentDimensions = getCurrentDimensions(el);
 
     return {
-        check() {
+        check() : { changed : boolean, dimensions : { width : number, height : number } } {
             let newDimensions = getCurrentDimensions(el);
 
             return {
@@ -568,7 +613,7 @@ export function trackDimensions(el, { width = true, height = true, threshold = 0
     };
 }
 
-export function onDimensionsChange(el, { width = true, height = true, delay = 50, threshold = 0 }) {
+export function onDimensionsChange(el : HTMLElement, { width = true, height = true, delay = 50, threshold = 0 } : { width? : boolean, height? : boolean, delay? : number, threshold? : number }) : ZalgoPromise<{ width : number, height : number }> {
 
     return new ZalgoPromise(resolve => {
 
@@ -594,7 +639,7 @@ export function onDimensionsChange(el, { width = true, height = true, delay = 50
             if (changed) {
                 tracker.reset();
                 window.removeEventListener('resize', onWindowResize);
-                return resolver(dimensions);
+                resolver(dimensions);
             }
         }
 
@@ -603,7 +648,7 @@ export function onDimensionsChange(el, { width = true, height = true, delay = 50
 }
 
 
-export function dimensionsMatchViewport(el, { width, height }) {
+export function dimensionsMatchViewport(el : HTMLElement, { width, height } : { width : number, height : number }) : boolean {
 
     let dimensions = getCurrentDimensions(el);
 
@@ -619,7 +664,7 @@ export function dimensionsMatchViewport(el, { width, height }) {
 }
 
 
-export function bindEvents(element, eventNames, handler) {
+export function bindEvents(element : HTMLElement, eventNames : Array<string>, handler : (event : Event) => void) : CancelableType {
 
     handler = once(handler);
 
@@ -638,13 +683,15 @@ export function bindEvents(element, eventNames, handler) {
 
 const VENDOR_PREFIXES = [ 'webkit', 'moz', 'ms', 'o' ];
 
-export function setVendorCSS(element, name, value) {
+export function setVendorCSS(element : HTMLElement, name : string, value : string) {
 
+    // $FlowFixMe
     element.style[name] = value;
 
     let capitalizedName = capitalizeFirstLetter(name);
 
     for (let prefix of VENDOR_PREFIXES) {
+        // $FlowFixMe
         element.style[`${prefix}${capitalizedName}`] = value;
     }
 }
@@ -655,13 +702,14 @@ let CSSRule = window.CSSRule;
 const KEYFRAMES_RULE = CSSRule.KEYFRAMES_RULE || CSSRule.WEBKIT_KEYFRAMES_RULE ||  CSSRule.MOZ_KEYFRAMES_RULE ||
                            CSSRule.O_KEYFRAMES_RULE || CSSRule.MS_KEYFRAMES_RULE;
 
-function isValidAnimation(element, name) {
+function isValidAnimation(element : HTMLElement, name : string) : boolean {
 
     let stylesheets = element.ownerDocument.styleSheets;
 
     try {
         for (let i = 0; i < stylesheets.length; i++) {
 
+            // $FlowFixMe
             let cssRules = stylesheets[i].cssRules;
 
             if (!cssRules) {
@@ -694,12 +742,12 @@ function isValidAnimation(element, name) {
 const ANIMATION_START_EVENTS = [ 'animationstart', 'webkitAnimationStart', 'oAnimationStart', 'MSAnimationStart' ];
 const ANIMATION_END_EVENTS   = [ 'animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd' ];
 
-export function animate(element, name, clean, timeout = 1000) {
+export function animate(element : ElementRefType, name : string, clean : (Function) => void, timeout : number = 1000) : ZalgoPromise<void> {
     return new ZalgoPromise((resolve, reject) => {
 
-        element = getElement(element);
+        let el = getElement(element);
 
-        if (!element || !isValidAnimation(element, name)) {
+        if (!el || !isValidAnimation(el, name)) {
             return resolve();
         }
 
@@ -711,16 +759,16 @@ export function animate(element, name, clean, timeout = 1000) {
         let endEvent;
 
         function cleanUp() {
-            setVendorCSS(element, 'animationName', '');
+            setVendorCSS(el, 'animationName', '');
             clearTimeout(startTimeout);
             clearTimeout(endTimeout);
             startEvent.cancel();
             endEvent.cancel();
         }
 
-        startEvent = bindEvents(element, ANIMATION_START_EVENTS, event => {
+        startEvent = bindEvents(el, ANIMATION_START_EVENTS, event => {
 
-            if (event.target !== element || event.animationName !== name) {
+            if (event.target !== el || event.animationName !== name) {
                 return;
             }
 
@@ -737,22 +785,22 @@ export function animate(element, name, clean, timeout = 1000) {
             }, timeout);
         });
 
-        endEvent = bindEvents(element, ANIMATION_END_EVENTS, event => {
+        endEvent = bindEvents(el, ANIMATION_END_EVENTS, event => {
 
-            if (event.target !== element || event.animationName !== name) {
+            if (event.target !== el || event.animationName !== name) {
                 return;
             }
 
             cleanUp();
 
-            if (event.animationName !== name) {
-                return reject(`Expected animation name to be ${name}, found ${event.animationName}`);
+            if (typeof event.animationName === 'string' && event.animationName !== name) {
+                return reject(`Expected animation name to be ${name}, found ${ event.animationName }`);
             }
 
             return resolve();
         });
 
-        setVendorCSS(element, 'animationName', name);
+        setVendorCSS(el, 'animationName', name);
 
         startTimeout = setTimeout(() => {
             if (!hasStarted) {
@@ -782,42 +830,42 @@ const STYLE = {
     IMPORTANT: 'important'
 };
 
-export function makeElementVisible(element) {
+export function makeElementVisible(element : HTMLElement) {
     element.style.setProperty('visibility', '');
 }
 
-export function makeElementInvisible(element) {
+export function makeElementInvisible(element : HTMLElement) {
     element.style.setProperty('visibility', STYLE.VISIBILITY.HIDDEN, STYLE.IMPORTANT);
 }
 
 
-export function showElement(element) {
+export function showElement(element : HTMLElement) {
     element.style.setProperty('display', '');
 }
 
-export function hideElement(element) {
+export function hideElement(element : HTMLElement) {
     element.style.setProperty('display', STYLE.DISPLAY.NONE, STYLE.IMPORTANT);
 }
 
-export function destroyElement(element) {
+export function destroyElement(element : HTMLElement) {
     if (element.parentNode) {
         element.parentNode.removeChild(element);
     }
 }
 
-export function showAndAnimate(element, name, clean) {
+export function showAndAnimate(element : HTMLElement, name : string, clean : (Function) => void) : ZalgoPromise<void> {
     let animation = animate(element, name, clean);
     showElement(element);
     return animation;
 }
 
-export function animateAndHide(element, name, clean) {
+export function animateAndHide(element : HTMLElement, name : string, clean : (Function) => void) : ZalgoPromise<void> {
     return animate(element, name, clean).then(() => {
         hideElement(element);
     });
 }
 
-export function addClass(element, name) {
+export function addClass(element : HTMLElement, name : string) {
     if (element.classList) {
         element.classList.add(name);
     } else if (element.className.split(/\s+/).indexOf(name) === -1) {
@@ -825,7 +873,7 @@ export function addClass(element, name) {
     }
 }
 
-export function removeClass(element, name) {
+export function removeClass(element : HTMLElement, name : string) {
     if (element.classList) {
         element.classList.remove(name);
     } else if (element.className.split(/\s+/).indexOf(name) !== -1) {
@@ -833,7 +881,7 @@ export function removeClass(element, name) {
     }
 }
 
-export function getCurrentScriptDir() {
+export function getCurrentScriptDir() : string {
     console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
 
     if (document.currentScript) {
@@ -843,7 +891,7 @@ export function getCurrentScriptDir() {
     return '.';
 }
 
-export function getElementName(element) {
+export function getElementName(element : ElementRefType) : string {
 
     if (typeof element === 'string') {
         return element;
@@ -864,14 +912,14 @@ export function getElementName(element) {
     return name;
 }
 
-export function isElementClosed(el) {
+export function isElementClosed(el : HTMLElement) : boolean {
     if (!el || !el.parentNode) {
         return true;
     }
     return false;
 }
 
-export function watchElementForClose(element, handler) {
+export function watchElementForClose(element : HTMLElement, handler : () => void) : CancelableType {
     handler = once(handler);
 
     let interval;
@@ -896,7 +944,7 @@ export function watchElementForClose(element, handler) {
     };
 }
 
-export function getHttpType(contentType, url) {
+export function getHttpType(contentType : string, url : string) : ZalgoPromise<string> {
     return new ZalgoPromise((resolve, reject) => {
 
         let req = new window.XMLHttpRequest();
@@ -915,19 +963,19 @@ export function getHttpType(contentType, url) {
     });
 }
 
-export function getHTML(url) {
+export function getHTML(url : string) : ZalgoPromise<string> {
     return getHttpType('text/html', url);
 }
 
-export function getCSS(url) {
+export function getCSS(url : string) : ZalgoPromise<string> {
     return getHttpType('text/css', url);
 }
 
-export function getScript(url) {
+export function getScript(url : string) : ZalgoPromise<string> {
     return getHttpType('*/*', url);
 }
 
-export function prefetchPage(url) {
+export function prefetchPage(url : string) : ZalgoPromise<string> {
     return getHTML(url);
 }
 
@@ -935,7 +983,7 @@ const JSX_EVENTS = {
     onClick: 'click'
 };
 
-export function fixScripts(el, doc = window.document) {
+export function fixScripts(el : HTMLElement, doc : Document = window.document) {
     for (let script of querySelectorAll(el, 'script')) {
         let newScript = doc.createElement('script');
         newScript.text = script.textContent;
@@ -943,7 +991,7 @@ export function fixScripts(el, doc = window.document) {
     }
 }
 
-export function jsxDom(name, props, content) {
+export function jsxDom(name : string, props : { [ string ] : mixed }, content : ElementRefType) : HTMLElement {
 
     name = name.toLowerCase();
 
@@ -1006,7 +1054,6 @@ export function jsxDom(name, props, content) {
             throw new Error(`Expected only text content for ${name} tag`);
         }
 
-        // $FlowFixMe
         el.text = content;
 
     } else {

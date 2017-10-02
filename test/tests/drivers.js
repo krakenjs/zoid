@@ -1,4 +1,3 @@
-
 import { testComponent } from '../component';
 
 angular.module('app', ['test-component']);
@@ -10,7 +9,7 @@ describe('xcomponent drivers', () => {
 
         let Main = window.React.createClass({
 
-            render() {
+            render: () => {
 
                 return window.React.createElement(
                     'div',
@@ -34,7 +33,7 @@ describe('xcomponent drivers', () => {
 
         let Main = window.React.createClass({
 
-            render() {
+            render: () => {
 
                 return window.React.createElement(
                     'div',

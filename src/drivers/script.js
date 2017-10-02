@@ -1,33 +1,46 @@
+/* @flow */
 
-export let htmlComponent = {
+import { type Component, type ComponentDriverType } from '../component/component';
 
-    global() {
-        return true;
+export let htmlComponent : ComponentDriverType<*, Document> = {
+
+    global() : ?Document {
+        return window.document;
     },
 
-    register(component) {
+    register(component : Component<*>, document : Document) {
 
-        function render(element) {
+        function render(element : HTMLElement) {
 
             if (!element || !element.tagName || element.tagName.toLowerCase() !== 'script') {
                 return;
             }
 
-            if (!element.attributes.type || element.attributes.type.value !== 'application/x-component') {
+            if (!element.attributes.type || element.attributes.type.value !== 'application/x-component' || !element.parentNode) {
                 return;
             }
 
-            if (!element.attributes['data-component'] || element.attributes['data-component'].value !== component.tag) {
+            let tag = element.getAttribute('data-component');
+
+            if (!tag || tag !== component.tag) {
                 return;
             }
 
             component.log(`instantiate_script_component`);
 
-            let props = eval(`(${element.innerText})`); // eslint-disable-line no-eval
+            let props : { [string] : mixed } = element.innerText
+                ? eval(`(${ element.innerText })`) // eslint-disable-line no-eval
+                : {};
 
             let container = document.createElement('div');
+
+            if (!element.parentNode) {
+                throw new Error(`Element has no parent`);
+            }
+
             element.parentNode.replaceChild(container, element);
 
+            // $FlowFixMe
             component.render(props, container);
         }
 
@@ -44,6 +57,7 @@ export let htmlComponent = {
         window.addEventListener('load', scan);
 
         document.addEventListener('DOMNodeInserted', event => {
+            // $FlowFixMe
             render(event.target);
         });
     }

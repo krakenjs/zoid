@@ -1,5 +1,9 @@
+/* @flow */
+/* @jsx jsxDom */
 
-export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxDom }) {
+import { type RenderOptionsType } from '../../parent';
+
+export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxDom, dimensions : { width, height } } : RenderOptionsType) : HTMLElement {
 
     return (
         <div id={ id } class={ `${ CLASS.XCOMPONENT } ${ CLASS.XCOMPONENT }-tag-${ tag } ${ CLASS.XCOMPONENT }-context-${ context }` }>
@@ -7,8 +11,8 @@ export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxD
                 {`
                     #${ id } > .${ CLASS.OUTLET } {
                         display: inline-block;
-                        height: 150px;
-                        width: 300px;
+                        width: ${ width }px;
+                        height: ${ height }px;
                         position: relative;
                     }
 
