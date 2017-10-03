@@ -6828,15 +6828,30 @@
                         promise.resolve(results);
                         return promise;
                     }
-                    for (var i = 0; i < promises.length; i++) !function(i) {
-                        ZalgoPromise.resolve(promises[i]).then(function(result) {
-                            results[i] = result;
-                            count -= 1;
-                            0 === count && promise.resolve(results);
-                        }, function(err) {
-                            promise.reject(err);
-                        });
-                    }(i);
+                    for (var i = 0; i < promises.length; i++) {
+                        (function(i) {
+                            var prom = promises[i];
+                            if (prom instanceof ZalgoPromise) {
+                                if (prom.resolved) {
+                                    results[i] = prom.value;
+                                    count -= 1;
+                                    return "continue";
+                                }
+                            } else if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__.a)(prom)) {
+                                results[i] = prom;
+                                count -= 1;
+                                return "continue";
+                            }
+                            ZalgoPromise.resolve(prom).then(function(result) {
+                                results[i] = result;
+                                count -= 1;
+                                0 === count && promise.resolve(results);
+                            }, function(err) {
+                                promise.reject(err);
+                            });
+                        })(i);
+                    }
+                    0 === count && promise.resolve(results);
                     return promise;
                 }
             }, {
@@ -7016,7 +7031,7 @@
             return jsxDom("div", {
                 id: id,
                 class: CLASS.XCOMPONENT + " " + CLASS.XCOMPONENT + "-tag-" + tag + " " + CLASS.XCOMPONENT + "-context-" + context
-            }, jsxDom("style", null, "\n                    #" + id + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        width: " + width + "px;\n                        height: " + height + "px;\n                        position: relative;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), outlet);
+            }, jsxDom("style", null, "\n                    #" + id + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        width: " + width + ";\n                        height: " + height + ";\n                        position: relative;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), outlet);
         }
         __webpack_exports__.a = defaultContainerTemplate;
         __webpack_require__(11);
