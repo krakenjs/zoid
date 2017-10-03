@@ -31,3 +31,5 @@ node_modules
 
 flow-typed
 .DS_Store
+
+package-lock.json

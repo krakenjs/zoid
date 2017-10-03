@@ -35,32 +35,61 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
 
     register(component : Component<*>, { React, ReactDOM } : ReactLibraryType) : (typeof ReactClassType) {
 
-        // $FlowFixMe
-        component.react = React.createClass({
+        if (React.createClass) {
 
-            render() : ReactElementType {
-                return React.createElement('div', null);
-            },
+            // $FlowFixMe
+            component.react = React.createClass({
 
-            componentDidMount() {
-                component.log(`instantiate_react_component`);
+                render() : ReactElementType {
+                    return React.createElement('div', null);
+                },
 
-                let el = ReactDOM.findDOMNode(this);
+                componentDidMount() {
+                    component.log(`instantiate_react_component`);
 
-                let parent = component.init(extend({}, this.props), null, el);
+                    let el = ReactDOM.findDOMNode(this);
 
-                this.setState({ parent });
+                    let parent = component.init(extend({}, this.props), null, el);
 
-                parent.render(el);
-            },
+                    this.setState({ parent });
 
-            componentDidUpdate() {
+                    parent.render(el);
+                },
 
-                if (this.state && this.state.parent) {
-                    this.state.parent.updateProps(extend({}, this.props));
+                componentDidUpdate() {
+
+                    if (this.state && this.state.parent) {
+                        this.state.parent.updateProps(extend({}, this.props));
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // $FlowFixMe
+            component.react = class extends React.Component {
+                render() : ReactElementType {
+                    return React.createElement('div', null);
+                }
+
+                componentDidMount() {
+                    component.log(`instantiate_react_component`);
+
+                    let el = ReactDOM.findDOMNode(this);
+
+                    let parent = component.init(extend({}, this.props), null, el);
+
+                    this.setState({ parent });
+
+                    parent.render(el);
+                }
+
+                componentDidUpdate() {
+
+                    if (this.state && this.state.parent) {
+                        this.state.parent.updateProps(extend({}, this.props));
+                    }
+                }
+            };
+        }
 
         return component.react;
     }
