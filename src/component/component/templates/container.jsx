@@ -11,8 +11,8 @@ export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxD
                 {`
                     #${ id } > .${ CLASS.OUTLET } {
                         display: inline-block;
-                        width: ${ width }px;
-                        height: ${ height }px;
+                        width: ${ width };
+                        height: ${ height };
                         position: relative;
                     }
 
