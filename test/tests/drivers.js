@@ -7,9 +7,9 @@ describe('xcomponent drivers', () => {
 
     it('should enter a component rendered with react and call onEnter', done => {
 
-        let Main = window.React.createClass({
+        let Main = class extends window.React.Component {
 
-            render: () => {
+            render() : Object {
 
                 return window.React.createElement(
                     'div',
@@ -21,7 +21,7 @@ describe('xcomponent drivers', () => {
                     })
                 );
             }
-        });
+        };
 
         let container = document.createElement('div');
         document.body.appendChild(container);
@@ -31,9 +31,9 @@ describe('xcomponent drivers', () => {
 
     it('should enter a component rendered with react and call a prop', done => {
 
-        let Main = window.React.createClass({
+        let Main = class extends window.React.Component {
 
-            render: () => {
+            render() : Object {
 
                 return window.React.createElement(
                     'div',
@@ -51,7 +51,7 @@ describe('xcomponent drivers', () => {
                     })
                 );
             }
-        });
+        };
 
         let container = document.createElement('div');
         document.body.appendChild(container);
