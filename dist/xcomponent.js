@@ -39,7 +39,7 @@
             return Object.prototype.hasOwnProperty.call(object, property);
         };
         __webpack_require__.p = "";
-        return __webpack_require__(__webpack_require__.s = 81);
+        return __webpack_require__(__webpack_require__.s = 82);
     }([ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function getActualDomain(win) {
@@ -543,7 +543,7 @@
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__dom__ = __webpack_require__(84);
+        var __WEBPACK_IMPORTED_MODULE_0__dom__ = __webpack_require__(85);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__dom__.a;
         });
@@ -650,7 +650,7 @@
         __webpack_require__.d(__webpack_exports__, "T", function() {
             return __WEBPACK_IMPORTED_MODULE_1__fn__.f;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__promise__ = __webpack_require__(87);
+        var __WEBPACK_IMPORTED_MODULE_2__promise__ = __webpack_require__(88);
         __webpack_require__.d(__webpack_exports__, "Q", function() {
             return __WEBPACK_IMPORTED_MODULE_2__promise__.a;
         });
@@ -694,7 +694,7 @@
         __webpack_require__.d(__webpack_exports__, "_5", function() {
             return __WEBPACK_IMPORTED_MODULE_3__util__.o;
         });
-        var __WEBPACK_IMPORTED_MODULE_4__css__ = __webpack_require__(82);
+        var __WEBPACK_IMPORTED_MODULE_4__css__ = __webpack_require__(83);
         __webpack_require__.d(__webpack_exports__, "L", function() {
             return __WEBPACK_IMPORTED_MODULE_4__css__.a;
         });
@@ -707,11 +707,11 @@
         __webpack_require__.d(__webpack_exports__, "_7", function() {
             return __WEBPACK_IMPORTED_MODULE_4__css__.d;
         });
-        var __WEBPACK_IMPORTED_MODULE_5__decorators__ = __webpack_require__(83);
+        var __WEBPACK_IMPORTED_MODULE_5__decorators__ = __webpack_require__(84);
         __webpack_require__.d(__webpack_exports__, "D", function() {
             return __WEBPACK_IMPORTED_MODULE_5__decorators__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_6__logger__ = __webpack_require__(86);
+        var __WEBPACK_IMPORTED_MODULE_6__logger__ = __webpack_require__(87);
         __webpack_require__.d(__webpack_exports__, "d", function() {
             return __WEBPACK_IMPORTED_MODULE_6__logger__.a;
         });
@@ -724,7 +724,7 @@
         __webpack_require__.d(__webpack_exports__, "_3", function() {
             return __WEBPACK_IMPORTED_MODULE_6__logger__.d;
         });
-        var __WEBPACK_IMPORTED_MODULE_7__global__ = __webpack_require__(85);
+        var __WEBPACK_IMPORTED_MODULE_7__global__ = __webpack_require__(86);
         __webpack_require__.d(__webpack_exports__, "c", function() {
             return __WEBPACK_IMPORTED_MODULE_7__global__.a;
         });
@@ -7560,32 +7560,70 @@
         __webpack_require__.d(__webpack_exports__, "react", function() {
             return __WEBPACK_IMPORTED_MODULE_1__react__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__angular__ = __webpack_require__(74);
-        __webpack_require__.d(__webpack_exports__, "angular", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__angular__.a;
+        var __WEBPACK_IMPORTED_MODULE_2__vue__ = __webpack_require__(81);
+        __webpack_require__.d(__webpack_exports__, "vue", function() {
+            return __WEBPACK_IMPORTED_MODULE_2__vue__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_3__ember__ = __webpack_require__(76);
-        __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__ember__);
-        for (var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_3__ember__) [ "htmlComponent", "react", "angular", "default" ].indexOf(__WEBPACK_IMPORT_KEY__) < 0 && function(key) {
+        var __WEBPACK_IMPORTED_MODULE_3__angular__ = __webpack_require__(74);
+        __webpack_require__.d(__webpack_exports__, "angular", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__angular__.a;
+        });
+        var __WEBPACK_IMPORTED_MODULE_4__ember__ = __webpack_require__(76);
+        __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__ember__);
+        for (var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_4__ember__) [ "htmlComponent", "react", "vue", "angular", "default" ].indexOf(__WEBPACK_IMPORT_KEY__) < 0 && function(key) {
             __webpack_require__.d(__webpack_exports__, key, function() {
-                return __WEBPACK_IMPORTED_MODULE_3__ember__[key];
+                return __WEBPACK_IMPORTED_MODULE_4__ember__[key];
             });
         }(__WEBPACK_IMPORT_KEY__);
-        var __WEBPACK_IMPORTED_MODULE_4__glimmer__ = __webpack_require__(77);
+        var __WEBPACK_IMPORTED_MODULE_5__glimmer__ = __webpack_require__(77);
         __webpack_require__.d(__webpack_exports__, "glimmer", function() {
-            return __WEBPACK_IMPORTED_MODULE_4__glimmer__.a;
+            return __WEBPACK_IMPORTED_MODULE_5__glimmer__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_5__angular2__ = __webpack_require__(75);
+        var __WEBPACK_IMPORTED_MODULE_6__angular2__ = __webpack_require__(75);
         __webpack_require__.d(__webpack_exports__, "angular2", function() {
-            return __WEBPACK_IMPORTED_MODULE_5__angular2__.a;
+            return __WEBPACK_IMPORTED_MODULE_6__angular2__.a;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
+        }
+        function _possibleConstructorReturn(self, call) {
+            if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+            return !call || "object" != typeof call && "function" != typeof call ? self : call;
+        }
+        function _inherits(subClass, superClass) {
+            if ("function" != typeof superClass && null !== superClass) throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+            subClass.prototype = Object.create(superClass && superClass.prototype, {
+                constructor: {
+                    value: subClass,
+                    enumerable: !1,
+                    writable: !0,
+                    configurable: !0
+                }
+            });
+            superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
+        }
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return react;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), react = (__webpack_require__(4), 
-        {
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), _createClass = (__webpack_require__(4), 
+        function() {
+            function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                    var descriptor = props[i];
+                    descriptor.enumerable = descriptor.enumerable || !1;
+                    descriptor.configurable = !0;
+                    "value" in descriptor && (descriptor.writable = !0);
+                    Object.defineProperty(target, descriptor.key, descriptor);
+                }
+            }
+            return function(Constructor, protoProps, staticProps) {
+                protoProps && defineProperties(Constructor.prototype, protoProps);
+                staticProps && defineProperties(Constructor, staticProps);
+                return Constructor;
+            };
+        }()), react = {
             global: function() {
                 if (window.React && window.ReactDOM) return {
                     React: window.React,
@@ -7594,7 +7632,7 @@
             },
             register: function(component, _ref) {
                 var React = _ref.React, ReactDOM = _ref.ReactDOM;
-                component.react = React.createClass({
+                React.createClass ? component.react = React.createClass({
                     displayName: "react",
                     render: function() {
                         return React.createElement("div", null);
@@ -7610,10 +7648,38 @@
                     componentDidUpdate: function() {
                         this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props));
                     }
-                });
+                }) : component.react = function(_React$Component) {
+                    function _class() {
+                        _classCallCheck(this, _class);
+                        return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+                    }
+                    _inherits(_class, _React$Component);
+                    _createClass(_class, [ {
+                        key: "render",
+                        value: function() {
+                            return React.createElement("div", null);
+                        }
+                    }, {
+                        key: "componentDidMount",
+                        value: function() {
+                            component.log("instantiate_react_component");
+                            var el = ReactDOM.findDOMNode(this), parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props), null, el);
+                            this.setState({
+                                parent: parent
+                            });
+                            parent.render(el);
+                        }
+                    }, {
+                        key: "componentDidUpdate",
+                        value: function() {
+                            this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props));
+                        }
+                    } ]);
+                    return _class;
+                }(React.Component);
                 return component.react;
             }
-        });
+        };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -7656,6 +7722,28 @@
                 document.addEventListener("DOMNodeInserted", function(event) {
                     render(event.target);
                 });
+            }
+        };
+    }, function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return vue;
+        });
+        var __WEBPACK_IMPORTED_MODULE_1__lib__ = (__webpack_require__(4), __webpack_require__(3)), vue = {
+            global: function() {},
+            register: function(component) {
+                return {
+                    template: "<div></div>",
+                    inheritAttrs: !1,
+                    mounted: function() {
+                        var el = this.$el;
+                        this.parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.l)({}, this.$attrs), null, el);
+                        this.parent.render(el);
+                    },
+                    beforeUpdate: function() {
+                        this.parent && this.$attrs && this.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.l)({}, this.$attrs));
+                    }
+                };
             }
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
