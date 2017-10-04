@@ -1,0 +1,66 @@
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+    <link rel="stylesheet" href="../../common/index.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+
+    <script src="https://unpkg.com/vue"></script>
+    <script src="../../../dist/xcomponent.js"></script>
+    <script src="./login.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="container">
+<app></app>
+</div>
+
+<script type="text/babel">
+
+    var MyLoginVueXComponent = MyLoginXComponent.driver('vue');
+
+    Vue.component('app', {
+
+
+        data: function () {
+            return {
+                userLoggedIn: false,
+                email: 'foo@bar.com'
+            }
+        },
+
+        template: `<div>
+                        <h3>Log in on xyz.com</h3>
+
+
+                        <my-component :prefilledEmail = "this.email" :onLogin = "onLogin"  />
+                        <div id="result">{{ this.userLoggedIn ? 'User logged in with email: ' + email : '' }}</div>
+
+                    </div>` ,
+        components: {
+            'my-component': MyLoginVueXComponent
+        },
+
+        computed: {
+            onLogin: function(email) {
+                return (email) => {
+
+                    this.userLoggedIn = true;
+                    this.email = email;
+                }
+
+
+            }
+        }
+    });
+
+    var vm = new Vue({
+        el: '#container'
+    });
+
+</script>
+
+</body>

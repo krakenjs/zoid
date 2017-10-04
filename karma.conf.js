@@ -21,6 +21,7 @@ module.exports = function(config) {
             'test/lib/react_v16.0.0.js',
             'test/lib/react-dom_v16.0.0.js',
             'test/lib/angular.min.js',
+            'test/lib/vue.min.js',
 
             { pattern: 'test/test.js', included: true, served: true },
             { pattern: 'test/*.js', included: false, served: true },
