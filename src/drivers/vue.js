@@ -1,31 +1,39 @@
+/* @flow */
+
+import { Component, type ComponentDriverType } from '../component/component';
 import { extend } from '../lib';
 
+type VueComponent = {
+    template : string,
+    inheritAttrs : boolean,
+    mounted : () => void,
+    beforeUpdate : () => void
+};
 
-export let vue = {
+export let vue : ComponentDriverType<*, void> = {
 
 
     global() {
 
     },
 
-    register(component) {
+    register<P>(component : Component<P>) : VueComponent {
 
         return {
             template: `<div></div>`,
 
             inheritAttrs: false,
 
-            mounted () {
-
+            mounted() {
                 let el = this.$el;
 
+                // $FlowFixMe
                 this.parent = component.init(extend({}, this.$attrs), null, el);
 
                 this.parent.render(el);
-
             },
 
-            beforeUpdate () {
+            beforeUpdate() {
                 
                 if (this.parent && this.$attrs) {
                     this.parent.updateProps(extend({}, this.$attrs));
