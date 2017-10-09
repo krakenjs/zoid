@@ -344,11 +344,15 @@ describe('xcomponent validation errors', () => {
             });
         });
 
+        /*
+
         expectError('Invalid prop passed', () => {
             testComponent.init({
                 invalidProp: 'foobar'
             });
         });
+
+        */
 
         expectError('No props passed', () => {
             testComponent5.init();

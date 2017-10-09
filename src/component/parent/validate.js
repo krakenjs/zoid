@@ -89,6 +89,8 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
 
     // First make sure all of the props we were sent are actually valid prop names
 
+    /*
+
     if (!component.looseProps) {
         for (let key of Object.keys(props)) {
             if (component.getPropNames().indexOf(key) === -1) {
@@ -96,6 +98,8 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
             }
         }
     }
+
+    */
 
     // Then loop over the props we expect, and make sure they're all present and valid
 
@@ -116,7 +120,7 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
         let prop : PropDefinitionType<*, P, *> = component.getProp(key);
         let value = props[key];
 
-        if (!props.hasOwnProperty(key)) {
+        if (prop && !props.hasOwnProperty(key)) {
             validateProp(prop, key, value, props, required);
         }
     }
