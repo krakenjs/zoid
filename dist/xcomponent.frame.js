@@ -6636,14 +6636,14 @@
                     if (_i.done) break;
                     _ref = _i.value;
                 }
-                var _key = _ref, prop = component.getProp(_key);
+                var key = _ref, prop = component.getProp(key);
                 if (prop.alias && props.hasOwnProperty(prop.alias)) {
                     var value = props[prop.alias];
                     delete props[prop.alias];
-                    props[_key] || (props[_key] = value);
+                    props[key] || (props[key] = value);
                 }
             }
-            if (!component.looseProps) for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+            for (var _iterator2 = Object.keys(props), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                 var _ref2;
                 if (_isArray2) {
                     if (_i2 >= _iterator2.length) break;
@@ -6653,10 +6653,10 @@
                     if (_i2.done) break;
                     _ref2 = _i2.value;
                 }
-                var key = _ref2;
-                if (-1 === component.getPropNames().indexOf(key)) throw component.error("Invalid prop: " + key);
+                var _key = _ref2, _prop = component.getProp(_key), _value = props[_key];
+                _prop && validateProp(_prop, _key, _value, props, required);
             }
-            for (var _iterator3 = Object.keys(props), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+            for (var _iterator3 = component.getPropNames(), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                 var _ref3;
                 if (_isArray3) {
                     if (_i3 >= _iterator3.length) break;
@@ -6666,21 +6666,8 @@
                     if (_i3.done) break;
                     _ref3 = _i3.value;
                 }
-                var _key2 = _ref3, _prop = component.getProp(_key2), _value = props[_key2];
-                _prop && validateProp(_prop, _key2, _value, props, required);
-            }
-            for (var _iterator4 = component.getPropNames(), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                var _ref4;
-                if (_isArray4) {
-                    if (_i4 >= _iterator4.length) break;
-                    _ref4 = _iterator4[_i4++];
-                } else {
-                    _i4 = _iterator4.next();
-                    if (_i4.done) break;
-                    _ref4 = _i4.value;
-                }
-                var _key3 = _ref4, _prop2 = component.getProp(_key3), _value2 = props[_key3];
-                props.hasOwnProperty(_key3) || validateProp(_prop2, _key3, _value2, props, required);
+                var _key2 = _ref3, _prop2 = component.getProp(_key2), _value2 = props[_key2];
+                _prop2 && !props.hasOwnProperty(_key2) && validateProp(_prop2, _key2, _value2, props, required);
             }
         }
         __webpack_exports__.a = validateProps;
