@@ -32,7 +32,11 @@ export type CrossDomainWindowType = {|
     closed : boolean,
     open : (string, string, string) => CrossDomainWindowType,
     close : () => void,
-    focus : () => void
+    focus : () => void,
+    frames : Array<CrossDomainWindowType>,
+    opener ? : CrossDomainWindowType,
+    parent : CrossDomainWindowType,
+    length : number
 |};
 
 export type SameDomainWindowType = Object & {
@@ -43,7 +47,11 @@ export type SameDomainWindowType = Object & {
     close : () => void,
     focus : () => void,
     XMLHttpRequest : typeof XMLHttpRequest,
-    document : Document
+    document : Document,
+    navigator : {
+        userAgent : string,
+        mockUserAgent? : string
+    }
 };
 
 export type CancelableType = {

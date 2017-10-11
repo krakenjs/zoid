@@ -101,37 +101,43 @@ export function getParentDomain() : string {
 
 function getWindowByRef({ ref, uid, distance } : { ref : string, uid : string, distance : number }) : CrossDomainWindowType {
 
+    let result;
+
     if (ref === WINDOW_REFERENCES.OPENER) {
-        // $FlowFixMe
-        return getOpener(window);
-    }
+        result = getOpener(window);
 
-    if (ref === WINDOW_REFERENCES.TOP) {
-        // $FlowFixMe
-        return getTop(window);
-    }
+    } else if (ref === WINDOW_REFERENCES.TOP) {
+        result = getTop(window);
 
-    if (ref === WINDOW_REFERENCES.PARENT) {
+    } else if (ref === WINDOW_REFERENCES.PARENT) {
 
         if (distance) {
-            return getNthParentFromTop(window, distance);
+            result = getNthParentFromTop(window, distance);
+        } else {
+            result = getParent(window);
         }
-
-        // $FlowFixMe
-        return getParent(window);
     }
 
     if (ref === WINDOW_REFERENCES.GLOBAL) {
-        for (let frame of getAllFramesInWindow(getAncestor(window))) {
-            let global = globalFor(frame);
+        let ancestor = getAncestor(window);
 
-            if (global && global.windows && global.windows[uid]) {
-                return global.windows[uid];
+        if (ancestor) {
+            for (let frame of getAllFramesInWindow(ancestor)) {
+                let global = globalFor(frame);
+
+                if (global && global.windows && global.windows[uid]) {
+                    result = global.windows[uid];
+                    break;
+                }
             }
         }
     }
 
-    throw new Error(`Unable to find window by ref`);
+    if (!result) {
+        throw new Error(`Unable to find window by ref`);
+    }
+
+    return result;
 }
 
 /*  Get Parent Component Window

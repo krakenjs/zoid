@@ -271,6 +271,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                     return;
                 }
 
+                // $FlowFixMe
                 for (let frame of getAllFramesInWindow(opener)) {
 
                     if (!isSameDomain(frame) || !frame.console || frame === window) {
@@ -290,6 +291,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
                                 try {
                                     if (frame) {
+                                        // $FlowFixMe
                                         return frame.console[level].apply(frame.console, arguments);
                                     }
                                 } catch (err3) {

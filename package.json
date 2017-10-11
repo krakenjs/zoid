@@ -87,7 +87,7 @@
   "dependencies": {
     "beaver-logger": "^3",
     "cross-domain-safe-weakmap": "^1.0.8",
-    "cross-domain-utils": "^1.0.5",
+    "cross-domain-utils": "^2.0.0",
     "hi-base32": "^0.1.1",
     "post-robot": "^7.0.1",
     "zalgo-promise": "^1.0.4"
