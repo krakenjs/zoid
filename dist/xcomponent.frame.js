@@ -321,7 +321,7 @@
         function findFrameByName(win, name) {
             var frame = void 0;
             frame = getFrameByName(win, name);
-            return frame || findChildFrameByName(getTop(win), name);
+            return frame || findChildFrameByName(getTop(win) || win, name);
         }
         function getAncestor(win) {
             win = win || window;
@@ -379,31 +379,36 @@
                     if (item1 === _ref9) return !0;
                 }
             }
+            return !1;
         }
         function getDistanceFromTop() {
-            for (var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, distance = 0; win; ) {
-                win = getParent(win);
-                win && (distance += 1);
+            for (var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, distance = 0, parent = win; parent; ) {
+                parent = getParent(parent);
+                parent && (distance += 1);
             }
             return distance;
         }
         function getNthParent(win) {
-            for (var n = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1, i = 0; i < n; i++) win = getParent(win);
-            return win;
+            for (var n = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1, parent = win, i = 0; i < n; i++) {
+                if (!parent) return;
+                parent = getParent(parent);
+            }
+            return parent;
         }
         function getNthParentFromTop(win) {
             var n = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
             return getNthParent(win, getDistanceFromTop(win) - n);
         }
         function isSameTopWindow(win1, win2) {
-            var top1 = getTop(win1), top2 = getTop(win2);
+            var top1 = getTop(win1) || win1, top2 = getTop(win2) || win2;
             try {
                 if (top1 && top2) return top1 === top2;
             } catch (err) {}
             var allFrames1 = getAllFramesInWindow(win1), allFrames2 = getAllFramesInWindow(win2);
             if (anyMatch(allFrames1, allFrames2)) return !0;
             var opener1 = getOpener(top1), opener2 = getOpener(top2);
-            return (!opener1 || !anyMatch(getAllFramesInWindow(opener1), allFrames2)) && ((!opener2 || !anyMatch(getAllFramesInWindow(opener2), allFrames1)) && void 0);
+            return (!opener1 || !anyMatch(getAllFramesInWindow(opener1), allFrames2)) && (opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1), 
+            !1);
         }
         function matchDomain(pattern, origin) {
             if ("string" == typeof pattern) {
@@ -414,6 +419,13 @@
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(pattern) ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(origin) ? pattern.toString() === origin.toString() : !Array.isArray(origin) && Boolean(origin.match(pattern)) : !!Array.isArray(pattern) && (Array.isArray(origin) ? JSON.stringify(pattern) === JSON.stringify(origin) : !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.b)(origin) && pattern.some(function(subpattern) {
                 return matchDomain(subpattern, origin);
             }));
+        }
+        function getDomainFromUrl(url) {
+            var domain = void 0;
+            if (!url.match(/^(https?|mock|file):\/\//)) return getDomain();
+            domain = url;
+            domain = domain.split("/").slice(0, 3).join("/");
+            return domain;
         }
         function onCloseWindow(win, callback) {
             var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, maxtime = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1 / 0, timeout = void 0;
@@ -496,6 +508,7 @@
         __webpack_exports__.t = getNthParentFromTop;
         __webpack_exports__.m = isSameTopWindow;
         __webpack_exports__.f = matchDomain;
+        __webpack_exports__.w = getDomainFromUrl;
         __webpack_exports__.p = onCloseWindow;
         __webpack_exports__.b = isWindow;
         var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(41), CONSTANTS = {
@@ -508,190 +521,6 @@
         var __WEBPACK_IMPORTED_MODULE_0__promise__ = __webpack_require__(56);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__promise__.a;
-        });
-    }, function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__dom__ = __webpack_require__(77);
-        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "f", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.b;
-        });
-        __webpack_require__.d(__webpack_exports__, "g", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.c;
-        });
-        __webpack_require__.d(__webpack_exports__, "h", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.d;
-        });
-        __webpack_require__.d(__webpack_exports__, "i", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.e;
-        });
-        __webpack_require__.d(__webpack_exports__, "m", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.f;
-        });
-        __webpack_require__.d(__webpack_exports__, "n", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.g;
-        });
-        __webpack_require__.d(__webpack_exports__, "r", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.h;
-        });
-        __webpack_require__.d(__webpack_exports__, "s", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.i;
-        });
-        __webpack_require__.d(__webpack_exports__, "t", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.j;
-        });
-        __webpack_require__.d(__webpack_exports__, "u", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.k;
-        });
-        __webpack_require__.d(__webpack_exports__, "v", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.l;
-        });
-        __webpack_require__.d(__webpack_exports__, "w", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.m;
-        });
-        __webpack_require__.d(__webpack_exports__, "x", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.n;
-        });
-        __webpack_require__.d(__webpack_exports__, "y", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.o;
-        });
-        __webpack_require__.d(__webpack_exports__, "z", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.p;
-        });
-        __webpack_require__.d(__webpack_exports__, "A", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.q;
-        });
-        __webpack_require__.d(__webpack_exports__, "B", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.r;
-        });
-        __webpack_require__.d(__webpack_exports__, "C", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.s;
-        });
-        __webpack_require__.d(__webpack_exports__, "G", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.t;
-        });
-        __webpack_require__.d(__webpack_exports__, "H", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.u;
-        });
-        __webpack_require__.d(__webpack_exports__, "I", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.v;
-        });
-        __webpack_require__.d(__webpack_exports__, "J", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.w;
-        });
-        __webpack_require__.d(__webpack_exports__, "K", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.x;
-        });
-        __webpack_require__.d(__webpack_exports__, "T", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.y;
-        });
-        __webpack_require__.d(__webpack_exports__, "U", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.z;
-        });
-        __webpack_require__.d(__webpack_exports__, "W", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.A;
-        });
-        __webpack_require__.d(__webpack_exports__, "X", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.B;
-        });
-        __webpack_require__.d(__webpack_exports__, "Y", function() {
-            return __WEBPACK_IMPORTED_MODULE_0__dom__.C;
-        });
-        var __WEBPACK_IMPORTED_MODULE_1__fn__ = __webpack_require__(35);
-        __webpack_require__.d(__webpack_exports__, "k", function() {
-            return __WEBPACK_IMPORTED_MODULE_1__fn__.d;
-        });
-        __webpack_require__.d(__webpack_exports__, "o", function() {
-            return __WEBPACK_IMPORTED_MODULE_1__fn__.e;
-        });
-        __webpack_require__.d(__webpack_exports__, "q", function() {
-            return __WEBPACK_IMPORTED_MODULE_1__fn__.c;
-        });
-        __webpack_require__.d(__webpack_exports__, "O", function() {
-            return __WEBPACK_IMPORTED_MODULE_1__fn__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "R", function() {
-            return __WEBPACK_IMPORTED_MODULE_1__fn__.f;
-        });
-        var __WEBPACK_IMPORTED_MODULE_2__promise__ = __webpack_require__(80);
-        __webpack_require__.d(__webpack_exports__, "M", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__promise__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "N", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__promise__.b;
-        });
-        __webpack_require__.d(__webpack_exports__, "V", function() {
-            return __WEBPACK_IMPORTED_MODULE_2__promise__.c;
-        });
-        var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(26);
-        __webpack_require__.d(__webpack_exports__, "b", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "e", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.d;
-        });
-        __webpack_require__.d(__webpack_exports__, "j", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.i;
-        });
-        __webpack_require__.d(__webpack_exports__, "l", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.e;
-        });
-        __webpack_require__.d(__webpack_exports__, "p", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.j;
-        });
-        __webpack_require__.d(__webpack_exports__, "E", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.k;
-        });
-        __webpack_require__.d(__webpack_exports__, "F", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.l;
-        });
-        __webpack_require__.d(__webpack_exports__, "P", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.m;
-        });
-        __webpack_require__.d(__webpack_exports__, "S", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.n;
-        });
-        __webpack_require__.d(__webpack_exports__, "_2", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.c;
-        });
-        __webpack_require__.d(__webpack_exports__, "_3", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__util__.o;
-        });
-        var __WEBPACK_IMPORTED_MODULE_4__css__ = __webpack_require__(75);
-        __webpack_require__.d(__webpack_exports__, "L", function() {
-            return __WEBPACK_IMPORTED_MODULE_4__css__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "_4", function() {
-            return __WEBPACK_IMPORTED_MODULE_4__css__.b;
-        });
-        __webpack_require__.d(__webpack_exports__, "_5", function() {
-            return __WEBPACK_IMPORTED_MODULE_4__css__.c;
-        });
-        var __WEBPACK_IMPORTED_MODULE_5__decorators__ = __webpack_require__(76);
-        __webpack_require__.d(__webpack_exports__, "D", function() {
-            return __WEBPACK_IMPORTED_MODULE_5__decorators__.a;
-        });
-        var __WEBPACK_IMPORTED_MODULE_6__logger__ = __webpack_require__(79);
-        __webpack_require__.d(__webpack_exports__, "d", function() {
-            return __WEBPACK_IMPORTED_MODULE_6__logger__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "Z", function() {
-            return __WEBPACK_IMPORTED_MODULE_6__logger__.b;
-        });
-        __webpack_require__.d(__webpack_exports__, "_0", function() {
-            return __WEBPACK_IMPORTED_MODULE_6__logger__.c;
-        });
-        __webpack_require__.d(__webpack_exports__, "_1", function() {
-            return __WEBPACK_IMPORTED_MODULE_6__logger__.d;
-        });
-        var __WEBPACK_IMPORTED_MODULE_7__global__ = __webpack_require__(78);
-        __webpack_require__.d(__webpack_exports__, "c", function() {
-            return __WEBPACK_IMPORTED_MODULE_7__global__.a;
-        });
-        __webpack_require__.d(__webpack_exports__, "Q", function() {
-            return __WEBPACK_IMPORTED_MODULE_7__global__.b;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -717,7 +546,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return Component;
         });
-        var _class, __WEBPACK_IMPORTED_MODULE_0_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_3__child__ = __webpack_require__(25), __WEBPACK_IMPORTED_MODULE_4__parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_5__delegate__ = __webpack_require__(63), __WEBPACK_IMPORTED_MODULE_6__props__ = __webpack_require__(12), __WEBPACK_IMPORTED_MODULE_7__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_8__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_9__validate__ = __webpack_require__(62), __WEBPACK_IMPORTED_MODULE_10__templates__ = __webpack_require__(61), __WEBPACK_IMPORTED_MODULE_11__drivers__ = __webpack_require__(70), __WEBPACK_IMPORTED_MODULE_12__lib__ = __webpack_require__(2), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _class, __WEBPACK_IMPORTED_MODULE_0_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_4__child__ = __webpack_require__(25), __WEBPACK_IMPORTED_MODULE_5__parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_6__delegate__ = __webpack_require__(63), __WEBPACK_IMPORTED_MODULE_7__props__ = __webpack_require__(12), __WEBPACK_IMPORTED_MODULE_8__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_9__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_10__validate__ = __webpack_require__(62), __WEBPACK_IMPORTED_MODULE_11__templates__ = __webpack_require__(61), __WEBPACK_IMPORTED_MODULE_12__drivers__ = __webpack_require__(70), __WEBPACK_IMPORTED_MODULE_13__lib__ = __webpack_require__(3), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -740,14 +569,14 @@
             function Component(options) {
                 _classCallCheck(this, Component);
                 var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__validate__.a)(options);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__validate__.a)(options);
                 _this.addProp(options, "tag");
                 _this.addProp(options, "defaultLogLevel", "info");
-                _this.addProp(options, "allowedParentDomains", __WEBPACK_IMPORTED_MODULE_8__constants__.WILDCARD);
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.d)(_this.defaultLogLevel);
+                _this.addProp(options, "allowedParentDomains", __WEBPACK_IMPORTED_MODULE_9__constants__.WILDCARD);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__lib__.d)(_this.defaultLogLevel);
                 if (Component.components[_this.tag]) throw new Error("Can not register multiple components with the same tag");
                 _this.addProp(options, "name", _this.tag.replace(/-/g, "_"));
-                _this.builtinProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__props__.a)();
+                _this.builtinProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__props__.a)();
                 _this.props = options.props || {};
                 options.props || (_this.looseProps = !0);
                 _this.addProp(options, "dimensions");
@@ -765,8 +594,8 @@
                 });
                 _this.addProp(options, "defaultContext");
                 _this.addProp(options, "autoResize", !1);
-                _this.addProp(options, "containerTemplate", __WEBPACK_IMPORTED_MODULE_10__templates__.a);
-                _this.addProp(options, "prerenderTemplate", __WEBPACK_IMPORTED_MODULE_10__templates__.b);
+                _this.addProp(options, "containerTemplate", __WEBPACK_IMPORTED_MODULE_11__templates__.a);
+                _this.addProp(options, "prerenderTemplate", __WEBPACK_IMPORTED_MODULE_11__templates__.b);
                 _this.addProp(options, "validate");
                 Component.components[_this.tag] = _this;
                 _this.registerDrivers();
@@ -802,7 +631,7 @@
                 key: "registerDrivers",
                 value: function() {
                     this.driverCache = {};
-                    for (var _iterator2 = Object.keys(__WEBPACK_IMPORTED_MODULE_11__drivers__), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                    for (var _iterator2 = Object.keys(__WEBPACK_IMPORTED_MODULE_12__drivers__), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                         var _ref2;
                         if (_isArray2) {
                             if (_i2 >= _iterator2.length) break;
@@ -814,7 +643,7 @@
                         }
                         var driverName = _ref2;
                         if (0 !== driverName.indexOf("_")) {
-                            var driver = __WEBPACK_IMPORTED_MODULE_11__drivers__[driverName], glob = driver.global();
+                            var driver = __WEBPACK_IMPORTED_MODULE_12__drivers__[driverName], glob = driver.global();
                             glob && this.driver(driverName, glob);
                         }
                     }
@@ -822,16 +651,16 @@
             }, {
                 key: "driver",
                 value: function(name, dep) {
-                    if (!__WEBPACK_IMPORTED_MODULE_11__drivers__[name]) throw new Error("Could not find driver for framework: " + name);
-                    this.driverCache[name] || (this.driverCache[name] = __WEBPACK_IMPORTED_MODULE_11__drivers__[name].register(this, dep));
+                    if (!__WEBPACK_IMPORTED_MODULE_12__drivers__[name]) throw new Error("Could not find driver for framework: " + name);
+                    this.driverCache[name] || (this.driverCache[name] = __WEBPACK_IMPORTED_MODULE_12__drivers__[name].register(this, dep));
                     return this.driverCache[name];
                 }
             }, {
                 key: "registerChild",
                 value: function() {
-                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__window__.f)()) {
-                        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__window__.e)().tag === this.tag) {
-                            window.xchild = new __WEBPACK_IMPORTED_MODULE_3__child__.a(this);
+                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__window__.f)()) {
+                        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__window__.e)().tag === this.tag) {
+                            window.xchild = new __WEBPACK_IMPORTED_MODULE_4__child__.a(this);
                             window.xprops = window.xchild.props;
                         }
                     }
@@ -840,7 +669,7 @@
                 key: "listenDelegate",
                 value: function() {
                     var _this2 = this;
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_8__constants__.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
                         var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this2.getDomain(null, data.env || _this2.defaultEnv);
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
                         if (domain !== origin) throw new Error("Can not render from " + origin + " - expected " + domain);
@@ -857,7 +686,7 @@
                 key: "getValidDomain",
                 value: function(url) {
                     if (url) {
-                        var domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.Y)(url);
+                        var domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.w)(url);
                         if ("string" == typeof this.domain && domain === this.domain) return domain;
                         if (this.domain && "object" === _typeof(this.domain)) for (var _iterator3 = Object.keys(this.domain), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                             var _ref4;
@@ -882,7 +711,7 @@
                     domain = this.getValidDomain(url);
                     if (domain) return domain;
                     var envUrl = this.getForEnv(this.url, env);
-                    return envUrl ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.Y)(envUrl) : url ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.Y)(url) : void 0;
+                    return envUrl ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.w)(envUrl) : url ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.w)(url) : void 0;
                 }
             }, {
                 key: "getBridgeUrl",
@@ -904,7 +733,7 @@
                     var bridgeDomain = this.getForEnv(this.bridgeDomain, env);
                     if (bridgeDomain) return bridgeDomain;
                     var bridgeUrl = this.getBridgeUrl(env);
-                    return bridgeUrl ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.Y)(bridgeUrl) : void 0;
+                    return bridgeUrl ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.w)(bridgeUrl) : void 0;
                 }
             }, {
                 key: "getUrl",
@@ -915,12 +744,12 @@
             }, {
                 key: "isXComponent",
                 value: function() {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__window__.f)();
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__window__.f)();
                 }
             }, {
                 key: "isChild",
                 value: function() {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__window__.f)() && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__window__.e)().tag === this.tag;
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__window__.f)() && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__window__.e)().tag === this.tag;
                 }
             }, {
                 key: "createError",
@@ -931,14 +760,14 @@
                 key: "init",
                 value: function(props, context, element) {
                     context = this.getRenderContext(element);
-                    return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(this, context, {
+                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(this, context, {
                         props: props
                     });
                 }
             }, {
                 key: "delegate",
                 value: function(source, options) {
-                    return new __WEBPACK_IMPORTED_MODULE_5__delegate__.a(this, source, options);
+                    return new __WEBPACK_IMPORTED_MODULE_6__delegate__.a(this, source, options);
                 }
             }, {
                 key: "validateRenderContext",
@@ -949,12 +778,12 @@
                 key: "getRenderContext",
                 value: function(element) {
                     if (element) {
-                        this.validateRenderContext(__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME);
-                        return __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME;
+                        this.validateRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME);
+                        return __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME;
                     }
                     if (this.defaultContext) return this.defaultContext;
-                    if (this.contexts[__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME]) return __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME;
-                    if (this.contexts[__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP]) return __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP;
+                    if (this.contexts[__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME]) return __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME;
+                    if (this.contexts[__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP]) return __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP;
                     throw new Error("[" + this.tag + "] No context options available for render");
                 }
             }, {
@@ -962,7 +791,7 @@
                 value: function(props, element) {
                     var _this3 = this;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this3, _this3.getRenderContext(element), {
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this3, _this3.getRenderContext(element), {
                             props: props
                         }).render(element || document.body);
                     });
@@ -973,8 +802,8 @@
                     var _this4 = this, element = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : document.body;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
                         if (!element) throw new Error("Expected element to be passed");
-                        _this4.validateRenderContext(__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME);
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this4, __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME, {
+                        _this4.validateRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME);
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this4, __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME, {
                             props: props
                         }).render(element);
                     });
@@ -984,8 +813,8 @@
                 value: function(props) {
                     var _this5 = this;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                        _this5.validateRenderContext(__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP);
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this5, __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP, {
+                        _this5.validateRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP);
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this5, __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP, {
                             props: props
                         }).render();
                     });
@@ -995,7 +824,7 @@
                 value: function(win, props, element) {
                     var _this6 = this;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this6, _this6.getRenderContext(element), {
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this6, _this6.getRenderContext(element), {
                             props: props
                         }).renderTo(win, element);
                     });
@@ -1005,8 +834,8 @@
                 value: function(win, props, element) {
                     var _this7 = this;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                        _this7.validateRenderContext(__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME);
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this7, __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.IFRAME, {
+                        _this7.validateRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME);
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this7, __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME, {
                             props: props
                         }).renderTo(win, element);
                     });
@@ -1016,8 +845,8 @@
                 value: function(win, props) {
                     var _this8 = this;
                     return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                        _this8.validateRenderContext(__WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP);
-                        return new __WEBPACK_IMPORTED_MODULE_4__parent__.a(_this8, __WEBPACK_IMPORTED_MODULE_8__constants__.CONTEXT_TYPES.POPUP, {
+                        _this8.validateRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP);
+                        return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this8, __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP, {
                             props: props
                         }).renderTo(win);
                     });
@@ -1025,7 +854,7 @@
             }, {
                 key: "prerender",
                 value: function(props, element) {
-                    var instance = new __WEBPACK_IMPORTED_MODULE_4__parent__.a(this, this.getRenderContext(element), {
+                    var instance = new __WEBPACK_IMPORTED_MODULE_5__parent__.a(this, this.getRenderContext(element), {
                         props: props
                     });
                     instance.prefetch();
@@ -1050,17 +879,17 @@
                 key: "log",
                 value: function(event) {
                     var payload = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__.Z)(this.name, event, payload);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__lib__.X)(this.name, event, payload);
                 }
             }, {
                 key: "logWarning",
                 value: function(event, payload) {
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__._0)(this.name, event, payload);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__lib__.Y)(this.name, event, payload);
                 }
             }, {
                 key: "logError",
                 value: function(event, payload) {
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__lib__._1)(this.name, event, payload);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__lib__.Z)(this.name, event, payload);
                 }
             } ], [ {
                 key: "getByTag",
@@ -1069,7 +898,7 @@
                 }
             } ]);
             return Component;
-        }(__WEBPACK_IMPORTED_MODULE_2__base__.a), function(target, property, decorators, descriptor, context) {
+        }(__WEBPACK_IMPORTED_MODULE_3__base__.a), function(target, property, decorators, descriptor, context) {
             var desc = {};
             Object.keys(descriptor).forEach(function(key) {
                 desc[key] = descriptor[key];
@@ -1089,9 +918,187 @@
                 desc = null;
             }
             return desc;
-        }(_class.prototype, "getPropNames", [ __WEBPACK_IMPORTED_MODULE_12__lib__.O ], Object.getOwnPropertyDescriptor(_class.prototype, "getPropNames"), _class.prototype), 
+        }(_class.prototype, "getPropNames", [ __WEBPACK_IMPORTED_MODULE_13__lib__.N ], Object.getOwnPropertyDescriptor(_class.prototype, "getPropNames"), _class.prototype), 
         _class);
         Component.components = {};
+    }, function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        var __WEBPACK_IMPORTED_MODULE_0__dom__ = __webpack_require__(77);
+        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "f", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.b;
+        });
+        __webpack_require__.d(__webpack_exports__, "g", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.c;
+        });
+        __webpack_require__.d(__webpack_exports__, "h", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.d;
+        });
+        __webpack_require__.d(__webpack_exports__, "l", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.e;
+        });
+        __webpack_require__.d(__webpack_exports__, "m", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.f;
+        });
+        __webpack_require__.d(__webpack_exports__, "q", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.g;
+        });
+        __webpack_require__.d(__webpack_exports__, "r", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.h;
+        });
+        __webpack_require__.d(__webpack_exports__, "s", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.i;
+        });
+        __webpack_require__.d(__webpack_exports__, "t", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.j;
+        });
+        __webpack_require__.d(__webpack_exports__, "u", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.k;
+        });
+        __webpack_require__.d(__webpack_exports__, "v", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.l;
+        });
+        __webpack_require__.d(__webpack_exports__, "w", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.m;
+        });
+        __webpack_require__.d(__webpack_exports__, "x", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.n;
+        });
+        __webpack_require__.d(__webpack_exports__, "y", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.o;
+        });
+        __webpack_require__.d(__webpack_exports__, "z", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.p;
+        });
+        __webpack_require__.d(__webpack_exports__, "A", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.q;
+        });
+        __webpack_require__.d(__webpack_exports__, "B", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.r;
+        });
+        __webpack_require__.d(__webpack_exports__, "F", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.s;
+        });
+        __webpack_require__.d(__webpack_exports__, "G", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.t;
+        });
+        __webpack_require__.d(__webpack_exports__, "H", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.u;
+        });
+        __webpack_require__.d(__webpack_exports__, "I", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.v;
+        });
+        __webpack_require__.d(__webpack_exports__, "J", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.w;
+        });
+        __webpack_require__.d(__webpack_exports__, "S", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.x;
+        });
+        __webpack_require__.d(__webpack_exports__, "T", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.y;
+        });
+        __webpack_require__.d(__webpack_exports__, "V", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.z;
+        });
+        __webpack_require__.d(__webpack_exports__, "W", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__dom__.A;
+        });
+        var __WEBPACK_IMPORTED_MODULE_1__fn__ = __webpack_require__(35);
+        __webpack_require__.d(__webpack_exports__, "j", function() {
+            return __WEBPACK_IMPORTED_MODULE_1__fn__.d;
+        });
+        __webpack_require__.d(__webpack_exports__, "n", function() {
+            return __WEBPACK_IMPORTED_MODULE_1__fn__.e;
+        });
+        __webpack_require__.d(__webpack_exports__, "p", function() {
+            return __WEBPACK_IMPORTED_MODULE_1__fn__.c;
+        });
+        __webpack_require__.d(__webpack_exports__, "N", function() {
+            return __WEBPACK_IMPORTED_MODULE_1__fn__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "Q", function() {
+            return __WEBPACK_IMPORTED_MODULE_1__fn__.f;
+        });
+        var __WEBPACK_IMPORTED_MODULE_2__promise__ = __webpack_require__(80);
+        __webpack_require__.d(__webpack_exports__, "L", function() {
+            return __WEBPACK_IMPORTED_MODULE_2__promise__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "M", function() {
+            return __WEBPACK_IMPORTED_MODULE_2__promise__.b;
+        });
+        __webpack_require__.d(__webpack_exports__, "U", function() {
+            return __WEBPACK_IMPORTED_MODULE_2__promise__.c;
+        });
+        var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(26);
+        __webpack_require__.d(__webpack_exports__, "b", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "e", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.d;
+        });
+        __webpack_require__.d(__webpack_exports__, "i", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.i;
+        });
+        __webpack_require__.d(__webpack_exports__, "k", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.e;
+        });
+        __webpack_require__.d(__webpack_exports__, "o", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.j;
+        });
+        __webpack_require__.d(__webpack_exports__, "D", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.k;
+        });
+        __webpack_require__.d(__webpack_exports__, "E", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.l;
+        });
+        __webpack_require__.d(__webpack_exports__, "O", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.m;
+        });
+        __webpack_require__.d(__webpack_exports__, "R", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.n;
+        });
+        __webpack_require__.d(__webpack_exports__, "_0", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.c;
+        });
+        __webpack_require__.d(__webpack_exports__, "_1", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__util__.o;
+        });
+        var __WEBPACK_IMPORTED_MODULE_4__css__ = __webpack_require__(75);
+        __webpack_require__.d(__webpack_exports__, "K", function() {
+            return __WEBPACK_IMPORTED_MODULE_4__css__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "_2", function() {
+            return __WEBPACK_IMPORTED_MODULE_4__css__.b;
+        });
+        __webpack_require__.d(__webpack_exports__, "_3", function() {
+            return __WEBPACK_IMPORTED_MODULE_4__css__.c;
+        });
+        var __WEBPACK_IMPORTED_MODULE_5__decorators__ = __webpack_require__(76);
+        __webpack_require__.d(__webpack_exports__, "C", function() {
+            return __WEBPACK_IMPORTED_MODULE_5__decorators__.a;
+        });
+        var __WEBPACK_IMPORTED_MODULE_6__logger__ = __webpack_require__(79);
+        __webpack_require__.d(__webpack_exports__, "d", function() {
+            return __WEBPACK_IMPORTED_MODULE_6__logger__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "X", function() {
+            return __WEBPACK_IMPORTED_MODULE_6__logger__.b;
+        });
+        __webpack_require__.d(__webpack_exports__, "Y", function() {
+            return __WEBPACK_IMPORTED_MODULE_6__logger__.c;
+        });
+        __webpack_require__.d(__webpack_exports__, "Z", function() {
+            return __WEBPACK_IMPORTED_MODULE_6__logger__.d;
+        });
+        var __WEBPACK_IMPORTED_MODULE_7__global__ = __webpack_require__(78);
+        __webpack_require__.d(__webpack_exports__, "c", function() {
+            return __WEBPACK_IMPORTED_MODULE_7__global__.a;
+        });
+        __webpack_require__.d(__webpack_exports__, "P", function() {
+            return __WEBPACK_IMPORTED_MODULE_7__global__.b;
+        });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(44);
@@ -1164,7 +1171,7 @@
         __webpack_require__.d(__webpack_exports__, "DEFAULT_DIMENSIONS", function() {
             return DEFAULT_DIMENSIONS;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(2), XCOMPONENT = "xcomponent", __XCOMPONENT__ = "__" + XCOMPONENT + "__", POST_MESSAGE = {
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), XCOMPONENT = "xcomponent", __XCOMPONENT__ = "__" + XCOMPONENT + "__", POST_MESSAGE = {
             INIT: XCOMPONENT + "_init",
             PROPS: XCOMPONENT + "_props",
             PROP_CALLBACK: XCOMPONENT + "_prop_callback",
@@ -1401,7 +1408,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return ParentComponent;
         });
-        var _class, __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(23), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__drivers__ = __webpack_require__(33), __WEBPACK_IMPORTED_MODULE_9__validate__ = __webpack_require__(65), __WEBPACK_IMPORTED_MODULE_10__props__ = __webpack_require__(34), __WEBPACK_IMPORTED_MODULE_11__error__ = __webpack_require__(14), _extends = (__webpack_require__(3), 
+        var _class, __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(23), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__drivers__ = __webpack_require__(33), __WEBPACK_IMPORTED_MODULE_9__validate__ = __webpack_require__(65), __WEBPACK_IMPORTED_MODULE_10__props__ = __webpack_require__(34), __WEBPACK_IMPORTED_MODULE_11__error__ = __webpack_require__(14), _extends = (__webpack_require__(2), 
         __webpack_require__(12), __webpack_require__(25), Object.assign || function(target) {
             for (var i = 1; i < arguments.length; i++) {
                 var source = arguments[i];
@@ -1561,7 +1568,7 @@
             }, {
                 key: "validateParentDomain",
                 value: function() {
-                    var domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)();
+                    var domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.i)();
                     if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(this.component.allowedParentDomains, domain)) throw new __WEBPACK_IMPORTED_MODULE_11__error__.c("Can not be rendered by domain: " + domain);
                 }
             }, {
@@ -1590,7 +1597,7 @@
                     var _this4 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         _this4.html = _this4.buildUrl().then(function(url) {
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.h)(url).then(function(html) {
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)(url).then(function(html) {
                                 return '\n                        <base href="' + url.split("/").slice(0, 3).join("/") + '">\n\n                        ' + html + "\n\n                        <script>\n                            if (window.history && window.history.pushState) {\n                                window.history.pushState({}, '', '/" + url.split("/").slice(3).join("/") + "');\n                            }\n                        <\/script>\n                    ";
                             });
                         });
@@ -1603,7 +1610,7 @@
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         if (!_this5.html) throw new Error("Html not prefetched");
                         return _this5.html.then(function(html) {
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(_this5.window, html);
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.h)(_this5.window, html);
                         });
                     });
                 }
@@ -1612,7 +1619,7 @@
                 value: function(win) {
                     if (!win) throw this.component.createError("Must pass window to renderTo");
                     if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win)) {
-                        var origin = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)(), domain = this.component.getDomain(null, this.props.env);
+                        var origin = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.i)(), domain = this.component.getDomain(null, this.props.env);
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
                         if (domain !== origin) throw new Error("Can not render remotely to " + domain + " - can only render to " + origin);
                     }
@@ -1639,7 +1646,7 @@
                         ref: __WEBPACK_IMPORTED_MODULE_7__constants__.WINDOW_REFERENCES.PARENT,
                         distance: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.o)(window)
                     };
-                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)();
+                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)();
                     __WEBPACK_IMPORTED_MODULE_6__lib__.c.windows[uid] = window;
                     this.clean.register(function() {
                         delete __WEBPACK_IMPORTED_MODULE_6__lib__.c.windows[uid];
@@ -1654,7 +1661,7 @@
                 value: function() {
                     var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                     if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
-                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)();
+                    var uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)();
                     __WEBPACK_IMPORTED_MODULE_6__lib__.c.windows[uid] = renderToWindow;
                     this.clean.register(function() {
                         delete __WEBPACK_IMPORTED_MODULE_6__lib__.c.windows[uid];
@@ -1667,7 +1674,7 @@
             }, {
                 key: "buildChildWindowName",
                 value: function() {
-                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref8$renderTo = _ref8.renderTo, renderTo = void 0 === _ref8$renderTo ? window : _ref8$renderTo, sameDomain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(renderTo), uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(), tag = this.component.tag, sProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
+                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref8$renderTo = _ref8.renderTo, renderTo = void 0 === _ref8$renderTo ? window : _ref8$renderTo, sameDomain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(renderTo), uid = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(), tag = this.component.tag, sProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
                         type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID,
                         uid: uid
                     } : {
@@ -1704,7 +1711,7 @@
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__validate__.a)(this.component, props, required);
                     this.component.validate && this.component.validate(this.component, props);
                     this.props = this.props || {};
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(this.props, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__props__.a)(this.component, this, props));
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(this.props, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__props__.a)(this.component, this, props));
                 }
             }, {
                 key: "buildUrl",
@@ -1716,7 +1723,7 @@
                             return url || _this7.component.getUrl(_this7.props.env, _this7.props);
                         }).then(function(finalUrl) {
                             query[__WEBPACK_IMPORTED_MODULE_7__constants__.XCOMPONENT] = "1";
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(finalUrl, {
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(finalUrl, {
                                 query: query
                             });
                         });
@@ -1816,7 +1823,7 @@
             }, {
                 key: "elementReady",
                 value: function(element) {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.n)(element).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(element).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                 }
             }, {
                 key: "delegate",
@@ -1871,7 +1878,7 @@
                         _this14.clean.register(data.destroy);
                         return data;
                     }).catch(function(err) {
-                        throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.p)(err));
+                        throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(err));
                     }), overrides = this.driver.delegateOverrides;
                     _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                         var _ref14, _ret = function() {
@@ -1921,11 +1928,11 @@
             }, {
                 key: "watchForUnload",
                 value: function() {
-                    var _this17 = this, onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(function() {
+                    var _this17 = this, onunload = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.p)(function() {
                         _this17.component.log("navigate_away");
                         __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.f();
                         _this17.destroyComponent();
-                    }), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)(window, "unload", onunload);
+                    }), unloadWindowListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.q)(window, "unload", onunload);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 }
             }, {
@@ -1934,8 +1941,8 @@
                     var _this18 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         _this18.component.log("load_url");
-                        window.location.href.split("#")[0] === url.split("#")[0] && (url = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.m)(url, {
-                            query: _defineProperty({}, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.j)(), "1")
+                        window.location.href.split("#")[0] === url.split("#")[0] && (url = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(url, {
+                            query: _defineProperty({}, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.i)(), "1")
                         }));
                         return _this18.driver.loadUrl.call(_this18, url);
                     });
@@ -2007,8 +2014,8 @@
                         _this21.driver.resize.call(_this21, width, height);
                         if (waitForTransition && (_this21.element || _this21.iframe)) {
                             var overflow = void 0;
-                            _this21.element && (overflow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)(_this21.element, "hidden"));
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(_this21.element || _this21.iframe).then(function() {
+                            _this21.element && (overflow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.r)(_this21.element, "hidden"));
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.s)(_this21.element || _this21.iframe).then(function() {
                                 overflow && overflow.reset();
                             });
                         }
@@ -2017,13 +2024,13 @@
             }, {
                 key: "hide",
                 value: function() {
-                    this.container && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(this.container);
+                    this.container && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(this.container);
                     return this.driver.hide.call(this);
                 }
             }, {
                 key: "show",
                 value: function() {
-                    this.container && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.v)(this.container);
+                    this.container && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(this.container);
                     return this.driver.show.call(this);
                 }
             }, {
@@ -2091,7 +2098,7 @@
                     }).then(function() {
                         return _this26.destroyComponent();
                     }).then(function() {
-                        _this26.childExports && _this26.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.c)(win) && _this26.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                        _this26.childExports && _this26.context === __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.c)(win) && _this26.childExports.close().catch(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                     });
                 }
             }, {
@@ -2109,7 +2116,7 @@
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         if (_this27.props.onDisplay) return _this27.props.onDisplay();
                     }).then(function() {
-                        if (_this27.container) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(_this27.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
+                        if (_this27.container) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.v)(_this27.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
                     });
                 }
             }, {
@@ -2119,7 +2126,7 @@
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         if (_this28.props.onDisplay) return _this28.props.onDisplay();
                     }).then(function() {
-                        if (_this28.element) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(_this28.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
+                        if (_this28.element) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.v)(_this28.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
                     });
                 }
             }, {
@@ -2127,7 +2134,7 @@
                 value: function() {
                     var _this29 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        return _this29.container ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.x)(_this29.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
+                        return _this29.container ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(_this29.container, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
                     });
                 }
             }, {
@@ -2135,7 +2142,7 @@
                 value: function() {
                     var _this30 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                        return _this30.element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.x)(_this30.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
+                        return _this30.element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.w)(_this30.element, __WEBPACK_IMPORTED_MODULE_7__constants__.ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
                     });
                 }
             }, {
@@ -2151,12 +2158,12 @@
                     var _this31 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         return _this31.component.prerenderTemplate ? __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            return _this31.prerenderIframe ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.y)(_this31.prerenderIframe).then(function() {
+                            return _this31.prerenderIframe ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.x)(_this31.prerenderIframe).then(function() {
                                 return _this31.prerenderWindow;
                             }) : _this31.prerenderWindow;
                         }).then(function(win) {
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.z)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                                jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.A.bind(win.document),
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.y)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                                jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.z.bind(win.document),
                                 document: win.document
                             }));
                         }) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
@@ -2187,7 +2194,7 @@
                         on: function(eventName, handler) {
                             return _this32.on(eventName, handler);
                         },
-                        jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.A,
+                        jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.z,
                         document: document,
                         dimensions: {
                             width: width,
@@ -2201,20 +2208,20 @@
                     var _this33 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         var el = void 0;
-                        el = element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.B)(element) : document.body;
+                        el = element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(element) : document.body;
                         if (!el) throw new Error("Could not find element to open container into");
                         if (_this33.component.containerTemplate) {
                             var container = _this33.renderTemplate(_this33.component.containerTemplate, {
                                 container: el
                             });
                             _this33.container = container;
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(_this33.container);
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.C)(el, _this33.container);
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(_this33.container);
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.B)(el, _this33.container);
                             if (_this33.driver.renderedIntoContainerTemplate) {
                                 _this33.element = _this33.getOutlet();
-                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(_this33.element);
+                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(_this33.element);
                                 if (!_this33.element) throw new Error("Could not find element to render component into");
-                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(_this33.element);
+                                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(_this33.element);
                             }
                             _this33.clean.register("destroyContainerTemplate", function() {
                                 _this33.container && _this33.container.parentNode && _this33.container.parentNode.removeChild(_this33.container);
@@ -2265,7 +2272,7 @@
                     }).then(function() {
                         if (_this36.props.onError) return _this36.props.onError(err);
                     }).catch(function(errErr) {
-                        throw new Error("An error was encountered while handling error:\n\n " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.p)(err) + "\n\n" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.p)(errErr));
+                        throw new Error("An error was encountered while handling error:\n\n " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(err) + "\n\n" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(errErr));
                     }).then(function() {
                         if (!_this36.props.onError) throw err;
                     });
@@ -2280,27 +2287,27 @@
                 key: "destroyAll",
                 value: function() {
                     for (var results = []; ParentComponent.activeComponents.length; ) results.push(ParentComponent.activeComponents[0].destroy());
-                    return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all(results).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                    return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all(results).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                 }
             } ]);
             return ParentComponent;
-        }(__WEBPACK_IMPORTED_MODULE_4__base__.a), _applyDecoratedDescriptor(_class.prototype, "getOutlet", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "prefetch", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "prefetch"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "loadHTML", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "loadHTML"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "buildUrl", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "buildUrl"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "open", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "open"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "openPrerender", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "openPrerender"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "switchPrerender", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "switchPrerender"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "close", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "closeContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "closeContainer"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "destroyContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "destroyContainer"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "closeComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "closeComponent"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "showContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "showContainer"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "showComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "showComponent"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "hideContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "hideContainer"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "hideComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "hideComponent"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "createPrerenderTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "createPrerenderTemplate"), _class.prototype), 
-        _applyDecoratedDescriptor(_class.prototype, "openContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.D ], Object.getOwnPropertyDescriptor(_class.prototype, "openContainer"), _class.prototype), 
+        }(__WEBPACK_IMPORTED_MODULE_4__base__.a), _applyDecoratedDescriptor(_class.prototype, "getOutlet", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "prefetch", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "prefetch"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "loadHTML", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "loadHTML"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "buildUrl", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "buildUrl"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "open", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "open"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "openPrerender", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "openPrerender"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "switchPrerender", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "switchPrerender"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "close", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "closeContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "closeContainer"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "destroyContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "destroyContainer"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "closeComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "closeComponent"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "showContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "showContainer"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "showComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "showComponent"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "hideContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "hideContainer"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "hideComponent", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "hideComponent"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "createPrerenderTemplate", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "createPrerenderTemplate"), _class.prototype), 
+        _applyDecoratedDescriptor(_class.prototype, "openContainer", [ __WEBPACK_IMPORTED_MODULE_6__lib__.C ], Object.getOwnPropertyDescriptor(_class.prototype, "openContainer"), _class.prototype), 
         _class);
         ParentComponent.activeComponents = [];
     }, function(module, __webpack_exports__, __webpack_require__) {
@@ -2341,7 +2348,7 @@
                 uid: {
                     type: "string",
                     def: function() {
-                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.j)();
+                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.i)();
                     },
                     queryParam: !0
                 },
@@ -2422,7 +2429,7 @@
             };
         }
         __webpack_exports__.a = getInternalProps;
-        var __WEBPACK_IMPORTED_MODULE_1__lib__ = (__webpack_require__(1), __webpack_require__(2));
+        var __WEBPACK_IMPORTED_MODULE_1__lib__ = (__webpack_require__(1), __webpack_require__(3));
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -3069,7 +3076,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return BaseComponent;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(2), _createClass = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(3), _createClass = (__webpack_require__(2), 
         function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
@@ -3089,12 +3096,12 @@
             function BaseComponent() {
                 _classCallCheck(this, BaseComponent);
                 this.clean = cleanup(this);
-                this.event = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.E)();
+                this.event = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.D)();
             }
             _createClass(BaseComponent, [ {
                 key: "addProp",
                 value: function(options, name, def) {
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.F)(options, this, name, def);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.E)(options, this, name, def);
                 }
             }, {
                 key: "on",
@@ -3109,7 +3116,7 @@
             }, {
                 key: "error",
                 value: function(err) {
-                    throw new Error("Expected error to be implemented - got " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.p)(err));
+                    throw new Error("Expected error to be implemented - got " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(err));
                 }
             }, {
                 key: "listen",
@@ -3169,8 +3176,8 @@
         }
         function buildChildWindowName(name, version) {
             var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
-            options.id = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.j)();
-            options.domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.g)(window);
+            options.id = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.i)();
+            options.domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.i)(window);
             var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = __WEBPACK_IMPORTED_MODULE_1_hi_base32___default.a.encode(JSON.stringify(options)).replace(/\=/g, "").toLowerCase();
             if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
             if (!encodedVersion) throw new Error("Invalid version: " + version + " - must contain alphanumeric characters");
@@ -3180,24 +3187,29 @@
             return getComponentMeta().domain;
         }
         function getWindowByRef(_ref) {
-            var ref = _ref.ref, uid = _ref.uid, distance = _ref.distance;
-            if (ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.OPENER) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.r)(window);
-            if (ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.TOP) return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.s)(window);
-            if (ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.PARENT) return distance ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(window, distance) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window);
-            if (ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.GLOBAL) for (var _iterator = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.v)(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.e)(window)), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                var _ref2;
-                if (_isArray) {
-                    if (_i >= _iterator.length) break;
-                    _ref2 = _iterator[_i++];
-                } else {
-                    _i = _iterator.next();
-                    if (_i.done) break;
-                    _ref2 = _i.value;
+            var ref = _ref.ref, uid = _ref.uid, distance = _ref.distance, result = void 0;
+            ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.OPENER ? result = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.r)(window) : ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.TOP ? result = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.s)(window) : ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.PARENT && (result = distance ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(window, distance) : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window));
+            if (ref === __WEBPACK_IMPORTED_MODULE_3__constants__.WINDOW_REFERENCES.GLOBAL) {
+                var ancestor = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.e)(window);
+                if (ancestor) for (var _iterator = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.v)(ancestor), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                    var _ref2;
+                    if (_isArray) {
+                        if (_i >= _iterator.length) break;
+                        _ref2 = _iterator[_i++];
+                    } else {
+                        _i = _iterator.next();
+                        if (_i.done) break;
+                        _ref2 = _i.value;
+                    }
+                    var frame = _ref2, global = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.P)(frame);
+                    if (global && global.windows && global.windows[uid]) {
+                        result = global.windows[uid];
+                        break;
+                    }
                 }
-                var frame = _ref2, global = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.Q)(frame);
-                if (global && global.windows && global.windows[uid]) return global.windows[uid];
             }
-            throw new Error("Unable to find window by ref");
+            if (!result) throw new Error("Unable to find window by ref");
+            return result;
         }
         __webpack_exports__.a = buildChildWindowName;
         __webpack_require__.d(__webpack_exports__, "f", function() {
@@ -3213,7 +3225,7 @@
         __webpack_require__.d(__webpack_exports__, "d", function() {
             return getParentRenderWindow;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1_hi_base32__ = __webpack_require__(42), __WEBPACK_IMPORTED_MODULE_1_hi_base32___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_hi_base32__), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(5), _slicedToArray = function() {
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1_hi_base32__ = __webpack_require__(42), __WEBPACK_IMPORTED_MODULE_1_hi_base32___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_hi_base32__), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(5), _slicedToArray = function() {
             function sliceIterator(arr, i) {
                 var _arr = [], _n = !0, _d = !1, _e = void 0;
                 try {
@@ -3238,11 +3250,11 @@
                 if (Symbol.iterator in Object(arr)) return sliceIterator(arr, i);
                 throw new TypeError("Invalid attempt to destructure non-iterable instance");
             };
-        }(), isXComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.O)(function() {
+        }(), isXComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.N)(function() {
             if (!window.name) return !1;
             var _window$name$split = window.name.split("__");
             return _slicedToArray(_window$name$split, 1)[0] === __WEBPACK_IMPORTED_MODULE_3__constants__.XCOMPONENT;
-        }), getComponentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.O)(function() {
+        }), getComponentMeta = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.N)(function() {
             if (!window.name) throw new Error("Can not get component meta without window name");
             var _window$name$split3 = window.name.split("__"), _window$name$split4 = _slicedToArray(_window$name$split3, 4), xcomp = _window$name$split4[0], name = _window$name$split4[1], version = _window$name$split4[2], encodedOptions = _window$name$split4[3];
             if (xcomp !== __WEBPACK_IMPORTED_MODULE_3__constants__.XCOMPONENT) throw new Error("Window not rendered by xcomponent - got " + xcomp);
@@ -3255,11 +3267,11 @@
             componentMeta.name = name;
             componentMeta.version = version.replace(/_/g, ".");
             return componentMeta;
-        }), getParentComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.O)(function() {
+        }), getParentComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.N)(function() {
             var componentMeta = getComponentMeta();
             if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
             return getWindowByRef(componentMeta.componentParent);
-        }), getParentRenderWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.O)(function() {
+        }), getParentRenderWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.N)(function() {
             var componentMeta = getComponentMeta();
             if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
             return getWindowByRef(componentMeta.renderParent);
@@ -3287,7 +3299,7 @@
         __webpack_require__.d(__webpack_exports__, "CONSTANTS", function() {
             return CONSTANTS;
         });
-        var __WEBPACK_IMPORTED_MODULE_1__component__ = (__webpack_require__(1), __webpack_require__(64)), __WEBPACK_IMPORTED_MODULE_2__component_parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(2);
+        var __WEBPACK_IMPORTED_MODULE_1__component__ = (__webpack_require__(1), __webpack_require__(64)), __WEBPACK_IMPORTED_MODULE_2__component_parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(3);
         __webpack_require__.d(__webpack_exports__, "getCurrentScriptDir", function() {
             return __WEBPACK_IMPORTED_MODULE_3__lib__.a;
         });
@@ -3435,7 +3447,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return ChildComponent;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(23), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__props__ = __webpack_require__(58), __WEBPACK_IMPORTED_MODULE_9__error__ = __webpack_require__(14), _typeof = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(23), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(20), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__props__ = __webpack_require__(58), __WEBPACK_IMPORTED_MODULE_9__error__ = __webpack_require__(14), _typeof = (__webpack_require__(2), 
         __webpack_require__(12), "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
@@ -3534,17 +3546,17 @@
                         var parentComponentWindow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__window__.b)();
                         if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.a)(parentComponentWindow)) {
                             if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
-                            throw new Error("Parent component window is on a different domain - expected " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.g)() + " - can not retrieve props");
+                            throw new Error("Parent component window is on a different domain - expected " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.i)() + " - can not retrieve props");
                         }
-                        var global = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.Q)(parentComponentWindow);
+                        var global = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.P)(parentComponentWindow);
                         if (!global) throw new Error("Can not find global for parent component - can not retrieve props");
                         props = global.props[componentMeta.uid];
                     }
                     if (!props) throw new Error("Initial props not found");
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.R)(props, function(_ref2) {
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.Q)(props, function(_ref2) {
                         var fullKey = _ref2.fullKey, self = _ref2.self, args = _ref2.args;
                         return _this3.onInit.then(function() {
-                            var func = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.S)(_this3.props, fullKey);
+                            var func = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.R)(_this3.props, fullKey);
                             if ("function" != typeof func) throw new Error("Expected " + (void 0 === func ? "undefined" : _typeof(func)) + " to be function");
                             return func.apply(self, args);
                         });
@@ -3556,7 +3568,7 @@
                     var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
                     this.props = this.props || {};
                     var normalizedProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__props__.a)(this.component, props, origin, required);
-                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.l)(this.props, normalizedProps);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.k)(this.props, normalizedProps);
                     window.xprops = this.props;
                     for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref3;
@@ -3625,7 +3637,7 @@
                         height = !0;
                     }
                     var element = void 0;
-                    element = autoResize.element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.B)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement;
+                    element = autoResize.element ? __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.A)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement;
                     return {
                         width: width,
                         height: height,
@@ -3639,9 +3651,9 @@
                     if ((width || height) && this.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            return __WEBPACK_IMPORTED_MODULE_6__lib__.T;
+                            return __WEBPACK_IMPORTED_MODULE_6__lib__.S;
                         }).then(function() {
-                            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.U)(element, {
+                            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.T)(element, {
                                 width: width,
                                 height: height
                             })) return _this5.resizeToElement(element, {
@@ -3649,8 +3661,8 @@
                                 height: height
                             });
                         }).then(function() {
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.V)(function() {
-                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.W)(element, {
+                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.U)(function() {
+                                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.V)(element, {
                                     width: width,
                                     height: height
                                 }).then(function(dimensions) {
@@ -3693,7 +3705,7 @@
                         if (_this7.context !== __WEBPACK_IMPORTED_MODULE_7__constants__.CONTEXT_TYPES.POPUP) return _this7.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE, {
                             width: width,
                             height: height
-                        }).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                        }).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                     });
                 }
             }, {
@@ -3702,7 +3714,7 @@
                     var _this8 = this, width = _ref6.width, height = _ref6.height, history = [];
                     return function resize() {
                         return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                            for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.X)(el, {
+                            for (var tracker = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.W)(el, {
                                 width: width,
                                 height: height
                             }), _tracker$check = tracker.check(), dimensions = _tracker$check.dimensions, _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
@@ -3731,12 +3743,12 @@
             }, {
                 key: "hide",
                 value: function() {
-                    return this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.HIDE).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                    return this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.HIDE).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                 }
             }, {
                 key: "show",
                 value: function() {
-                    return this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.SHOW).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                    return this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.SHOW).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                 }
             }, {
                 key: "userClose",
@@ -3773,13 +3785,13 @@
             }, {
                 key: "error",
                 value: function(err) {
-                    var stringifiedError = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.p)(err);
+                    var stringifiedError = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__lib__.o)(err);
                     this.component.logError("error", {
                         error: stringifiedError
                     });
                     return this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ERROR, {
                         error: stringifiedError
-                    }).then(__WEBPACK_IMPORTED_MODULE_6__lib__.o);
+                    }).then(__WEBPACK_IMPORTED_MODULE_6__lib__.n);
                 }
             } ]);
             return ChildComponent;
@@ -4219,7 +4231,7 @@
                             _ref3 = _i3.value;
                         }
                         var _ref4 = _ref3, regex = _ref4.regex, listener = _ref4.listener;
-                        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(regex, domain)) return listener;
+                        if (domain && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(regex, domain)) return listener;
                     }
                 }
             }
@@ -4413,7 +4425,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return RENDER_DRIVERS;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_4__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), RENDER_DRIVERS = (__webpack_require__(14), 
+        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), RENDER_DRIVERS = (__webpack_require__(14), 
         {});
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_4__constants__.CONTEXT_TYPES.IFRAME] = {
             focusable: !1,
@@ -4422,7 +4434,7 @@
             openOnClick: !1,
             open: function(url) {
                 var _this = this;
-                this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)({
+                this.iframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.F)({
                     url: url,
                     attributes: {
                         name: this.childWindowName,
@@ -4430,7 +4442,7 @@
                     },
                     class: [ __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.COMPONENT_FRAME, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE ]
                 }, this.element);
-                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(this.iframe).then(function(frameWindow) {
+                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(this.iframe).then(function(frameWindow) {
                     _this.window = frameWindow;
                     var detectClose = function() {
                         __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(function() {
@@ -4438,14 +4450,14 @@
                         }).finally(function() {
                             return _this.destroy();
                         });
-                    }, iframeWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.I)(_this.iframe, detectClose), elementWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.I)(_this.element, detectClose);
+                    }, iframeWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(_this.iframe, detectClose), elementWatcher = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(_this.element, detectClose);
                     _this.clean.register("destroyWindow", function() {
                         iframeWatcher.cancel();
                         elementWatcher.cancel();
                         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.cleanUpWindow)(_this.window);
                         delete _this.window;
                         if (_this.iframe) {
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.J)(_this.iframe);
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.I)(_this.iframe);
                             delete _this.iframe;
                         }
                     });
@@ -4453,18 +4465,18 @@
             },
             openPrerender: function() {
                 var _this2 = this;
-                this.prerenderIframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)({
+                this.prerenderIframe = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.F)({
                     attributes: {
                         name: "__prerender__" + this.childWindowName,
                         scrolling: this.component.scrolling ? "yes" : "no"
                     },
                     class: [ __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.PRERENDER_FRAME, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.VISIBLE ]
                 }, this.element);
-                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.H)(this.prerenderIframe).then(function(prerenderFrameWindow) {
+                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.G)(this.prerenderIframe).then(function(prerenderFrameWindow) {
                     _this2.prerenderWindow = prerenderFrameWindow;
                     _this2.clean.register("destroyPrerender", function() {
                         if (_this2.prerenderIframe) {
-                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.J)(_this2.prerenderIframe);
+                            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.I)(_this2.prerenderIframe);
                             delete _this2.prerenderIframe;
                         }
                     });
@@ -4473,11 +4485,11 @@
             switchPrerender: function() {
                 var _this3 = this;
                 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.f)(this.prerenderIframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE);
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(this.prerenderIframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.VISIBLE);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.J)(this.prerenderIframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.VISIBLE);
                 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.f)(this.iframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.VISIBLE);
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(this.iframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.J)(this.iframe, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE);
                 setTimeout(function() {
-                    _this3.prerenderIframe && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.J)(_this3.prerenderIframe);
+                    _this3.prerenderIframe && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.I)(_this3.prerenderIframe);
                 }, 1e3);
             },
             delegateOverrides: {
@@ -4512,14 +4524,14 @@
                 }
             },
             resize: function(width, height) {
-                width && (this.element.style.width = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.L)(width));
-                height && (this.element.style.height = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.L)(height));
+                width && (this.element.style.width = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(width));
+                height && (this.element.style.height = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.K)(height));
             },
             show: function() {
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.v)(this.element);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.u)(this.element);
             },
             hide: function() {
-                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.u)(this.element);
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.t)(this.element);
             },
             loadUrl: function(url) {
                 this.iframe.setAttribute("src", url);
@@ -4541,20 +4553,20 @@
             }
             if ("boolean" === prop.type) resultValue = Boolean(resultValue); else if ("function" === prop.type) {
                 if (!resultValue && prop.noop) {
-                    resultValue = __WEBPACK_IMPORTED_MODULE_1__lib__.o;
+                    resultValue = __WEBPACK_IMPORTED_MODULE_1__lib__.n;
                     !decorated && prop.decorate && (resultValue = prop.decorate(resultValue, props));
                 }
                 if (resultValue && "function" == typeof resultValue) {
                     resultValue = resultValue.bind(instance);
-                    prop.denodeify && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.M)(resultValue));
-                    prop.promisify && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.N)(resultValue));
+                    prop.denodeify && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.L)(resultValue));
+                    prop.promisify && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.M)(resultValue));
                     var original = resultValue;
                     resultValue = function() {
                         component.log("call_prop_" + key);
                         return original.apply(this, arguments);
                     };
-                    prop.once && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.q)(resultValue));
-                    prop.memoize && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.O)(resultValue));
+                    prop.once && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.p)(resultValue));
+                    prop.memoize && (resultValue = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.N)(resultValue));
                 }
             } else "string" === prop.type || "object" === prop.type || "number" === prop.type && void 0 !== resultValue && (resultValue = parseInt(resultValue, 10));
             return resultValue;
@@ -4619,7 +4631,7 @@
                             if ("function" == typeof queryValue) return;
                             if ("object" === (void 0 === queryValue ? "undefined" : _typeof(queryValue))) {
                                 if ("json" !== prop.serialization) {
-                                    result = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.P)(queryValue, key);
+                                    result = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.O)(queryValue, key);
                                     for (var dotkey in result) params[dotkey] = result[dotkey];
                                     return;
                                 }
@@ -4635,7 +4647,7 @@
         }
         __webpack_exports__.a = normalizeProps;
         __webpack_exports__.b = propsToQuery;
-        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(2), _typeof = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(3), _typeof = (__webpack_require__(2), 
         __webpack_require__(12), __webpack_require__(10), "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
@@ -6320,7 +6332,7 @@
                     _ref = _i.value;
                 }
                 var _key = _ref, prop = component.getProp(_key), value = props[_key];
-                if (!prop || !prop.sameDomain || origin === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.g)(window)) {
+                if (!prop || !prop.sameDomain || origin === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.i)(window)) {
                     result[_key] = normalizeChildProp(component, props, _key, value);
                     prop && prop.alias && !result[prop.alias] && (result[prop.alias] = value);
                 }
@@ -6341,8 +6353,8 @@
             return result;
         }
         __webpack_exports__.a = normalizeChildProps;
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(2);
-        __webpack_require__(3), __webpack_require__(12);
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0);
+        __webpack_require__(2), __webpack_require__(12);
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function defaultPrerenderTemplate(_ref) {
@@ -6403,8 +6415,8 @@
             if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) throw new Error("Invalid options.tag: " + options.tag);
             validatePropDefinitions(options);
             if (options.dimensions) {
-                if (options.dimensions && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._4)(options.dimensions.width) && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._5)(options.dimensions.width)) throw new Error("Expected options.dimensions.width to be a px or % string value");
-                if (options.dimensions && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._4)(options.dimensions.height) && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._5)(options.dimensions.height)) throw new Error("Expected options.dimensions.height to be a px or % string value");
+                if (options.dimensions && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._2)(options.dimensions.width) && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._3)(options.dimensions.width)) throw new Error("Expected options.dimensions.width to be a px or % string value");
+                if (options.dimensions && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._2)(options.dimensions.height) && !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__._3)(options.dimensions.height)) throw new Error("Expected options.dimensions.height to be a px or % string value");
             }
             if (options.contexts) {
                 if (options.contexts.popup) throw new Error("Popups not supported in this build -- please use the full xcomponent.js build");
@@ -6455,7 +6467,7 @@
             if (options.containerTemplate && "function" != typeof options.containerTemplate) throw new Error("Expected options.containerTemplate to be a function");
         }
         __webpack_exports__.a = validate;
-        var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(2), _typeof = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_1__lib__ = __webpack_require__(3), _typeof = (__webpack_require__(2), 
         "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
@@ -6486,7 +6498,7 @@
             return DelegateComponent;
         });
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2__base__ = (__webpack_require__(1), 
-        __webpack_require__(20)), __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_4__parent_drivers__ = __webpack_require__(33), _createClass = (__webpack_require__(3), 
+        __webpack_require__(20)), __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_4__parent_drivers__ = __webpack_require__(33), _createClass = (__webpack_require__(2), 
         function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
@@ -6598,7 +6610,7 @@
         }(__WEBPACK_IMPORTED_MODULE_2__base__.a);
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__component__ = __webpack_require__(3);
+        var __WEBPACK_IMPORTED_MODULE_0__component__ = __webpack_require__(2);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__component__.a;
         });
@@ -6671,7 +6683,7 @@
             }
         }
         __webpack_exports__.a = validateProps;
-        var _typeof = (__webpack_require__(3), __webpack_require__(12), "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var _typeof = (__webpack_require__(2), __webpack_require__(12), "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -6681,13 +6693,13 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return angular;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(2), angular = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), angular = (__webpack_require__(2), 
         {
             global: function() {
                 return window.angular;
             },
             register: function(component, ng) {
-                return ng.module(component.tag, []).directive(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._3)(component.tag), function() {
+                return ng.module(component.tag, []).directive(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._1)(component.tag), function() {
                     for (var scope = {}, _iterator = component.getPropNames(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref;
                         if (_isArray) {
@@ -6732,7 +6744,7 @@
                                         scopeProps[key] = $scope[key];
                                     }
                                 }
-                                scopeProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._2)(scopeProps, function(value, key, fullKey) {
+                                scopeProps = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._0)(scopeProps, function(value, key, fullKey) {
                                     if ("function" == typeof value) return function() {
                                         var result = value.apply(this, arguments);
                                         safeApply();
@@ -6755,7 +6767,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return angular2;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(2), _extends = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), _extends = (__webpack_require__(2), 
         Object.assign || function(target) {
             for (var i = 1; i < arguments.length; i++) {
                 var source = arguments[i];
@@ -6768,7 +6780,7 @@
                 var AngularComponent = _ref.Component, NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
                 xcomponent.log("initializing angular2 component");
                 var getProps = function(component) {
-                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._2)(_extends({}, component.internalProps, component.props), function(value, key, fullKey) {
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__._0)(_extends({}, component.internalProps, component.props), function(value, key, fullKey) {
                         if ("function" == typeof value) return function() {
                             var _this = this, _arguments = arguments;
                             return component.zone.run(function() {
@@ -6826,7 +6838,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return glimmer;
         });
-        var _extends = (__webpack_require__(3), Object.assign || function(target) {
+        var _extends = (__webpack_require__(2), Object.assign || function(target) {
             for (var i = 1; i < arguments.length; i++) {
                 var source = arguments[i];
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -6926,7 +6938,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return react;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(2), _createClass = (__webpack_require__(3), 
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(3), _createClass = (__webpack_require__(2), 
         function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
@@ -6958,14 +6970,14 @@
                     },
                     componentDidMount: function() {
                         component.log("instantiate_react_component");
-                        var el = ReactDOM.findDOMNode(this), parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props), null, el);
+                        var el = ReactDOM.findDOMNode(this), parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.k)({}, this.props), null, el);
                         this.setState({
                             parent: parent
                         });
                         parent.render(el);
                     },
                     componentDidUpdate: function() {
-                        this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props));
+                        this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.k)({}, this.props));
                     }
                 }) : component.react = function(_React$Component) {
                     function _class() {
@@ -6982,7 +6994,7 @@
                         key: "componentDidMount",
                         value: function() {
                             component.log("instantiate_react_component");
-                            var el = ReactDOM.findDOMNode(this), parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props), null, el);
+                            var el = ReactDOM.findDOMNode(this), parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.k)({}, this.props), null, el);
                             this.setState({
                                 parent: parent
                             });
@@ -6991,7 +7003,7 @@
                     }, {
                         key: "componentDidUpdate",
                         value: function() {
-                            this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.l)({}, this.props));
+                            this.state && this.state.parent && this.state.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib__.k)({}, this.props));
                         }
                     } ]);
                     return _class;
@@ -7004,7 +7016,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return htmlComponent;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__component_component__ = __webpack_require__(3), htmlComponent = {
+        var __WEBPACK_IMPORTED_MODULE_0__component_component__ = __webpack_require__(2), htmlComponent = {
             global: function() {
                 return window.document;
             },
@@ -7048,7 +7060,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return vue;
         });
-        var __WEBPACK_IMPORTED_MODULE_1__lib__ = (__webpack_require__(3), __webpack_require__(2)), vue = {
+        var __WEBPACK_IMPORTED_MODULE_1__lib__ = (__webpack_require__(2), __webpack_require__(3)), vue = {
             global: function() {},
             register: function(component) {
                 return {
@@ -7056,11 +7068,11 @@
                     inheritAttrs: !1,
                     mounted: function() {
                         var el = this.$el;
-                        this.parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.l)({}, this.$attrs), null, el);
+                        this.parent = component.init(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.k)({}, this.$attrs), null, el);
                         this.parent.render(el);
                     },
                     beforeUpdate: function() {
-                        this.parent && this.$attrs && this.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.l)({}, this.$attrs));
+                        this.parent && this.$attrs && this.parent.updateProps(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.k)({}, this.$attrs));
                     }
                 };
             }
@@ -7276,17 +7288,6 @@
                     obj.removeEventListener(event, handler);
                 }
             };
-        }
-        function getDomain(win) {
-            win = win || window;
-            return win.mockDomain && 0 === win.mockDomain.indexOf("mock://") ? win.mockDomain : win.location.protocol + "//" + win.location.host;
-        }
-        function getDomainFromUrl(url) {
-            var domain = void 0;
-            if (!url.match(/^(https?|mock|file):\/\//)) return getDomain(window);
-            domain = url;
-            domain = domain.split("/").slice(0, 3).join("/");
-            return domain;
         }
         function formatQuery() {
             var obj = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -7617,37 +7618,35 @@
             } else for (var i = 2; i < arguments.length; i++) "string" == typeof arguments[i] ? el.textContent = arguments[i] : appendChild(el, arguments[i]);
             return el;
         }
-        __webpack_exports__.s = appendChild;
-        __webpack_exports__.r = getElement;
-        __webpack_require__.d(__webpack_exports__, "y", function() {
+        __webpack_exports__.r = appendChild;
+        __webpack_exports__.q = getElement;
+        __webpack_require__.d(__webpack_exports__, "x", function() {
             return documentReady;
         });
-        __webpack_exports__.g = elementReady;
-        __webpack_exports__.e = writeToWindow;
-        __webpack_exports__.p = writeElementToWindow;
-        __webpack_exports__.o = awaitFrameLoad;
-        __webpack_exports__.u = awaitFrameWindow;
-        __webpack_exports__.t = iframe;
-        __webpack_exports__.h = addEventListener;
-        __webpack_exports__.c = getDomain;
-        __webpack_exports__.C = getDomainFromUrl;
-        __webpack_exports__.f = extendUrl;
-        __webpack_exports__.j = elementStoppedMoving;
-        __webpack_exports__.i = setOverflow;
-        __webpack_exports__.B = trackDimensions;
-        __webpack_exports__.A = onDimensionsChange;
-        __webpack_exports__.z = dimensionsMatchViewport;
-        __webpack_exports__.l = showElement;
-        __webpack_exports__.k = hideElement;
-        __webpack_exports__.w = destroyElement;
-        __webpack_exports__.m = showAndAnimate;
-        __webpack_exports__.n = animateAndHide;
+        __webpack_exports__.f = elementReady;
+        __webpack_exports__.d = writeToWindow;
+        __webpack_exports__.o = writeElementToWindow;
+        __webpack_exports__.n = awaitFrameLoad;
+        __webpack_exports__.t = awaitFrameWindow;
+        __webpack_exports__.s = iframe;
+        __webpack_exports__.g = addEventListener;
+        __webpack_exports__.e = extendUrl;
+        __webpack_exports__.i = elementStoppedMoving;
+        __webpack_exports__.h = setOverflow;
+        __webpack_exports__.A = trackDimensions;
+        __webpack_exports__.z = onDimensionsChange;
+        __webpack_exports__.y = dimensionsMatchViewport;
+        __webpack_exports__.k = showElement;
+        __webpack_exports__.j = hideElement;
+        __webpack_exports__.v = destroyElement;
+        __webpack_exports__.l = showAndAnimate;
+        __webpack_exports__.m = animateAndHide;
         __webpack_exports__.b = addClass;
-        __webpack_exports__.x = removeClass;
+        __webpack_exports__.w = removeClass;
         __webpack_exports__.a = getCurrentScriptDir;
-        __webpack_exports__.v = watchElementForClose;
-        __webpack_exports__.d = prefetchPage;
-        __webpack_exports__.q = jsxDom;
+        __webpack_exports__.u = watchElementForClose;
+        __webpack_exports__.c = prefetchPage;
+        __webpack_exports__.p = jsxDom;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2_cross_domain_safe_weakmap_src__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_3__fn__ = __webpack_require__(35), __WEBPACK_IMPORTED_MODULE_4__util__ = __webpack_require__(26), _slicedToArray = (__webpack_require__(14), 
         function() {
             function sliceIterator(arr, i) {
