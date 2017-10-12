@@ -130,7 +130,7 @@ export function elementReady(id : ElementRefType) : ZalgoPromise<window.HTMLElem
     Open a popup window with the specified option map
 */
 
-export function popup(url : string, options : { [ string ] : mixed }) : WindowType {
+export function popup(url : string, options : { [ string ] : mixed }) : CrossDomainWindowType {
 
     let params = Object.keys(options).map((key) => {
         if (options[key]) {
@@ -155,7 +155,7 @@ export function popup(url : string, options : { [ string ] : mixed }) : WindowTy
 }
 
 
-export function writeToWindow(win : WindowType, html : string) {
+export function writeToWindow(win : SameDomainWindowType, html : string) {
     try {
         win.document.open();
         win.document.write(html);
@@ -169,7 +169,7 @@ export function writeToWindow(win : WindowType, html : string) {
     }
 }
 
-export function writeElementToWindow(win : WindowType, el : HTMLElement) {
+export function writeElementToWindow(win : SameDomainWindowType, el : HTMLElement) {
 
     let tag = el.tagName.toLowerCase();
 
@@ -188,7 +188,7 @@ export function writeElementToWindow(win : WindowType, el : HTMLElement) {
     }
 }
 
-export function setStyle(el : HTMLElement, styleText : string, doc : DocumentType = window.document) {
+export function setStyle(el : HTMLElement, styleText : string, doc : Document = window.document) {
     if (el.styleSheet) {
         // $FlowFixMe
         el.styleSheet.cssText = styleText;
@@ -244,6 +244,7 @@ export function createElement(tag : string = 'div', options : ElementOptionsType
                 throw new Error(`Iframe html can not be written unless container provided and iframe in DOM`);
             }
 
+            // $FlowFixMe
             writeToWindow(element.contentWindow, options.html);
 
         } else {
@@ -413,33 +414,6 @@ export function getQueryParam(name : string) : ?string {
     return parseQuery(window.location.search.slice(1))[name];
 }
 
-
-export function getDomain(win : WindowType) : string {
-
-    win = win || window;
-
-    if (win.mockDomain && win.mockDomain.indexOf('mock://') === 0) {
-        return win.mockDomain;
-    }
-
-    return `${win.location.protocol}//${win.location.host}`;
-}
-
-export function getDomainFromUrl(url : string) : string {
-
-    let domain;
-
-    if (url.match(/^(https?|mock|file):\/\//)) {
-        domain = url;
-    } else {
-        return getDomain(window);
-    }
-
-    domain = domain.split('/').slice(0, 3).join('/');
-
-    return domain;
-}
-
 export function formatQuery(obj : { [ string ] : string } = {}) : string {
 
     return Object.keys(obj).filter(key => {
@@ -515,35 +489,6 @@ export function elementStoppedMoving(element : ElementRefType, timeout : number 
             reject(new Error(`Timed out waiting for element to stop animating after ${timeout}ms`));
         }, timeout);
     });
-}
-
-
-export function getOpener(win : WindowType) : WindowType {
-
-    if (!win) {
-        return;
-    }
-
-    try {
-        return win.opener;
-    } catch (err) {
-        return;
-    }
-}
-
-export function getParent(win : WindowType) : WindowType {
-
-    if (!win) {
-        return;
-    }
-
-    try {
-        if (win.parent && win.parent !== win) {
-            return win.parent;
-        }
-    } catch (err) {
-        return;
-    }
 }
 
 export function getCurrentDimensions(el : HTMLElement) : { width : number, height : number } {

@@ -2,6 +2,7 @@
 
 import { on } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { getDomainFromUrl } from 'cross-domain-utils/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -14,7 +15,7 @@ import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 
 import * as drivers from '../../drivers';
-import { getDomainFromUrl, info, error, warn, setLogLevel, memoize } from '../../lib';
+import { info, error, warn, setLogLevel, memoize } from '../../lib';
 
 
 /*  Component
@@ -404,7 +405,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
 
-    delegate(source : WindowType, options : DelegateOptionsType) : DelegateComponent<P> {
+    delegate(source : CrossDomainWindowType, options : DelegateOptionsType) : DelegateComponent<P> {
         return new DelegateComponent(this, source, options);
     }
 
@@ -461,27 +462,27 @@ export class Component<P> extends BaseComponent<P> {
         });
     }
 
-    renderTo(win : WindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+    renderTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
             return new ParentComponent(this, this.getRenderContext(element), { props }).renderTo(win, element);
         });
     }
 
-    renderIframeTo(win : WindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+    renderIframeTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
             this.validateRenderContext(CONTEXT_TYPES.IFRAME);
             return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).renderTo(win, element);
         });
     }
 
-    renderPopupTo(win : WindowType, props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
+    renderPopupTo(win : CrossDomainWindowType, props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
             this.validateRenderContext(CONTEXT_TYPES.POPUP);
             return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
         });
     }
 
-    prerender(props : (PropsType & P), element : ElementRefType) : { render : ((PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>>, renderTo : (any, (PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>> } {
+    prerender(props : (PropsType & P), element : ElementRefType) : { render : ((PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>>, renderTo : (CrossDomainWindowType, (PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>> } {
         let instance = new ParentComponent(this, this.getRenderContext(element), { props });
         instance.prefetch();
 
@@ -494,7 +495,7 @@ export class Component<P> extends BaseComponent<P> {
                 return instance.render(innerElement);
             },
 
-            renderTo(win : WindowType, innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+            renderTo(win : CrossDomainWindowType, innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
                 if (innerProps) {
                     instance.updateProps(innerProps);
                 }

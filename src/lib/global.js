@@ -3,7 +3,7 @@
 import { isSameDomain } from 'cross-domain-utils/src';
 import { __XCOMPONENT__ } from '../constants';
 
-export function globalFor(win : WindowType) : ?Object {
+export function globalFor(win : CrossDomainWindowType) : ?Object {
 
     if (!isSameDomain(win)) {
         return;

@@ -2,7 +2,7 @@
 
 import * as $logger from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, getDistanceFromTop, onCloseWindow } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
@@ -11,7 +11,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
          noop, showAndAnimate, animateAndHide, showElement, hideElement,
          addClass, extend, serializeFunctions, extendUrl, jsxDom,
          setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-         getDomain, global, writeToWindow, setLogLevel, once,
+         global, writeToWindow, setLogLevel, once,
          prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
@@ -287,6 +287,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             }
 
             return this.html.then(html => {
+                // $FlowFixMe
                 return writeToWindow(this.window, html);
             });
         });
@@ -401,7 +402,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Send a post message to our parent window.
     */
 
-    sendToParent(name : string, data : Object) : ZalgoPromise<{ origin : string, source : WindowType, data : Object }> {
+    sendToParent(name : string, data : Object) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
@@ -790,7 +791,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Post-robot listeners to the child component window
     */
 
-    listeners() : { [string] : (any, Object) => mixed } {
+    listeners() : { [string] : (CrossDomainWindowType, Object) => mixed } {
         return {
 
             // The child rendered, and the component called .attach()

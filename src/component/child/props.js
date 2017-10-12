@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getDomain } from '../../lib';
+import { getDomain } from 'cross-domain-utils/src';
 
 import { type Component } from '../component';
 import { type BuiltInPropsType } from '../component/props';

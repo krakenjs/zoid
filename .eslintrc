@@ -292,7 +292,7 @@
         ],
         "flowtype/no-primitive-constructor-types": 2,
         "flowtype/no-weak-types": [2, {
-            "any": false,
+            "any": true,
             "Object": false,
             "Function": false
         }],

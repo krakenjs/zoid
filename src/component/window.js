@@ -1,8 +1,8 @@
 /* @flow */
 
-import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor } from 'cross-domain-utils/src';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
-import { memoize, uniqueID, getDomain, globalFor } from '../lib';
+import { memoize, uniqueID, globalFor } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 
 

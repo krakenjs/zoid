@@ -1,14 +1,14 @@
 /* @flow */
 
 import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getAllFramesInWindow, getDomain } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-         cycle, globalFor, setLogLevel, getElement, documentReady, getDomain, noop, stringifyError } from '../../lib';
+         cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { normalizeChildProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
@@ -125,11 +125,11 @@ export class ChildComponent<P> extends BaseComponent<P> {
         this.onPropHandlers.push(handler);
     }
 
-    getParentComponentWindow() : WindowType {
+    getParentComponentWindow() : CrossDomainWindowType {
         return getParentComponentWindow();
     }
 
-    getParentRenderWindow() : WindowType {
+    getParentRenderWindow() : CrossDomainWindowType {
         return getParentRenderWindow();
     }
 
@@ -201,7 +201,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         Send a post message to our parent window.
     */
 
-    sendToParent(name : string, data : ?Object = {}) : ZalgoPromise<{ origin : string, source : WindowType, data : Object }> {
+    sendToParent(name : string, data : ?Object = {}) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
