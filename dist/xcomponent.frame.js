@@ -5506,7 +5506,6 @@
         "use strict";
         function initOnReady() {
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.READY, {
-                window: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
                 domain: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD
             }, function(event) {
                 var win = event.source, promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
@@ -5655,7 +5654,6 @@
         __WEBPACK_IMPORTED_MODULE_7__global__.a.methods = __WEBPACK_IMPORTED_MODULE_7__global__.a.methods || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
         var listenForMethods = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.e)(function() {
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.METHOD, {
-                window: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD,
                 origin: __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD
             }, function(_ref) {
                 var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = __WEBPACK_IMPORTED_MODULE_7__global__.a.methods.get(source);
@@ -5684,19 +5682,20 @@
         function request(options) {
             return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
                 if (!options.name) throw new Error("Expected options.name");
-                var name = options.name, win = options.window, domain = void 0;
-                if ("string" == typeof win) {
-                    var el = document.getElementById(win);
-                    if (!el) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be a valid element id");
-                    if ("iframe" !== el.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be an iframe");
+                var name = options.name, targetWindow = void 0, domain = void 0;
+                if ("string" == typeof options.window) {
+                    var el = document.getElementById(options.window);
+                    if (!el) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be a valid element id");
+                    if ("iframe" !== el.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be an iframe");
                     if (!el.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
-                    win = el.contentWindow;
-                } else if (win instanceof HTMLElement) {
-                    if ("iframe" !== win.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be an iframe");
-                    if (win && !win.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
-                    win && win.contentWindow && (win = win.contentWindow);
-                }
-                if (!win) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
+                    targetWindow = el.contentWindow;
+                } else if (options.window instanceof HTMLIFrameElement) {
+                    if ("iframe" !== options.window.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be an iframe");
+                    if (options.window && !options.window.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
+                    options.window && options.window.contentWindow && (targetWindow = options.window.contentWindow);
+                } else targetWindow = options.window;
+                if (!targetWindow) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
+                var win = targetWindow;
                 domain = options.domain || __WEBPACK_IMPORTED_MODULE_3__conf__.b.WILDCARD;
                 var hash = options.name + "_" + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.d)();
                 if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.c)(win)) throw new Error("Target window is closed");
@@ -5771,9 +5770,10 @@
         function client() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
             if (!options.window) throw new Error("Expected options.window");
+            var win = options.window;
             return {
                 send: function(name, data) {
-                    return _send(options.window, name, data, options);
+                    return _send(win, name, data, options);
                 }
             };
         }
@@ -5849,18 +5849,18 @@
         function listen(options) {
             if (!options.name) throw new Error("Expected options.name");
             if (!options.handler) throw new Error("Expected options.handler");
-            var listenerOptions = {
+            var name = options.name, win = options.window, domain = options.domain, listenerOptions = {
                 handler: options.handler,
                 handleError: options.errorHandler || function(err) {
                     throw err;
                 },
-                window: options.window,
-                domain: options.domain || __WEBPACK_IMPORTED_MODULE_4__conf__.b.WILDCARD,
-                name: options.name
+                window: win,
+                domain: domain || __WEBPACK_IMPORTED_MODULE_4__conf__.b.WILDCARD,
+                name: name
             }, requestListener = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__drivers__.c)({
-                name: listenerOptions.name,
-                win: listenerOptions.window,
-                domain: listenerOptions.domain
+                name: name,
+                win: win,
+                domain: domain
             }, listenerOptions);
             if (options.once) {
                 var _handler = listenerOptions.handler;
@@ -5870,7 +5870,7 @@
                 });
             }
             if (listenerOptions.window && options.errorOnClose) var interval = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(function() {
-                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.c)(listenerOptions.window)) {
+                if (win && "object" === (void 0 === win ? "undefined" : _typeof(win)) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.c)(win)) {
                     interval.cancel();
                     listenerOptions.handleError(new Error("Post message target window is closed"));
                 }
@@ -5929,7 +5929,11 @@
         __webpack_exports__.b = listen;
         __webpack_exports__.c = once;
         __webpack_exports__.d = listener;
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_3__drivers__ = __webpack_require__(11), __WEBPACK_IMPORTED_MODULE_4__conf__ = __webpack_require__(4);
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_3__drivers__ = __webpack_require__(11), __WEBPACK_IMPORTED_MODULE_4__conf__ = __webpack_require__(4), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
     }, function(module, exports) {
         var g, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
