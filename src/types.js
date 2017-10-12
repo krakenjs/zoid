@@ -33,7 +33,8 @@ export type CrossDomainWindowType = {|
     frames : Array<CrossDomainWindowType>,
     opener ? : CrossDomainWindowType,
     parent : CrossDomainWindowType,
-    length : number
+    length : number,
+    postMessage : (string, string) => void
 |};
 
 export type SameDomainWindowType = Object & {
