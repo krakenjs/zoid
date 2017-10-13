@@ -242,7 +242,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
                     result = queryValue.toString();
                 } else if (typeof queryValue === 'function') {
                     return;
-                } else if (typeof queryValue === 'object') {
+                } else if (typeof queryValue === 'object' && queryValue !== null) {
 
                     if (prop.serialization === 'json') {
                         result = JSON.stringify(queryValue);

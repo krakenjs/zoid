@@ -147,7 +147,7 @@ export class BaseComponent<P> {
         All post-messaging is done using post-robot.
     */
 
-    listen(win : CrossDomainWindowType, domain : string) {
+    listen(win : CrossDomainWindowType, domain : string | RegExp) {
 
         if (!win) {
             throw this.component.createError(`window to listen to not set`);
@@ -173,8 +173,8 @@ export class BaseComponent<P> {
             });
 
             let errorListener = on(listenerName, { window: win, errorHandler: err => { this.error(err); } }, ({ origin, data }) => {
-                this.component.logError(`unexpected_listener_${name}`, { origin, domain });
-                this.error(new Error(`Unexpected ${name} message from domain ${origin} -- expected message from ${domain}`));
+                this.component.logError(`unexpected_listener_${name}`, { origin, domain: domain.toString() });
+                this.error(new Error(`Unexpected ${name} message from domain ${origin} -- expected message from ${ domain.toString() }`));
             });
 
             this.clean.register(() => {

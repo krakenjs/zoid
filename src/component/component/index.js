@@ -2,7 +2,7 @@
 
 import { on } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl } from 'cross-domain-utils/src';
+import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -258,8 +258,8 @@ export class Component<P> extends BaseComponent<P> {
                 throw new Error(`Could not determine domain to allow remote render`);
             }
 
-            if (domain !== origin) {
-                throw new Error(`Can not render from ${origin} - expected ${domain}`);
+            if (!matchDomain(domain, origin)) {
+                throw new Error(`Can not render from ${origin} - expected ${ domain.toString() }`);
             }
 
             let delegate = this.delegate(source, data.options);
@@ -272,7 +272,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
 
-    getValidDomain(url : ?string) : ?string {
+    getValidDomain(url : ?string) : ?(string | RegExp) {
 
         if (!url) {
             return;
@@ -299,7 +299,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
 
-    getDomain(url : ?string, env : string) : ?string {
+    getDomain(url : ?string, env : string) : ?(string | RegExp) {
 
         let domain = this.getForEnv(this.domain, env);
 

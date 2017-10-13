@@ -162,7 +162,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             });
 
             tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
-                if (bridge) {
+                if (bridge && typeof domain === 'string') {
                     return bridge.linkUrl(this.window, domain);
                 }
             });
@@ -314,7 +314,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             return;
         }
 
-        throw new Error(`Can not render remotely to ${domain} - can only render to ${origin}`);
+        throw new Error(`Can not render remotely to ${domain.toString()} - can only render to ${origin}`);
     }
 
     registerActiveComponent() {
@@ -470,7 +470,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    getDomain() : ZalgoPromise<string> {
+    getDomain() : ZalgoPromise<string | RegExp> {
         return ZalgoPromise.try(() => {
             return this.props.url;
 
