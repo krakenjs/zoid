@@ -44,7 +44,8 @@ export function buildChildWindowName(name : string, version : string, options : 
         XCOMPONENT,
         encodedName,
         encodedVersion,
-        encodedOptions
+        encodedOptions,
+        ''
     ].join('__');
 }
 
