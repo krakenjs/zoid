@@ -35,7 +35,7 @@ export type ComponentOptionsType<P> = {
     url? : EnvString,
     buildUrl? : (BuiltInPropsType & P) => string | ZalgoPromise<string>,
 
-    domain? : EnvString,
+    domain? : EnvStringRegExp,
     bridgeUrl? : EnvString,
     bridgeDomain? : EnvString,
 
@@ -74,7 +74,7 @@ export class Component<P> extends BaseComponent<P> {
     tag : string
     url : EnvString
 
-    domain : EnvString
+    domain : EnvStringRegExp
     bridgeUrl : EnvString
     bridgeDomain : EnvString
 
@@ -313,9 +313,11 @@ export class Component<P> extends BaseComponent<P> {
             return domain;
         }
 
+        // $FlowFixMe
         let envUrl = this.getForEnv(this.url, env);
 
         if (envUrl) {
+            // $FlowFixMe
             return getDomainFromUrl(envUrl);
         }
 
@@ -325,16 +327,17 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     getBridgeUrl(env : string) : ?string {
+        // $FlowFixMe
         return this.getForEnv(this.bridgeUrl, env);
     }
 
-    getForEnv(item : string | Object, env : ?string) : ?string {
+    getForEnv(item : (string | RegExp) | { [string] : (string | RegExp) }, env : ?string) : ?(string | RegExp) {
 
         if (!item) {
             return;
         }
 
-        if (typeof item === 'string') {
+        if (typeof item === 'string' || item instanceof RegExp) {
             return item;
         }
 
@@ -353,9 +356,11 @@ export class Component<P> extends BaseComponent<P> {
 
     getBridgeDomain(env : string) : ?string {
 
+        // $FlowFixMe
         let bridgeDomain = this.getForEnv(this.bridgeDomain, env);
 
         if (bridgeDomain) {
+            // $FlowFixMe
             return bridgeDomain;
         }
 
@@ -368,6 +373,7 @@ export class Component<P> extends BaseComponent<P> {
 
     getUrl(env : string, props : BuiltInPropsType & P) : ?(string | ZalgoPromise<string>) {
 
+        // $FlowFixMe
         let url = this.getForEnv(this.url, env);
 
         if (url) {
