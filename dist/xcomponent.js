@@ -696,7 +696,7 @@
                     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
                         var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this2.getDomain(null, data.env || _this2.defaultEnv);
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
-                        if (domain !== origin) throw new Error("Can not render from " + origin + " - expected " + domain);
+                        if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(domain, origin)) throw new Error("Can not render from " + origin + " - expected " + domain.toString());
                         var delegate = _this2.delegate(source, data.options);
                         return {
                             overrides: delegate.getOverrides(data.context),
@@ -746,7 +746,7 @@
                 key: "getForEnv",
                 value: function(item, env) {
                     if (item) {
-                        if ("string" == typeof item) return item;
+                        if ("string" == typeof item || item instanceof RegExp) return item;
                         env || (env = this.defaultEnv);
                         if (env) return env && "object" === (void 0 === item ? "undefined" : _typeof(item)) && item[env] ? item[env] : void 0;
                     }
@@ -1574,7 +1574,7 @@
                         });
                         tasks.linkDomain = __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ tasks.getDomain, tasks.open ]).then(function(_ref4) {
                             var _ref5 = _slicedToArray(_ref4, 1), domain = _ref5[0];
-                            if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge) return __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.linkUrl(_this2.window, domain);
+                            if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge && "string" == typeof domain) return __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.linkUrl(_this2.window, domain);
                         });
                         if (!_this2.html) {
                             tasks.createPrerenderTemplate = tasks.openPrerender.then(function() {
@@ -1667,7 +1667,7 @@
                     if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.a)(win)) {
                         var origin = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.i)(), domain = this.component.getDomain(null, this.props.env);
                         if (!domain) throw new Error("Could not determine domain to allow remote render");
-                        if (domain !== origin) throw new Error("Can not render remotely to " + domain + " - can only render to " + origin);
+                        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(domain, origin)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
                     }
                 }
             }, {
@@ -3189,9 +3189,9 @@
                                 _ref4.data;
                                 _this.component.logError("unexpected_listener_" + name, {
                                     origin: origin,
-                                    domain: domain
+                                    domain: domain.toString()
                                 });
-                                _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain));
+                                _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain.toString()));
                             });
                             _this.clean.register(function() {
                                 listener.cancel();
@@ -3216,7 +3216,7 @@
             var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = __WEBPACK_IMPORTED_MODULE_1_hi_base32___default.a.encode(JSON.stringify(options)).replace(/\=/g, "").toLowerCase();
             if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
             if (!encodedVersion) throw new Error("Invalid version: " + version + " - must contain alphanumeric characters");
-            return [ __WEBPACK_IMPORTED_MODULE_3__constants__.XCOMPONENT, encodedName, encodedVersion, encodedOptions ].join("__");
+            return [ __WEBPACK_IMPORTED_MODULE_3__constants__.XCOMPONENT, encodedName, encodedVersion, encodedOptions, "" ].join("__");
         }
         function getParentDomain() {
             return getComponentMeta().domain;
@@ -4413,26 +4413,23 @@
             if (nameListeners) for (var _arr = [ win, __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD ], _i = 0; _i < _arr.length; _i++) {
                 var winQualifier = _arr[_i], winListeners = winQualifier && nameListeners.get(winQualifier);
                 if (winListeners) {
-                    for (var _arr2 = [ domain, __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD ], _i2 = 0; _i2 < _arr2.length; _i2++) {
-                        var domainQualifier = _arr2[_i2];
-                        if (domainQualifier) {
-                            domainQualifier = domainQualifier.toString();
-                            if (winListeners[domainQualifier]) return winListeners[domainQualifier];
+                    if (domain && "string" == typeof domain) {
+                        if (winListeners[domain]) return winListeners[domain];
+                        if (winListeners[__DOMAIN_REGEX__]) for (var _iterator = winListeners[__DOMAIN_REGEX__], _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                            var _ref3;
+                            if (_isArray) {
+                                if (_i2 >= _iterator.length) break;
+                                _ref3 = _iterator[_i2++];
+                            } else {
+                                _i2 = _iterator.next();
+                                if (_i2.done) break;
+                                _ref3 = _i2.value;
+                            }
+                            var _ref4 = _ref3, regex = _ref4.regex, listener = _ref4.listener;
+                            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(regex, domain)) return listener;
                         }
                     }
-                    if (winListeners[__DOMAIN_REGEX__]) for (var _iterator = winListeners[__DOMAIN_REGEX__], _isArray = Array.isArray(_iterator), _i3 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                        var _ref3;
-                        if (_isArray) {
-                            if (_i3 >= _iterator.length) break;
-                            _ref3 = _iterator[_i3++];
-                        } else {
-                            _i3 = _iterator.next();
-                            if (_i3.done) break;
-                            _ref3 = _i3.value;
-                        }
-                        var _ref4 = _ref3, regex = _ref4.regex, listener = _ref4.listener;
-                        if (domain && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)(regex, domain)) return listener;
-                    }
+                    if (winListeners[__WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD]) return winListeners[__WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD];
                 }
             }
         }
@@ -4440,15 +4437,15 @@
             var name = _ref5.name, win = _ref5.win, domain = _ref5.domain;
             if (!name || "string" != typeof name) throw new Error("Name required to add request listener");
             if (Array.isArray(win)) {
-                for (var listenersCollection = [], _iterator2 = win, _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                for (var listenersCollection = [], _iterator2 = win, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                     var _ref6;
                     if (_isArray2) {
-                        if (_i4 >= _iterator2.length) break;
-                        _ref6 = _iterator2[_i4++];
+                        if (_i3 >= _iterator2.length) break;
+                        _ref6 = _iterator2[_i3++];
                     } else {
-                        _i4 = _iterator2.next();
-                        if (_i4.done) break;
-                        _ref6 = _i4.value;
+                        _i3 = _iterator2.next();
+                        if (_i3.done) break;
+                        _ref6 = _i3.value;
                     }
                     var item = _ref6;
                     listenersCollection.push(addRequestListener({
@@ -4459,15 +4456,15 @@
                 }
                 return {
                     cancel: function() {
-                        for (var _iterator3 = listenersCollection, _isArray3 = Array.isArray(_iterator3), _i5 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                        for (var _iterator3 = listenersCollection, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                             var _ref7;
                             if (_isArray3) {
-                                if (_i5 >= _iterator3.length) break;
-                                _ref7 = _iterator3[_i5++];
+                                if (_i4 >= _iterator3.length) break;
+                                _ref7 = _iterator3[_i4++];
                             } else {
-                                _i5 = _iterator3.next();
-                                if (_i5.done) break;
-                                _ref7 = _i5.value;
+                                _i4 = _iterator3.next();
+                                if (_i4.done) break;
+                                _ref7 = _i4.value;
                             }
                             _ref7.cancel();
                         }
@@ -4475,15 +4472,15 @@
                 };
             }
             if (Array.isArray(domain)) {
-                for (var _listenersCollection = [], _iterator4 = domain, _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                for (var _listenersCollection = [], _iterator4 = domain, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
                     var _ref8;
                     if (_isArray4) {
-                        if (_i6 >= _iterator4.length) break;
-                        _ref8 = _iterator4[_i6++];
+                        if (_i5 >= _iterator4.length) break;
+                        _ref8 = _iterator4[_i5++];
                     } else {
-                        _i6 = _iterator4.next();
-                        if (_i6.done) break;
-                        _ref8 = _i6.value;
+                        _i5 = _iterator4.next();
+                        if (_i5.done) break;
+                        _ref8 = _i5.value;
                     }
                     var _item = _ref8;
                     _listenersCollection.push(addRequestListener({
@@ -4494,15 +4491,15 @@
                 }
                 return {
                     cancel: function() {
-                        for (var _iterator5 = _listenersCollection, _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                        for (var _iterator5 = _listenersCollection, _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
                             var _ref9;
                             if (_isArray5) {
-                                if (_i7 >= _iterator5.length) break;
-                                _ref9 = _iterator5[_i7++];
+                                if (_i6 >= _iterator5.length) break;
+                                _ref9 = _iterator5[_i6++];
                             } else {
-                                _i7 = _iterator5.next();
-                                if (_i7.done) break;
-                                _ref9 = _i7.value;
+                                _i6 = _iterator5.next();
+                                if (_i6.done) break;
+                                _ref9 = _i6.value;
                             }
                             _ref9.cancel();
                         }
@@ -4527,9 +4524,7 @@
                 winListeners = {};
                 nameListeners.set(win, winListeners);
             }
-            var strDomain = domain.toString();
-            winListeners[strDomain] = listener;
-            var regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
+            var strDomain = domain.toString(), regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
             if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__lib__.c)(domain)) {
                 if (!regexListeners) {
                     regexListeners = [];
@@ -4540,7 +4535,7 @@
                     listener: listener
                 };
                 regexListeners.push(regexListener);
-            }
+            } else winListeners[strDomain] = listener;
             return {
                 cancel: function() {
                     if (winListeners) {
@@ -4906,7 +4901,7 @@
                         var _ref4 = _slicedToArray(_ref3, 2), queryParam = _ref4[0], queryValue = _ref4[1], result = void 0;
                         if ("boolean" == typeof queryValue) result = "1"; else if ("string" == typeof queryValue) result = queryValue.toString(); else {
                             if ("function" == typeof queryValue) return;
-                            if ("object" === (void 0 === queryValue ? "undefined" : _typeof(queryValue))) {
+                            if ("object" === (void 0 === queryValue ? "undefined" : _typeof(queryValue)) && null !== queryValue) {
                                 if ("json" !== prop.serialization) {
                                     result = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__lib__.R)(queryValue, key);
                                     for (var dotkey in result) params[dotkey] = result[dotkey];
