@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint src",
+    "demo": "serve . --port 1337",
     "postinstall": "node postinstall.js"
   },
   "repository": {
@@ -76,6 +77,7 @@
     "mocha": "^3.0.0",
     "phantomjs-prebuilt": "^2.1.7",
     "raw-loader": "^0.5.1",
+    "serve": "^6.2.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "text-loader": "0.0.1",
