@@ -59,6 +59,7 @@
     "gulp-eslint": "^2.0.0",
     "gulp-flowtype": "^1.0.0",
     "gulp-karma": "0.0.5",
+    "ifdef-loader": "^2.0.3",
     "istanbul-instrumenter-loader": "^0.2.0",
     "karma": "^0.13.22",
     "karma-chrome-launcher": "^1.0.1",
@@ -91,7 +92,7 @@
     "cross-domain-safe-weakmap": "^1.0.8",
     "cross-domain-utils": "^2.0.0",
     "hi-base32": "^0.1.1",
-    "post-robot": "^7.0.1",
+    "post-robot": "^8.0.0",
     "zalgo-promise": "^1.0.4"
   }
 }

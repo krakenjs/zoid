@@ -7,6 +7,7 @@ let eslint = require('gulp-eslint');
 let Server = require('karma').Server;
 let argv = require('yargs').argv;
 let UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+let qs = require('querystring');
 
 gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['test', 'webpack']);
@@ -15,9 +16,27 @@ let MODULE_NAME = 'xcomponent';
 
 function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
 
+    globals = {
+        __TEST__: false,
+        __POPUP_SUPPORT__: true,
+        __IE_POPUP_SUPPORT__: true,
+        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
+        __SEND_POPUP_LOGS_TO_OPENER__: false,
+        ...globals
+    };
+
+    const PREPROCESSOR_OPTS = {
+        'ifdef-triple-slash': 'false',
+        ...globals
+    };
+
     return {
         module: {
             rules: [
+                {
+                    test: /\.js$/,
+                    loader: `ifdef-loader?${qs.encode(PREPROCESSOR_OPTS)}`
+                },
                 {
                     test: /\.jsx?$/,
                     loader: 'babel-loader'
@@ -39,13 +58,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             library: modulename
         },
         plugins: [
-            new webpack.DefinePlugin(Object.assign({
-                __TEST__: false,
-                __POPUP_SUPPORT__: true,
-                __IE_POPUP_SUPPORT__: true,
-                __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-                __SEND_POPUP_LOGS_TO_OPENER__: false
-            }, globals)),
+            new webpack.DefinePlugin(globals),
             new webpack.SourceMapDevToolPlugin({
                 filename: '[file].map'
             }),

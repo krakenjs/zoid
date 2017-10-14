@@ -534,7 +534,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    openBridge() : ZalgoPromise<?HTMLIFrameElement> {
+    openBridge() : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
             if (!bridge) {
                 return;
@@ -553,7 +553,11 @@ export class ParentComponent<P> extends BaseComponent<P> {
             }
 
             if (bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
-                return bridge.openBridge(bridgeUrl, bridgeDomain);
+                return bridge.openBridge(bridgeUrl, bridgeDomain).then(result => {
+                    if (result) {
+                        return result;
+                    }
+                });
             }
         });
     }
