@@ -310,7 +310,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             throw new Error(`Could not determine domain to allow remote render`);
         }
 
-        if (!matchDomain(domain, origin)) {
+        if (matchDomain(domain, origin)) {
             return;
         }
 
