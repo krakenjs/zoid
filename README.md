@@ -22,6 +22,10 @@ Public options and methods supported by xcomponent
 
 Working demos of different xcomponent patterns
 
+### [Demo App](https://github.com/krakenjs/xcomponent-demo)
+
+Forkable demo app with build, test, publishing and demos pre-configured.
+
 ### [Example](./docs/example.md)
 
 A full example of a cross-domain component using xcomponent
