@@ -54,7 +54,7 @@
     "es6-symbol": "^3.0.2",
     "eslint": "^2",
     "eslint-plugin-flowtype": "^2.35.0",
-    "flow-bin": "^0.56.0",
+    "flow-bin": "0.56.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^2.0.0",
     "gulp-flowtype": "^1.0.0",
