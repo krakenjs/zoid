@@ -1,14 +1,14 @@
 {
-  "presets": [ [ "es2015", { "modules": false } ], "react" ],
+  "presets": [ [ "es2015", { "modules": false, "loose": true } ], "react" ],
   "plugins": [
-    "transform-flow-strip-types",
-    "transform-object-rest-spread",
-    "syntax-object-rest-spread",
-    "transform-es3-property-literals",
-    "transform-es3-member-expression-literals",
-    "transform-class-properties",
-    "transform-decorators-legacy",
+    [ "transform-flow-strip-types", { "loose": true } ],
+    [ "transform-object-rest-spread", { "loose": true } ],
+    [ "syntax-object-rest-spread", { "loose": true } ],
+    [ "transform-es3-property-literals", { "loose": true } ],
+    [ "transform-es3-member-expression-literals", { "loose": true } ],
+    [ "transform-class-properties", { "loose": true } ],
+    [ "transform-decorators-legacy", { "loose": true } ],
     [ "transform-es2015-for-of", { "loose": true } ],
-    [ "babel-plugin-transform-react-jsx", { "pragma": "jsxDom" } ]
+    [ "babel-plugin-transform-react-jsx", { "loose": true, "pragma": "jsxDom" } ]
   ]
 }

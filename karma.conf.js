@@ -25,7 +25,7 @@ module.exports = function(config) {
 
             { pattern: 'test/test.js', included: true, served: true },
             { pattern: 'test/*.js', included: false, served: true },
-            { pattern: 'test/*.htm', included: false, served: true },
+            { pattern: 'test/*.htm', included: false, served: true }
         ],
 
         plugins: [
@@ -67,15 +67,15 @@ module.exports = function(config) {
                         query: {
                             presets: [ [ 'es2015', { modules: false } ], 'react' ],
                             plugins: [
-                                'transform-flow-strip-types',
-                                'transform-object-rest-spread',
-                                'syntax-object-rest-spread',
-                                'transform-es3-property-literals',
-                                'transform-es3-member-expression-literals',
-                                ['transform-es2015-for-of', {loose: true}],
-                                'transform-class-properties',
-                                'transform-decorators-legacy',
-                                [ "babel-plugin-transform-react-jsx", { "pragma": "jsxDom" } ],
+                                [ 'transform-flow-strip-types', { 'loose': true } ],
+                                [ 'transform-object-rest-spread', { 'loose': true } ],
+                                [ 'syntax-object-rest-spread', { 'loose': true } ],
+                                [ 'transform-es3-property-literals', { 'loose': true } ],
+                                [ 'transform-es3-member-expression-literals', { 'loose': true } ],
+                                [ 'transform-class-properties', { 'loose': true } ],
+                                [ 'transform-decorators-legacy', { 'loose': true } ],
+                                [ 'transform-es2015-for-of', { 'loose': true } ],
+                                [ 'babel-plugin-transform-react-jsx', { 'loose': true, 'pragma': 'jsxDom' } ],
                                 [ '__coverage__', { only: `${__dirname}/src` } ]
                             ]
                         }
