@@ -596,6 +596,24 @@ Equivalent to `Component.render()` but allows rendering to a remote window. For 
 
 The target window to which the component should be rendered. Ordinarily this will be `window.parent`.
 
+### `Component.init(props, context, container)`
+
+Shortcut to instantiate a component on a parent page, with props. Returns instance of `ParentComponent`. Does not render the component. Render the instance using `ParentComponent.render(container)`. Useful for obtaining the parent instance for inter-component operations.
+
+#### props `Object`
+
+Object containing all of the props required by the given component
+
+#### context `string` (optional)
+
+Context type of the component (`iframe`, `popup`)
+
+#### container `string | HTMLElement`
+
+Element selector, or element, into which the component should be rendered.
+
+Defaults to `document.body`.
+
 ### `Component.driver(name, dependencies)`
 
 Register a component with your framework of choice, so it can be rendered natively in your app.
