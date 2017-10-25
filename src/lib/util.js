@@ -9,7 +9,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
 */
 
 export function urlEncode(str : string) : string {
-    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23');
+    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23').replace(/\+/g, '%2B');
 }
 
 
