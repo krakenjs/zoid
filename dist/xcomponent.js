@@ -3215,7 +3215,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function needsBridgeForBrowser() {
-            return !!Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.n)(window).match(/MSIE|trident|edge/i) || !__WEBPACK_IMPORTED_MODULE_3__conf__.a.ALLOW_POSTMESSAGE_POPUP;
+            return !!Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.n)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !__WEBPACK_IMPORTED_MODULE_3__conf__.a.ALLOW_POSTMESSAGE_POPUP;
         }
         function needsBridgeForWin(win) {
             return !Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.u)(window, win);
@@ -3509,12 +3509,18 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return ChildComponent;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(26), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_post_robot_src__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(17), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_8__props__ = __webpack_require__(74), __WEBPACK_IMPORTED_MODULE_9__error__ = __webpack_require__(14), _typeof = (__webpack_require__(3), 
-        __webpack_require__(13), "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__ = __webpack_require__(26), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2_post_robot_src__ = __webpack_require__(10), __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_4__base__ = __webpack_require__(17), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), __WEBPACK_IMPORTED_MODULE_6__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_7__constants__ = __webpack_require__(9), __WEBPACK_IMPORTED_MODULE_8__props__ = __webpack_require__(74), __WEBPACK_IMPORTED_MODULE_9__error__ = __webpack_require__(14), _extends = (__webpack_require__(3), 
+        __webpack_require__(13), Object.assign || function(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+            }
+            return target;
+        }), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }), ChildComponent = function(_BaseComponent) {
+        }, ChildComponent = function(_BaseComponent) {
             function ChildComponent(component) {
                 _classCallCheck(this, ChildComponent);
                 var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
@@ -3613,12 +3619,12 @@
                 }
             };
             ChildComponent.prototype.sendToParent = function(name) {
-                var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, parentWindow = Object(__WEBPACK_IMPORTED_MODULE_5__window__.c)();
+                var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, parentWindow = Object(__WEBPACK_IMPORTED_MODULE_5__window__.c)();
                 if (!parentWindow) throw new Error("Can not find parent component window to message");
                 this.component.log("send_to_parent_" + name);
-                return Object(__WEBPACK_IMPORTED_MODULE_2_post_robot_src__.send)(parentWindow, name, data, {
+                return Object(__WEBPACK_IMPORTED_MODULE_2_post_robot_src__.send)(parentWindow, name, data, _extends({
                     domain: Object(__WEBPACK_IMPORTED_MODULE_5__window__.d)()
-                });
+                }, options));
             };
             ChildComponent.prototype.setWindows = function() {
                 if (window.__activeXComponent__) throw this.component.createError("Can not attach multiple components to the same window");
@@ -3766,7 +3772,9 @@
                 });
             };
             ChildComponent.prototype.checkClose = function() {
-                this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CHECK_CLOSE);
+                this.sendToParent(__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CHECK_CLOSE, {}, {
+                    fireAndForget: !0
+                });
             };
             ChildComponent.prototype.destroy = function() {
                 __WEBPACK_IMPORTED_MODULE_0_beaver_logger_client__.c().then(function() {
@@ -5503,22 +5511,26 @@
                 return win.postMessage(serializedMessage, dom);
             });
         };
-        var sendBridgeMessage = __webpack_require__(23).sendBridgeMessage;
+        var _require = __webpack_require__(23), sendBridgeMessage = _require.sendBridgeMessage, needsBridgeForBrowser = _require.needsBridgeForBrowser, isBridge = _require.isBridge;
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_1__conf__.b.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
-            if (Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(win)) throw new Error("Post message through bridge disabled between same domain windows");
-            if (!1 !== Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
-            return sendBridgeMessage(win, serializedMessage, domain);
+            if (needsBridgeForBrowser() || isBridge()) {
+                if (Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(win)) throw new Error("Post message through bridge disabled between same domain windows");
+                if (!1 !== Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
+                return sendBridgeMessage(win, serializedMessage, domain);
+            }
         };
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_1__conf__.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage, domain) {
-            if (!Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(win)) throw new Error("Post message through global disabled between different domain windows");
-            if (!1 !== Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
-            var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_1__conf__.b.WINDOW_PROPS.POSTROBOT];
-            if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
-            return foreignGlobal.receiveMessage({
-                source: window,
-                origin: Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.f)(),
-                data: serializedMessage
-            });
+            if (needsBridgeForBrowser()) {
+                if (!Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.t)(win)) throw new Error("Post message through global disabled between different domain windows");
+                if (!1 !== Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.u)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
+                var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_1__conf__.b.WINDOW_PROPS.POSTROBOT];
+                if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
+                return foreignGlobal.receiveMessage({
+                    source: window,
+                    origin: Object(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.f)(),
+                    data: serializedMessage
+                });
+            }
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -5936,19 +5948,22 @@
                     if (Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.p)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(Object(__WEBPACK_IMPORTED_MODULE_5__lib__.k)(win));
                 }).then(function() {
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                        var responseListener = {
-                            name: name,
-                            window: win,
-                            domain: domain,
-                            respond: function(err, result) {
-                                if (!err) {
-                                    hasResult = !0;
-                                    requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                        var responseListener = void 0;
+                        if (!options.fireAndForget) {
+                            responseListener = {
+                                name: name,
+                                window: win,
+                                domain: domain,
+                                respond: function(err, result) {
+                                    if (!err) {
+                                        hasResult = !0;
+                                        requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                                    }
+                                    err ? reject(err) : resolve(result);
                                 }
-                                err ? reject(err) : resolve(result);
-                            }
-                        };
-                        Object(__WEBPACK_IMPORTED_MODULE_4__drivers__.b)(hash, responseListener);
+                            };
+                            Object(__WEBPACK_IMPORTED_MODULE_4__drivers__.b)(hash, responseListener);
+                        }
                         Object(__WEBPACK_IMPORTED_MODULE_4__drivers__.g)(win, {
                             type: __WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_TYPE.REQUEST,
                             hash: hash,
