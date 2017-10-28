@@ -5641,7 +5641,7 @@
             });
             awaitFrameLoad(frame);
             el.appendChild(frame);
-            options.url && frame.setAttribute("src", options.url);
+            frame.setAttribute("src", options.url || "about:blank");
             return frame;
         }
         function addEventListener(obj, event, handler) {
