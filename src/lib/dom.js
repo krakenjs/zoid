@@ -344,7 +344,9 @@ export function iframe(options : IframeElementOptionsType = {}, container : HTML
 
     el.appendChild(frame);
 
-    frame.setAttribute('src', options.url || 'about:blank');
+    if (options.url || window.navigator.userAgent.match(/MSIE|Edge/i)) {
+        frame.setAttribute('src', options.url || 'about:blank');
+    }
 
     // $FlowFixMe
     return frame;
