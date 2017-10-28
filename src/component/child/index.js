@@ -201,7 +201,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         Send a post message to our parent window.
     */
 
-    sendToParent(name : string, data : ?Object = {}) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
+    sendToParent(name : string, data : ?Object = {}, options : ?Object = {}) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
         let parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
@@ -210,7 +210,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         this.component.log(`send_to_parent_${name}`);
 
-        return send(parentWindow, name, data, { domain: getParentDomain() });
+        return send(parentWindow, name, data, { domain: getParentDomain(), ...options });
     }
 
 
@@ -502,7 +502,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     checkClose() {
-        this.sendToParent(POST_MESSAGE.CHECK_CLOSE);
+        this.sendToParent(POST_MESSAGE.CHECK_CLOSE, {}, { fireAndForget: true });
     }
 
 
