@@ -1093,6 +1093,13 @@ export class ParentComponent<P> extends BaseComponent<P> {
     focus() {
 
         if (this.window) {
+            if (this.driver.openOnFocus) {
+                try {
+                    window.open('', this.childWindowName);
+                } catch (err) {
+                    // pass
+                }
+            }
 
             this.component.log(`focus`);
             this.window.focus();

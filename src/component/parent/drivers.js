@@ -18,6 +18,7 @@ export type ContextDriverType = {
     renderedIntoContainerTemplate : boolean,
     allowResize : boolean,
     openOnClick : boolean,
+    openOnFocus : boolean,
 
     open : (?string) => ZalgoPromise<void>,
     resize : (number | string, number | string) => void,
@@ -60,6 +61,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     renderedIntoContainerTemplate: true,
     allowResize: true,
     openOnClick: false,
+    openOnFocus: false,
 
     open(url : ?string) : ZalgoPromise<void> {
 
@@ -220,6 +222,7 @@ if (__POPUP_SUPPORT__) {
         renderedIntoContainerTemplate: false,
         allowResize: false,
         openOnClick: true,
+        openOnFocus: true,
 
         open(url : ?string = '') : ZalgoPromise<void> {
             return ZalgoPromise.try(() => {
