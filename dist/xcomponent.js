@@ -6277,7 +6277,7 @@
             });
             awaitFrameLoad(frame);
             el.appendChild(frame);
-            frame.setAttribute("src", options.url || "about:blank");
+            (options.url || window.navigator.userAgent.match(/MSIE|Edge/i)) && frame.setAttribute("src", options.url || "about:blank");
             return frame;
         }
         function addEventListener(obj, event, handler) {
