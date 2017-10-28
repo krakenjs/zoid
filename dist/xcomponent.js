@@ -2014,10 +2014,20 @@
                             return _this31.prerenderWindow;
                         }) : _this31.prerenderWindow;
                     }).then(function(win) {
-                        Object(__WEBPACK_IMPORTED_MODULE_6__lib__._4)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                            jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.F.bind(win.document),
-                            document: win.document
-                        }));
+                        var doc = void 0;
+                        try {
+                            doc = win.document;
+                        } catch (err) {
+                            return;
+                        }
+                        try {
+                            Object(__WEBPACK_IMPORTED_MODULE_6__lib__._4)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                                jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.F.bind(document),
+                                document: doc
+                            }));
+                        } catch (err) {
+                            return;
+                        }
                     }) : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.resolve();
                 });
             };
