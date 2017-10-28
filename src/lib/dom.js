@@ -344,9 +344,7 @@ export function iframe(options : IframeElementOptionsType = {}, container : HTML
 
     el.appendChild(frame);
 
-    if (options.url) {
-        frame.setAttribute('src', options.url);
-    }
+    frame.setAttribute('src', options.url || 'about:blank');
 
     // $FlowFixMe
     return frame;
