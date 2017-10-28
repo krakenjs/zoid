@@ -1954,6 +1954,9 @@
             };
             ParentComponent.prototype.focus = function() {
                 if (!this.window) throw new Error("No window to focus");
+                if (this.driver.openOnFocus) try {
+                    window.open("", this.childWindowName);
+                } catch (err) {}
                 this.component.log("focus");
                 this.window.focus();
             };
@@ -4153,6 +4156,7 @@
             renderedIntoContainerTemplate: !0,
             allowResize: !0,
             openOnClick: !1,
+            openOnFocus: !1,
             open: function(url) {
                 var _this = this;
                 this.iframe = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.B)({
@@ -4600,24 +4604,18 @@
                 0 === count && promise.resolve(results);
                 return promise;
             };
-            ZalgoPromise.map = function(promises, method) {
-                var promise = new ZalgoPromise(), count = promises.length, results = [];
-                if (!count) {
-                    promise.resolve(results);
-                    return promise;
-                }
-                for (var i = 0; i < promises.length; i++) !function(i) {
-                    ZalgoPromise.try(function() {
-                        return method(promises[i]);
-                    }).then(function(result) {
-                        results[i] = result;
-                        count -= 1;
-                        0 === count && promise.resolve(results);
-                    }, function(err) {
-                        promise.reject(err);
+            ZalgoPromise.hash = function(promises) {
+                var result = {};
+                return ZalgoPromise.all(Object.keys(promises).map(function(key) {
+                    return ZalgoPromise.resolve(promises[key]).then(function(value) {
+                        result[key] = value;
                     });
-                }(i);
-                return promise;
+                })).then(function() {
+                    return result;
+                });
+            };
+            ZalgoPromise.map = function(items, method) {
+                return ZalgoPromise.all(items.map(method));
             };
             ZalgoPromise.onPossiblyUnhandledException = function(handler) {
                 return Object(__WEBPACK_IMPORTED_MODULE_1__exceptions__.b)(handler);
@@ -4634,17 +4632,6 @@
             ZalgoPromise.delay = function(_delay) {
                 return new ZalgoPromise(function(resolve) {
                     setTimeout(resolve, _delay);
-                });
-            };
-            ZalgoPromise.hash = function(obj) {
-                var results = {}, promises = [];
-                for (var key in obj) !function(key) {
-                    obj.hasOwnProperty(key) && promises.push(ZalgoPromise.resolve(obj[key]).then(function(result) {
-                        results[key] = result;
-                    }));
-                }(key);
-                return ZalgoPromise.all(promises).then(function() {
-                    return results;
                 });
             };
             ZalgoPromise.isPromise = function(value) {
@@ -6726,7 +6713,12 @@
                     var propName = _ref;
                     _this.component.getProp(propName).allowDelegate && (_this.props[propName] = options.props[propName]);
                 }
-                _this.focus = options.overrides.focus;
+                _this.focus = function() {
+                    if (_this.driver.openOnFocus) try {
+                        window.open("", _this.childWindowName).focus();
+                    } catch (err) {}
+                    return options.overrides.focus.call(_this);
+                };
                 _this.userClose = options.overrides.userClose;
                 _this.getDomain = options.overrides.getDomain;
                 _this.error = options.overrides.error;
