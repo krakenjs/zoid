@@ -9,10 +9,13 @@ export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxD
         <div id={ id } class={ `${ CLASS.XCOMPONENT } ${ CLASS.XCOMPONENT }-tag-${ tag } ${ CLASS.XCOMPONENT }-context-${ context }` }>
             <style>
                 {`
-                    #${ id } > .${ CLASS.OUTLET } {
-                        display: inline-block;
+                    #${ id }, #${ id } > .${ CLASS.OUTLET } {
                         width: ${ width };
                         height: ${ height };
+                    }
+
+                    #${ id } > .${ CLASS.OUTLET } {
+                        display: inline-block;
                         position: relative;
                     }
 
