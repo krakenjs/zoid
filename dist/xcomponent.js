@@ -2025,7 +2025,7 @@
                         }
                         try {
                             Object(__WEBPACK_IMPORTED_MODULE_6__lib__._4)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                                jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.F.bind(document),
+                                jsxDom: __WEBPACK_IMPORTED_MODULE_6__lib__.F.bind(doc),
                                 document: doc
                             }));
                         } catch (err) {
@@ -2369,15 +2369,21 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function stringifyError(err) {
-            if (!err) return "<unknown error: " + Object.prototype.toString.call(err) + ">";
-            if ("string" == typeof err) return err;
-            if (err instanceof Error) {
-                var stack = err && err.stack, message = err && err.message;
-                if (stack && message) return -1 !== stack.indexOf(message) ? stack : message + "\n" + stack;
-                if (stack) return stack;
-                if (message) return message;
+            var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
+            if (level >= 3) return "stringifyError stack overflow";
+            try {
+                if (!err) return "<unknown error: " + Object.prototype.toString.call(err) + ">";
+                if ("string" == typeof err) return err;
+                if (err instanceof Error) {
+                    var stack = err && err.stack, message = err && err.message;
+                    if (stack && message) return -1 !== stack.indexOf(message) ? stack : message + "\n" + stack;
+                    if (stack) return stack;
+                    if (message) return message;
+                }
+                return "function" == typeof err.toString ? err.toString() : Object.prototype.toString.call(err);
+            } catch (newErr) {
+                return "Error while stringifying error: " + stringifyError(newErr, level + 1);
             }
-            return "function" == typeof err.toString ? err.toString() : Object.prototype.toString.call(err);
         }
         function noop() {}
         function addEventListener(obj, event, handler) {
@@ -5663,9 +5669,7 @@
                                         source: this.source
                                     });
                                 } catch (err) {
-                                    setTimeout(function() {
-                                        throw err;
-                                    }, 1);
+                                    __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.reject(err);
                                 }
                             }
                         }).then(function(_ref2) {
@@ -5748,9 +5752,7 @@
                                     source: winDetails.win
                                 });
                             } catch (err) {
-                                setTimeout(function() {
-                                    throw err;
-                                }, 1);
+                                __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.reject(err);
                             }
                         }
                     }
