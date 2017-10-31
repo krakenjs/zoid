@@ -105,7 +105,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
     listenForResize() {
         window.addEventListener('resize', () => {
-            this.sendToParent(POST_MESSAGE.ONRESIZE);
+            this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
         });
     }
 
