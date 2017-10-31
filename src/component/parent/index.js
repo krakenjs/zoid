@@ -1144,7 +1144,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
                 try {
                     writeElementToWindow(win, this.renderTemplate(this.component.prerenderTemplate, {
-                        jsxDom: jsxDom.bind(document),
+                        jsxDom: jsxDom.bind(doc),
                         document: doc
                     }));
                 } catch (err) {
