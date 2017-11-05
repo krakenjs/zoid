@@ -240,12 +240,14 @@ export class Component<P> extends BaseComponent<P> {
 
     registerChild() {
         if (isXComponentWindow()) {
-            let componentMeta = getComponentMeta();
+            ZalgoPromise.try(() => {
+                let componentMeta = getComponentMeta();
 
-            if (componentMeta.tag === this.tag) {
-                window.xchild = new ChildComponent(this);
-                window.xprops = window.xchild.props;
-            }
+                if (componentMeta.tag === this.tag) {
+                    window.xchild = new ChildComponent(this);
+                    window.xprops = window.xchild.props;
+                }
+            });
         }
     }
 
