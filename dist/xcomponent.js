@@ -4570,6 +4570,12 @@
                 getOutlet: __WEBPACK_IMPORTED_MODULE_4__constants__.DELEGATE.CALL_ORIGINAL
             },
             loadUrl: function(url) {
+                if (Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.t)(this.window)) try {
+                    if (this.window.location && this.window.location.replace) {
+                        this.window.location.replace(url);
+                        return;
+                    }
+                } catch (err) {}
                 this.window.location = url;
             }
         };
