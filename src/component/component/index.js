@@ -392,7 +392,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     isChild() : boolean {
-        return isXComponentWindow() && getComponentMeta().tag === this.tag;
+        return isXComponentWindow() && window.xprops && getComponentMeta().tag === this.tag;
     }
 
 
