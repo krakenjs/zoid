@@ -4488,8 +4488,14 @@
                 }
             },
             resize: function(width, height) {
-                width && (this.element.style.width = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(width));
-                height && (this.element.style.height = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(height));
+                if (width) {
+                    this.container.style.width = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(width);
+                    this.element.style.width = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(width);
+                }
+                if (height) {
+                    this.container.style.height = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(height);
+                    this.element.style.height = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.Y)(height);
+                }
             },
             show: function() {
                 Object(__WEBPACK_IMPORTED_MODULE_3__lib__.V)(this.element);
