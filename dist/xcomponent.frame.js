@@ -570,6 +570,7 @@
                 _this.addProp(options, "domain");
                 _this.addProp(options, "bridgeUrl");
                 _this.addProp(options, "bridgeDomain");
+                _this.addProp(options, "attributes", {});
                 _this.addProp(options, "contexts", {
                     iframe: !0,
                     popup: !1
@@ -4188,8 +4189,14 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return RENDER_DRIVERS;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), RENDER_DRIVERS = (__webpack_require__(13), 
-        {});
+        var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_post_robot_src__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__constants__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__window__ = __webpack_require__(21), _extends = (__webpack_require__(13), 
+        Object.assign || function(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+            }
+            return target;
+        }), RENDER_DRIVERS = {};
         RENDER_DRIVERS[__WEBPACK_IMPORTED_MODULE_4__constants__.CONTEXT_TYPES.IFRAME] = {
             focusable: !1,
             renderedIntoContainerTemplate: !0,
@@ -4197,13 +4204,13 @@
             openOnClick: !1,
             openOnFocus: !1,
             open: function(url) {
-                var _this = this;
+                var _this = this, attributes = this.component.attributes.iframe || {};
                 this.iframe = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.B)({
                     url: url,
-                    attributes: {
+                    attributes: _extends({
                         name: this.childWindowName,
                         scrolling: this.component.scrolling ? "yes" : "no"
-                    },
+                    }, attributes),
                     class: [ __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.COMPONENT_FRAME, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE ]
                 }, this.element);
                 return Object(__WEBPACK_IMPORTED_MODULE_3__lib__.f)(this.iframe).then(function(frameWindow) {
@@ -4228,12 +4235,12 @@
                 });
             },
             openPrerender: function() {
-                var _this2 = this;
+                var _this2 = this, attributes = this.component.attributes.iframe || {};
                 this.prerenderIframe = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.B)({
-                    attributes: {
+                    attributes: _extends({
                         name: "__prerender__" + this.childWindowName,
                         scrolling: this.component.scrolling ? "yes" : "no"
-                    },
+                    }, attributes),
                     class: [ __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.PRERENDER_FRAME, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.VISIBLE ]
                 }, this.element);
                 return Object(__WEBPACK_IMPORTED_MODULE_3__lib__.f)(this.prerenderIframe).then(function(prerenderFrameWindow) {
