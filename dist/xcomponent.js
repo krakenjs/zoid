@@ -728,7 +728,7 @@
                 return Object(__WEBPACK_IMPORTED_MODULE_8__window__.g)();
             };
             Component.prototype.isChild = function() {
-                return Object(__WEBPACK_IMPORTED_MODULE_8__window__.g)() && Object(__WEBPACK_IMPORTED_MODULE_8__window__.b)().tag === this.tag;
+                return Object(__WEBPACK_IMPORTED_MODULE_8__window__.g)() && window.xprops && Object(__WEBPACK_IMPORTED_MODULE_8__window__.b)().tag === this.tag;
             };
             Component.prototype.createError = function(message, tag) {
                 return new Error("[" + (tag || this.tag) + "] " + message);
