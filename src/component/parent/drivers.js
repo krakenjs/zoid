@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
-import { findFrameByName } from 'cross-domain-utils/src';
+import { findFrameByName, isSameDomain } from 'cross-domain-utils/src';
 
 import { iframe, popup, toCSS, showElement, hideElement,
          destroyElement, normalizeDimension, watchElementForClose,
@@ -320,6 +320,18 @@ if (__POPUP_SUPPORT__) {
         },
 
         loadUrl(url : string) {
+
+            if (isSameDomain(this.window)) {
+                try {
+                    if (this.window.location && this.window.location.replace) {
+                        this.window.location.replace(url);
+                        return;
+                    }
+                } catch (err) {
+                    // pass
+                }
+            }
+
             this.window.location = url;
         }
     };
