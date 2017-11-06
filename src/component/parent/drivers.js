@@ -65,11 +65,14 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
     open(url : ?string) : ZalgoPromise<void> {
 
+        let attributes = this.component.attributes.iframe || {};
+
         this.iframe = iframe({
             url,
             attributes: {
                 name: this.childWindowName,
-                scrolling: this.component.scrolling ? 'yes' : 'no'
+                scrolling: this.component.scrolling ? 'yes' : 'no',
+                ...attributes
             },
             class: [
                 CLASS_NAMES.COMPONENT_FRAME,
@@ -111,10 +114,13 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
     openPrerender() : ZalgoPromise<void> {
 
+        let attributes = this.component.attributes.iframe || {};
+
         this.prerenderIframe = iframe({
             attributes: {
                 name: `__prerender__${ this.childWindowName }`,
-                scrolling: this.component.scrolling ? 'yes' : 'no'
+                scrolling: this.component.scrolling ? 'yes' : 'no',
+                ...attributes
             },
             class: [
                 CLASS_NAMES.PRERENDER_FRAME,
@@ -237,6 +243,8 @@ if (__POPUP_SUPPORT__) {
 
                 let { x, y } = getPosition({ width, height });
 
+                let attributes = this.component.attributes.popup || {};
+
                 try {
                     this.window = popup(url || '', {
                         name: this.childWindowName,
@@ -248,7 +256,8 @@ if (__POPUP_SUPPORT__) {
                         toolbar: 0,
                         menubar: 0,
                         resizable: 1,
-                        scrollbars: 1
+                        scrollbars: 1,
+                        ...attributes
                     });
                 } catch (err) {
 

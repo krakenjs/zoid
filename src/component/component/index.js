@@ -157,6 +157,8 @@ export class Component<P> extends BaseComponent<P> {
         this.addProp(options, 'bridgeUrl');
         this.addProp(options, 'bridgeDomain');
 
+        this.addProp(options, 'attributes', {});
+
         // A url to use by default to render the component, if not using envs
 
 
