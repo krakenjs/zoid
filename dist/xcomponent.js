@@ -3218,9 +3218,12 @@
         });
         var __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(57);
         __webpack_require__.d(__webpack_exports__, "openBridge", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.c;
         });
         __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
+        });
+        __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.a;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
@@ -4094,7 +4097,7 @@
             });
             win && win !== __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD || (win = __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD);
             domain = domain || __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD;
-            if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for specified window") : win ? new Error("Request listener already exists for " + name + " for specified window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
+            if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for " + (win === __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : win ? new Error("Request listener already exists for " + name + " for " + (win === __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
             var requestListeners = __WEBPACK_IMPORTED_MODULE_3__global__.a.requestListeners, nameListeners = requestListeners[name];
             if (!nameListeners) {
                 nameListeners = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
@@ -5750,7 +5753,7 @@
         "use strict";
         function listenForRegister(source, domain) {
             Object(__WEBPACK_IMPORTED_MODULE_6__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
-                source: source,
+                window: source,
                 domain: domain
             }, function(_ref) {
                 var origin = _ref.origin, data = _ref.data;
@@ -5804,21 +5807,18 @@
                 var name = Object(__WEBPACK_IMPORTED_MODULE_8__common__.c)(domain);
                 if (Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.h)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
                 var iframe = openBridgeFrame(name, url);
+                __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain] = iframe;
                 return __WEBPACK_IMPORTED_MODULE_8__common__.a.then(function(body) {
+                    body.appendChild(iframe);
+                    var bridge = iframe.contentWindow;
+                    listenForRegister(bridge, domain);
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                        setTimeout(resolve, 1);
+                        iframe.onload = resolve;
+                        iframe.onerror = reject;
                     }).then(function() {
-                        body.appendChild(iframe);
-                        var bridge = iframe.contentWindow;
-                        listenForRegister(bridge, domain);
-                        return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                            iframe.onload = resolve;
-                            iframe.onerror = reject;
-                        }).then(function() {
-                            return Object(__WEBPACK_IMPORTED_MODULE_4__lib__.k)(bridge, __WEBPACK_IMPORTED_MODULE_3__conf__.a.BRIDGE_TIMEOUT, "Bridge " + url);
-                        }).then(function() {
-                            return bridge;
-                        });
+                        return Object(__WEBPACK_IMPORTED_MODULE_4__lib__.k)(bridge, __WEBPACK_IMPORTED_MODULE_3__conf__.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                    }).then(function() {
+                        return bridge;
                     });
                 });
             });
@@ -5831,10 +5831,29 @@
                 Object(__WEBPACK_IMPORTED_MODULE_8__common__.j)(win);
             }
         }
-        __webpack_exports__.b = openBridge;
-        __webpack_exports__.a = linkUrl;
+        function destroyBridges() {
+            for (var _iterator2 = Object.keys(__WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                var _ref3;
+                if (_isArray2) {
+                    if (_i2 >= _iterator2.length) break;
+                    _ref3 = _iterator2[_i2++];
+                } else {
+                    _i2 = _iterator2.next();
+                    if (_i2.done) break;
+                    _ref3 = _i2.value;
+                }
+                var domain = _ref3, frame = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain];
+                frame.parentNode && frame.parentNode.removeChild(frame);
+            }
+            __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = {};
+            __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
+        }
+        __webpack_exports__.c = openBridge;
+        __webpack_exports__.b = linkUrl;
+        __webpack_exports__.a = destroyBridges;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_4__lib__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_6__interface__ = __webpack_require__(12), __WEBPACK_IMPORTED_MODULE_7__drivers__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_8__common__ = __webpack_require__(24);
         __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges || {};
+        __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames || {};
         __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByWin = __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByWin || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a();
         __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByName = __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByName || {};
         var windowOpen = window.open;
@@ -5926,6 +5945,9 @@
         });
         __webpack_require__.d(__webpack_exports__, "openTunnelToOpener", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.openTunnelToOpener;
+        });
+        __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__index__.destroyBridges;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
