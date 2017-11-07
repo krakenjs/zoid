@@ -93,7 +93,8 @@ module.exports = function(config) {
                     __POPUP_SUPPORT__: true,
                     __IE_POPUP_SUPPORT__: true,
                     __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: true,
-                    __SEND_POPUP_LOGS_TO_OPENER__: true
+                    __SEND_POPUP_LOGS_TO_OPENER__: true,
+                    __ALLOW_POSTMESSAGE_POPUP__: false
                 })
             ],
 
