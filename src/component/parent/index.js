@@ -177,8 +177,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 });
             }
 
-            tasks.openBridge = tasks.open.then(() => {
-                return this.openBridge();
+            tasks.openBridge = tasks.getDomain.then((domain) => {
+                return this.openBridge(typeof domain === 'string' ? domain : null);
             });
 
             if (this.html) {
@@ -534,15 +534,22 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    openBridge() : ZalgoPromise<?CrossDomainWindowType> {
+    openBridge(domain : ?string) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
             if (!bridge) {
                 return;
             }
 
+            let needsBridge = bridge.needsBridge({ win: this.window, domain });
+
             let bridgeUrl = this.component.getBridgeUrl(this.props.env);
 
             if (!bridgeUrl) {
+
+                if (needsBridge && domain && !bridge.hasBridge(domain)) {
+                    throw new Error(`Bridge url needed to render popup`);
+                }
+
                 return;
             }
 
@@ -552,7 +559,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 throw new Error(`Can not determine domain for bridge`);
             }
 
-            if (bridge.needsBridge({ win: this.window, domain: bridgeDomain })) {
+            if (needsBridge) {
                 return bridge.openBridge(bridgeUrl, bridgeDomain).then(result => {
                     if (result) {
                         return result;
