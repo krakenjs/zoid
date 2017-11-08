@@ -540,13 +540,18 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 return;
             }
 
-            let needsBridge = bridge.needsBridge({ win: this.window, domain });
+            let needsBridgeParams : Object = { win : this.window };
+            if (domain) {
+                needsBridgeParams.domain = domain;
+            }
+
+            let needsBridge = bridge.needsBridge(needsBridgeParams);
 
             let bridgeUrl = this.component.getBridgeUrl(this.props.env);
 
             if (!bridgeUrl) {
 
-                if (needsBridge && domain && !bridge.hasBridge(domain)) {
+                if (needsBridge && domain && !bridge.hasBridge(domain, domain)) {
                     throw new Error(`Bridge url needed to render popup`);
                 }
 
