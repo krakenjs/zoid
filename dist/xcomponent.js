@@ -1474,8 +1474,8 @@
                             return _this2.showComponent();
                         });
                     }
-                    tasks.openBridge = tasks.open.then(function() {
-                        return _this2.openBridge();
+                    tasks.openBridge = tasks.getDomain.then(function(domain) {
+                        return _this2.openBridge("string" == typeof domain ? domain : null);
                     });
                     if (_this2.html) tasks.loadHTML = tasks.open.then(function() {
                         return _this2.loadHTML();
@@ -1679,21 +1679,22 @@
                     throw new Error("Child exports were not available");
                 });
             };
-            ParentComponent.prototype.openBridge = function() {
+            ParentComponent.prototype.openBridge = function(domain) {
                 var _this10 = this;
                 return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                     if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge) {
-                        var bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
+                        var needsBridge = __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.needsBridge({
+                            win: _this10.window,
+                            domain: domain
+                        }), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
                         if (bridgeUrl) {
                             var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
                             if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
-                            return __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.needsBridge({
-                                win: _this10.window,
-                                domain: bridgeDomain
-                            }) ? __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
+                            return needsBridge ? __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
                                 if (result) return result;
                             }) : void 0;
                         }
+                        if (needsBridge && domain && !__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.hasBridge(domain)) throw new Error("Bridge url needed to render popup");
                     }
                 });
             };
@@ -3217,11 +3218,14 @@
             return __WEBPACK_IMPORTED_MODULE_2__common__.l;
         });
         var __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(57);
+        __webpack_require__.d(__webpack_exports__, "hasBridge", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
+        });
         __webpack_require__.d(__webpack_exports__, "openBridge", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__parent__.c;
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.d;
         });
         __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
-            return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.c;
         });
         __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.a;
@@ -5202,7 +5206,7 @@
             return CONFIG;
         });
         var _ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(30), CONFIG = {
-            ALLOW_POSTMESSAGE_POPUP: !0,
+            ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
             ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
@@ -5799,6 +5803,10 @@
             iframe.src = url;
             return iframe;
         }
+        function hasBridge(url, domain) {
+            domain = domain || Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)(url);
+            return Boolean(__WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain]);
+        }
         function openBridge(url, domain) {
             domain = domain || Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)(url);
             if (__WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain]) return __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain];
@@ -5848,8 +5856,9 @@
             __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = {};
             __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
         }
-        __webpack_exports__.c = openBridge;
-        __webpack_exports__.b = linkUrl;
+        __webpack_exports__.b = hasBridge;
+        __webpack_exports__.d = openBridge;
+        __webpack_exports__.c = linkUrl;
         __webpack_exports__.a = destroyBridges;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_4__lib__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_6__interface__ = __webpack_require__(12), __WEBPACK_IMPORTED_MODULE_7__drivers__ = __webpack_require__(8), __WEBPACK_IMPORTED_MODULE_8__common__ = __webpack_require__(24);
         __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges || {};
@@ -5936,6 +5945,9 @@
         });
         __webpack_require__.d(__webpack_exports__, "needsBridgeForBrowser", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridgeForBrowser;
+        });
+        __webpack_require__.d(__webpack_exports__, "hasBridge", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__index__.hasBridge;
         });
         __webpack_require__.d(__webpack_exports__, "needsBridgeForWin", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridgeForWin;
@@ -6055,8 +6067,8 @@
                                     if (resTimeout === 1 / 0) return;
                                     cycleTime = Math.min(resTimeout, 2e3);
                                 } else {
-                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
-                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
+                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)() + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
+                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.f)() + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
                                 }
                                 setTimeout(cycle, cycleTime);
                             }
