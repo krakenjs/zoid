@@ -1683,10 +1683,11 @@
                 var _this10 = this;
                 return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                     if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge) {
-                        var needsBridge = __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.needsBridge({
-                            win: _this10.window,
-                            domain: domain
-                        }), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
+                        var needsBridgeParams = {
+                            win: _this10.window
+                        };
+                        domain && (needsBridgeParams.domain = domain);
+                        var needsBridge = __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.needsBridge(needsBridgeParams), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
                         if (bridgeUrl) {
                             var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
                             if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
@@ -1694,7 +1695,7 @@
                                 if (result) return result;
                             }) : void 0;
                         }
-                        if (needsBridge && domain && !__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.hasBridge(domain)) throw new Error("Bridge url needed to render popup");
+                        if (needsBridge && domain && !__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.hasBridge(domain, domain)) throw new Error("Bridge url needed to render popup");
                     }
                 });
             };
