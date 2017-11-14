@@ -2006,9 +2006,9 @@
                 });
             };
             ParentComponent.prototype.focus = function() {
-                if (!this.window) throw new Error("No window to focus");
+                if (!this.window || Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.x)(this.window)) throw new Error("No window to focus");
                 if (this.driver.openOnFocus) try {
-                    window.open("", this.childWindowName);
+                    window.open("", this.childWindowName).focus();
                 } catch (err) {}
                 this.component.log("focus");
                 this.window.focus();
@@ -2688,7 +2688,7 @@
                         }
                         var builder = _ref2;
                         try {
-                            Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(meta, builder(), !1);
+                            Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(meta, builder(meta), !1);
                         } catch (err) {
                             console.error("Error in custom meta builder:", err.stack || err.toString());
                         }
@@ -2705,7 +2705,7 @@
                         }
                         var _builder = _ref3;
                         try {
-                            Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(headers, _builder(), !1);
+                            Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(headers, _builder(headers), !1);
                         } catch (err) {
                             console.error("Error in custom header builder:", err.stack || err.toString());
                         }
@@ -2757,7 +2757,7 @@
                 }
                 var builder = _ref4;
                 try {
-                    Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(payload, builder(), !1);
+                    Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(payload, builder(payload), !1);
                 } catch (err) {
                     console.error("Error in custom payload builder:", err.stack || err.toString());
                 }
@@ -2818,7 +2818,7 @@
                     }
                     var builder = _ref5;
                     try {
-                        Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(payload, builder(), !1);
+                        Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(payload, builder(payload), !1);
                     } catch (err) {
                         console.error("Error in custom tracking builder:", err.stack || err.toString());
                     }
@@ -7470,10 +7470,14 @@
                 }
                 _this.focus = function() {
                     if (_this.driver.openOnFocus) try {
-                        window.open("", _this.childWindowName).focus();
+                        var win = window.open("", _this.childWindowName);
+                        win && win.focus();
                     } catch (err) {}
                     return options.overrides.focus.call(_this);
                 };
+                _this.clean.register("destroyFocusOverride", function() {
+                    _this.focus = function() {};
+                });
                 _this.userClose = options.overrides.userClose;
                 _this.getDomain = options.overrides.getDomain;
                 _this.error = options.overrides.error;
