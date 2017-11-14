@@ -70,13 +70,19 @@ export class DelegateComponent<P> extends BaseComponent<P> {
             if (this.driver.openOnFocus) {
                 try {
                     let win = window.open('', this.childWindowName);
-                    win.focus();
+                    if (win) {
+                        win.focus();
+                    }
                 } catch (err) {
                     // pass
                 }
             }
             return options.overrides.focus.call(this);
         };
+
+        this.clean.register('destroyFocusOverride', () => {
+            this.focus = () => {};
+        });
 
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;

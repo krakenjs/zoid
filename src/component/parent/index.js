@@ -1104,10 +1104,11 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     focus() {
 
-        if (this.window) {
+        if (this.window && !isWindowClosed(this.window)) {
             if (this.driver.openOnFocus) {
                 try {
-                    window.open('', this.childWindowName);
+                    let win = window.open('', this.childWindowName);
+                    win.focus();
                 } catch (err) {
                     // pass
                 }
