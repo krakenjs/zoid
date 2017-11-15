@@ -4379,7 +4379,7 @@
                     _ref2 = _i2.value;
                 }
                 var _key = _ref2;
-                if (!props.hasOwnProperty(_key)) {
+                if (!(props.hasOwnProperty(_key) || instance.props && instance.props.hasOwnProperty(_key))) {
                     var normalizedProp = normalizeProp(component, instance, props, _key, props[_key]);
                     void 0 !== normalizedProp && (result[_key] = normalizedProp);
                 }
