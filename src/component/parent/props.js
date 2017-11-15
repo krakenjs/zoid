@@ -143,7 +143,7 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
     }
 
     for (let key of component.getPropNames()) {
-        if (!props.hasOwnProperty(key)) {
+        if (!props.hasOwnProperty(key) && (!instance.props || !instance.props.hasOwnProperty(key))) {
 
             // $FlowFixMe
             let normalizedProp = normalizeProp(component, instance, props, key, props[key]);
