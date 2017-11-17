@@ -81,6 +81,7 @@ export class DelegateComponent<P> extends BaseComponent<P> {
         };
 
         this.clean.register('destroyFocusOverride', () => {
+            // $FlowFixMe
             this.focus = () => {};
         });
 
