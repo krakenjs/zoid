@@ -410,7 +410,7 @@ export class Component<P> extends BaseComponent<P> {
     */
 
     init(props : (PropsType & P), context : ?string, element : ElementRefType) : ParentComponent<P> {
-        return new ParentComponent(this, this.getRenderContext(context), { props });
+        return new ParentComponent(this, this.getRenderContext(context, element), { props });
     }
 
 
