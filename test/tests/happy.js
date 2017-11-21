@@ -195,6 +195,19 @@ describe('xcomponent happy cases', () => {
         });
     });
 
+    it('should try to render to defaultContext iframe using renderTo', done => {
+        
+        let originalDefaultContext = testComponent.defaultContext;
+        testComponent.defaultContext = 'iframe';
+
+        testComponent.renderTo(window, {
+            onEnter() {
+                testComponent.defaultContext = originalDefaultContext;
+                done();
+            }
+        });
+    });
+
     it('should try to render to defaultContext popup', done => {
 
         let originalDefaultContext = testComponent.defaultContext;
@@ -244,6 +257,31 @@ describe('xcomponent happy cases', () => {
                 testComponent.defaultContext = originalDefaultContext;
                 testComponent.contexts = originalContexts;
                 done();
+            }
+        });
+    });
+
+    it('should try to render to iframe, when both iframe and popup are supported contexts', done => {
+        
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: true,
+            iframe: true
+        };
+
+        testComponent.render({
+            onEnter() {
+                try {
+                    assert.equal(this.context, 'iframe');
+                    testComponent.defaultContext = originalDefaultContext;
+                    testComponent.contexts = originalContexts;
+                    done();
+                } catch (e) {
+                    done(e);
+                }
             }
         });
     });

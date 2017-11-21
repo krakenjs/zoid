@@ -410,8 +410,7 @@ export class Component<P> extends BaseComponent<P> {
     */
 
     init(props : (PropsType & P), context : ?string, element : ElementRefType) : ParentComponent<P> {
-        context = this.getRenderContext(element);
-        return new ParentComponent(this, context, { props });
+        return new ParentComponent(this, this.getRenderContext(context), { props });
     }
 
 
@@ -419,23 +418,39 @@ export class Component<P> extends BaseComponent<P> {
         return new DelegateComponent(this, source, options);
     }
 
-    validateRenderContext(context : string) {
-        if (!this.contexts[context]) {
+    validateRenderContext(context : ?string, element : ?(ElementRefType)) {
+        if (context && !this.contexts[context]) {
             throw new Error(`[${this.tag}] Can not render to ${context}`);
+        }
+
+        if (element) {
+            const defaultContext = this.getDefaultContext();
+
+            if (context === CONTEXT_TYPES.POPUP || defaultContext === CONTEXT_TYPES.POPUP) {
+                throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.POPUP} does not support use of an element selector`);
+            }
         }
     }
 
-    getRenderContext(element : ElementRefType) : string {
-
-        if (element) {
-            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
-            return CONTEXT_TYPES.IFRAME;
-        } else if (this.defaultContext) {
+    getDefaultContext() : string {
+        if (this.defaultContext) {
             return this.defaultContext;
         } else if (this.contexts[CONTEXT_TYPES.IFRAME]) {
             return CONTEXT_TYPES.IFRAME;
         } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
             return CONTEXT_TYPES.POPUP;
+        }
+    }
+
+    getRenderContext(context : ?string, element : ?(ElementRefType)) : string {
+        const defaultContext = this.getDefaultContext();
+
+        if (context || element) {
+            this.validateRenderContext(context, element);
+            
+            return context ? context : defaultContext;
+        } else if (defaultContext) {
+            return defaultContext;
         }
 
         throw new Error(`[${this.tag}] No context options available for render`);
@@ -448,52 +463,60 @@ export class Component<P> extends BaseComponent<P> {
         Shortcut to render a parent component
     */
 
-    render(props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+    render(props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(element), { props }).render(element || document.body);
+            const context = this.getRenderContext(null, element);
+
+            if (context === CONTEXT_TYPES.IFRAME && !element) {
+                element = document.body;
+            }
+
+            return new ParentComponent(this, context, { props }).render(element);
         });
     }
 
-    renderIframe(props : (PropsType & P), element : ?(ElementRefType) = document.body) : ZalgoPromise<ParentComponent<P>> {
+    renderIframe(props : (PropsType & P), element : ?ElementRefType = document.body) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
             if (!element) {
                 throw new Error(`Expected element to be passed`);
             }
 
-            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
-            return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).render(element);
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME), { props }).render(element);
         });
     }
 
     renderPopup(props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            this.validateRenderContext(CONTEXT_TYPES.POPUP);
-            return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).render();
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.POPUP), { props }).render();
         });
     }
 
-    renderTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
+    renderTo(win : CrossDomainWindowType, props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(element), { props }).renderTo(win, element);
+            const context = this.getRenderContext(null, element);
+            
+            if (context === CONTEXT_TYPES.IFRAME && !element) {
+                element = document.body;
+            }
+
+            return new ParentComponent(this, context, { props }).renderTo(win, element);
         });
     }
 
     renderIframeTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            this.validateRenderContext(CONTEXT_TYPES.IFRAME);
-            return new ParentComponent(this, CONTEXT_TYPES.IFRAME, { props }).renderTo(win, element);
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME), { props }).renderTo(win, element);
         });
     }
 
     renderPopupTo(win : CrossDomainWindowType, props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            this.validateRenderContext(CONTEXT_TYPES.POPUP);
-            return new ParentComponent(this, CONTEXT_TYPES.POPUP, { props }).renderTo(win);
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.POPUP), { props }).renderTo(win);
         });
     }
 
     prerender(props : (PropsType & P), element : ElementRefType) : { render : ((PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>>, renderTo : (CrossDomainWindowType, (PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>> } {
-        let instance = new ParentComponent(this, this.getRenderContext(element), { props });
+        let instance = new ParentComponent(this, this.getRenderContext(null, element), { props });
         instance.prefetch();
 
         return {

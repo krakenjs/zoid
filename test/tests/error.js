@@ -72,13 +72,6 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should try to render a component with a specified element when iframe mode is not supported', done => {
-
-        testComponent3.render({}, document.body).catch(() => {
-            done();
-        });
-    });
-
     it('should try to render to when iframe is the only available option but no element is passed', done => {
 
         let originalDefaultContext = testComponent.defaultContext;
@@ -95,6 +88,87 @@ describe('xcomponent error cases', () => {
             testComponent.contexts = originalContexts;
             done();
         });
+    });
+
+    it('should try to render a popup when an element selector is specified', done => {
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: true,
+            iframe: false
+        };
+
+        testComponent.render(null, 'moo').then(() => {
+            done('Expected an error to be thrown');
+        }).catch(() => {
+            testComponent.defaultContext = originalDefaultContext;
+            testComponent.contexts = originalContexts;
+
+            done();
+        });
+    });
+
+    it('should try to render a popup when an element selector is specified using renderTo', done => {
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: true,
+            iframe: false
+        };
+
+        testComponent.renderTo(window, null, 'moo').then(() => {
+            done('Expected an error to be thrown');
+        }).catch(() => {
+            testComponent.defaultContext = originalDefaultContext;
+            testComponent.contexts = originalContexts;
+
+            done();
+        });
+    });
+
+    it('should throw an error if the component does not have a suitable context configured', done => {
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: false,
+            iframe: false
+        };
+
+        testComponent.render(null).then(() => {
+            done('Expected an error to be thrown');
+        }).catch(() => {
+            testComponent.defaultContext = originalDefaultContext;
+            testComponent.contexts = originalContexts;
+
+            done();
+        });
+    });
+
+    it('should throw an error if the context specified is not accepted by the component config', done => {
+        let originalDefaultContext = testComponent.defaultContext;
+        let originalContexts = testComponent.contexts;
+
+        delete testComponent.defaultContext;
+        testComponent.contexts = {
+            popup: false,
+            iframe: true
+        };
+
+        try {
+            testComponent.init(null, 'popup', 'moo');
+            done('expected error to be thrown');
+        } catch (e) {
+            testComponent.defaultContext = originalDefaultContext;
+            testComponent.contexts = originalContexts;
+
+            done();
+        }
     });
 
     it('should call onclose when a popup is closed by someone other than xcomponent', done => {
