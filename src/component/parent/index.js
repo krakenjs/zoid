@@ -107,10 +107,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         this.onInit = new ZalgoPromise();
 
-        this.clean.register(() => {
-            this.onInit = new ZalgoPromise();
-        });
-
         this.onInit.catch(err => {
             return this.error(err);
         });
@@ -1280,12 +1276,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     tryInit(method : () => mixed) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(method).catch(err => {
-
             this.onInit.reject(err);
-            throw err;
-
         }).then(() => {
-
             return this.onInit;
         });
     }
