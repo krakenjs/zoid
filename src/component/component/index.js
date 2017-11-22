@@ -418,17 +418,13 @@ export class Component<P> extends BaseComponent<P> {
         return new DelegateComponent(this, source, options);
     }
 
-    validateRenderContext(context : ?string, element : ?(ElementRefType)) {
+    validateRenderContext(context : ?string, element : ?ElementRefType) {
         if (context && !this.contexts[context]) {
             throw new Error(`[${this.tag}] Can not render to ${context}`);
         }
 
-        if (element) {
-            const defaultContext = this.getDefaultContext();
-
-            if (context === CONTEXT_TYPES.POPUP || defaultContext === CONTEXT_TYPES.POPUP) {
-                throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.POPUP} does not support use of an element selector`);
-            }
+        if (element && context === CONTEXT_TYPES.POPUP) {
+            throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.POPUP} does not support use of an element selector`);
         }
     }
 
@@ -440,20 +436,14 @@ export class Component<P> extends BaseComponent<P> {
         } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
             return CONTEXT_TYPES.POPUP;
         }
+
+        throw new Error(`Can not determine default context`);
     }
 
     getRenderContext(context : ?string, element : ?(ElementRefType)) : string {
-        const defaultContext = this.getDefaultContext();
-
-        if (context || element) {
-            this.validateRenderContext(context, element);
-            
-            return context ? context : defaultContext;
-        } else if (defaultContext) {
-            return defaultContext;
-        }
-
-        throw new Error(`[${this.tag}] No context options available for render`);
+        context = context || this.getDefaultContext();
+        this.validateRenderContext(context, element);
+        return context;
     }
 
 
