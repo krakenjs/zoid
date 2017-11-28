@@ -745,7 +745,6 @@
             Component.prototype.validateRenderContext = function(context, element) {
                 if (context && !this.contexts[context]) throw new Error("[" + this.tag + "] Can not render to " + context);
                 if (!element && context === __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME) throw new Error("[" + this.tag + "] Context type " + __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME + " requires an element selector");
-                if (element && context === __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP) throw new Error("[" + this.tag + "] Context type " + __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP + " does not support use of an element selector");
             };
             Component.prototype.getDefaultContext = function() {
                 if (this.defaultContext) return this.defaultContext;
