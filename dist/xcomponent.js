@@ -744,6 +744,7 @@
             };
             Component.prototype.validateRenderContext = function(context, element) {
                 if (context && !this.contexts[context]) throw new Error("[" + this.tag + "] Can not render to " + context);
+                if (!element && context === __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME) throw new Error("[" + this.tag + "] Context type " + __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME + " requires an element selector");
                 if (element && context === __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP) throw new Error("[" + this.tag + "] Context type " + __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.POPUP + " does not support use of an element selector");
             };
             Component.prototype.getDefaultContext = function() {
@@ -760,18 +761,15 @@
             Component.prototype.render = function(props, element) {
                 var _this4 = this;
                 return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    var context = _this4.getRenderContext(null, element);
-                    context !== __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME || element || (element = document.body);
-                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this4, context, {
+                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this4, _this4.getRenderContext(null, element), {
                         props: props
                     }).render(element);
                 });
             };
-            Component.prototype.renderIframe = function(props) {
-                var _this5 = this, element = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : document.body;
+            Component.prototype.renderIframe = function(props, element) {
+                var _this5 = this;
                 return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    if (!element) throw new Error("Expected element to be passed");
-                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this5, _this5.getRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME), {
+                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this5, _this5.getRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME, element), {
                         props: props
                     }).render(element);
                 });
@@ -787,9 +785,7 @@
             Component.prototype.renderTo = function(win, props, element) {
                 var _this7 = this;
                 return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    var context = _this7.getRenderContext(null, element);
-                    context !== __WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME || element || (element = document.body);
-                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this7, context, {
+                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this7, _this7.getRenderContext(null, element), {
                         props: props
                     }).renderTo(win, element);
                 });
@@ -797,7 +793,7 @@
             Component.prototype.renderIframeTo = function(win, props, element) {
                 var _this8 = this;
                 return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this8, _this8.getRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME), {
+                    return new __WEBPACK_IMPORTED_MODULE_5__parent__.a(_this8, _this8.getRenderContext(__WEBPACK_IMPORTED_MODULE_9__constants__.CONTEXT_TYPES.IFRAME, element), {
                         props: props
                     }).renderTo(win, element);
                 });
