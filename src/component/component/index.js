@@ -426,10 +426,6 @@ export class Component<P> extends BaseComponent<P> {
         if (!element && context === CONTEXT_TYPES.IFRAME) {
             throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.IFRAME} requires an element selector`);
         }
-
-        if (element && context === CONTEXT_TYPES.POPUP) {
-            throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.POPUP} does not support use of an element selector`);
-        }
     }
 
     getDefaultContext() : string {
