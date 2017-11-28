@@ -21,7 +21,7 @@ describe('parent domain check', () => {
                 onEnter: () => {
                     done();
                 }
-            });
+            }, document.body);
         });
 
         it('allowedParentDomains is specified as string and parent domian match', done => {
@@ -29,7 +29,7 @@ describe('parent domain check', () => {
                 onEnter: () => {
                     done();
                 }
-            });
+            }, document.body);
         });
 
         it('allowedParentDomains is specified as array of strings and parent domian match', done => {
@@ -37,7 +37,7 @@ describe('parent domain check', () => {
                 onEnter: () => {
                     done();
                 }
-            });
+            }, document.body);
         });
 
         it('allowedParentDomains is specified as array of strings with a wildcard', done => {
@@ -45,7 +45,7 @@ describe('parent domain check', () => {
                 onEnter: () => {
                     done();
                 }
-            });
+            }, document.body);
         });
 
         it('allowedParentDomains is specified as array of regex and parent domian match', done => {
@@ -53,14 +53,14 @@ describe('parent domain check', () => {
                 onEnter: () => {
                     done();
                 }
-            });
+            }, document.body);
         });
 
     });
 
     describe('should throw error when: ', () => {
         it('allowedParentDomains is specified as string and parent domain does not match', done => {
-            testComponent_parentDomains_string.renderIframe()
+            testComponent_parentDomains_string.renderIframe({}, document.body)
             .catch(err => {
                 assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
@@ -69,7 +69,7 @@ describe('parent domain check', () => {
         });
 
         it('allowedParentDomains is specified as array of strings and parent domain does not match', done => {
-            testComponent_parentDomains_array_of_strings.renderIframe()
+            testComponent_parentDomains_array_of_strings.renderIframe({}, document.body)
             .catch(err => {
                 assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
@@ -78,7 +78,7 @@ describe('parent domain check', () => {
         });
 
         it('allowedParentDomains is specified as array of regex expressions and parent domain does not match', done => {
-            testComponent_parentDomains_array_of_regex.renderIframe()
+            testComponent_parentDomains_array_of_regex.renderIframe({}, document.body)
             .catch(err => {
                 assert.isTrue(err instanceof RenderError);
                 assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);

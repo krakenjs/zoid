@@ -14,7 +14,7 @@ describe('xcomponent console logging', () => {
                         done();
                     }
                 }
-            });
+            }, document.body);
         });
 
         it('when passing logLevel as prop, it should override component configured value', done => {
@@ -27,7 +27,7 @@ describe('xcomponent console logging', () => {
                         done();
                     }
                 }
-            });
+            }, document.body);
         });
     });
 
@@ -41,7 +41,7 @@ describe('xcomponent console logging', () => {
                         done();
                     }
                 }
-            });
+            }, document.body);
         });
 
         it('when passing logLevel as prop, it should override component default value', done => {
@@ -54,7 +54,7 @@ describe('xcomponent console logging', () => {
                         done();
                     }
                 }
-            });
+            }, document.body);
         });
     });
 

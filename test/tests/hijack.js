@@ -28,7 +28,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
@@ -61,7 +61,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         document.getElementById('hijackButton').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
@@ -90,7 +90,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;
@@ -119,7 +119,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME);
+        }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         document.getElementById('hijackLink').addEventListener('click', event => {
             let target = event.target.form ? event.target.form : event.target;

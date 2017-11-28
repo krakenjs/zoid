@@ -37,7 +37,7 @@ describe('xcomponent error cases', () => {
             run: `
                 window.xchild.error(new Error('xxxxx'));
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and timeout, then call onTimeout', done => {
@@ -47,7 +47,7 @@ describe('xcomponent error cases', () => {
             onTimeout() {
                 done();
             }
-        });
+        }, document.body);
     });
 
     it('should enter a component and timeout, then call onError in the absense of onTimeout', done => {
@@ -57,7 +57,7 @@ describe('xcomponent error cases', () => {
             onError() {
                 done();
             }
-        });
+        }, document.body);
     });
 
     it.skip('should enter a component and error out when the page name is not valid', done => {
@@ -83,7 +83,7 @@ describe('xcomponent error cases', () => {
             iframe: true
         };
 
-        testComponent.render().then(() => {
+        testComponent.render().catch(() => {
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
             done();
@@ -200,6 +200,6 @@ describe('xcomponent error cases', () => {
             onClose() {
                 done();
             }
-        });
+        }, document.body);
     });
 });

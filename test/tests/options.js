@@ -19,7 +19,7 @@ describe('xcomponent options', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component with a custom env', done => {
@@ -35,7 +35,7 @@ describe('xcomponent options', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a memoized function', done => {
@@ -62,7 +62,7 @@ describe('xcomponent options', () => {
                     });
                 });
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a once function', done => {
@@ -89,7 +89,7 @@ describe('xcomponent options', () => {
                     });
                 });
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a denodeify function', done => {
@@ -112,7 +112,7 @@ describe('xcomponent options', () => {
                     return window.xprops.complete(result);
                 });
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a denodeify function returning a promise', done => {
@@ -134,7 +134,7 @@ describe('xcomponent options', () => {
                 });
             `
 
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a denodeify function with an error', done => {
@@ -158,7 +158,7 @@ describe('xcomponent options', () => {
                 });
             `
 
-        });
+        }, document.body);
     });
 
     it('should enter a component and call a denodeify function incorrectly', done => {
@@ -186,6 +186,6 @@ describe('xcomponent options', () => {
                 });
             `
 
-        });
+        }, document.body);
     });
 });

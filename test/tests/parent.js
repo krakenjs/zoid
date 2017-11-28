@@ -14,7 +14,7 @@ describe('xcomponent render to parent', () => {
                     onEnter: function() {
                         return window.xprops.foo();
                     }
-                });
+                }, 'body');
             `
         }, document.body);
     });
@@ -64,7 +64,7 @@ describe('xcomponent render to parent', () => {
 
                     run: 'window.xprops.foo();'
 
-                });
+                }, 'body');
             `
         }, document.body);
     });
@@ -120,7 +120,7 @@ describe('xcomponent render to parent', () => {
                     onClose: function() {
                         window.xchild.close();
                     }
-                });
+                }, 'body');
             `
         }, document.body);
     });
@@ -151,7 +151,7 @@ describe('xcomponent render to parent', () => {
                         return window.xprops.childEntered();
                     }
 
-                });
+                }, 'body');
             `
         }, document.body);
     });

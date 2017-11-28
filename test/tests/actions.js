@@ -33,7 +33,7 @@ describe('xcomponent actions', () => {
                 this.close();
             }
 
-        });
+        }, document.body);
     });
 
     it('should focus an xcomponent popup', done => {

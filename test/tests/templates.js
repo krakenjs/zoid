@@ -50,6 +50,6 @@ describe('xcomponent templates and styles', () => {
                 this.container.querySelector('.xcomponent-close').click();
             }
 
-        });
+        }, document.body);
     });
 });

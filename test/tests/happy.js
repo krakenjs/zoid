@@ -8,7 +8,7 @@ describe('xcomponent happy cases', () => {
 
         testComponent.renderIframe({
             onEnter: done
-        });
+        }, document.body);
     });
 
     it.skip('should enter a component rendered as an iframe with the correct dimensions', done => {
@@ -105,7 +105,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo('bar');
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component rendered as an iframe', done => {
@@ -172,7 +172,7 @@ describe('xcomponent happy cases', () => {
                     window.xprops.foo('bar');
                 });
             `
-        });
+        }, document.body);
     });
 
     it('should try to render by passing in an element', done => {
@@ -192,7 +192,7 @@ describe('xcomponent happy cases', () => {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        });
+        }, document.body);
     });
 
     it('should try to render to defaultContext iframe using renderTo', done => {
@@ -205,7 +205,7 @@ describe('xcomponent happy cases', () => {
                 testComponent.defaultContext = originalDefaultContext;
                 done();
             }
-        });
+        }, 'body');
     });
 
     it('should try to render to defaultContext popup', done => {
@@ -258,7 +258,7 @@ describe('xcomponent happy cases', () => {
                 testComponent.contexts = originalContexts;
                 done();
             }
-        });
+        }, document.body);
     });
 
     it('should try to render to iframe, when both iframe and popup are supported contexts', done => {
@@ -283,7 +283,7 @@ describe('xcomponent happy cases', () => {
                     done(e);
                 }
             }
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a string prop', done => {
@@ -300,7 +300,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.stringProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a number prop', done => {
@@ -317,7 +317,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.numberProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a parseInted number prop', done => {
@@ -334,7 +334,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.numberProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a boolean prop', done => {
@@ -351,7 +351,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a truthy boolean prop', done => {
@@ -368,7 +368,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a falsy boolean prop', done => {
@@ -385,7 +385,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.booleanProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with an object prop', done => {
@@ -405,7 +405,7 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.objectProp);
             `
-        });
+        }, document.body);
     });
 
     it('should enter a component and call back with a function prop', done => {
@@ -422,6 +422,6 @@ describe('xcomponent happy cases', () => {
             run: `
                 window.xprops.foo(window.xprops.functionProp);
             `
-        });
+        }, document.body);
     });
 });

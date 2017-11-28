@@ -423,6 +423,10 @@ export class Component<P> extends BaseComponent<P> {
             throw new Error(`[${this.tag}] Can not render to ${context}`);
         }
 
+        if (!element && context === CONTEXT_TYPES.IFRAME) {
+            throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.IFRAME} requires an element selector`);
+        }
+
         if (element && context === CONTEXT_TYPES.POPUP) {
             throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.POPUP} does not support use of an element selector`);
         }
@@ -440,7 +444,7 @@ export class Component<P> extends BaseComponent<P> {
         throw new Error(`Can not determine default context`);
     }
 
-    getRenderContext(context : ?string, element : ?(ElementRefType)) : string {
+    getRenderContext(context : ?string, element : ?ElementRefType) : string {
         context = context || this.getDefaultContext();
         this.validateRenderContext(context, element);
         return context;
@@ -455,23 +459,13 @@ export class Component<P> extends BaseComponent<P> {
 
     render(props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            const context = this.getRenderContext(null, element);
-
-            if (context === CONTEXT_TYPES.IFRAME && !element) {
-                element = document.body;
-            }
-
-            return new ParentComponent(this, context, { props }).render(element);
+            return new ParentComponent(this, this.getRenderContext(null, element), { props }).render(element);
         });
     }
 
-    renderIframe(props : (PropsType & P), element : ?ElementRefType = document.body) : ZalgoPromise<ParentComponent<P>> {
+    renderIframe(props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            if (!element) {
-                throw new Error(`Expected element to be passed`);
-            }
-
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME), { props }).render(element);
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props }).render(element);
         });
     }
 
@@ -483,19 +477,13 @@ export class Component<P> extends BaseComponent<P> {
 
     renderTo(win : CrossDomainWindowType, props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            const context = this.getRenderContext(null, element);
-            
-            if (context === CONTEXT_TYPES.IFRAME && !element) {
-                element = document.body;
-            }
-
-            return new ParentComponent(this, context, { props }).renderTo(win, element);
+            return new ParentComponent(this, this.getRenderContext(null, element), { props }).renderTo(win, element);
         });
     }
 
     renderIframeTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME), { props }).renderTo(win, element);
+            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props }).renderTo(win, element);
         });
     }
 
