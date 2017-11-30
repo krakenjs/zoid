@@ -548,7 +548,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             if (!bridgeUrl) {
 
                 if (needsBridge && domain && !bridge.hasBridge(domain, domain)) {
-                    throw new Error(`Bridge url needed to render popup`);
+                    throw new Error(`Bridge url needed to render ${ this.context }`);
                 }
 
                 return;
