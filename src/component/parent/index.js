@@ -173,7 +173,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 });
             }
 
-            tasks.openBridge = tasks.getDomain.then((domain) => {
+            tasks.openBridge = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
                 return this.openBridge(typeof domain === 'string' ? domain : null);
             });
 
@@ -532,7 +532,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     openBridge(domain : ?string) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
-            if (!bridge) {
+            if (!bridge || !this.driver.needsBridge) {
                 return;
             }
 
