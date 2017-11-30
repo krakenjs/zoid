@@ -1467,15 +1467,16 @@
                             return _this2.showComponent();
                         });
                     }
-                    tasks.openBridge = tasks.getDomain.then(function(domain) {
+                    tasks.openBridge = __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ tasks.getDomain, tasks.open ]).then(function(_ref4) {
+                        var domain = _ref4[0];
                         return _this2.openBridge("string" == typeof domain ? domain : null);
                     });
                     if (_this2.html) tasks.loadHTML = tasks.open.then(function() {
                         return _this2.loadHTML();
                     }); else if (loadUrl) {
                         tasks.buildUrl = _this2.buildUrl();
-                        tasks.loadUrl = __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate ]).then(function(_ref4) {
-                            var url = _ref4[0];
+                        tasks.loadUrl = __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate ]).then(function(_ref5) {
+                            var url = _ref5[0];
                             return _this2.loadUrl(url);
                         });
                         tasks.runTimeout = tasks.loadUrl.then(function() {
@@ -1583,7 +1584,7 @@
                 };
             };
             ParentComponent.prototype.buildChildWindowName = function() {
-                var _ref5 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref5$renderTo = _ref5.renderTo, renderTo = void 0 === _ref5$renderTo ? window : _ref5$renderTo, sameDomain = Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.t)(renderTo), uid = Object(__WEBPACK_IMPORTED_MODULE_6__lib__._0)(), tag = this.component.tag, sProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.R)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
+                var _ref6 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref6$renderTo = _ref6.renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.t)(renderTo), uid = Object(__WEBPACK_IMPORTED_MODULE_6__lib__._0)(), tag = this.component.tag, sProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.R)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
                     type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID,
                     uid: uid
                 } : {
@@ -1620,8 +1621,8 @@
             };
             ParentComponent.prototype.buildUrl = function() {
                 var _this7 = this;
-                return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ this.props.url, Object(__WEBPACK_IMPORTED_MODULE_10__props__.b)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref6) {
-                    var url = _ref6[0], query = _ref6[1];
+                return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.all([ this.props.url, Object(__WEBPACK_IMPORTED_MODULE_10__props__.b)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref7) {
+                    var url = _ref7[0], query = _ref7[1];
                     return url && !_this7.component.getValidDomain(url) ? url : __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         return url || _this7.component.getUrl(_this7.props.env, _this7.props);
                     }).then(function(finalUrl) {
@@ -1650,16 +1651,16 @@
             };
             ParentComponent.prototype.getPropsForChild = function() {
                 for (var result = {}, _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                    var _ref7;
+                    var _ref8;
                     if (_isArray) {
                         if (_i >= _iterator.length) break;
-                        _ref7 = _iterator[_i++];
+                        _ref8 = _iterator[_i++];
                     } else {
                         _i = _iterator.next();
                         if (_i.done) break;
-                        _ref7 = _i.value;
+                        _ref8 = _i.value;
                     }
-                    var key = _ref7, prop = this.component.getProp(key);
+                    var key = _ref8, prop = this.component.getProp(key);
                     prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
                 }
                 return result;
@@ -1675,7 +1676,7 @@
             ParentComponent.prototype.openBridge = function(domain) {
                 var _this10 = this;
                 return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
-                    if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge) {
+                    if (__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge && _this10.driver.needsBridge) {
                         var needsBridgeParams = {
                             win: _this10.window
                         };
@@ -1725,16 +1726,16 @@
                     onClose: this.props.onClose,
                     onDisplay: this.props.onDisplay
                 }, _iterator2 = this.component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                    var _ref8;
+                    var _ref9;
                     if (_isArray2) {
                         if (_i2 >= _iterator2.length) break;
-                        _ref8 = _iterator2[_i2++];
+                        _ref9 = _iterator2[_i2++];
                     } else {
                         _i2 = _iterator2.next();
                         if (_i2.done) break;
-                        _ref8 = _i2.value;
+                        _ref9 = _i2.value;
                     }
-                    var propName = _ref8;
+                    var propName = _ref9;
                     this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
                 }
                 var delegate = Object(__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.send)(win, __WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.DELEGATE + "_" + this.component.name, {
@@ -1762,24 +1763,24 @@
                             }
                         }
                     }
-                }).then(function(_ref9) {
-                    var data = _ref9.data;
+                }).then(function(_ref10) {
+                    var data = _ref10.data;
                     _this14.clean.register(data.destroy);
                     return data;
                 }).catch(function(err) {
                     throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + Object(__WEBPACK_IMPORTED_MODULE_6__lib__.X)(err));
                 }), overrides = this.driver.delegateOverrides;
                 _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                    var _ref10, _ret = function() {
+                    var _ref11, _ret = function() {
                         if (_isArray3) {
                             if (_i3 >= _iterator3.length) return "break";
-                            _ref10 = _iterator3[_i3++];
+                            _ref11 = _iterator3[_i3++];
                         } else {
                             _i3 = _iterator3.next();
                             if (_i3.done) return "break";
-                            _ref10 = _i3.value;
+                            _ref11 = _i3.value;
                         }
-                        var key = _ref10, val = overrides[key];
+                        var key = _ref11, val = overrides[key];
                         if (val === __WEBPACK_IMPORTED_MODULE_7__constants__.DELEGATE.CALL_ORIGINAL) return "continue";
                         var original = _this14[key];
                         _this14[key] = function() {
@@ -1855,8 +1856,8 @@
                 }
             };
             ParentComponent.prototype.listeners = function() {
-                var _ref11;
-                return _ref11 = {}, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.INIT] = function(source, data) {
+                var _ref12;
+                return _ref12 = {}, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.INIT] = function(source, data) {
                     this.childExports = data.exports;
                     this.onInit.resolve(this);
                     this.timeout && clearTimeout(this.timeout);
@@ -1864,27 +1865,27 @@
                         props: this.getPropsForChild(),
                         context: this.context
                     };
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CLOSE] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CLOSE] = function(source, data) {
                     this.close(data.reason);
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CHECK_CLOSE] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.CHECK_CLOSE] = function(source, data) {
                     this.checkClose();
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.RESIZE] = function(source, data) {
                     var _this20 = this;
                     return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                         if (_this20.driver.allowResize) return _this20.resize(data.width, data.height);
                     });
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ONRESIZE] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ONRESIZE] = function(source, data) {
                     this.event.trigger("resize");
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.HIDE] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.HIDE] = function(source, data) {
                     this.hide();
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.SHOW] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.SHOW] = function(source, data) {
                     this.show();
-                }, _ref11[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ERROR] = function(source, data) {
+                }, _ref12[__WEBPACK_IMPORTED_MODULE_7__constants__.POST_MESSAGE.ERROR] = function(source, data) {
                     this.error(new Error(data.error));
-                }, _ref11;
+                }, _ref12;
             };
             ParentComponent.prototype.resize = function(width, height) {
-                var _this21 = this, _ref12 = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, _ref12$waitForTransit = _ref12.waitForTransition, waitForTransition = void 0 === _ref12$waitForTransit || _ref12$waitForTransit;
+                var _this21 = this, _ref13 = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, _ref13$waitForTransit = _ref13.waitForTransition, waitForTransition = void 0 === _ref13$waitForTransit || _ref13$waitForTransit;
                 return __WEBPACK_IMPORTED_MODULE_3_zalgo_promise_src__.a.try(function() {
                     _this21.component.log("resize", {
                         height: Object(__WEBPACK_IMPORTED_MODULE_6__lib__.W)(height),
@@ -2032,7 +2033,7 @@
                 });
             };
             ParentComponent.prototype.renderTemplate = function(renderer) {
-                var _this32 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _ref13 = this.component.dimensions || {}, _ref13$width = _ref13.width, width = void 0 === _ref13$width ? __WEBPACK_IMPORTED_MODULE_7__constants__.DEFAULT_DIMENSIONS.WIDTH + "px" : _ref13$width, _ref13$height = _ref13.height, height = void 0 === _ref13$height ? __WEBPACK_IMPORTED_MODULE_7__constants__.DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref13$height;
+                var _this32 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _ref14 = this.component.dimensions || {}, _ref14$width = _ref14.width, width = void 0 === _ref14$width ? __WEBPACK_IMPORTED_MODULE_7__constants__.DEFAULT_DIMENSIONS.WIDTH + "px" : _ref14$width, _ref14$height = _ref14.height, height = void 0 === _ref14$height ? __WEBPACK_IMPORTED_MODULE_7__constants__.DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref14$height;
                 return renderer.call(this, _extends({
                     id: __WEBPACK_IMPORTED_MODULE_7__constants__.CLASS_NAMES.XCOMPONENT + "-" + this.component.tag + "-" + this.props.uid,
                     props: renderer.__xdomain__ ? null : this.props,
@@ -4396,6 +4397,7 @@
             allowResize: !0,
             openOnClick: !1,
             openOnFocus: !1,
+            needsBridge: !1,
             open: function(url) {
                 var _this = this, attributes = this.component.attributes.iframe || {};
                 this.iframe = Object(__WEBPACK_IMPORTED_MODULE_3__lib__.B)({
@@ -4513,6 +4515,7 @@
             allowResize: !1,
             openOnClick: !0,
             openOnFocus: !0,
+            needsBridge: !0,
             open: function() {
                 var _this5 = this, url = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "";
                 return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(function() {
