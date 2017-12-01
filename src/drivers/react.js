@@ -75,11 +75,11 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
 
                     let el = ReactDOM.findDOMNode(this);
 
-                    let parent = component.init(extend({}, this.props), null, el);
+                    let parent = component.init(extend({}, this.props), null, el.parentElement);
 
                     this.setState({ parent });
 
-                    parent.render(el);
+                    parent.render(el.parentElement);
                 }
 
                 componentDidUpdate() {
