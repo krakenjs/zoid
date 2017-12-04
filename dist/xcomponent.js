@@ -1683,13 +1683,18 @@
                         domain && (needsBridgeParams.domain = domain);
                         var needsBridge = __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.needsBridge(needsBridgeParams), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
                         if (bridgeUrl) {
+                            bridgeUrl = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.u)(bridgeUrl, {
+                                query: {
+                                    version: _this10.component.version
+                                }
+                            });
                             var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
                             if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
                             return needsBridge ? __WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
                                 if (result) return result;
                             }) : void 0;
                         }
-                        if (needsBridge && domain && !__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.hasBridge(domain, domain)) throw new Error("Bridge url needed to render popup");
+                        if (needsBridge && domain && !__WEBPACK_IMPORTED_MODULE_1_post_robot_src__.bridge.hasBridge(domain, domain)) throw new Error("Bridge url needed to render " + _this10.context);
                     }
                 });
             };
