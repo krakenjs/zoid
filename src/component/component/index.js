@@ -1,6 +1,6 @@
 /* @flow */
 
-import { on } from 'post-robot/src';
+import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
 
@@ -254,6 +254,10 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     listenDelegate() {
+        on(`${POST_MESSAGE.ALLOW_DELEGATE}_${this.name}`, ({ source, origin, data }) => {
+            return true;
+        });
+
         on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
 
             let domain = this.getDomain(null, data.env || this.defaultEnv);
@@ -272,6 +276,14 @@ export class Component<P> extends BaseComponent<P> {
                 overrides: delegate.getOverrides(data.context),
                 destroy:   () => delegate.destroy()
             };
+        });
+    }
+
+    canRenderTo(win : CrossDomainWindowType) : ZalgoPromise<boolean> {
+        return send(win, `${POST_MESSAGE.ALLOW_DELEGATE}_${this.name}`).then(({ data }) => {
+            return data;
+        }).catch(() => {
+            return false;
         });
     }
 

@@ -16,6 +16,7 @@ export const POST_MESSAGE = {
     RESIZE: `${XCOMPONENT}_resize`,
     ONRESIZE: `${XCOMPONENT}_onresize`,
     DELEGATE: `${XCOMPONENT}_delegate`,
+    ALLOW_DELEGATE: `${XCOMPONENT}_allow_delegate`,
     ERROR: `${XCOMPONENT}_error`,
     HIDE: `${XCOMPONENT}_hide`,
     SHOW: `${XCOMPONENT}_show`
