@@ -641,8 +641,12 @@
             };
             Component.prototype.listenDelegate = function() {
                 var _this3 = this;
-                Object(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
-                    var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
+                Object(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name, function(_ref3) {
+                    _ref3.source, _ref3.origin, _ref3.data;
+                    return !0;
+                });
+                Object(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.on)(__WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref4) {
+                    var source = _ref4.source, origin = _ref4.origin, data = _ref4.data, domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
                     if (!domain) throw new Error("Could not determine domain to allow remote render");
                     if (!Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.v)(domain, origin)) throw new Error("Can not render from " + origin + " - expected " + domain.toString());
                     var delegate = _this3.delegate(source, data.options);
@@ -654,21 +658,28 @@
                     };
                 });
             };
+            Component.prototype.canRenderTo = function(win) {
+                return Object(__WEBPACK_IMPORTED_MODULE_0_post_robot_src__.send)(win, __WEBPACK_IMPORTED_MODULE_9__constants__.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name).then(function(_ref5) {
+                    return _ref5.data;
+                }).catch(function() {
+                    return !1;
+                });
+            };
             Component.prototype.getValidDomain = function(url) {
                 if (url) {
                     var domain = Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)(url);
                     if ("string" == typeof this.domain && domain === this.domain) return domain;
                     if (this.domain && "object" === _typeof(this.domain)) for (var _iterator3 = Object.keys(this.domain), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                        var _ref4;
+                        var _ref6;
                         if (_isArray3) {
                             if (_i3 >= _iterator3.length) break;
-                            _ref4 = _iterator3[_i3++];
+                            _ref6 = _iterator3[_i3++];
                         } else {
                             _i3 = _iterator3.next();
                             if (_i3.done) break;
-                            _ref4 = _i3.value;
+                            _ref6 = _i3.value;
                         }
-                        var env = _ref4;
+                        var env = _ref6;
                         if ("test" !== env && domain === this.domain[env]) return domain;
                     }
                 }
@@ -1100,6 +1111,7 @@
             RESIZE: XCOMPONENT + "_resize",
             ONRESIZE: XCOMPONENT + "_onresize",
             DELEGATE: XCOMPONENT + "_delegate",
+            ALLOW_DELEGATE: XCOMPONENT + "_allow_delegate",
             ERROR: XCOMPONENT + "_error",
             HIDE: XCOMPONENT + "_hide",
             SHOW: XCOMPONENT + "_show"
