@@ -44,7 +44,7 @@
             if (!location) throw new Error("Can not read window location");
             var protocol = location.protocol;
             if (!protocol) throw new Error("Can not read window protocol");
-            if (protocol === CONSTANTS.FILE_PROTOCOL) return "file://";
+            if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
             var host = location.host;
             if (!host) throw new Error("Can not read window host");
             return protocol + "//" + host;
@@ -6714,7 +6714,10 @@
                 if ("string" != typeof content) throw new Error("Expected " + name + " tag content to be string, got " + (void 0 === content ? "undefined" : _typeof(content)));
                 if (arguments.length > 3) throw new Error("Expected only text content for " + name + " tag");
                 el.text = content;
-            } else for (var i = 2; i < arguments.length; i++) "string" == typeof arguments[i] ? el.textContent = arguments[i] : appendChild(el, arguments[i]);
+            } else for (var i = 2; i < arguments.length; i++) if ("string" == typeof arguments[i]) {
+                var textNode = document.createTextNode(arguments[i]);
+                appendChild(el, textNode);
+            } else appendChild(el, arguments[i]);
             return el;
         }
         __webpack_exports__.d = appendChild;
