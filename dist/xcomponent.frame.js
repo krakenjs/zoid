@@ -580,6 +580,7 @@
                 _this.addProp(options, "containerTemplate", __WEBPACK_IMPORTED_MODULE_11__templates__.a);
                 _this.addProp(options, "prerenderTemplate", __WEBPACK_IMPORTED_MODULE_11__templates__.b);
                 _this.addProp(options, "validate");
+                _this.addProp(options, "unsafeRenderTo", !1);
                 Component.components[_this.tag] = _this;
                 _this.registerDrivers();
                 _this.registerChild();
@@ -1547,7 +1548,7 @@
                 };
             };
             ParentComponent.prototype.buildChildWindowName = function() {
-                var _ref6 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref6$renderTo = _ref6.renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.p)(renderTo), uid = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.Y)(), tag = this.component.tag, sProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.P)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain, props = secureProps ? {
+                var _ref6 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref6$renderTo = _ref6.renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.p)(renderTo), uid = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.Y)(), tag = this.component.tag, sProps = Object(__WEBPACK_IMPORTED_MODULE_6__lib__.P)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), secureProps = !sameDomain && !this.component.unsafeRenderTo, props = secureProps ? {
                     type: __WEBPACK_IMPORTED_MODULE_7__constants__.INITIAL_PROPS.UID,
                     uid: uid
                 } : {
