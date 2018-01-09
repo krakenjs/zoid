@@ -1004,7 +1004,8 @@ export function jsxDom(name : string, props : { [ string ] : mixed }, content : 
     } else {
         for (let i = 2; i < arguments.length; i++) {
             if (typeof arguments[i] === 'string') {
-                el.textContent = arguments[i];
+                let textNode = document.createTextNode(arguments[i]);
+                appendChild(el, textNode);
             } else {
                 appendChild(el, arguments[i]);
             }
