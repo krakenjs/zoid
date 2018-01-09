@@ -51,14 +51,15 @@ export type ComponentOptionsType<P> = {
     version? : string,
     defaultEnv? : string,
 
-
     contexts? : { iframe? : boolean, popup? : boolean },
     defaultContext? : string,
 
     containerTemplate? : (RenderOptionsType) => HTMLElement,
     prerenderTemplate? : (RenderOptionsType) => HTMLElement,
 
-    validate? : (Component<P>, PropsType) => void // eslint-disable-line no-use-before-define
+    validate? : (Component<P>, PropsType) => void, // eslint-disable-line no-use-before-define
+
+    unsafeRenderTo : boolean
 };
 
 export type ComponentDriverType<P, T : mixed> = {
@@ -99,6 +100,8 @@ export class Component<P> extends BaseComponent<P> {
     prerenderTemplate : (RenderOptionsType) => HTMLElement
 
     validate : (Component<P>, (PropsType & P)) => void
+
+    unsafeRenderTo : boolean
 
     driverCache : { [string] : mixed }
 
@@ -180,7 +183,13 @@ export class Component<P> extends BaseComponent<P> {
         this.addProp(options, 'containerTemplate', defaultContainerTemplate);
         this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
 
+        // Validation
+
         this.addProp(options, 'validate');
+
+        // Security
+
+        this.addProp(options, 'unsafeRenderTo', false);
 
         // A mapping of tag->component so we can reference components by string tag name
 

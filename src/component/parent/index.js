@@ -374,7 +374,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         let componentParent = this.getComponentParentRef(renderTo);
         let renderParent    = this.getRenderParentRef(renderTo);
 
-        let secureProps = !sameDomain;
+        let secureProps = !sameDomain && !this.component.unsafeRenderTo;
 
         let props = secureProps
             ? { type: INITIAL_PROPS.UID, uid }
