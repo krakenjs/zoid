@@ -5,3 +5,7 @@ body {
 h3 {
     margin: 50px;
 }
+
+#container {
+    display: inline-block;
+}

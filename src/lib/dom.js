@@ -8,7 +8,7 @@ import { once, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter, stringify } from './util';
 import { PopupOpenError } from '../error';
 
-export function appendChild(container : HTMLElement, child : HTMLElement) {
+export function appendChild(container : HTMLElement, child : HTMLElement | Text) {
     container.appendChild(child);
 }
 

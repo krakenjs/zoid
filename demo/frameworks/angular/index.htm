@@ -8,22 +8,11 @@
 
     <script src="../../../dist/xcomponent.js"></script>
     <script src="./login.js"></script>
-</head>
-
-<body ng-app="app" ng-controller="appController">
-
-    <h3>Log in on xyz.com</h3>
-
-    <div id="container">
-        <my-login-component props="{ prefilledEmail: email, onLogin: onLogin }"></my-login-component>
-    </div>
-
-    <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>
 
     <script>
         var MyLoginAngularXComponent = MyLoginXComponent.driver('angular', window.angular);
 
-        angular.module('app', [ MyLoginAngularXComponent.tag ]).controller('appController', function($scope) {
+        angular.module('app', [ MyLoginAngularXComponent.name ]).controller('appController', function ($scope) {
 
             $scope.userLoggedIn = false;
             $scope.email = 'foo@bar.com';
@@ -36,5 +25,14 @@
             }
         });
     </script>
+</head>
 
+<body ng-app="app" ng-controller="appController">
+    <h3>Log in on xyz.com</h3>
+
+    <div id="container">
+        <my-login-component props="{ prefilledEmail: email, onLogin: onLogin }"></my-login-component>
+    </div>
+
+    <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>
 </body>
