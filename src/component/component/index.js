@@ -59,7 +59,7 @@ export type ComponentOptionsType<P> = {
 
     validate? : (Component<P>, PropsType) => void, // eslint-disable-line no-use-before-define
 
-    unsafeRenderTo : boolean
+    unsafeRenderTo? : boolean
 };
 
 export type ComponentDriverType<P, T : mixed> = {
@@ -101,7 +101,7 @@ export class Component<P> extends BaseComponent<P> {
 
     validate : (Component<P>, (PropsType & P)) => void
 
-    unsafeRenderTo : boolean
+    unsafeRenderTo : ?boolean
 
     driverCache : { [string] : mixed }
 
