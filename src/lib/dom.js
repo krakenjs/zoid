@@ -936,7 +936,7 @@ export function fixScripts(el : HTMLElement, doc : Document = window.document) {
     }
 }
 
-export function jsxDom(name : string, props : { [ string ] : mixed }, content : ElementRefType) : HTMLElement {
+export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content : ElementRefType) : HTMLElement {
 
     name = name.toLowerCase();
 
