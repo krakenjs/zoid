@@ -31,6 +31,12 @@ url: {
     live: 'https://my-live-site.com/mycomponent'
 }
 ```
+Note: If the map-syntax is used for `url`, the rendered component can override the `defaultEnv` at runtime like so:
+```javascript
+MyComponent.render({
+env: 'local'
+}, '#container')
+```
 
 #### dimensions `{ width : string, height : string }`
 
@@ -455,6 +461,8 @@ url: {
 
 defaultEnv: 'live'
 ```
+
+Note: See `url` definition for note on overriding defaultEnv.
 
 #### domain `string | { env : string }`
 
