@@ -250,28 +250,19 @@ if (__POPUP_SUPPORT__) {
 
                 let attributes = this.component.attributes.popup || {};
 
-                try {
-                    this.window = popup(url || '', {
-                        name: this.childWindowName,
-                        width,
-                        height,
-                        top: y,
-                        left: x,
-                        status: 1,
-                        toolbar: 0,
-                        menubar: 0,
-                        resizable: 1,
-                        scrollbars: 1,
-                        ...attributes
-                    });
-                } catch (err) {
-
-                    if (err instanceof PopupOpenError) {
-                        this.component.logError(`popup_open_error`);
-                    }
-
-                    throw err;
-                }
+                this.window = popup(url || '', {
+                    name: this.childWindowName,
+                    width,
+                    height,
+                    top: y,
+                    left: x,
+                    status: 1,
+                    toolbar: 0,
+                    menubar: 0,
+                    resizable: 1,
+                    scrollbars: 1,
+                    ...attributes
+                });
 
                 this.prerenderWindow = this.window;
 
