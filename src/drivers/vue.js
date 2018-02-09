@@ -1,6 +1,6 @@
 /* @flow */
 
-import { Component, type ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component/component';
 import { extend } from '../lib';
 
 type VueComponent = {

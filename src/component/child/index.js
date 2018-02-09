@@ -14,8 +14,8 @@ import { normalizeChildProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
 import { RenderError } from '../../error';
 
-import { type Component } from '../component';
-import { type BuiltInPropsType } from '../component/props';
+import type { Component } from '../component';
+import type { BuiltInPropsType } from '../component/props';
 
 export type ChildExportsType<P> = {
     updateProps : (props : (BuiltInPropsType & P)) => ZalgoPromise<void>,

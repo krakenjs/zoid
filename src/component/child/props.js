@@ -2,8 +2,8 @@
 
 import { getDomain } from 'cross-domain-utils/src';
 
-import { type Component } from '../component';
-import { type BuiltInPropsType } from '../component/props';
+import type { Component } from '../component';
+import type { BuiltInPropsType } from '../component/props';
 
 export function normalizeChildProp<T : mixed, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : T  {
 

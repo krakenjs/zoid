@@ -8,6 +8,7 @@ let Server = require('karma').Server;
 let argv = require('yargs').argv;
 let UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 let qs = require('querystring');
+let CircularDependencyPlugin = require('circular-dependency-plugin');
 
 gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['test', 'webpack']);
@@ -53,7 +54,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             extensions: [ '.js', '.jsx' ]
         },
         output: {
-            filename: filename,
+            filename,
             libraryTarget: 'umd',
             umdNamedDefine: true,
             library: modulename
@@ -73,6 +74,9 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
                 },
                 mangle: minify,
                 sourceMap: true
+            }),
+            new CircularDependencyPlugin({
+                failOnError: true
             })
         ],
         bail: true
@@ -128,7 +132,7 @@ gulp.task('webpack-min-frame', function() {
 });
 
 gulp.task('lint', function() {
-  return gulp.src([ 'src/**/*.js', 'test/tests/**/*.js' ]).pipe(eslint())
+    return gulp.src([ 'src/**/*.js', 'test/tests/**/*.js' ]).pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
 });
@@ -137,30 +141,30 @@ gulp.task('typecheck', [ 'lint' ], function() {
     return gulp.src([ 'src/**/*.js', 'test/**/*.js' ])
         .pipe(gulpFlowtype({
             abort: true
-        }))
+        }));
 });
 
 gulp.task('karma', function (done) {
 
     let server = new Server({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: !Boolean(argv['keep-browser-open']),
-    client: {
-      captureConsole: Boolean(argv['capture-console'])
-    }
-  });
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: !Boolean(argv['keep-browser-open']),
+        client: {
+            captureConsole: Boolean(argv['capture-console'])
+        }
+    });
 
-  server.on('browser_error', function (browser, err) {
-    console.log('Karma Run Failed: ' + err.message);
-    throw err;
-  });
+    server.on('browser_error', function (browser, err) {
+        console.log('Karma Run Failed: ' + err.message);
+        throw err;
+    });
 
-  server.on('run_complete', function (browsers, results) {
-    if (results.failed) {
-      return done(new Error('Karma: Tests Failed'));
-    }
-    done();
-  });
+    server.on('run_complete', function (browsers, results) {
+        if (results.failed) {
+            return done(new Error('Karma: Tests Failed'));
+        }
+        done();
+    });
 
-  server.start();
+    server.start();
 });

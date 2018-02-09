@@ -1,7 +1,7 @@
 /* @flow */
 
-import { type Component } from '../component';
-import { type PropDefinitionType, type PropsType, type PropDefinitionTypeEnum, type PropTypeEnum } from '../component/props';
+import type { Component } from '../component';
+import type { PropDefinitionType, PropsType, PropDefinitionTypeEnum, PropTypeEnum } from '../component/props';
 
 export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : ?T, props : (PropsType & P), required : boolean = true) {
 

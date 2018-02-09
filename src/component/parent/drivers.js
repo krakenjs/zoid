@@ -9,7 +9,6 @@ import { iframe, popup, toCSS, showElement, hideElement,
          awaitFrameWindow, addClass, removeClass } from '../../lib';
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
-import { PopupOpenError } from '../../error';
 
 
 export type ContextDriverType = {

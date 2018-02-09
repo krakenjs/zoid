@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type Component, type ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component/component';
 
 export let htmlComponent : ComponentDriverType<*, Document> = {
 

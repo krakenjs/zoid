@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 
 import { copyProp, eventEmitter, type EventEmitterType, stringifyError } from '../lib';
-import { type Component } from './component';
+import type { Component } from './component';
 
 type CleanupType = {
     set : <T : mixed >(string, T) => T,

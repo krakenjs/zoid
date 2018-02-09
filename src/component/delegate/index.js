@@ -6,7 +6,7 @@ import { type ZalgoPromise } from 'zalgo-promise/src';
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
-import { type Component } from '../component';
+import type { Component } from '../component';
 
 export type DelegatePropsType = {
     uid : string,

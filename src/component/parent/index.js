@@ -22,9 +22,9 @@ import { normalizeProps } from './props';
 import { matchDomain } from 'cross-domain-utils/src';
 import { RenderError } from '../../error';
 
-import { type Component } from '../component';
-import { type PropsType, type BuiltInPropsType } from '../component/props';
-import { type ChildExportsType } from '../child';
+import type { Component } from '../component';
+import type { PropsType, BuiltInPropsType } from '../component/props';
+import type { ChildExportsType } from '../child';
 
 global.props = global.props || {};
 global.windows = global.windows || {};

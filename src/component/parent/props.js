@@ -4,10 +4,10 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { noop, denodeify, once, memoize, promisify, dotify } from '../../lib';
 
-import { type Component } from '../component';
-import { type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropTypeEnum, type PropDefinitionType, type PropDefinitionTypeEnum } from '../component/props';
+import type { Component } from '../component';
+import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, PropTypeEnum, PropDefinitionType, PropDefinitionTypeEnum } from '../component/props';
 
-import { type ParentComponent } from './index';
+import type { ParentComponent } from './index';
 
 function isDefined(value : ?mixed) : boolean {
     return value !== null && value !== undefined && value !== '';
