@@ -14,8 +14,6 @@ export function normalizeChildProp<T : mixed, P>(component : Component<P>, props
         if (component.looseProps) {
             return value;
         }
-
-        throw new Error(`Unrecognized prop: ${ key }`);
     }
 
     if (typeof prop.childDecorate === 'function') {
