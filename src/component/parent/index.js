@@ -211,9 +211,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     @memoized
     getOutlet() : HTMLElement {
-        this.outlet = document.createElement('div');
-        addClass(this.outlet, CLASS_NAMES.OUTLET);
-        return this.outlet;
+        let outlet = document.createElement('div');
+        addClass(outlet, CLASS_NAMES.OUTLET);
+        return outlet;
     }
 
     validateParentDomain() {
