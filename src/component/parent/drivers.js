@@ -72,6 +72,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             url,
             attributes: {
                 name: this.childWindowName,
+                title: this.component.name,
                 scrolling: this.component.scrolling ? 'yes' : 'no',
                 ...attributes
             },
