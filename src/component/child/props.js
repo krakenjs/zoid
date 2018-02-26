@@ -5,14 +5,15 @@ import { getDomain } from 'cross-domain-utils/src';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
 
-export function normalizeChildProp<T : mixed, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : T  {
+export function normalizeChildProp<T : mixed, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : ?T  {
 
     let prop = component.getProp(key);
 
     if (!prop) {
-
         if (component.looseProps) {
             return value;
+        } else {
+            return;
         }
     }
 
