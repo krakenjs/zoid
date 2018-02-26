@@ -4038,6 +4038,7 @@
                     url: url,
                     attributes: _extends({
                         name: this.childWindowName,
+                        title: this.component.name,
                         scrolling: this.component.scrolling ? "yes" : "no"
                     }, attributes),
                     class: [ __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.COMPONENT_FRAME, __WEBPACK_IMPORTED_MODULE_4__constants__.CLASS_NAMES.INVISIBLE ]
