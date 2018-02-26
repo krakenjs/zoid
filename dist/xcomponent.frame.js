@@ -6530,7 +6530,7 @@
         "use strict";
         function normalizeChildProp(component, props, key, value) {
             var prop = component.getProp(key);
-            if (!prop && component.looseProps) return value;
+            if (!prop) return component.looseProps ? value : void 0;
             "function" == typeof prop.childDecorate && (value = prop.childDecorate(value));
             return value;
         }
