@@ -105,8 +105,8 @@ export class Component<P> extends BaseComponent<P> {
 
     driverCache : { [string] : mixed }
 
-    xchild : ChildComponent<P>
-    xprops : P
+    xchild : ?ChildComponent<P>
+    xprops : ?P
 
     constructor(options : ComponentOptionsType<P>) {
         super();
