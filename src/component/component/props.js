@@ -51,7 +51,7 @@ export type PropDefinitionTypeEnum = PropStringType | PropBooleanType | PropNumb
 export type PropDefinitionType<T : PropTypeEnum, P, S : PropDefinitionTypeEnum> = {
     type : S,
     alias? : string,
-    value? : T,
+    value? : ?T,
     required? : boolean,
     noop? : boolean,
     once? : boolean,
