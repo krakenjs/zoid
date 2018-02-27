@@ -3744,6 +3744,7 @@
                 _this.sendLogsToOpener();
                 _this.component.log("construct_child");
                 _this.onPropHandlers = [];
+                _this.component.xchild = _this;
                 _this.setProps(_this.getInitialProps(), Object(__WEBPACK_IMPORTED_MODULE_5__window__.d)());
                 _this.props.logLevel && Object(__WEBPACK_IMPORTED_MODULE_6__lib__.S)(_this.props.logLevel);
                 _this.component.log("init_child");
@@ -3822,6 +3823,7 @@
                 var normalizedProps = Object(__WEBPACK_IMPORTED_MODULE_8__props__.a)(this.component, props, origin, required);
                 Object(__WEBPACK_IMPORTED_MODULE_6__lib__.t)(this.props, normalizedProps);
                 window.xprops = this.props;
+                this.component.xprops = this.props;
                 for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                     var _ref3;
                     if (_isArray) {
