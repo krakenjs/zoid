@@ -62,6 +62,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         this.onPropHandlers = [];
 
+        this.component.xchild = this;
         this.setProps(this.getInitialProps(), getParentDomain());
 
         // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
@@ -190,6 +191,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         let normalizedProps = normalizeChildProps(this.component, props, origin, required);
         extend(this.props, normalizedProps);
         window.xprops = this.props;
+        this.component.xprops = this.props;
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
