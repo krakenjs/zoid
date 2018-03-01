@@ -67,7 +67,9 @@ export let angular : ComponentDriverType<*, Angular> = {
                         } else {
                             scopeProps = {};
                             for (let key of Object.keys(scope)) {
-                                scopeProps[key] = $scope[key];
+                                if ($scope[key] !== undefined) {
+                                    scopeProps[key] = $scope[key];
+                                }
                             }
                         }
 

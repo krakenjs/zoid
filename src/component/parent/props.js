@@ -131,8 +131,6 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
     // $FlowFixMe
     props = props || {};
 
-    result.version = component.version;
-
     for (let key of Object.keys(props)) {
         if (component.getPropNames().indexOf(key) !== -1) {
             // $FlowFixMe

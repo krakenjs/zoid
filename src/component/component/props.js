@@ -142,7 +142,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         version: {
             type: 'string',
             required: false,
-            queryParam: true
+            queryParam: true,
+            def(component) : string {
+                return this.version;
+            }
         },
 
         // A millisecond timeout before onTimeout is called
