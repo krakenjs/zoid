@@ -695,7 +695,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                         return override.apply(this, arguments);
                     }
 
-                    if (val instanceof Function) {
+                    if (typeof val === 'function') {
                         return val(original, override).apply(this, arguments);
                     }
 

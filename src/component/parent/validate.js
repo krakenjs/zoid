@@ -21,7 +21,7 @@ export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(pr
 
     if (prop.type === 'function') {
 
-        if (!(value instanceof Function)) {
+        if (!(typeof value === 'function')) {
             throw new Error(`Prop is not of type function: ${key}`);
         }
 

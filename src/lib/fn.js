@@ -88,7 +88,7 @@ export function debounce<T>(method : (...args : Array<mixed>) => T, time : numbe
 
 export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
     return replaceObject(obj, (value, key, fullKey) => {
-        if (value instanceof Function) {
+        if (typeof value === 'function') {
             return {
                 __type__: '__function__'
             };
