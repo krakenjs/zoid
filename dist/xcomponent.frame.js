@@ -39,46 +39,8 @@
         return __webpack_require__(__webpack_require__.s = 36);
     }([ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        function getActualDomain(win) {
-            var location = win.location;
-            if (!location) throw new Error("Can not read window location");
-            var protocol = location.protocol;
-            if (!protocol) throw new Error("Can not read window protocol");
-            if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
-            var host = location.host;
-            if (!host) throw new Error("Can not read window host");
-            return protocol + "//" + host;
-        }
-        function getDomain(win) {
-            win = win || window;
-            var domain = getActualDomain(win);
-            return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
-        }
-        function isBlankDomain(win) {
-            try {
-                if (!win.location.href) return !0;
-                if ("about:blank" === win.location.href) return !0;
-            } catch (err) {}
-            return !1;
-        }
-        function isActuallySameDomain(win) {
-            try {
-                var desc = Object.getOwnPropertyDescriptor(win, "location");
-                if (desc && !1 === desc.enumerable) return !1;
-            } catch (err) {}
-            try {
-                if (isBlankDomain(win)) return !0;
-                if (getActualDomain(win) === getActualDomain(window)) return !0;
-            } catch (err) {}
-            return !1;
-        }
-        function isSameDomain(win) {
-            if (!isActuallySameDomain(win)) return !1;
-            try {
-                if (isBlankDomain(win)) return !0;
-                if (getDomain(window) === getDomain(win)) return !0;
-            } catch (err) {}
-            return !1;
+        function isAboutProtocol() {
+            return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.ABOUT_PROTOCOL;
         }
         function getParent(win) {
             if (win) try {
@@ -93,6 +55,57 @@
             } catch (err) {
                 return;
             }
+        }
+        function canReadFromWindow(win) {
+            try {
+                Object(__WEBPACK_IMPORTED_MODULE_0__util__.b)(win && win.location && win.location.href);
+                return !0;
+            } catch (err) {}
+            return !1;
+        }
+        function getActualDomain(win) {
+            var location = win.location;
+            if (!location) throw new Error("Can not read window location");
+            var protocol = location.protocol;
+            if (!protocol) throw new Error("Can not read window protocol");
+            if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
+            if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
+                var parent = getParent(win);
+                return parent && canReadFromWindow(win) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+            }
+            var host = location.host;
+            if (!host) throw new Error("Can not read window host");
+            return protocol + "//" + host;
+        }
+        function getDomain(win) {
+            win = win || window;
+            var domain = getActualDomain(win);
+            return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
+        }
+        function isActuallySameDomain(win) {
+            try {
+                if (win === window) return !0;
+            } catch (err) {}
+            try {
+                var desc = Object.getOwnPropertyDescriptor(win, "location");
+                if (desc && !1 === desc.enumerable) return !1;
+            } catch (err) {}
+            try {
+                if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+            } catch (err) {}
+            try {
+                if (getActualDomain(win) === getActualDomain(window)) return !0;
+            } catch (err) {}
+            return !1;
+        }
+        function isSameDomain(win) {
+            if (!isActuallySameDomain(win)) return !1;
+            try {
+                if (win === window) return !0;
+                if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+                if (getDomain(window) === getDomain(win)) return !0;
+            } catch (err) {}
+            return !1;
         }
         function getParents(win) {
             var result = [];
@@ -485,12 +498,12 @@
             }
             return !1;
         }
+        __webpack_exports__.j = getParent;
+        __webpack_exports__.i = getOpener;
         __webpack_exports__.b = getActualDomain;
         __webpack_exports__.f = getDomain;
         __webpack_exports__.l = isActuallySameDomain;
         __webpack_exports__.p = isSameDomain;
-        __webpack_exports__.j = getParent;
-        __webpack_exports__.i = getOpener;
         __webpack_exports__.k = getTop;
         __webpack_exports__.c = getAllFramesInWindow;
         __webpack_exports__.r = isTop;
@@ -511,6 +524,7 @@
         var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(43), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
+            ABOUT_PROTOCOL: "about:",
             WILDCARD: "*"
         }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n", iframeWindows = [], iframeFrames = [];
     }, function(module, __webpack_exports__, __webpack_require__) {
@@ -1450,7 +1464,7 @@
                             return delegate.then(function(data) {
                                 var override = data.overrides[key];
                                 if (val === __WEBPACK_IMPORTED_MODULE_7__constants__.DELEGATE.CALL_DELEGATE) return override.apply(_this15, _arguments);
-                                if (val instanceof Function) return val(original, override).apply(_this15, _arguments);
+                                if ("function" == typeof val) return val(original, override).apply(_this15, _arguments);
                                 throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
                             });
                         };
@@ -3308,7 +3322,7 @@
         }
         function serializeFunctions(obj) {
             return Object(__WEBPACK_IMPORTED_MODULE_0__util__.i)(obj, function(value, key, fullKey) {
-                if (value instanceof Function) return {
+                if ("function" == typeof value) return {
                     __type__: "__function__"
                 };
             });
@@ -6576,7 +6590,7 @@
             if (null !== value && void 0 !== value && "" !== value) {
                 if (!value || "function" != typeof value.then || !prop.promise) {
                     if ("function" === prop.type) {
-                        if (!(value instanceof Function)) throw new Error("Prop is not of type function: " + key);
+                        if ("function" != typeof value) throw new Error("Prop is not of type function: " + key);
                     } else if ("string" === prop.type) {
                         if ("string" != typeof value) throw new Error("Prop is not of type string: " + key);
                     } else if ("object" === prop.type) try {
