@@ -4265,7 +4265,6 @@
             var result = (!(arguments.length > 3 && void 0 !== arguments[3]) || arguments[3], 
             {});
             props = props || {};
-            result.version = component.version;
             for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref;
                 if (_isArray) {
@@ -7499,7 +7498,10 @@
                 version: {
                     type: "string",
                     required: !1,
-                    queryParam: !0
+                    queryParam: !0,
+                    def: function(component) {
+                        return this.version;
+                    }
                 },
                 timeout: {
                     type: "number",
@@ -7905,7 +7907,7 @@
                                             _ref2 = _i2.value;
                                         }
                                         var key = _ref2;
-                                        scopeProps[key] = $scope[key];
+                                        void 0 !== $scope[key] && (scopeProps[key] = $scope[key]);
                                     }
                                 }
                                 scopeProps = Object(__WEBPACK_IMPORTED_MODULE_0__lib__.Q)(scopeProps, function(value, key, fullKey) {
