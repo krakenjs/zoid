@@ -41,7 +41,7 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
     let decorated = false;
 
     if (prop.decorate && resultValue !== null && resultValue !== undefined) {
-        resultValue = prop.decorate(resultValue, props);
+        resultValue = prop.decorate.call(instance, resultValue, props);
         decorated = true;
     }
 
@@ -56,7 +56,7 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
             resultValue = noop;
 
             if (!decorated && prop.decorate) {
-                resultValue = prop.decorate(resultValue, props);
+                resultValue = prop.decorate.call(instance, resultValue, props);
             }
         }
 
