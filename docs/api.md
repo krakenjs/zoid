@@ -412,7 +412,7 @@ defaultLogLevel: 'error'
 Note that this value can be overriden by passing 'logLevel' as a prop when rendering the component.
 
 
-#### autoResize `boolean | Object<String, Boolean>`
+#### autoResize `boolean | { height: boolean, width: boolean, element: string }`
 
 When set to `true`, makes the xcomponent parent iframe resize automatically when the child component size changes.
 You can also decide whether you want autoresizing for `width` or `height`
@@ -424,6 +424,17 @@ autoResize: true
 autoResize: {
     width: true,
     height: false,
+}
+```
+
+Note that by default it matches the `html` element of your content. (`body` if you are using IE9 or IE10).
+You can override this setting by specifying a custom selector as an `element` property.
+
+```javascript
+autoResize: {
+    width: true,
+    height: true,
+    element: '.my-selector',
 }
 ```
 
