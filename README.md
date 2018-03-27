@@ -34,7 +34,7 @@ A full example of a cross-domain component using xcomponent
 
 ### Quick example
 
-Define a component:
+Define a component to be put on both the parent and child pages:
 
 ```javascript
 var MyLoginComponent = xcomponent.create({
@@ -47,15 +47,20 @@ var MyLoginComponent = xcomponent.create({
 Render the component on the parent page:
 
 ```javascript
-MyLoginComponent.render({
+<div id="container"></div>
 
-    prefilledEmail: 'foo@bar.com',
+<script src="script-where-my-login-component-is-defined.js"></script>
+<script>
+    MyLoginComponent.render({
 
-    onLogin: function(email) {
-        console.log('User logged in with email:', email);
-    }
+        prefilledEmail: 'foo@bar.com',
 
-}, '#container');
+        onLogin: function(email) {
+            console.log('User logged in with email:', email);
+        }
+
+    }, '#container');
+</script>
 ```
 
 Implement the component in the iframe:
@@ -65,6 +70,7 @@ Implement the component in the iframe:
 <input type="password" id="password" />
 <button id="login">Log In</button>
 
+<script src="script-where-my-login-component-is-defined.js"></script>
 <script>
     var email = document.querySelector('#email');
     var password = document.querySelector('#password');
