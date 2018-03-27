@@ -78,6 +78,10 @@ Implement the component in the iframe:
 
     email.value = window.xprops.prefilledEmail;
 
+    function validUser (email, password) {
+      return email && password;
+    }
+
     button.addEventListener('click', function() {
         if (validUser(email.value, password.value)) {
             window.xprops.onLogin(email.value);
