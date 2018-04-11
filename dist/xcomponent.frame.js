@@ -2884,13 +2884,12 @@
                     if (void 0 === global) throw new Error("Can not find global");
                     glob = global;
                 }
-                glob.__zalgopromise__ || (glob.__zalgopromise__ = {
-                    flushPromises: [],
-                    activeCount: 0,
-                    possiblyUnhandledPromiseHandlers: [],
-                    dispatchedErrors: []
-                });
-                return glob.__zalgopromise__;
+                var zalgoGlobal = glob.__zalgopromise__ = glob.__zalgopromise__ || {};
+                zalgoGlobal.flushPromises = zalgoGlobal.flushPromises || [];
+                zalgoGlobal.activeCount = zalgoGlobal.activeCount || 0;
+                zalgoGlobal.possiblyUnhandledPromiseHandlers = zalgoGlobal.possiblyUnhandledPromiseHandlers || [];
+                zalgoGlobal.dispatchedErrors = zalgoGlobal.dispatchedErrors || [];
+                return zalgoGlobal;
             }
             __webpack_exports__.a = getGlobal;
         }).call(__webpack_exports__, __webpack_require__(24));
