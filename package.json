@@ -92,7 +92,7 @@
     "beaver-logger": "^3.0.11",
     "cross-domain-safe-weakmap": "^1.0.19",
     "cross-domain-utils": "^2.0.3",
-    "hi-base32": "^0.1.1",
+    "hi-base32": "^0.5.0",
     "post-robot": "^8.0.14",
     "zalgo-promise": "^1.0.22"
   }
