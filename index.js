@@ -1,5 +1,5 @@
 
-if (process.env.XCOMPONENT_EXCLUDE_IE_BRIDGE) {
+if (process.env.XCOMPONENT_FRAME_ONLY) {
   module.exports = require('./dist/xcomponent.frame');
   module.exports.default = module.exports;
 } else {
