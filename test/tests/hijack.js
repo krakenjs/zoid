@@ -38,6 +38,7 @@ describe('xcomponent hijack', () => {
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         button.addEventListener('click', (event : Event) => {
+            // $FlowFixMe
             let target = event.target.form ? event.target.form : event.target;
             // $FlowFixMe
             component.hijack(target);
@@ -78,6 +79,7 @@ describe('xcomponent hijack', () => {
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         button.addEventListener('click', (event : Event) => {
+            // $FlowFixMe
             let target = event.target.form ? event.target.form : event.target;
             // $FlowFixMe
             component.hijack(target);
@@ -116,6 +118,7 @@ describe('xcomponent hijack', () => {
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         link.addEventListener('click', (event : Event) => {
+            // $FlowFixMe
             let target = event.target.form ? event.target.form : event.target;
             // $FlowFixMe
             component.hijack(target);
@@ -153,6 +156,7 @@ describe('xcomponent hijack', () => {
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         link.addEventListener('click', (event : Event) => {
+            // $FlowFixMe
             let target = event.target.form ? event.target.form : event.target;
             // $FlowFixMe
             component.hijack(target);

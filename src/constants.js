@@ -40,7 +40,7 @@ export const WINDOW_REFERENCES = {
     GLOBAL: `global`
 };
 
-export const PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(key => PROP_TYPES[key]);
+export const PROP_TYPES_LIST : Array<string> = Object.keys(PROP_TYPES).map(key => PROP_TYPES[key]);
 
 export const CONTEXT_TYPES = {
     IFRAME: `iframe`,
@@ -83,7 +83,7 @@ export const CLOSE_REASONS = {
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 
-export const CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(key => CONTEXT_TYPES[key]);
+export const CONTEXT_TYPES_LIST : Array<string> = Object.keys(CONTEXT_TYPES).map(key => CONTEXT_TYPES[key]);
 
 export const DELEGATE = {
     CALL_ORIGINAL: 'call_original',

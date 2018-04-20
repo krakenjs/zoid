@@ -193,6 +193,7 @@ export function writeElementToWindow(win : SameDomainWindowType, el : HTMLElemen
 }
 
 export function setStyle(el : HTMLElement, styleText : string, doc : Document = window.document) {
+    // $FlowFixMe
     if (el.styleSheet) {
         // $FlowFixMe
         el.styleSheet.cssText = styleText;
@@ -244,6 +245,7 @@ export function createElement(tag : string = 'div', options : ElementOptionsType
 
     if (options.html) {
         if (tag === 'iframe') {
+            // $FlowFixMe
             if (!container || !element.contentWindow) {
                 throw new Error(`Iframe html can not be written unless container provided and iframe in DOM`);
             }
@@ -717,6 +719,7 @@ export function animate(element : ElementRefType, name : string, clean : (Functi
 
         startEvent = bindEvents(el, ANIMATION_START_EVENTS, event => {
 
+            // $FlowFixMe
             if (event.target !== el || event.animationName !== name) {
                 return;
             }
@@ -736,12 +739,14 @@ export function animate(element : ElementRefType, name : string, clean : (Functi
 
         endEvent = bindEvents(el, ANIMATION_END_EVENTS, event => {
 
+            // $FlowFixMe
             if (event.target !== el || event.animationName !== name) {
                 return;
             }
 
             cleanUp();
 
+            // $FlowFixMe
             if (typeof event.animationName === 'string' && event.animationName !== name) {
                 return reject(`Expected animation name to be ${ name }, found ${ event.animationName }`);
             }

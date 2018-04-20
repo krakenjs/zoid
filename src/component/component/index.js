@@ -17,7 +17,7 @@ import type { EnvStringRegExp, CssDimensionsType, StringMatcherType, ElementRefT
 
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
-import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropDefinitionType, type PropDefinitionTypeEnum, type PropTypeEnum } from './props';
+import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type MixedPropDefinitionType } from './props';
 
 const drivers = { angular, angular2, glimmer, react, vue, script };
 
@@ -221,7 +221,8 @@ export class Component<P> extends BaseComponent<P> {
         return props;
     }
 
-    getProp<T : PropTypeEnum, S : PropDefinitionTypeEnum>(name : string) : PropDefinitionType<T, P, S> {
+    // $FlowFixMe
+    getProp(name : string) : MixedPropDefinitionType<P> {
         // $FlowFixMe
         return this.props[name] || this.builtinProps[name];
     }
@@ -409,6 +410,7 @@ export class Component<P> extends BaseComponent<P> {
         let url = this.getForEnv(this.url, env);
 
         if (url) {
+            // $FlowFixMe
             return url;
         }
 

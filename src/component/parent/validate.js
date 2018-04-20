@@ -1,9 +1,10 @@
 /* @flow */
 
 import type { Component } from '../component';
-import type { PropDefinitionType, PropsType, PropDefinitionTypeEnum, PropTypeEnum } from '../component/props';
+import type { MixedPropDefinitionType, PropsType } from '../component/props';
 
-export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : ?T, props : (PropsType & P), required : boolean = true) {
+// $FlowFixMe
+export function validateProp<T, P>(prop : MixedPropDefinitionType<P>, key : string, value : ?T, props : (PropsType & P), required : boolean = true) {
 
     let hasProp = value !== null && value !== undefined && value !== '';
 
@@ -106,10 +107,11 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
     for (let key of Object.keys(props)) {
 
         // $FlowFixMe
-        let prop : PropDefinitionType<*, P> = component.getProp(key);
+        let prop : MixedPropDefinitionType<P> = component.getProp(key);
         let value = props[key];
 
         if (prop) {
+            // $FlowFixMe
             validateProp(prop, key, value, props, required);
         }
     }
@@ -117,7 +119,7 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
     for (let key of component.getPropNames()) {
 
         // $FlowFixMe
-        let prop : PropDefinitionType<*, P, *> = component.getProp(key);
+        let prop: MixedPropDefinitionType<P> = component.getProp(key);
         let value = props[key];
 
         if (prop && !props.hasOwnProperty(key)) {

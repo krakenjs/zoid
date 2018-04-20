@@ -268,6 +268,7 @@ export function replaceObject<T : Object | Array<mixed>>(obj : T, callback : Fun
 export function copyProp(source : Object, target : Object, name : string, def : mixed) {
     if (source.hasOwnProperty(name)) {
         let descriptor = Object.getOwnPropertyDescriptor(source, name);
+        // $FlowFixMe
         Object.defineProperty(target, name, descriptor);
 
     } else {

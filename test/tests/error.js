@@ -33,6 +33,7 @@ describe('xcomponent error cases', () => {
         testComponent.renderIframe({
 
             onError(err) {
+                // $FlowFixMe
                 assert.isTrue(err && err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
                 done();
             },

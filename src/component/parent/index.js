@@ -77,7 +77,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     prerenderWindow : SameDomainWindowType
 
     childExports : ?ChildExportsType<P>
-    timeout : ?number
+    timeout : ?TimeoutID
 
     constructor(component : Component<P>, context : string, { props } : { props : (PropsType & P) }) {
         super();
@@ -205,6 +205,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         }).then(() => {
             return this.props.onEnter();
+        }).then(() => {
+            return this;
         });
     }
 
@@ -442,6 +444,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.all([
 
             this.props.url,
+            // $FlowFixMe
             propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
 
         ]).then(([ url, query ]) => {
@@ -778,9 +781,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
         let timeout = this.props.timeout;
 
         if (timeout) {
-            this.timeout = setTimeout(() => {
+            let id = this.timeout = setTimeout(() => {
 
-                this.component.log(`timed_out`, { timeout });
+                this.component.log(`timed_out`, { timeout: timeout.toString() });
 
                 let error = this.component.createError(`Loading component timed out after ${ timeout } milliseconds`);
 
@@ -790,7 +793,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             }, timeout);
 
             this.clean.register(() => {
-                clearTimeout(this.timeout);
+                clearTimeout(id);
                 delete this.timeout;
             });
         }

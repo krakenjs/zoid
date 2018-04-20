@@ -16,6 +16,7 @@ export let script : ComponentDriverType<*, Document> = {
                 return;
             }
 
+            // $FlowFixMe
             if (!element.attributes.type || element.attributes.type.value !== 'application/x-component' || !element.parentNode) {
                 return;
             }

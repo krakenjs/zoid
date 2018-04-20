@@ -3,55 +3,12 @@
 import { type ZalgoPromise } from 'zalgo-promise/src';
 
 import { uniqueID } from '../../lib';
+import { type DimensionsType } from '../../types';
 
-export type EventHandlerType = () => ?ZalgoPromise<void>;
-
-export type BuiltInPropsType = {
-    env : string,
-    uid : string,
-    url? : string,
-    version? : string,
-    timeout? : number,
-    logLevel : string,
-
-    onDisplay : EventHandlerType,
-    onEnter : EventHandlerType,
-    onRender : EventHandlerType,
-    onClose : (string) => ?ZalgoPromise<void>,
-    onTimeout : EventHandlerType,
-    onError? : EventHandlerType
-};
-
-export type PropsType = {
-    env? : string,
-    uid? : string,
-    url? : string,
-    version? : string,
-    timeout? : number,
-    logLevel? : string,
-
-    onDisplay? : EventHandlerType,
-    onEnter? : EventHandlerType,
-    onRender? : EventHandlerType,
-    onClose? : (string) => ?ZalgoPromise<void>,
-    onTimeout? : EventHandlerType,
-    onError? : EventHandlerType
-};
-
-export type PropTypeEnum = string | boolean | number | Object | Function;
-
-export type PropStringType   = 'string';
-export type PropBooleanType  = 'boolean';
-export type PropNumberType   = 'number';
-export type PropObjectType   = 'object';
-export type PropFunctionType = 'function';
-
-export type PropDefinitionTypeEnum = PropStringType | PropBooleanType | PropNumberType | PropObjectType | PropFunctionType;
-
-export type PropDefinitionType<T : PropTypeEnum, P, S : PropDefinitionTypeEnum> = {
+type PropDefinitionType<T, P, S : string> = {
     type : S,
     alias? : string,
-    value? : ?T,
+    value? : T,
     required? : boolean,
     noop? : boolean,
     once? : boolean,
@@ -62,35 +19,92 @@ export type PropDefinitionType<T : PropTypeEnum, P, S : PropDefinitionTypeEnum> 
     sendToChild? : boolean,
     allowDelegate? : boolean,
     validate? : (T, PropsType & P) => void,
-    decorate? : (T, PropsType & P) => ?(ZalgoPromise<T> | T),
+    decorate? : (T, PropsType & P) => (void | ZalgoPromise<T> | T),
     def? : (P) => ?T,
-    sameDomain? : boolean
+    sameDomain? : boolean,
+    serialization? : 'json' | 'dotify',
+    childDecorate? : (T) => ?T,
+    denodeify? : boolean
 };
 
-type BooleanPropDefinitionType<P> = PropDefinitionType<boolean, P, PropBooleanType>;
-type StringPropDefinitionType<P> = PropDefinitionType<string, P, PropStringType>;
-type NumberPropDefinitionType<P> = PropDefinitionType<number, P, PropNumberType>;
-type FunctionPropDefinitionType<P> = PropDefinitionType<Function, P, PropFunctionType>;
-type ObjectPropDefinitionType<P> = PropDefinitionType<Object, P, PropObjectType>;
+export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;
+export type StringPropDefinitionType<T : string, P> = PropDefinitionType<T, P, 'string'>;
+export type NumberPropDefinitionType<T : number, P> = PropDefinitionType<T, P, 'number'>;
+export type FunctionPropDefinitionType<T : Function, P> = PropDefinitionType<T, P, 'function'>;
+export type ObjectPropDefinitionType<T : Object, P> = PropDefinitionType<T, P, 'object'>;
+
+export type MixedPropDefinitionType<P> = BooleanPropDefinitionType<*, P> | StringPropDefinitionType<*, P> | NumberPropDefinitionType<*, P> | FunctionPropDefinitionType<*, P> | ObjectPropDefinitionType<*, P>;
 
 export type UserPropsDefinitionType<P> = {
-    [string] : (BooleanPropDefinitionType<P> | StringPropDefinitionType<P> | NumberPropDefinitionType<P> | FunctionPropDefinitionType<P> | ObjectPropDefinitionType<P>)
+    [string] : MixedPropDefinitionType<P>
+};
+
+export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
+
+type envPropType = string;
+type uidPropType = string;
+type urlPropType = string;
+type versionPropType = string;
+type timeoutPropType = number;
+type logLevelPropType = string;
+type dimensionsPropType = DimensionsType;
+
+type onDisplayPropType = EventHandlerType<void>;
+type onEnterPropType = EventHandlerType<void>;
+type onRenderPropType = EventHandlerType<void>;
+type onClosePropType = EventHandlerType<string>;
+type onTimeoutPropType = EventHandlerType<Error>;
+type onErrorPropType = EventHandlerType<mixed>;
+
+export type BuiltInPropsType = {
+    env : envPropType,
+    uid : uidPropType,
+    url? : urlPropType,
+    version? : versionPropType,
+    timeout? : timeoutPropType,
+    logLevel : logLevelPropType,
+    dimensions? : dimensionsPropType,
+
+    onDisplay : onDisplayPropType,
+    onEnter : onEnterPropType,
+    onRender : onRenderPropType,
+    onClose : onClosePropType,
+    onTimeout : onTimeoutPropType,
+    onError? : onErrorPropType
+};
+
+export type PropsType = {
+    env? : envPropType,
+    uid? : uidPropType,
+    url? : urlPropType,
+    version? : versionPropType,
+    timeout? : timeoutPropType,
+    logLevel? : logLevelPropType,
+    dimensions? : dimensionsPropType,
+
+    onDisplay? : onDisplayPropType,
+    onEnter? : onEnterPropType,
+    onRender? : onRenderPropType,
+    onClose? : onClosePropType,
+    onTimeout? : onTimeoutPropType,
+    onError? : onErrorPropType
 };
 
 export type BuiltInPropsDefinitionType<P> = {
-    env : PropDefinitionType<string, P, PropStringType>,
-    uid : PropDefinitionType<string, P, PropStringType>,
-    url : PropDefinitionType<string, P, PropStringType>,
-    version : PropDefinitionType<string, P, PropStringType>,
-    timeout : PropDefinitionType<number, P, PropNumberType>,
-    logLevel : PropDefinitionType<string, P, PropStringType>,
+    env : StringPropDefinitionType<envPropType, P>,
+    uid : StringPropDefinitionType<uidPropType, P>,
+    url : StringPropDefinitionType<urlPropType, P>,
+    version : StringPropDefinitionType<versionPropType, P>,
+    timeout : NumberPropDefinitionType<timeoutPropType, P>,
+    logLevel : StringPropDefinitionType<logLevelPropType, P>,
+    dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
 
-    onDisplay : PropDefinitionType<EventHandlerType, P, PropFunctionType>,
-    onEnter : PropDefinitionType<EventHandlerType, P, PropFunctionType>,
-    onRender : PropDefinitionType<EventHandlerType, P, PropFunctionType>,
-    onClose : PropDefinitionType<(string) => ?ZalgoPromise<void>, P, PropFunctionType>,
-    onTimeout : PropDefinitionType<EventHandlerType, P, PropFunctionType>,
-    onError : PropDefinitionType<EventHandlerType, P, PropFunctionType>
+    onDisplay : FunctionPropDefinitionType<onDisplayPropType, P>,
+    onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
+    onRender : FunctionPropDefinitionType<onRenderPropType, P>,
+    onClose : FunctionPropDefinitionType<onClosePropType, P>,
+    onTimeout : FunctionPropDefinitionType<onTimeoutPropType, P>,
+    onError : FunctionPropDefinitionType<onErrorPropType, P>
 };
 
 /*  Internal Props
@@ -138,6 +152,11 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             required:    false,
             promise:     true,
             sendToChild: false
+        },
+
+        dimensions: {
+            type:     'object',
+            required: false
         },
 
         version: {

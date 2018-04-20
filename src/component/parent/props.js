@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { noop, denodeify, once, memoize, promisify, dotify } from '../../lib';
 import type { Component } from '../component';
-import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, PropTypeEnum, PropDefinitionType, PropDefinitionTypeEnum } from '../component/props';
+import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, MixedPropDefinitionType } from '../component/props';
 
 import type { ParentComponent } from './index';
 
@@ -19,8 +19,8 @@ function isDefined(value : ?mixed) : boolean {
     Turn prop into normalized value, using defaults, function options, etc.
 */
 
-// eslint-disable-next-line complexity
-export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), key : string, value : ?T) : ?(ZalgoPromise<T> | T) {
+// $FlowFixMe
+export function normalizeProp<P, T>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), key : string, value : ?T) : ?(ZalgoPromise<T> | T) { // eslint-disable-line complexity
 
     let prop = component.getProp(key);
 
@@ -45,18 +45,21 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
         decorated = true;
     }
 
-    if (prop.type === 'boolean') {
+    let type = prop.type;
+
+    if (type === 'boolean') {
         // $FlowFixMe
         resultValue = Boolean(resultValue);
 
-    } else if (prop.type === 'function') {
+    } else if (type === 'function') {
 
         if (!resultValue && prop.noop) {
             // $FlowFixMe
             resultValue = noop;
 
             if (!decorated && prop.decorate) {
-                resultValue = prop.decorate.call(instance, resultValue, props);
+                // $FlowFixMe
+                resultValue = prop.decorate.call(instance, noop, props);
             }
         }
 
@@ -100,13 +103,13 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
             }
         }
 
-    } else if (prop.type === 'string') {
+    } else if (type === 'string') {
         // pass
 
-    } else if (prop.type === 'object') {
+    } else if (type === 'object') {
         // pass
 
-    } else if (prop.type === 'number') {
+    } else if (type === 'number') {
         if (resultValue !== undefined) {
             // $FlowFixMe
             resultValue = parseInt(resultValue, 10);
@@ -168,7 +171,8 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
     number -> string
 */
 
-function getQueryParam<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : T) : ZalgoPromise<string> {
+// $FlowFixMe
+function getQueryParam<T, P>(prop : MixedPropDefinitionType<P>, key : string, value : T) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryParam === 'function') {
             return prop.queryParam(value);
@@ -180,7 +184,8 @@ function getQueryParam<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : P
     });
 }
 
-function getQueryValue<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(prop : PropDefinitionType<T, P, S>, key : string, value : T) : ZalgoPromise<mixed> {
+// $FlowFixMe
+function getQueryValue<T, P>(prop : MixedPropDefinitionType<P>, key : string, value : T) : ZalgoPromise<mixed> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryValue === 'function') {
             return prop.queryValue(value);
@@ -223,7 +228,9 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
             }
 
             return ZalgoPromise.all([
+                // $FlowFixMe
                 getQueryParam(prop, key, value),
+                // $FlowFixMe
                 getQueryValue(prop, key, value)
             ]).then(([ queryParam, queryValue ]) => {
 
