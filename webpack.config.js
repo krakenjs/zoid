@@ -30,7 +30,7 @@ export let WEBPACK_CONFIG_MIN = getWebpackConfig({
 });
 
 export let WEBPACK_CONFIG_FRAME = getWebpackConfig({
-    filename:   `${ FILE_NAME }.js`,
+    filename:   `${ FILE_NAME }.frame.js`,
     modulename: MODULE_NAME,
     vars:       {
         __POPUP_SUPPORT__:                  false,
@@ -42,7 +42,7 @@ export let WEBPACK_CONFIG_FRAME = getWebpackConfig({
 });
 
 export let WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
-    filename:   `${ FILE_NAME }.min.js`,
+    filename:   `${ FILE_NAME }.frame.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
     vars:       {
