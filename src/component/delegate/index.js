@@ -1,7 +1,7 @@
 /* @flow */
 
-import { onCloseWindow } from 'cross-domain-utils/src';
-import { type ZalgoPromise } from 'zalgo-promise/src';
+import { onCloseWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';

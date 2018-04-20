@@ -1,7 +1,7 @@
 /* @flow */
 
 import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow, getDomain } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getAllFramesInWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 
 import { ZalgoPromise } from 'zalgo-promise/src';

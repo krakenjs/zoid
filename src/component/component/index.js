@@ -2,7 +2,7 @@
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
+import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';

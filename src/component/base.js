@@ -2,6 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
+import { type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { copyProp, eventEmitter, type EventEmitterType, stringifyError } from '../lib';
 import type { Component } from './component';

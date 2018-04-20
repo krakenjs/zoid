@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isWindowClosed, linkFrameWindow } from 'cross-domain-utils/src';
+import { isWindowClosed, linkFrameWindow, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
