@@ -40,7 +40,7 @@ export let angular : ComponentDriverType<*, Angular> = {
 
                 restrict: 'E',
 
-                controller: ['$scope', '$element', ($scope, $element) => {
+                controller: [ '$scope', '$element', ($scope, $element) => {
 
                     if (component.looseProps && !$scope.props) {
                         throw new Error(`For angular bindings to work, prop definitions must be passed to xcomponent.create`);
@@ -48,12 +48,12 @@ export let angular : ComponentDriverType<*, Angular> = {
 
                     component.log(`instantiate_angular_component`);
 
-                    function safeApply(fn) {
+                    function safeApply() {
                         if ($scope.$root.$$phase !== '$apply' && $scope.$root.$$phase !== '$digest') {
                             try {
                                 $scope.$apply();
                             } catch (err) {
-                                console.warn('Error trying to scope.apply on prop function call:', err);
+                                // pass
                             }
                         }
                     }
@@ -73,9 +73,9 @@ export let angular : ComponentDriverType<*, Angular> = {
                             }
                         }
 
-                        scopeProps = replaceObject(scopeProps, (value, key, fullKey) => {
+                        scopeProps = replaceObject(scopeProps, (value) => {
                             if (typeof value === 'function') {
-                                return function() : mixed {
+                                return function angularWrapped() : mixed {
                                     let result = value.apply(this, arguments);
                                     safeApply();
                                     return result;
@@ -92,7 +92,7 @@ export let angular : ComponentDriverType<*, Angular> = {
                     $scope.$watch(() => {
                         parent.updateProps(getProps());
                     });
-                }]
+                } ]
             };
         });
 

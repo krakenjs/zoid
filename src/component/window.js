@@ -2,8 +2,10 @@
 
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
+
 import { memoize, uniqueID, globalFor } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
+import type { DimensionsType, PositionType } from '../types';
 
 
 function normalize(str : string) : string {
@@ -30,14 +32,14 @@ export function buildChildWindowName(name : string, version : string, options : 
 
     let encodedName = normalize(name);
     let encodedVersion = normalize(version);
-    let encodedOptions = base32.encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase();
+    let encodedOptions = base32.encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
 
     if (!encodedName) {
-        throw new Error(`Invalid name: ${name} - must contain alphanumeric characters`);
+        throw new Error(`Invalid name: ${ name } - must contain alphanumeric characters`);
     }
 
     if (!encodedVersion) {
-        throw new Error(`Invalid version: ${version} - must contain alphanumeric characters`);
+        throw new Error(`Invalid version: ${ version } - must contain alphanumeric characters`);
     }
 
     return [

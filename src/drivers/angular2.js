@@ -1,9 +1,8 @@
 /* @flow */
+/* eslint new-cap: 0 */
 
 import { replaceObject } from '../lib';
 import type { Component, ComponentDriverType } from '../component/component';
-
-/* eslint-disable new-cap, object-shorthand */
 
 type Angular2Injection = {};
 
@@ -26,7 +25,7 @@ type Angular2 = {
 export let angular2 : ComponentDriverType<*, Angular2> = {
 
     global() {
-
+        // pass
     },
 
     register(xcomponent : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
@@ -34,9 +33,9 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
         xcomponent.log('initializing angular2 component');
 
         let getProps = (component) => {
-            return replaceObject({ ...component.internalProps, ...component.props }, (value, key, fullKey) => {
+            return replaceObject({ ...component.internalProps, ...component.props }, (value) => {
                 if (typeof value === 'function') {
-                    return function() : void {
+                    return function angular2Wrapped() : void {
                         return component.zone.run(() => value.apply(this, arguments));
                     };
                 }
@@ -47,20 +46,19 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
             AngularComponent({
                 selector: xcomponent.tag,
                 template: '<div></div>',
-                inputs: ['props']
-            })
-            .Class({
-                constructor: [ElementRef, NgZone, function(elementRef, zone) {
+                inputs:   [ 'props' ]
+            }).Class({
+                constructor: [ ElementRef, NgZone, function angularConstructor(elementRef, zone) {
                     this.elementRef = elementRef;
                     this.zone = zone;
-                }],
-                ngOnInit: function () {
+                } ],
+                ngOnInit () {
                     const targetElement = this.elementRef.nativeElement;
                     const parent = xcomponent.init(getProps(this), null, targetElement);
                     parent.render(targetElement);
                     this.parent = parent;
                 },
-                ngOnChanges: function() {
+                ngOnChanges() {
                     if (this.parent) {
                         this.parent.updateProps(getProps(this));
                     }
@@ -69,12 +67,11 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
 
 
         const ModuleInstance = NgModule({
-            declarations: [ComponentInstance],
-            exports: [ComponentInstance]
-        })
-        .Class({
-            constructor: function () {
-
+            declarations: [ ComponentInstance ],
+            exports:      [ ComponentInstance ]
+        }).Class({
+            constructor () {
+                // pass
             }
         });
 

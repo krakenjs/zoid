@@ -1,12 +1,15 @@
 /* @flow */
+/* eslint max-lines: 0 */
 
 import { isWindowClosed, linkFrameWindow, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
+import { PopupOpenError } from '../error';
+import type { ElementRefType, CancelableType } from '../types';
+
 import { once, memoize, debounce } from './fn';
 import { extend, safeInterval, urlEncode, capitalizeFirstLetter, stringify } from './util';
-import { PopupOpenError } from '../error';
 
 export function appendChild(container : HTMLElement, child : HTMLElement | Text) {
     container.appendChild(child);
@@ -132,6 +135,7 @@ export function elementReady(id : ElementRefType) : ZalgoPromise<window.HTMLElem
 
 export function popup(url : string, options : { [ string ] : mixed }) : CrossDomainWindowType {
 
+    // eslint-disable-next-line array-callback-return
     let params = Object.keys(options).map((key) => {
         if (options[key]) {
             return `${ key }=${ stringify(options[key]) }`;
@@ -162,7 +166,7 @@ export function writeToWindow(win : SameDomainWindowType, html : string) {
         win.document.close();
     } catch (err) {
         try {
-            win.location = `javascript: document.open(); document.write(${JSON.stringify(html)}); document.close();`;
+            win.location = `javascript: document.open(); document.write(${ JSON.stringify(html) }); document.close();`;
         } catch (err2) {
             // pass
         }
@@ -327,7 +331,7 @@ export function iframe(options : IframeElementOptionsType = {}, container : HTML
 
     let frame = createElement('iframe', {
         attributes: {
-            frameBorder: '0',
+            frameBorder:       '0',
             allowTransparency: 'true',
             ...attributes
         },
@@ -335,7 +339,7 @@ export function iframe(options : IframeElementOptionsType = {}, container : HTML
             backgroundColor: 'transparent',
             ...style
         },
-        html: options.html,
+        html:  options.html,
         class: options.class
     });
 
@@ -380,7 +384,7 @@ export function scanForJavascript(str : string) : string {
     }
 
     if (str.match(/<script|on\w+\s*=|javascript:|expression\s*\(|eval\(|new\s*Function/)) {
-        throw new Error(`HTML contains potential javascript: ${str}`);
+        throw new Error(`HTML contains potential javascript: ${ str }`);
     }
 
     return str;
@@ -395,7 +399,7 @@ export let parseQuery = memoize((queryString : string) : { [ string ] : string }
     }
 
     if (queryString.indexOf('=') === -1) {
-        throw new Error(`Can not parse query string params: ${queryString}`);
+        throw new Error(`Can not parse query string params: ${ queryString }`);
     }
 
     for (let pair of queryString.split('&')) {
@@ -419,7 +423,7 @@ export function formatQuery(obj : { [ string ] : string } = {}) : string {
     return Object.keys(obj).filter(key => {
         return typeof obj[key] === 'string';
     }).map(key => {
-        return `${urlEncode(key)}=${urlEncode(obj[key])}`;
+        return `${ urlEncode(key) }=${ urlEncode(obj[key]) }`;
     }).join('&');
 }
 
@@ -451,11 +455,11 @@ export function extendUrl(url : string, options : { query? : { [ string ] : stri
     let hashString  = extendQuery(originalHash, hash);
 
     if (queryString) {
-        originalUrl = `${originalUrl}?${queryString}`;
+        originalUrl = `${ originalUrl }?${ queryString }`;
     }
 
     if (hashString) {
-        originalUrl = `${originalUrl}#${hashString}`;
+        originalUrl = `${ originalUrl }#${ hashString }`;
     }
 
     return originalUrl;
@@ -486,14 +490,14 @@ export function elementStoppedMoving(element : ElementRefType, timeout : number 
 
         timer = setTimeout(() => {
             clearInterval(interval);
-            reject(new Error(`Timed out waiting for element to stop animating after ${timeout}ms`));
+            reject(new Error(`Timed out waiting for element to stop animating after ${ timeout }ms`));
         }, timeout);
     });
 }
 
 export function getCurrentDimensions(el : HTMLElement) : { width : number, height : number } {
     return {
-        width: el.offsetWidth,
+        width:  el.offsetWidth,
         height: el.offsetHeight
     };
 }
@@ -547,7 +551,7 @@ export function trackDimensions(el : HTMLElement, { width = true, height = true,
             let newDimensions = getCurrentDimensions(el);
 
             return {
-                changed: dimensionsDiff(currentDimensions, newDimensions, { width, height, threshold }),
+                changed:    dimensionsDiff(currentDimensions, newDimensions, { width, height, threshold }),
                 dimensions: newDimensions
             };
         },
@@ -637,7 +641,7 @@ export function setVendorCSS(element : HTMLElement, name : string, value : strin
 
     for (let prefix of VENDOR_PREFIXES) {
         // $FlowFixMe
-        element.style[`${prefix}${capitalizedName}`] = value;
+        element.style[`${ prefix }${ capitalizedName }`] = value;
     }
 }
 
@@ -739,7 +743,7 @@ export function animate(element : ElementRefType, name : string, clean : (Functi
             cleanUp();
 
             if (typeof event.animationName === 'string' && event.animationName !== name) {
-                return reject(`Expected animation name to be ${name}, found ${ event.animationName }`);
+                return reject(`Expected animation name to be ${ name }, found ${ event.animationName }`);
             }
 
             return resolve();
@@ -763,13 +767,13 @@ export function animate(element : ElementRefType, name : string, clean : (Functi
 const STYLE = {
 
     DISPLAY: {
-        NONE: 'none',
+        NONE:  'none',
         BLOCK: 'block'
     },
 
     VISIBILITY: {
         VISIBLE: 'visible',
-        HIDDEN: 'hidden'
+        HIDDEN:  'hidden'
     },
 
     IMPORTANT: 'important'
@@ -814,7 +818,7 @@ export function addClass(element : HTMLElement, name : string) {
     if (element.classList) {
         element.classList.add(name);
     } else if (element.className.split(/\s+/).indexOf(name) === -1) {
-        element.className += ` ${name}`;
+        element.className += ` ${ name }`;
     }
 }
 
@@ -827,6 +831,7 @@ export function removeClass(element : HTMLElement, name : string) {
 }
 
 export function getCurrentScriptDir() : string {
+    // eslint-disable-next-line no-console
     console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
 
     if (document.currentScript) {
@@ -849,9 +854,9 @@ export function getElementName(element : ElementRefType) : string {
     let name = element.tagName.toLowerCase();
 
     if (element.id) {
-        name += `#${element.id}`;
+        name += `#${ element.id }`;
     } else if (element.className) {
-        name += `.${element.className.split(' ').join('.')}`;
+        name += `.${ element.className.split(' ').join('.') }`;
     }
 
     return name;
@@ -864,7 +869,7 @@ export function isElementClosed(el : HTMLElement) : boolean {
     return false;
 }
 
-export function watchElementForClose(element : HTMLElement, handler : () => void) : CancelableType {
+export function watchElementForClose(element : HTMLElement, handler : () => mixed) : CancelableType {
     handler = once(handler);
 
     let interval;
@@ -960,11 +965,11 @@ export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content :
     if (name === 'style') {
 
         if (typeof content !== 'string') {
-            throw new Error(`Expected ${name} tag content to be string, got ${typeof content}`);
+            throw new TypeError(`Expected ${ name } tag content to be string, got ${ typeof content }`);
         }
 
         if (arguments.length > 3) {
-            throw new Error(`Expected only text content for ${name} tag`);
+            throw new Error(`Expected only text content for ${ name } tag`);
         }
 
         setStyle(el, content, doc);
@@ -992,11 +997,11 @@ export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content :
     } else if (name === 'script') {
 
         if (typeof content !== 'string') {
-            throw new Error(`Expected ${name} tag content to be string, got ${typeof content}`);
+            throw new TypeError(`Expected ${ name } tag content to be string, got ${ typeof content }`);
         }
 
         if (arguments.length > 3) {
-            throw new Error(`Expected only text content for ${name} tag`);
+            throw new Error(`Expected only text content for ${ name } tag`);
         }
 
         el.text = content;

@@ -1,4 +1,7 @@
+/* @flow */
 
+import { assert } from 'chai';
+import { type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { testComponent, testComponent4 } from '../component';
 
@@ -16,7 +19,7 @@ describe('xcomponent happy cases', () => {
         testComponent.renderIframe({
             onEnter() {
                 if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
-                    throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
+                    throw new Error(`The parent and child window dimensions do not match ${ window.innerWidth }`);
                 } else {
                     done();
                 }
@@ -27,9 +30,9 @@ describe('xcomponent happy cases', () => {
     it.skip('should enter a component rendered as a popup with the correct dimensions', done => {
 
         let open = window.open;
-        window.open = function(url, name, options) : CrossDomainWindowType {
-            assert.isTrue(options.indexOf(`width=${testComponent.dimensions.width}`) !== -1, 'Expected width passed to window.open to be correct');
-            assert.isTrue(options.indexOf(`height=${testComponent.dimensions.height}`) !== -1, 'Expected height passed to window.open to be correct');
+        window.open = function windowOpen(url, name, options) : CrossDomainWindowType {
+            assert.isTrue(options.indexOf(`width=${ testComponent.dimensions.width }`) !== -1, 'Expected width passed to window.open to be correct');
+            assert.isTrue(options.indexOf(`height=${ testComponent.dimensions.height }`) !== -1, 'Expected height passed to window.open to be correct');
             return open.apply(this, arguments);
         };
 
@@ -57,7 +60,7 @@ describe('xcomponent happy cases', () => {
         testComponent4.renderIframe({
             onEnter() {
                 if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
-                    throw new Error(`The parent and child window dimensions do not match ${window.innerWidth}`);
+                    throw new Error(`The parent and child window dimensions do not match ${ window.innerWidth }`);
                 } else {
                     done();
                 }
@@ -68,7 +71,7 @@ describe('xcomponent happy cases', () => {
     it.skip('should enter a component rendered as a popup with no dimensions', done => {
 
         let open = window.open;
-        window.open = function (url, name, options) : CrossDomainWindowType {
+        window.open = function windowOpen(url, name, options) : CrossDomainWindowType {
             assert.isTrue(options.indexOf(`width=`) === -1, 'Expected width not to be passed to window.open');
             assert.isTrue(options.indexOf(`height=`) === -1, 'Expected height not to be passed to window.open');
             return open.apply(this, arguments);
@@ -228,7 +231,7 @@ describe('xcomponent happy cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: true,
+            popup:  true,
             iframe: false
         };
 
@@ -248,7 +251,7 @@ describe('xcomponent happy cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: false,
+            popup:  false,
             iframe: true
         };
 
@@ -268,7 +271,7 @@ describe('xcomponent happy cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: true,
+            popup:  true,
             iframe: true
         };
 
@@ -279,8 +282,8 @@ describe('xcomponent happy cases', () => {
                     testComponent.defaultContext = originalDefaultContext;
                     testComponent.contexts = originalContexts;
                     done();
-                } catch (e) {
-                    done(e);
+                } catch (err) {
+                    done(err);
                 }
             }
         }, document.body);

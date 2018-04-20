@@ -1,5 +1,6 @@
+/* @flow */
 
-
+import { assert } from 'chai';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { testComponent } from '../component';
@@ -76,7 +77,7 @@ describe('xcomponent options', () => {
                 return x;
             },
 
-            complete(result) {
+            complete() {
                 assert.equal(x, 1, 'Expected result to have only been returned once');
                 done();
             },
@@ -98,7 +99,7 @@ describe('xcomponent options', () => {
 
             denodeifyFunction(val, callback) {
                 setTimeout(() => {
-                    return callback(null, `${val}bar`);
+                    return callback(null, `${ val }bar`);
                 });
             },
 
@@ -120,7 +121,7 @@ describe('xcomponent options', () => {
         testComponent.renderIframe({
 
             denodeifyFunction: (val) => {
-                return ZalgoPromise.resolve(`${val}bar`);
+                return ZalgoPromise.resolve(`${ val }bar`);
             },
 
             complete(result) {

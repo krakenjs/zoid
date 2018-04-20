@@ -11,7 +11,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 
 export function denodeify<T>(method : (...args : Array<mixed>) => T) : (...args : Array<mixed>) => ZalgoPromise<T> {
 
-    return function() : ZalgoPromise<T> {
+    return function denodeifyWrapper() : ZalgoPromise<T> {
 
         let self = this;
         let args = Array.prototype.slice.call(arguments);
@@ -24,7 +24,7 @@ export function denodeify<T>(method : (...args : Array<mixed>) => T) : (...args 
             args.push((err, result) => {
 
                 if (err && !(err instanceof Error)) {
-                    throw new Error(`Passed non-Error object in callback: [ ${err} ] -- callbacks should either be called with callback(new Error(...)) or callback(null, result).`);
+                    throw new Error(`Passed non-Error object in callback: [ ${ err } ] -- callbacks should either be called with callback(new Error(...)) or callback(null, result).`);
                 }
 
                 return err ? reject(err) : resolve(result);
@@ -35,7 +35,7 @@ export function denodeify<T>(method : (...args : Array<mixed>) => T) : (...args 
 }
 
 export function promisify<T>(method : (...args : Array<mixed>) => T | ZalgoPromise<T>) : (...args : Array<mixed>) => ZalgoPromise<T> {
-    return function() : ZalgoPromise<T> {
+    return function promisifyWRapper() : ZalgoPromise<T> {
         return ZalgoPromise.try(() => {
             return method.apply(this, arguments);
         });

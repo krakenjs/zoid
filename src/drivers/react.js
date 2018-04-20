@@ -27,7 +27,7 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
     global() : ?ReactLibraryType {
         if (window.React && window.ReactDOM) {
             return {
-                React: window.React,
+                React:    window.React,
                 ReactDOM: window.ReactDOM
             };
         }

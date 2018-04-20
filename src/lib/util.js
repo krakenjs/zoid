@@ -2,6 +2,8 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
+import type { CancelableType } from '../types';
+
 /*  Url Encode
     ----------
 
@@ -9,7 +11,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
 */
 
 export function urlEncode(str : string) : string {
-    return str.replace(/\?/g, '%3F').replace(/\&/g, '%26').replace(/#/g, '%23').replace(/\+/g, '%2B');
+    return str.replace(/\?/g, '%3F').replace(/&/g, '%26').replace(/#/g, '%23').replace(/\+/g, '%2B');
 }
 
 
@@ -21,7 +23,7 @@ export function urlEncode(str : string) : string {
 
 export function camelToDasherize(string : string) : string {
     return string.replace(/([A-Z])/g, (g) => {
-        return `-${g.toLowerCase()}`;
+        return `-${ g.toLowerCase() }`;
     });
 }
 
@@ -222,7 +224,7 @@ export function each(item : Array<mixed> | Object, callback : Function) {
         return;
     }
 
-    if (item instanceof Array) {
+    if (Array.isArray(item)) {
         let len = item.length;
         for (let i = 0; i < len; i++) {
             callback(item[i], i);
@@ -239,14 +241,13 @@ export function each(item : Array<mixed> | Object, callback : Function) {
 }
 
 
-
 export function replaceObject<T : Object | Array<mixed>>(obj : T, callback : Function, parentKey : string = '') : T {
 
-    let newobj = obj instanceof Array ? [] : {};
+    let newobj = Array.isArray(obj) ? [] : {};
 
     each(obj, (item, key) => {
 
-        let fullKey = parentKey ? `${parentKey}.${key}` : key;
+        let fullKey = parentKey ? `${ parentKey }.${ key }` : key;
 
         let result = callback(item, key, fullKey);
 
@@ -264,7 +265,6 @@ export function replaceObject<T : Object | Array<mixed>>(obj : T, callback : Fun
 }
 
 
-
 export function copyProp(source : Object, target : Object, name : string, def : mixed) {
     if (source.hasOwnProperty(name)) {
         let descriptor = Object.getOwnPropertyDescriptor(source, name);
@@ -276,16 +276,16 @@ export function copyProp(source : Object, target : Object, name : string, def : 
 }
 
 export function dotify(obj : Object, prefix : string = '', newobj : Object = {}) : { [string] : string } {
-    prefix = prefix ? `${prefix}.` : prefix;
+    prefix = prefix ? `${ prefix }.` : prefix;
     for (let key in obj) {
         if (obj[key] === undefined || obj[key] === null || typeof obj[key] === 'function') {
             continue;
         } else if (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(val => typeof val !== 'object')) {
-            newobj[`${prefix}${key}`] = obj[key].join(',');
+            newobj[`${ prefix }${ key }`] = obj[key].join(',');
         } else if (obj[key] && typeof obj[key] === 'object') {
-            newobj = dotify(obj[key], `${prefix}${key}`, newobj);
+            newobj = dotify(obj[key], `${ prefix }${ key }`, newobj);
         } else {
-            newobj[`${prefix}${key}`] = obj[key].toString();
+            newobj[`${ prefix }${ key }`] = obj[key].toString();
         }
     }
     return newobj;
@@ -302,7 +302,7 @@ export function getObjectID(obj : Object) : string {
     let uid = objectIDs.get(obj);
 
     if (!uid) {
-        uid = `${typeof obj}:${uniqueID()}`;
+        uid = `${ typeof obj }:${ uniqueID() }`;
         objectIDs.set(obj, uid);
     }
 
@@ -321,6 +321,7 @@ type RegexResultType = {
 export function regex(pattern : string | RegExp, string : string, start : number = 0) : ?RegexResultType {
 
     if (typeof pattern === 'string') {
+        // eslint-disable-next-line security/detect-non-literal-regexp
         pattern = new RegExp(pattern);
     }
 
@@ -335,10 +336,10 @@ export function regex(pattern : string | RegExp, string : string, start : number
     let match = result[0];
 
     return {
-        text: match,
+        text:   match,
         groups: result.slice(1),
-        start: start + index,
-        end: start + index + match.length,
+        start:  start + index,
+        end:    start + index + match.length,
         length: match.length,
 
         replace(text : string) : string {
@@ -357,6 +358,7 @@ export function regexAll(pattern : string | RegExp, string : string) : Array<Reg
     let matches = [];
     let start = 0;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let match = regex(pattern, string, start);
 
@@ -376,6 +378,7 @@ export function count(str : string, substr : string) : number {
     let startIndex = 0;
     let itemCount = 0;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let index = str.indexOf(substr, startIndex);
 

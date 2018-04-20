@@ -2,7 +2,7 @@
 
 import type { Component, ComponentDriverType } from '../component/component';
 
-export let htmlComponent : ComponentDriverType<*, Document> = {
+export let script : ComponentDriverType<*, Document> = {
 
     global() : ?Document {
         return window.document;
@@ -29,7 +29,7 @@ export let htmlComponent : ComponentDriverType<*, Document> = {
             component.log(`instantiate_script_component`);
 
             let props : { [string] : mixed } = element.innerText
-                ? eval(`(${ element.innerText })`) // eslint-disable-line no-eval
+                ? eval(`(${ element.innerText })`) // eslint-disable-line no-eval, security/detect-eval-with-expression
                 : {};
 
             let container = document.createElement('div');

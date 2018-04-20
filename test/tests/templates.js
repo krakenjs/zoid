@@ -1,5 +1,7 @@
+/* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
+
 import { testComponent } from '../component';
 
 describe('xcomponent templates and styles', () => {
@@ -9,7 +11,7 @@ describe('xcomponent templates and styles', () => {
 
             onEnter() {
 
-                this.window.focus = function() {
+                this.window.focus = () => {
                     done();
                 };
 
@@ -26,7 +28,7 @@ describe('xcomponent templates and styles', () => {
             onEnter() {
                 let close = this.window.close;
 
-                this.window.close = function() {
+                this.window.close = function windowClose() {
                     close.apply(this, arguments);
                     done();
                 };

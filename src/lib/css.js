@@ -24,7 +24,7 @@ export function toNum(val : string | number) : number {
 }
 
 export function toPx(val : number | string) : string {
-    return `${ toNum(val)}px`;
+    return `${ toNum(val) }px`;
 }
 
 export function toCSS(val : number | string) : string {

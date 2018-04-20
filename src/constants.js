@@ -2,30 +2,30 @@
 
 export const XCOMPONENT = `xcomponent`;
 
-export const __XCOMPONENT__ = `__${XCOMPONENT}__`;
+export const __XCOMPONENT__ = `__${ XCOMPONENT }__`;
 
 export const POST_MESSAGE = {
-    INIT: `${XCOMPONENT}_init`,
-    PROPS: `${XCOMPONENT}_props`,
-    PROP_CALLBACK: `${XCOMPONENT}_prop_callback`,
-    CLOSE: `${XCOMPONENT}_close`,
-    CHECK_CLOSE: `${XCOMPONENT}_check_close`,
-    REDIRECT: `${XCOMPONENT}_redirect`,
-    RESIZE: `${XCOMPONENT}_resize`,
-    ONRESIZE: `${XCOMPONENT}_onresize`,
-    DELEGATE: `${XCOMPONENT}_delegate`,
-    ALLOW_DELEGATE: `${XCOMPONENT}_allow_delegate`,
-    ERROR: `${XCOMPONENT}_error`,
-    HIDE: `${XCOMPONENT}_hide`,
-    SHOW: `${XCOMPONENT}_show`
+    INIT:           `${ XCOMPONENT }_init`,
+    PROPS:          `${ XCOMPONENT }_props`,
+    PROP_CALLBACK:  `${ XCOMPONENT }_prop_callback`,
+    CLOSE:          `${ XCOMPONENT }_close`,
+    CHECK_CLOSE:    `${ XCOMPONENT }_check_close`,
+    REDIRECT:       `${ XCOMPONENT }_redirect`,
+    RESIZE:         `${ XCOMPONENT }_resize`,
+    ONRESIZE:       `${ XCOMPONENT }_onresize`,
+    DELEGATE:       `${ XCOMPONENT }_delegate`,
+    ALLOW_DELEGATE: `${ XCOMPONENT }_allow_delegate`,
+    ERROR:          `${ XCOMPONENT }_error`,
+    HIDE:           `${ XCOMPONENT }_hide`,
+    SHOW:           `${ XCOMPONENT }_show`
 };
 
 export const PROP_TYPES = {
-    STRING: `string`,
-    OBJECT: `object`,
+    STRING:   `string`,
+    OBJECT:   `object`,
     FUNCTION: `function`,
-    BOOLEAN: `boolean`,
-    NUMBER: `number`
+    BOOLEAN:  `boolean`,
+    NUMBER:   `number`
 };
 
 export const INITIAL_PROPS = {
@@ -44,31 +44,31 @@ export const PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(key => PROP_TYPES[key
 
 export const CONTEXT_TYPES = {
     IFRAME: `iframe`,
-    POPUP: `popup`
+    POPUP:  `popup`
 };
 
 export const CLASS_NAMES = {
-    XCOMPONENT:        `${XCOMPONENT}`,
-    OUTLET:            `${XCOMPONENT}-outlet`,
-    COMPONENT_FRAME:   `${XCOMPONENT}-component-frame`,
-    PRERENDER_FRAME:   `${XCOMPONENT}-prerender-frame`,
-    VISIBLE:           `${XCOMPONENT}-visible`,
-    INVISIBLE:         `${XCOMPONENT}-invisible`
+    XCOMPONENT:        `${ XCOMPONENT }`,
+    OUTLET:            `${ XCOMPONENT }-outlet`,
+    COMPONENT_FRAME:   `${ XCOMPONENT }-component-frame`,
+    PRERENDER_FRAME:   `${ XCOMPONENT }-prerender-frame`,
+    VISIBLE:           `${ XCOMPONENT }-visible`,
+    INVISIBLE:         `${ XCOMPONENT }-invisible`
 };
 
 export const EVENTS = {
-    CLOSE: `${XCOMPONENT}-close`
+    CLOSE: `${ XCOMPONENT }-close`
 };
 
 export const ATTRIBUTES = {
-    IFRAME_PLACEHOLDER: `data-xcomponent-${XCOMPONENT}-placeholder`
+    IFRAME_PLACEHOLDER: `data-xcomponent-${ XCOMPONENT }-placeholder`
 };
 
 export const ANIMATION_NAMES = {
-    SHOW_CONTAINER: `${XCOMPONENT}-show-container`,
-    SHOW_COMPONENT: `${XCOMPONENT}-show-component`,
-    HIDE_CONTAINER: `${XCOMPONENT}-hide-container`,
-    HIDE_COMPONENT: `${XCOMPONENT}-hide-component`
+    SHOW_CONTAINER: `${ XCOMPONENT }-show-container`,
+    SHOW_COMPONENT: `${ XCOMPONENT }-show-component`,
+    HIDE_CONTAINER: `${ XCOMPONENT }-hide-container`,
+    HIDE_COMPONENT: `${ XCOMPONENT }-hide-component`
 };
 
 export const EVENT_NAMES = {
@@ -76,10 +76,10 @@ export const EVENT_NAMES = {
 };
 
 export const CLOSE_REASONS = {
-    PARENT_CALL: 'parent_call',
-    CHILD_CALL: 'child_call',
-    CLOSE_DETECTED: 'close_detected',
-    USER_CLOSED: 'user_closed',
+    PARENT_CALL:           'parent_call',
+    CHILD_CALL:            'child_call',
+    CLOSE_DETECTED:        'close_detected',
+    USER_CLOSED:           'user_closed',
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 
@@ -93,6 +93,6 @@ export const DELEGATE = {
 export const WILDCARD = '*';
 
 export const DEFAULT_DIMENSIONS = {
-    WIDTH: 300,
+    WIDTH:  300,
     HEIGHT: 150
 };

@@ -12,9 +12,8 @@ type VueComponent = {
 
 export let vue : ComponentDriverType<*, void> = {
 
-
     global() {
-
+        // pass
     },
 
     register<P>(component : Component<P>) : VueComponent {

@@ -1,6 +1,7 @@
 /* @flow */
 
 import { isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+
 import { __XCOMPONENT__ } from '../constants';
 
 export function globalFor(win : CrossDomainWindowType) : ?Object {

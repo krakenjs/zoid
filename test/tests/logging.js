@@ -1,4 +1,4 @@
-
+/* @flow */
 
 import { testComponent_logLevel_configured, testComponent_no_logLevel_configured } from '../component';
 
@@ -9,7 +9,7 @@ describe('xcomponent console logging', () => {
             testComponent_logLevel_configured.renderIframe({
                 onEnter() {
                     if (!(window.LOG_LEVEL === 'error')) {
-                        throw new Error(`should set log level to the configured value: error, but it was ${window.LOG_LEVEL}`);
+                        throw new Error(`should set log level to the configured value: error, but it was ${ window.LOG_LEVEL }`);
                     } else {
                         done();
                     }
@@ -22,7 +22,7 @@ describe('xcomponent console logging', () => {
                 logLevel: 'warn',
                 onEnter() {
                     if (!(window.LOG_LEVEL === 'warn')) {
-                        throw new Error(`should set log level to the prop value: warn, but it was ${window.LOG_LEVEL}`);
+                        throw new Error(`should set log level to the prop value: warn, but it was ${ window.LOG_LEVEL }`);
                     } else {
                         done();
                     }
@@ -36,7 +36,7 @@ describe('xcomponent console logging', () => {
             testComponent_no_logLevel_configured.renderIframe({
                 onEnter() {
                     if (!(window.LOG_LEVEL === 'info')) {
-                        throw new Error(`should have set log level to the default value: info, but it was ${window.LOG_LEVEL}`);
+                        throw new Error(`should have set log level to the default value: info, but it was ${ window.LOG_LEVEL }`);
                     } else {
                         done();
                     }
@@ -49,7 +49,7 @@ describe('xcomponent console logging', () => {
                 logLevel: 'warn',
                 onEnter() {
                     if (!(window.LOG_LEVEL === 'warn')) {
-                        throw new Error(`should set log level to the prop value: warn, but it was ${window.LOG_LEVEL}`);
+                        throw new Error(`should set log level to the prop value: warn, but it was ${ window.LOG_LEVEL }`);
                     } else {
                         done();
                     }

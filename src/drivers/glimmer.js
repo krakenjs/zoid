@@ -10,7 +10,7 @@ declare class GlimmerComponentType {
 export let glimmer : ComponentDriverType<*, (typeof GlimmerComponentType)> = {
 
     global() {
-
+        // pass
     },
 
     register(component : Component<*>, GlimmerComponent : (typeof GlimmerComponentType)) : (typeof GlimmerComponentType) {

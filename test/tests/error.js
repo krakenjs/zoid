@@ -1,5 +1,8 @@
-import xcomponent from 'src/index';
+/* @flow */
 
+import { assert } from 'chai';
+
+import xcomponent from '../../src';
 import { testComponent, testComponent3 } from '../component';
 
 describe('xcomponent error cases', () => {
@@ -11,7 +14,7 @@ describe('xcomponent error cases', () => {
         window.open = () => {
             return {
                 closed: true,
-                close() {}
+                close() { /* pass */ }
             };
         };
 
@@ -30,7 +33,7 @@ describe('xcomponent error cases', () => {
         testComponent.renderIframe({
 
             onError(err) {
-                assert.isTrue(err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
+                assert.isTrue(err && err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
                 done();
             },
 
@@ -60,13 +63,14 @@ describe('xcomponent error cases', () => {
         }, document.body);
     });
 
-    it.skip('should enter a component and error out when the page name is not valid', done => {
+    it.skip('should enter a component and error out when the page name is not valid', () => {
 
         window.open('/base/test/child.htm', 'INVALIDNAME');
     });
 
     it('should try to render a component to an unsupported context and error out', done => {
 
+        // $FlowFixMe
         testComponent3.render(null, 'moo').catch(() => {
             done();
         });
@@ -79,10 +83,11 @@ describe('xcomponent error cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: false,
+            popup:  false,
             iframe: true
         };
 
+        // $FlowFixMe
         testComponent.render().catch(() => {
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
@@ -96,10 +101,11 @@ describe('xcomponent error cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: true,
+            popup:  true,
             iframe: false
         };
 
+        // $FlowFixMe
         testComponent.render(null, 'moo').then(() => {
             done('Expected an error to be thrown');
         }).catch(() => {
@@ -116,10 +122,11 @@ describe('xcomponent error cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: true,
+            popup:  true,
             iframe: false
         };
 
+        // $FlowFixMe
         testComponent.renderTo(window, null, 'moo').then(() => {
             done('Expected an error to be thrown');
         }).catch(() => {
@@ -136,10 +143,11 @@ describe('xcomponent error cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: false,
+            popup:  false,
             iframe: false
         };
 
+        // $FlowFixMe
         testComponent.render(null).then(() => {
             done('Expected an error to be thrown');
         }).catch(() => {
@@ -156,14 +164,15 @@ describe('xcomponent error cases', () => {
 
         delete testComponent.defaultContext;
         testComponent.contexts = {
-            popup: false,
+            popup:  false,
             iframe: true
         };
 
         try {
+            // $FlowFixMe
             testComponent.init(null, 'popup', 'moo');
             done('expected error to be thrown');
-        } catch (e) {
+        } catch (err) {
             testComponent.defaultContext = originalDefaultContext;
             testComponent.contexts = originalContexts;
 

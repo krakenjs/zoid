@@ -1,7 +1,8 @@
+/* @flow */
 
+import { assert } from 'chai';
 
-import xcomponent from 'src/index';
-
+import xcomponent from '../../src';
 import { testComponent } from '../component';
 
 describe('xcomponent hijack', () => {
@@ -16,11 +17,17 @@ describe('xcomponent hijack', () => {
         button.id = 'hijackButton';
 
         form.appendChild(button);
+        if (!document.body) {
+            throw new Error(`Expected document.body to be present`);
+        }
         document.body.appendChild(form);
 
         let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                if (!document.body) {
+                    throw new Error(`Expected document.body to be present`);
+                }
                 document.body.removeChild(form);
                 done();
             },
@@ -30,8 +37,9 @@ describe('xcomponent hijack', () => {
             `
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
-        document.getElementById('hijackButton').addEventListener('click', event => {
+        button.addEventListener('click', (event : Event) => {
             let target = event.target.form ? event.target.form : event.target;
+            // $FlowFixMe
             component.hijack(target);
             component.render(null, false);
         });
@@ -49,11 +57,17 @@ describe('xcomponent hijack', () => {
         button.id = 'hijackButton';
 
         form.appendChild(button);
+        if (!document.body) {
+            throw new Error(`Expected document.body to be present`);
+        }
         document.body.appendChild(form);
 
         let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                if (!document.body) {
+                    throw new Error(`Expected document.body to be present`);
+                }
                 document.body.removeChild(form);
                 done();
             },
@@ -63,14 +77,15 @@ describe('xcomponent hijack', () => {
             `
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
-        document.getElementById('hijackButton').addEventListener('click', event => {
+        button.addEventListener('click', (event : Event) => {
             let target = event.target.form ? event.target.form : event.target;
+            // $FlowFixMe
             component.hijack(target);
             component.render(null, false);
         });
 
         button.click();
-    }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
+    });
 
     it('should render a component by hijacking a link to an iframe', done => {
 
@@ -78,11 +93,19 @@ describe('xcomponent hijack', () => {
         link.id = 'hijackLink';
         link.href = '/base/test/child.htm?foo=xyzhijacktest';
 
+        if (!document.body) {
+            throw new Error(`Expected document.body to be present`);
+        }
+
         document.body.appendChild(link);
 
         let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                
+                if (!document.body) {
+                    throw new Error(`Expected document.body to be present`);
+                }
                 document.body.removeChild(link);
                 done();
             },
@@ -92,8 +115,9 @@ describe('xcomponent hijack', () => {
             `
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
-        document.getElementById('hijackLink').addEventListener('click', event => {
+        link.addEventListener('click', (event : Event) => {
             let target = event.target.form ? event.target.form : event.target;
+            // $FlowFixMe
             component.hijack(target);
             component.render(null, false);
         });
@@ -107,11 +131,18 @@ describe('xcomponent hijack', () => {
         link.id = 'hijackLink';
         link.href = '/base/test/child.htm?foo=xyzhijacktest';
 
+        if (!document.body) {
+            throw new Error(`Expected document.body to be present`);
+        }
+
         document.body.appendChild(link);
 
         let component = testComponent.init({
             sendUrl(url) {
                 assert.isTrue(url.indexOf('xyzhijacktest') !== -1, 'Expected url to be custom url passed during init');
+                if (!document.body) {
+                    throw new Error(`Expected document.body to be present`);
+                }
                 document.body.removeChild(link);
                 done();
             },
@@ -121,8 +152,9 @@ describe('xcomponent hijack', () => {
             `
         }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
 
-        document.getElementById('hijackLink').addEventListener('click', event => {
+        link.addEventListener('click', (event : Event) => {
             let target = event.target.form ? event.target.form : event.target;
+            // $FlowFixMe
             component.hijack(target);
             component.render(null, false);
         });

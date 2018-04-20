@@ -1,15 +1,16 @@
+/* @flow */
 
+import { assert } from 'chai';
 
 import { testComponent_parentDomains_string,
-        testComponent_parentDomains_array_of_strings,
-        testComponent_parentDomains_array_of_regex,
-        testComponent_parentDomains_string_match,
-        testComponent_parentDomains_array_of_regex_match,
-        testComponent_parentDomains_array_of_strings_match,
-        testComponent_parentDomains_array_of_strings_match_wildcard,
-        testComponent_parentDomains_string_match_wildcard
-    } from '../component';
-
+    testComponent_parentDomains_array_of_strings,
+    testComponent_parentDomains_array_of_regex,
+    testComponent_parentDomains_string_match,
+    testComponent_parentDomains_array_of_regex_match,
+    testComponent_parentDomains_array_of_strings_match,
+    testComponent_parentDomains_array_of_strings_match_wildcard,
+    testComponent_parentDomains_string_match_wildcard
+} from '../component';
 import { RenderError } from '../../src/error';
 
 describe('parent domain check', () => {
@@ -61,29 +62,32 @@ describe('parent domain check', () => {
     describe('should throw error when: ', () => {
         it('allowedParentDomains is specified as string and parent domain does not match', done => {
             testComponent_parentDomains_string.renderIframe({}, document.body)
-            .catch(err => {
-                assert.isTrue(err instanceof RenderError);
-                assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
-                done();
-            });
+                .catch(err => {
+                    assert.isTrue(err instanceof RenderError);
+                    // $FlowFixMe
+                    assert.isTrue(err && err.toString().indexOf('Can not be rendered by domain:') > -1);
+                    done();
+                });
         });
 
         it('allowedParentDomains is specified as array of strings and parent domain does not match', done => {
             testComponent_parentDomains_array_of_strings.renderIframe({}, document.body)
-            .catch(err => {
-                assert.isTrue(err instanceof RenderError);
-                assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
-                done();
-            });
+                .catch(err => {
+                    assert.isTrue(err instanceof RenderError);
+                    // $FlowFixMe
+                    assert.isTrue(err && err.toString().indexOf('Can not be rendered by domain:') > -1);
+                    done();
+                });
         });
 
         it('allowedParentDomains is specified as array of regex expressions and parent domain does not match', done => {
             testComponent_parentDomains_array_of_regex.renderIframe({}, document.body)
-            .catch(err => {
-                assert.isTrue(err instanceof RenderError);
-                assert.isTrue(err.toString().indexOf('Can not be rendered by domain:') > -1);
-                done();
-            });
+                .catch(err => {
+                    assert.isTrue(err instanceof RenderError);
+                    // $FlowFixMe
+                    assert.isTrue(err && err.toString().indexOf('Can not be rendered by domain:') > -1);
+                    done();
+                });
         });
     });
 

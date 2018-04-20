@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint max-lines: 0 */
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -8,15 +9,17 @@ import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
-import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropDefinitionType, type PropDefinitionTypeEnum, type PropTypeEnum } from './props';
 import { isXComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
+import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
+import { info, error, warn, setLogLevel, memoize } from '../../lib';
+import type { EnvStringRegExp, CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
+
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
+import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type PropDefinitionType, type PropDefinitionTypeEnum, type PropTypeEnum } from './props';
 
-import * as drivers from '../../drivers';
-import { info, error, warn, setLogLevel, memoize } from '../../lib';
-
+const drivers = { angular, angular2, glimmer, react, vue, script };
 
 /*  Component
     ---------
@@ -57,7 +60,7 @@ export type ComponentOptionsType<P> = {
     containerTemplate? : (RenderOptionsType) => HTMLElement,
     prerenderTemplate? : (RenderOptionsType) => HTMLElement,
 
-    validate? : (Component<P>, PropsType) => void, // eslint-disable-line no-use-before-define
+    validate? : (Component<P>, PropsType) => void,
 
     unsafeRenderTo? : boolean
 };
@@ -168,7 +171,6 @@ export class Component<P> extends BaseComponent<P> {
         // A url to use by default to render the component, if not using envs
 
 
-
         // The allowed contexts. For example { iframe: true, popup: false }
 
         this.addProp(options, 'contexts', { iframe: true, popup: false });
@@ -242,7 +244,7 @@ export class Component<P> extends BaseComponent<P> {
 
     driver(name : string, dep : mixed) : mixed {
         if (!drivers[name]) {
-            throw new Error(`Could not find driver for framework: ${name}`);
+            throw new Error(`Could not find driver for framework: ${ name }`);
         }
 
         if (!this.driverCache[name]) {
@@ -266,11 +268,11 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     listenDelegate() {
-        on(`${POST_MESSAGE.ALLOW_DELEGATE}_${this.name}`, ({ source, origin, data }) => {
+        on(`${ POST_MESSAGE.ALLOW_DELEGATE }_${ this.name }`, () => {
             return true;
         });
 
-        on(`${POST_MESSAGE.DELEGATE}_${this.name}`, ({ source, origin, data }) => {
+        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, origin, data }) => {
 
             let domain = this.getDomain(null, data.env || this.defaultEnv);
 
@@ -279,7 +281,7 @@ export class Component<P> extends BaseComponent<P> {
             }
 
             if (!matchDomain(domain, origin)) {
-                throw new Error(`Can not render from ${origin} - expected ${ domain.toString() }`);
+                throw new Error(`Can not render from ${ origin } - expected ${ domain.toString() }`);
             }
 
             let delegate = this.delegate(source, data.options);
@@ -292,7 +294,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     canRenderTo(win : CrossDomainWindowType) : ZalgoPromise<boolean> {
-        return send(win, `${POST_MESSAGE.ALLOW_DELEGATE}_${this.name}`).then(({ data }) => {
+        return send(win, `${ POST_MESSAGE.ALLOW_DELEGATE }_${ this.name }`).then(({ data }) => {
             return data;
         }).catch(() => {
             return false;
@@ -312,14 +314,16 @@ export class Component<P> extends BaseComponent<P> {
             return domain;
         }
 
-        if (this.domain && typeof this.domain === 'object') {
-            for (let env of Object.keys(this.domain)) {
+        let domains = this.domain;
+
+        if (domains && typeof domains === 'object' && !(domains instanceof RegExp)) {
+            for (let env of Object.keys(domains)) {
 
                 if (env === 'test') {
                     continue;
                 }
 
-                if (domain === this.domain[env]) {
+                if (domain === domains[env]) {
                     return domain;
                 }
             }
@@ -399,7 +403,7 @@ export class Component<P> extends BaseComponent<P> {
         }
     }
 
-    getUrl(env : string, props : BuiltInPropsType & P) : ?(string | ZalgoPromise<string>) {
+    getUrl(env : string, props : BuiltInPropsType & P) : (string | ZalgoPromise<string>) {
 
         // $FlowFixMe
         let url = this.getForEnv(this.url, env);
@@ -411,6 +415,8 @@ export class Component<P> extends BaseComponent<P> {
         if (this.buildUrl) {
             return this.buildUrl(props);
         }
+
+        throw new Error(`Unable to get url`);
     }
 
     isXComponent() : boolean {
@@ -423,7 +429,7 @@ export class Component<P> extends BaseComponent<P> {
 
 
     createError(message : string, tag : ?string) : Error {
-        return new Error(`[${ tag || this.tag  }] ${message}`);
+        return new Error(`[${ tag || this.tag  }] ${ message }`);
     }
 
 
@@ -444,11 +450,11 @@ export class Component<P> extends BaseComponent<P> {
 
     validateRenderContext(context : ?string, element : ?ElementRefType) {
         if (context && !this.contexts[context]) {
-            throw new Error(`[${this.tag}] Can not render to ${context}`);
+            throw new Error(`[${ this.tag }] Can not render to ${ context }`);
         }
 
         if (!element && context === CONTEXT_TYPES.IFRAME) {
-            throw new Error(`[${this.tag}] Context type ${CONTEXT_TYPES.IFRAME} requires an element selector`);
+            throw new Error(`[${ this.tag }] Context type ${ CONTEXT_TYPES.IFRAME } requires an element selector`);
         }
     }
 

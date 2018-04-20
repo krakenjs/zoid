@@ -63,7 +63,8 @@ export type PropDefinitionType<T : PropTypeEnum, P, S : PropDefinitionTypeEnum> 
     allowDelegate? : boolean,
     validate? : (T, PropsType & P) => void,
     decorate? : (T, PropsType & P) => ?(ZalgoPromise<T> | T),
-    def? : (P) => ?T
+    def? : (P) => ?T,
+    sameDomain? : boolean
 };
 
 type BooleanPropDefinitionType<P> = PropDefinitionType<boolean, P, PropBooleanType>;
@@ -105,8 +106,8 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // The desired env in which the component is being rendered. Used to determine the correct url
 
         env: {
-            type: 'string',
-            required: false,
+            type:       'string',
+            required:   false,
             queryParam: true,
             def() : string {
                 return this.defaultEnv;
@@ -122,8 +123,8 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         },
 
         logLevel: {
-            type: 'string',
-            required: false,
+            type:       'string',
+            required:   false,
             queryParam: true,
             def() : string {
                 return this.defaultLogLevel;
@@ -133,17 +134,17 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // A custom url to use to render the component
 
         url: {
-            type: 'string',
-            required: false,
-            promise: true,
+            type:        'string',
+            required:    false,
+            promise:     true,
             sendToChild: false
         },
 
         version: {
-            type: 'string',
-            required: false,
+            type:       'string',
+            required:   false,
             queryParam: true,
-            def(component) : string {
+            def() : string {
                 return this.version;
             }
         },
@@ -151,59 +152,59 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // A millisecond timeout before onTimeout is called
 
         timeout: {
-            type: 'number',
-            required: false,
+            type:        'number',
+            required:    false,
             sendToChild: false
         },
 
         onDisplay: {
-            type: 'function',
-            required: false,
-            noop: true,
-            promisify: true,
-            memoize: true,
+            type:        'function',
+            required:    false,
+            noop:        true,
+            promisify:   true,
+            memoize:     true,
             sendToChild: false
         },
 
         onEnter: {
-            type: 'function',
-            required: false,
-            noop: true,
-            promisify: true,
+            type:        'function',
+            required:    false,
+            noop:        true,
+            promisify:   true,
             sendToChild: false
         },
 
         // When we get an INIT message from the child
 
         onRender: {
-            type: 'function',
-            required: false,
-            noop: true,
-            promisify: true,
+            type:        'function',
+            required:    false,
+            noop:        true,
+            promisify:   true,
             sendToChild: false
         },
 
         // When the user closes the component.
 
         onClose: {
-            type: 'function',
-            required: false,
-            noop: true,
-            once: true,
-            promisify: true,
+            type:        'function',
+            required:    false,
+            noop:        true,
+            once:        true,
+            promisify:   true,
             sendToChild: false
         },
 
         // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
 
         onTimeout: {
-            type: 'function',
-            required: false,
-            memoize: true,
-            promisify: true,
+            type:        'function',
+            required:    false,
+            memoize:     true,
+            promisify:   true,
             sendToChild: false,
             def() : (() => void) {
-                return function(err : mixed) : void {
+                return function onTimeout(err : mixed) : void {
                     if (this.props.onError) {
                         return this.props.onError(err);
                     }
@@ -215,11 +216,11 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // When the component ePperiences an error
 
         onError: {
-            type: 'function',
-            required: false,
-            promisify: true,
+            type:        'function',
+            required:    false,
+            promisify:   true,
             sendToChild: true,
-            once: true
+            once:        true
         }
     };
 }

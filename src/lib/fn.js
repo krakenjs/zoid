@@ -25,7 +25,8 @@ export function once<T, A : mixed>(method : (...args : Array<A>) => T) : (...arg
     let called = false;
     let result;
 
-    return function(...args : Array<A>) : T {
+    // eslint-disable-next-line no-unused-vars
+    return function onceWrapper(...args : Array<A>) : T {
         if (called) {
             return result;
         }
@@ -47,7 +48,8 @@ export function memoize<T, A : mixed>(method : (...args : Array<A>) => T) : (...
 
     let results = {};
 
-    return function(...args : Array<A>) : T {
+    // eslint-disable-next-line no-unused-vars
+    return function memoizeWrapper(...args : Array<A>) : T {
 
         let cacheKey;
 
@@ -55,7 +57,7 @@ export function memoize<T, A : mixed>(method : (...args : Array<A>) => T) : (...
             cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), (key, val) => {
 
                 if (typeof val === 'function') {
-                    return `xcomponent:memoize[${getObjectID(val)}]`;
+                    return `xcomponent:memoize[${ getObjectID(val) }]`;
                 }
 
                 return val;
@@ -77,7 +79,7 @@ export function debounce<T>(method : (...args : Array<mixed>) => T, time : numbe
 
     let timeout;
 
-    return function() {
+    return function debounceWrapper() {
         clearTimeout(timeout);
 
         timeout = setTimeout(() => {
@@ -87,7 +89,7 @@ export function debounce<T>(method : (...args : Array<mixed>) => T, time : numbe
 }
 
 export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
-    return replaceObject(obj, (value, key, fullKey) => {
+    return replaceObject(obj, (value) => {
         if (typeof value === 'function') {
             return {
                 __type__: '__function__'
@@ -99,7 +101,7 @@ export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
 export function deserializeFunctions<T : Object | Array<mixed>>(obj : T, handler : Function) : T {
     return replaceObject(obj, (value, key, fullKey) => {
         if (value && value.__type__ === '__function__') {
-            return function() : mixed {
+            return function deserializedFunctionWrapper() : mixed {
                 return handler({ key, fullKey, self: this, args: arguments });
             };
         }

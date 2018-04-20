@@ -1,4 +1,4 @@
-
+/* @flow */
 
 import { testComponent } from '../component';
 
@@ -128,8 +128,14 @@ describe('xcomponent render to parent', () => {
     it('should close an xcomponent renderToParent iframe on click of the overlay close button', done => {
 
         testComponent.renderIframe({
-            childEntered() {
-                document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close').click();
+            childEntered: () => {
+                let closeButton = document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close');
+
+                if (!closeButton) {
+                    return done(new Error(`Expected close button to be present`));
+                }
+
+                closeButton.click();
             },
 
             foo: () => done(),
@@ -160,8 +166,14 @@ describe('xcomponent render to parent', () => {
 
         testComponent.renderIframe({
 
-            childEntered() {
-                document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close').click();
+            childEntered: () => {
+                let closeButton = document.querySelector('.xcomponent-tag-test-component2 .xcomponent-close');
+
+                if (!closeButton) {
+                    return done(new Error(`Expected close button to be present`));
+                }
+
+                closeButton.click();
             },
 
             foo: () => done(),
@@ -189,8 +201,14 @@ describe('xcomponent render to parent', () => {
 
         testComponent.renderIframe({
 
-            childEntered() {
-                document.querySelector('.xcomponent-tag-test-component2').click();
+            childEntered: () => {
+                let overlayElement = document.querySelector('.xcomponent-tag-test-component2');
+
+                if (!overlayElement) {
+                    return done(new Error(`Expected overlay element to be present`));
+                }
+
+                overlayElement.click();
             },
 
             foo: () => done(),

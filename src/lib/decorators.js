@@ -16,7 +16,7 @@ export function memoized<T : mixed>(target : Object, name : string, descriptor :
         return this.__memoized__[name];
     };
 
-    descriptor.value.displayName = `${name}:memoized`;
+    descriptor.value.displayName = `${ name }:memoized`;
 }
 
 export function promise<T : mixed>(target : Object, name : string, descriptor : Object) {
@@ -26,5 +26,5 @@ export function promise<T : mixed>(target : Object, name : string, descriptor : 
         return ZalgoPromise.try(method, this, arguments);
     };
 
-    descriptor.value.displayName = `${name}:promisified`;
+    descriptor.value.displayName = `${ name }:promisified`;
 }

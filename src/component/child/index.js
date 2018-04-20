@@ -1,21 +1,22 @@
 /* @flow */
+/* eslint max-lines: 0 */
 
-import * as $logger from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { flush, logLevels } from 'beaver-logger/client';
+import { isSameDomain, getOpener, getAllFramesInWindow, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
-
 import { ZalgoPromise } from 'zalgo-promise/src';
+
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
 import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-         cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
+    cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
-import { normalizeChildProps } from './props';
-import { matchDomain } from 'cross-domain-utils/src';
 import { RenderError } from '../../error';
-
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
+import type { DimensionsType } from '../../types';
+
+import { normalizeChildProps } from './props';
 
 export type ChildExportsType<P> = {
     updateProps : (props : (BuiltInPropsType & P)) => ZalgoPromise<void>,
@@ -152,7 +153,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                     throw new Error(`Can not get props from file:// domain`);
                 }
 
-                throw new Error(`Parent component window is on a different domain - expected ${getDomain()} - can not retrieve props`);
+                throw new Error(`Parent component window is on a different domain - expected ${ getDomain() } - can not retrieve props`);
             }
 
             let global = globalFor(parentComponentWindow);
@@ -164,7 +165,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
             props = global.props[componentMeta.uid];
 
         } else {
-            throw new Error(`Unrecognized props type: ${props.type}`);
+            throw new Error(`Unrecognized props type: ${ props.type }`);
         }
 
         if (!props) {
@@ -176,7 +177,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                 let func = get(this.props, fullKey);
 
                 if (typeof func !== 'function') {
-                    throw new Error(`Expected ${ typeof func } to be function`);
+                    throw new TypeError(`Expected ${ typeof func } to be function`);
                 }
 
                 return func.apply(self, args);
@@ -211,7 +212,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
             throw new Error(`Can not find parent component window to message`);
         }
 
-        this.component.log(`send_to_parent_${name}`);
+        this.component.log(`send_to_parent_${ name }`);
 
         return send(parentWindow, name, data, { domain: getParentDomain(), ...options });
     }
@@ -244,7 +245,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         let componentMeta = getComponentMeta();
 
         if (componentMeta.tag !== this.component.tag) {
-            throw this.component.createError(`Parent is ${componentMeta.tag} - can not attach ${this.component.tag}`);
+            throw this.component.createError(`Parent is ${ componentMeta.tag } - can not attach ${ this.component.tag }`);
         }
 
         // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
@@ -277,6 +278,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                 // $FlowFixMe
                 for (let frame of getAllFramesInWindow(opener)) {
 
+                    // $FlowFixMe
                     if (!isSameDomain(frame) || !frame.console || frame === window) {
                         continue;
                     }
@@ -290,21 +292,21 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
                         try {
 
-                            window.console[level] = function() : void {
+                            window.console[level] = function consoleLevel() : void {
 
                                 try {
                                     if (frame) {
                                         // $FlowFixMe
                                         return frame.console[level].apply(frame.console, arguments);
                                     }
-                                } catch (err3) {
+                                } catch (err3) { // eslint-disable-line unicorn/catch-error-name
                                     // pass
                                 }
 
                                 return original.apply(this, arguments);
                             };
 
-                        } catch (err2) {
+                        } catch (err2) { // eslint-disable-line unicorn/catch-error-name
                             // pass
                         }
                     }
@@ -389,7 +391,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         }).then(() => {
 
             return cycle(() => {
-                return onDimensionsChange(element, { width, height }).then(dimensions => {
+                return onDimensionsChange(element, { width, height }).then(() => {
                     // $FlowFixMe
                     return this.resizeToElement(element, { width, height });
                 });
@@ -509,8 +511,8 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
 
-    destroy() {
-        $logger.flush().then(() => {
+    destroy() : ZalgoPromise<void> {
+        return flush().then(() => {
             window.close();
         });
     }
@@ -550,8 +552,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
 if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
 
     if (isXComponentWindow() && window.console) {
-        let logLevels = $logger.logLevels;
-
         for (let level of logLevels) {
 
             try {
@@ -562,7 +562,7 @@ if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
                     continue;
                 }
 
-                window.console[level] = function() : void {
+                window.console[level] = function consoleLevel() : void {
                     try {
                         let logLevel = window.LOG_LEVEL;
 
@@ -576,7 +576,7 @@ if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
 
                         return original.apply(this, arguments);
 
-                    } catch (err2) {
+                    } catch (err2) { // eslint-disable-line unicorn/catch-error-name
                         // pass
                     }
                 };

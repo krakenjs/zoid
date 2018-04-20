@@ -1,4 +1,7 @@
+/* @flow */
+
 import { onCloseWindow } from 'cross-domain-utils/src';
+
 import { testComponent } from '../component';
 
 describe('xcomponent actions', () => {
@@ -10,7 +13,7 @@ describe('xcomponent actions', () => {
             onEnter() {
                 let close = this.window.close;
 
-                this.window.close = function() {
+                this.window.close = function windowClose() {
                     close.apply(this, arguments);
                     done();
                 };

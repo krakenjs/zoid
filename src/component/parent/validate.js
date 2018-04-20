@@ -9,7 +9,7 @@ export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(pr
 
     if (!hasProp) {
         if (required && prop.required !== false && !prop.hasOwnProperty('def')) {
-            throw new Error(`Prop is required: ${key}`);
+            throw new Error(`Prop is required: ${ key }`);
         }
 
         return;
@@ -22,13 +22,13 @@ export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(pr
     if (prop.type === 'function') {
 
         if (!(typeof value === 'function')) {
-            throw new Error(`Prop is not of type function: ${key}`);
+            throw new TypeError(`Prop is not of type function: ${ key }`);
         }
 
     } else if (prop.type === 'string') {
 
         if (typeof value !== 'string') {
-            throw new Error(`Prop is not of type string: ${key}`);
+            throw new TypeError(`Prop is not of type string: ${ key }`);
         }
 
     } else if (prop.type === 'object') {
@@ -38,13 +38,13 @@ export function validateProp<T : PropTypeEnum, P, S : PropDefinitionTypeEnum>(pr
         try {
             JSON.stringify(value);
         } catch (err) {
-            throw new Error(`Unable to serialize prop: ${key}`);
+            throw new Error(`Unable to serialize prop: ${ key }`);
         }
 
     } else if (prop.type === 'number') {
 
         if (isNaN(parseInt(value, 10))) {
-            throw new Error(`Prop is not a number: ${key}`);
+            throw new TypeError(`Prop is not a number: ${ key }`);
         }
     }
 
@@ -66,7 +66,7 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
     props = props || {};
 
     if (props.env && typeof component.url === 'object' && !component.url[props.env]) {
-        throw new Error(`Invalid env: ${props.env}`);
+        throw new Error(`Invalid env: ${ props.env }`);
     }
 
     // Set aliases

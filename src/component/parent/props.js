@@ -3,7 +3,6 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { noop, denodeify, once, memoize, promisify, dotify } from '../../lib';
-
 import type { Component } from '../component';
 import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, PropTypeEnum, PropDefinitionType, PropDefinitionTypeEnum } from '../component/props';
 
@@ -20,6 +19,7 @@ function isDefined(value : ?mixed) : boolean {
     Turn prop into normalized value, using defaults, function options, etc.
 */
 
+// eslint-disable-next-line complexity
 export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), key : string, value : ?T) : ?(ZalgoPromise<T> | T) {
 
     let prop = component.getProp(key);
@@ -81,7 +81,7 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
             let original = resultValue;
             // $FlowFixMe
             resultValue = function() : mixed {
-                component.log(`call_prop_${key}`);
+                component.log(`call_prop_${ key }`);
                 return original.apply(this, arguments);
             };
 
@@ -124,7 +124,7 @@ export function normalizeProp<P, T : PropTypeEnum>(component : Component<P>, ins
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function normalizeProps<P>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P), required : boolean = true) : (BuiltInPropsType & P) {
+export function normalizeProps<P>(component : Component<P>, instance : ParentComponent<P>, props : (PropsType & P)) : (BuiltInPropsType & P) {
 
     let result = {};
 
@@ -155,11 +155,6 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
     // $FlowFixMe
     return result;
 }
-
-
-
-
-
 
 
 /*  Props to Query
@@ -204,7 +199,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
         let prop = propsDef[key];
 
         if (!prop) {
-            return;
+            return; // eslint-disable-line array-callback-return
         }
 
         return ZalgoPromise.resolve().then(() => {
@@ -227,7 +222,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
                 return;
             }
 
-            ZalgoPromise.all([
+            return ZalgoPromise.all([
                 getQueryParam(prop, key, value),
                 getQueryValue(prop, key, value)
             ]).then(([ queryParam, queryValue ]) => {
@@ -247,7 +242,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
                     } else {
                         result = dotify(queryValue, key);
 
-                        for (let dotkey in result) {
+                        for (let dotkey of Object.keys(result)) {
                             params[dotkey] = result[dotkey];
                         }
 

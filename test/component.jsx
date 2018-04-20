@@ -1,6 +1,7 @@
+/* @flow */
+/* @jsx jsxDom */
 
-
-import xcomponent from 'src/index';
+import xcomponent from '../src';
 
 window.xcomponent = xcomponent;
 
@@ -9,7 +10,7 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
     function close(event) {
         event.preventDefault();
         event.stopPropagation();
-        return actions.close();
+        return actions.close('foo');
     }
 
     function focus(event) {
@@ -336,6 +337,7 @@ export let testComponent_parentDomains_array_of_strings = xcomponent.create({
 export let testComponent_parentDomains_array_of_regex = xcomponent.create({
     tag: 'test-component-parent-domains-array-of-regex',
 
+    // $FlowFixMe
     allowedParentDomains: [/^http\:\/\/www.somedomain.com$/, /^http\:\/\/www.otherdomain.com$/],
 
     url: '/base/test/child.htm?devenv=true',
@@ -378,6 +380,7 @@ export let testComponent_parentDomains_string_match_wildcard = xcomponent.create
 export let testComponent_parentDomains_array_of_regex_match = xcomponent.create({
     tag: 'test-component-parent-domains-array-of-regex-match',
 
+    // $FlowFixMe
     allowedParentDomains: [/^http\:\/\/www.somedomain.com$/, /^http\:\/\/localhost\:9876$/],
 
     url: '/base/test/child.htm?devenv=true',
