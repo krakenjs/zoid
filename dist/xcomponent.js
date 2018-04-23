@@ -4682,51 +4682,6 @@
                 }, {
                     key: "sendLogsToOpener",
                     value: function() {
-                        if (__SEND_POPUP_LOGS_TO_OPENER__) try {
-                            var opener = (0, _src.getOpener)(window);
-                            if (!opener || !window.console) return;
-                            _loop2: for (var _iterator2 = (0, _src.getAllFramesInWindow)(opener), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                                var _ref4, _ret = function() {
-                                    if (_isArray2) {
-                                        if (_i2 >= _iterator2.length) return "break";
-                                        _ref4 = _iterator2[_i2++];
-                                    } else {
-                                        _i2 = _iterator2.next();
-                                        if (_i2.done) return "break";
-                                        _ref4 = _i2.value;
-                                    }
-                                    var frame = _ref4;
-                                    if (!(0, _src.isSameDomain)(frame) || !frame.console || frame === window) return "continue";
-                                    for (var _arr = [ "log", "debug", "info", "warn", "error" ], _i3 = 0; _i3 < _arr.length; _i3++) {
-                                        (function() {
-                                            var level = _arr[_i3], original = window.console[level];
-                                            if (!original) return "continue";
-                                            try {
-                                                window.console[level] = function() {
-                                                    try {
-                                                        if (frame) return frame.console[level].apply(frame.console, arguments);
-                                                    } catch (err3) {}
-                                                    return original.apply(this, arguments);
-                                                };
-                                            } catch (err2) {}
-                                        })();
-                                    }
-                                    return {
-                                        v: void 0
-                                    };
-                                }();
-                                switch (_ret) {
-                                  case "break":
-                                    break _loop2;
-
-                                  case "continue":
-                                    continue;
-
-                                  default:
-                                    if ("object" === (void 0 === _ret ? "undefined" : _typeof(_ret))) return _ret.v;
-                                }
-                            }
-                        } catch (err) {}
                     }
                 }, {
                     key: "watchForClose",
@@ -4919,41 +4874,6 @@
                 } ]);
                 return ChildComponent;
             }(_base.BaseComponent);
-            if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__ && (0, _window.isXComponentWindow)() && window.console) {
-                _loop5: for (var _iterator4 = _client.logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                    var _ref8, _ret3 = function() {
-                        if (_isArray4) {
-                            if (_i5 >= _iterator4.length) return "break";
-                            _ref8 = _iterator4[_i5++];
-                        } else {
-                            _i5 = _iterator4.next();
-                            if (_i5.done) return "break";
-                            _ref8 = _i5.value;
-                        }
-                        var level = _ref8;
-                        try {
-                            var _original = window.console[level];
-                            if (!_original || !_original.apply) return "continue";
-                            window.console[level] = function() {
-                                try {
-                                    var logLevel = window.LOG_LEVEL;
-                                    if (!logLevel || -1 === _client.logLevels.indexOf(logLevel)) return _original.apply(this, arguments);
-                                    if (_client.logLevels.indexOf(level) > _client.logLevels.indexOf(logLevel)) return;
-                                    return _original.apply(this, arguments);
-                                } catch (err2) {}
-                            };
-                            "info" === level && (window.console.log = window.console[level]);
-                        } catch (err) {}
-                    }();
-                    switch (_ret3) {
-                      case "break":
-                        break _loop5;
-
-                      case "continue":
-                        continue;
-                    }
-                }
-            }
         },
         "./src/component/child/props.js": function(module, exports, __webpack_require__) {
             "use strict";
