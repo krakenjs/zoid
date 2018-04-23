@@ -10,8 +10,10 @@ export let WEBPACK_CONFIG = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
     vars:       {
-        __IE_POPUP_SUPPORT__:        false,
-        __ALLOW_POSTMESSAGE_POPUP__: true
+        __IE_POPUP_SUPPORT__:               false,
+        __ALLOW_POSTMESSAGE_POPUP__:        true,
+        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
+        __SEND_POPUP_LOGS_TO_OPENER__:      false
     }
 });
 
