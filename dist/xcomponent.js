@@ -5540,7 +5540,7 @@
                     if (options.dimensions && !(0, _lib.isPx)(options.dimensions.height) && !(0, _lib.isPerc)(options.dimensions.height)) throw new Error("Expected options.dimensions.height to be a px or % string value");
                 }
                 if (options.contexts) {
-                    if (options.contexts.popup && !__POPUP_SUPPORT__) throw new Error("Popups not supported in this build -- please use the full xcomponent.js build");
+                    if (options.contexts.popup, !1) throw new Error("Popups not supported in this build -- please use the full xcomponent.js build");
                     for (var anyEnabled = !1, _iterator2 = Object.keys(options.contexts), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                         var _ref2;
                         if (_isArray2) {
@@ -5905,7 +5905,7 @@
                     this.iframe.setAttribute("src", url);
                 }
             };
-            __POPUP_SUPPORT__ && (RENDER_DRIVERS[_constants.CONTEXT_TYPES.POPUP] = {
+            RENDER_DRIVERS[_constants.CONTEXT_TYPES.POPUP] = {
                 focusable: !0,
                 renderedIntoContainerTemplate: !1,
                 allowResize: !1,
@@ -5984,7 +5984,7 @@
                     } catch (err) {}
                     this.window.location = url;
                 }
-            });
+            };
         },
         "./src/component/parent/index.js": function(module, exports, __webpack_require__) {
             "use strict";
