@@ -27,3 +27,5 @@ export let postRobot = _postRobot;
 export * from './error';
 
 export const CONSTANTS = _CONSTANTS;
+
+export type XComponent<P> = Component<P>;
