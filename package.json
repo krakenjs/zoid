@@ -50,7 +50,8 @@
   "devDependencies": {
     "flow-bin": "^0.70.0",
     "grumbler-scripts": "^2.0.19",
-    "mocha": "^3.5.0"
+    "mocha": "^3.5.0",
+    "serve": "^6.5.6"
   },
   "dependencies": {
     "beaver-logger": "^3.0.11",

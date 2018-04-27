@@ -68,16 +68,6 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        expectError('No url passed', () => {
-            xcomponent.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                }
-            });
-        });
-
         expectError('Props passed as string', () => {
             // $FlowFixMe
             xcomponent.create({

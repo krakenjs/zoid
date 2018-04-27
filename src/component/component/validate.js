@@ -93,12 +93,8 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
         }
     }
 
-    if (!options.url && !options.buildUrl) {
-        throw new Error(`Expected options.url to be passed`);
-    }
-
     if (options.url && options.buildUrl) {
-        throw new Error(`Can not pass options.url and options.buildUrl`);
+        throw new Error(`Can not pass both options.url and options.buildUrl`);
     }
 
     if (options.defaultEnv) {
