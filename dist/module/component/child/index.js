@@ -63,8 +63,6 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
             return _possibleConstructorReturn(_this);
         }
 
-        _this.sendLogsToOpener();
-
         _this.component.log('construct_child');
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
@@ -311,99 +309,6 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
             this.watchForClose();
         }
     }, {
-        key: 'sendLogsToOpener',
-        value: function sendLogsToOpener() {
-            if (__SEND_POPUP_LOGS_TO_OPENER__) {
-                try {
-                    var opener = (0, _src.getOpener)(window);
-
-                    if (!opener || !window.console) {
-                        return;
-                    }
-
-                    // $FlowFixMe
-
-                    var _loop = function _loop() {
-                        if (_isArray2) {
-                            if (_i2 >= _iterator2.length) return 'break';
-                            _ref4 = _iterator2[_i2++];
-                        } else {
-                            _i2 = _iterator2.next();
-                            if (_i2.done) return 'break';
-                            _ref4 = _i2.value;
-                        }
-
-                        var frame = _ref4;
-
-
-                        // $FlowFixMe
-                        if (!(0, _src.isSameDomain)(frame) || !frame.console || frame === window) {
-                            return 'continue';
-                        }
-
-                        var _arr = ['log', 'debug', 'info', 'warn', 'error'];
-
-                        var _loop3 = function _loop3() {
-                            var level = _arr[_i3];
-                            var original = window.console[level];
-
-                            if (!original) {
-                                return 'continue';
-                            }
-
-                            try {
-
-                                window.console[level] = function consoleLevel() {
-
-                                    try {
-                                        if (frame) {
-                                            // $FlowFixMe
-                                            return frame.console[level].apply(frame.console, arguments);
-                                        }
-                                    } catch (err3) {// eslint-disable-line unicorn/catch-error-name
-                                        // pass
-                                    }
-
-                                    return original.apply(this, arguments);
-                                };
-                            } catch (err2) {// eslint-disable-line unicorn/catch-error-name
-                                // pass
-                            }
-                        };
-
-                        for (var _i3 = 0; _i3 < _arr.length; _i3++) {
-                            var _ret2 = _loop3();
-
-                            if (_ret2 === 'continue') continue;
-                        }
-
-                        return {
-                            v: void 0
-                        };
-                    };
-
-                    _loop2: for (var _iterator2 = (0, _src.getAllFramesInWindow)(opener), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-                        var _ref4;
-
-                        var _ret = _loop();
-
-                        switch (_ret) {
-                            case 'break':
-                                break _loop2;
-
-                            case 'continue':
-                                continue;
-
-                            default:
-                                if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-                        }
-                    }
-                } catch (err) {
-                    // pass
-                }
-            }
-        }
-    }, {
         key: 'watchForClose',
         value: function watchForClose() {
             var _this4 = this;
@@ -415,11 +320,11 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
     }, {
         key: 'enableAutoResize',
         value: function enableAutoResize() {
-            var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-                _ref5$width = _ref5.width,
-                width = _ref5$width === undefined ? true : _ref5$width,
-                _ref5$height = _ref5.height,
-                height = _ref5$height === undefined ? true : _ref5$height;
+            var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+                _ref4$width = _ref4.width,
+                width = _ref4$width === undefined ? true : _ref4$width,
+                _ref4$height = _ref4.height,
+                height = _ref4$height === undefined ? true : _ref4$height;
 
             this.autoResize = { width: width, height: height };
             this.watchForResize();
@@ -543,11 +448,11 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
         }
     }, {
         key: 'resizeToElement',
-        value: function resizeToElement(el, _ref6) {
+        value: function resizeToElement(el, _ref5) {
             var _this8 = this;
 
-            var width = _ref6.width,
-                height = _ref6.height;
+            var width = _ref5.width,
+                height = _ref5.height;
 
 
             var history = [];
@@ -561,19 +466,19 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
                     var _tracker$check = tracker.check(),
                         dimensions = _tracker$check.dimensions;
 
-                    for (var _iterator3 = history, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                        var _ref7;
+                    for (var _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+                        var _ref6;
 
-                        if (_isArray3) {
-                            if (_i4 >= _iterator3.length) break;
-                            _ref7 = _iterator3[_i4++];
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) break;
+                            _ref6 = _iterator2[_i2++];
                         } else {
-                            _i4 = _iterator3.next();
-                            if (_i4.done) break;
-                            _ref7 = _i4.value;
+                            _i2 = _iterator2.next();
+                            if (_i2.done) break;
+                            _ref6 = _i2.value;
                         }
 
-                        var size = _ref7;
+                        var size = _ref6;
 
 
                         var widthMatch = !width || size.width === dimensions.width;
@@ -684,27 +589,27 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
     return ChildComponent;
 }(_base.BaseComponent);
 
-if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
+if (__XCOMPONENT__.__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
 
     if ((0, _window.isXComponentWindow)() && window.console) {
-        var _loop4 = function _loop4() {
-            if (_isArray4) {
-                if (_i5 >= _iterator4.length) return 'break';
-                _ref8 = _iterator4[_i5++];
+        var _loop = function _loop() {
+            if (_isArray3) {
+                if (_i3 >= _iterator3.length) return 'break';
+                _ref7 = _iterator3[_i3++];
             } else {
-                _i5 = _iterator4.next();
-                if (_i5.done) return 'break';
-                _ref8 = _i5.value;
+                _i3 = _iterator3.next();
+                if (_i3.done) return 'break';
+                _ref7 = _i3.value;
             }
 
-            var level = _ref8;
+            var level = _ref7;
 
 
             try {
 
-                var _original = window.console[level];
+                var original = window.console[level];
 
-                if (!_original || !_original.apply) {
+                if (!original || !original.apply) {
                     return 'continue';
                 }
 
@@ -713,14 +618,14 @@ if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
                         var logLevel = window.LOG_LEVEL;
 
                         if (!logLevel || _client.logLevels.indexOf(logLevel) === -1) {
-                            return _original.apply(this, arguments);
+                            return original.apply(this, arguments);
                         }
 
                         if (_client.logLevels.indexOf(level) > _client.logLevels.indexOf(logLevel)) {
                             return;
                         }
 
-                        return _original.apply(this, arguments);
+                        return original.apply(this, arguments);
                     } catch (err2) {// eslint-disable-line unicorn/catch-error-name
                         // pass
                     }
@@ -734,14 +639,14 @@ if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
             }
         };
 
-        _loop5: for (var _iterator4 = _client.logLevels, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-            var _ref8;
+        _loop2: for (var _iterator3 = _client.logLevels, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+            var _ref7;
 
-            var _ret3 = _loop4();
+            var _ret = _loop();
 
-            switch (_ret3) {
+            switch (_ret) {
                 case 'break':
-                    break _loop5;
+                    break _loop2;
 
                 case 'continue':
                     continue;}

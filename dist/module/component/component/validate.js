@@ -82,7 +82,7 @@ function validate(options) {
 
     if (options.contexts) {
 
-        if (options.contexts.popup && !__POPUP_SUPPORT__) {
+        if (options.contexts.popup && !__XCOMPONENT__.__POPUP_SUPPORT__) {
             throw new Error('Popups not supported in this build -- please use the full xcomponent.js build');
         }
 
