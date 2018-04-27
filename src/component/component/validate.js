@@ -61,7 +61,7 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
 
     if (options.contexts) {
 
-        if (options.contexts.popup && !__POPUP_SUPPORT__) {
+        if (options.contexts.popup && !__XCOMPONENT__.__POPUP_SUPPORT__) {
             throw new Error(`Popups not supported in this build -- please use the full xcomponent.js build`);
         }
 

@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { flush, logLevels } from 'beaver-logger/client';
-import { isSameDomain, getOpener, getAllFramesInWindow, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
@@ -52,8 +52,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
             this.error(new RenderError(`Can not be rendered by domain: ${ this.getParentDomain() }`));
             return;
         }
-
-        this.sendLogsToOpener();
 
         this.component.log(`construct_child`);
 
@@ -263,61 +261,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
         // if there's no parent to message to.
 
         this.watchForClose();
-    }
-
-
-    sendLogsToOpener() {
-        if (__SEND_POPUP_LOGS_TO_OPENER__) {
-            try {
-                let opener = getOpener(window);
-
-                if (!opener || !window.console) {
-                    return;
-                }
-
-                // $FlowFixMe
-                for (let frame of getAllFramesInWindow(opener)) {
-
-                    // $FlowFixMe
-                    if (!isSameDomain(frame) || !frame.console || frame === window) {
-                        continue;
-                    }
-
-                    for (let level of [ 'log', 'debug', 'info', 'warn', 'error' ]) {
-                        let original = window.console[level];
-
-                        if (!original) {
-                            continue;
-                        }
-
-                        try {
-
-                            window.console[level] = function consoleLevel() : void {
-
-                                try {
-                                    if (frame) {
-                                        // $FlowFixMe
-                                        return frame.console[level].apply(frame.console, arguments);
-                                    }
-                                } catch (err3) { // eslint-disable-line unicorn/catch-error-name
-                                    // pass
-                                }
-
-                                return original.apply(this, arguments);
-                            };
-
-                        } catch (err2) { // eslint-disable-line unicorn/catch-error-name
-                            // pass
-                        }
-                    }
-
-                    return;
-                }
-
-            } catch (err) {
-                // pass
-            }
-        }
     }
 
     watchForClose() {
@@ -549,7 +492,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 }
 
-if (__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
+if (__XCOMPONENT__.__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
 
     if (isXComponentWindow() && window.console) {
         for (let level of logLevels) {

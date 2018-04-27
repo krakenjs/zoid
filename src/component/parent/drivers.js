@@ -220,7 +220,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     }
 };
 
-if (__POPUP_SUPPORT__) {
+if (__XCOMPONENT__.__POPUP_SUPPORT__) {
 
     // Popup context opens up a centered popup window on the page.
 

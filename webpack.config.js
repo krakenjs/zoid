@@ -3,44 +3,35 @@
 
 import { getWebpackConfig } from 'grumbler-scripts/config/webpack.config';
 
+import globals from './globals';
+
 export let FILE_NAME = 'xcomponent';
 export let MODULE_NAME = 'xcomponent';
 
 export let WEBPACK_CONFIG = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
-    vars:       {
-        __IE_POPUP_SUPPORT__:               false,
-        __POPUP_SUPPORT__:                  true,
-        __ALLOW_POSTMESSAGE_POPUP__:        true,
-        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-        __SEND_POPUP_LOGS_TO_OPENER__:      false
-    }
+    vars:       globals
 });
 
 export let WEBPACK_CONFIG_MIN = getWebpackConfig({
     filename:   `${ FILE_NAME }.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
-    vars:       {
-        __MIN__:                            true,
-        __POPUP_SUPPORT__:                  true,
-        __IE_POPUP_SUPPORT__:               true,
-        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-        __SEND_POPUP_LOGS_TO_OPENER__:      false,
-        __ALLOW_POSTMESSAGE_POPUP__:        true
-    }
+    vars:       globals
 });
 
 export let WEBPACK_CONFIG_FRAME = getWebpackConfig({
     filename:   `${ FILE_NAME }.frame.js`,
     modulename: MODULE_NAME,
     vars:       {
-        __POPUP_SUPPORT__:                  false,
-        __IE_POPUP_SUPPORT__:               false,
-        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-        __SEND_POPUP_LOGS_TO_OPENER__:      false,
-        __ALLOW_POSTMESSAGE_POPUP__:        true
+        ...globals,
+
+        __XCOMPONENT__: {
+            ...globals.__XCOMPONENT__,
+            __POPUP_SUPPORT__:    false,
+            __IE_POPUP_SUPPORT__: false
+        }
     }
 });
 
@@ -49,28 +40,27 @@ export let WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
     modulename: MODULE_NAME,
     minify:     true,
     vars:       {
-        __MIN__:                            true,
-        __POPUP_SUPPORT__:                  false,
-        __IE_POPUP_SUPPORT__:               false,
-        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-        __SEND_POPUP_LOGS_TO_OPENER__:      false,
-        __ALLOW_POSTMESSAGE_POPUP__:        true
+        ...globals,
+
+        __XCOMPONENT__: {
+            ...globals.__XCOMPONENT__,
+            __POPUP_SUPPORT__:    false,
+            __IE_POPUP_SUPPORT__: false
+        }
     }
 });
 
 export let WEBPACK_CONFIG_TEST = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
-    options:    {
-        devtool: 'inline-source-map'
-    },
-    vars: {
-        __TEST__:                           true,
-        __POPUP_SUPPORT__:                  true,
-        __IE_POPUP_SUPPORT__:               true,
-        __CHILD_WINDOW_ENFORCE_LOG_LEVEL__: false,
-        __SEND_POPUP_LOGS_TO_OPENER__:      false,
-        __ALLOW_POSTMESSAGE_POPUP__:        false
+    test:       true,
+    vars:       {
+        ...globals,
+
+        __POST_ROBOT__: {
+            ...globals.__POST_ROBOT__,
+            __ALLOW_POSTMESSAGE_POPUP__: false
+        }
     }
 });
 

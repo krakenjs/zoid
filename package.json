@@ -44,7 +44,7 @@
   "files": [
     "dist/",
     "src/",
-    "postinstall.js"
+    "globals.js"
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
