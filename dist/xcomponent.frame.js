@@ -2383,7 +2383,7 @@
                 },
                 POST_MESSAGE_NAMES: {
                     METHOD: "postrobot_method",
-                    HELLO: "postrobot_hello",
+                    HELLO: "postrobot_ready",
                     OPEN_TUNNEL: "postrobot_open_tunnel"
                 },
                 WINDOW_TYPES: {
@@ -5561,8 +5561,7 @@
                     if (-1 === _constants.CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw new Error("Unsupported context type: " + (options.defaultContext || "unknown"));
                     if (options.contexts && options.defaultContext && !options.contexts[options.defaultContext]) throw new Error("Disallowed default context type: " + (options.defaultContext || "unknown"));
                 }
-                if (!options.url && !options.buildUrl) throw new Error("Expected options.url to be passed");
-                if (options.url && options.buildUrl) throw new Error("Can not pass options.url and options.buildUrl");
+                if (options.url && options.buildUrl) throw new Error("Can not pass both options.url and options.buildUrl");
                 if (options.defaultEnv) {
                     if ("string" != typeof options.defaultEnv) throw new TypeError("Expected options.defaultEnv to be a string");
                     if (!options.buildUrl && "object" !== _typeof(options.url)) throw new Error("Expected options.url to be an object mapping env->url");
