@@ -24,16 +24,18 @@ var angular2 = exports.angular2 = {
         xcomponent.log('initializing angular2 component');
 
         var getProps = function getProps(component) {
-            return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), function (value) {
-                if (typeof value === 'function') {
-                    return function angular2Wrapped() {
-                        var _this = this,
-                            _arguments = arguments;
+            return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), {
+                'function': function _function(value) {
+                    if (typeof value === 'function') {
+                        return function angular2Wrapped() {
+                            var _this = this,
+                                _arguments = arguments;
 
-                        return component.zone.run(function () {
-                            return value.apply(_this, _arguments);
-                        });
-                    };
+                            return component.zone.run(function () {
+                                return value.apply(_this, _arguments);
+                            });
+                        };
+                    }
                 }
             });
         };

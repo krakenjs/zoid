@@ -107,8 +107,8 @@ function debounce(method) {
 }
 
 function serializeFunctions(obj) {
-    return (0, _util.replaceObject)(obj, function (value) {
-        if (typeof value === 'function') {
+    return (0, _util.replaceObject)(obj, {
+        'function': function _function() {
             return {
                 __type__: '__function__'
             };
@@ -117,11 +117,13 @@ function serializeFunctions(obj) {
 }
 
 function deserializeFunctions(obj, handler) {
-    return (0, _util.replaceObject)(obj, function (value, key, fullKey) {
-        if (value && value.__type__ === '__function__') {
-            return function deserializedFunctionWrapper() {
-                return handler({ key: key, fullKey: fullKey, self: this, args: arguments });
-            };
+    return (0, _util.replaceObject)(obj, {
+        'object': function object(value, key, fullKey) {
+            if (value && value.__type__ === '__function__') {
+                return function deserializedFunctionWrapper() {
+                    return handler({ key: key, fullKey: fullKey, self: this, args: arguments });
+                };
+            }
         }
     });
 }

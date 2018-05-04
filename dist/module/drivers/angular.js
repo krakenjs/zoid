@@ -89,8 +89,8 @@ var angular = exports.angular = {
                             }
                         }
 
-                        scopeProps = (0, _lib.replaceObject)(scopeProps, function (value) {
-                            if (typeof value === 'function') {
+                        scopeProps = (0, _lib.replaceObject)(scopeProps, {
+                            'function': function _function(value) {
                                 return function angularWrapped() {
                                     var result = value.apply(this, arguments);
                                     safeApply();

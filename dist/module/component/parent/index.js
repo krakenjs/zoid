@@ -416,7 +416,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             var props = secureProps ? { type: _constants.INITIAL_PROPS.UID, uid: uid } : { type: _constants.INITIAL_PROPS.RAW, value: sProps };
 
             if (props.type === _constants.INITIAL_PROPS.UID) {
-                _lib.global.props[uid] = sProps;
+                _lib.global.props[uid] = JSON.stringify(sProps);
 
                 this.clean.register(function () {
                     delete _lib.global.props[uid];

@@ -137,14 +137,21 @@ function getInternalProps() {
             }
         },
 
-        // When the component ePperiences an error
+        // When the component experiences an error
 
         onError: {
             type: 'function',
             required: false,
             promisify: true,
             sendToChild: true,
-            once: true
+            once: true,
+            def: function def() {
+                return function onError(err) {
+                    setTimeout(function () {
+                        throw err;
+                    });
+                };
+            }
         }
     };
 }

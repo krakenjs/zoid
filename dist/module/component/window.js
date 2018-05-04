@@ -27,6 +27,14 @@ function normalize(str) {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
 }
 
+function encode(str) {
+    return _hiBase2['default'].encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
+}
+
+function decode(str) {
+    return _hiBase2['default'].decode(str.toUpperCase());
+}
+
 /*  Build Child Window Name
     -----------------------
 
@@ -48,7 +56,7 @@ function buildChildWindowName(name, version) {
 
     var encodedName = normalize(name);
     var encodedVersion = normalize(version);
-    var encodedOptions = _hiBase2['default'].encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
+    var encodedOptions = encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
@@ -104,9 +112,9 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
     var componentMeta = void 0;
 
     try {
-        componentMeta = JSON.parse(_hiBase2['default'].decode(encodedOptions.toUpperCase()));
+        componentMeta = JSON.parse(decode(encodedOptions));
     } catch (err) {
-        throw new Error('Can not decode component-meta');
+        throw new Error('Can not decode component-meta: ' + encodedOptions + ' ' + (0, _lib.stringifyError)(err));
     }
 
     componentMeta.name = name;

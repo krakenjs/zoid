@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+/* eslint max-lines: off */
 
 exports.urlEncode = urlEncode;
 exports.camelToDasherize = camelToDasherize;
@@ -257,29 +258,117 @@ function each(item, callback) {
     }
 }
 
-function replaceObject(obj, callback) {
-    var parentKey = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+function replaceObject(item, replacers) {
+    var fullKey = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
 
-    var newobj = Array.isArray(obj) ? [] : {};
+    if (Array.isArray(item)) {
+        var _ret = function () {
+            var length = item.length;
+            var result = [];
 
-    each(obj, function (item, key) {
+            var _loop = function _loop(i) {
+                Object.defineProperty(result, i, {
+                    configurable: true,
+                    enumerable: true,
+                    get: function get() {
+                        var itemKey = fullKey ? fullKey + '.' + i : '' + i;
+                        var child = item[i];
 
-        var fullKey = parentKey ? parentKey + '.' + key : key;
+                        var type = typeof child === 'undefined' ? 'undefined' : _typeof(child);
+                        var replacer = replacers[type];
+                        if (replacer) {
+                            var replaced = replacer(child, i, itemKey);
+                            if (typeof replaced !== 'undefined') {
+                                result[i] = replaced;
+                                return result[i];
+                            }
+                        }
 
-        var result = callback(item, key, fullKey);
+                        if ((typeof child === 'undefined' ? 'undefined' : _typeof(child)) === 'object' && child !== null) {
+                            result[i] = replaceObject(child, replacers, itemKey);
+                            return result[i];
+                        }
 
-        if (result !== undefined) {
-            newobj[key] = result;
-        } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
-            newobj[key] = replaceObject(item, callback, fullKey);
-        } else {
-            newobj[key] = item;
-        }
-    });
+                        result[i] = child;
+                        return result[i];
+                    },
+                    set: function set(value) {
+                        delete result[i];
+                        result[i] = value;
+                    }
+                });
+            };
 
-    // $FlowFixMe
-    return newobj;
+            for (var i = 0; i < length; i++) {
+                _loop(i);
+            }
+
+            // $FlowFixMe
+            return {
+                v: result
+            };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
+        var _ret3 = function () {
+            var result = {};
+
+            var _loop2 = function _loop2(key) {
+                if (!item.hasOwnProperty(key)) {
+                    return 'continue';
+                }
+
+                Object.defineProperty(result, key, {
+                    configurable: true,
+                    enumerable: true,
+                    get: function get() {
+                        var itemKey = fullKey ? fullKey + '.' + key : '' + key;
+                        // $FlowFixMe
+                        var child = item[key];
+
+                        var type = typeof child === 'undefined' ? 'undefined' : _typeof(child);
+                        var replacer = replacers[type];
+                        if (replacer) {
+                            var replaced = replacer(child, key, itemKey);
+                            if (typeof replaced !== 'undefined') {
+                                result[key] = replaced;
+                                return result[key];
+                            }
+                        }
+
+                        if ((typeof child === 'undefined' ? 'undefined' : _typeof(child)) === 'object' && child !== null) {
+                            result[key] = replaceObject(child, replacers, itemKey);
+                            return result[key];
+                        }
+
+                        result[key] = child;
+                        return result[key];
+                    },
+                    set: function set(value) {
+                        delete result[key];
+                        result[key] = value;
+                    }
+                });
+            };
+
+            for (var key in item) {
+                var _ret4 = _loop2(key);
+
+                if (_ret4 === 'continue') continue;
+            }
+
+            // $FlowFixMe
+            return {
+                v: result
+            };
+        }();
+
+        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+    } else {
+        throw new Error('Pass an object or array');
+    }
 }
 
 function copyProp(source, target, name, def) {

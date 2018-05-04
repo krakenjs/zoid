@@ -131,6 +131,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
 
         _this.addProp(options, 'dimensions');
         _this.addProp(options, 'scrolling');
+        _this.addProp(options, 'listenForResize');
 
         _this.addProp(options, 'version', 'latest');
 
@@ -274,16 +275,11 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
         value: function registerChild() {
             var _this2 = this;
 
-            if ((0, _window.isXComponentWindow)()) {
-                _src2.ZalgoPromise['try'](function () {
-                    var componentMeta = (0, _window.getComponentMeta)();
-
-                    if (componentMeta.tag === _this2.tag) {
-                        window.xchild = new _child.ChildComponent(_this2);
-                        window.xprops = window.xchild.props;
-                    }
-                });
-            }
+            return _src2.ZalgoPromise['try'](function () {
+                if (_this2.isChild()) {
+                    return new _child.ChildComponent(_this2);
+                }
+            });
         }
     }, {
         key: 'listenDelegate',
@@ -475,7 +471,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     }, {
         key: 'isChild',
         value: function isChild() {
-            return (0, _window.isXComponentWindow)() && window.xprops && (0, _window.getComponentMeta)().tag === this.tag;
+            return (0, _window.isXComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
         }
     }, {
         key: 'createError',

@@ -9,6 +9,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _client = require('beaver-logger/client');
@@ -71,13 +73,44 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
 
         _this.onPropHandlers = [];
 
-        _this.component.xchild = _this;
-        _this.setProps(_this.getInitialProps(), (0, _window.getParentDomain)());
+        var _arr = [_this.component, window];
 
-        // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
+        var _loop = function _loop() {
+            var item = _arr[_i];var _arr2 = [['xchild', function () {
+                return _this;
+            }], ['xprops', function () {
+                return _this.props;
+            }]];
 
-        if (_this.props.logLevel) {
-            (0, _lib.setLogLevel)(_this.props.logLevel);
+            var _loop2 = function _loop2() {
+                var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+                    name = _arr2$_i[0],
+                    getter = _arr2$_i[1];
+
+                // $FlowFixMe
+                Object.defineProperty(item, name, {
+                    configurable: true,
+                    get: function get() {
+                        if (!_this.props) {
+                            _this.setProps(_this.getInitialProps(), (0, _window.getParentDomain)());
+                        }
+                        // $FlowFixMe
+                        delete item[name];
+                        // $FlowFixMe
+                        item[name] = getter();
+                        // $FlowFixMe
+                        return item[name];
+                    }
+                });
+            };
+
+            for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+                _loop2();
+            }
+        };
+
+        for (var _i = 0; _i < _arr.length; _i++) {
+            _loop();
         }
 
         _this.component.log('init_child');
@@ -121,10 +154,12 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
         value: function listenForResize() {
             var _this2 = this;
 
-            this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-            window.addEventListener('resize', function () {
-                _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-            });
+            if (this.component.listenForResize) {
+                this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
+                window.addEventListener('resize', function () {
+                    _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
+                });
+            }
         }
     }, {
         key: 'hasValidParentDomain',
@@ -186,7 +221,7 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
                     throw new Error('Can not find global for parent component - can not retrieve props');
                 }
 
-                props = global.props[componentMeta.uid];
+                props = JSON.parse(global.props[componentMeta.uid]);
             } else {
                 throw new Error('Unrecognized props type: ' + props.type);
             }
@@ -204,7 +239,7 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
                     var func = (0, _lib.get)(_this3.props, fullKey);
 
                     if (typeof func !== 'function') {
-                        throw new TypeError('Expected ' + (typeof func === 'undefined' ? 'undefined' : _typeof(func)) + ' to be function');
+                        throw new TypeError('Expected ' + fullKey + ' to be function, got ' + (typeof func === 'undefined' ? 'undefined' : _typeof(func)));
                     }
 
                     return func.apply(self, args);
@@ -220,18 +255,19 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
             this.props = this.props || {};
             var normalizedProps = (0, _props.normalizeChildProps)(this.component, props, origin, required);
             (0, _lib.extend)(this.props, normalizedProps);
-            window.xprops = this.props;
-            this.component.xprops = this.props;
-            for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            if (this.props.logLevel) {
+                (0, _lib.setLogLevel)(this.props.logLevel);
+            }
+            for (var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i3 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
                 var _ref3;
 
                 if (_isArray) {
-                    if (_i >= _iterator.length) break;
-                    _ref3 = _iterator[_i++];
+                    if (_i3 >= _iterator.length) break;
+                    _ref3 = _iterator[_i3++];
                 } else {
-                    _i = _iterator.next();
-                    if (_i.done) break;
-                    _ref3 = _i.value;
+                    _i3 = _iterator.next();
+                    if (_i3.done) break;
+                    _ref3 = _i3.value;
                 }
 
                 var handler = _ref3;
@@ -466,16 +502,16 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
                     var _tracker$check = tracker.check(),
                         dimensions = _tracker$check.dimensions;
 
-                    for (var _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+                    for (var _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
                         var _ref6;
 
                         if (_isArray2) {
-                            if (_i2 >= _iterator2.length) break;
-                            _ref6 = _iterator2[_i2++];
+                            if (_i4 >= _iterator2.length) break;
+                            _ref6 = _iterator2[_i4++];
                         } else {
-                            _i2 = _iterator2.next();
-                            if (_i2.done) break;
-                            _ref6 = _i2.value;
+                            _i4 = _iterator2.next();
+                            if (_i4.done) break;
+                            _ref6 = _i4.value;
                         }
 
                         var size = _ref6;
@@ -588,68 +624,3 @@ var ChildComponent = exports.ChildComponent = function (_BaseComponent) {
 
     return ChildComponent;
 }(_base.BaseComponent);
-
-if (__XCOMPONENT__.__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
-
-    if ((0, _window.isXComponentWindow)() && window.console) {
-        var _loop = function _loop() {
-            if (_isArray3) {
-                if (_i3 >= _iterator3.length) return 'break';
-                _ref7 = _iterator3[_i3++];
-            } else {
-                _i3 = _iterator3.next();
-                if (_i3.done) return 'break';
-                _ref7 = _i3.value;
-            }
-
-            var level = _ref7;
-
-
-            try {
-
-                var original = window.console[level];
-
-                if (!original || !original.apply) {
-                    return 'continue';
-                }
-
-                window.console[level] = function consoleLevel() {
-                    try {
-                        var logLevel = window.LOG_LEVEL;
-
-                        if (!logLevel || _client.logLevels.indexOf(logLevel) === -1) {
-                            return original.apply(this, arguments);
-                        }
-
-                        if (_client.logLevels.indexOf(level) > _client.logLevels.indexOf(logLevel)) {
-                            return;
-                        }
-
-                        return original.apply(this, arguments);
-                    } catch (err2) {// eslint-disable-line unicorn/catch-error-name
-                        // pass
-                    }
-                };
-
-                if (level === 'info') {
-                    window.console.log = window.console[level];
-                }
-            } catch (err) {
-                // pass
-            }
-        };
-
-        _loop2: for (var _iterator3 = _client.logLevels, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref7;
-
-            var _ret = _loop();
-
-            switch (_ret) {
-                case 'break':
-                    break _loop2;
-
-                case 'continue':
-                    continue;}
-        }
-    }
-}

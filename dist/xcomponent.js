@@ -2295,7 +2295,7 @@
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
                 ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
-                RES_TIMEOUT: 1 / 0,
+                RES_TIMEOUT: -1,
                 LOG_TO_PAGE: !1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, !0), 
                 _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, !0), 
@@ -3119,7 +3119,7 @@
             function sayHello(win) {
                 return _global.global.send(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, {
                     domain: _conf.CONSTANTS.WILDCARD,
-                    timeout: 1 / 0
+                    timeout: -1
                 }).then(function(_ref2) {
                     return {
                         origin: _ref2.origin
@@ -3238,7 +3238,7 @@
                         args: args
                     }, {
                         domain: origin,
-                        timeout: 1 / 0
+                        timeout: -1
                     }).then(function(_ref2) {
                         var data = _ref2.data;
                         _log.log.debug("Got foreign method result", obj.__name__, data.result);
@@ -3504,15 +3504,15 @@
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if ((0, _src3.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
-                                    ackTimeout -= cycleTime;
-                                    resTimeout -= cycleTime;
+                                    ackTimeout = Math.max(ackTimeout - cycleTime, 0);
+                                    -1 !== resTimeout && (resTimeout = Math.max(resTimeout - cycleTime, 0));
                                     if (responseListener.ack) {
-                                        if (resTimeout === 1 / 0) return;
+                                        if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + (0, 
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + (0, 
                                         _src3.getDomain)() + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
-                                        if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + (0, 
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + (0, 
                                         _src3.getDomain)() + " in " + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
@@ -4410,7 +4410,31 @@
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, _createClass = function() {
+            }, _slicedToArray = function() {
+                return function(arr, i) {
+                    if (Array.isArray(arr)) return arr;
+                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
+                        var _arr = [], _n = !0, _d = !1, _e = void 0;
+                        try {
+                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
+                                _arr.push(_s.value);
+                                if (i && _arr.length === i) break;
+                            }
+                        } catch (err) {
+                            _d = !0;
+                            _e = err;
+                        } finally {
+                            try {
+                                !_n && _i.return && _i.return();
+                            } finally {
+                                if (_d) throw _e;
+                            }
+                        }
+                        return _arr;
+                    }(arr, i);
+                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+                };
+            }(), _createClass = function() {
                 function defineProperties(target, props) {
                     for (var i = 0; i < props.length; i++) {
                         var descriptor = props[i];
@@ -4455,9 +4479,24 @@
                     }
                     _this.component.log("construct_child");
                     _this.onPropHandlers = [];
-                    _this.component.xchild = _this;
-                    _this.setProps(_this.getInitialProps(), (0, _window.getParentDomain)());
-                    _this.props.logLevel && (0, _lib.setLogLevel)(_this.props.logLevel);
+                    for (var _arr = [ _this.component, window ], _loop = function() {
+                        for (var item = _arr[_i], _arr2 = [ [ "xchild", function() {
+                            return _this;
+                        } ], [ "xprops", function() {
+                            return _this.props;
+                        } ] ], _loop2 = function() {
+                            var _arr2$_i = _slicedToArray(_arr2[_i2], 2), name = _arr2$_i[0], getter = _arr2$_i[1];
+                            Object.defineProperty(item, name, {
+                                configurable: !0,
+                                get: function() {
+                                    _this.props || _this.setProps(_this.getInitialProps(), (0, _window.getParentDomain)());
+                                    delete item[name];
+                                    item[name] = getter();
+                                    return item[name];
+                                }
+                            });
+                        }, _i2 = 0; _i2 < _arr2.length; _i2++) _loop2();
+                    }, _i = 0; _i < _arr.length; _i++) _loop();
                     _this.component.log("init_child");
                     _this.setWindows();
                     _this.listenForResize();
@@ -4479,14 +4518,16 @@
                     key: "listenForResize",
                     value: function() {
                         var _this2 = this;
-                        this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
-                            fireAndForget: !0
-                        });
-                        window.addEventListener("resize", function() {
-                            _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
+                        if (this.component.listenForResize) {
+                            this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
                                 fireAndForget: !0
                             });
-                        });
+                            window.addEventListener("resize", function() {
+                                _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
+                                    fireAndForget: !0
+                                });
+                            });
+                        }
                     }
                 }, {
                     key: "hasValidParentDomain",
@@ -4532,14 +4573,14 @@
                             }
                             var global = (0, _lib.globalFor)(parentComponentWindow);
                             if (!global) throw new Error("Can not find global for parent component - can not retrieve props");
-                            props = global.props[componentMeta.uid];
+                            props = JSON.parse(global.props[componentMeta.uid]);
                         }
                         if (!props) throw new Error("Initial props not found");
                         return (0, _lib.deserializeFunctions)(props, function(_ref2) {
                             var fullKey = _ref2.fullKey, self = _ref2.self, args = _ref2.args;
                             return _this3.onInit.then(function() {
                                 var func = (0, _lib.get)(_this3.props, fullKey);
-                                if ("function" != typeof func) throw new TypeError("Expected " + (void 0 === func ? "undefined" : _typeof(func)) + " to be function");
+                                if ("function" != typeof func) throw new TypeError("Expected " + fullKey + " to be function, got " + (void 0 === func ? "undefined" : _typeof(func)));
                                 return func.apply(self, args);
                             });
                         });
@@ -4551,17 +4592,16 @@
                         this.props = this.props || {};
                         var normalizedProps = (0, _props.normalizeChildProps)(this.component, props, origin, required);
                         (0, _lib.extend)(this.props, normalizedProps);
-                        window.xprops = this.props;
-                        this.component.xprops = this.props;
-                        var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i = 0;
+                        this.props.logLevel && (0, _lib.setLogLevel)(this.props.logLevel);
+                        var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i3 = 0;
                         for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                             var _ref3;
                             if (_isArray) {
-                                if (_i >= _iterator.length) break;
-                                _ref3 = _iterator[_i++];
+                                if (_i3 >= _iterator.length) break;
+                                _ref3 = _iterator[_i3++];
                             } else {
-                                if ((_i = _iterator.next()).done) break;
-                                _ref3 = _i.value;
+                                if ((_i3 = _iterator.next()).done) break;
+                                _ref3 = _i3.value;
                             }
                             _ref3.call(this, this.props);
                         }
@@ -4695,15 +4735,15 @@
                                 var tracker = (0, _lib.trackDimensions)(el, {
                                     width: width,
                                     height: height
-                                }), dimensions = tracker.check().dimensions, _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i2 = 0;
+                                }), dimensions = tracker.check().dimensions, _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i4 = 0;
                                 for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                                     var _ref6;
                                     if (_isArray2) {
-                                        if (_i2 >= _iterator2.length) break;
-                                        _ref6 = _iterator2[_i2++];
+                                        if (_i4 >= _iterator2.length) break;
+                                        _ref6 = _iterator2[_i4++];
                                     } else {
-                                        if ((_i2 = _iterator2.next()).done) break;
-                                        _ref6 = _i2.value;
+                                        if ((_i4 = _iterator2.next()).done) break;
+                                        _ref6 = _i4.value;
                                     }
                                     var size = _ref6, widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
                                     if (widthMatch && heightMatch) return;
@@ -4905,6 +4945,7 @@
                     options.props || (_this.looseProps = !0);
                     _this.addProp(options, "dimensions");
                     _this.addProp(options, "scrolling");
+                    _this.addProp(options, "listenForResize");
                     _this.addProp(options, "version", "latest");
                     _this.addProp(options, "defaultEnv");
                     _this.addProp(options, "buildUrl");
@@ -4984,11 +5025,8 @@
                     key: "registerChild",
                     value: function() {
                         var _this2 = this;
-                        (0, _window.isXComponentWindow)() && _src2.ZalgoPromise.try(function() {
-                            if ((0, _window.getComponentMeta)().tag === _this2.tag) {
-                                window.xchild = new _child.ChildComponent(_this2);
-                                window.xprops = window.xchild.props;
-                            }
+                        return _src2.ZalgoPromise.try(function() {
+                            if (_this2.isChild()) return new _child.ChildComponent(_this2);
                         });
                     }
                 }, {
@@ -5090,7 +5128,7 @@
                 }, {
                     key: "isChild",
                     value: function() {
-                        return (0, _window.isXComponentWindow)() && window.xprops && (0, _window.getComponentMeta)().tag === this.tag;
+                        return (0, _window.isXComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
                     }
                 }, {
                     key: "createError",
@@ -5341,7 +5379,14 @@
                         required: !1,
                         promisify: !0,
                         sendToChild: !0,
-                        once: !0
+                        once: !0,
+                        def: function() {
+                            return function(err) {
+                                setTimeout(function() {
+                                    throw err;
+                                });
+                            };
+                        }
                     }
                 };
             };
@@ -6196,7 +6241,7 @@
                             value: sProps
                         };
                         if (props.type === _constants.INITIAL_PROPS.UID) {
-                            _lib.global.props[uid] = sProps;
+                            _lib.global.props[uid] = JSON.stringify(sProps);
                             this.clean.register(function() {
                                 delete _lib.global.props[uid];
                             });
@@ -7097,7 +7142,9 @@
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 options.id = (0, _lib.uniqueID)();
                 options.domain = (0, _src.getDomain)(window);
-                var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = _hiBase2.default.encode(JSON.stringify(options)).replace(/\=/g, "").toLowerCase();
+                var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = (str = JSON.stringify(options), 
+                _hiBase2.default.encode(str).replace(/\=/g, "").toLowerCase());
+                var str;
                 if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
                 if (!encodedVersion) throw new Error("Invalid version: " + version + " - must contain alphanumeric characters");
                 return [ _constants.XCOMPONENT, encodedName, encodedVersion, encodedOptions, "" ].join("__");
@@ -7129,11 +7176,11 @@
                 if (!window.name) throw new Error("Can not get component meta without window name");
                 var _window$name$split3 = window.name.split("__"), _window$name$split4 = _slicedToArray(_window$name$split3, 4), xcomp = _window$name$split4[0], name = _window$name$split4[1], version = _window$name$split4[2], encodedOptions = _window$name$split4[3];
                 if (xcomp !== _constants.XCOMPONENT) throw new Error("Window not rendered by xcomponent - got " + xcomp);
-                var componentMeta = void 0;
+                var str, componentMeta = void 0;
                 try {
-                    componentMeta = JSON.parse(_hiBase2.default.decode(encodedOptions.toUpperCase()));
+                    componentMeta = JSON.parse((str = encodedOptions, _hiBase2.default.decode(str.toUpperCase())));
                 } catch (err) {
-                    throw new Error("Can not decode component-meta");
+                    throw new Error("Can not decode component-meta: " + encodedOptions + " " + (0, _lib.stringifyError)(err));
                 }
                 componentMeta.name = name;
                 componentMeta.version = version.replace(/_/g, ".");
@@ -7302,16 +7349,18 @@
                                             void 0 !== $scope[key] && (scopeProps[key] = $scope[key]);
                                         }
                                     }
-                                    return scopeProps = (0, _lib.replaceObject)(scopeProps, function(value) {
-                                        if ("function" == typeof value) return function() {
-                                            var result = value.apply(this, arguments);
-                                            !function() {
-                                                if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
-                                                    $scope.$apply();
-                                                } catch (err) {}
-                                            }();
-                                            return result;
-                                        };
+                                    return scopeProps = (0, _lib.replaceObject)(scopeProps, {
+                                        function: function(value) {
+                                            return function() {
+                                                var result = value.apply(this, arguments);
+                                                !function() {
+                                                    if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
+                                                        $scope.$apply();
+                                                    } catch (err) {}
+                                                }();
+                                                return result;
+                                            };
+                                        }
                                     });
                                 }, parent = component.init(getProps(), null, $element[0]);
                                 parent.render($element[0]);
@@ -7343,13 +7392,15 @@
                     var AngularComponent = _ref.Component, NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
                     xcomponent.log("initializing angular2 component");
                     var getProps = function(component) {
-                        return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), function(value) {
-                            if ("function" == typeof value) return function() {
-                                var _this = this, _arguments = arguments;
-                                return component.zone.run(function() {
-                                    return value.apply(_this, _arguments);
-                                });
-                            };
+                        return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), {
+                            function: function(value) {
+                                if ("function" == typeof value) return function() {
+                                    var _this = this, _arguments = arguments;
+                                    return component.zone.run(function() {
+                                        return value.apply(_this, _arguments);
+                                    });
+                                };
+                            }
                         });
                     }, ComponentInstance = AngularComponent({
                         selector: xcomponent.tag,
@@ -8511,22 +8562,26 @@
                 };
             };
             exports.serializeFunctions = function(obj) {
-                return (0, _util.replaceObject)(obj, function(value) {
-                    if ("function" == typeof value) return {
-                        __type__: "__function__"
-                    };
+                return (0, _util.replaceObject)(obj, {
+                    function: function() {
+                        return {
+                            __type__: "__function__"
+                        };
+                    }
                 });
             };
             exports.deserializeFunctions = function(obj, handler) {
-                return (0, _util.replaceObject)(obj, function(value, key, fullKey) {
-                    if (value && "__function__" === value.__type__) return function() {
-                        return handler({
-                            key: key,
-                            fullKey: fullKey,
-                            self: this,
-                            args: arguments
-                        });
-                    };
+                return (0, _util.replaceObject)(obj, {
+                    object: function(value, key, fullKey) {
+                        if (value && "__function__" === value.__type__) return function() {
+                            return handler({
+                                key: key,
+                                fullKey: fullKey,
+                                self: this,
+                                args: arguments
+                            });
+                        };
+                    }
                 });
             };
             var _util = __webpack_require__("./src/lib/util.js");
@@ -8760,15 +8815,85 @@
                     }
                 }, 100);
             };
-            exports.each = each;
-            exports.replaceObject = function replaceObject(obj, callback) {
-                var parentKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
-                var newobj = Array.isArray(obj) ? [] : {};
-                each(obj, function(item, key) {
-                    var fullKey = parentKey ? parentKey + "." + key : key, result = callback(item, key, fullKey);
-                    void 0 !== result ? newobj[key] = result : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = replaceObject(item, callback, fullKey) : newobj[key] = item;
-                });
-                return newobj;
+            exports.each = function(item, callback) {
+                if (!item) return;
+                if (Array.isArray(item)) for (var len = item.length, i = 0; i < len; i++) callback(item[i], i); else if ("object" === (void 0 === item ? "undefined" : _typeof(item))) for (var keys = Object.keys(item), _len = keys.length, _i = 0; _i < _len; _i++) {
+                    var key = keys[_i];
+                    callback(item[key], key);
+                }
+            };
+            exports.replaceObject = function replaceObject(item, replacers) {
+                var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
+                if (Array.isArray(item)) {
+                    var _ret = function() {
+                        for (var length = item.length, result = [], _loop = function(i) {
+                            Object.defineProperty(result, i, {
+                                configurable: !0,
+                                enumerable: !0,
+                                get: function() {
+                                    var itemKey = fullKey ? fullKey + "." + i : "" + i, child = item[i], type = void 0 === child ? "undefined" : _typeof(child), replacer = replacers[type];
+                                    if (replacer) {
+                                        var replaced = replacer(child, i, itemKey);
+                                        if (void 0 !== replaced) {
+                                            result[i] = replaced;
+                                            return result[i];
+                                        }
+                                    }
+                                    if ("object" === (void 0 === child ? "undefined" : _typeof(child)) && null !== child) {
+                                        result[i] = replaceObject(child, replacers, itemKey);
+                                        return result[i];
+                                    }
+                                    result[i] = child;
+                                    return result[i];
+                                },
+                                set: function(value) {
+                                    delete result[i];
+                                    result[i] = value;
+                                }
+                            });
+                        }, i = 0; i < length; i++) _loop(i);
+                        return {
+                            v: result
+                        };
+                    }();
+                    if ("object" === (void 0 === _ret ? "undefined" : _typeof(_ret))) return _ret.v;
+                } else {
+                    if ("object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item) throw new Error("Pass an object or array");
+                    var _ret3 = function() {
+                        var result = {}, _loop2 = function(key) {
+                            if (!item.hasOwnProperty(key)) return "continue";
+                            Object.defineProperty(result, key, {
+                                configurable: !0,
+                                enumerable: !0,
+                                get: function() {
+                                    var itemKey = fullKey ? fullKey + "." + key : "" + key, child = item[key], type = void 0 === child ? "undefined" : _typeof(child), replacer = replacers[type];
+                                    if (replacer) {
+                                        var replaced = replacer(child, key, itemKey);
+                                        if (void 0 !== replaced) {
+                                            result[key] = replaced;
+                                            return result[key];
+                                        }
+                                    }
+                                    if ("object" === (void 0 === child ? "undefined" : _typeof(child)) && null !== child) {
+                                        result[key] = replaceObject(child, replacers, itemKey);
+                                        return result[key];
+                                    }
+                                    result[key] = child;
+                                    return result[key];
+                                },
+                                set: function(value) {
+                                    delete result[key];
+                                    result[key] = value;
+                                }
+                            });
+                        };
+                        for (var key in item) _loop2(key);
+                        return {
+                            v: result
+                        };
+                    }();
+                    if ("object" === (void 0 === _ret3 ? "undefined" : _typeof(_ret3))) return _ret3.v;
+                }
             };
             exports.copyProp = function(source, target, name, def) {
                 if (source.hasOwnProperty(name)) {
@@ -8887,12 +9012,6 @@
                         clearTimeout(timeout);
                     }
                 };
-            }
-            function each(item, callback) {
-                if (item) if (Array.isArray(item)) for (var len = item.length, i = 0; i < len; i++) callback(item[i], i); else if ("object" === (void 0 === item ? "undefined" : _typeof(item))) for (var keys = Object.keys(item), _len = keys.length, _i = 0; _i < _len; _i++) {
-                    var key = keys[_i];
-                    callback(item[key], key);
-                }
             }
             var objectIDs = new (__webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js").WeakMap)();
             function regex(pattern, string) {
