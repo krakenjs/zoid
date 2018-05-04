@@ -1,13 +1,13 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { flush, logLevels } from 'beaver-logger/client';
+import { flush } from 'beaver-logger/client';
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { BaseComponent } from '../base';
-import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow, isXComponentWindow } from '../window';
+import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
 import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
     cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
@@ -61,13 +61,24 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         this.onPropHandlers = [];
 
-        this.component.xchild = this;
-        this.setProps(this.getInitialProps(), getParentDomain());
-
-        // update logLevel with prop.logLevel to override defaultLogLevel configured when creating component
-
-        if (this.props.logLevel) {
-            setLogLevel(this.props.logLevel);
+        for (let item of [ this.component, window ]) {
+            for (let [ name, getter ] of [ [ 'xchild', () => this ], [ 'xprops', () => this.props ] ]) {
+                // $FlowFixMe
+                Object.defineProperty(item, name, {
+                    configurable: true,
+                    get:          () => {
+                        if (!this.props) {
+                            this.setProps(this.getInitialProps(), getParentDomain());
+                        }
+                        // $FlowFixMe
+                        delete item[name];
+                        // $FlowFixMe
+                        item[name] = getter();
+                        // $FlowFixMe
+                        return item[name];
+                    }
+                });
+            }
         }
 
         this.component.log(`init_child`);
@@ -104,10 +115,12 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     listenForResize() {
-        this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-        window.addEventListener('resize', () => {
+        if (this.component.listenForResize) {
             this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-        });
+            window.addEventListener('resize', () => {
+                this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
+            });
+        }
     }
 
     hasValidParentDomain() : boolean {
@@ -160,7 +173,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                 throw new Error(`Can not find global for parent component - can not retrieve props`);
             }
 
-            props = global.props[componentMeta.uid];
+            props = JSON.parse(global.props[componentMeta.uid]);
 
         } else {
             throw new Error(`Unrecognized props type: ${ props.type }`);
@@ -169,13 +182,13 @@ export class ChildComponent<P> extends BaseComponent<P> {
         if (!props) {
             throw new Error(`Initial props not found`);
         }
-
+        
         return deserializeFunctions(props, ({ fullKey, self, args }) => {
             return this.onInit.then(() => {
                 let func = get(this.props, fullKey);
 
                 if (typeof func !== 'function') {
-                    throw new TypeError(`Expected ${ typeof func } to be function`);
+                    throw new TypeError(`Expected ${ fullKey } to be function, got ${ typeof func }`);
                 }
 
                 return func.apply(self, args);
@@ -189,8 +202,9 @@ export class ChildComponent<P> extends BaseComponent<P> {
         this.props = this.props || {};
         let normalizedProps = normalizeChildProps(this.component, props, origin, required);
         extend(this.props, normalizedProps);
-        window.xprops = this.props;
-        this.component.xprops = this.props;
+        if (this.props.logLevel) {
+            setLogLevel(this.props.logLevel);
+        }
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
@@ -489,48 +503,5 @@ export class ChildComponent<P> extends BaseComponent<P> {
         return this.sendToParent(POST_MESSAGE.ERROR, {
             error: stringifiedError
         }).then(noop);
-    }
-}
-
-if (__XCOMPONENT__.__CHILD_WINDOW_ENFORCE_LOG_LEVEL__) {
-
-    if (isXComponentWindow() && window.console) {
-        for (let level of logLevels) {
-
-            try {
-
-                let original = window.console[level];
-
-                if (!original || !original.apply) {
-                    continue;
-                }
-
-                window.console[level] = function consoleLevel() : void {
-                    try {
-                        let logLevel = window.LOG_LEVEL;
-
-                        if (!logLevel || logLevels.indexOf(logLevel) === -1) {
-                            return original.apply(this, arguments);
-                        }
-
-                        if (logLevels.indexOf(level) > logLevels.indexOf(logLevel)) {
-                            return;
-                        }
-
-                        return original.apply(this, arguments);
-
-                    } catch (err2) { // eslint-disable-line unicorn/catch-error-name
-                        // pass
-                    }
-                };
-
-                if (level === 'info') {
-                    window.console.log = window.console[level];
-                }
-
-            } catch (err) {
-                // pass
-            }
-        }
     }
 }

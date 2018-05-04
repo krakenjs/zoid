@@ -382,7 +382,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             : { type: INITIAL_PROPS.RAW, value: sProps };
 
         if (props.type === INITIAL_PROPS.UID) {
-            global.props[uid] = sProps;
+            global.props[uid] = JSON.stringify(sProps);
 
             this.clean.register(() => {
                 delete global.props[uid];

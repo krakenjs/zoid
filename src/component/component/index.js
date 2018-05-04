@@ -47,6 +47,7 @@ export type ComponentOptionsType<P> = {
     dimensions? : CssDimensionsType,
     scrolling? : boolean,
     autoResize? : boolean | { width? : boolean, height? : boolean, element? : string },
+    listenForResize? : boolean,
 
     defaultLogLevel? : string,
     allowedParentDomains? : StringMatcherType,
@@ -88,6 +89,7 @@ export class Component<P> extends BaseComponent<P> {
     dimensions : CssDimensionsType
     scrolling : boolean
     autoResize : ?(boolean | { width? : boolean, height? : boolean, element? : string })
+    listenForResize : ?boolean
 
     defaultLogLevel : string
     allowedParentDomains : StringMatcherType
@@ -149,6 +151,7 @@ export class Component<P> extends BaseComponent<P> {
 
         this.addProp(options, 'dimensions');
         this.addProp(options, 'scrolling');
+        this.addProp(options, 'listenForResize');
 
         this.addProp(options, 'version', 'latest');
 
@@ -255,17 +258,12 @@ export class Component<P> extends BaseComponent<P> {
         return this.driverCache[name];
     }
 
-    registerChild() {
-        if (isXComponentWindow()) {
-            ZalgoPromise.try(() => {
-                let componentMeta = getComponentMeta();
-
-                if (componentMeta.tag === this.tag) {
-                    window.xchild = new ChildComponent(this);
-                    window.xprops = window.xchild.props;
-                }
-            });
-        }
+    registerChild() : ZalgoPromise<?ChildComponent<P>> {
+        return ZalgoPromise.try(() => {
+            if (this.isChild()) {
+                return new ChildComponent(this);
+            }
+        });
     }
 
     listenDelegate() {
@@ -426,7 +424,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     isChild() : boolean {
-        return isXComponentWindow() && window.xprops && getComponentMeta().tag === this.tag;
+        return isXComponentWindow() && getComponentMeta().tag === this.tag;
     }
 
 

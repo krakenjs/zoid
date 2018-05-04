@@ -73,8 +73,8 @@ export let angular : ComponentDriverType<*, Angular> = {
                             }
                         }
 
-                        scopeProps = replaceObject(scopeProps, (value) => {
-                            if (typeof value === 'function') {
+                        scopeProps = replaceObject(scopeProps, {
+                            'function': (value) => {
                                 return function angularWrapped() : mixed {
                                     let result = value.apply(this, arguments);
                                     safeApply();

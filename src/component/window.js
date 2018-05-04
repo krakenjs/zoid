@@ -3,13 +3,21 @@
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
 
-import { memoize, uniqueID, globalFor } from '../lib';
+import { memoize, uniqueID, globalFor, stringifyError } from '../lib';
 import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 import type { DimensionsType, PositionType } from '../types';
 
 
 function normalize(str : string) : string {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
+}
+
+function encode(str : string) : string {
+    return base32.encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
+}
+
+function decode(str : string) : string {
+    return base32.decode(str.toUpperCase());
 }
 
 
@@ -32,7 +40,7 @@ export function buildChildWindowName(name : string, version : string, options : 
 
     let encodedName = normalize(name);
     let encodedVersion = normalize(version);
-    let encodedOptions = base32.encode(JSON.stringify(options)).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
+    let encodedOptions = encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error(`Invalid name: ${ name } - must contain alphanumeric characters`);
@@ -87,9 +95,9 @@ export let getComponentMeta = memoize(() => {
     let componentMeta;
 
     try {
-        componentMeta = JSON.parse(base32.decode(encodedOptions.toUpperCase()));
+        componentMeta = JSON.parse(decode(encodedOptions));
     } catch (err) {
-        throw new Error(`Can not decode component-meta`);
+        throw new Error(`Can not decode component-meta: ${ encodedOptions } ${ stringifyError(err) }`);
     }
 
     componentMeta.name = name;

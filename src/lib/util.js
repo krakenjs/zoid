@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint max-lines: off */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
@@ -241,27 +242,93 @@ export function each(item : Array<mixed> | Object, callback : Function) {
 }
 
 
-export function replaceObject<T : Object | Array<mixed>>(obj : T, callback : Function, parentKey : string = '') : T {
+export function replaceObject<T : Object | Array<mixed>> (item : T, replacers : { [string] : Function }, fullKey : string = '') : T {
 
-    let newobj = Array.isArray(obj) ? [] : {};
+    if (Array.isArray(item)) {
+        let length = item.length;
+        let result = [];
 
-    each(obj, (item, key) => {
+        for (let i = 0; i < length; i++) {
+            Object.defineProperty(result, i, {
+                configurable: true,
+                enumerable:   true,
+                get:          () => {
+                    let itemKey = fullKey ? `${ fullKey }.${ i }` : `${ i }`;
+                    let child = item[i];
 
-        let fullKey = parentKey ? `${ parentKey }.${ key }` : key;
+                    let type = (typeof child);
+                    let replacer = replacers[type];
+                    if (replacer) {
+                        let replaced = replacer(child, i, itemKey);
+                        if (typeof replaced !== 'undefined') {
+                            result[i] = replaced;
+                            return result[i];
+                        }
+                    }
 
-        let result = callback(item, key, fullKey);
+                    if (typeof child === 'object' && child !== null) {
+                        result[i] = replaceObject(child, replacers, itemKey);
+                        return result[i];
+                    }
 
-        if (result !== undefined) {
-            newobj[key] = result;
-        } else if (typeof item === 'object' && item !== null) {
-            newobj[key] = replaceObject(item, callback, fullKey);
-        } else {
-            newobj[key] = item;
+                    result[i] = child;
+                    return result[i];
+                },
+                set: (value) => {
+                    delete result[i];
+                    result[i] = value;
+                }
+            });
         }
-    });
 
-    // $FlowFixMe
-    return newobj;
+        // $FlowFixMe
+        return result;
+    } else if (typeof item === 'object' && item !== null) {
+        let result = {};
+
+        for (let key in item) {
+            if (!item.hasOwnProperty(key)) {
+                continue;
+            }
+
+            Object.defineProperty(result, key, {
+                configurable: true,
+                enumerable:   true,
+                get:          () => {
+                    let itemKey = fullKey ? `${ fullKey }.${ key }` : `${ key }`;
+                    // $FlowFixMe
+                    let child = item[key];
+
+                    let type = (typeof child);
+                    let replacer = replacers[type];
+                    if (replacer) {
+                        let replaced = replacer(child, key, itemKey);
+                        if (typeof replaced !== 'undefined') {
+                            result[key] = replaced;
+                            return result[key];
+                        }
+                    }
+
+                    if (typeof child === 'object' && child !== null) {
+                        result[key] = replaceObject(child, replacers, itemKey);
+                        return result[key];
+                    }
+
+                    result[key] = child;
+                    return result[key];
+                },
+                set: (value) => {
+                    delete result[key];
+                    result[key] = value;
+                }
+            });
+        }
+
+        // $FlowFixMe
+        return result;
+    } else {
+        throw new Error(`Pass an object or array`);
+    }
 }
 
 

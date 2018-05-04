@@ -33,11 +33,13 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
         xcomponent.log('initializing angular2 component');
 
         let getProps = (component) => {
-            return replaceObject({ ...component.internalProps, ...component.props }, (value) => {
-                if (typeof value === 'function') {
-                    return function angular2Wrapped() : void {
-                        return component.zone.run(() => value.apply(this, arguments));
-                    };
+            return replaceObject({ ...component.internalProps, ...component.props }, {
+                'function': (value) => {
+                    if (typeof value === 'function') {
+                        return function angular2Wrapped() : void {
+                            return component.zone.run(() => value.apply(this, arguments));
+                        };
+                    }
                 }
             });
         };

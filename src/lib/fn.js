@@ -89,8 +89,8 @@ export function debounce<T>(method : (...args : Array<mixed>) => T, time : numbe
 }
 
 export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
-    return replaceObject(obj, (value) => {
-        if (typeof value === 'function') {
+    return replaceObject(obj, {
+        'function': () => {
             return {
                 __type__: '__function__'
             };
@@ -99,11 +99,13 @@ export function serializeFunctions<T : Object | Array<mixed>>(obj : T) : T {
 }
 
 export function deserializeFunctions<T : Object | Array<mixed>>(obj : T, handler : Function) : T {
-    return replaceObject(obj, (value, key, fullKey) => {
-        if (value && value.__type__ === '__function__') {
-            return function deserializedFunctionWrapper() : mixed {
-                return handler({ key, fullKey, self: this, args: arguments });
-            };
+    return replaceObject(obj, {
+        'object': (value, key, fullKey) => {
+            if (value && value.__type__ === '__function__') {
+                return function deserializedFunctionWrapper() : mixed {
+                    return handler({ key, fullKey, self: this, args: arguments });
+                };
+            }
         }
     });
 }
