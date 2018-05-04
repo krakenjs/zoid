@@ -232,14 +232,21 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             }
         },
 
-        // When the component ePperiences an error
+        // When the component experiences an error
 
         onError: {
             type:        'function',
             required:    false,
             promisify:   true,
             sendToChild: true,
-            once:        true
+            once:        true,
+            def() : (() => void) {
+                return function onError(err : mixed) {
+                    setTimeout(() => {
+                        throw err;
+                    });
+                };
+            }
         }
     };
 }
