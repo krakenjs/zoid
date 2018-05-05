@@ -4,7 +4,7 @@ import type { Component, ComponentDriverType } from '../component/component';
 import { extend } from '../lib';
 
 type VueComponent = {
-    template : string,
+    render : (Function) => Element,
     inheritAttrs : boolean,
     mounted : () => void,
     beforeUpdate : () => void
@@ -19,7 +19,9 @@ export let vue : ComponentDriverType<*, void> = {
     register<P>(component : Component<P>) : VueComponent {
 
         return {
-            template: `<div></div>`,
+            render(createElement) : Element {
+                return createElement('div');
+            },
 
             inheritAttrs: false,
 
