@@ -13,17 +13,21 @@ describe('vue drivers', () => {
             return done(new Error('Can not find document.body'));
         }
 
-        let app = document.createElement('div');
+        const app = document.createElement('div');
+        const vueComponent = testComponent.driver('vue');
+
         if (!document.body) {
             throw new Error(`Expected document.body to be present`);
         }
         document.body.appendChild(app);
-        app.setAttribute('id', 'container');
 
-        window.Vue.component('comp', {
-            template:   `<vue-component :onEnter = "onEnter"></vue-component>`,
-            components: {
-                'vue-component': testComponent.driver('vue')
+        new window.Vue({
+            render(createElement) : Element {
+                return createElement(vueComponent, {
+                    attrs: {
+                        onEnter: this.onEnter
+                    }
+                });
             },
             computed: {
                 onEnter: () => {
@@ -32,13 +36,7 @@ describe('vue drivers', () => {
                     };
                 }
             }
-        });
-
-        // eslint-disable-next-line no-unused-vars
-        let vm = new window.Vue({
-            el:       '#container',
-            template: `<comp></comp>`
-        });
+        }).$mount(app);
     });
 
 
@@ -48,22 +46,27 @@ describe('vue drivers', () => {
             return done(new Error('Can not find document.body'));
         }
 
-        let app = document.createElement('div');
+        const app = document.createElement('div');
+        const vueComponent = testComponent.driver('vue');
+
         if (!document.body) {
             throw new Error(`Expected document.body to be present`);
         }
         document.body.appendChild(app);
-        app.setAttribute('id', 'container');
 
-        window.Vue.component('comp', {
-            template: `<vue-component :foo = "foo" :run = "this.run"></vue-component>`,
+        new window.Vue({
+            render(createElement) : Element {
+                return createElement(vueComponent, {
+                    attrs: {
+                        foo: this.foo,
+                        run: this.run
+                    }
+                });
+            },
             data:     () => {
                 return {
                     run: `window.xprops.foo('bar');`
                 };
-            },
-            components: {
-                'vue-component': testComponent.driver('vue')
             },
             computed: {
                 foo: () => {
@@ -73,14 +76,6 @@ describe('vue drivers', () => {
                     };
                 }
             }
-        });
-
-        // eslint-disable-next-line no-unused-vars
-        let vm = new window.Vue({
-            el:       '#container',
-            template: `<comp></comp>`
-        });
+        }).$mount(app);
     });
 });
-
-

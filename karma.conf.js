@@ -15,7 +15,7 @@ export default function configKarma(karma : Object) {
         'test/lib/react_v16.0.0.js',
         'test/lib/react-dom_v16.0.0.js',
         'test/lib/angular.min.js',
-        'test/lib/vue.min.js',
+        'test/lib/vue_v2.5.16.runtime.min.js',
 
         ...karmaConfig.files
     ];
