@@ -1,5 +1,5 @@
 
-window.MyLoginXComponent = xcomponent.create({
+window.MyLoginZoidComponent = zoid.create({
 
     // The html tag used to render my component
 
@@ -7,7 +7,7 @@ window.MyLoginXComponent = xcomponent.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: xcomponent.getCurrentScriptDir() + '/login.htm',
+    url: zoid.getCurrentScriptDir() + '/login.htm',
 
     // Allow the component to be rendered as a popup
 
@@ -36,9 +36,9 @@ window.MyLoginXComponent = xcomponent.create({
             return actions.focus();
         }
 
-        return jsxDom('div', { id, onClick: focus, 'class': `${CLASS.XCOMPONENT} ${CLASS.XCOMPONENT}-tag-${tag} ${CLASS.XCOMPONENT}-context-${context} ${CLASS.XCOMPONENT}-focus` },
+        return jsxDom('div', { id, onClick: focus, 'class': `${CLASS.ZOID} ${CLASS.ZOID}-tag-${tag} ${CLASS.ZOID}-context-${context} ${CLASS.ZOID}-focus` },
 
-            jsxDom('a', { href: '#', onClick: close, 'class': `${CLASS.XCOMPONENT}-close` }),
+            jsxDom('a', { href: '#', onClick: close, 'class': `${CLASS.ZOID}-close` }),
 
             outlet,
 
@@ -54,11 +54,11 @@ window.MyLoginXComponent = xcomponent.create({
                         background-color: rgba(0, 0, 0, 0.8);
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.POPUP} {
+                    #${id}.${CLASS.ZOID}-context-${CONTEXT.POPUP} {
                         cursor: pointer;
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} .${CLASS.OUTLET} {
+                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} .${CLASS.OUTLET} {
                         box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);
                         position: fixed;
                         top: 50%;
@@ -70,17 +70,17 @@ window.MyLoginXComponent = xcomponent.create({
                         -ms-transform: translate3d(-50%, -50%, 0);
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} {
+                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} {
                         height: 150px;
                         width: 300px;
                     }
 
-                    #${id}.${CLASS.XCOMPONENT}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} iframe {
+                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} iframe {
                         height: 100%;
                         width: 100%;
                     }
 
-                    #${id} .${CLASS.XCOMPONENT}-close {
+                    #${id} .${CLASS.ZOID}-close {
                         position: absolute;
                         right: 16px;
                         top: 16px;
@@ -89,12 +89,12 @@ window.MyLoginXComponent = xcomponent.create({
                         opacity: 0.6;
                     }
 
-                    #${id} .${CLASS.XCOMPONENT}-close:hover {
+                    #${id} .${CLASS.ZOID}-close:hover {
                         opacity: 1;
                     }
 
-                    #${id} .${CLASS.XCOMPONENT}-close:before,
-                    #${id} .${CLASS.XCOMPONENT}-close:after {
+                    #${id} .${CLASS.ZOID}-close:before,
+                    #${id} .${CLASS.ZOID}-close:after {
                         position: absolute;
                         left: 8px;
                         content: ' ';
@@ -103,11 +103,11 @@ window.MyLoginXComponent = xcomponent.create({
                         background-color: white;
                     }
 
-                    #${id} .${CLASS.XCOMPONENT}-close:before {
+                    #${id} .${CLASS.ZOID}-close:before {
                         transform: rotate(45deg);
                     }
 
-                    #${id} .${CLASS.XCOMPONENT}-close:after {
+                    #${id} .${CLASS.ZOID}-close:after {
                         transform: rotate(-45deg);
                     }
                 `

@@ -2,10 +2,10 @@
 
 import { assert } from 'chai';
 
-import xcomponent from '../../src';
+import zoid from '../../src';
 import { testComponent } from '../component';
 
-describe('xcomponent hijack', () => {
+describe('zoid hijack', () => {
 
     it('should render a component by hijacking a button to an iframe', done => {
 
@@ -35,7 +35,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
+        }, zoid.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         button.addEventListener('click', (event : Event) => {
             // $FlowFixMe
@@ -76,7 +76,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
+        }, zoid.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         button.addEventListener('click', (event : Event) => {
             // $FlowFixMe
@@ -115,7 +115,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
+        }, zoid.CONSTANTS.CONTEXT_TYPES.IFRAME, document.body);
 
         link.addEventListener('click', (event : Event) => {
             // $FlowFixMe
@@ -153,7 +153,7 @@ describe('xcomponent hijack', () => {
             run: `
                 window.xprops.sendUrl(window.location.pathname + window.location.search);
             `
-        }, xcomponent.CONSTANTS.CONTEXT_TYPES.POPUP);
+        }, zoid.CONSTANTS.CONTEXT_TYPES.POPUP);
 
         link.addEventListener('click', (event : Event) => {
             // $FlowFixMe

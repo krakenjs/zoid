@@ -2,13 +2,13 @@ import * as ngCore from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import { AppComponent } from './app-component';
 
-declare const xcomponent:any;
-declare const MyLoginXComponent:any;
+declare const zoid:any;
+declare const MyLoginZoidComponent:any;
 
-const MyLoginXComponentModule = MyLoginXComponent.driver('angular2', ngCore);
+const MyLoginZoidComponentModule = MyLoginZoidComponent.driver('angular2', ngCore);
 
 @ngCore.NgModule({
-  imports: [ BrowserModule, MyLoginXComponentModule ],
+  imports: [ BrowserModule, MyLoginZoidComponentModule ],
   declarations: [ AppComponent ],
   bootstrap: [ AppComponent ]
 })

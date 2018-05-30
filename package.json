@@ -1,5 +1,5 @@
 {
-  "name": "xcomponent",
+  "name": "zoid",
   "version": "6.0.60",
   "description": "Cross domain components.",
   "main": "index.js",
@@ -25,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/krakenjs/xcomponent.git"
+    "url": "git://github.com/krakenjs/zoid.git"
   },
   "keywords": [
     "cross-domain",

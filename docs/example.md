@@ -1,16 +1,16 @@
-# xcomponent example
+# zoid example
 
 Let's create a login component. We want the user to be able to log in on our site, and to notify the parent window
 that the user has logged in, without exposing any of the users credentials to the parent window.
 
-Take a look at the [demos](http://krakenjs.com/xcomponent/demo/index.htm) to see this example in action.
+Take a look at the [demos](http://krakenjs.com/zoid/demo/index.htm) to see this example in action.
 
 ### As the component creator
 
 First I'd create a spec for the component's interface. I should do this once -- once I've created the component, I can render it multiple times if I need to:
 
 ```javascript
-var MyLoginComponent = xcomponent.create({
+var MyLoginComponent = zoid.create({
 
     // The html tag used to render my component
 
@@ -121,7 +121,7 @@ My life is even easier. I just need to drop in your component onto my page:
 
 I can render a component as many times as I like on my page.
 
-This is even easier if you're using a supported framework like React, Ember or Angular -- xcomponent will automatically
+This is even easier if you're using a supported framework like React, Ember or Angular -- zoid will automatically
 set up bindings for these frameworks:
 
 ### React / JSX
@@ -153,7 +153,7 @@ Include the tag in one of your templates (don't forget to use dasherized prop na
 ---
 
 And we're done! Notice how I never had to write any code to create an iframe, or send post messages? That's all taken care of for you.
-When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `xcomponent` is transparently
+When you call `this.props.onLogin(email);` it looks like you're just calling a function, but in reality `zoid` is transparently
 turning that callback into a post-message and relaying it to the parent for you.
 
-- [Now try building a cross-domain React component!](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-xcomponent-fbcccc4778fd#.73jnwv44c)
+- [Now try building a cross-domain React component!](https://medium.com/@bluepnume/creating-a-cross-domain-react-component-with-zoid-fbcccc4778fd#.73jnwv44c)

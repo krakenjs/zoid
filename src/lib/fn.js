@@ -57,7 +57,7 @@ export function memoize<T, A : mixed>(method : (...args : Array<A>) => T) : (...
             cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), (key, val) => {
 
                 if (typeof val === 'function') {
-                    return `xcomponent:memoize[${ getObjectID(val) }]`;
+                    return `zoid:memoize[${ getObjectID(val) }]`;
                 }
 
                 return val;

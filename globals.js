@@ -4,7 +4,7 @@
 let postRobotGlobals = require('post-robot/globals');
 
 module.exports = Object.assign({}, postRobotGlobals, {
-    __XCOMPONENT__: {
+    __ZOID__: {
         __POPUP_SUPPORT__: true
     }
 });

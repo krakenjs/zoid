@@ -2,10 +2,10 @@
 
 import { assert } from 'chai';
 
-import xcomponent from '../../src';
+import zoid from '../../src';
 import { testComponent, testComponent3 } from '../component';
 
-describe('xcomponent error cases', () => {
+describe('zoid error cases', () => {
 
     it('should error out when window.open returns a closed window', done => {
 
@@ -22,7 +22,7 @@ describe('xcomponent error cases', () => {
             onEnter: done
 
         }).catch(err => {
-            assert.isTrue(err instanceof xcomponent.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
+            assert.isTrue(err instanceof zoid.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
             window.open = windowOpen;
             done();
         });
@@ -181,7 +181,7 @@ describe('xcomponent error cases', () => {
         }
     });
 
-    it('should call onclose when a popup is closed by someone other than xcomponent', done => {
+    it('should call onclose when a popup is closed by someone other than zoid', done => {
 
         testComponent.renderPopup({
 
@@ -197,7 +197,7 @@ describe('xcomponent error cases', () => {
         });
     });
 
-    it('should call onclose when an iframe is closed by someone other than xcomponent', done => {
+    it('should call onclose when an iframe is closed by someone other than zoid', done => {
 
         testComponent.renderIframe({
 

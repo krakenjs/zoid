@@ -1,23 +1,23 @@
 /* @flow */
 
-export const XCOMPONENT = `xcomponent`;
+export const ZOID = `zoid`;
 
-export const __XCOMPONENT__ = `__${ XCOMPONENT }__`;
+export const __ZOID__ = `__${ ZOID }__`;
 
 export const POST_MESSAGE = {
-    INIT:           `${ XCOMPONENT }_init`,
-    PROPS:          `${ XCOMPONENT }_props`,
-    PROP_CALLBACK:  `${ XCOMPONENT }_prop_callback`,
-    CLOSE:          `${ XCOMPONENT }_close`,
-    CHECK_CLOSE:    `${ XCOMPONENT }_check_close`,
-    REDIRECT:       `${ XCOMPONENT }_redirect`,
-    RESIZE:         `${ XCOMPONENT }_resize`,
-    ONRESIZE:       `${ XCOMPONENT }_onresize`,
-    DELEGATE:       `${ XCOMPONENT }_delegate`,
-    ALLOW_DELEGATE: `${ XCOMPONENT }_allow_delegate`,
-    ERROR:          `${ XCOMPONENT }_error`,
-    HIDE:           `${ XCOMPONENT }_hide`,
-    SHOW:           `${ XCOMPONENT }_show`
+    INIT:           `${ ZOID }_init`,
+    PROPS:          `${ ZOID }_props`,
+    PROP_CALLBACK:  `${ ZOID }_prop_callback`,
+    CLOSE:          `${ ZOID }_close`,
+    CHECK_CLOSE:    `${ ZOID }_check_close`,
+    REDIRECT:       `${ ZOID }_redirect`,
+    RESIZE:         `${ ZOID }_resize`,
+    ONRESIZE:       `${ ZOID }_onresize`,
+    DELEGATE:       `${ ZOID }_delegate`,
+    ALLOW_DELEGATE: `${ ZOID }_allow_delegate`,
+    ERROR:          `${ ZOID }_error`,
+    HIDE:           `${ ZOID }_hide`,
+    SHOW:           `${ ZOID }_show`
 };
 
 export const PROP_TYPES = {
@@ -48,27 +48,27 @@ export const CONTEXT_TYPES = {
 };
 
 export const CLASS_NAMES = {
-    XCOMPONENT:        `${ XCOMPONENT }`,
-    OUTLET:            `${ XCOMPONENT }-outlet`,
-    COMPONENT_FRAME:   `${ XCOMPONENT }-component-frame`,
-    PRERENDER_FRAME:   `${ XCOMPONENT }-prerender-frame`,
-    VISIBLE:           `${ XCOMPONENT }-visible`,
-    INVISIBLE:         `${ XCOMPONENT }-invisible`
+    ZOID:              `${ ZOID }`,
+    OUTLET:            `${ ZOID }-outlet`,
+    COMPONENT_FRAME:   `${ ZOID }-component-frame`,
+    PRERENDER_FRAME:   `${ ZOID }-prerender-frame`,
+    VISIBLE:           `${ ZOID }-visible`,
+    INVISIBLE:         `${ ZOID }-invisible`
 };
 
 export const EVENTS = {
-    CLOSE: `${ XCOMPONENT }-close`
+    CLOSE: `${ ZOID }-close`
 };
 
 export const ATTRIBUTES = {
-    IFRAME_PLACEHOLDER: `data-xcomponent-${ XCOMPONENT }-placeholder`
+    IFRAME_PLACEHOLDER: `data-zoid-${ ZOID }-placeholder`
 };
 
 export const ANIMATION_NAMES = {
-    SHOW_CONTAINER: `${ XCOMPONENT }-show-container`,
-    SHOW_COMPONENT: `${ XCOMPONENT }-show-component`,
-    HIDE_CONTAINER: `${ XCOMPONENT }-hide-container`,
-    HIDE_COMPONENT: `${ XCOMPONENT }-hide-component`
+    SHOW_CONTAINER: `${ ZOID }-show-container`,
+    SHOW_COMPONENT: `${ ZOID }-show-component`,
+    HIDE_CONTAINER: `${ ZOID }-hide-container`,
+    HIDE_COMPONENT: `${ ZOID }-hide-component`
 };
 
 export const EVENT_NAMES = {

@@ -165,7 +165,7 @@ export class BaseComponent<P> {
 
         for (let listenerName of Object.keys(listeners)) {
 
-            let name = listenerName.replace(/^xcomponent_/, '');
+            let name = listenerName.replace(/^zoid_/, '');
 
             let errorHandler = (err) => {
                 this.error(err);

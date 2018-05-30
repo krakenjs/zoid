@@ -5,8 +5,8 @@ import { getWebpackConfig } from 'grumbler-scripts/config/webpack.config';
 
 import globals from './globals';
 
-export let FILE_NAME = 'xcomponent';
-export let MODULE_NAME = 'xcomponent';
+export let FILE_NAME = 'zoid';
+export let MODULE_NAME = 'zoid';
 
 export let WEBPACK_CONFIG = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
@@ -27,8 +27,8 @@ export let WEBPACK_CONFIG_FRAME = getWebpackConfig({
     vars:       {
         ...globals,
 
-        __XCOMPONENT__: {
-            ...globals.__XCOMPONENT__,
+        __ZOID__: {
+            ...globals.__ZOID__,
             __POPUP_SUPPORT__:    false,
             __IE_POPUP_SUPPORT__: false
         }
@@ -42,8 +42,8 @@ export let WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
     vars:       {
         ...globals,
 
-        __XCOMPONENT__: {
-            ...globals.__XCOMPONENT__,
+        __ZOID__: {
+            ...globals.__ZOID__,
             __POPUP_SUPPORT__:    false,
             __IE_POPUP_SUPPORT__: false
         }

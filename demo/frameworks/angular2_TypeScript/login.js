@@ -1,5 +1,5 @@
 
-window.MyLoginXComponent = xcomponent.create({
+window.MyLoginZoidComponent = zoid.create({
 
     // The html tag used to render my component
 
@@ -7,7 +7,7 @@ window.MyLoginXComponent = xcomponent.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: xcomponent.getCurrentScriptDir() + '/login.htm',
+    url: zoid.getCurrentScriptDir() + '/login.htm',
 
     props: {
 

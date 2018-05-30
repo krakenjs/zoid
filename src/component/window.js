@@ -4,7 +4,7 @@ import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow
 import base32 from 'hi-base32';
 
 import { memoize, uniqueID, globalFor, stringifyError } from '../lib';
-import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
+import { WINDOW_REFERENCES } from '../constants';
 import type { DimensionsType, PositionType } from '../types';
 
 
@@ -26,7 +26,7 @@ function decode(str : string) : string {
 
     Build a name for our child window. This should identify the following things to the child:
 
-    - That the window was created by, and is owned by xcomponent
+    - That the window was created by, and is owned by zoid
     - The name of the child's parent. This is so the child can identify which window created it, even when we do a
       renderTo, in which case the true parent may actually be a sibling frame in the window hierarchy
 
@@ -51,7 +51,7 @@ export function buildChildWindowName(name : string, version : string, options : 
     }
 
     return [
-        XCOMPONENT,
+        'xcomponent',
         encodedName,
         encodedVersion,
         encodedOptions,
@@ -59,14 +59,14 @@ export function buildChildWindowName(name : string, version : string, options : 
     ].join('__');
 }
 
-export let isXComponentWindow = memoize(() => {
+export let isZoidComponentWindow = memoize(() => {
     if (!window.name) {
         return false;
     }
 
-    let [ xcomp ] = window.name.split('__');
+    let [ zoidcomp ] = window.name.split('__');
 
-    if (xcomp !== XCOMPONENT) {
+    if (zoidcomp !== 'xcomponent') {
         return false;
     }
 
@@ -77,7 +77,7 @@ export let isXComponentWindow = memoize(() => {
     -----------------
 
     The inverse of buildChildWindowName. Base64 decodes and json parses the window name to get the original props
-    passed down, including the parent name. Only accepts window names built by xcomponent
+    passed down, including the parent name. Only accepts window names built by zoid
 */
 
 export let getComponentMeta = memoize(() => {
@@ -86,10 +86,10 @@ export let getComponentMeta = memoize(() => {
         throw new Error(`Can not get component meta without window name`);
     }
 
-    let [ xcomp, name, version, encodedOptions ] = window.name.split('__');
+    let [ zoidcomp, name, version, encodedOptions ] = window.name.split('__');
 
-    if (xcomp !== XCOMPONENT) {
-        throw new Error(`Window not rendered by xcomponent - got ${ xcomp }`);
+    if (zoidcomp !== 'xcomponent') {
+        throw new Error(`Window not rendered by zoid - got ${ zoidcomp }`);
     }
 
     let componentMeta;
@@ -162,7 +162,7 @@ export let getParentComponentWindow = memoize(() => {
     let componentMeta = getComponentMeta();
 
     if (!componentMeta) {
-        throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
+        throw new Error(`Can not get parent component window - window not rendered by zoid`);
     }
 
     return getWindowByRef(componentMeta.componentParent);
@@ -174,7 +174,7 @@ export let getParentRenderWindow = memoize(() => {
     let componentMeta = getComponentMeta();
 
     if (!componentMeta) {
-        throw new Error(`Can not get parent component window - window not rendered by xcomponent`);
+        throw new Error(`Can not get parent component window - window not rendered by zoid`);
     }
 
     return getWindowByRef(componentMeta.renderParent);

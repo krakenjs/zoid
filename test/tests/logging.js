@@ -2,7 +2,7 @@
 
 import { testComponent_logLevel_configured, testComponent_no_logLevel_configured } from '../component';
 
-describe('xcomponent console logging', () => {
+describe('zoid console logging', () => {
 
     describe('when defaultLogLevel is configured when creating component', () => {
         it('should set log level to the configured value', done => {

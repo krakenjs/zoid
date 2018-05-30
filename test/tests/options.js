@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { testComponent } from '../component';
 
-describe('xcomponent options', () => {
+describe('zoid options', () => {
 
     it('should enter a component with a custom url', done => {
 

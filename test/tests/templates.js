@@ -4,9 +4,9 @@ import { onCloseWindow } from 'cross-domain-utils/src';
 
 import { testComponent } from '../component';
 
-describe('xcomponent templates and styles', () => {
+describe('zoid templates and styles', () => {
 
-    it('should focus an xcomponent popup on click of the overlay', done => {
+    it('should focus an zoid popup on click of the overlay', done => {
         testComponent.renderPopup({
 
             onEnter() {
@@ -21,7 +21,7 @@ describe('xcomponent templates and styles', () => {
         });
     });
 
-    it('should close an xcomponent popup on click of the overlay close button', done => {
+    it('should close an zoid popup on click of the overlay close button', done => {
 
         testComponent.renderPopup({
 
@@ -33,14 +33,14 @@ describe('xcomponent templates and styles', () => {
                     done();
                 };
 
-                this.container.querySelector('.xcomponent-close').click();
+                this.container.querySelector('.zoid-close').click();
             }
 
         });
     });
 
 
-    it('should close an xcomponent iframe on click of the overlay close button', done => {
+    it('should close an zoid iframe on click of the overlay close button', done => {
 
         testComponent.renderIframe({
 
@@ -49,7 +49,7 @@ describe('xcomponent templates and styles', () => {
                     done();
                 }, 50);
 
-                this.container.querySelector('.xcomponent-close').click();
+                this.container.querySelector('.zoid-close').click();
             }
 
         }, document.body);

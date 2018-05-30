@@ -242,11 +242,11 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         // Ensure we do not try to .attach() multiple times for the same component on the same page
 
-        if (window.__activeXComponent__) {
+        if (window.__activeZoidComponent__) {
             throw this.component.createError(`Can not attach multiple components to the same window`);
         }
 
-        window.__activeXComponent__ = this;
+        window.__activeZoidComponent__ = this;
 
         // Get the direct parent window
 

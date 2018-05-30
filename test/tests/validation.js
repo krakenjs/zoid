@@ -2,10 +2,10 @@
 
 import { assert } from 'chai';
 
-import xcomponent from '../../src';
+import zoid from '../../src';
 import { testComponent, testComponent5 } from '../component';
 
-describe('xcomponent validation errors', () => {
+describe('zoid validation errors', () => {
 
     function expectError(description, method) {
         try {
@@ -22,18 +22,18 @@ describe('xcomponent validation errors', () => {
 
         expectError('Empty options', () => {
             // $FlowFixMe
-            xcomponent.create({});
+            zoid.create({});
         });
 
         expectError('Special chars in tag name', () => {
-            xcomponent.create({
+            zoid.create({
                 tag: 'special$%&-chars'
             });
         });
 
         expectError('String passed for dimensions', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: 'moo'
             });
@@ -41,14 +41,14 @@ describe('xcomponent validation errors', () => {
 
         expectError('Empty options passed for dimensions', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {}
             });
         });
 
         expectError('Strings passed for dimensions', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: 'foo',
@@ -59,7 +59,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('String passed for height', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: 'foo',
@@ -70,7 +70,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Props passed as string', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -83,7 +83,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Prop passed as string', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -98,7 +98,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Invalid prop type passed', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -115,7 +115,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Empty prop definition', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -131,7 +131,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Required and default passed', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -149,7 +149,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Invalid context passed', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -164,7 +164,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('No contexts enabled', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -178,7 +178,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        xcomponent.create({
+        zoid.create({
             tag:        'my-component-working-2',
             dimensions: {
                 height: '50px',
@@ -192,7 +192,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Invalid default context', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -208,7 +208,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Default context disabled', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -223,7 +223,7 @@ describe('xcomponent validation errors', () => {
             });
         });
 
-        xcomponent.create({
+        zoid.create({
             tag:        'my-component',
             dimensions: {
                 height: '50px',
@@ -238,7 +238,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Undefined url', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -252,7 +252,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('No default env passed', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -266,7 +266,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Invalid default env passed', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -280,7 +280,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Default env passed with no urls', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -291,7 +291,7 @@ describe('xcomponent validation errors', () => {
         });
 
         expectError('Default env passed with empty urls', () => {
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',
@@ -306,7 +306,7 @@ describe('xcomponent validation errors', () => {
 
         expectError('Invalid url passed', () => {
             // $FlowFixMe
-            xcomponent.create({
+            zoid.create({
                 tag:        'my-component',
                 dimensions: {
                     height: '50px',

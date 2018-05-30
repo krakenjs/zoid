@@ -2,7 +2,7 @@
 
 import { CONFIG } from 'post-robot/src';
 
-import xcomponent from '../src';
+import zoid from '../src';
 
 import './tests';
 
@@ -23,7 +23,7 @@ beforeEach(() => {
     };
 });
 
-window.name = '__xcomponent_test_parent_window__';
+window.name = '__zoid_test_parent_window__';
 
 let body = document.body;
 
@@ -35,5 +35,5 @@ body.style.width = '1000px';
 body.style.height = '1000px';
 
 afterEach((done) => {
-    return xcomponent.destroyAll().then(() => done());
+    return zoid.destroyAll().then(() => done());
 });

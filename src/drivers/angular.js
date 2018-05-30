@@ -43,7 +43,7 @@ export let angular : ComponentDriverType<*, Angular> = {
                 controller: [ '$scope', '$element', ($scope, $element) => {
 
                     if (component.looseProps && !$scope.props) {
-                        throw new Error(`For angular bindings to work, prop definitions must be passed to xcomponent.create`);
+                        throw new Error(`For angular bindings to work, prop definitions must be passed to zoid.create`);
                     }
 
                     component.log(`instantiate_angular_component`);

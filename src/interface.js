@@ -28,4 +28,4 @@ export * from './error';
 
 export const CONSTANTS = _CONSTANTS;
 
-export type XComponent<P> = Component<P>;
+export type ZoidComponent<P> = Component<P>;

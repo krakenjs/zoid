@@ -61,8 +61,8 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
 
     if (options.contexts) {
 
-        if (options.contexts.popup && !__XCOMPONENT__.__POPUP_SUPPORT__) {
-            throw new Error(`Popups not supported in this build -- please use the full xcomponent.js build`);
+        if (options.contexts.popup && !__ZOID__.__POPUP_SUPPORT__) {
+            throw new Error(`Popups not supported in this build -- please use the full zoid.js build`);
         }
 
         let anyEnabled = false;

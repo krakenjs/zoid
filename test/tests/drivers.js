@@ -7,7 +7,7 @@ import { testComponent } from '../component';
 window.angular.module('app', [ 'test-component' ]);
 window.angular.bootstrap(document.body, [ 'app' ]);
 
-describe('xcomponent drivers', () => {
+describe('zoid drivers', () => {
 
     it('should enter a component rendered with react and call onEnter', done => {
 

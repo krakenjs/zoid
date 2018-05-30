@@ -837,7 +837,7 @@ export function removeClass(element : HTMLElement, name : string) {
 
 export function getCurrentScriptDir() : string {
     // eslint-disable-next-line no-console
-    console.warn(`Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited`);
+    console.warn(`Do not use zoid.getCurrentScriptDir() in production -- browser support is limited`);
 
     // eslint-disable-next-line compat/compat
     if (document.currentScript) {

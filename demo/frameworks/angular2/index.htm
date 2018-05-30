@@ -12,7 +12,7 @@
     <script src="https://npmcdn.com/@angular/compiler@4.2.3/bundles/compiler.umd.js"></script>
     <script src="https://npmcdn.com/@angular/platform-browser@4.2.3/bundles/platform-browser.umd.js"></script>
     <script src="https://npmcdn.com/@angular/platform-browser-dynamic@4.2.3/bundles/platform-browser-dynamic.umd.js"></script>
-    <script src="../../../dist/xcomponent.js"></script>
+    <script src="../../../dist/zoid.js"></script>
     <script src="./login.js"></script>
 </head>
 
@@ -22,7 +22,7 @@
 
         (function() {
             
-            const MyLoginXComponentModule = MyLoginXComponent.driver('angular2', ng.core);
+            const MyLoginZoidComponentModule = MyLoginZoidComponent.driver('angular2', ng.core);
 
             const appComponent =
                 ng.core.Component({
@@ -48,7 +48,7 @@
             });
 
             const appModule = ng.core.NgModule({
-                imports: [ng.platformBrowser.BrowserModule, MyLoginXComponentModule],
+                imports: [ng.platformBrowser.BrowserModule, MyLoginZoidComponentModule],
                 declarations: [appComponent],
                 bootstrap: [appComponent]
             })

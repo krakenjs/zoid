@@ -14,7 +14,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
     global, writeToWindow, setLogLevel, once,
     prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, XCOMPONENT, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
 import type { PropsType, BuiltInPropsType } from '../component/props';
@@ -461,7 +461,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
             }).then(finalUrl => {
 
-                query[XCOMPONENT] = '1';
+                query.xcomponent = '1';
                 return extendUrl(finalUrl, { query });
             });
         });
@@ -1171,7 +1171,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         } = (this.component.dimensions || {});
 
         return renderer.call(this, {
-            id:        `${ CLASS_NAMES.XCOMPONENT }-${ this.component.tag }-${ this.props.uid }`,
+            id:        `${ CLASS_NAMES.ZOID }-${ this.component.tag }-${ this.props.uid }`,
             props:     renderer.__xdomain__ ? null : this.props,
             tag:       this.component.tag,
             context:   this.context,

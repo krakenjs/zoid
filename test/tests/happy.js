@@ -5,7 +5,7 @@ import { type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { testComponent, testComponent4 } from '../component';
 
-describe('xcomponent happy cases', () => {
+describe('zoid happy cases', () => {
 
     it('should enter a component rendered as an iframe', done => {
 

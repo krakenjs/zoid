@@ -9,7 +9,7 @@ import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
-import { isXComponentWindow, getComponentMeta } from '../window';
+import { isZoidComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
 import { info, error, warn, setLogLevel, memoize } from '../../lib';
@@ -24,7 +24,7 @@ const drivers = { angular, angular2, glimmer, react, vue, script };
 /*  Component
     ---------
 
-    This is the spec for the component. The idea is, when I call xcomponent.create(), it will create a new instance
+    This is the spec for the component. The idea is, when I call zoid.create(), it will create a new instance
     of Component with the blueprint needed to set up ParentComponents and ChildComponents.
 
     This is the one portion of code which is required by -- and shared to -- both the parent and child windows, and
@@ -419,12 +419,12 @@ export class Component<P> extends BaseComponent<P> {
         throw new Error(`Unable to get url`);
     }
 
-    isXComponent() : boolean {
-        return isXComponentWindow();
+    isZoidComponent() : boolean {
+        return isZoidComponentWindow();
     }
 
     isChild() : boolean {
-        return isXComponentWindow() && getComponentMeta().tag === this.tag;
+        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
     }
 
 

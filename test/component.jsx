@@ -1,9 +1,9 @@
 /* @flow */
 /* @jsx jsxDom */
 
-import xcomponent from '../src';
+import zoid from '../src';
 
-window.xcomponent = xcomponent;
+window.zoid = zoid;
 
 function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, jsxDom }) {
 
@@ -20,9 +20,9 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
     }
 
     return (
-        <div id={ id } onClick={ focus } class={ `${ CLASS.XCOMPONENT } ${ CLASS.XCOMPONENT }-tag-${ tag } ${ CLASS.XCOMPONENT }-context-${ context } ${ CLASS.XCOMPONENT }-focus` }>
+        <div id={ id } onClick={ focus } class={ `${ CLASS.ZOID } ${ CLASS.ZOID }-tag-${ tag } ${ CLASS.ZOID }-context-${ context } ${ CLASS.ZOID }-focus` }>
 
-            <a href="#" onClick={ close } class={ `${ CLASS.XCOMPONENT }-close` }></a>
+            <a href="#" onClick={ close } class={ `${ CLASS.ZOID }-close` }></a>
 
             { outlet }
 
@@ -37,11 +37,11 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
                         background-color: rgba(0, 0, 0, 0.8);
                     }
 
-                    #${ id }.${ CLASS.XCOMPONENT }-context-${ CONTEXT.POPUP } {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.POPUP } {
                         cursor: pointer;
                     }
 
-                    #${ id }.${ CLASS.XCOMPONENT }-context-${ CONTEXT.IFRAME } .${CLASS.OUTLET} {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.IFRAME } .${CLASS.OUTLET} {
                         box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);
                         position: fixed;
                         top: 50%;
@@ -53,12 +53,12 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
                         -ms-transform: translate3d(-50%, -50%, 0);
                     }
 
-                    #${ id }.${ CLASS.XCOMPONENT }-context-${ CONTEXT.IFRAME } iframe {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.IFRAME } iframe {
                         height: 100%;
                         width: 100%;
                     }
 
-                    #${ id } .${ CLASS.XCOMPONENT }-close {
+                    #${ id } .${ CLASS.ZOID }-close {
                         position: absolute;
                         right: 16px;
                         top: 16px;
@@ -67,12 +67,12 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
                         opacity: 0.6;
                     }
 
-                    #${ id } .${ CLASS.XCOMPONENT }-close:hover {
+                    #${ id } .${ CLASS.ZOID }-close:hover {
                         opacity: 1;
                     }
 
-                    #${ id } .${ CLASS.XCOMPONENT }-close:before,
-                    #${ id } .${ CLASS.XCOMPONENT }-close:after {
+                    #${ id } .${ CLASS.ZOID }-close:before,
+                    #${ id } .${ CLASS.ZOID }-close:after {
                         position: absolute;
                         left: 8px;
                         content: ' ';
@@ -81,11 +81,11 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
                         background-color: white;
                     }
 
-                    #${ id } .${ CLASS.XCOMPONENT }-close:before {
+                    #${ id } .${ CLASS.ZOID }-close:before {
                         transform: rotate(45deg);
                     }
 
-                    #${ id } .${ CLASS.XCOMPONENT }-close:after {
+                    #${ id } .${ CLASS.ZOID }-close:after {
                         transform: rotate(-45deg);
                     }
                 `}
@@ -94,7 +94,7 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
     );
 }
 
-export let testComponent = xcomponent.create({
+export let testComponent = zoid.create({
 
     tag: 'test-component',
 
@@ -185,7 +185,7 @@ export let testComponent = xcomponent.create({
     }
 });
 
-export let testComponent2 = xcomponent.create({
+export let testComponent2 = zoid.create({
 
     tag: 'test-component2',
 
@@ -220,7 +220,7 @@ export let testComponent2 = xcomponent.create({
     }
 });
 
-export let testComponent3 = xcomponent.create({
+export let testComponent3 = zoid.create({
 
     tag: 'test-component3',
 
@@ -250,7 +250,7 @@ export let testComponent3 = xcomponent.create({
     }
 });
 
-export let testComponent4 = xcomponent.create({
+export let testComponent4 = zoid.create({
 
     tag: 'test-component4',
 
@@ -264,7 +264,7 @@ export let testComponent4 = xcomponent.create({
 });
 
 
-export let testComponent5 = xcomponent.create({
+export let testComponent5 = zoid.create({
 
     tag: 'test-component5',
 
@@ -290,7 +290,7 @@ export let testComponent5 = xcomponent.create({
 });
 
 
-export let testComponent_no_logLevel_configured = xcomponent.create({
+export let testComponent_no_logLevel_configured = zoid.create({
 
     tag: 'test-component-no-log-level',
 
@@ -302,7 +302,7 @@ export let testComponent_no_logLevel_configured = xcomponent.create({
     defaultEnv: 'dev'
 });
 
-export let testComponent_logLevel_configured = xcomponent.create({
+export let testComponent_logLevel_configured = zoid.create({
 
     tag: 'test-component-log-level',
 
@@ -317,7 +317,7 @@ export let testComponent_logLevel_configured = xcomponent.create({
 });
 
 
-export let testComponent_parentDomains_string = xcomponent.create({
+export let testComponent_parentDomains_string = zoid.create({
     tag: 'test-component-parent-domains-string',
 
     allowedParentDomains: 'http://www.somedomain.com',
@@ -325,7 +325,7 @@ export let testComponent_parentDomains_string = xcomponent.create({
     url: '/base/test/child.htm?devenv=true',
 });
 
-export let testComponent_parentDomains_array_of_strings = xcomponent.create({
+export let testComponent_parentDomains_array_of_strings = zoid.create({
     tag: 'test-component-parent-domain-array-of-strings',
 
     allowedParentDomains: ['http://www.somedomain.com', 'http://www.otherdomain.com'],
@@ -334,7 +334,7 @@ export let testComponent_parentDomains_array_of_strings = xcomponent.create({
 });
 
 
-export let testComponent_parentDomains_array_of_regex = xcomponent.create({
+export let testComponent_parentDomains_array_of_regex = zoid.create({
     tag: 'test-component-parent-domains-array-of-regex',
 
     // $FlowFixMe
@@ -343,7 +343,7 @@ export let testComponent_parentDomains_array_of_regex = xcomponent.create({
     url: '/base/test/child.htm?devenv=true',
 });
 
-export let testComponent_parentDomains_string_match = xcomponent.create({
+export let testComponent_parentDomains_string_match = zoid.create({
     tag: 'test-component-parent-domains-string-match',
 
     allowedParentDomains: 'http://localhost:9876',
@@ -351,7 +351,7 @@ export let testComponent_parentDomains_string_match = xcomponent.create({
     url: '/base/test/child.htm?devenv=true',
 });
 
-export let testComponent_parentDomains_array_of_strings_match = xcomponent.create({
+export let testComponent_parentDomains_array_of_strings_match = zoid.create({
     tag: 'test-component-parent-domains-array-of-strings-match',
 
     allowedParentDomains: ['http://www.somedomain.com', 'http://localhost:9876'],
@@ -359,7 +359,7 @@ export let testComponent_parentDomains_array_of_strings_match = xcomponent.creat
     url: '/base/test/child.htm?devenv=true',
 });
 
-export let testComponent_parentDomains_array_of_strings_match_wildcard = xcomponent.create({
+export let testComponent_parentDomains_array_of_strings_match_wildcard = zoid.create({
     tag: 'test-component-parent-domains-array-of-strings-match-wildcard',
 
     allowedParentDomains: ['http://www.somedomain.com', '*'],
@@ -368,7 +368,7 @@ export let testComponent_parentDomains_array_of_strings_match_wildcard = xcompon
 });
 
 
-export let testComponent_parentDomains_string_match_wildcard = xcomponent.create({
+export let testComponent_parentDomains_string_match_wildcard = zoid.create({
     tag: 'test-component-parent-domains-string-match-wildcard',
 
     allowedParentDomains: '*',
@@ -377,7 +377,7 @@ export let testComponent_parentDomains_string_match_wildcard = xcomponent.create
 });
 
 
-export let testComponent_parentDomains_array_of_regex_match = xcomponent.create({
+export let testComponent_parentDomains_array_of_regex_match = zoid.create({
     tag: 'test-component-parent-domains-array-of-regex-match',
 
     // $FlowFixMe

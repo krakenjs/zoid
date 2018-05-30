@@ -6,13 +6,13 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
 
-    <script src="../../../dist/xcomponent.js"></script>
+    <script src="../../../dist/zoid.js"></script>
     <script src="./login.js"></script>
 
     <script>
-        var MyLoginAngularXComponent = MyLoginXComponent.driver('angular', window.angular);
+        var MyLoginAngularZoidComponent = MyLoginZoidComponent.driver('angular', window.angular);
 
-        angular.module('app', [ MyLoginAngularXComponent.name ]).controller('appController', function ($scope) {
+        angular.module('app', [ MyLoginAngularZoidComponent.name ]).controller('appController', function ($scope) {
 
             $scope.userLoggedIn = false;
             $scope.email = 'foo@bar.com';

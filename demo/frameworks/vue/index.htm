@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
     <script src="https://unpkg.com/vue"></script>
-    <script src="../../../dist/xcomponent.js"></script>
+    <script src="../../../dist/zoid.js"></script>
     <script src="./login.js"></script>
 
 
@@ -21,7 +21,7 @@
 
 <script type="text/babel">
 
-    var MyLoginVueXComponent = MyLoginXComponent.driver('vue');
+    var MyLoginVueZoidComponent = MyLoginZoidComponent.driver('vue');
 
     Vue.component('app', {
 
@@ -42,7 +42,7 @@
 
                     </div>` ,
         components: {
-            'my-component': MyLoginVueXComponent
+            'my-component': MyLoginVueZoidComponent
         },
 
         computed: {

@@ -28,9 +28,9 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
         // pass
     },
 
-    register(xcomponent : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
+    register(zoid : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
 
-        xcomponent.log('initializing angular2 component');
+        zoid.log('initializing angular2 component');
 
         let getProps = (component) => {
             return replaceObject({ ...component.internalProps, ...component.props }, {
@@ -46,7 +46,7 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
 
         const ComponentInstance =
             AngularComponent({
-                selector: xcomponent.tag,
+                selector: zoid.tag,
                 template: '<div></div>',
                 inputs:   [ 'props' ]
             }).Class({
@@ -56,7 +56,7 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
                 } ],
                 ngOnInit () {
                     const targetElement = this.elementRef.nativeElement;
-                    const parent = xcomponent.init(getProps(this), null, targetElement);
+                    const parent = zoid.init(getProps(this), null, targetElement);
                     parent.render(targetElement);
                     this.parent = parent;
                 },

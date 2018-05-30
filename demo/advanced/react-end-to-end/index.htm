@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="../../../dist/xcomponent.js"></script>
+    <script src="../../../dist/zoid.js"></script>
     <script src="./login.js"></script>
 </head>
 
@@ -17,7 +17,7 @@
 
     <script type="text/babel">
 
-        let MyLoginReactXComponent = MyLoginXComponent.driver('react', {
+        let MyLoginReactZoidComponent = MyLoginZoidComponent.driver('react', {
             React: window.React,
             ReactDOM: window.ReactDOM
         });
@@ -43,7 +43,7 @@
 
                             ? <p>User logged in with email: { this.state.email }</p>
 
-                            : <MyLoginReactXComponent prefilledEmail={ this.state.prefilledEmail } onLogin={ onLogin } />
+                            : <MyLoginReactZoidComponent prefilledEmail={ this.state.prefilledEmail } onLogin={ onLogin } />
                         }
                     </div>
                 );
