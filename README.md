@@ -183,7 +183,3 @@ worry about iframes or post-messages.
 - Firefox 30+
 - Safari 5.1+
 - Opera 23+
-
-## Notes
-
-- Please note this project has no involvement with Invivoo Software's [ZoidComponent](http://www.zoid.com/).
