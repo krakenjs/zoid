@@ -80,7 +80,7 @@ var drivers = { angular: _index.angular, angular2: _index.angular2, glimmer: _in
 /*  Component
     ---------
 
-    This is the spec for the component. The idea is, when I call xcomponent.create(), it will create a new instance
+    This is the spec for the component. The idea is, when I call zoid.create(), it will create a new instance
     of Component with the blueprint needed to set up ParentComponents and ChildComponents.
 
     This is the one portion of code which is required by -- and shared to -- both the parent and child windows, and
@@ -464,14 +464,14 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
             throw new Error('Unable to get url');
         }
     }, {
-        key: 'isXComponent',
-        value: function isXComponent() {
-            return (0, _window.isXComponentWindow)();
+        key: 'isZoidComponent',
+        value: function isZoidComponent() {
+            return (0, _window.isZoidComponentWindow)();
         }
     }, {
         key: 'isChild',
         value: function isChild() {
-            return (0, _window.isXComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
+            return (0, _window.isZoidComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
         }
     }, {
         key: 'createError',

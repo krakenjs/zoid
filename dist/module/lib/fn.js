@@ -71,7 +71,7 @@ function memoize(method) {
             cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), function (key, val) {
 
                 if (typeof val === 'function') {
-                    return 'xcomponent:memoize[' + (0, _util.getObjectID)(val) + ']';
+                    return 'zoid:memoize[' + (0, _util.getObjectID)(val) + ']';
                 }
 
                 return val;

@@ -1,5 +1,5 @@
 !function(root, factory) {
-    "object" == typeof exports && "object" == typeof module ? module.exports = factory() : "function" == typeof define && define.amd ? define("xcomponent", [], factory) : "object" == typeof exports ? exports.xcomponent = factory() : root.xcomponent = factory();
+    "object" == typeof exports && "object" == typeof module ? module.exports = factory() : "function" == typeof define && define.amd ? define("zoid", [], factory) : "object" == typeof exports ? exports.zoid = factory() : root.zoid = factory();
 }("undefined" != typeof self ? self : this, function() {
     return function(modules) {
         var installedModules = {};
@@ -4358,7 +4358,7 @@
                                     if ((_i2 = _iterator2.next()).done) return "break";
                                     _ref2 = _i2.value;
                                 }
-                                var listenerName = _ref2, name = listenerName.replace(/^xcomponent_/, ""), errorHandler = function(err) {
+                                var listenerName = _ref2, name = listenerName.replace(/^zoid_/, ""), errorHandler = function(err) {
                                     _this.error(err);
                                 }, listener = (0, _src2.on)(listenerName, {
                                     window: win,
@@ -4620,8 +4620,8 @@
                 }, {
                     key: "setWindows",
                     value: function() {
-                        if (window.__activeXComponent__) throw this.component.createError("Can not attach multiple components to the same window");
-                        window.__activeXComponent__ = this;
+                        if (window.__activeZoidComponent__) throw this.component.createError("Can not attach multiple components to the same window");
+                        window.__activeZoidComponent__ = this;
                         if (!(0, _window.getParentComponentWindow)()) throw this.component.createError("Can not find parent window");
                         var componentMeta = (0, _window.getComponentMeta)();
                         if (componentMeta.tag !== this.component.tag) throw this.component.createError("Parent is " + componentMeta.tag + " - can not attach " + this.component.tag);
@@ -5121,14 +5121,14 @@
                         throw new Error("Unable to get url");
                     }
                 }, {
-                    key: "isXComponent",
+                    key: "isZoidComponent",
                     value: function() {
-                        return (0, _window.isXComponentWindow)();
+                        return (0, _window.isZoidComponentWindow)();
                     }
                 }, {
                     key: "isChild",
                     value: function() {
-                        return (0, _window.isXComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
+                        return (0, _window.isZoidComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
                     }
                 }, {
                     key: "createError",
@@ -5419,7 +5419,7 @@
                 var id = _ref.id, tag = _ref.tag, context = _ref.context, CLASS = _ref.CLASS, outlet = _ref.outlet, jsxDom = _ref.jsxDom, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
                 return jsxDom("div", {
                     id: id,
-                    class: CLASS.XCOMPONENT + " " + CLASS.XCOMPONENT + "-tag-" + tag + " " + CLASS.XCOMPONENT + "-context-" + context
+                    class: CLASS.ZOID + " " + CLASS.ZOID + "-tag-" + tag + " " + CLASS.ZOID + "-context-" + context
                 }, jsxDom("style", null, "\n                    #" + id + ", #" + id + " > ." + CLASS.OUTLET + " {\n                        width: " + width + ";\n                        height: " + height + ";\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        position: relative;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), outlet);
             };
             __webpack_require__("./src/component/parent/index.js");
@@ -5484,7 +5484,7 @@
                     if (options.dimensions && !(0, _lib.isPx)(options.dimensions.height) && !(0, _lib.isPerc)(options.dimensions.height)) throw new Error("Expected options.dimensions.height to be a px or % string value");
                 }
                 if (options.contexts) {
-                    if (options.contexts.popup) throw new Error("Popups not supported in this build -- please use the full xcomponent.js build");
+                    if (options.contexts.popup) throw new Error("Popups not supported in this build -- please use the full zoid.js build");
                     for (var anyEnabled = !1, _iterator2 = Object.keys(options.contexts), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                         var _ref2;
                         if (_isArray2) {
@@ -6202,7 +6202,7 @@
                             return url && !_this7.component.getValidDomain(url) ? url : _src3.ZalgoPromise.try(function() {
                                 return url || _this7.component.getUrl(_this7.props.env, _this7.props);
                             }).then(function(finalUrl) {
-                                query[_constants.XCOMPONENT] = "1";
+                                query.xcomponent = "1";
                                 return (0, _lib.extendUrl)(finalUrl, {
                                     query: query
                                 });
@@ -6673,7 +6673,7 @@
                     value: function(renderer) {
                         var _this32 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _ref19 = this.component.dimensions || {}, _ref19$width = _ref19.width, width = void 0 === _ref19$width ? _constants.DEFAULT_DIMENSIONS.WIDTH + "px" : _ref19$width, _ref19$height = _ref19.height, height = void 0 === _ref19$height ? _constants.DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref19$height;
                         return renderer.call(this, _extends({
-                            id: _constants.CLASS_NAMES.XCOMPONENT + "-" + this.component.tag + "-" + this.props.uid,
+                            id: _constants.CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.props.uid,
                             props: renderer.__xdomain__ ? null : this.props,
                             tag: this.component.tag,
                             context: this.context,
@@ -7033,7 +7033,7 @@
             Object.defineProperty(exports, "__esModule", {
                 value: !0
             });
-            exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isXComponentWindow = void 0;
+            exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isZoidComponentWindow = void 0;
             var _slicedToArray = function() {
                 return function(arr, i) {
                     if (Array.isArray(arr)) return arr;
@@ -7068,7 +7068,7 @@
                 var str;
                 if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
                 if (!encodedVersion) throw new Error("Invalid version: " + version + " - must contain alphanumeric characters");
-                return [ _constants.XCOMPONENT, encodedName, encodedVersion, encodedOptions, "" ].join("__");
+                return [ "xcomponent", encodedName, encodedVersion, encodedOptions, "" ].join("__");
             };
             exports.getParentDomain = function() {
                 return getComponentMeta().domain;
@@ -7088,15 +7088,15 @@
             function normalize(str) {
                 return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_");
             }
-            exports.isXComponentWindow = (0, _lib.memoize)(function() {
+            exports.isZoidComponentWindow = (0, _lib.memoize)(function() {
                 if (!window.name) return !1;
                 var _window$name$split = window.name.split("__");
-                return _slicedToArray(_window$name$split, 1)[0] === _constants.XCOMPONENT;
+                return "xcomponent" === _slicedToArray(_window$name$split, 1)[0];
             });
             var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function() {
                 if (!window.name) throw new Error("Can not get component meta without window name");
-                var _window$name$split3 = window.name.split("__"), _window$name$split4 = _slicedToArray(_window$name$split3, 4), xcomp = _window$name$split4[0], name = _window$name$split4[1], version = _window$name$split4[2], encodedOptions = _window$name$split4[3];
-                if (xcomp !== _constants.XCOMPONENT) throw new Error("Window not rendered by xcomponent - got " + xcomp);
+                var _window$name$split3 = window.name.split("__"), _window$name$split4 = _slicedToArray(_window$name$split3, 4), zoidcomp = _window$name$split4[0], name = _window$name$split4[1], version = _window$name$split4[2], encodedOptions = _window$name$split4[3];
+                if ("xcomponent" !== zoidcomp) throw new Error("Window not rendered by zoid - got " + zoidcomp);
                 var str, componentMeta = void 0;
                 try {
                     componentMeta = JSON.parse((str = encodedOptions, _hiBase2.default.decode(str.toUpperCase())));
@@ -7138,11 +7138,11 @@
             }
             exports.getParentComponentWindow = (0, _lib.memoize)(function() {
                 var componentMeta = getComponentMeta();
-                if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
+                if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by zoid");
                 return getWindowByRef(componentMeta.componentParent);
             }), exports.getParentRenderWindow = (0, _lib.memoize)(function() {
                 var componentMeta = getComponentMeta();
-                if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by xcomponent");
+                if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by zoid");
                 return getWindowByRef(componentMeta.renderParent);
             });
         },
@@ -7151,21 +7151,21 @@
             Object.defineProperty(exports, "__esModule", {
                 value: !0
             });
-            var XCOMPONENT = exports.XCOMPONENT = "xcomponent", PROP_TYPES = (exports.__XCOMPONENT__ = "__" + XCOMPONENT + "__", 
+            var ZOID = exports.ZOID = "zoid", PROP_TYPES = (exports.__ZOID__ = "__" + ZOID + "__", 
             exports.POST_MESSAGE = {
-                INIT: XCOMPONENT + "_init",
-                PROPS: XCOMPONENT + "_props",
-                PROP_CALLBACK: XCOMPONENT + "_prop_callback",
-                CLOSE: XCOMPONENT + "_close",
-                CHECK_CLOSE: XCOMPONENT + "_check_close",
-                REDIRECT: XCOMPONENT + "_redirect",
-                RESIZE: XCOMPONENT + "_resize",
-                ONRESIZE: XCOMPONENT + "_onresize",
-                DELEGATE: XCOMPONENT + "_delegate",
-                ALLOW_DELEGATE: XCOMPONENT + "_allow_delegate",
-                ERROR: XCOMPONENT + "_error",
-                HIDE: XCOMPONENT + "_hide",
-                SHOW: XCOMPONENT + "_show"
+                INIT: ZOID + "_init",
+                PROPS: ZOID + "_props",
+                PROP_CALLBACK: ZOID + "_prop_callback",
+                CLOSE: ZOID + "_close",
+                CHECK_CLOSE: ZOID + "_check_close",
+                REDIRECT: ZOID + "_redirect",
+                RESIZE: ZOID + "_resize",
+                ONRESIZE: ZOID + "_onresize",
+                DELEGATE: ZOID + "_delegate",
+                ALLOW_DELEGATE: ZOID + "_allow_delegate",
+                ERROR: ZOID + "_error",
+                HIDE: ZOID + "_hide",
+                SHOW: ZOID + "_show"
             }, exports.PROP_TYPES = {
                 STRING: "string",
                 OBJECT: "object",
@@ -7187,21 +7187,21 @@
                 POPUP: "popup"
             });
             exports.CLASS_NAMES = {
-                XCOMPONENT: "" + XCOMPONENT,
-                OUTLET: XCOMPONENT + "-outlet",
-                COMPONENT_FRAME: XCOMPONENT + "-component-frame",
-                PRERENDER_FRAME: XCOMPONENT + "-prerender-frame",
-                VISIBLE: XCOMPONENT + "-visible",
-                INVISIBLE: XCOMPONENT + "-invisible"
+                ZOID: "" + ZOID,
+                OUTLET: ZOID + "-outlet",
+                COMPONENT_FRAME: ZOID + "-component-frame",
+                PRERENDER_FRAME: ZOID + "-prerender-frame",
+                VISIBLE: ZOID + "-visible",
+                INVISIBLE: ZOID + "-invisible"
             }, exports.EVENTS = {
-                CLOSE: XCOMPONENT + "-close"
+                CLOSE: ZOID + "-close"
             }, exports.ATTRIBUTES = {
-                IFRAME_PLACEHOLDER: "data-xcomponent-" + XCOMPONENT + "-placeholder"
+                IFRAME_PLACEHOLDER: "data-zoid-" + ZOID + "-placeholder"
             }, exports.ANIMATION_NAMES = {
-                SHOW_CONTAINER: XCOMPONENT + "-show-container",
-                SHOW_COMPONENT: XCOMPONENT + "-show-component",
-                HIDE_CONTAINER: XCOMPONENT + "-hide-container",
-                HIDE_COMPONENT: XCOMPONENT + "-hide-component"
+                SHOW_CONTAINER: ZOID + "-show-container",
+                SHOW_COMPONENT: ZOID + "-show-component",
+                HIDE_CONTAINER: ZOID + "-hide-container",
+                HIDE_COMPONENT: ZOID + "-hide-component"
             }, exports.EVENT_NAMES = {
                 CLICK: "click"
             }, exports.CLOSE_REASONS = {
@@ -7250,7 +7250,7 @@
                             scope: scope,
                             restrict: "E",
                             controller: [ "$scope", "$element", function($scope, $element) {
-                                if (component.looseProps && !$scope.props) throw new Error("For angular bindings to work, prop definitions must be passed to xcomponent.create");
+                                if (component.looseProps && !$scope.props) throw new Error("For angular bindings to work, prop definitions must be passed to zoid.create");
                                 component.log("instantiate_angular_component");
                                 var getProps = function() {
                                     var scopeProps = void 0;
@@ -7309,9 +7309,9 @@
             }, _lib = __webpack_require__("./src/lib/index.js");
             exports.angular2 = {
                 global: function() {},
-                register: function(xcomponent, _ref) {
+                register: function(zoid, _ref) {
                     var AngularComponent = _ref.Component, NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
-                    xcomponent.log("initializing angular2 component");
+                    zoid.log("initializing angular2 component");
                     var getProps = function(component) {
                         return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), {
                             function: function(value) {
@@ -7324,7 +7324,7 @@
                             }
                         });
                     }, ComponentInstance = AngularComponent({
-                        selector: xcomponent.tag,
+                        selector: zoid.tag,
                         template: "<div></div>",
                         inputs: [ "props" ]
                     }).Class({
@@ -7333,7 +7333,7 @@
                             this.zone = zone;
                         } ],
                         ngOnInit: function() {
-                            var targetElement = this.elementRef.nativeElement, parent = xcomponent.init(getProps(this), null, targetElement);
+                            var targetElement = this.elementRef.nativeElement, parent = zoid.init(getProps(this), null, targetElement);
                             parent.render(targetElement);
                             this.parent = parent;
                         },
@@ -7636,7 +7636,9 @@
                 global: function() {},
                 register: function(component) {
                     return {
-                        template: "<div></div>",
+                        render: function(createElement) {
+                            return createElement("div");
+                        },
                         inheritAttrs: !1,
                         mounted: function() {
                             var el = this.$el;
@@ -8048,7 +8050,7 @@
                 element.classList ? element.classList.remove(name) : -1 !== element.className.split(/\s+/).indexOf(name) && (element.className = element.className.replace(name, ""));
             };
             exports.getCurrentScriptDir = function() {
-                console.warn("Do not use xcomponent.getCurrentScriptDir() in production -- browser support is limited");
+                console.warn("Do not use zoid.getCurrentScriptDir() in production -- browser support is limited");
                 if (document.currentScript) return document.currentScript.src.split("/").slice(0, -1).join("/");
                 return ".";
             };
@@ -8463,7 +8465,7 @@
                     var cacheKey = void 0;
                     try {
                         cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), function(key, val) {
-                            return "function" == typeof val ? "xcomponent:memoize[" + (0, _util.getObjectID)(val) + "]" : val;
+                            return "function" == typeof val ? "zoid:memoize[" + (0, _util.getObjectID)(val) + "]" : val;
                         });
                     } catch (err) {
                         throw new Error("Arguments not serializable -- can not be used to memoize");
@@ -8518,8 +8520,8 @@
             var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _constants = __webpack_require__("./src/constants.js");
             function globalFor(win) {
                 if ((0, _src.isSameDomain)(win)) {
-                    win[_constants.__XCOMPONENT__] || (win[_constants.__XCOMPONENT__] = {});
-                    return win[_constants.__XCOMPONENT__];
+                    win[_constants.__ZOID__] || (win[_constants.__ZOID__] = {});
+                    return win[_constants.__ZOID__];
                 }
             }
             function localGlobal() {
@@ -8962,5 +8964,5 @@
         }
     });
 });
-//# sourceMappingURL=xcomponent.frame.js.map
-//# sourceMappingURL=xcomponent.frame.js.map
+//# sourceMappingURL=zoid.frame.js.map
+//# sourceMappingURL=zoid.frame.js.map

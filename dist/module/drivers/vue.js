@@ -14,7 +14,10 @@ var vue = exports.vue = {
     register: function register(component) {
 
         return {
-            template: '<div></div>',
+            render: function render(createElement) {
+                return createElement('div');
+            },
+
 
             inheritAttrs: false,
 

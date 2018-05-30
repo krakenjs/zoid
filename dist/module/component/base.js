@@ -188,7 +188,7 @@ var BaseComponent = exports.BaseComponent = function () {
                 var listenerName = _ref2;
 
 
-                var name = listenerName.replace(/^xcomponent_/, '');
+                var name = listenerName.replace(/^zoid_/, '');
 
                 var errorHandler = function errorHandler(err) {
                     _this.error(err);

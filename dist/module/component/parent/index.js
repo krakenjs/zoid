@@ -496,7 +496,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                     return url || _this7.component.getUrl(_this7.props.env, _this7.props);
                 }).then(function (finalUrl) {
 
-                    query[_constants.XCOMPONENT] = '1';
+                    query.xcomponent = '1';
                     return (0, _lib.extendUrl)(finalUrl, { query: query });
                 });
             });
@@ -1274,7 +1274,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 height = _ref19$height === undefined ? _constants.DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref19$height;
 
             return renderer.call(this, _extends({
-                id: _constants.CLASS_NAMES.XCOMPONENT + '-' + this.component.tag + '-' + this.props.uid,
+                id: _constants.CLASS_NAMES.ZOID + '-' + this.component.tag + '-' + this.props.uid,
                 props: renderer.__xdomain__ ? null : this.props,
                 tag: this.component.tag,
                 context: this.context,

@@ -14,14 +14,14 @@ var angular2 = exports.angular2 = {
     global: function global() {
         // pass
     },
-    register: function register(xcomponent, _ref) {
+    register: function register(zoid, _ref) {
         var AngularComponent = _ref.Component,
             NgModule = _ref.NgModule,
             ElementRef = _ref.ElementRef,
             NgZone = _ref.NgZone;
 
 
-        xcomponent.log('initializing angular2 component');
+        zoid.log('initializing angular2 component');
 
         var getProps = function getProps(component) {
             return (0, _lib.replaceObject)(_extends({}, component.internalProps, component.props), {
@@ -41,7 +41,7 @@ var angular2 = exports.angular2 = {
         };
 
         var ComponentInstance = AngularComponent({
-            selector: xcomponent.tag,
+            selector: zoid.tag,
             template: '<div></div>',
             inputs: ['props']
         }).Class({
@@ -51,7 +51,7 @@ var angular2 = exports.angular2 = {
             }],
             ngOnInit: function ngOnInit() {
                 var targetElement = this.elementRef.nativeElement;
-                var parent = xcomponent.init(getProps(this), null, targetElement);
+                var parent = zoid.init(getProps(this), null, targetElement);
                 parent.render(targetElement);
                 this.parent = parent;
             },

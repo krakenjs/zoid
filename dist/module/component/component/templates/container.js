@@ -21,7 +21,7 @@ function defaultContainerTemplate(_ref) {
 
     return jsxDom(
         'div',
-        { id: id, 'class': CLASS.XCOMPONENT + ' ' + CLASS.XCOMPONENT + '-tag-' + tag + ' ' + CLASS.XCOMPONENT + '-context-' + context },
+        { id: id, 'class': CLASS.ZOID + ' ' + CLASS.ZOID + '-tag-' + tag + ' ' + CLASS.ZOID + '-context-' + context },
         jsxDom(
             'style',
             null,

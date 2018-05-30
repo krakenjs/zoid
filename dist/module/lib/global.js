@@ -17,11 +17,11 @@ function globalFor(win) {
         return;
     }
 
-    if (!win[_constants.__XCOMPONENT__]) {
-        win[_constants.__XCOMPONENT__] = {};
+    if (!win[_constants.__ZOID__]) {
+        win[_constants.__ZOID__] = {};
     }
 
-    return win[_constants.__XCOMPONENT__];
+    return win[_constants.__ZOID__];
 }
 
 function localGlobal() {
