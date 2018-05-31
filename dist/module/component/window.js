@@ -1,12 +1,7 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isZoidComponentWindow = undefined;
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 exports.buildChildWindowName = buildChildWindowName;
 exports.getParentDomain = getParentDomain;
 exports.getPosition = getPosition;
@@ -75,8 +70,7 @@ var isZoidComponentWindow = exports.isZoidComponentWindow = (0, _lib.memoize)(fu
     }
 
     var _window$name$split = window.name.split('__'),
-        _window$name$split2 = _slicedToArray(_window$name$split, 1),
-        zoidcomp = _window$name$split2[0];
+        zoidcomp = _window$name$split[0];
 
     if (zoidcomp !== 'xcomponent') {
         return false;
@@ -98,12 +92,11 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
         throw new Error('Can not get component meta without window name');
     }
 
-    var _window$name$split3 = window.name.split('__'),
-        _window$name$split4 = _slicedToArray(_window$name$split3, 4),
-        zoidcomp = _window$name$split4[0],
-        name = _window$name$split4[1],
-        version = _window$name$split4[2],
-        encodedOptions = _window$name$split4[3];
+    var _window$name$split2 = window.name.split('__'),
+        zoidcomp = _window$name$split2[0],
+        name = _window$name$split2[1],
+        version = _window$name$split2[2],
+        encodedOptions = _window$name$split2[3];
 
     if (zoidcomp !== 'xcomponent') {
         throw new Error('Window not rendered by zoid - got ' + zoidcomp);

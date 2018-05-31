@@ -1,12 +1,8 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 exports.normalizeProp = normalizeProp;
 exports.normalizeProps = normalizeProps;
@@ -261,9 +257,9 @@ function propsToQuery(propsDef, props) {
             getQueryParam(prop, key, value),
             // $FlowFixMe
             getQueryValue(prop, key, value)]).then(function (_ref3) {
-                var _ref4 = _slicedToArray(_ref3, 2),
-                    queryParam = _ref4[0],
-                    queryValue = _ref4[1];
+                var queryParam = _ref3[0],
+                    queryValue = _ref3[1];
+
 
                 var result = void 0;
 
@@ -281,18 +277,18 @@ function propsToQuery(propsDef, props) {
                         result = (0, _lib.dotify)(queryValue, key);
 
                         for (var _iterator3 = Object.keys(result), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                            var _ref5;
+                            var _ref4;
 
                             if (_isArray3) {
                                 if (_i3 >= _iterator3.length) break;
-                                _ref5 = _iterator3[_i3++];
+                                _ref4 = _iterator3[_i3++];
                             } else {
                                 _i3 = _iterator3.next();
                                 if (_i3.done) break;
-                                _ref5 = _i3.value;
+                                _ref4 = _i3.value;
                             }
 
-                            var dotkey = _ref5;
+                            var dotkey = _ref4;
 
                             params[dotkey] = result[dotkey];
                         }

@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 var ZOID = exports.ZOID = 'zoid';
 
 var __ZOID__ = exports.__ZOID__ = '__' + ZOID + '__';

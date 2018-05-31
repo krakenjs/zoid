@@ -40,9 +40,7 @@
     }({
         "./node_modules/beaver-logger/client/builders.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.addPayloadBuilder = function(builder) {
                 payloadBuilders.push(builder);
             };
@@ -59,9 +57,7 @@
         },
         "./node_modules/beaver-logger/client/config.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.config = {
                 uri: "",
                 prefix: "",
@@ -83,9 +79,7 @@
         },
         "./node_modules/beaver-logger/client/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./node_modules/beaver-logger/client/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -106,9 +100,7 @@
         },
         "./node_modules/beaver-logger/client/init.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.init = function(conf) {
                 (0, _util.extend)(_config.config, conf || {});
                 if (initiated) return;
@@ -141,9 +133,7 @@
         },
         "./node_modules/beaver-logger/client/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _logger = __webpack_require__("./node_modules/beaver-logger/client/logger.js");
             Object.keys(_logger).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -192,9 +182,7 @@
         },
         "./node_modules/beaver-logger/client/logger.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.track = exports.flush = exports.tracking = exports.buffer = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -400,9 +388,7 @@
         },
         "./node_modules/beaver-logger/client/performance.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.reqTimer = exports.clientTimer = void 0;
             exports.now = now;
             exports.reqStartElapsed = reqStartElapsed;
@@ -481,9 +467,7 @@
         },
         "./node_modules/beaver-logger/client/transitions.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.startTransition = startTransition;
             exports.endTransition = endTransition;
             exports.transition = function(toState) {
@@ -526,9 +510,7 @@
         },
         "./node_modules/beaver-logger/client/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.windowReady = void 0;
             exports.extend = function(dest, src) {
                 var over = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
@@ -623,9 +605,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -646,9 +626,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _weakmap = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/weakmap.js");
             Object.defineProperty(exports, "WeakMap", {
                 enumerable: !0,
@@ -659,9 +637,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/native.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.hasNativeWeakMap = function() {
                 if (!window.WeakMap) return !1;
                 if (!window.Object.freeze) return !1;
@@ -677,9 +653,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.safeIndexOf = function(collection, item) {
                 for (var i = 0; i < collection.length; i++) try {
                     if (collection[i] === item) return i;
@@ -690,26 +664,9 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/weakmap.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CrossDomainSafeWeakMap = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _native = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/native.js"), _util = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/util.js");
+            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _native = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/native.js"), _util = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/util.js");
             var defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
             exports.CrossDomainSafeWeakMap = function() {
                 function CrossDomainSafeWeakMap() {
@@ -724,125 +681,110 @@
                     this.keys = [];
                     this.values = [];
                 }
-                _createClass(CrossDomainSafeWeakMap, [ {
-                    key: "_cleanupClosedWindows",
-                    value: function() {
-                        for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
-                            var value = keys[i];
-                            if ((0, _src.isWindow)(value) && (0, _src.isWindowClosed)(value)) {
-                                if (weakmap) try {
-                                    weakmap.delete(value);
-                                } catch (err) {}
-                                keys.splice(i, 1);
-                                this.values.splice(i, 1);
-                                i -= 1;
-                            }
+                CrossDomainSafeWeakMap.prototype._cleanupClosedWindows = function() {
+                    for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
+                        var value = keys[i];
+                        if ((0, _src.isWindow)(value) && (0, _src.isWindowClosed)(value)) {
+                            if (weakmap) try {
+                                weakmap.delete(value);
+                            } catch (err) {}
+                            keys.splice(i, 1);
+                            this.values.splice(i, 1);
+                            i -= 1;
                         }
                     }
-                }, {
-                    key: "isSafeToReadWrite",
-                    value: function(key) {
-                        if ((0, _src.isWindow)(key)) return !1;
-                        try {
-                            (0, _util.noop)(key && key.self);
-                            (0, _util.noop)(key && key[this.name]);
-                        } catch (err) {
-                            return !1;
-                        }
-                        return !0;
+                };
+                CrossDomainSafeWeakMap.prototype.isSafeToReadWrite = function(key) {
+                    if ((0, _src.isWindow)(key)) return !1;
+                    try {
+                        (0, _util.noop)(key && key.self);
+                        (0, _util.noop)(key && key[this.name]);
+                    } catch (err) {
+                        return !1;
                     }
-                }, {
-                    key: "set",
-                    value: function(key, value) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            weakmap.set(key, value);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var name = this.name, entry = key[name];
-                            entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
-                                value: [ key, value ],
-                                writable: !0
-                            });
-                        } else {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, values = this.values, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 === index) {
-                                keys.push(key);
-                                values.push(value);
-                            } else values[index] = value;
-                        }
+                    return !0;
+                };
+                CrossDomainSafeWeakMap.prototype.set = function(key, value) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.set(key, value);
+                    } catch (err) {
+                        delete this.weakmap;
                     }
-                }, {
-                    key: "get",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            if (weakmap.has(key)) return weakmap.get(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (!this.isSafeToReadWrite(key)) {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 === index) return;
-                            return this.values[index];
-                        }
-                        var entry = key[this.name];
-                        if (entry && entry[0] === key) return entry[1];
-                    }
-                }, {
-                    key: "delete",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            weakmap.delete(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var entry = key[this.name];
-                            entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                        } else {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 !== index) {
-                                keys.splice(index, 1);
-                                this.values.splice(index, 1);
-                            }
-                        }
-                    }
-                }, {
-                    key: "has",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            return weakmap.has(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var entry = key[this.name];
-                            return !(!entry || entry[0] !== key);
-                        }
+                    if (this.isSafeToReadWrite(key)) {
+                        var name = this.name, entry = key[name];
+                        entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                            value: [ key, value ],
+                            writable: !0
+                        });
+                    } else {
                         this._cleanupClosedWindows();
-                        return -1 !== (0, _util.safeIndexOf)(this.keys, key);
+                        var keys = this.keys, values = this.values, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 === index) {
+                            keys.push(key);
+                            values.push(value);
+                        } else values[index] = value;
                     }
-                } ]);
+                };
+                CrossDomainSafeWeakMap.prototype.get = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        if (weakmap.has(key)) return weakmap.get(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (!this.isSafeToReadWrite(key)) {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 === index) return;
+                        return this.values[index];
+                    }
+                    var entry = key[this.name];
+                    if (entry && entry[0] === key) return entry[1];
+                };
+                CrossDomainSafeWeakMap.prototype.delete = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.delete(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        entry && entry[0] === key && (entry[0] = entry[1] = void 0);
+                    } else {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 !== index) {
+                            keys.splice(index, 1);
+                            this.values.splice(index, 1);
+                        }
+                    }
+                };
+                CrossDomainSafeWeakMap.prototype.has = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        return weakmap.has(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        return !(!entry || entry[0] !== key);
+                    }
+                    this._cleanupClosedWindows();
+                    return -1 !== (0, _util.safeIndexOf)(this.keys, key);
+                };
                 return CrossDomainSafeWeakMap;
             }();
         },
         "./node_modules/cross-domain-utils/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _utils = __webpack_require__("./node_modules/cross-domain-utils/src/utils.js");
             Object.keys(_utils).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -867,9 +809,7 @@
         },
         "./node_modules/cross-domain-utils/src/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isRegex = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
@@ -877,9 +817,7 @@
         },
         "./node_modules/cross-domain-utils/src/utils.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isFileProtocol = function() {
                 return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.FILE_PROTOCOL;
             };
@@ -1783,9 +1721,7 @@
         },
         "./node_modules/post-robot/src/bridge/child.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.openTunnelToOpener = function() {
                 return _src.ZalgoPromise.try(function() {
                     var opener = (0, _src2.getOpener)(window);
@@ -1870,9 +1806,7 @@
         },
         "./node_modules/post-robot/src/bridge/common.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.documentBodyReady = void 0;
             exports.needsBridgeForBrowser = needsBridgeForBrowser;
             exports.needsBridgeForWin = needsBridgeForWin;
@@ -1952,9 +1886,7 @@
         },
         "./node_modules/post-robot/src/bridge/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _child = __webpack_require__("./node_modules/post-robot/src/bridge/child.js");
             Object.keys(_child).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1986,9 +1918,7 @@
         },
         "./node_modules/post-robot/src/bridge/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _index = __webpack_require__("./node_modules/post-robot/src/bridge/index.js");
             Object.defineProperty(exports, "openBridge", {
                 enumerable: !0,
@@ -2053,34 +1983,7 @@
         },
         "./node_modules/post-robot/src/bridge/parent.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
-            var _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }();
+            exports.__esModule = !0;
             exports.hasBridge = function(url, domain) {
                 domain = domain || (0, _src3.getDomainFromUrl)(url);
                 return Boolean(_global.global.bridges[domain]);
@@ -2188,9 +2091,9 @@
             window.open = function(url, name, options, last) {
                 var domain = url;
                 if (url && 0 === url.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) {
-                    var _url$split = url.split("|"), _url$split2 = _slicedToArray(_url$split, 2);
-                    domain = _url$split2[0];
-                    url = _url$split2[1];
+                    var _url$split = url.split("|");
+                    domain = _url$split[0];
+                    url = _url$split[1];
                 }
                 domain && (domain = (0, _src3.getDomainFromUrl)(domain));
                 var win = windowOpen.call(this, url, name, options, last);
@@ -2222,9 +2125,7 @@
         },
         "./node_modules/post-robot/src/clean.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.cleanUpWindow = function(win) {
                 var requestPromises = _global.global.requestPromises.get(win);
                 if (requestPromises) for (var _iterator = requestPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -2250,9 +2151,7 @@
         },
         "./node_modules/post-robot/src/compat/ie.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.emulateIERestrictions = function(sourceWindow, targetWindow) {
                 if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP && !1 === (0, _src.isSameTopWindow)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
             };
@@ -2260,9 +2159,7 @@
         },
         "./node_modules/post-robot/src/compat/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _ie = __webpack_require__("./node_modules/post-robot/src/compat/ie.js");
             Object.keys(_ie).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -2275,21 +2172,9 @@
         },
         "./node_modules/post-robot/src/conf/config.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONFIG = void 0;
-            var _ALLOWED_POST_MESSAGE, _constants = __webpack_require__("./node_modules/post-robot/src/conf/constants.js");
-            function _defineProperty(obj, key, value) {
-                key in obj ? Object.defineProperty(obj, key, {
-                    value: value,
-                    enumerable: !0,
-                    configurable: !0,
-                    writable: !0
-                }) : obj[key] = value;
-                return obj;
-            }
-            var CONFIG = exports.CONFIG = {
+            var _ALLOWED_POST_MESSAGE, _constants = __webpack_require__("./node_modules/post-robot/src/conf/constants.js"), CONFIG = exports.CONFIG = {
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 LOG_LEVEL: "info",
                 BRIDGE_TIMEOUT: 5e3,
@@ -2297,9 +2182,8 @@
                 ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
                 RES_TIMEOUT: -1,
                 LOG_TO_PAGE: !1,
-                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, !0), 
-                _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, !0), 
-                _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL, !0), 
+                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
+                _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
                 _ALLOWED_POST_MESSAGE),
                 ALLOW_SAME_ORIGIN: !1
             };
@@ -2307,9 +2191,7 @@
         },
         "./node_modules/post-robot/src/conf/constants.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONSTANTS = {
                 POST_MESSAGE_TYPE: {
                     REQUEST: "postrobot_message_request",
@@ -2362,9 +2244,7 @@
         },
         "./node_modules/post-robot/src/conf/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _config = __webpack_require__("./node_modules/post-robot/src/conf/config.js");
             Object.keys(_config).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -2386,9 +2266,7 @@
         },
         "./node_modules/post-robot/src/drivers/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _receive = __webpack_require__("./node_modules/post-robot/src/drivers/receive/index.js");
             Object.keys(_receive).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -2419,9 +2297,7 @@
         },
         "./node_modules/post-robot/src/drivers/listeners.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.resetListeners = function() {
                 _global.global.responseListeners = {};
                 _global.global.requestListeners = {};
@@ -2597,9 +2473,7 @@
         },
         "./node_modules/post-robot/src/drivers/receive/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -2665,9 +2539,7 @@
         },
         "./node_modules/post-robot/src/drivers/receive/types.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.RECEIVE_MESSAGE_TYPES = void 0;
             var _RECEIVE_MESSAGE_TYPE, _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -2676,23 +2548,14 @@
                 }
                 return target;
             }, _src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src2 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), _lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), _send = __webpack_require__("./node_modules/post-robot/src/drivers/send/index.js"), _listeners = __webpack_require__("./node_modules/post-robot/src/drivers/listeners.js");
-            function _defineProperty(obj, key, value) {
-                key in obj ? Object.defineProperty(obj, key, {
-                    value: value,
-                    enumerable: !0,
-                    configurable: !0,
-                    writable: !0
-                }) : obj[key] = value;
-                return obj;
-            }
-            exports.RECEIVE_MESSAGE_TYPES = (_defineProperty(_RECEIVE_MESSAGE_TYPE = {}, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
+            exports.RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[_conf.CONSTANTS.POST_MESSAGE_TYPE.ACK] = function(source, origin, message) {
                 if (!(0, _listeners.isResponseListenerErrored)(message.hash)) {
                     var options = (0, _listeners.getResponseListener)(message.hash);
                     if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                     if (!(0, _src2.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
                     options.ack = !0;
                 }
-            }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
                 var options = (0, _listeners.getRequestListener)({
                     name: message.name,
                     win: source,
@@ -2735,7 +2598,7 @@
                     if (options && options.handleError) return options.handleError(err);
                     _lib.log.error((0, _lib.stringifyError)(err));
                 });
-            }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
                 if (!(0, _listeners.isResponseListenerErrored)(message.hash)) {
                     var options = (0, _listeners.getResponseListener)(message.hash);
                     if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2756,13 +2619,11 @@
                         });
                     }
                 }
-            }), _RECEIVE_MESSAGE_TYPE);
+            }, _RECEIVE_MESSAGE_TYPE);
         },
         "./node_modules/post-robot/src/drivers/send/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
@@ -2772,6 +2633,7 @@
             };
             exports.sendMessage = function(win, message, domain) {
                 return _src2.ZalgoPromise.try(function() {
+                    var _jsonStringify;
                     message = function(win, message) {
                         var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = (0, 
                         _lib.uniqueID)(), type = (0, _lib.getWindowType)(), sourceDomain = (0, _src.getDomain)(window);
@@ -2790,15 +2652,8 @@
                     if (win === window && !_conf.CONFIG.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if ((0, _src.isWindowClosed)(win)) throw new Error("Window is closed");
                     _lib.log.debug("Running send message strategies", message);
-                    var messages = [], serializedMessage = (0, _lib.jsonStringify)(function(obj, key, value) {
-                        key in obj ? Object.defineProperty(obj, key, {
-                            value: value,
-                            enumerable: !0,
-                            configurable: !0,
-                            writable: !0
-                        }) : obj[key] = value;
-                        return obj;
-                    }({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), null, 2);
+                    var messages = [], serializedMessage = (0, _lib.jsonStringify)(((_jsonStringify = {})[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, 
+                    _jsonStringify), null, 2);
                     return _src2.ZalgoPromise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function(strategyName) {
                         return _src2.ZalgoPromise.try(function() {
                             if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
@@ -2821,9 +2676,7 @@
         },
         "./node_modules/post-robot/src/drivers/send/strategies.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.SEND_MESSAGE_STRATEGIES = void 0;
             var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
@@ -2867,18 +2720,14 @@
         },
         "./node_modules/post-robot/src/global.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.global = void 0;
             var _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js");
             (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
         },
         "./node_modules/post-robot/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./node_modules/post-robot/src/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -2899,9 +2748,7 @@
         },
         "./node_modules/post-robot/src/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.bridge = exports.Promise = exports.cleanUpWindow = void 0;
             var _public = __webpack_require__("./node_modules/post-robot/src/public/index.js");
             Object.keys(_public).forEach(function(key) {
@@ -2945,9 +2792,7 @@
         },
         "./node_modules/post-robot/src/lib/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _util = __webpack_require__("./node_modules/post-robot/src/lib/util.js");
             Object.keys(_util).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -2987,9 +2832,7 @@
         },
         "./node_modules/post-robot/src/lib/log.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.log = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -3075,9 +2918,7 @@
         },
         "./node_modules/post-robot/src/lib/ready.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.onHello = onHello;
             exports.sayHello = sayHello;
             exports.initOnReady = function() {
@@ -3129,9 +2970,7 @@
         },
         "./node_modules/post-robot/src/lib/serialize.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.listenForMethods = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -3275,9 +3114,7 @@
         },
         "./node_modules/post-robot/src/lib/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.weakMapMemoize = exports.once = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -3413,9 +3250,7 @@
         },
         "./node_modules/post-robot/src/public/client.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.send = void 0;
             exports.request = request;
             exports.sendToParent = function(name, data, options) {
@@ -3539,9 +3374,7 @@
         },
         "./node_modules/post-robot/src/public/config.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONSTANTS = exports.CONFIG = void 0;
             var _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js");
             Object.defineProperty(exports, "CONFIG", {
@@ -3564,9 +3397,7 @@
         },
         "./node_modules/post-robot/src/public/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.parent = void 0;
             var _client = __webpack_require__("./node_modules/post-robot/src/public/client.js");
             Object.keys(_client).forEach(function(key) {
@@ -3600,9 +3431,7 @@
         },
         "./node_modules/post-robot/src/public/server.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.on = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -3858,9 +3687,7 @@
         },
         "./node_modules/zalgo-promise/src/exceptions.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.dispatchPossiblyUnhandledError = function(err) {
                 if (-1 !== (0, _global.getGlobal)().dispatchedErrors.indexOf(err)) return;
                 (0, _global.getGlobal)().dispatchedErrors.push(err);
@@ -3883,9 +3710,7 @@
         "./node_modules/zalgo-promise/src/global.js": function(module, exports, __webpack_require__) {
             "use strict";
             (function(global) {
-                Object.defineProperty(exports, "__esModule", {
-                    value: !0
-                });
+                exports.__esModule = !0;
                 exports.getGlobal = function() {
                     var glob = void 0;
                     if ("undefined" != typeof window) glob = window; else {
@@ -3903,9 +3728,7 @@
         },
         "./node_modules/zalgo-promise/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _promise = __webpack_require__("./node_modules/zalgo-promise/src/promise.js");
             Object.defineProperty(exports, "ZalgoPromise", {
                 enumerable: !0,
@@ -3916,26 +3739,9 @@
         },
         "./node_modules/zalgo-promise/src/promise.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.ZalgoPromise = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _utils = __webpack_require__("./node_modules/zalgo-promise/src/utils.js"), _exceptions = __webpack_require__("./node_modules/zalgo-promise/src/exceptions.js"), _global = __webpack_require__("./node_modules/zalgo-promise/src/global.js");
+            var _utils = __webpack_require__("./node_modules/zalgo-promise/src/utils.js"), _exceptions = __webpack_require__("./node_modules/zalgo-promise/src/exceptions.js"), _global = __webpack_require__("./node_modules/zalgo-promise/src/global.js");
             var ZalgoPromise = function() {
                 function ZalgoPromise(handler) {
                     var _this = this;
@@ -3968,257 +3774,214 @@
                         resolved ? this.resolve(_result) : rejected && this.reject(_error);
                     }
                 }
-                _createClass(ZalgoPromise, [ {
-                    key: "resolve",
-                    value: function(result) {
-                        if (this.resolved || this.rejected) return this;
-                        if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
-                        this.resolved = !0;
-                        this.value = result;
-                        this.dispatch();
-                        return this;
+                ZalgoPromise.prototype.resolve = function(result) {
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
+                    this.resolved = !0;
+                    this.value = result;
+                    this.dispatch();
+                    return this;
+                };
+                ZalgoPromise.prototype.reject = function(error) {
+                    var _this2 = this;
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
+                    if (!error) {
+                        var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
+                        error = new Error("Expected reject to be called with Error, got " + _err);
                     }
-                }, {
-                    key: "reject",
-                    value: function(error) {
-                        var _this2 = this;
-                        if (this.resolved || this.rejected) return this;
-                        if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
-                        if (!error) {
-                            var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
-                            error = new Error("Expected reject to be called with Error, got " + _err);
-                        }
-                        this.rejected = !0;
-                        this.error = error;
-                        this.errorHandled || setTimeout(function() {
-                            _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
-                        }, 1);
-                        this.dispatch();
-                        return this;
-                    }
-                }, {
-                    key: "asyncReject",
-                    value: function(error) {
-                        this.errorHandled = !0;
-                        this.reject(error);
-                    }
-                }, {
-                    key: "dispatch",
-                    value: function() {
-                        var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
-                        if (!dispatching && (resolved || rejected)) {
-                            this.dispatching = !0;
-                            (0, _global.getGlobal)().activeCount += 1;
-                            for (var _loop = function(i) {
-                                var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
-                                if (resolved) try {
-                                    result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                    this.rejected = !0;
+                    this.error = error;
+                    this.errorHandled || setTimeout(function() {
+                        _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
+                    }, 1);
+                    this.dispatch();
+                    return this;
+                };
+                ZalgoPromise.prototype.asyncReject = function(error) {
+                    this.errorHandled = !0;
+                    this.reject(error);
+                };
+                ZalgoPromise.prototype.dispatch = function() {
+                    var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
+                    if (!dispatching && (resolved || rejected)) {
+                        this.dispatching = !0;
+                        (0, _global.getGlobal)().activeCount += 1;
+                        for (var _loop = function(i) {
+                            var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
+                            if (resolved) try {
+                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                            } catch (err) {
+                                promise.reject(err);
+                                return "continue";
+                            } else if (rejected) {
+                                if (!onError) {
+                                    promise.reject(_this3.error);
+                                    return "continue";
+                                }
+                                try {
+                                    result = onError(_this3.error);
                                 } catch (err) {
                                     promise.reject(err);
                                     return "continue";
-                                } else if (rejected) {
-                                    if (!onError) {
-                                        promise.reject(_this3.error);
-                                        return "continue";
-                                    }
-                                    try {
-                                        result = onError(_this3.error);
-                                    } catch (err) {
-                                        promise.reject(err);
-                                        return "continue";
-                                    }
                                 }
-                                if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
-                                    result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
-                                    result.errorHandled = !0;
-                                } else (0, _utils.isPromise)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
-                                    promise.resolve(res);
-                                }, function(err) {
-                                    promise.reject(err);
-                                }) : promise.resolve(result);
-                            }, i = 0; i < handlers.length; i++) _loop(i);
-                            handlers.length = 0;
-                            this.dispatching = !1;
-                            (0, _global.getGlobal)().activeCount -= 1;
-                            0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
-                        }
+                            }
+                            if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
+                                result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
+                                result.errorHandled = !0;
+                            } else (0, _utils.isPromise)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
+                                promise.resolve(res);
+                            }, function(err) {
+                                promise.reject(err);
+                            }) : promise.resolve(result);
+                        }, i = 0; i < handlers.length; i++) _loop(i);
+                        handlers.length = 0;
+                        this.dispatching = !1;
+                        (0, _global.getGlobal)().activeCount -= 1;
+                        0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
                     }
-                }, {
-                    key: "then",
-                    value: function(onSuccess, onError) {
-                        if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
-                        if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
-                        var promise = new ZalgoPromise();
-                        this.handlers.push({
-                            promise: promise,
-                            onSuccess: onSuccess,
-                            onError: onError
-                        });
-                        this.errorHandled = !0;
-                        this.dispatch();
-                        return promise;
-                    }
-                }, {
-                    key: "catch",
-                    value: function(onError) {
-                        return this.then(void 0, onError);
-                    }
-                }, {
-                    key: "finally",
-                    value: function(handler) {
-                        return this.then(function(result) {
-                            return ZalgoPromise.try(handler).then(function() {
-                                return result;
-                            });
-                        }, function(err) {
-                            return ZalgoPromise.try(handler).then(function() {
-                                throw err;
-                            });
-                        });
-                    }
-                }, {
-                    key: "timeout",
-                    value: function(time, err) {
-                        var _this4 = this;
-                        if (this.resolved || this.rejected) return this;
-                        var timeout = setTimeout(function() {
-                            _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
-                        }, time);
-                        return this.then(function(result) {
-                            clearTimeout(timeout);
+                };
+                ZalgoPromise.prototype.then = function(onSuccess, onError) {
+                    if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
+                    if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
+                    var promise = new ZalgoPromise();
+                    this.handlers.push({
+                        promise: promise,
+                        onSuccess: onSuccess,
+                        onError: onError
+                    });
+                    this.errorHandled = !0;
+                    this.dispatch();
+                    return promise;
+                };
+                ZalgoPromise.prototype.catch = function(onError) {
+                    return this.then(void 0, onError);
+                };
+                ZalgoPromise.prototype.finally = function(handler) {
+                    return this.then(function(result) {
+                        return ZalgoPromise.try(handler).then(function() {
                             return result;
                         });
+                    }, function(err) {
+                        return ZalgoPromise.try(handler).then(function() {
+                            throw err;
+                        });
+                    });
+                };
+                ZalgoPromise.prototype.timeout = function(time, err) {
+                    var _this4 = this;
+                    if (this.resolved || this.rejected) return this;
+                    var timeout = setTimeout(function() {
+                        _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
+                    }, time);
+                    return this.then(function(result) {
+                        clearTimeout(timeout);
+                        return result;
+                    });
+                };
+                ZalgoPromise.prototype.toPromise = function() {
+                    if ("undefined" == typeof Promise) throw new TypeError("Could not find Promise");
+                    return Promise.resolve(this);
+                };
+                ZalgoPromise.resolve = function(value) {
+                    return value instanceof ZalgoPromise ? value : (0, _utils.isPromise)(value) ? new ZalgoPromise(function(resolve, reject) {
+                        return value.then(resolve, reject);
+                    }) : new ZalgoPromise().resolve(value);
+                };
+                ZalgoPromise.reject = function(error) {
+                    return new ZalgoPromise().reject(error);
+                };
+                ZalgoPromise.all = function(promises) {
+                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    if (!count) {
+                        promise.resolve(results);
+                        return promise;
                     }
-                }, {
-                    key: "toPromise",
-                    value: function() {
-                        if ("undefined" == typeof Promise) throw new TypeError("Could not find Promise");
-                        return Promise.resolve(this);
-                    }
-                } ], [ {
-                    key: "resolve",
-                    value: function(value) {
-                        return value instanceof ZalgoPromise ? value : (0, _utils.isPromise)(value) ? new ZalgoPromise(function(resolve, reject) {
-                            return value.then(resolve, reject);
-                        }) : new ZalgoPromise().resolve(value);
-                    }
-                }, {
-                    key: "reject",
-                    value: function(error) {
-                        return new ZalgoPromise().reject(error);
-                    }
-                }, {
-                    key: "all",
-                    value: function(promises) {
-                        var promise = new ZalgoPromise(), count = promises.length, results = [];
-                        if (!count) {
-                            promise.resolve(results);
-                            return promise;
-                        }
-                        for (var _loop2 = function(i) {
-                            var prom = promises[i];
-                            if (prom instanceof ZalgoPromise) {
-                                if (prom.resolved) {
-                                    results[i] = prom.value;
-                                    count -= 1;
-                                    return "continue";
-                                }
-                            } else if (!(0, _utils.isPromise)(prom)) {
-                                results[i] = prom;
+                    for (var _loop2 = function(i) {
+                        var prom = promises[i];
+                        if (prom instanceof ZalgoPromise) {
+                            if (prom.resolved) {
+                                results[i] = prom.value;
                                 count -= 1;
                                 return "continue";
                             }
-                            ZalgoPromise.resolve(prom).then(function(result) {
-                                results[i] = result;
-                                0 === (count -= 1) && promise.resolve(results);
-                            }, function(err) {
-                                promise.reject(err);
-                            });
-                        }, i = 0; i < promises.length; i++) _loop2(i);
-                        0 === count && promise.resolve(results);
-                        return promise;
-                    }
-                }, {
-                    key: "hash",
-                    value: function(promises) {
-                        var result = {};
-                        return ZalgoPromise.all(Object.keys(promises).map(function(key) {
-                            return ZalgoPromise.resolve(promises[key]).then(function(value) {
-                                result[key] = value;
-                            });
-                        })).then(function() {
-                            return result;
-                        });
-                    }
-                }, {
-                    key: "map",
-                    value: function(items, method) {
-                        return ZalgoPromise.all(items.map(method));
-                    }
-                }, {
-                    key: "onPossiblyUnhandledException",
-                    value: function(handler) {
-                        return (0, _exceptions.onPossiblyUnhandledException)(handler);
-                    }
-                }, {
-                    key: "try",
-                    value: function(method, context, args) {
-                        var result = void 0;
-                        try {
-                            result = method.apply(context, args || []);
-                        } catch (err) {
-                            return ZalgoPromise.reject(err);
+                        } else if (!(0, _utils.isPromise)(prom)) {
+                            results[i] = prom;
+                            count -= 1;
+                            return "continue";
                         }
-                        return ZalgoPromise.resolve(result);
-                    }
-                }, {
-                    key: "delay",
-                    value: function(_delay) {
-                        return new ZalgoPromise(function(resolve) {
-                            setTimeout(resolve, _delay);
+                        ZalgoPromise.resolve(prom).then(function(result) {
+                            results[i] = result;
+                            0 === (count -= 1) && promise.resolve(results);
+                        }, function(err) {
+                            promise.reject(err);
                         });
+                    }, i = 0; i < promises.length; i++) _loop2(i);
+                    0 === count && promise.resolve(results);
+                    return promise;
+                };
+                ZalgoPromise.hash = function(promises) {
+                    var result = {};
+                    return ZalgoPromise.all(Object.keys(promises).map(function(key) {
+                        return ZalgoPromise.resolve(promises[key]).then(function(value) {
+                            result[key] = value;
+                        });
+                    })).then(function() {
+                        return result;
+                    });
+                };
+                ZalgoPromise.map = function(items, method) {
+                    return ZalgoPromise.all(items.map(method));
+                };
+                ZalgoPromise.onPossiblyUnhandledException = function(handler) {
+                    return (0, _exceptions.onPossiblyUnhandledException)(handler);
+                };
+                ZalgoPromise.try = function(method, context, args) {
+                    var result = void 0;
+                    try {
+                        result = method.apply(context, args || []);
+                    } catch (err) {
+                        return ZalgoPromise.reject(err);
                     }
-                }, {
-                    key: "isPromise",
-                    value: function(value) {
-                        return !!(value && value instanceof ZalgoPromise) || (0, _utils.isPromise)(value);
-                    }
-                }, {
-                    key: "flush",
-                    value: function() {
-                        var promise = new ZalgoPromise();
-                        (0, _global.getGlobal)().flushPromises.push(promise);
-                        0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
-                        return promise;
-                    }
-                }, {
-                    key: "flushQueue",
-                    value: function() {
-                        var promisesToFlush = (0, _global.getGlobal)().flushPromises;
-                        (0, _global.getGlobal)().flushPromises = [];
-                        var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0;
-                        for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                            var _ref;
-                            if (_isArray) {
-                                if (_i >= _iterator.length) break;
-                                _ref = _iterator[_i++];
-                            } else {
-                                if ((_i = _iterator.next()).done) break;
-                                _ref = _i.value;
-                            }
-                            _ref.resolve();
+                    return ZalgoPromise.resolve(result);
+                };
+                ZalgoPromise.delay = function(_delay) {
+                    return new ZalgoPromise(function(resolve) {
+                        setTimeout(resolve, _delay);
+                    });
+                };
+                ZalgoPromise.isPromise = function(value) {
+                    return !!(value && value instanceof ZalgoPromise) || (0, _utils.isPromise)(value);
+                };
+                ZalgoPromise.flush = function() {
+                    var promise = new ZalgoPromise();
+                    (0, _global.getGlobal)().flushPromises.push(promise);
+                    0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
+                    return promise;
+                };
+                ZalgoPromise.flushQueue = function() {
+                    var promisesToFlush = (0, _global.getGlobal)().flushPromises;
+                    (0, _global.getGlobal)().flushPromises = [];
+                    var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0;
+                    for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref;
+                        if (_isArray) {
+                            if (_i >= _iterator.length) break;
+                            _ref = _iterator[_i++];
+                        } else {
+                            if ((_i = _iterator.next()).done) break;
+                            _ref = _i.value;
                         }
+                        _ref.resolve();
                     }
-                } ]);
+                };
                 return ZalgoPromise;
             }();
             exports.ZalgoPromise = ZalgoPromise;
         },
         "./node_modules/zalgo-promise/src/utils.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isPromise = function(item) {
                 try {
                     if (!item) return !1;
@@ -4239,26 +4002,9 @@
         },
         "./src/component/base.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.BaseComponent = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src2 = __webpack_require__("./node_modules/post-robot/src/index.js");
+            var _src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src2 = __webpack_require__("./node_modules/post-robot/src/index.js");
             __webpack_require__("./node_modules/cross-domain-utils/src/index.js");
             var _lib = __webpack_require__("./src/lib/index.js");
             exports.BaseComponent = function() {
@@ -4323,82 +4069,69 @@
                     var obj, tasks, cleaned;
                     this.event = (0, _lib.eventEmitter)();
                 }
-                _createClass(BaseComponent, [ {
-                    key: "addProp",
-                    value: function(options, name, def) {
-                        (0, _lib.copyProp)(options, this, name, def);
-                    }
-                }, {
-                    key: "on",
-                    value: function(eventName, handler) {
-                        return this.event.on(eventName, handler);
-                    }
-                }, {
-                    key: "listeners",
-                    value: function() {
-                        throw new Error("Expected listeners to be implemented");
-                    }
-                }, {
-                    key: "error",
-                    value: function(err) {
-                        throw new Error("Expected error to be implemented - got " + (0, _lib.stringifyError)(err));
-                    }
-                }, {
-                    key: "listen",
-                    value: function(win, domain) {
-                        var _this = this;
-                        if (!win) throw this.component.createError("window to listen to not set");
-                        if (!domain) throw new Error("Must pass domain to listen to");
-                        if (this.listeners) {
-                            var listeners = this.listeners(), _loop = function() {
-                                if (_isArray2) {
-                                    if (_i2 >= _iterator2.length) return "break";
-                                    _ref2 = _iterator2[_i2++];
-                                } else {
-                                    if ((_i2 = _iterator2.next()).done) return "break";
-                                    _ref2 = _i2.value;
-                                }
-                                var listenerName = _ref2, name = listenerName.replace(/^zoid_/, ""), errorHandler = function(err) {
-                                    _this.error(err);
-                                }, listener = (0, _src2.on)(listenerName, {
-                                    window: win,
-                                    domain: domain,
-                                    errorHandler: errorHandler
-                                }, function(_ref3) {
-                                    var source = _ref3.source, data = _ref3.data;
-                                    _this.component.log("listener_" + name);
-                                    return listeners[listenerName].call(_this, source, data);
-                                }), errorListener = (0, _src2.on)(listenerName, {
-                                    window: win,
-                                    errorHandler: errorHandler
-                                }, function(_ref4) {
-                                    var origin = _ref4.origin;
-                                    _this.component.logError("unexpected_listener_" + name, {
-                                        origin: origin,
-                                        domain: domain.toString()
-                                    });
-                                    _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain.toString()));
-                                });
-                                _this.clean.register(function() {
-                                    listener.cancel();
-                                    errorListener.cancel();
-                                });
-                            }, _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
-                            for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                                var _ref2;
-                                if ("break" === _loop()) break;
+                BaseComponent.prototype.addProp = function(options, name, def) {
+                    (0, _lib.copyProp)(options, this, name, def);
+                };
+                BaseComponent.prototype.on = function(eventName, handler) {
+                    return this.event.on(eventName, handler);
+                };
+                BaseComponent.prototype.listeners = function() {
+                    throw new Error("Expected listeners to be implemented");
+                };
+                BaseComponent.prototype.error = function(err) {
+                    throw new Error("Expected error to be implemented - got " + (0, _lib.stringifyError)(err));
+                };
+                BaseComponent.prototype.listen = function(win, domain) {
+                    var _this = this;
+                    if (!win) throw this.component.createError("window to listen to not set");
+                    if (!domain) throw new Error("Must pass domain to listen to");
+                    if (this.listeners) {
+                        var listeners = this.listeners(), _loop = function() {
+                            if (_isArray2) {
+                                if (_i2 >= _iterator2.length) return "break";
+                                _ref2 = _iterator2[_i2++];
+                            } else {
+                                if ((_i2 = _iterator2.next()).done) return "break";
+                                _ref2 = _i2.value;
                             }
+                            var listenerName = _ref2, name = listenerName.replace(/^zoid_/, ""), errorHandler = function(err) {
+                                _this.error(err);
+                            }, listener = (0, _src2.on)(listenerName, {
+                                window: win,
+                                domain: domain,
+                                errorHandler: errorHandler
+                            }, function(_ref3) {
+                                var source = _ref3.source, data = _ref3.data;
+                                _this.component.log("listener_" + name);
+                                return listeners[listenerName].call(_this, source, data);
+                            }), errorListener = (0, _src2.on)(listenerName, {
+                                window: win,
+                                errorHandler: errorHandler
+                            }, function(_ref4) {
+                                var origin = _ref4.origin;
+                                _this.component.logError("unexpected_listener_" + name, {
+                                    origin: origin,
+                                    domain: domain.toString()
+                                });
+                                _this.error(new Error("Unexpected " + name + " message from domain " + origin + " -- expected message from " + domain.toString()));
+                            });
+                            _this.clean.register(function() {
+                                listener.cancel();
+                                errorListener.cancel();
+                            });
+                        }, _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
+                        for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                            var _ref2;
+                            if ("break" === _loop()) break;
                         }
                     }
-                } ]);
+                };
                 return BaseComponent;
             }();
         },
         "./src/component/child/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.ChildComponent = void 0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -4410,46 +4143,7 @@
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }(), _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _client = __webpack_require__("./node_modules/beaver-logger/client/index.js"), _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _src2 = __webpack_require__("./node_modules/post-robot/src/index.js"), _src3 = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _base = __webpack_require__("./src/component/base.js"), _window = __webpack_require__("./src/component/window.js"), _lib = __webpack_require__("./src/lib/index.js"), _constants = __webpack_require__("./src/constants.js"), _error = __webpack_require__("./src/error.js"), _props = __webpack_require__("./src/component/child/props.js");
+            }, _client = __webpack_require__("./node_modules/beaver-logger/client/index.js"), _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _src2 = __webpack_require__("./node_modules/post-robot/src/index.js"), _src3 = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _base = __webpack_require__("./src/component/base.js"), _window = __webpack_require__("./src/component/window.js"), _lib = __webpack_require__("./src/lib/index.js"), _constants = __webpack_require__("./src/constants.js"), _error = __webpack_require__("./src/error.js"), _props = __webpack_require__("./src/component/child/props.js");
             function _possibleConstructorReturn(self, call) {
                 if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                 return !call || "object" != typeof call && "function" != typeof call ? self : call;
@@ -4466,12 +4160,12 @@
                         }
                     });
                     superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(ChildComponent, _base.BaseComponent);
+                }(ChildComponent, _BaseComponent);
                 function ChildComponent(component) {
                     !function(instance, Constructor) {
                         if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
                     }(this, ChildComponent);
-                    var _this = _possibleConstructorReturn(this, (ChildComponent.__proto__ || Object.getPrototypeOf(ChildComponent)).call(this));
+                    var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
                     _this.component = component;
                     if (!_this.hasValidParentDomain()) {
                         _this.error(new _error.RenderError("Can not be rendered by domain: " + _this.getParentDomain()));
@@ -4485,7 +4179,7 @@
                         } ], [ "xprops", function() {
                             return _this.props;
                         } ] ], _loop2 = function() {
-                            var _arr2$_i = _slicedToArray(_arr2[_i2], 2), name = _arr2$_i[0], getter = _arr2$_i[1];
+                            var _arr2$_i = _arr2[_i2], name = _arr2$_i[0], getter = _arr2$_i[1];
                             Object.defineProperty(item, name, {
                                 configurable: !0,
                                 get: function() {
@@ -4514,314 +4208,259 @@
                     });
                     return _this;
                 }
-                _createClass(ChildComponent, [ {
-                    key: "listenForResize",
-                    value: function() {
-                        var _this2 = this;
-                        if (this.component.listenForResize) {
-                            this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
+                ChildComponent.prototype.listenForResize = function() {
+                    var _this2 = this;
+                    if (this.component.listenForResize) {
+                        this.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
+                            fireAndForget: !0
+                        });
+                        window.addEventListener("resize", function() {
+                            _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
                                 fireAndForget: !0
                             });
-                            window.addEventListener("resize", function() {
-                                _this2.sendToParent(_constants.POST_MESSAGE.ONRESIZE, {}, {
-                                    fireAndForget: !0
-                                });
-                            });
-                        }
-                    }
-                }, {
-                    key: "hasValidParentDomain",
-                    value: function() {
-                        return (0, _src.matchDomain)(this.component.allowedParentDomains, this.getParentDomain());
-                    }
-                }, {
-                    key: "init",
-                    value: function() {
-                        return this.onInit;
-                    }
-                }, {
-                    key: "getParentDomain",
-                    value: function() {
-                        return (0, _window.getParentDomain)();
-                    }
-                }, {
-                    key: "onProps",
-                    value: function(handler) {
-                        this.onPropHandlers.push(handler);
-                    }
-                }, {
-                    key: "getParentComponentWindow",
-                    value: function() {
-                        return (0, _window.getParentComponentWindow)();
-                    }
-                }, {
-                    key: "getParentRenderWindow",
-                    value: function() {
-                        return (0, _window.getParentRenderWindow)();
-                    }
-                }, {
-                    key: "getInitialProps",
-                    value: function() {
-                        var _this3 = this, componentMeta = (0, _window.getComponentMeta)(), props = componentMeta.props;
-                        if (props.type === _constants.INITIAL_PROPS.RAW) props = props.value; else {
-                            if (props.type !== _constants.INITIAL_PROPS.UID) throw new Error("Unrecognized props type: " + props.type);
-                            var parentComponentWindow = (0, _window.getParentComponentWindow)();
-                            if (!(0, _src.isSameDomain)(parentComponentWindow)) {
-                                if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
-                                throw new Error("Parent component window is on a different domain - expected " + (0, 
-                                _src.getDomain)() + " - can not retrieve props");
-                            }
-                            var global = (0, _lib.globalFor)(parentComponentWindow);
-                            if (!global) throw new Error("Can not find global for parent component - can not retrieve props");
-                            props = JSON.parse(global.props[componentMeta.uid]);
-                        }
-                        if (!props) throw new Error("Initial props not found");
-                        return (0, _lib.deserializeFunctions)(props, function(_ref2) {
-                            var fullKey = _ref2.fullKey, self = _ref2.self, args = _ref2.args;
-                            return _this3.onInit.then(function() {
-                                var func = (0, _lib.get)(_this3.props, fullKey);
-                                if ("function" != typeof func) throw new TypeError("Expected " + fullKey + " to be function, got " + (void 0 === func ? "undefined" : _typeof(func)));
-                                return func.apply(self, args);
-                            });
                         });
                     }
-                }, {
-                    key: "setProps",
-                    value: function(props, origin) {
-                        var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
-                        this.props = this.props || {};
-                        var normalizedProps = (0, _props.normalizeChildProps)(this.component, props, origin, required);
-                        (0, _lib.extend)(this.props, normalizedProps);
-                        this.props.logLevel && (0, _lib.setLogLevel)(this.props.logLevel);
-                        var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i3 = 0;
-                        for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                            var _ref3;
-                            if (_isArray) {
-                                if (_i3 >= _iterator.length) break;
-                                _ref3 = _iterator[_i3++];
-                            } else {
-                                if ((_i3 = _iterator.next()).done) break;
-                                _ref3 = _i3.value;
-                            }
-                            _ref3.call(this, this.props);
+                };
+                ChildComponent.prototype.hasValidParentDomain = function() {
+                    return (0, _src.matchDomain)(this.component.allowedParentDomains, this.getParentDomain());
+                };
+                ChildComponent.prototype.init = function() {
+                    return this.onInit;
+                };
+                ChildComponent.prototype.getParentDomain = function() {
+                    return (0, _window.getParentDomain)();
+                };
+                ChildComponent.prototype.onProps = function(handler) {
+                    this.onPropHandlers.push(handler);
+                };
+                ChildComponent.prototype.getParentComponentWindow = function() {
+                    return (0, _window.getParentComponentWindow)();
+                };
+                ChildComponent.prototype.getParentRenderWindow = function() {
+                    return (0, _window.getParentRenderWindow)();
+                };
+                ChildComponent.prototype.getInitialProps = function() {
+                    var _this3 = this, componentMeta = (0, _window.getComponentMeta)(), props = componentMeta.props;
+                    if (props.type === _constants.INITIAL_PROPS.RAW) props = props.value; else {
+                        if (props.type !== _constants.INITIAL_PROPS.UID) throw new Error("Unrecognized props type: " + props.type);
+                        var parentComponentWindow = (0, _window.getParentComponentWindow)();
+                        if (!(0, _src.isSameDomain)(parentComponentWindow)) {
+                            if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
+                            throw new Error("Parent component window is on a different domain - expected " + (0, 
+                            _src.getDomain)() + " - can not retrieve props");
                         }
+                        var global = (0, _lib.globalFor)(parentComponentWindow);
+                        if (!global) throw new Error("Can not find global for parent component - can not retrieve props");
+                        props = JSON.parse(global.props[componentMeta.uid]);
                     }
-                }, {
-                    key: "sendToParent",
-                    value: function(name) {
-                        var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, parentWindow = (0, 
-                        _window.getParentComponentWindow)();
-                        if (!parentWindow) throw new Error("Can not find parent component window to message");
-                        this.component.log("send_to_parent_" + name);
-                        return (0, _src2.send)(parentWindow, name, data, _extends({
-                            domain: (0, _window.getParentDomain)()
-                        }, options));
-                    }
-                }, {
-                    key: "setWindows",
-                    value: function() {
-                        if (window.__activeZoidComponent__) throw this.component.createError("Can not attach multiple components to the same window");
-                        window.__activeZoidComponent__ = this;
-                        if (!(0, _window.getParentComponentWindow)()) throw this.component.createError("Can not find parent window");
-                        var componentMeta = (0, _window.getComponentMeta)();
-                        if (componentMeta.tag !== this.component.tag) throw this.component.createError("Parent is " + componentMeta.tag + " - can not attach " + this.component.tag);
-                        this.watchForClose();
-                    }
-                }, {
-                    key: "watchForClose",
-                    value: function() {
-                        var _this4 = this;
-                        window.addEventListener("unload", function() {
-                            return _this4.checkClose();
+                    if (!props) throw new Error("Initial props not found");
+                    return (0, _lib.deserializeFunctions)(props, function(_ref2) {
+                        var fullKey = _ref2.fullKey, self = _ref2.self, args = _ref2.args;
+                        return _this3.onInit.then(function() {
+                            var func = (0, _lib.get)(_this3.props, fullKey);
+                            if ("function" != typeof func) throw new TypeError("Expected " + fullKey + " to be function, got " + (void 0 === func ? "undefined" : _typeof(func)));
+                            return func.apply(self, args);
                         });
-                    }
-                }, {
-                    key: "enableAutoResize",
-                    value: function() {
-                        var _ref4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref4$width = _ref4.width, width = void 0 === _ref4$width || _ref4$width, _ref4$height = _ref4.height, height = void 0 === _ref4$height || _ref4$height;
-                        this.autoResize = {
-                            width: width,
-                            height: height
-                        };
-                        this.watchForResize();
-                    }
-                }, {
-                    key: "getAutoResize",
-                    value: function() {
-                        var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
-                        if ("object" === (void 0 === autoResize ? "undefined" : _typeof(autoResize))) {
-                            width = Boolean(autoResize.width);
-                            height = Boolean(autoResize.height);
-                        } else if (autoResize) {
-                            width = !0;
-                            height = !0;
+                    });
+                };
+                ChildComponent.prototype.setProps = function(props, origin) {
+                    var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
+                    this.props = this.props || {};
+                    var normalizedProps = (0, _props.normalizeChildProps)(this.component, props, origin, required);
+                    (0, _lib.extend)(this.props, normalizedProps);
+                    this.props.logLevel && (0, _lib.setLogLevel)(this.props.logLevel);
+                    var _iterator = this.onPropHandlers, _isArray = Array.isArray(_iterator), _i3 = 0;
+                    for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref3;
+                        if (_isArray) {
+                            if (_i3 >= _iterator.length) break;
+                            _ref3 = _iterator[_i3++];
+                        } else {
+                            if ((_i3 = _iterator.next()).done) break;
+                            _ref3 = _i3.value;
                         }
-                        return {
-                            width: width,
-                            height: height,
-                            element: autoResize.element ? (0, _lib.getElement)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement
-                        };
+                        _ref3.call(this, this.props);
                     }
-                }, {
-                    key: "watchForResize",
-                    value: function() {
-                        var _this5 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                        if ((width || height) && this.context !== _constants.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
-                            this.watchingForResize = !0;
-                            return _src3.ZalgoPromise.try(function() {
-                                return _lib.documentReady;
-                            }).then(function() {
-                                if (!(0, _lib.dimensionsMatchViewport)(element, {
+                };
+                ChildComponent.prototype.sendToParent = function(name) {
+                    var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, parentWindow = (0, 
+                    _window.getParentComponentWindow)();
+                    if (!parentWindow) throw new Error("Can not find parent component window to message");
+                    this.component.log("send_to_parent_" + name);
+                    return (0, _src2.send)(parentWindow, name, data, _extends({
+                        domain: (0, _window.getParentDomain)()
+                    }, options));
+                };
+                ChildComponent.prototype.setWindows = function() {
+                    if (window.__activeZoidComponent__) throw this.component.createError("Can not attach multiple components to the same window");
+                    window.__activeZoidComponent__ = this;
+                    if (!(0, _window.getParentComponentWindow)()) throw this.component.createError("Can not find parent window");
+                    var componentMeta = (0, _window.getComponentMeta)();
+                    if (componentMeta.tag !== this.component.tag) throw this.component.createError("Parent is " + componentMeta.tag + " - can not attach " + this.component.tag);
+                    this.watchForClose();
+                };
+                ChildComponent.prototype.watchForClose = function() {
+                    var _this4 = this;
+                    window.addEventListener("unload", function() {
+                        return _this4.checkClose();
+                    });
+                };
+                ChildComponent.prototype.enableAutoResize = function() {
+                    var _ref4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref4$width = _ref4.width, width = void 0 === _ref4$width || _ref4$width, _ref4$height = _ref4.height, height = void 0 === _ref4$height || _ref4$height;
+                    this.autoResize = {
+                        width: width,
+                        height: height
+                    };
+                    this.watchForResize();
+                };
+                ChildComponent.prototype.getAutoResize = function() {
+                    var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
+                    if ("object" === (void 0 === autoResize ? "undefined" : _typeof(autoResize))) {
+                        width = Boolean(autoResize.width);
+                        height = Boolean(autoResize.height);
+                    } else if (autoResize) {
+                        width = !0;
+                        height = !0;
+                    }
+                    return {
+                        width: width,
+                        height: height,
+                        element: autoResize.element ? (0, _lib.getElement)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement
+                    };
+                };
+                ChildComponent.prototype.watchForResize = function() {
+                    var _this5 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
+                    if ((width || height) && this.context !== _constants.CONTEXT_TYPES.POPUP && !this.watchingForResize) {
+                        this.watchingForResize = !0;
+                        return _src3.ZalgoPromise.try(function() {
+                            return _lib.documentReady;
+                        }).then(function() {
+                            if (!(0, _lib.dimensionsMatchViewport)(element, {
+                                width: width,
+                                height: height
+                            })) return _this5.resizeToElement(element, {
+                                width: width,
+                                height: height
+                            });
+                        }).then(function() {
+                            return (0, _lib.cycle)(function() {
+                                return (0, _lib.onDimensionsChange)(element, {
                                     width: width,
                                     height: height
-                                })) return _this5.resizeToElement(element, {
-                                    width: width,
-                                    height: height
-                                });
-                            }).then(function() {
-                                return (0, _lib.cycle)(function() {
-                                    return (0, _lib.onDimensionsChange)(element, {
+                                }).then(function() {
+                                    return _this5.resizeToElement(element, {
                                         width: width,
                                         height: height
-                                    }).then(function() {
-                                        return _this5.resizeToElement(element, {
-                                            width: width,
-                                            height: height
-                                        });
                                     });
                                 });
                             });
-                        }
+                        });
                     }
-                }, {
-                    key: "exports",
-                    value: function() {
-                        var self = this;
-                        return {
-                            updateProps: function(props) {
-                                var _this6 = this;
-                                return _src3.ZalgoPromise.try(function() {
-                                    return self.setProps(props, _this6.origin, !1);
-                                });
-                            },
-                            close: function() {
-                                return _src3.ZalgoPromise.try(function() {
-                                    return self.destroy();
-                                });
-                            }
-                        };
-                    }
-                }, {
-                    key: "resize",
-                    value: function(width, height) {
-                        var _this7 = this;
-                        return _src3.ZalgoPromise.resolve().then(function() {
-                            _this7.component.log("resize", {
-                                width: (0, _lib.stringify)(width),
-                                height: (0, _lib.stringify)(height)
+                };
+                ChildComponent.prototype.exports = function() {
+                    var self = this;
+                    return {
+                        updateProps: function(props) {
+                            var _this6 = this;
+                            return _src3.ZalgoPromise.try(function() {
+                                return self.setProps(props, _this6.origin, !1);
                             });
-                            if (_this7.context !== _constants.CONTEXT_TYPES.POPUP) return _this7.sendToParent(_constants.POST_MESSAGE.RESIZE, {
+                        },
+                        close: function() {
+                            return _src3.ZalgoPromise.try(function() {
+                                return self.destroy();
+                            });
+                        }
+                    };
+                };
+                ChildComponent.prototype.resize = function(width, height) {
+                    var _this7 = this;
+                    return _src3.ZalgoPromise.resolve().then(function() {
+                        _this7.component.log("resize", {
+                            width: (0, _lib.stringify)(width),
+                            height: (0, _lib.stringify)(height)
+                        });
+                        if (_this7.context !== _constants.CONTEXT_TYPES.POPUP) return _this7.sendToParent(_constants.POST_MESSAGE.RESIZE, {
+                            width: width,
+                            height: height
+                        }).then(_lib.noop);
+                    });
+                };
+                ChildComponent.prototype.resizeToElement = function(el, _ref5) {
+                    var _this8 = this, width = _ref5.width, height = _ref5.height, history = [];
+                    return function resize() {
+                        return _src3.ZalgoPromise.try(function() {
+                            var tracker = (0, _lib.trackDimensions)(el, {
                                 width: width,
                                 height: height
-                            }).then(_lib.noop);
-                        });
-                    }
-                }, {
-                    key: "resizeToElement",
-                    value: function(el, _ref5) {
-                        var _this8 = this, width = _ref5.width, height = _ref5.height, history = [];
-                        return function resize() {
-                            return _src3.ZalgoPromise.try(function() {
-                                var tracker = (0, _lib.trackDimensions)(el, {
-                                    width: width,
-                                    height: height
-                                }), dimensions = tracker.check().dimensions, _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i4 = 0;
-                                for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                                    var _ref6;
-                                    if (_isArray2) {
-                                        if (_i4 >= _iterator2.length) break;
-                                        _ref6 = _iterator2[_i4++];
-                                    } else {
-                                        if ((_i4 = _iterator2.next()).done) break;
-                                        _ref6 = _i4.value;
-                                    }
-                                    var size = _ref6, widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
-                                    if (widthMatch && heightMatch) return;
+                            }), dimensions = tracker.check().dimensions, _iterator2 = history, _isArray2 = Array.isArray(_iterator2), _i4 = 0;
+                            for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                                var _ref6;
+                                if (_isArray2) {
+                                    if (_i4 >= _iterator2.length) break;
+                                    _ref6 = _iterator2[_i4++];
+                                } else {
+                                    if ((_i4 = _iterator2.next()).done) break;
+                                    _ref6 = _i4.value;
                                 }
-                                history.push({
-                                    width: dimensions.width,
-                                    height: dimensions.height
-                                });
-                                return _this8.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
-                                    if (tracker.check().changed) return resize();
-                                });
+                                var size = _ref6, widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
+                                if (widthMatch && heightMatch) return;
+                            }
+                            history.push({
+                                width: dimensions.width,
+                                height: dimensions.height
                             });
-                        }();
-                    }
-                }, {
-                    key: "hide",
-                    value: function() {
-                        return this.sendToParent(_constants.POST_MESSAGE.HIDE).then(_lib.noop);
-                    }
-                }, {
-                    key: "show",
-                    value: function() {
-                        return this.sendToParent(_constants.POST_MESSAGE.SHOW).then(_lib.noop);
-                    }
-                }, {
-                    key: "userClose",
-                    value: function() {
-                        return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
-                    }
-                }, {
-                    key: "close",
-                    value: function() {
-                        var reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.CHILD_CALL;
-                        this.component.log("close_child");
-                        this.sendToParent(_constants.POST_MESSAGE.CLOSE, {
-                            reason: reason
+                            return _this8.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
+                                if (tracker.check().changed) return resize();
+                            });
                         });
-                    }
-                }, {
-                    key: "checkClose",
-                    value: function() {
-                        this.sendToParent(_constants.POST_MESSAGE.CHECK_CLOSE, {}, {
-                            fireAndForget: !0
-                        });
-                    }
-                }, {
-                    key: "destroy",
-                    value: function() {
-                        return (0, _client.flush)().then(function() {
-                            window.close();
-                        });
-                    }
-                }, {
-                    key: "focus",
-                    value: function() {
-                        this.component.log("focus");
-                        window.focus();
-                    }
-                }, {
-                    key: "error",
-                    value: function(err) {
-                        var stringifiedError = (0, _lib.stringifyError)(err);
-                        this.component.logError("error", {
-                            error: stringifiedError
-                        });
-                        return this.sendToParent(_constants.POST_MESSAGE.ERROR, {
-                            error: stringifiedError
-                        }).then(_lib.noop);
-                    }
-                } ]);
+                    }();
+                };
+                ChildComponent.prototype.hide = function() {
+                    return this.sendToParent(_constants.POST_MESSAGE.HIDE).then(_lib.noop);
+                };
+                ChildComponent.prototype.show = function() {
+                    return this.sendToParent(_constants.POST_MESSAGE.SHOW).then(_lib.noop);
+                };
+                ChildComponent.prototype.userClose = function() {
+                    return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
+                };
+                ChildComponent.prototype.close = function() {
+                    var reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.CHILD_CALL;
+                    this.component.log("close_child");
+                    this.sendToParent(_constants.POST_MESSAGE.CLOSE, {
+                        reason: reason
+                    });
+                };
+                ChildComponent.prototype.checkClose = function() {
+                    this.sendToParent(_constants.POST_MESSAGE.CHECK_CLOSE, {}, {
+                        fireAndForget: !0
+                    });
+                };
+                ChildComponent.prototype.destroy = function() {
+                    return (0, _client.flush)().then(function() {
+                        window.close();
+                    });
+                };
+                ChildComponent.prototype.focus = function() {
+                    this.component.log("focus");
+                    window.focus();
+                };
+                ChildComponent.prototype.error = function(err) {
+                    var stringifiedError = (0, _lib.stringifyError)(err);
+                    this.component.logError("error", {
+                        error: stringifiedError
+                    });
+                    return this.sendToParent(_constants.POST_MESSAGE.ERROR, {
+                        error: stringifiedError
+                    }).then(_lib.noop);
+                };
                 return ChildComponent;
-            }();
+            }(_base.BaseComponent);
         },
         "./src/component/child/props.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.normalizeChildProp = normalizeChildProp;
             exports.normalizeChildProps = function(component, props, origin) {
                 for (var required = !(arguments.length > 3 && void 0 !== arguments[3]) || arguments[3], result = {}, _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -4861,30 +4500,13 @@
         },
         "./src/component/component/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.Component = void 0;
             var _class, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _src = __webpack_require__("./node_modules/post-robot/src/index.js"), _src2 = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src3 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _base = __webpack_require__("./src/component/base.js"), _child = __webpack_require__("./src/component/child/index.js"), _parent = __webpack_require__("./src/component/parent/index.js"), _delegate = __webpack_require__("./src/component/delegate/index.js"), _window = __webpack_require__("./src/component/window.js"), _constants = __webpack_require__("./src/constants.js"), _index = __webpack_require__("./src/drivers/index.js"), _lib = __webpack_require__("./src/lib/index.js"), _validate = __webpack_require__("./src/component/component/validate.js"), _templates = __webpack_require__("./src/component/component/templates/index.js"), _props = __webpack_require__("./src/component/component/props.js");
+            }, _src = __webpack_require__("./node_modules/post-robot/src/index.js"), _src2 = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src3 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _base = __webpack_require__("./src/component/base.js"), _child = __webpack_require__("./src/component/child/index.js"), _parent = __webpack_require__("./src/component/parent/index.js"), _delegate = __webpack_require__("./src/component/delegate/index.js"), _window = __webpack_require__("./src/component/window.js"), _constants = __webpack_require__("./src/constants.js"), _index = __webpack_require__("./src/drivers/index.js"), _lib = __webpack_require__("./src/lib/index.js"), _validate = __webpack_require__("./src/component/component/validate.js"), _templates = __webpack_require__("./src/component/component/templates/index.js"), _props = __webpack_require__("./src/component/component/props.js");
             var drivers = {
                 angular: _index.angular,
                 angular2: _index.angular2,
@@ -4924,7 +4546,7 @@
                         }
                     });
                     superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(Component, _base.BaseComponent);
+                }(Component, _BaseComponent);
                 function Component(options) {
                     !function(instance, Constructor) {
                         if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
@@ -4932,7 +4554,7 @@
                     var _this = function(self, call) {
                         if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                    }(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
+                    }(this, _BaseComponent.call(this));
                     (0, _validate.validate)(options);
                     _this.addProp(options, "tag");
                     _this.addProp(options, "defaultLogLevel", "info");
@@ -4970,319 +4592,252 @@
                     _this.listenDelegate();
                     return _this;
                 }
-                _createClass(Component, [ {
-                    key: "getPropNames",
-                    value: function() {
-                        var props = Object.keys(this.props), _iterator = Object.keys(this.builtinProps), _isArray = Array.isArray(_iterator), _i = 0;
-                        for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                            var _ref;
-                            if (_isArray) {
-                                if (_i >= _iterator.length) break;
-                                _ref = _iterator[_i++];
-                            } else {
-                                if ((_i = _iterator.next()).done) break;
-                                _ref = _i.value;
-                            }
-                            var key = _ref;
-                            -1 === props.indexOf(key) && props.push(key);
+                Component.prototype.getPropNames = function() {
+                    var props = Object.keys(this.props), _iterator = Object.keys(this.builtinProps), _isArray = Array.isArray(_iterator), _i = 0;
+                    for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref;
+                        if (_isArray) {
+                            if (_i >= _iterator.length) break;
+                            _ref = _iterator[_i++];
+                        } else {
+                            if ((_i = _iterator.next()).done) break;
+                            _ref = _i.value;
                         }
-                        return props;
+                        var key = _ref;
+                        -1 === props.indexOf(key) && props.push(key);
                     }
-                }, {
-                    key: "getProp",
-                    value: function(name) {
-                        return this.props[name] || this.builtinProps[name];
-                    }
-                }, {
-                    key: "registerDrivers",
-                    value: function() {
-                        this.driverCache = {};
-                        var _iterator2 = Object.keys(drivers), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
-                        for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                            var _ref2;
-                            if (_isArray2) {
-                                if (_i2 >= _iterator2.length) break;
-                                _ref2 = _iterator2[_i2++];
-                            } else {
-                                if ((_i2 = _iterator2.next()).done) break;
-                                _ref2 = _i2.value;
-                            }
-                            var driverName = _ref2;
-                            if (0 !== driverName.indexOf("_")) {
-                                var glob = drivers[driverName].global();
-                                glob && this.driver(driverName, glob);
-                            }
+                    return props;
+                };
+                Component.prototype.getProp = function(name) {
+                    return this.props[name] || this.builtinProps[name];
+                };
+                Component.prototype.registerDrivers = function() {
+                    this.driverCache = {};
+                    var _iterator2 = Object.keys(drivers), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
+                    for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                        var _ref2;
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) break;
+                            _ref2 = _iterator2[_i2++];
+                        } else {
+                            if ((_i2 = _iterator2.next()).done) break;
+                            _ref2 = _i2.value;
+                        }
+                        var driverName = _ref2;
+                        if (0 !== driverName.indexOf("_")) {
+                            var glob = drivers[driverName].global();
+                            glob && this.driver(driverName, glob);
                         }
                     }
-                }, {
-                    key: "driver",
-                    value: function(name, dep) {
-                        if (!drivers[name]) throw new Error("Could not find driver for framework: " + name);
-                        this.driverCache[name] || (this.driverCache[name] = drivers[name].register(this, dep));
-                        return this.driverCache[name];
-                    }
-                }, {
-                    key: "registerChild",
-                    value: function() {
-                        var _this2 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            if (_this2.isChild()) return new _child.ChildComponent(_this2);
-                        });
-                    }
-                }, {
-                    key: "listenDelegate",
-                    value: function() {
-                        var _this3 = this;
-                        (0, _src.on)(_constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name, function() {
-                            return !0;
-                        });
-                        (0, _src.on)(_constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
-                            var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
-                            if (!domain) throw new Error("Could not determine domain to allow remote render");
-                            if (!(0, _src3.matchDomain)(domain, origin)) throw new Error("Can not render from " + origin + " - expected " + domain.toString());
-                            var delegate = _this3.delegate(source, data.options);
-                            return {
-                                overrides: delegate.getOverrides(data.context),
-                                destroy: function() {
-                                    return delegate.destroy();
-                                }
-                            };
-                        });
-                    }
-                }, {
-                    key: "canRenderTo",
-                    value: function(win) {
-                        return (0, _src.send)(win, _constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name).then(function(_ref4) {
-                            return _ref4.data;
-                        }).catch(function() {
-                            return !1;
-                        });
-                    }
-                }, {
-                    key: "getValidDomain",
-                    value: function(url) {
-                        if (url) {
-                            var domain = (0, _src3.getDomainFromUrl)(url);
-                            if ("string" == typeof this.domain && domain === this.domain) return domain;
-                            var domains = this.domain;
-                            if (domains && "object" === (void 0 === domains ? "undefined" : _typeof(domains)) && !(domains instanceof RegExp)) {
-                                var _iterator3 = Object.keys(domains), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
-                                for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                    var _ref5;
-                                    if (_isArray3) {
-                                        if (_i3 >= _iterator3.length) break;
-                                        _ref5 = _iterator3[_i3++];
-                                    } else {
-                                        if ((_i3 = _iterator3.next()).done) break;
-                                        _ref5 = _i3.value;
-                                    }
-                                    if ("test" !== _ref5 && domain === domains[_ref5]) return domain;
-                                }
-                            }
-                        }
-                    }
-                }, {
-                    key: "getDomain",
-                    value: function(url, env) {
-                        var domain = this.getForEnv(this.domain, env);
-                        if (domain) return domain;
-                        if (domain = this.getValidDomain(url)) return domain;
-                        var envUrl = this.getForEnv(this.url, env);
-                        return envUrl ? (0, _src3.getDomainFromUrl)(envUrl) : url ? (0, _src3.getDomainFromUrl)(url) : void 0;
-                    }
-                }, {
-                    key: "getBridgeUrl",
-                    value: function(env) {
-                        return this.getForEnv(this.bridgeUrl, env);
-                    }
-                }, {
-                    key: "getForEnv",
-                    value: function(item, env) {
-                        if (item) {
-                            if ("string" == typeof item || item instanceof RegExp) return item;
-                            env || (env = this.defaultEnv);
-                            if (env) return env && "object" === (void 0 === item ? "undefined" : _typeof(item)) && item[env] ? item[env] : void 0;
-                        }
-                    }
-                }, {
-                    key: "getBridgeDomain",
-                    value: function(env) {
-                        var bridgeDomain = this.getForEnv(this.bridgeDomain, env);
-                        if (bridgeDomain) return bridgeDomain;
-                        var bridgeUrl = this.getBridgeUrl(env);
-                        return bridgeUrl ? (0, _src3.getDomainFromUrl)(bridgeUrl) : void 0;
-                    }
-                }, {
-                    key: "getUrl",
-                    value: function(env, props) {
-                        var url = this.getForEnv(this.url, env);
-                        if (url) return url;
-                        if (this.buildUrl) return this.buildUrl(props);
-                        throw new Error("Unable to get url");
-                    }
-                }, {
-                    key: "isZoidComponent",
-                    value: function() {
-                        return (0, _window.isZoidComponentWindow)();
-                    }
-                }, {
-                    key: "isChild",
-                    value: function() {
-                        return (0, _window.isZoidComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
-                    }
-                }, {
-                    key: "createError",
-                    value: function(message, tag) {
-                        return new Error("[" + (tag || this.tag) + "] " + message);
-                    }
-                }, {
-                    key: "init",
-                    value: function(props, context, element) {
-                        return new _parent.ParentComponent(this, this.getRenderContext(context, element), {
-                            props: props
-                        });
-                    }
-                }, {
-                    key: "delegate",
-                    value: function(source, options) {
-                        return new _delegate.DelegateComponent(this, source, options);
-                    }
-                }, {
-                    key: "validateRenderContext",
-                    value: function(context, element) {
-                        if (context && !this.contexts[context]) throw new Error("[" + this.tag + "] Can not render to " + context);
-                        if (!element && context === _constants.CONTEXT_TYPES.IFRAME) throw new Error("[" + this.tag + "] Context type " + _constants.CONTEXT_TYPES.IFRAME + " requires an element selector");
-                    }
-                }, {
-                    key: "getDefaultContext",
-                    value: function() {
-                        if (this.defaultContext) return this.defaultContext;
-                        if (this.contexts[_constants.CONTEXT_TYPES.IFRAME]) return _constants.CONTEXT_TYPES.IFRAME;
-                        if (this.contexts[_constants.CONTEXT_TYPES.POPUP]) return _constants.CONTEXT_TYPES.POPUP;
-                        throw new Error("Can not determine default context");
-                    }
-                }, {
-                    key: "getRenderContext",
-                    value: function(context, element) {
-                        context = context || this.getDefaultContext();
-                        this.validateRenderContext(context, element);
-                        return context;
-                    }
-                }, {
-                    key: "render",
-                    value: function(props, element) {
-                        var _this4 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this4, _this4.getRenderContext(null, element), {
-                                props: props
-                            }).render(element);
-                        });
-                    }
-                }, {
-                    key: "renderIframe",
-                    value: function(props, element) {
-                        var _this5 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this5, _this5.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), {
-                                props: props
-                            }).render(element);
-                        });
-                    }
-                }, {
-                    key: "renderPopup",
-                    value: function(props) {
-                        var _this6 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this6, _this6.getRenderContext(_constants.CONTEXT_TYPES.POPUP), {
-                                props: props
-                            }).render();
-                        });
-                    }
-                }, {
-                    key: "renderTo",
-                    value: function(win, props, element) {
-                        var _this7 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this7, _this7.getRenderContext(null, element), {
-                                props: props
-                            }).renderTo(win, element);
-                        });
-                    }
-                }, {
-                    key: "renderIframeTo",
-                    value: function(win, props, element) {
-                        var _this8 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this8, _this8.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), {
-                                props: props
-                            }).renderTo(win, element);
-                        });
-                    }
-                }, {
-                    key: "renderPopupTo",
-                    value: function(win, props) {
-                        var _this9 = this;
-                        return _src2.ZalgoPromise.try(function() {
-                            return new _parent.ParentComponent(_this9, _this9.getRenderContext(_constants.CONTEXT_TYPES.POPUP), {
-                                props: props
-                            }).renderTo(win);
-                        });
-                    }
-                }, {
-                    key: "prerender",
-                    value: function(props, element) {
-                        var instance = new _parent.ParentComponent(this, this.getRenderContext(null, element), {
-                            props: props
-                        });
-                        instance.prefetch();
+                };
+                Component.prototype.driver = function(name, dep) {
+                    if (!drivers[name]) throw new Error("Could not find driver for framework: " + name);
+                    this.driverCache[name] || (this.driverCache[name] = drivers[name].register(this, dep));
+                    return this.driverCache[name];
+                };
+                Component.prototype.registerChild = function() {
+                    var _this2 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        if (_this2.isChild()) return new _child.ChildComponent(_this2);
+                    });
+                };
+                Component.prototype.listenDelegate = function() {
+                    var _this3 = this;
+                    (0, _src.on)(_constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name, function() {
+                        return !0;
+                    });
+                    (0, _src.on)(_constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref3) {
+                        var source = _ref3.source, origin = _ref3.origin, data = _ref3.data, domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
+                        if (!domain) throw new Error("Could not determine domain to allow remote render");
+                        if (!(0, _src3.matchDomain)(domain, origin)) throw new Error("Can not render from " + origin + " - expected " + domain.toString());
+                        var delegate = _this3.delegate(source, data.options);
                         return {
-                            render: function(innerProps, innerElement) {
-                                innerProps && instance.updateProps(innerProps);
-                                return instance.render(innerElement);
-                            },
-                            renderTo: function(win, innerProps, innerElement) {
-                                innerProps && instance.updateProps(innerProps);
-                                return instance.renderTo(win, innerElement);
-                            },
-                            get html() {
-                                return instance.html;
-                            },
-                            set html(value) {
-                                instance.html = value;
+                            overrides: delegate.getOverrides(data.context),
+                            destroy: function() {
+                                return delegate.destroy();
                             }
                         };
+                    });
+                };
+                Component.prototype.canRenderTo = function(win) {
+                    return (0, _src.send)(win, _constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name).then(function(_ref4) {
+                        return _ref4.data;
+                    }).catch(function() {
+                        return !1;
+                    });
+                };
+                Component.prototype.getValidDomain = function(url) {
+                    if (url) {
+                        var domain = (0, _src3.getDomainFromUrl)(url);
+                        if ("string" == typeof this.domain && domain === this.domain) return domain;
+                        var domains = this.domain;
+                        if (domains && "object" === (void 0 === domains ? "undefined" : _typeof(domains)) && !(domains instanceof RegExp)) {
+                            var _iterator3 = Object.keys(domains), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
+                            for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                                var _ref5;
+                                if (_isArray3) {
+                                    if (_i3 >= _iterator3.length) break;
+                                    _ref5 = _iterator3[_i3++];
+                                } else {
+                                    if ((_i3 = _iterator3.next()).done) break;
+                                    _ref5 = _i3.value;
+                                }
+                                if ("test" !== _ref5 && domain === domains[_ref5]) return domain;
+                            }
+                        }
                     }
-                }, {
-                    key: "log",
-                    value: function(event) {
-                        var payload = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                        (0, _lib.info)(this.name, event, payload);
+                };
+                Component.prototype.getDomain = function(url, env) {
+                    var domain = this.getForEnv(this.domain, env);
+                    if (domain) return domain;
+                    if (domain = this.getValidDomain(url)) return domain;
+                    var envUrl = this.getForEnv(this.url, env);
+                    return envUrl ? (0, _src3.getDomainFromUrl)(envUrl) : url ? (0, _src3.getDomainFromUrl)(url) : void 0;
+                };
+                Component.prototype.getBridgeUrl = function(env) {
+                    return this.getForEnv(this.bridgeUrl, env);
+                };
+                Component.prototype.getForEnv = function(item, env) {
+                    if (item) {
+                        if ("string" == typeof item || item instanceof RegExp) return item;
+                        env || (env = this.defaultEnv);
+                        if (env) return env && "object" === (void 0 === item ? "undefined" : _typeof(item)) && item[env] ? item[env] : void 0;
                     }
-                }, {
-                    key: "logWarning",
-                    value: function(event, payload) {
-                        (0, _lib.warn)(this.name, event, payload);
-                    }
-                }, {
-                    key: "logError",
-                    value: function(event, payload) {
-                        (0, _lib.error)(this.name, event, payload);
-                    }
-                } ], [ {
-                    key: "getByTag",
-                    value: function(tag) {
-                        return Component.components[tag];
-                    }
-                } ]);
+                };
+                Component.prototype.getBridgeDomain = function(env) {
+                    var bridgeDomain = this.getForEnv(this.bridgeDomain, env);
+                    if (bridgeDomain) return bridgeDomain;
+                    var bridgeUrl = this.getBridgeUrl(env);
+                    return bridgeUrl ? (0, _src3.getDomainFromUrl)(bridgeUrl) : void 0;
+                };
+                Component.prototype.getUrl = function(env, props) {
+                    var url = this.getForEnv(this.url, env);
+                    if (url) return url;
+                    if (this.buildUrl) return this.buildUrl(props);
+                    throw new Error("Unable to get url");
+                };
+                Component.prototype.isZoidComponent = function() {
+                    return (0, _window.isZoidComponentWindow)();
+                };
+                Component.prototype.isChild = function() {
+                    return (0, _window.isZoidComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
+                };
+                Component.prototype.createError = function(message, tag) {
+                    return new Error("[" + (tag || this.tag) + "] " + message);
+                };
+                Component.prototype.init = function(props, context, element) {
+                    return new _parent.ParentComponent(this, this.getRenderContext(context, element), {
+                        props: props
+                    });
+                };
+                Component.prototype.delegate = function(source, options) {
+                    return new _delegate.DelegateComponent(this, source, options);
+                };
+                Component.prototype.validateRenderContext = function(context, element) {
+                    if (context && !this.contexts[context]) throw new Error("[" + this.tag + "] Can not render to " + context);
+                    if (!element && context === _constants.CONTEXT_TYPES.IFRAME) throw new Error("[" + this.tag + "] Context type " + _constants.CONTEXT_TYPES.IFRAME + " requires an element selector");
+                };
+                Component.prototype.getDefaultContext = function() {
+                    if (this.defaultContext) return this.defaultContext;
+                    if (this.contexts[_constants.CONTEXT_TYPES.IFRAME]) return _constants.CONTEXT_TYPES.IFRAME;
+                    if (this.contexts[_constants.CONTEXT_TYPES.POPUP]) return _constants.CONTEXT_TYPES.POPUP;
+                    throw new Error("Can not determine default context");
+                };
+                Component.prototype.getRenderContext = function(context, element) {
+                    context = context || this.getDefaultContext();
+                    this.validateRenderContext(context, element);
+                    return context;
+                };
+                Component.prototype.render = function(props, element) {
+                    var _this4 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this4, _this4.getRenderContext(null, element), {
+                            props: props
+                        }).render(element);
+                    });
+                };
+                Component.prototype.renderIframe = function(props, element) {
+                    var _this5 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this5, _this5.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), {
+                            props: props
+                        }).render(element);
+                    });
+                };
+                Component.prototype.renderPopup = function(props) {
+                    var _this6 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this6, _this6.getRenderContext(_constants.CONTEXT_TYPES.POPUP), {
+                            props: props
+                        }).render();
+                    });
+                };
+                Component.prototype.renderTo = function(win, props, element) {
+                    var _this7 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this7, _this7.getRenderContext(null, element), {
+                            props: props
+                        }).renderTo(win, element);
+                    });
+                };
+                Component.prototype.renderIframeTo = function(win, props, element) {
+                    var _this8 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this8, _this8.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), {
+                            props: props
+                        }).renderTo(win, element);
+                    });
+                };
+                Component.prototype.renderPopupTo = function(win, props) {
+                    var _this9 = this;
+                    return _src2.ZalgoPromise.try(function() {
+                        return new _parent.ParentComponent(_this9, _this9.getRenderContext(_constants.CONTEXT_TYPES.POPUP), {
+                            props: props
+                        }).renderTo(win);
+                    });
+                };
+                Component.prototype.prerender = function(props, element) {
+                    var instance = new _parent.ParentComponent(this, this.getRenderContext(null, element), {
+                        props: props
+                    });
+                    instance.prefetch();
+                    return {
+                        render: function(innerProps, innerElement) {
+                            innerProps && instance.updateProps(innerProps);
+                            return instance.render(innerElement);
+                        },
+                        renderTo: function(win, innerProps, innerElement) {
+                            innerProps && instance.updateProps(innerProps);
+                            return instance.renderTo(win, innerElement);
+                        },
+                        get html() {
+                            return instance.html;
+                        },
+                        set html(value) {
+                            instance.html = value;
+                        }
+                    };
+                };
+                Component.prototype.log = function(event) {
+                    var payload = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                    (0, _lib.info)(this.name, event, payload);
+                };
+                Component.prototype.logWarning = function(event, payload) {
+                    (0, _lib.warn)(this.name, event, payload);
+                };
+                Component.prototype.logError = function(event, payload) {
+                    (0, _lib.error)(this.name, event, payload);
+                };
+                Component.getByTag = function(tag) {
+                    return Component.components[tag];
+                };
                 return Component;
-            }()).prototype, "getPropNames", [ _lib.memoize ], Object.getOwnPropertyDescriptor(_class.prototype, "getPropNames"), _class.prototype), 
+            }(_base.BaseComponent)).prototype, "getPropNames", [ _lib.memoize ], Object.getOwnPropertyDescriptor(_class.prototype, "getPropNames"), _class.prototype), 
             _class)).components = {};
         },
         "./src/component/component/props.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.getInternalProps = function() {
                 return {
                     env: {
@@ -5396,9 +4951,7 @@
         },
         "./src/component/component/templates/component.jsx": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.defaultPrerenderTemplate = function(_ref) {
                 var jsxDom = _ref.jsxDom;
                 return jsxDom("html", null, jsxDom("head", null, jsxDom("style", null, "\n                        html, body {\n                            width: 100%;\n                            height: 100%;\n                            overflow: hidden;\n                            top: 0;\n                            left: 0;\n                            margin: 0;\n                            text-align: center;\n                        }\n\n                        .spinner {\n                            position: absolute;\n                            max-height: 60vmin;\n                            max-width: 60vmin;\n                            height: 40px;\n                            width: 40px;\n                            top: 50%;\n                            left: 50%;\n                            transform: translateX(-50%) translateY(-50%);\n                            z-index: 10;\n                        }\n\n                        .spinner .loader {\n                            height: 100%;\n                            width: 100%;\n                            box-sizing: border-box;\n                            border: 3px solid rgba(0, 0, 0, .2);\n                            border-top-color: rgba(33, 128, 192, 0.8);\n                            border-radius: 100%;\n                            animation: rotation .7s infinite linear;\n\n                        }\n\n                        @keyframes rotation {\n                            from {\n                                transform: rotate(0deg)\n                            }\n                            to {\n                                transform: rotate(359deg)\n                            }\n                        }\n                    ")), jsxDom("body", null, jsxDom("div", {
@@ -5412,9 +4965,7 @@
         },
         "./src/component/component/templates/container.jsx": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.defaultContainerTemplate = function(_ref) {
                 var id = _ref.id, tag = _ref.tag, context = _ref.context, CLASS = _ref.CLASS, outlet = _ref.outlet, jsxDom = _ref.jsxDom, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
                 return jsxDom("div", {
@@ -5426,9 +4977,7 @@
         },
         "./src/component/component/templates/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _container = __webpack_require__("./src/component/component/templates/container.jsx");
             Object.keys(_container).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -5450,9 +4999,7 @@
         },
         "./src/component/component/validate.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -5532,9 +5079,7 @@
         },
         "./src/component/delegate/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.DelegateComponent = void 0;
             var _createClass = function() {
                 function defineProperties(target, props) {
@@ -5565,7 +5110,7 @@
                         }
                     });
                     superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(DelegateComponent, _base.BaseComponent);
+                }(DelegateComponent, _BaseComponent);
                 function DelegateComponent(component, source, options) {
                     !function(instance, Constructor) {
                         if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
@@ -5573,7 +5118,7 @@
                     var _this = function(self, call) {
                         if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                    }(this, (DelegateComponent.__proto__ || Object.getPrototypeOf(DelegateComponent)).call(this));
+                    }(this, _BaseComponent.call(this));
                     _this.component = component;
                     _this.clean.set("source", source);
                     _this.context = options.context;
@@ -5624,42 +5169,36 @@
                     _this.watchForClose();
                     return _this;
                 }
-                _createClass(DelegateComponent, [ {
-                    key: "watchForClose",
-                    value: function() {
-                        var _this2 = this, closeWindowListener = (0, _src.onCloseWindow)(this.source, function() {
-                            return _this2.destroy();
-                        }, 3e3);
-                        this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
-                    }
-                }, {
-                    key: "getOverrides",
-                    value: function(context) {
-                        var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function() {
-                            if (_isArray3) {
-                                if (_i3 >= _iterator3.length) return "break";
-                                _ref3 = _iterator3[_i3++];
-                            } else {
-                                if ((_i3 = _iterator3.next()).done) return "break";
-                                _ref3 = _i3.value;
-                            }
-                            var key = _ref3;
-                            overrides[key] = function() {
-                                return _parent.ParentComponent.prototype[key].apply(self, arguments);
-                            };
-                        }, _iterator3 = Object.keys(delegateOverrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
-                        for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                            var _ref3;
-                            if ("break" === _loop()) break;
+                DelegateComponent.prototype.watchForClose = function() {
+                    var _this2 = this, closeWindowListener = (0, _src.onCloseWindow)(this.source, function() {
+                        return _this2.destroy();
+                    }, 3e3);
+                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                };
+                DelegateComponent.prototype.getOverrides = function(context) {
+                    var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function() {
+                        if (_isArray3) {
+                            if (_i3 >= _iterator3.length) return "break";
+                            _ref3 = _iterator3[_i3++];
+                        } else {
+                            if ((_i3 = _iterator3.next()).done) return "break";
+                            _ref3 = _i3.value;
                         }
-                        return overrides;
+                        var key = _ref3;
+                        overrides[key] = function() {
+                            return _parent.ParentComponent.prototype[key].apply(self, arguments);
+                        };
+                    }, _iterator3 = Object.keys(delegateOverrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
+                    for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                        var _ref3;
+                        if ("break" === _loop()) break;
                     }
-                }, {
-                    key: "destroy",
-                    value: function() {
-                        return this.clean.all();
-                    }
-                }, {
+                    return overrides;
+                };
+                DelegateComponent.prototype.destroy = function() {
+                    return this.clean.all();
+                };
+                _createClass(DelegateComponent, [ {
                     key: "driver",
                     get: function() {
                         if (!this.context) throw new Error("Context not set");
@@ -5667,13 +5206,11 @@
                     }
                 } ]);
                 return DelegateComponent;
-            }();
+            }(_base.BaseComponent);
         },
         "./src/component/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _component = __webpack_require__("./src/component/component/index.js");
             Object.keys(_component).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -5704,9 +5241,7 @@
         },
         "./src/component/parent/drivers.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.RENDER_DRIVERS = void 0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -5917,9 +5452,7 @@
         },
         "./src/component/parent/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.ParentComponent = void 0;
             var _class, _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -5931,31 +5464,7 @@
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }(), _createClass = function() {
+            }, _createClass = function() {
                 function defineProperties(target, props) {
                     for (var i = 0; i < props.length; i++) {
                         var descriptor = props[i];
@@ -5971,15 +5480,6 @@
                     return Constructor;
                 };
             }(), _client = __webpack_require__("./node_modules/beaver-logger/client/index.js"), _src = __webpack_require__("./node_modules/post-robot/src/index.js"), _src2 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _src3 = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _base = __webpack_require__("./src/component/base.js"), _window = __webpack_require__("./src/component/window.js"), _lib = __webpack_require__("./src/lib/index.js"), _constants = __webpack_require__("./src/constants.js"), _error = __webpack_require__("./src/error.js"), _drivers = __webpack_require__("./src/component/parent/drivers.js"), _validate = __webpack_require__("./src/component/parent/validate.js"), _props = __webpack_require__("./src/component/parent/props.js");
-            function _defineProperty(obj, key, value) {
-                key in obj ? Object.defineProperty(obj, key, {
-                    value: value,
-                    enumerable: !0,
-                    configurable: !0,
-                    writable: !0
-                }) : obj[key] = value;
-                return obj;
-            }
             function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
                 var desc = {};
                 Object.keys(descriptor).forEach(function(key) {
@@ -6015,7 +5515,7 @@
                         }
                     });
                     superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(ParentComponent, _base.BaseComponent);
+                }(ParentComponent, _BaseComponent);
                 function ParentComponent(component, context, _ref) {
                     var props = _ref.props;
                     !function(instance, Constructor) {
@@ -6024,7 +5524,7 @@
                     var _this = function(self, call) {
                         if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                    }(this, (ParentComponent.__proto__ || Object.getPrototypeOf(ParentComponent)).call(this));
+                    }(this, _BaseComponent.call(this));
                     _this.component = component;
                     _this.validateParentDomain();
                     _this.context = context;
@@ -6042,833 +5542,732 @@
                     });
                     return _this;
                 }
-                _createClass(ParentComponent, [ {
-                    key: "render",
-                    value: function(element) {
-                        var _this2 = this, loadUrl = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
-                        return this.tryInit(function() {
-                            _this2.component.log("render_" + _this2.context, {
-                                context: _this2.context,
-                                element: element,
-                                loadUrl: (0, _lib.stringify)(loadUrl)
-                            });
-                            var tasks = {};
-                            tasks.onRender = _this2.props.onRender();
-                            tasks.getDomain = _this2.getDomain();
-                            tasks.elementReady = _src3.ZalgoPromise.try(function() {
-                                if (element) return _this2.elementReady(element);
-                            });
-                            tasks.openContainer = tasks.elementReady.then(function() {
-                                return _this2.openContainer(element);
-                            });
-                            tasks.showContainer = tasks.openContainer.then(function() {
-                                return _this2.showContainer();
-                            });
-                            tasks.openPrerender = tasks.openContainer.then(function() {
-                                return _this2.openPrerender();
-                            });
-                            tasks.switchPrerender = _src3.ZalgoPromise.all([ tasks.openPrerender, _this2.onInit ]).then(function() {
-                                return _this2.switchPrerender();
-                            });
-                            tasks.open = _this2.driver.openOnClick ? _this2.open() : tasks.openContainer.then(function() {
-                                return _this2.open();
-                            });
-                            tasks.listen = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref2) {
-                                var domain = _slicedToArray(_ref2, 1)[0];
-                                _this2.listen(_this2.window, domain);
-                            });
-                            tasks.watchForClose = tasks.open.then(function() {
-                                return _this2.watchForClose();
-                            });
-                            tasks.linkDomain = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref4) {
-                                var domain = _slicedToArray(_ref4, 1)[0];
-                                if (_src.bridge && "string" == typeof domain) return _src.bridge.linkUrl(_this2.window, domain);
-                            });
-                            if (!_this2.html) {
-                                tasks.createPrerenderTemplate = tasks.openPrerender.then(function() {
-                                    return _this2.createPrerenderTemplate();
-                                });
-                                tasks.showComponent = tasks.createPrerenderTemplate.then(function() {
-                                    return _this2.showComponent();
-                                });
-                            }
-                            tasks.openBridge = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref6) {
-                                var domain = _slicedToArray(_ref6, 1)[0];
-                                return _this2.openBridge("string" == typeof domain ? domain : null);
-                            });
-                            if (_this2.html) tasks.loadHTML = tasks.open.then(function() {
-                                return _this2.loadHTML();
-                            }); else if (loadUrl) {
-                                tasks.buildUrl = _this2.buildUrl();
-                                tasks.loadUrl = _src3.ZalgoPromise.all([ tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate ]).then(function(_ref8) {
-                                    var url = _slicedToArray(_ref8, 1)[0];
-                                    return _this2.loadUrl(url);
-                                });
-                                tasks.runTimeout = tasks.loadUrl.then(function() {
-                                    return _this2.runTimeout();
-                                });
-                            }
-                            return _src3.ZalgoPromise.hash(tasks);
-                        }).then(function() {
-                            return _this2.props.onEnter();
-                        }).then(function() {
-                            return _this2;
+                ParentComponent.prototype.render = function(element) {
+                    var _this2 = this, loadUrl = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+                    return this.tryInit(function() {
+                        _this2.component.log("render_" + _this2.context, {
+                            context: _this2.context,
+                            element: element,
+                            loadUrl: (0, _lib.stringify)(loadUrl)
                         });
-                    }
-                }, {
-                    key: "getOutlet",
-                    value: function() {
-                        var outlet = document.createElement("div");
-                        (0, _lib.addClass)(outlet, _constants.CLASS_NAMES.OUTLET);
-                        return outlet;
-                    }
-                }, {
-                    key: "validateParentDomain",
-                    value: function() {
-                        var domain = (0, _src2.getDomain)();
-                        if (!(0, _src2.matchDomain)(this.component.allowedParentDomains, domain)) throw new _error.RenderError("Can not be rendered by domain: " + domain);
-                    }
-                }, {
-                    key: "renderTo",
-                    value: function(win, element) {
-                        var _this3 = this;
-                        return this.tryInit(function() {
-                            if (win === window) return _this3.render(element);
-                            if (!(0, _src2.isSameTopWindow)(window, win)) throw new Error("Can only renderTo an adjacent frame");
-                            if (element && "string" != typeof element) throw new Error("Element passed to renderTo must be a string selector, got " + (void 0 === element ? "undefined" : _typeof(element)) + " " + element);
-                            _this3.checkAllowRenderTo(win);
-                            _this3.component.log("render_" + _this3.context + "_to_win", {
-                                element: (0, _lib.stringify)(element),
-                                context: _this3.context
-                            });
-                            _this3.childWindowName = _this3.buildChildWindowName({
-                                renderTo: win
-                            });
-                            _this3.delegate(win);
-                            return _this3.render(element);
+                        var tasks = {};
+                        tasks.onRender = _this2.props.onRender();
+                        tasks.getDomain = _this2.getDomain();
+                        tasks.elementReady = _src3.ZalgoPromise.try(function() {
+                            if (element) return _this2.elementReady(element);
                         });
-                    }
-                }, {
-                    key: "prefetch",
-                    value: function() {
-                        var _this4 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this4.html = _this4.buildUrl().then(function(url) {
-                                return (0, _lib.prefetchPage)(url).then(function(html) {
-                                    return '\n                        <base href="' + ("" + url.split("/").slice(0, 3).join("/")) + '">\n\n                        ' + html + "\n\n                        <script>\n                            if (window.history && window.history.pushState) {\n                                window.history.pushState({}, '', '" + ("/" + url.split("/").slice(3).join("/")) + "');\n                            }\n                        <\/script>\n                    ";
-                                });
-                            });
+                        tasks.openContainer = tasks.elementReady.then(function() {
+                            return _this2.openContainer(element);
                         });
-                    }
-                }, {
-                    key: "loadHTML",
-                    value: function() {
-                        var _this5 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (!_this5.html) throw new Error("Html not prefetched");
-                            return _this5.html.then(function(html) {
-                                return (0, _lib.writeToWindow)(_this5.window, html);
-                            });
+                        tasks.showContainer = tasks.openContainer.then(function() {
+                            return _this2.showContainer();
                         });
-                    }
-                }, {
-                    key: "checkAllowRenderTo",
-                    value: function(win) {
-                        if (!win) throw this.component.createError("Must pass window to renderTo");
-                        if (!(0, _src2.isSameDomain)(win)) {
-                            var origin = (0, _src2.getDomain)(), domain = this.component.getDomain(null, this.props.env);
-                            if (!domain) throw new Error("Could not determine domain to allow remote render");
-                            if (!(0, _src2.matchDomain)(domain, origin)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
+                        tasks.openPrerender = tasks.openContainer.then(function() {
+                            return _this2.openPrerender();
+                        });
+                        tasks.switchPrerender = _src3.ZalgoPromise.all([ tasks.openPrerender, _this2.onInit ]).then(function() {
+                            return _this2.switchPrerender();
+                        });
+                        tasks.open = _this2.driver.openOnClick ? _this2.open() : tasks.openContainer.then(function() {
+                            return _this2.open();
+                        });
+                        tasks.listen = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref2) {
+                            var domain = _ref2[0];
+                            _this2.listen(_this2.window, domain);
+                        });
+                        tasks.watchForClose = tasks.open.then(function() {
+                            return _this2.watchForClose();
+                        });
+                        tasks.linkDomain = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref3) {
+                            var domain = _ref3[0];
+                            if (_src.bridge && "string" == typeof domain) return _src.bridge.linkUrl(_this2.window, domain);
+                        });
+                        if (!_this2.html) {
+                            tasks.createPrerenderTemplate = tasks.openPrerender.then(function() {
+                                return _this2.createPrerenderTemplate();
+                            });
+                            tasks.showComponent = tasks.createPrerenderTemplate.then(function() {
+                                return _this2.showComponent();
+                            });
                         }
+                        tasks.openBridge = _src3.ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(function(_ref4) {
+                            var domain = _ref4[0];
+                            return _this2.openBridge("string" == typeof domain ? domain : null);
+                        });
+                        if (_this2.html) tasks.loadHTML = tasks.open.then(function() {
+                            return _this2.loadHTML();
+                        }); else if (loadUrl) {
+                            tasks.buildUrl = _this2.buildUrl();
+                            tasks.loadUrl = _src3.ZalgoPromise.all([ tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate ]).then(function(_ref5) {
+                                var url = _ref5[0];
+                                return _this2.loadUrl(url);
+                            });
+                            tasks.runTimeout = tasks.loadUrl.then(function() {
+                                return _this2.runTimeout();
+                            });
+                        }
+                        return _src3.ZalgoPromise.hash(tasks);
+                    }).then(function() {
+                        return _this2.props.onEnter();
+                    }).then(function() {
+                        return _this2;
+                    });
+                };
+                ParentComponent.prototype.getOutlet = function() {
+                    var outlet = document.createElement("div");
+                    (0, _lib.addClass)(outlet, _constants.CLASS_NAMES.OUTLET);
+                    return outlet;
+                };
+                ParentComponent.prototype.validateParentDomain = function() {
+                    var domain = (0, _src2.getDomain)();
+                    if (!(0, _src2.matchDomain)(this.component.allowedParentDomains, domain)) throw new _error.RenderError("Can not be rendered by domain: " + domain);
+                };
+                ParentComponent.prototype.renderTo = function(win, element) {
+                    var _this3 = this;
+                    return this.tryInit(function() {
+                        if (win === window) return _this3.render(element);
+                        if (!(0, _src2.isSameTopWindow)(window, win)) throw new Error("Can only renderTo an adjacent frame");
+                        if (element && "string" != typeof element) throw new Error("Element passed to renderTo must be a string selector, got " + (void 0 === element ? "undefined" : _typeof(element)) + " " + element);
+                        _this3.checkAllowRenderTo(win);
+                        _this3.component.log("render_" + _this3.context + "_to_win", {
+                            element: (0, _lib.stringify)(element),
+                            context: _this3.context
+                        });
+                        _this3.childWindowName = _this3.buildChildWindowName({
+                            renderTo: win
+                        });
+                        _this3.delegate(win);
+                        return _this3.render(element);
+                    });
+                };
+                ParentComponent.prototype.prefetch = function() {
+                    var _this4 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this4.html = _this4.buildUrl().then(function(url) {
+                            return (0, _lib.prefetchPage)(url).then(function(html) {
+                                return '\n                        <base href="' + ("" + url.split("/").slice(0, 3).join("/")) + '">\n\n                        ' + html + "\n\n                        <script>\n                            if (window.history && window.history.pushState) {\n                                window.history.pushState({}, '', '" + ("/" + url.split("/").slice(3).join("/")) + "');\n                            }\n                        <\/script>\n                    ";
+                            });
+                        });
+                    });
+                };
+                ParentComponent.prototype.loadHTML = function() {
+                    var _this5 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (!_this5.html) throw new Error("Html not prefetched");
+                        return _this5.html.then(function(html) {
+                            return (0, _lib.writeToWindow)(_this5.window, html);
+                        });
+                    });
+                };
+                ParentComponent.prototype.checkAllowRenderTo = function(win) {
+                    if (!win) throw this.component.createError("Must pass window to renderTo");
+                    if (!(0, _src2.isSameDomain)(win)) {
+                        var origin = (0, _src2.getDomain)(), domain = this.component.getDomain(null, this.props.env);
+                        if (!domain) throw new Error("Could not determine domain to allow remote render");
+                        if (!(0, _src2.matchDomain)(domain, origin)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
                     }
-                }, {
-                    key: "registerActiveComponent",
-                    value: function() {
-                        var _this6 = this;
-                        ParentComponent.activeComponents.push(this);
+                };
+                ParentComponent.prototype.registerActiveComponent = function() {
+                    var _this6 = this;
+                    ParentComponent.activeComponents.push(this);
+                    this.clean.register(function() {
+                        ParentComponent.activeComponents.splice(ParentComponent.activeComponents.indexOf(_this6), 1);
+                    });
+                };
+                ParentComponent.prototype.getComponentParentRef = function() {
+                    var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                    if (this.context === _constants.CONTEXT_TYPES.POPUP) return {
+                        ref: _constants.WINDOW_REFERENCES.OPENER
+                    };
+                    if (renderToWindow === window) return (0, _src2.isTop)(window) ? {
+                        ref: _constants.WINDOW_REFERENCES.TOP
+                    } : {
+                        ref: _constants.WINDOW_REFERENCES.PARENT,
+                        distance: (0, _src2.getDistanceFromTop)(window)
+                    };
+                    var uid = (0, _lib.uniqueID)();
+                    _lib.global.windows[uid] = window;
+                    this.clean.register(function() {
+                        delete _lib.global.windows[uid];
+                    });
+                    return {
+                        ref: _constants.WINDOW_REFERENCES.GLOBAL,
+                        uid: uid
+                    };
+                };
+                ParentComponent.prototype.getRenderParentRef = function() {
+                    var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                    if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
+                    var uid = (0, _lib.uniqueID)();
+                    _lib.global.windows[uid] = renderToWindow;
+                    this.clean.register(function() {
+                        delete _lib.global.windows[uid];
+                    });
+                    return {
+                        ref: _constants.WINDOW_REFERENCES.GLOBAL,
+                        uid: uid
+                    };
+                };
+                ParentComponent.prototype.buildChildWindowName = function() {
+                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = (0, 
+                    _src2.isSameDomain)(renderTo), uid = (0, _lib.uniqueID)(), tag = this.component.tag, sProps = (0, 
+                    _lib.serializeFunctions)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), props = !sameDomain && !this.component.unsafeRenderTo ? {
+                        type: _constants.INITIAL_PROPS.UID,
+                        uid: uid
+                    } : {
+                        type: _constants.INITIAL_PROPS.RAW,
+                        value: sProps
+                    };
+                    if (props.type === _constants.INITIAL_PROPS.UID) {
+                        _lib.global.props[uid] = JSON.stringify(sProps);
                         this.clean.register(function() {
-                            ParentComponent.activeComponents.splice(ParentComponent.activeComponents.indexOf(_this6), 1);
+                            delete _lib.global.props[uid];
                         });
                     }
-                }, {
-                    key: "getComponentParentRef",
-                    value: function() {
-                        var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                        if (this.context === _constants.CONTEXT_TYPES.POPUP) return {
-                            ref: _constants.WINDOW_REFERENCES.OPENER
-                        };
-                        if (renderToWindow === window) return (0, _src2.isTop)(window) ? {
-                            ref: _constants.WINDOW_REFERENCES.TOP
-                        } : {
-                            ref: _constants.WINDOW_REFERENCES.PARENT,
-                            distance: (0, _src2.getDistanceFromTop)(window)
-                        };
-                        var uid = (0, _lib.uniqueID)();
-                        _lib.global.windows[uid] = window;
-                        this.clean.register(function() {
-                            delete _lib.global.windows[uid];
-                        });
-                        return {
-                            ref: _constants.WINDOW_REFERENCES.GLOBAL,
-                            uid: uid
-                        };
-                    }
-                }, {
-                    key: "getRenderParentRef",
-                    value: function() {
-                        var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                        if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
-                        var uid = (0, _lib.uniqueID)();
-                        _lib.global.windows[uid] = renderToWindow;
-                        this.clean.register(function() {
-                            delete _lib.global.windows[uid];
-                        });
-                        return {
-                            ref: _constants.WINDOW_REFERENCES.GLOBAL,
-                            uid: uid
-                        };
-                    }
-                }, {
-                    key: "buildChildWindowName",
-                    value: function() {
-                        var _ref10$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref10$renderTo ? window : _ref10$renderTo, sameDomain = (0, 
-                        _src2.isSameDomain)(renderTo), uid = (0, _lib.uniqueID)(), tag = this.component.tag, sProps = (0, 
-                        _lib.serializeFunctions)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), props = !sameDomain && !this.component.unsafeRenderTo ? {
-                            type: _constants.INITIAL_PROPS.UID,
-                            uid: uid
-                        } : {
-                            type: _constants.INITIAL_PROPS.RAW,
-                            value: sProps
-                        };
-                        if (props.type === _constants.INITIAL_PROPS.UID) {
-                            _lib.global.props[uid] = JSON.stringify(sProps);
-                            this.clean.register(function() {
-                                delete _lib.global.props[uid];
-                            });
-                        }
-                        return (0, _window.buildChildWindowName)(this.component.name, this.component.version, {
-                            uid: uid,
-                            tag: tag,
-                            componentParent: componentParent,
-                            renderParent: renderParent,
-                            props: props
-                        });
-                    }
-                }, {
-                    key: "sendToParent",
-                    value: function(name, data) {
-                        if (!(0, _window.getParentComponentWindow)()) throw new Error("Can not find parent component window to message");
-                        this.component.log("send_to_parent_" + name);
-                        return (0, _src.send)((0, _window.getParentComponentWindow)(), name, data, {
-                            domain: (0, _window.getParentDomain)()
-                        });
-                    }
-                }, {
-                    key: "setProps",
-                    value: function(props) {
-                        var required = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
-                        (0, _validate.validateProps)(this.component, props, required);
-                        this.component.validate && this.component.validate(this.component, props);
-                        this.props = this.props || {};
-                        (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props));
-                    }
-                }, {
-                    key: "buildUrl",
-                    value: function() {
-                        var _this7 = this;
-                        return _src3.ZalgoPromise.all([ this.props.url, (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref11) {
-                            var _ref12 = _slicedToArray(_ref11, 2), url = _ref12[0], query = _ref12[1];
-                            return url && !_this7.component.getValidDomain(url) ? url : _src3.ZalgoPromise.try(function() {
-                                return url || _this7.component.getUrl(_this7.props.env, _this7.props);
-                            }).then(function(finalUrl) {
-                                query.xcomponent = "1";
-                                return (0, _lib.extendUrl)(finalUrl, {
-                                    query: query
-                                });
+                    return (0, _window.buildChildWindowName)(this.component.name, this.component.version, {
+                        uid: uid,
+                        tag: tag,
+                        componentParent: componentParent,
+                        renderParent: renderParent,
+                        props: props
+                    });
+                };
+                ParentComponent.prototype.sendToParent = function(name, data) {
+                    if (!(0, _window.getParentComponentWindow)()) throw new Error("Can not find parent component window to message");
+                    this.component.log("send_to_parent_" + name);
+                    return (0, _src.send)((0, _window.getParentComponentWindow)(), name, data, {
+                        domain: (0, _window.getParentDomain)()
+                    });
+                };
+                ParentComponent.prototype.setProps = function(props) {
+                    var required = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+                    (0, _validate.validateProps)(this.component, props, required);
+                    this.component.validate && this.component.validate(this.component, props);
+                    this.props = this.props || {};
+                    (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props));
+                };
+                ParentComponent.prototype.buildUrl = function() {
+                    var _this7 = this;
+                    return _src3.ZalgoPromise.all([ this.props.url, (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref7) {
+                        var url = _ref7[0], query = _ref7[1];
+                        return url && !_this7.component.getValidDomain(url) ? url : _src3.ZalgoPromise.try(function() {
+                            return url || _this7.component.getUrl(_this7.props.env, _this7.props);
+                        }).then(function(finalUrl) {
+                            query.xcomponent = "1";
+                            return (0, _lib.extendUrl)(finalUrl, {
+                                query: query
                             });
                         });
-                    }
-                }, {
-                    key: "getDomain",
-                    value: function() {
-                        var _this8 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            return _this8.props.url;
-                        }).then(function(url) {
-                            var domain = _this8.component.getDomain(url, _this8.props.env);
-                            return domain || (_this8.component.buildUrl ? _src3.ZalgoPromise.try(function() {
-                                return _this8.component.buildUrl(_this8.props);
-                            }).then(function(builtUrl) {
-                                return _this8.component.getDomain(builtUrl, _this8.props.env);
-                            }) : void 0);
-                        }).then(function(domain) {
-                            if (!domain) throw new Error("Could not determine domain");
-                            return domain;
-                        });
-                    }
-                }, {
-                    key: "getPropsForChild",
-                    value: function() {
-                        var result = {}, _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0;
-                        for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                            var _ref13;
-                            if (_isArray) {
-                                if (_i >= _iterator.length) break;
-                                _ref13 = _iterator[_i++];
-                            } else {
-                                if ((_i = _iterator.next()).done) break;
-                                _ref13 = _i.value;
-                            }
-                            var key = _ref13, prop = this.component.getProp(key);
-                            prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
+                    });
+                };
+                ParentComponent.prototype.getDomain = function() {
+                    var _this8 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        return _this8.props.url;
+                    }).then(function(url) {
+                        var domain = _this8.component.getDomain(url, _this8.props.env);
+                        return domain || (_this8.component.buildUrl ? _src3.ZalgoPromise.try(function() {
+                            return _this8.component.buildUrl(_this8.props);
+                        }).then(function(builtUrl) {
+                            return _this8.component.getDomain(builtUrl, _this8.props.env);
+                        }) : void 0);
+                    }).then(function(domain) {
+                        if (!domain) throw new Error("Could not determine domain");
+                        return domain;
+                    });
+                };
+                ParentComponent.prototype.getPropsForChild = function() {
+                    var result = {}, _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0;
+                    for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref8;
+                        if (_isArray) {
+                            if (_i >= _iterator.length) break;
+                            _ref8 = _iterator[_i++];
+                        } else {
+                            if ((_i = _iterator.next()).done) break;
+                            _ref8 = _i.value;
                         }
-                        return result;
+                        var key = _ref8, prop = this.component.getProp(key);
+                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
                     }
-                }, {
-                    key: "updateProps",
-                    value: function(props) {
-                        var _this9 = this;
-                        this.setProps(props, !1);
-                        return this.onInit.then(function() {
-                            if (_this9.childExports) return _this9.childExports.updateProps(_this9.getPropsForChild());
-                            throw new Error("Child exports were not available");
-                        });
-                    }
-                }, {
-                    key: "openBridge",
-                    value: function(domain) {
-                        var _this10 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_src.bridge && _this10.driver.needsBridge) {
-                                var needsBridgeParams = {
-                                    win: _this10.window
-                                };
-                                domain && (needsBridgeParams.domain = domain);
-                                var needsBridge = _src.bridge.needsBridge(needsBridgeParams), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
-                                if (bridgeUrl) {
-                                    bridgeUrl = (0, _lib.extendUrl)(bridgeUrl, {
-                                        query: {
-                                            version: _this10.component.version
-                                        }
-                                    });
-                                    var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
-                                    if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
-                                    return needsBridge ? _src.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
-                                        if (result) return result;
-                                    }) : void 0;
-                                }
-                                if (needsBridge && domain && !_src.bridge.hasBridge(domain, domain)) throw new Error("Bridge url needed to render " + _this10.context);
-                            }
-                        });
-                    }
-                }, {
-                    key: "open",
-                    value: function() {
-                        var _this11 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this11.component.log("open_" + _this11.context, {
-                                windowName: _this11.childWindowName
-                            });
-                            return _this11.driver.open.call(_this11);
-                        });
-                    }
-                }, {
-                    key: "openPrerender",
-                    value: function() {
-                        var _this12 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_this12.component.prerenderTemplate) return _this12.driver.openPrerender.call(_this12);
-                        });
-                    }
-                }, {
-                    key: "switchPrerender",
-                    value: function() {
-                        var _this13 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_this13.prerenderWindow && _this13.driver.switchPrerender) return _this13.driver.switchPrerender.call(_this13);
-                        });
-                    }
-                }, {
-                    key: "elementReady",
-                    value: function(element) {
-                        return (0, _lib.elementReady)(element).then(_lib.noop);
-                    }
-                }, {
-                    key: "delegate",
-                    value: function(win) {
-                        var _this14 = this;
-                        this.component.log("delegate_" + this.context);
-                        var props = {
-                            uid: this.props.uid,
-                            dimensions: this.props.dimensions,
-                            onClose: this.props.onClose,
-                            onDisplay: this.props.onDisplay
-                        }, _iterator2 = this.component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
-                        for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
-                            var _ref14;
-                            if (_isArray2) {
-                                if (_i2 >= _iterator2.length) break;
-                                _ref14 = _iterator2[_i2++];
-                            } else {
-                                if ((_i2 = _iterator2.next()).done) break;
-                                _ref14 = _i2.value;
-                            }
-                            var propName = _ref14;
-                            this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
-                        }
-                        var delegate = (0, _src.send)(win, _constants.POST_MESSAGE.DELEGATE + "_" + this.component.name, {
-                            context: this.context,
-                            env: this.props.env,
-                            options: {
-                                context: this.context,
-                                childWindowName: this.childWindowName,
-                                props: props,
-                                overrides: {
-                                    focus: function() {
-                                        return _this14.focus();
-                                    },
-                                    userClose: function() {
-                                        return _this14.userClose();
-                                    },
-                                    getDomain: function() {
-                                        return _this14.getDomain();
-                                    },
-                                    error: function(err) {
-                                        return _this14.error(err);
-                                    },
-                                    on: function(eventName, handler) {
-                                        return _this14.on(eventName, handler);
+                    return result;
+                };
+                ParentComponent.prototype.updateProps = function(props) {
+                    var _this9 = this;
+                    this.setProps(props, !1);
+                    return this.onInit.then(function() {
+                        if (_this9.childExports) return _this9.childExports.updateProps(_this9.getPropsForChild());
+                        throw new Error("Child exports were not available");
+                    });
+                };
+                ParentComponent.prototype.openBridge = function(domain) {
+                    var _this10 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_src.bridge && _this10.driver.needsBridge) {
+                            var needsBridgeParams = {
+                                win: _this10.window
+                            };
+                            domain && (needsBridgeParams.domain = domain);
+                            var needsBridge = _src.bridge.needsBridge(needsBridgeParams), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
+                            if (bridgeUrl) {
+                                bridgeUrl = (0, _lib.extendUrl)(bridgeUrl, {
+                                    query: {
+                                        version: _this10.component.version
                                     }
-                                }
-                            }
-                        }).then(function(_ref15) {
-                            var data = _ref15.data;
-                            _this14.clean.register(data.destroy);
-                            return data;
-                        }).catch(function(err) {
-                            throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + (0, 
-                            _lib.stringifyError)(err));
-                        }), overrides = this.driver.delegateOverrides, _loop = function() {
-                            if (_isArray3) {
-                                if (_i3 >= _iterator3.length) return "break";
-                                _ref16 = _iterator3[_i3++];
-                            } else {
-                                if ((_i3 = _iterator3.next()).done) return "break";
-                                _ref16 = _i3.value;
-                            }
-                            var key = _ref16, val = overrides[key];
-                            if (val === _constants.DELEGATE.CALL_ORIGINAL) return "continue";
-                            var original = _this14[key];
-                            _this14[key] = function() {
-                                var _this15 = this, _arguments = arguments;
-                                return delegate.then(function(data) {
-                                    var override = data.overrides[key];
-                                    if (val === _constants.DELEGATE.CALL_DELEGATE) return override.apply(_this15, _arguments);
-                                    if ("function" == typeof val) return val(original, override).apply(_this15, _arguments);
-                                    throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
                                 });
-                            };
-                        };
-                        var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
-                        _loop2: for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                            var _ref16;
-                            switch (_loop()) {
-                              case "break":
-                                break _loop2;
-
-                              case "continue":
-                                continue;
+                                var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
+                                if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
+                                return needsBridge ? _src.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
+                                    if (result) return result;
+                                }) : void 0;
                             }
+                            if (needsBridge && domain && !_src.bridge.hasBridge(domain, domain)) throw new Error("Bridge url needed to render " + _this10.context);
                         }
-                    }
-                }, {
-                    key: "watchForClose",
-                    value: function() {
-                        var _this16 = this, closeWindowListener = (0, _src2.onCloseWindow)(this.window, function() {
-                            _this16.component.log("detect_close_child");
-                            return _src3.ZalgoPromise.try(function() {
-                                return _this16.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
-                            }).finally(function() {
-                                return _this16.destroy();
-                            });
-                        }, 3e3);
-                        this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
-                    }
-                }, {
-                    key: "watchForUnload",
-                    value: function() {
-                        var _this17 = this, onunload = (0, _lib.once)(function() {
-                            _this17.component.log("navigate_away");
-                            (0, _client.flush)();
-                            _this17.destroyComponent();
-                        }), unloadWindowListener = (0, _lib.addEventListener)(window, "unload", onunload);
-                        this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
-                    }
-                }, {
-                    key: "loadUrl",
-                    value: function(url) {
-                        var _this18 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this18.component.log("load_url");
-                            window.location.href.split("#")[0] === url.split("#")[0] && (url = (0, _lib.extendUrl)(url, {
-                                query: _defineProperty({}, (0, _lib.uniqueID)(), "1")
-                            }));
-                            return _this18.driver.loadUrl.call(_this18, url);
+                    });
+                };
+                ParentComponent.prototype.open = function() {
+                    var _this11 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this11.component.log("open_" + _this11.context, {
+                            windowName: _this11.childWindowName
                         });
-                    }
-                }, {
-                    key: "hijack",
-                    value: function(targetElement) {
-                        targetElement.target = this.childWindowName;
-                    }
-                }, {
-                    key: "runTimeout",
-                    value: function() {
-                        var _this19 = this, timeout = this.props.timeout;
-                        if (timeout) {
-                            var _id = this.timeout = setTimeout(function() {
-                                _this19.component.log("timed_out", {
-                                    timeout: timeout.toString()
-                                });
-                                var error = _this19.component.createError("Loading component timed out after " + timeout + " milliseconds");
-                                _this19.onInit.reject(error);
-                                _this19.props.onTimeout(error);
-                            }, timeout);
-                            this.clean.register(function() {
-                                clearTimeout(_id);
-                                delete _this19.timeout;
-                            });
+                        return _this11.driver.open.call(_this11);
+                    });
+                };
+                ParentComponent.prototype.openPrerender = function() {
+                    var _this12 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_this12.component.prerenderTemplate) return _this12.driver.openPrerender.call(_this12);
+                    });
+                };
+                ParentComponent.prototype.switchPrerender = function() {
+                    var _this13 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_this13.prerenderWindow && _this13.driver.switchPrerender) return _this13.driver.switchPrerender.call(_this13);
+                    });
+                };
+                ParentComponent.prototype.elementReady = function(element) {
+                    return (0, _lib.elementReady)(element).then(_lib.noop);
+                };
+                ParentComponent.prototype.delegate = function(win) {
+                    var _this14 = this;
+                    this.component.log("delegate_" + this.context);
+                    var props = {
+                        uid: this.props.uid,
+                        dimensions: this.props.dimensions,
+                        onClose: this.props.onClose,
+                        onDisplay: this.props.onDisplay
+                    }, _iterator2 = this.component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0;
+                    for (_iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                        var _ref9;
+                        if (_isArray2) {
+                            if (_i2 >= _iterator2.length) break;
+                            _ref9 = _iterator2[_i2++];
+                        } else {
+                            if ((_i2 = _iterator2.next()).done) break;
+                            _ref9 = _i2.value;
                         }
+                        var propName = _ref9;
+                        this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
                     }
-                }, {
-                    key: "listeners",
-                    value: function() {
-                        var _ref17;
-                        return _defineProperty(_ref17 = {}, _constants.POST_MESSAGE.INIT, function(source, data) {
-                            this.childExports = data.exports;
-                            this.onInit.resolve(this);
-                            this.timeout && clearTimeout(this.timeout);
-                            return {
-                                props: this.getPropsForChild(),
-                                context: this.context
-                            };
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.CLOSE, function(source, data) {
-                            this.close(data.reason);
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.CHECK_CLOSE, function() {
-                            this.checkClose();
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.RESIZE, function(source, data) {
-                            var _this20 = this;
-                            return _src3.ZalgoPromise.try(function() {
-                                if (_this20.driver.allowResize) return _this20.resize(data.width, data.height);
-                            });
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.ONRESIZE, function() {
-                            this.event.trigger("resize");
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.HIDE, function() {
-                            this.hide();
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.SHOW, function() {
-                            this.show();
-                        }), _defineProperty(_ref17, _constants.POST_MESSAGE.ERROR, function(source, data) {
-                            this.error(new Error(data.error));
-                        }), _ref17;
-                    }
-                }, {
-                    key: "resize",
-                    value: function(width, height) {
-                        var _this21 = this, _ref18$waitForTransit = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref18$waitForTransit || _ref18$waitForTransit;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this21.component.log("resize", {
-                                height: (0, _lib.stringify)(height),
-                                width: (0, _lib.stringify)(width)
-                            });
-                            _this21.driver.resize.call(_this21, width, height);
-                            if (waitForTransition && (_this21.element || _this21.iframe)) {
-                                var overflow = void 0;
-                                _this21.element && (overflow = (0, _lib.setOverflow)(_this21.element, "hidden"));
-                                return (0, _lib.elementStoppedMoving)(_this21.element || _this21.iframe).then(function() {
-                                    overflow && overflow.reset();
-                                });
-                            }
-                        });
-                    }
-                }, {
-                    key: "hide",
-                    value: function() {
-                        this.container && (0, _lib.hideElement)(this.container);
-                        return this.driver.hide.call(this);
-                    }
-                }, {
-                    key: "show",
-                    value: function() {
-                        this.container && (0, _lib.showElement)(this.container);
-                        return this.driver.show.call(this);
-                    }
-                }, {
-                    key: "checkClose",
-                    value: function() {
-                        var _this22 = this, closeWindowListener = (0, _src2.onCloseWindow)(this.window, function() {
-                            _this22.userClose();
-                        }, 50, 500);
-                        this.clean.register(closeWindowListener.cancel);
-                    }
-                }, {
-                    key: "userClose",
-                    value: function() {
-                        return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
-                    }
-                }, {
-                    key: "close",
-                    value: function() {
-                        var _this23 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this23.component.log("close", {
-                                reason: reason
-                            });
-                            _this23.event.triggerOnce(_constants.EVENTS.CLOSE);
-                            return _this23.props.onClose(reason);
-                        }).then(function() {
-                            return _src3.ZalgoPromise.all([ _this23.closeComponent(), _this23.closeContainer() ]);
-                        }).then(function() {
-                            return _this23.destroy();
-                        });
-                    }
-                }, {
-                    key: "closeContainer",
-                    value: function() {
-                        var _this24 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this24.event.triggerOnce(_constants.EVENTS.CLOSE);
-                            return _this24.props.onClose(reason);
-                        }).then(function() {
-                            return _src3.ZalgoPromise.all([ _this24.closeComponent(reason), _this24.hideContainer() ]);
-                        }).then(function() {
-                            return _this24.destroyContainer();
-                        });
-                    }
-                }, {
-                    key: "destroyContainer",
-                    value: function() {
-                        var _this25 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this25.clean.run("destroyContainerEvents");
-                            _this25.clean.run("destroyContainerTemplate");
-                        });
-                    }
-                }, {
-                    key: "closeComponent",
-                    value: function() {
-                        var _this26 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL, win = this.window;
-                        return _src3.ZalgoPromise.try(function() {
-                            return _this26.cancelContainerEvents();
-                        }).then(function() {
-                            _this26.event.triggerOnce(_constants.EVENTS.CLOSE);
-                            return _this26.props.onClose(reason);
-                        }).then(function() {
-                            return _this26.hideComponent();
-                        }).then(function() {
-                            return _this26.destroyComponent();
-                        }).then(function() {
-                            _this26.childExports && _this26.context === _constants.CONTEXT_TYPES.POPUP && !(0, 
-                            _src2.isWindowClosed)(win) && _this26.childExports.close().catch(_lib.noop);
-                        });
-                    }
-                }, {
-                    key: "destroyComponent",
-                    value: function() {
-                        this.clean.run("destroyUnloadWindowListener");
-                        this.clean.run("destroyCloseWindowListener");
-                        this.clean.run("destroyContainerEvents");
-                        this.clean.run("destroyWindow");
-                    }
-                }, {
-                    key: "showContainer",
-                    value: function() {
-                        var _this27 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_this27.props.onDisplay) return _this27.props.onDisplay();
-                        }).then(function() {
-                            if (_this27.container) return (0, _lib.showAndAnimate)(_this27.container, _constants.ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
-                        });
-                    }
-                }, {
-                    key: "showComponent",
-                    value: function() {
-                        var _this28 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_this28.props.onDisplay) return _this28.props.onDisplay();
-                        }).then(function() {
-                            if (_this28.element) return (0, _lib.showAndAnimate)(_this28.element, _constants.ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
-                        });
-                    }
-                }, {
-                    key: "hideContainer",
-                    value: function() {
-                        var _this29 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            return _this29.container ? (0, _lib.animateAndHide)(_this29.container, _constants.ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register) : _src3.ZalgoPromise.resolve();
-                        });
-                    }
-                }, {
-                    key: "hideComponent",
-                    value: function() {
-                        var _this30 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            return _this30.element ? (0, _lib.animateAndHide)(_this30.element, _constants.ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register) : _src3.ZalgoPromise.resolve();
-                        });
-                    }
-                }, {
-                    key: "focus",
-                    value: function() {
-                        if (!this.window || (0, _src2.isWindowClosed)(this.window)) throw new Error("No window to focus");
-                        this.component.log("focus");
-                        this.window.focus();
-                    }
-                }, {
-                    key: "createPrerenderTemplate",
-                    value: function() {
-                        var _this31 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            return _this31.component.prerenderTemplate ? _src3.ZalgoPromise.try(function() {
-                                return _this31.prerenderIframe ? (0, _lib.awaitFrameLoad)(_this31.prerenderIframe).then(function() {
-                                    return _this31.prerenderWindow;
-                                }) : _this31.prerenderWindow;
-                            }).then(function(win) {
-                                var doc = void 0;
-                                try {
-                                    doc = win.document;
-                                } catch (err) {
-                                    return;
-                                }
-                                try {
-                                    (0, _lib.writeElementToWindow)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                                        jsxDom: _lib.jsxDom.bind(doc),
-                                        document: doc
-                                    }));
-                                } catch (err) {}
-                            }) : _src3.ZalgoPromise.resolve();
-                        });
-                    }
-                }, {
-                    key: "renderTemplate",
-                    value: function(renderer) {
-                        var _this32 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _ref19 = this.component.dimensions || {}, _ref19$width = _ref19.width, width = void 0 === _ref19$width ? _constants.DEFAULT_DIMENSIONS.WIDTH + "px" : _ref19$width, _ref19$height = _ref19.height, height = void 0 === _ref19$height ? _constants.DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref19$height;
-                        return renderer.call(this, _extends({
-                            id: _constants.CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.props.uid,
-                            props: renderer.__xdomain__ ? null : this.props,
-                            tag: this.component.tag,
+                    var delegate = (0, _src.send)(win, _constants.POST_MESSAGE.DELEGATE + "_" + this.component.name, {
+                        context: this.context,
+                        env: this.props.env,
+                        options: {
                             context: this.context,
-                            outlet: this.getOutlet(),
-                            CLASS: _constants.CLASS_NAMES,
-                            ANIMATION: _constants.ANIMATION_NAMES,
-                            CONTEXT: _constants.CONTEXT_TYPES,
-                            EVENT: _constants.EVENTS,
-                            actions: {
-                                close: function() {
-                                    return _this32.userClose();
-                                },
+                            childWindowName: this.childWindowName,
+                            props: props,
+                            overrides: {
                                 focus: function() {
-                                    return _this32.focus();
+                                    return _this14.focus();
+                                },
+                                userClose: function() {
+                                    return _this14.userClose();
+                                },
+                                getDomain: function() {
+                                    return _this14.getDomain();
+                                },
+                                error: function(err) {
+                                    return _this14.error(err);
+                                },
+                                on: function(eventName, handler) {
+                                    return _this14.on(eventName, handler);
                                 }
+                            }
+                        }
+                    }).then(function(_ref10) {
+                        var data = _ref10.data;
+                        _this14.clean.register(data.destroy);
+                        return data;
+                    }).catch(function(err) {
+                        throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + (0, 
+                        _lib.stringifyError)(err));
+                    }), overrides = this.driver.delegateOverrides, _loop = function() {
+                        if (_isArray3) {
+                            if (_i3 >= _iterator3.length) return "break";
+                            _ref11 = _iterator3[_i3++];
+                        } else {
+                            if ((_i3 = _iterator3.next()).done) return "break";
+                            _ref11 = _i3.value;
+                        }
+                        var key = _ref11, val = overrides[key];
+                        if (val === _constants.DELEGATE.CALL_ORIGINAL) return "continue";
+                        var original = _this14[key];
+                        _this14[key] = function() {
+                            var _this15 = this, _arguments = arguments;
+                            return delegate.then(function(data) {
+                                var override = data.overrides[key];
+                                if (val === _constants.DELEGATE.CALL_DELEGATE) return override.apply(_this15, _arguments);
+                                if ("function" == typeof val) return val(original, override).apply(_this15, _arguments);
+                                throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
+                            });
+                        };
+                    };
+                    var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0;
+                    _loop2: for (_iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                        var _ref11;
+                        switch (_loop()) {
+                          case "break":
+                            break _loop2;
+
+                          case "continue":
+                            continue;
+                        }
+                    }
+                };
+                ParentComponent.prototype.watchForClose = function() {
+                    var _this16 = this, closeWindowListener = (0, _src2.onCloseWindow)(this.window, function() {
+                        _this16.component.log("detect_close_child");
+                        return _src3.ZalgoPromise.try(function() {
+                            return _this16.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
+                        }).finally(function() {
+                            return _this16.destroy();
+                        });
+                    }, 3e3);
+                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                };
+                ParentComponent.prototype.watchForUnload = function() {
+                    var _this17 = this, onunload = (0, _lib.once)(function() {
+                        _this17.component.log("navigate_away");
+                        (0, _client.flush)();
+                        _this17.destroyComponent();
+                    }), unloadWindowListener = (0, _lib.addEventListener)(window, "unload", onunload);
+                    this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
+                };
+                ParentComponent.prototype.loadUrl = function(url) {
+                    var _this18 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this18.component.log("load_url");
+                        if (window.location.href.split("#")[0] === url.split("#")[0]) {
+                            var _query;
+                            url = (0, _lib.extendUrl)(url, {
+                                query: (_query = {}, _query[(0, _lib.uniqueID)()] = "1", _query)
+                            });
+                        }
+                        return _this18.driver.loadUrl.call(_this18, url);
+                    });
+                };
+                ParentComponent.prototype.hijack = function(targetElement) {
+                    targetElement.target = this.childWindowName;
+                };
+                ParentComponent.prototype.runTimeout = function() {
+                    var _this19 = this, timeout = this.props.timeout;
+                    if (timeout) {
+                        var _id = this.timeout = setTimeout(function() {
+                            _this19.component.log("timed_out", {
+                                timeout: timeout.toString()
+                            });
+                            var error = _this19.component.createError("Loading component timed out after " + timeout + " milliseconds");
+                            _this19.onInit.reject(error);
+                            _this19.props.onTimeout(error);
+                        }, timeout);
+                        this.clean.register(function() {
+                            clearTimeout(_id);
+                            delete _this19.timeout;
+                        });
+                    }
+                };
+                ParentComponent.prototype.listeners = function() {
+                    var _ref12;
+                    return (_ref12 = {})[_constants.POST_MESSAGE.INIT] = function(source, data) {
+                        this.childExports = data.exports;
+                        this.onInit.resolve(this);
+                        this.timeout && clearTimeout(this.timeout);
+                        return {
+                            props: this.getPropsForChild(),
+                            context: this.context
+                        };
+                    }, _ref12[_constants.POST_MESSAGE.CLOSE] = function(source, data) {
+                        this.close(data.reason);
+                    }, _ref12[_constants.POST_MESSAGE.CHECK_CLOSE] = function() {
+                        this.checkClose();
+                    }, _ref12[_constants.POST_MESSAGE.RESIZE] = function(source, data) {
+                        var _this20 = this;
+                        return _src3.ZalgoPromise.try(function() {
+                            if (_this20.driver.allowResize) return _this20.resize(data.width, data.height);
+                        });
+                    }, _ref12[_constants.POST_MESSAGE.ONRESIZE] = function() {
+                        this.event.trigger("resize");
+                    }, _ref12[_constants.POST_MESSAGE.HIDE] = function() {
+                        this.hide();
+                    }, _ref12[_constants.POST_MESSAGE.SHOW] = function() {
+                        this.show();
+                    }, _ref12[_constants.POST_MESSAGE.ERROR] = function(source, data) {
+                        this.error(new Error(data.error));
+                    }, _ref12;
+                };
+                ParentComponent.prototype.resize = function(width, height) {
+                    var _this21 = this, _ref13$waitForTransit = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref13$waitForTransit || _ref13$waitForTransit;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this21.component.log("resize", {
+                            height: (0, _lib.stringify)(height),
+                            width: (0, _lib.stringify)(width)
+                        });
+                        _this21.driver.resize.call(_this21, width, height);
+                        if (waitForTransition && (_this21.element || _this21.iframe)) {
+                            var overflow = void 0;
+                            _this21.element && (overflow = (0, _lib.setOverflow)(_this21.element, "hidden"));
+                            return (0, _lib.elementStoppedMoving)(_this21.element || _this21.iframe).then(function() {
+                                overflow && overflow.reset();
+                            });
+                        }
+                    });
+                };
+                ParentComponent.prototype.hide = function() {
+                    this.container && (0, _lib.hideElement)(this.container);
+                    return this.driver.hide.call(this);
+                };
+                ParentComponent.prototype.show = function() {
+                    this.container && (0, _lib.showElement)(this.container);
+                    return this.driver.show.call(this);
+                };
+                ParentComponent.prototype.checkClose = function() {
+                    var _this22 = this, closeWindowListener = (0, _src2.onCloseWindow)(this.window, function() {
+                        _this22.userClose();
+                    }, 50, 500);
+                    this.clean.register(closeWindowListener.cancel);
+                };
+                ParentComponent.prototype.userClose = function() {
+                    return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
+                };
+                ParentComponent.prototype.close = function() {
+                    var _this23 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this23.component.log("close", {
+                            reason: reason
+                        });
+                        _this23.event.triggerOnce(_constants.EVENTS.CLOSE);
+                        return _this23.props.onClose(reason);
+                    }).then(function() {
+                        return _src3.ZalgoPromise.all([ _this23.closeComponent(), _this23.closeContainer() ]);
+                    }).then(function() {
+                        return _this23.destroy();
+                    });
+                };
+                ParentComponent.prototype.closeContainer = function() {
+                    var _this24 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this24.event.triggerOnce(_constants.EVENTS.CLOSE);
+                        return _this24.props.onClose(reason);
+                    }).then(function() {
+                        return _src3.ZalgoPromise.all([ _this24.closeComponent(reason), _this24.hideContainer() ]);
+                    }).then(function() {
+                        return _this24.destroyContainer();
+                    });
+                };
+                ParentComponent.prototype.destroyContainer = function() {
+                    var _this25 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this25.clean.run("destroyContainerEvents");
+                        _this25.clean.run("destroyContainerTemplate");
+                    });
+                };
+                ParentComponent.prototype.closeComponent = function() {
+                    var _this26 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL, win = this.window;
+                    return _src3.ZalgoPromise.try(function() {
+                        return _this26.cancelContainerEvents();
+                    }).then(function() {
+                        _this26.event.triggerOnce(_constants.EVENTS.CLOSE);
+                        return _this26.props.onClose(reason);
+                    }).then(function() {
+                        return _this26.hideComponent();
+                    }).then(function() {
+                        return _this26.destroyComponent();
+                    }).then(function() {
+                        _this26.childExports && _this26.context === _constants.CONTEXT_TYPES.POPUP && !(0, 
+                        _src2.isWindowClosed)(win) && _this26.childExports.close().catch(_lib.noop);
+                    });
+                };
+                ParentComponent.prototype.destroyComponent = function() {
+                    this.clean.run("destroyUnloadWindowListener");
+                    this.clean.run("destroyCloseWindowListener");
+                    this.clean.run("destroyContainerEvents");
+                    this.clean.run("destroyWindow");
+                };
+                ParentComponent.prototype.showContainer = function() {
+                    var _this27 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_this27.props.onDisplay) return _this27.props.onDisplay();
+                    }).then(function() {
+                        if (_this27.container) return (0, _lib.showAndAnimate)(_this27.container, _constants.ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
+                    });
+                };
+                ParentComponent.prototype.showComponent = function() {
+                    var _this28 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_this28.props.onDisplay) return _this28.props.onDisplay();
+                    }).then(function() {
+                        if (_this28.element) return (0, _lib.showAndAnimate)(_this28.element, _constants.ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
+                    });
+                };
+                ParentComponent.prototype.hideContainer = function() {
+                    var _this29 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        return _this29.container ? (0, _lib.animateAndHide)(_this29.container, _constants.ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register) : _src3.ZalgoPromise.resolve();
+                    });
+                };
+                ParentComponent.prototype.hideComponent = function() {
+                    var _this30 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        return _this30.element ? (0, _lib.animateAndHide)(_this30.element, _constants.ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register) : _src3.ZalgoPromise.resolve();
+                    });
+                };
+                ParentComponent.prototype.focus = function() {
+                    if (!this.window || (0, _src2.isWindowClosed)(this.window)) throw new Error("No window to focus");
+                    this.component.log("focus");
+                    this.window.focus();
+                };
+                ParentComponent.prototype.createPrerenderTemplate = function() {
+                    var _this31 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        return _this31.component.prerenderTemplate ? _src3.ZalgoPromise.try(function() {
+                            return _this31.prerenderIframe ? (0, _lib.awaitFrameLoad)(_this31.prerenderIframe).then(function() {
+                                return _this31.prerenderWindow;
+                            }) : _this31.prerenderWindow;
+                        }).then(function(win) {
+                            var doc = void 0;
+                            try {
+                                doc = win.document;
+                            } catch (err) {
+                                return;
+                            }
+                            try {
+                                (0, _lib.writeElementToWindow)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                                    jsxDom: _lib.jsxDom.bind(doc),
+                                    document: doc
+                                }));
+                            } catch (err) {}
+                        }) : _src3.ZalgoPromise.resolve();
+                    });
+                };
+                ParentComponent.prototype.renderTemplate = function(renderer) {
+                    var _this32 = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, _ref14 = this.component.dimensions || {}, _ref14$width = _ref14.width, width = void 0 === _ref14$width ? _constants.DEFAULT_DIMENSIONS.WIDTH + "px" : _ref14$width, _ref14$height = _ref14.height, height = void 0 === _ref14$height ? _constants.DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref14$height;
+                    return renderer.call(this, _extends({
+                        id: _constants.CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.props.uid,
+                        props: renderer.__xdomain__ ? null : this.props,
+                        tag: this.component.tag,
+                        context: this.context,
+                        outlet: this.getOutlet(),
+                        CLASS: _constants.CLASS_NAMES,
+                        ANIMATION: _constants.ANIMATION_NAMES,
+                        CONTEXT: _constants.CONTEXT_TYPES,
+                        EVENT: _constants.EVENTS,
+                        actions: {
+                            close: function() {
+                                return _this32.userClose();
                             },
-                            on: function(eventName, handler) {
-                                return _this32.on(eventName, handler);
-                            },
-                            jsxDom: _lib.jsxDom,
-                            document: document,
-                            dimensions: {
-                                width: width,
-                                height: height
+                            focus: function() {
+                                return _this32.focus();
                             }
-                        }, options));
-                    }
-                }, {
-                    key: "openContainer",
-                    value: function(element) {
-                        var _this33 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            var el = void 0;
-                            if (!(el = element ? (0, _lib.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
-                            if (_this33.component.containerTemplate) {
-                                var container = _this33.renderTemplate(_this33.component.containerTemplate, {
-                                    container: el
-                                });
-                                _this33.container = container;
-                                (0, _lib.hideElement)(_this33.container);
-                                (0, _lib.appendChild)(el, _this33.container);
-                                if (_this33.driver.renderedIntoContainerTemplate) {
-                                    _this33.element = _this33.getOutlet();
-                                    (0, _lib.hideElement)(_this33.element);
-                                    if (!_this33.element) throw new Error("Could not find element to render component into");
-                                    (0, _lib.hideElement)(_this33.element);
-                                }
-                                _this33.clean.register("destroyContainerTemplate", function() {
-                                    _this33.container && _this33.container.parentNode && _this33.container.parentNode.removeChild(_this33.container);
-                                    delete _this33.container;
-                                });
-                            } else if (_this33.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this33.context);
-                        });
-                    }
-                }, {
-                    key: "cancelContainerEvents",
-                    value: function() {
-                        this.clean.run("destroyContainerEvents");
-                    }
-                }, {
-                    key: "destroy",
-                    value: function() {
-                        var _this34 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            if (_this34.clean.hasTasks()) {
-                                _this34.component.log("destroy");
-                                (0, _client.flush)();
-                                return _this34.clean.all();
+                        },
+                        on: function(eventName, handler) {
+                            return _this32.on(eventName, handler);
+                        },
+                        jsxDom: _lib.jsxDom,
+                        document: document,
+                        dimensions: {
+                            width: width,
+                            height: height
+                        }
+                    }, options));
+                };
+                ParentComponent.prototype.openContainer = function(element) {
+                    var _this33 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        var el = void 0;
+                        if (!(el = element ? (0, _lib.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
+                        if (_this33.component.containerTemplate) {
+                            var container = _this33.renderTemplate(_this33.component.containerTemplate, {
+                                container: el
+                            });
+                            _this33.container = container;
+                            (0, _lib.hideElement)(_this33.container);
+                            (0, _lib.appendChild)(el, _this33.container);
+                            if (_this33.driver.renderedIntoContainerTemplate) {
+                                _this33.element = _this33.getOutlet();
+                                (0, _lib.hideElement)(_this33.element);
+                                if (!_this33.element) throw new Error("Could not find element to render component into");
+                                (0, _lib.hideElement)(_this33.element);
                             }
-                        });
-                    }
-                }, {
-                    key: "tryInit",
-                    value: function(method) {
-                        var _this35 = this;
-                        return _src3.ZalgoPromise.try(method).catch(function(err) {
-                            _this35.onInit.reject(err);
-                        }).then(function() {
-                            return _this35.onInit;
-                        });
-                    }
-                }, {
-                    key: "error",
-                    value: function(err) {
-                        var _this36 = this;
-                        return _src3.ZalgoPromise.try(function() {
-                            _this36.handledErrors = _this36.handledErrors || [];
-                            if (-1 === _this36.handledErrors.indexOf(err)) {
-                                _this36.handledErrors.push(err);
-                                _this36.onInit.reject(err);
-                                return _this36.destroy();
-                            }
-                        }).then(function() {
-                            if (_this36.props.onError) return _this36.props.onError(err);
-                        }).catch(function(errErr) {
-                            throw new Error("An error was encountered while handling error:\n\n " + (0, _lib.stringifyError)(err) + "\n\n" + (0, 
-                            _lib.stringifyError)(errErr));
-                        }).then(function() {
-                            if (!_this36.props.onError) throw err;
-                        });
-                    }
-                }, {
+                            _this33.clean.register("destroyContainerTemplate", function() {
+                                _this33.container && _this33.container.parentNode && _this33.container.parentNode.removeChild(_this33.container);
+                                delete _this33.container;
+                            });
+                        } else if (_this33.driver.renderedIntoContainerTemplate) throw new Error("containerTemplate needed to render " + _this33.context);
+                    });
+                };
+                ParentComponent.prototype.cancelContainerEvents = function() {
+                    this.clean.run("destroyContainerEvents");
+                };
+                ParentComponent.prototype.destroy = function() {
+                    var _this34 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        if (_this34.clean.hasTasks()) {
+                            _this34.component.log("destroy");
+                            (0, _client.flush)();
+                            return _this34.clean.all();
+                        }
+                    });
+                };
+                ParentComponent.prototype.tryInit = function(method) {
+                    var _this35 = this;
+                    return _src3.ZalgoPromise.try(method).catch(function(err) {
+                        _this35.onInit.reject(err);
+                    }).then(function() {
+                        return _this35.onInit;
+                    });
+                };
+                ParentComponent.prototype.error = function(err) {
+                    var _this36 = this;
+                    return _src3.ZalgoPromise.try(function() {
+                        _this36.handledErrors = _this36.handledErrors || [];
+                        if (-1 === _this36.handledErrors.indexOf(err)) {
+                            _this36.handledErrors.push(err);
+                            _this36.onInit.reject(err);
+                            return _this36.destroy();
+                        }
+                    }).then(function() {
+                        if (_this36.props.onError) return _this36.props.onError(err);
+                    }).catch(function(errErr) {
+                        throw new Error("An error was encountered while handling error:\n\n " + (0, _lib.stringifyError)(err) + "\n\n" + (0, 
+                        _lib.stringifyError)(errErr));
+                    }).then(function() {
+                        if (!_this36.props.onError) throw err;
+                    });
+                };
+                ParentComponent.destroyAll = function() {
+                    for (var results = []; ParentComponent.activeComponents.length; ) results.push(ParentComponent.activeComponents[0].destroy());
+                    return _src3.ZalgoPromise.all(results).then(_lib.noop);
+                };
+                _createClass(ParentComponent, [ {
                     key: "driver",
                     get: function() {
                         if (!this.context) throw new Error("Context not set");
                         return _drivers.RENDER_DRIVERS[this.context];
                     }
-                } ], [ {
-                    key: "destroyAll",
-                    value: function() {
-                        for (var results = []; ParentComponent.activeComponents.length; ) results.push(ParentComponent.activeComponents[0].destroy());
-                        return _src3.ZalgoPromise.all(results).then(_lib.noop);
-                    }
                 } ]);
                 return ParentComponent;
-            }()).prototype, "getOutlet", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
+            }(_base.BaseComponent)).prototype, "getOutlet", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "prefetch", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "prefetch"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "loadHTML", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "loadHTML"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "buildUrl", [ _lib.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "buildUrl"), _class.prototype), 
@@ -6889,38 +6288,12 @@
         },
         "./src/component/parent/props.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }();
+            };
             exports.normalizeProp = normalizeProp;
             exports.normalizeProps = function(component, instance, props) {
                 var result = {};
@@ -6971,22 +6344,22 @@
                                 return "function" == typeof prop.queryValue ? prop.queryValue(value) : value;
                             });
                         }(prop, 0, value) ]).then(function(_ref3) {
-                            var _ref4 = _slicedToArray(_ref3, 2), queryParam = _ref4[0], queryValue = _ref4[1], result = void 0;
+                            var queryParam = _ref3[0], queryValue = _ref3[1], result = void 0;
                             if ("boolean" == typeof queryValue) result = "1"; else if ("string" == typeof queryValue) result = queryValue.toString(); else {
                                 if ("function" == typeof queryValue) return;
                                 if ("object" === (void 0 === queryValue ? "undefined" : _typeof(queryValue)) && null !== queryValue) {
                                     if ("json" !== prop.serialization) {
                                         result = (0, _lib.dotify)(queryValue, key);
                                         for (var _iterator3 = Object.keys(result), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                                            var _ref5;
+                                            var _ref4;
                                             if (_isArray3) {
                                                 if (_i3 >= _iterator3.length) break;
-                                                _ref5 = _iterator3[_i3++];
+                                                _ref4 = _iterator3[_i3++];
                                             } else {
                                                 if ((_i3 = _iterator3.next()).done) break;
-                                                _ref5 = _i3.value;
+                                                _ref4 = _i3.value;
                                             }
-                                            var dotkey = _ref5;
+                                            var dotkey = _ref4;
                                             params[dotkey] = result[dotkey];
                                         }
                                         return;
@@ -7036,9 +6409,7 @@
         },
         "./src/component/parent/validate.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -7109,35 +6480,8 @@
         },
         "./src/component/window.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isZoidComponentWindow = void 0;
-            var _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }();
             exports.buildChildWindowName = function(name, version) {
                 var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 options.id = (0, _lib.uniqueID)();
@@ -7168,13 +6512,11 @@
                 return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_");
             }
             exports.isZoidComponentWindow = (0, _lib.memoize)(function() {
-                if (!window.name) return !1;
-                var _window$name$split = window.name.split("__");
-                return "xcomponent" === _slicedToArray(_window$name$split, 1)[0];
+                return !!window.name && "xcomponent" === window.name.split("__")[0];
             });
             var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function() {
                 if (!window.name) throw new Error("Can not get component meta without window name");
-                var _window$name$split3 = window.name.split("__"), _window$name$split4 = _slicedToArray(_window$name$split3, 4), zoidcomp = _window$name$split4[0], name = _window$name$split4[1], version = _window$name$split4[2], encodedOptions = _window$name$split4[3];
+                var _window$name$split2 = window.name.split("__"), zoidcomp = _window$name$split2[0], name = _window$name$split2[1], version = _window$name$split2[2], encodedOptions = _window$name$split2[3];
                 if ("xcomponent" !== zoidcomp) throw new Error("Window not rendered by zoid - got " + zoidcomp);
                 var str, componentMeta = void 0;
                 try {
@@ -7227,9 +6569,7 @@
         },
         "./src/constants.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var ZOID = exports.ZOID = "zoid", PROP_TYPES = (exports.__ZOID__ = "__" + ZOID + "__", 
             exports.POST_MESSAGE = {
                 INIT: ZOID + "_init",
@@ -7301,9 +6641,7 @@
         },
         "./src/drivers/angular.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.angular = void 0;
             var _lib = __webpack_require__("./src/lib/index.js");
             exports.angular = {
@@ -7375,9 +6713,7 @@
         },
         "./src/drivers/angular2.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.angular2 = void 0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -7434,31 +6770,14 @@
         },
         "./src/drivers/glimmer.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
                 }
                 return target;
-            }, _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }();
+            };
             exports.glimmer = {
                 global: function() {},
                 register: function(component, GlimmerComponent) {
@@ -7474,7 +6793,7 @@
                                 }
                             });
                             superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                        }(_class, GlimmerComponent);
+                        }(_class, _GlimmerComponent);
                         function _class() {
                             !function(instance, Constructor) {
                                 if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
@@ -7482,24 +6801,19 @@
                             return function(self, call) {
                                 if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                                 return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                            }(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+                            }(this, _GlimmerComponent.apply(this, arguments));
                         }
-                        _createClass(_class, [ {
-                            key: "didInsertElement",
-                            value: function() {
-                                component.render(_extends({}, this.args), this.element);
-                            }
-                        } ]);
+                        _class.prototype.didInsertElement = function() {
+                            component.render(_extends({}, this.args), this.element);
+                        };
                         return _class;
-                    }();
+                    }(GlimmerComponent);
                 }
             };
         },
         "./src/drivers/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _script = __webpack_require__("./src/drivers/script.js");
             Object.keys(_script).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -7566,26 +6880,9 @@
         },
         "./src/drivers/react.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.react = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _lib = __webpack_require__("./src/lib/index.js");
+            var _lib = __webpack_require__("./src/lib/index.js");
             exports.react = {
                 global: function() {
                     if (window.React && window.ReactDOM) return {
@@ -7622,7 +6919,7 @@
                                 }
                             });
                             superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                        }(_class, React.Component);
+                        }(_class, _React$Component);
                         function _class() {
                             !function(instance, Constructor) {
                                 if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
@@ -7630,40 +6927,31 @@
                             return function(self, call) {
                                 if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                                 return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                            }(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+                            }(this, _React$Component.apply(this, arguments));
                         }
-                        _createClass(_class, [ {
-                            key: "render",
-                            value: function() {
-                                return React.createElement("div", null);
-                            }
-                        }, {
-                            key: "componentDidMount",
-                            value: function() {
-                                component.log("instantiate_react_component");
-                                var el = ReactDOM.findDOMNode(this), parent = component.init((0, _lib.extend)({}, this.props), null, el);
-                                this.setState({
-                                    parent: parent
-                                });
-                                parent.render(el);
-                            }
-                        }, {
-                            key: "componentDidUpdate",
-                            value: function() {
-                                this.state && this.state.parent && this.state.parent.updateProps((0, _lib.extend)({}, this.props));
-                            }
-                        } ]);
+                        _class.prototype.render = function() {
+                            return React.createElement("div", null);
+                        };
+                        _class.prototype.componentDidMount = function() {
+                            component.log("instantiate_react_component");
+                            var el = ReactDOM.findDOMNode(this), parent = component.init((0, _lib.extend)({}, this.props), null, el);
+                            this.setState({
+                                parent: parent
+                            });
+                            parent.render(el);
+                        };
+                        _class.prototype.componentDidUpdate = function() {
+                            this.state && this.state.parent && this.state.parent.updateProps((0, _lib.extend)({}, this.props));
+                        };
                         return _class;
-                    }();
+                    }(React.Component);
                     return component.react;
                 }
             };
         },
         "./src/drivers/script.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var script = exports.script = {
                 global: function() {
                     return window.document;
@@ -7706,9 +6994,7 @@
         },
         "./src/drivers/vue.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.vue = void 0;
             var _lib = __webpack_require__("./src/lib/index.js");
             exports.vue = {
@@ -7733,9 +7019,7 @@
         },
         "./src/error.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.PopupOpenError = PopupOpenError;
             exports.IntegrationError = IntegrationError;
             exports.RenderError = RenderError;
@@ -7754,9 +7038,7 @@
         },
         "./src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./src/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -7777,9 +7059,7 @@
         },
         "./src/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONSTANTS = exports.postRobot = exports.getCurrentScriptDir = void 0;
             exports.create = function(options) {
                 return new _component.Component(options);
@@ -7819,9 +7099,7 @@
         },
         "./src/lib/css.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isPerc = isPerc;
             exports.isPx = isPx;
             exports.toNum = toNum;
@@ -7858,9 +7136,7 @@
         },
         "./src/lib/decorators.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.memoized = function(target, name, descriptor) {
                 var method = descriptor.value;
                 descriptor.value = function() {
@@ -7881,35 +7157,9 @@
         },
         "./src/lib/dom.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.parseQuery = exports.documentReady = void 0;
-            var _slicedToArray = function() {
-                return function(arr, i) {
-                    if (Array.isArray(arr)) return arr;
-                    if (Symbol.iterator in Object(arr)) return function(arr, i) {
-                        var _arr = [], _n = !0, _d = !1, _e = void 0;
-                        try {
-                            for (var _s, _i = arr[Symbol.iterator](); !(_n = (_s = _i.next()).done); _n = !0) {
-                                _arr.push(_s.value);
-                                if (i && _arr.length === i) break;
-                            }
-                        } catch (err) {
-                            _d = !0;
-                            _e = err;
-                        } finally {
-                            try {
-                                !_n && _i.return && _i.return();
-                            } finally {
-                                if (_d) throw _e;
-                            }
-                        }
-                        return _arr;
-                    }(arr, i);
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                };
-            }(), _extends = Object.assign || function(target) {
+            var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -8005,12 +7255,12 @@
             exports.formatQuery = formatQuery;
             exports.extendQuery = extendQuery;
             exports.extendUrl = function(url) {
-                var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, query = options.query || {}, hash = options.hash || {}, originalUrl = void 0, originalHash = void 0, _url$split = url.split("#"), _url$split2 = _slicedToArray(_url$split, 2);
-                originalUrl = _url$split2[0];
-                originalHash = _url$split2[1];
-                var _originalUrl$split = originalUrl.split("?"), _originalUrl$split2 = _slicedToArray(_originalUrl$split, 2);
-                originalUrl = _originalUrl$split2[0];
-                var queryString = extendQuery(_originalUrl$split2[1], query), hashString = extendQuery(originalHash, hash);
+                var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, query = options.query || {}, hash = options.hash || {}, originalUrl = void 0, originalHash = void 0, _url$split = url.split("#");
+                originalUrl = _url$split[0];
+                originalHash = _url$split[1];
+                var _originalUrl$split = originalUrl.split("?");
+                originalUrl = _originalUrl$split[0];
+                var queryString = extendQuery(_originalUrl$split[1], query), hashString = extendQuery(originalHash, hash);
                 queryString && (originalUrl = originalUrl + "?" + queryString);
                 hashString && (originalUrl = originalUrl + "#" + hashString);
                 return originalUrl;
@@ -8524,9 +7774,7 @@
         },
         "./src/lib/fn.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.noop = function() {};
             exports.once = function(method) {
                 var called = !1, result = void 0;
@@ -8590,9 +7838,7 @@
         },
         "./src/lib/global.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.global = void 0;
             exports.globalFor = globalFor;
             exports.localGlobal = localGlobal;
@@ -8612,9 +7858,7 @@
         },
         "./src/lib/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _dom = __webpack_require__("./src/lib/dom.js");
             Object.keys(_dom).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -8690,9 +7934,7 @@
         },
         "./src/lib/logger.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.setLogLevel = function(logLevel) {
                 if (-1 === _client.logLevels.indexOf(logLevel)) throw new Error("Invalid logLevel: " + logLevel);
                 _client.config.logLevel = logLevel;
@@ -8715,9 +7957,7 @@
         },
         "./src/lib/promise.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.denodeify = function(method) {
                 return function() {
                     var self = this, args = Array.prototype.slice.call(arguments);
@@ -8753,9 +7993,7 @@
         },
         "./src/lib/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {

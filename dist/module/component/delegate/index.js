@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.DelegateComponent = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31,7 +29,7 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
     function DelegateComponent(component, source, options) {
         _classCallCheck(this, DelegateComponent);
 
-        var _this = _possibleConstructorReturn(this, (DelegateComponent.__proto__ || Object.getPrototypeOf(DelegateComponent)).call(this));
+        var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
 
         _this.component = component;
         _this.clean.set('source', source);
@@ -109,60 +107,57 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
         return _this;
     }
 
-    _createClass(DelegateComponent, [{
-        key: 'watchForClose',
-        value: function watchForClose() {
-            var _this2 = this;
+    DelegateComponent.prototype.watchForClose = function watchForClose() {
+        var _this2 = this;
 
-            var closeWindowListener = (0, _src.onCloseWindow)(this.source, function () {
-                return _this2.destroy();
-            }, 3000);
-            this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
-        }
-    }, {
-        key: 'getOverrides',
-        value: function getOverrides(context) {
+        var closeWindowListener = (0, _src.onCloseWindow)(this.source, function () {
+            return _this2.destroy();
+        }, 3000);
+        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+    };
 
-            var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides;
+    DelegateComponent.prototype.getOverrides = function getOverrides(context) {
 
-            var overrides = {};
+        var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides;
 
-            var self = this;
+        var overrides = {};
 
-            var _loop = function _loop() {
-                if (_isArray3) {
-                    if (_i3 >= _iterator3.length) return 'break';
-                    _ref3 = _iterator3[_i3++];
-                } else {
-                    _i3 = _iterator3.next();
-                    if (_i3.done) return 'break';
-                    _ref3 = _i3.value;
-                }
+        var self = this;
 
-                var key = _ref3;
-
-                overrides[key] = function delegateOverride() {
-                    // $FlowFixMe
-                    return _parent.ParentComponent.prototype[key].apply(self, arguments);
-                };
-            };
-
-            for (var _iterator3 = Object.keys(delegateOverrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                var _ref3;
-
-                var _ret = _loop();
-
-                if (_ret === 'break') break;
+        var _loop = function _loop() {
+            if (_isArray3) {
+                if (_i3 >= _iterator3.length) return 'break';
+                _ref3 = _iterator3[_i3++];
+            } else {
+                _i3 = _iterator3.next();
+                if (_i3.done) return 'break';
+                _ref3 = _i3.value;
             }
 
-            return overrides;
+            var key = _ref3;
+
+            overrides[key] = function delegateOverride() {
+                // $FlowFixMe
+                return _parent.ParentComponent.prototype[key].apply(self, arguments);
+            };
+        };
+
+        for (var _iterator3 = Object.keys(delegateOverrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+            var _ref3;
+
+            var _ret = _loop();
+
+            if (_ret === 'break') break;
         }
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            return this.clean.all();
-        }
-    }, {
+
+        return overrides;
+    };
+
+    DelegateComponent.prototype.destroy = function destroy() {
+        return this.clean.all();
+    };
+
+    _createClass(DelegateComponent, [{
         key: 'driver',
         get: function get() {
 

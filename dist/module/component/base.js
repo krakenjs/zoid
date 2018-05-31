@@ -1,11 +1,7 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.BaseComponent = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _src = require('zalgo-promise/src');
 
@@ -128,102 +124,94 @@ var BaseComponent = exports.BaseComponent = function () {
         this.event = (0, _lib.eventEmitter)();
     }
 
-    _createClass(BaseComponent, [{
-        key: 'addProp',
-        value: function addProp(options, name, def) {
-            (0, _lib.copyProp)(options, this, name, def);
-        }
-    }, {
-        key: 'on',
-        value: function on(eventName, handler) {
-            return this.event.on(eventName, handler);
-        }
-    }, {
-        key: 'listeners',
-        value: function listeners() {
-            throw new Error('Expected listeners to be implemented');
-        }
-    }, {
-        key: 'error',
-        value: function error(err) {
-            throw new Error('Expected error to be implemented - got ' + (0, _lib.stringifyError)(err));
+    BaseComponent.prototype.addProp = function addProp(options, name, def) {
+        (0, _lib.copyProp)(options, this, name, def);
+    };
+
+    BaseComponent.prototype.on = function on(eventName, handler) {
+        return this.event.on(eventName, handler);
+    };
+
+    BaseComponent.prototype.listeners = function listeners() {
+        throw new Error('Expected listeners to be implemented');
+    };
+
+    BaseComponent.prototype.error = function error(err) {
+        throw new Error('Expected error to be implemented - got ' + (0, _lib.stringifyError)(err));
+    };
+
+    /*  Listen
+        ------
+         Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
+        post-messages, so this sets up an easy way to create a collection of listeners in one go.
+         All post-messaging is done using post-robot.
+    */
+
+    BaseComponent.prototype.listen = function listen(win, domain) {
+        var _this = this;
+
+        if (!win) {
+            throw this.component.createError('window to listen to not set');
         }
 
-        /*  Listen
-            ------
-             Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
-            post-messages, so this sets up an easy way to create a collection of listeners in one go.
-             All post-messaging is done using post-robot.
-        */
+        if (!domain) {
+            throw new Error('Must pass domain to listen to');
+        }
 
-    }, {
-        key: 'listen',
-        value: function listen(win, domain) {
-            var _this = this;
+        if (!this.listeners) {
+            return;
+        }
 
-            if (!win) {
-                throw this.component.createError('window to listen to not set');
+        var listeners = this.listeners();
+
+        var _loop = function _loop() {
+            if (_isArray2) {
+                if (_i2 >= _iterator2.length) return 'break';
+                _ref2 = _iterator2[_i2++];
+            } else {
+                _i2 = _iterator2.next();
+                if (_i2.done) return 'break';
+                _ref2 = _i2.value;
             }
 
-            if (!domain) {
-                throw new Error('Must pass domain to listen to');
-            }
-
-            if (!this.listeners) {
-                return;
-            }
-
-            var listeners = this.listeners();
-
-            var _loop = function _loop() {
-                if (_isArray2) {
-                    if (_i2 >= _iterator2.length) return 'break';
-                    _ref2 = _iterator2[_i2++];
-                } else {
-                    _i2 = _iterator2.next();
-                    if (_i2.done) return 'break';
-                    _ref2 = _i2.value;
-                }
-
-                var listenerName = _ref2;
+            var listenerName = _ref2;
 
 
-                var name = listenerName.replace(/^zoid_/, '');
+            var name = listenerName.replace(/^zoid_/, '');
 
-                var errorHandler = function errorHandler(err) {
-                    _this.error(err);
-                };
-
-                var listener = (0, _src2.on)(listenerName, { window: win, domain: domain, errorHandler: errorHandler }, function (_ref3) {
-                    var source = _ref3.source,
-                        data = _ref3.data;
-
-                    _this.component.log('listener_' + name);
-                    return listeners[listenerName].call(_this, source, data);
-                });
-
-                var errorListener = (0, _src2.on)(listenerName, { window: win, errorHandler: errorHandler }, function (_ref4) {
-                    var origin = _ref4.origin;
-
-                    _this.component.logError('unexpected_listener_' + name, { origin: origin, domain: domain.toString() });
-                    _this.error(new Error('Unexpected ' + name + ' message from domain ' + origin + ' -- expected message from ' + domain.toString()));
-                });
-
-                _this.clean.register(function () {
-                    listener.cancel();
-                    errorListener.cancel();
-                });
+            var errorHandler = function errorHandler(err) {
+                _this.error(err);
             };
 
-            for (var _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-                var _ref2;
+            var listener = (0, _src2.on)(listenerName, { window: win, domain: domain, errorHandler: errorHandler }, function (_ref3) {
+                var source = _ref3.source,
+                    data = _ref3.data;
 
-                var _ret = _loop();
+                _this.component.log('listener_' + name);
+                return listeners[listenerName].call(_this, source, data);
+            });
 
-                if (_ret === 'break') break;
-            }
+            var errorListener = (0, _src2.on)(listenerName, { window: win, errorHandler: errorHandler }, function (_ref4) {
+                var origin = _ref4.origin;
+
+                _this.component.logError('unexpected_listener_' + name, { origin: origin, domain: domain.toString() });
+                _this.error(new Error('Unexpected ' + name + ' message from domain ' + origin + ' -- expected message from ' + domain.toString()));
+            });
+
+            _this.clean.register(function () {
+                listener.cancel();
+                errorListener.cancel();
+            });
+        };
+
+        for (var _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+            var _ref2;
+
+            var _ret = _loop();
+
+            if (_ret === 'break') break;
         }
-    }]);
+    };
 
     return BaseComponent;
 }();

@@ -1,11 +1,7 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.react = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _lib = require('../lib');
 
@@ -62,36 +58,31 @@ var react = exports.react = {
                 function _class() {
                     _classCallCheck(this, _class);
 
-                    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+                    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
                 }
 
-                _createClass(_class, [{
-                    key: 'render',
-                    value: function render() {
-                        return React.createElement('div', null);
+                _class.prototype.render = function render() {
+                    return React.createElement('div', null);
+                };
+
+                _class.prototype.componentDidMount = function componentDidMount() {
+                    component.log('instantiate_react_component');
+
+                    var el = ReactDOM.findDOMNode(this);
+
+                    var parent = component.init((0, _lib.extend)({}, this.props), null, el);
+
+                    this.setState({ parent: parent });
+
+                    parent.render(el);
+                };
+
+                _class.prototype.componentDidUpdate = function componentDidUpdate() {
+
+                    if (this.state && this.state.parent) {
+                        this.state.parent.updateProps((0, _lib.extend)({}, this.props));
                     }
-                }, {
-                    key: 'componentDidMount',
-                    value: function componentDidMount() {
-                        component.log('instantiate_react_component');
-
-                        var el = ReactDOM.findDOMNode(this);
-
-                        var parent = component.init((0, _lib.extend)({}, this.props), null, el);
-
-                        this.setState({ parent: parent });
-
-                        parent.render(el);
-                    }
-                }, {
-                    key: 'componentDidUpdate',
-                    value: function componentDidUpdate() {
-
-                        if (this.state && this.state.parent) {
-                            this.state.parent.updateProps((0, _lib.extend)({}, this.props));
-                        }
-                    }
-                }]);
+                };
 
                 return _class;
             }(React.Component);
