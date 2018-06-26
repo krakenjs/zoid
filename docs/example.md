@@ -20,11 +20,11 @@ var MyLoginComponent = zoid.create({
 
     url: 'http://www.my-site.com/my-login-component',
 
-    // The size of the component on their page
+    // The size of the component on their page. Only px and % strings are supported
 
     dimensions: {
-        width: 400,
-        height: 200
+        width: '400px',
+        height: '200px'
     },
 
     // The properties they can (or must) pass down to my component. This is optional.
