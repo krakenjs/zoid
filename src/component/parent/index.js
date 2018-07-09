@@ -441,9 +441,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     @memoized
     buildUrl() : ZalgoPromise<string> {
+
+        let propUrl : (string | void) = this.props.url;
+
         return ZalgoPromise.all([
 
-            this.props.url,
+            propUrl,
             // $FlowFixMe
             propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
 

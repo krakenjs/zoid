@@ -119,7 +119,7 @@ export function validateProps<P>(component : Component<P>, props : PropsType, re
     for (let key of component.getPropNames()) {
 
         // $FlowFixMe
-        let prop: MixedPropDefinitionType<P> = component.getProp(key);
+        let prop : MixedPropDefinitionType<P> = component.getProp(key);
         let value = props[key];
 
         if (prop && !props.hasOwnProperty(key)) {

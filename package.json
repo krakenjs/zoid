@@ -7,7 +7,7 @@
     "setup": "npm install && npm run flow-typed",
     "demo": "serve . --port 1337",
     "lint": "eslint src/ test/ *.js",
-    "flow-typed": "flow-typed install",
+    "flow-typed": "rm -rf flow-typed && flow-typed install",
     "flow": "flow",
     "flow:build": "flow gen-flow-files ./src/index.js --out-dir ./dist/module",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
@@ -48,9 +48,9 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "flow-bin": "^0.70.0",
+    "flow-bin": "^0.76",
     "grumbler-scripts": "^2.0.19",
-    "mocha": "^3.5.0",
+    "mocha": "^4",
     "serve": "^6.5.6"
   },
   "dependencies": {
