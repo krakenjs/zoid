@@ -1147,11 +1147,13 @@ export class ParentComponent<P> extends BaseComponent<P> {
                     return;
                 }
 
+                let el = this.renderTemplate(this.component.prerenderTemplate, {
+                    jsxDom:   jsxDom.bind(doc),
+                    document: doc
+                });
+
                 try {
-                    writeElementToWindow(win, this.renderTemplate(this.component.prerenderTemplate, {
-                        jsxDom:   jsxDom.bind(doc),
-                        document: doc
-                    }));
+                    writeElementToWindow(win, el);
                 } catch (err) {
                     // pass
                 }
