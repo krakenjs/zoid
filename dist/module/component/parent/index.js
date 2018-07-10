@@ -450,7 +450,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.buildUrl = function buildUrl() {
         var _this7 = this;
 
-        return _src3.ZalgoPromise.all([this.props.url,
+        var propUrl = this.props.url;
+
+        return _src3.ZalgoPromise.all([propUrl,
         // $FlowFixMe
         (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props)]).then(function (_ref7) {
             var url = _ref7[0],

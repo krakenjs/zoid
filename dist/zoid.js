@@ -2678,7 +2678,7 @@
             "use strict";
             exports.__esModule = !0;
             exports.SEND_MESSAGE_STRATEGIES = void 0;
-            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
+            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), _lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
                 try {
                     __webpack_require__("./node_modules/post-robot/src/compat/index.js").emulateIERestrictions(window, win);
@@ -2705,7 +2705,7 @@
                 }
             };
             SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
-                if (needsBridgeForBrowser()) {
+                if ((0, _lib.needsGlobalMessagingForBrowser)()) {
                     if (!(0, _src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
                     if (!1 !== (0, _src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
                     var foreignGlobal = win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
@@ -3217,6 +3217,11 @@
             };
             exports.jsonParse = function(item) {
                 return JSON.parse(item);
+            };
+            exports.needsGlobalMessagingForBrowser = function() {
+                if ((0, _src2.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) return !0;
+                if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) return !0;
+                return !1;
             };
             var _src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _src2 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js");
             exports.once = function(method) {
@@ -5747,8 +5752,8 @@
                     (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props));
                 };
                 ParentComponent.prototype.buildUrl = function() {
-                    var _this7 = this;
-                    return _src3.ZalgoPromise.all([ this.props.url, (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref7) {
+                    var _this7 = this, propUrl = this.props.url;
+                    return _src3.ZalgoPromise.all([ propUrl, (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props) ]).then(function(_ref7) {
                         var url = _ref7[0], query = _ref7[1];
                         return url && !_this7.component.getValidDomain(url) ? url : _src3.ZalgoPromise.try(function() {
                             return url || _this7.component.getUrl(_this7.props.env, _this7.props);
