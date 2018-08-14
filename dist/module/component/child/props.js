@@ -32,6 +32,7 @@ function normalizeChildProps(component, props, origin) {
 
     var result = {};
 
+    // $FlowFixMe
     for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
         var _ref;
 

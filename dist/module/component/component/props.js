@@ -3,7 +3,7 @@
 exports.__esModule = true;
 exports.getInternalProps = getInternalProps;
 
-require('zalgo-promise/src');
+var _src = require('zalgo-promise/src');
 
 var _lib = require('../../lib');
 
@@ -23,10 +23,10 @@ function getInternalProps() {
 
         env: {
             type: 'string',
-            required: false,
             queryParam: true,
-            def: function def() {
-                return this.defaultEnv;
+            required: false,
+            def: function def(props, component) {
+                return component.defaultEnv;
             }
         },
 
@@ -41,20 +41,10 @@ function getInternalProps() {
 
         logLevel: {
             type: 'string',
-            required: false,
             queryParam: true,
-            def: function def() {
-                return this.defaultLogLevel;
+            def: function def(props, component) {
+                return component.defaultLogLevel;
             }
-        },
-
-        // A custom url to use to render the component
-
-        url: {
-            type: 'string',
-            required: false,
-            promise: true,
-            sendToChild: false
         },
 
         dimensions: {
@@ -66,8 +56,8 @@ function getInternalProps() {
             type: 'string',
             required: false,
             queryParam: true,
-            def: function def() {
-                return this.version;
+            def: function def(props, component) {
+                return component.version;
             }
         },
 
@@ -82,18 +72,27 @@ function getInternalProps() {
         onDisplay: {
             type: 'function',
             required: false,
-            noop: true,
-            promisify: true,
-            memoize: true,
-            sendToChild: false
+            sendToChild: false,
+
+            def: function def() {
+                return _lib.noop;
+            },
+            decorate: function decorate(onDisplay) {
+                return (0, _lib.memoize)((0, _lib.promisify)(onDisplay));
+            }
         },
 
         onEnter: {
             type: 'function',
             required: false,
-            noop: true,
-            promisify: true,
-            sendToChild: false
+            sendToChild: false,
+
+            def: function def() {
+                return _lib.noop;
+            },
+            decorate: function decorate(onEnter) {
+                return (0, _lib.promisify)(onEnter);
+            }
         },
 
         // When we get an INIT message from the child
@@ -101,9 +100,14 @@ function getInternalProps() {
         onRender: {
             type: 'function',
             required: false,
-            noop: true,
-            promisify: true,
-            sendToChild: false
+            sendToChild: false,
+
+            def: function def() {
+                return _lib.noop;
+            },
+            decorate: function decorate(onRender) {
+                return (0, _lib.promisify)(onRender);
+            }
         },
 
         // When the user closes the component.
@@ -111,10 +115,14 @@ function getInternalProps() {
         onClose: {
             type: 'function',
             required: false,
-            noop: true,
-            once: true,
-            promisify: true,
-            sendToChild: false
+            sendToChild: false,
+
+            def: function def() {
+                return _lib.noop;
+            },
+            decorate: function decorate(onClose) {
+                return (0, _lib.once)((0, _lib.promisify)(onClose));
+            }
         },
 
         // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -122,16 +130,14 @@ function getInternalProps() {
         onTimeout: {
             type: 'function',
             required: false,
-            memoize: true,
-            promisify: true,
             sendToChild: false,
             def: function def() {
                 return function onTimeout(err) {
-                    if (this.props.onError) {
-                        return this.props.onError(err);
-                    }
-                    throw err;
+                    return this.props.onError(err);
                 };
+            },
+            decorate: function decorate(onTimeout) {
+                return (0, _lib.memoize)((0, _lib.promisify)(onTimeout));
             }
         },
 
@@ -140,15 +146,16 @@ function getInternalProps() {
         onError: {
             type: 'function',
             required: false,
-            promisify: true,
             sendToChild: true,
-            once: true,
             def: function def() {
                 return function onError(err) {
                     setTimeout(function () {
                         throw err;
                     });
                 };
+            },
+            decorate: function decorate(onError) {
+                return (0, _lib.once)((0, _lib.promisify)(onError));
             }
         }
     };

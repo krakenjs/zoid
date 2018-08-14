@@ -23,8 +23,6 @@ exports.awaitFrameLoad = awaitFrameLoad;
 exports.awaitFrameWindow = awaitFrameWindow;
 exports.iframe = iframe;
 exports.addEventListener = addEventListener;
-exports.scanForJavascript = scanForJavascript;
-exports.getQueryParam = getQueryParam;
 exports.formatQuery = formatQuery;
 exports.extendQuery = extendQuery;
 exports.extendUrl = extendUrl;
@@ -431,25 +429,6 @@ function addEventListener(obj, event, handler) {
     };
 }
 
-/*  Scan For Javascript
-    -------------------
-
-    Check if the string contains anything which could conceivably be run as javascript if the string is set to innerHTML
-*/
-
-function scanForJavascript(str) {
-
-    if (!str) {
-        return str;
-    }
-
-    if (str.match(/<script|on\w+\s*=|javascript:|expression\s*\(|eval\(|new\s*Function/)) {
-        throw new Error('HTML contains potential javascript: ' + str);
-    }
-
-    return str;
-}
-
 var parseQuery = exports.parseQuery = (0, _fn.memoize)(function (queryString) {
 
     var params = {};
@@ -485,10 +464,6 @@ var parseQuery = exports.parseQuery = (0, _fn.memoize)(function (queryString) {
 
     return params;
 });
-
-function getQueryParam(name) {
-    return parseQuery(window.location.search.slice(1))[name];
-}
 
 function formatQuery() {
     var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -1126,9 +1101,16 @@ function fixScripts(el) {
     }
 }
 
-function jsxDom(name, props, content) {
+function jsxDom(element, props) {
+    for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+        children[_key - 2] = arguments[_key];
+    }
 
-    name = name.toLowerCase();
+    if (typeof element === 'function') {
+        return element(props, children);
+    }
+
+    var name = element.toLowerCase();
 
     var doc = this && this.createElement ? this : window.document;
 
@@ -1145,20 +1127,24 @@ function jsxDom(name, props, content) {
         }
     }
 
+    var content = children[0],
+        remaining = children.slice(1);
+
+
     if (name === 'style') {
 
         if (typeof content !== 'string') {
             throw new TypeError('Expected ' + name + ' tag content to be string, got ' + (typeof content === 'undefined' ? 'undefined' : _typeof(content)));
         }
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error('Expected only text content for ' + name + ' tag');
         }
 
         setStyle(el, content, doc);
     } else if (name === 'iframe') {
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error('Expected only single child node for iframe');
         }
 
@@ -1181,18 +1167,18 @@ function jsxDom(name, props, content) {
             throw new TypeError('Expected ' + name + ' tag content to be string, got ' + (typeof content === 'undefined' ? 'undefined' : _typeof(content)));
         }
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error('Expected only text content for ' + name + ' tag');
         }
 
         el.text = content;
     } else {
-        for (var i = 2; i < arguments.length; i++) {
-            if (typeof arguments[i] === 'string') {
-                var textNode = document.createTextNode(arguments[i]);
+        for (var i = 0; i < children.length; i++) {
+            if (typeof children[i] === 'string') {
+                var textNode = document.createTextNode(children[i]);
                 appendChild(el, textNode);
             } else {
-                appendChild(el, arguments[i]);
+                appendChild(el, children[i]);
             }
         }
     }

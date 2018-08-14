@@ -26,7 +26,8 @@ var PROP_TYPES = exports.PROP_TYPES = {
     OBJECT: 'object',
     FUNCTION: 'function',
     BOOLEAN: 'boolean',
-    NUMBER: 'number'
+    NUMBER: 'number',
+    ARRAY: 'array'
 };
 
 var INITIAL_PROPS = exports.INITIAL_PROPS = {

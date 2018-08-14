@@ -4,123 +4,12 @@ exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.normalizeProp = normalizeProp;
 exports.normalizeProps = normalizeProps;
 exports.propsToQuery = propsToQuery;
 
 var _src = require('zalgo-promise/src');
 
 var _lib = require('../../lib');
-
-function isDefined(value) {
-    return value !== null && value !== undefined && value !== '';
-}
-
-/*  Normalize Prop
-    --------------
-
-    Turn prop into normalized value, using defaults, function options, etc.
-*/
-
-// $FlowFixMe
-function normalizeProp(component, instance, props, key, value) {
-    // eslint-disable-line complexity
-
-    var prop = component.getProp(key);
-
-    var resultValue = void 0;
-
-    if (prop.value) {
-        resultValue = prop.value;
-    } else if (prop.def && (!props.hasOwnProperty(key) || !isDefined(value))) {
-        resultValue = prop.def.call(component, props);
-    } else {
-        resultValue = value;
-    }
-
-    if (!resultValue && prop.alias && props[prop.alias]) {
-        resultValue = props[prop.alias];
-    }
-
-    var decorated = false;
-
-    if (prop.decorate && resultValue !== null && resultValue !== undefined) {
-        resultValue = prop.decorate.call(instance, resultValue, props);
-        decorated = true;
-    }
-
-    var type = prop.type;
-
-    if (type === 'boolean') {
-        // $FlowFixMe
-        resultValue = Boolean(resultValue);
-    } else if (type === 'function') {
-
-        if (!resultValue && prop.noop) {
-            // $FlowFixMe
-            resultValue = _lib.noop;
-
-            if (!decorated && prop.decorate) {
-                // $FlowFixMe
-                resultValue = prop.decorate.call(instance, _lib.noop, props);
-            }
-        }
-
-        if (resultValue && typeof resultValue === 'function') {
-
-            resultValue = resultValue.bind(instance);
-
-            // If prop.denodeify is set, denodeify the function (accepts callback -> returns promise)
-
-            if (prop.denodeify) {
-                // $FlowFixMe
-                resultValue = (0, _lib.denodeify)(resultValue);
-            }
-
-            if (prop.promisify) {
-                // $FlowFixMe
-                resultValue = (0, _lib.promisify)(resultValue);
-            }
-
-            // Wrap the function in order to log when it is called
-
-            var original = resultValue;
-            // $FlowFixMe
-            resultValue = function resultValue() {
-                component.log('call_prop_' + key);
-                return original.apply(this, arguments);
-            };
-
-            // If prop.once is set, ensure the function can only be called once
-
-            if (prop.once) {
-                // $FlowFixMe
-                resultValue = (0, _lib.once)(resultValue);
-            }
-
-            // If prop.memoize is set, ensure the function is memoized (first return resultValue is cached and returned for any future calls)
-
-            if (prop.memoize) {
-                // $FlowFixMe
-                resultValue = (0, _lib.memoize)(resultValue);
-            }
-        }
-    } else if (type === 'string') {
-        // pass
-
-    } else if (type === 'object') {
-        // pass
-
-    } else if (type === 'number') {
-        if (resultValue !== undefined) {
-            // $FlowFixMe
-            resultValue = parseInt(resultValue, 10);
-        }
-    }
-
-    // $FlowFixMe
-    return resultValue;
-}
 
 /*  Normalize Props
     ---------------
@@ -129,12 +18,15 @@ function normalizeProp(component, instance, props, key, value) {
 */
 
 function normalizeProps(component, instance, props) {
+    var isUpdate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    // eslint-disable-line complexity
 
     var result = {};
-
-    // $FlowFixMe
     props = props || {};
 
+    var propNames = isUpdate ? [] : component.getPropNames();
+
+    // $FlowFixMe
     for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
         var _ref;
 
@@ -149,15 +41,12 @@ function normalizeProps(component, instance, props) {
 
         var key = _ref;
 
-        if (component.getPropNames().indexOf(key) !== -1) {
-            // $FlowFixMe
-            result[key] = normalizeProp(component, instance, props, key, props[key]);
-        } else {
-            result[key] = props[key];
+        if (propNames.indexOf(key) === -1) {
+            propNames.push(key);
         }
     }
 
-    for (var _iterator2 = component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+    for (var _iterator2 = propNames, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
         var _ref2;
 
         if (_isArray2) {
@@ -171,14 +60,74 @@ function normalizeProps(component, instance, props) {
 
         var _key = _ref2;
 
-        if (!props.hasOwnProperty(_key) && (!instance.props || !instance.props.hasOwnProperty(_key))) {
+        var propDef = component.getProp(_key);
+        var value = props[_key];
 
-            // $FlowFixMe
-            var normalizedProp = normalizeProp(component, instance, props, _key, props[_key]);
-
-            if (normalizedProp !== undefined) {
-                result[_key] = normalizedProp;
+        if (!propDef) {
+            if (component.looseProps) {
+                result[_key] = value;
+                continue;
+            } else {
+                throw new Error('Unrecognized prop: ' + _key);
             }
+        }
+
+        if (!(0, _lib.isDefined)(value) && propDef.alias) {
+            value = props[propDef.alias];
+        }
+
+        if (!(0, _lib.isDefined)(value) && propDef.value) {
+            value = propDef.value();
+        }
+
+        if (!(0, _lib.isDefined)(value) && propDef.def) {
+            value = propDef.def(props, component);
+        }
+
+        if ((0, _lib.isDefined)(value)) {
+            if (propDef.type === 'array' ? !Array.isArray(value) : (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== propDef.type) {
+                throw new TypeError('Prop is not of type ' + propDef.type + ': ' + _key);
+            }
+        } else if (propDef.required !== false) {
+            throw new Error('Expected prop ' + _key + ' to be passed');
+        }
+
+        result[_key] = value;
+    }
+
+    for (var _iterator3 = Object.keys(result), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+        var _ref3;
+
+        if (_isArray3) {
+            if (_i3 >= _iterator3.length) break;
+            _ref3 = _iterator3[_i3++];
+        } else {
+            _i3 = _iterator3.next();
+            if (_i3.done) break;
+            _ref3 = _i3.value;
+        }
+
+        var _key2 = _ref3;
+
+        var _propDef = component.getProp(_key2);
+        var _value = result[_key2];
+
+        if (!_propDef) {
+            continue;
+        }
+
+        if (_propDef.validate) {
+            // $FlowFixMe
+            _propDef.validate(_value, result);
+        }
+
+        if (_propDef.decorate) {
+            // $FlowFixMe
+            result[_key2] = _propDef.decorate(_value, result);
+        }
+
+        if (result[_key2] && _propDef.type === 'function') {
+            result[_key2] = result[_key2].bind(instance);
         }
     }
 
@@ -256,9 +205,9 @@ function propsToQuery(propsDef, props) {
             // $FlowFixMe
             getQueryParam(prop, key, value),
             // $FlowFixMe
-            getQueryValue(prop, key, value)]).then(function (_ref3) {
-                var queryParam = _ref3[0],
-                    queryValue = _ref3[1];
+            getQueryValue(prop, key, value)]).then(function (_ref4) {
+                var queryParam = _ref4[0],
+                    queryValue = _ref4[1];
 
 
                 var result = void 0;
@@ -276,19 +225,19 @@ function propsToQuery(propsDef, props) {
                     } else {
                         result = (0, _lib.dotify)(queryValue, key);
 
-                        for (var _iterator3 = Object.keys(result), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                            var _ref4;
+                        for (var _iterator4 = Object.keys(result), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+                            var _ref5;
 
-                            if (_isArray3) {
-                                if (_i3 >= _iterator3.length) break;
-                                _ref4 = _iterator3[_i3++];
+                            if (_isArray4) {
+                                if (_i4 >= _iterator4.length) break;
+                                _ref5 = _iterator4[_i4++];
                             } else {
-                                _i3 = _iterator3.next();
-                                if (_i3.done) break;
-                                _ref4 = _i3.value;
+                                _i4 = _iterator4.next();
+                                if (_i4.done) break;
+                                _ref5 = _i4.value;
                             }
 
-                            var dotkey = _ref4;
+                            var dotkey = _ref5;
 
                             params[dotkey] = result[dotkey];
                         }

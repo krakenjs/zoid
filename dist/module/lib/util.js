@@ -28,8 +28,13 @@ exports.count = count;
 exports.stringify = stringify;
 exports.stringifyError = stringifyError;
 exports.eventEmitter = eventEmitter;
+exports.isDefined = isDefined;
+exports.cycle = cycle;
+exports.promisify = promisify;
 
-var _src = require('cross-domain-safe-weakmap/src');
+var _src = require('zalgo-promise/src');
+
+var _src2 = require('cross-domain-safe-weakmap/src');
 
 /*  Url Encode
     ----------
@@ -400,7 +405,7 @@ function dotify(obj) {
     return newobj;
 }
 
-var objectIDs = new _src.WeakMap();
+var objectIDs = new _src2.WeakMap();
 
 function getObjectID(obj) {
 
@@ -590,5 +595,26 @@ function eventEmitter() {
             triggered[eventName] = true;
             this.trigger(eventName);
         }
+    };
+}
+
+function isDefined(value) {
+    return value !== null && value !== undefined;
+}
+
+function cycle(method) {
+    return _src.ZalgoPromise['try'](method).then(function () {
+        return cycle(method);
+    });
+}
+
+function promisify(method) {
+    return function promisifyWRapper() {
+        var _this = this,
+            _arguments = arguments;
+
+        return _src.ZalgoPromise['try'](function () {
+            return method.apply(_this, _arguments);
+        });
     };
 }

@@ -26,18 +26,6 @@ Object.keys(_fn).forEach(function (key) {
   });
 });
 
-var _promise = require('./promise');
-
-Object.keys(_promise).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _promise[key];
-    }
-  });
-});
-
 var _util = require('./util');
 
 Object.keys(_util).forEach(function (key) {

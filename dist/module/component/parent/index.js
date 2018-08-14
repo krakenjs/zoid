@@ -32,8 +32,6 @@ var _error = require('../../error');
 
 var _drivers = require('./drivers');
 
-var _validate = require('./validate');
-
 var _props = require('./props');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -427,10 +425,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     */
 
     ParentComponent.prototype.setProps = function setProps(props) {
-        var required = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+        var isUpdate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
 
-        (0, _validate.validateProps)(this.component, props, required);
         if (this.component.validate) {
             this.component.validate(this.component, props);
         }
@@ -438,7 +435,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         // $FlowFixMe
         this.props = this.props || {};
 
-        (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props));
+        (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props, isUpdate));
     };
 
     /*  Build Url
@@ -450,29 +447,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.buildUrl = function buildUrl() {
         var _this7 = this;
 
-        var propUrl = this.props.url;
-
-        return _src3.ZalgoPromise.all([propUrl,
-        // $FlowFixMe
-        (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props)]).then(function (_ref7) {
-            var url = _ref7[0],
-                query = _ref7[1];
-
-
-            // Do not extend the url if it is for a different domain
-
-            if (url && !_this7.component.getValidDomain(url)) {
-                return url;
-            }
-
-            return _src3.ZalgoPromise['try'](function () {
-
-                return url || _this7.component.getUrl(_this7.props.env, _this7.props);
-            }).then(function (finalUrl) {
-
-                query.xcomponent = '1';
-                return (0, _lib.extendUrl)(finalUrl, { query: query });
-            });
+        return (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props).then(function (query) {
+            var url = _this7.component.getUrl(_this7.props.env, _this7.props);
+            return (0, _lib.extendUrl)(url, { query: _extends({}, query, { xcomponent: '1' }) });
         });
     };
 
@@ -480,10 +457,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var _this8 = this;
 
         return _src3.ZalgoPromise['try'](function () {
-            return _this8.props.url;
-        }).then(function (url) {
 
-            var domain = _this8.component.getDomain(url, _this8.props.env);
+            var domain = _this8.component.getDomain(null, _this8.props.env);
 
             if (domain) {
                 return domain;
@@ -511,22 +486,23 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var result = {};
 
         for (var _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref8;
+            var _ref7;
 
             if (_isArray) {
                 if (_i >= _iterator.length) break;
-                _ref8 = _iterator[_i++];
+                _ref7 = _iterator[_i++];
             } else {
                 _i = _iterator.next();
                 if (_i.done) break;
-                _ref8 = _i.value;
+                _ref7 = _i.value;
             }
 
-            var key = _ref8;
+            var key = _ref7;
 
             var prop = this.component.getProp(key);
 
             if (!prop || prop.sendToChild !== false) {
+                // $FlowFixMe
                 result[key] = this.props[key];
             }
         }
@@ -543,7 +519,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.updateProps = function updateProps(props) {
         var _this9 = this;
 
-        this.setProps(props, false);
+        this.setProps(props, true);
 
         return this.onInit.then(function () {
             if (_this9.childExports) {
@@ -649,18 +625,18 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         };
 
         for (var _iterator2 = this.component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref9;
+            var _ref8;
 
             if (_isArray2) {
                 if (_i2 >= _iterator2.length) break;
-                _ref9 = _iterator2[_i2++];
+                _ref8 = _iterator2[_i2++];
             } else {
                 _i2 = _iterator2.next();
                 if (_i2.done) break;
-                _ref9 = _i2.value;
+                _ref8 = _i2.value;
             }
 
-            var propName = _ref9;
+            var propName = _ref8;
 
             var prop = this.component.getProp(propName);
 
@@ -702,8 +678,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 }
             }
 
-        }).then(function (_ref10) {
-            var data = _ref10.data;
+        }).then(function (_ref9) {
+            var data = _ref9.data;
 
 
             _this14.clean.register(data.destroy);
@@ -718,14 +694,14 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var _loop = function _loop() {
             if (_isArray3) {
                 if (_i3 >= _iterator3.length) return 'break';
-                _ref11 = _iterator3[_i3++];
+                _ref10 = _iterator3[_i3++];
             } else {
                 _i3 = _iterator3.next();
                 if (_i3.done) return 'break';
-                _ref11 = _i3.value;
+                _ref10 = _i3.value;
             }
 
-            var key = _ref11;
+            var key = _ref10;
 
             var val = overrides[key];
 
@@ -759,7 +735,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         };
 
         _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref11;
+            var _ref10;
 
             var _ret = _loop();
 
@@ -835,10 +811,6 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         });
     };
 
-    ParentComponent.prototype.hijack = function hijack(targetElement) {
-        targetElement.target = this.childWindowName;
-    };
-
     /*  Run Timeout
         -----------
          Set a timeout on the initial render, and call this.props.onTimeout if we don't get an init call in time.
@@ -873,9 +845,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     */
 
     ParentComponent.prototype.listeners = function listeners() {
-        var _ref12;
+        var _ref11;
 
-        return _ref12 = {}, _ref12[_constants.POST_MESSAGE.INIT] = function (source, data) {
+        return _ref11 = {}, _ref11[_constants.POST_MESSAGE.INIT] = function (source, data) {
 
             this.childExports = data.exports;
 
@@ -889,11 +861,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 props: this.getPropsForChild(),
                 context: this.context
             };
-        }, _ref12[_constants.POST_MESSAGE.CLOSE] = function (source, data) {
+        }, _ref11[_constants.POST_MESSAGE.CLOSE] = function (source, data) {
             this.close(data.reason);
-        }, _ref12[_constants.POST_MESSAGE.CHECK_CLOSE] = function () {
+        }, _ref11[_constants.POST_MESSAGE.CHECK_CLOSE] = function () {
             this.checkClose();
-        }, _ref12[_constants.POST_MESSAGE.RESIZE] = function (source, data) {
+        }, _ref11[_constants.POST_MESSAGE.RESIZE] = function (source, data) {
             var _this20 = this;
 
             return _src3.ZalgoPromise['try'](function () {
@@ -901,15 +873,15 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                     return _this20.resize(data.width, data.height);
                 }
             });
-        }, _ref12[_constants.POST_MESSAGE.ONRESIZE] = function () {
+        }, _ref11[_constants.POST_MESSAGE.ONRESIZE] = function () {
             this.event.trigger('resize');
-        }, _ref12[_constants.POST_MESSAGE.HIDE] = function () {
+        }, _ref11[_constants.POST_MESSAGE.HIDE] = function () {
             this.hide();
-        }, _ref12[_constants.POST_MESSAGE.SHOW] = function () {
+        }, _ref11[_constants.POST_MESSAGE.SHOW] = function () {
             this.show();
-        }, _ref12[_constants.POST_MESSAGE.ERROR] = function (source, data) {
+        }, _ref11[_constants.POST_MESSAGE.ERROR] = function (source, data) {
             this.error(new Error(data.error));
-        }, _ref12;
+        }, _ref11;
     };
 
     /*  Resize
@@ -920,9 +892,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.resize = function resize(width, height) {
         var _this21 = this;
 
-        var _ref13 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-            _ref13$waitForTransit = _ref13.waitForTransition,
-            waitForTransition = _ref13$waitForTransit === undefined ? true : _ref13$waitForTransit;
+        var _ref12 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+            _ref12$waitForTransit = _ref12.waitForTransition,
+            waitForTransition = _ref12$waitForTransit === undefined ? true : _ref12$waitForTransit;
 
         return _src3.ZalgoPromise['try'](function () {
             _this21.component.log('resize', { height: (0, _lib.stringify)(height), width: (0, _lib.stringify)(width) });
@@ -1177,11 +1149,13 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                     return;
                 }
 
+                var el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                    jsxDom: _lib.jsxDom.bind(doc),
+                    document: doc
+                });
+
                 try {
-                    (0, _lib.writeElementToWindow)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                        jsxDom: _lib.jsxDom.bind(doc),
-                        document: doc
-                    }));
+                    (0, _lib.writeElementToWindow)(win, el);
                 } catch (err) {
                     // pass
                 }
@@ -1199,11 +1173,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var _ref14 = this.component.dimensions || {},
-            _ref14$width = _ref14.width,
-            width = _ref14$width === undefined ? _constants.DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref14$width,
-            _ref14$height = _ref14.height,
-            height = _ref14$height === undefined ? _constants.DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref14$height;
+        var _ref13 = this.component.dimensions || {},
+            _ref13$width = _ref13.width,
+            width = _ref13$width === undefined ? _constants.DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref13$width,
+            _ref13$height = _ref13.height,
+            height = _ref13$height === undefined ? _constants.DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref13$height;
 
         return renderer.call(this, _extends({
             id: _constants.CLASS_NAMES.ZOID + '-' + this.component.tag + '-' + this.props.uid,
