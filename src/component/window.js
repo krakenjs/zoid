@@ -33,27 +33,21 @@ function decode(str : string) : string {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(name : string, version : string, options : Object = {}) : string {
+export function buildChildWindowName(name : string, options : Object = {}) : string {
 
     options.id = uniqueID();
     options.domain = getDomain(window);
 
     let encodedName = normalize(name);
-    let encodedVersion = normalize(version);
     let encodedOptions = encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error(`Invalid name: ${ name } - must contain alphanumeric characters`);
     }
 
-    if (!encodedVersion) {
-        throw new Error(`Invalid version: ${ version } - must contain alphanumeric characters`);
-    }
-
     return [
         'xcomponent',
         encodedName,
-        encodedVersion,
         encodedOptions,
         ''
     ].join('__');
@@ -86,7 +80,7 @@ export let getComponentMeta = memoize(() => {
         throw new Error(`Can not get component meta without window name`);
     }
 
-    let [ zoidcomp, name, version, encodedOptions ] = window.name.split('__');
+    let [ zoidcomp, name, encodedOptions ] = window.name.split('__');
 
     if (zoidcomp !== 'xcomponent') {
         throw new Error(`Window not rendered by zoid - got ${ zoidcomp }`);
@@ -101,7 +95,6 @@ export let getComponentMeta = memoize(() => {
     }
 
     componentMeta.name = name;
-    componentMeta.version = version.replace(/_/g, '.');
 
     return componentMeta;
 });

@@ -42,7 +42,6 @@ export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 type envPropType = string;
 type uidPropType = string;
 type urlPropType = string;
-type versionPropType = string;
 type timeoutPropType = number;
 type logLevelPropType = string;
 type dimensionsPropType = DimensionsType;
@@ -57,7 +56,6 @@ type onErrorPropType = EventHandlerType<mixed>;
 export type BuiltInPropsType = {
     env : envPropType,
     uid : uidPropType,
-    version? : versionPropType,
     timeout? : timeoutPropType,
     logLevel : logLevelPropType,
     dimensions? : dimensionsPropType,
@@ -74,7 +72,6 @@ export type PropsType = {
     env? : envPropType,
     uid? : uidPropType,
     url? : urlPropType,
-    version? : versionPropType,
     timeout? : timeoutPropType,
     logLevel? : logLevelPropType,
     dimensions? : dimensionsPropType,
@@ -90,7 +87,6 @@ export type PropsType = {
 export type BuiltInPropsDefinitionType<P> = {
     env : StringPropDefinitionType<envPropType, P>,
     uid : StringPropDefinitionType<uidPropType, P>,
-    version : StringPropDefinitionType<versionPropType, P>,
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     logLevel : StringPropDefinitionType<logLevelPropType, P>,
     dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
@@ -143,15 +139,6 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         dimensions: {
             type:     'object',
             required: false
-        },
-
-        version: {
-            type:       'string',
-            required:   false,
-            queryParam: true,
-            def(props, component) : string {
-                return component.version;
-            }
         },
 
         // A millisecond timeout before onTimeout is called

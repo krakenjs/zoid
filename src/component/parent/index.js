@@ -388,7 +388,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             });
         }
 
-        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props });
+        return buildChildWindowName(this.component.name, { uid, tag, componentParent, renderParent, props });
     }
 
 
@@ -532,8 +532,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
                 return;
             }
-
-            bridgeUrl = extendUrl(bridgeUrl, { query: { version: this.component.version } });
 
             let bridgeDomain = this.component.getBridgeDomain(this.props.env);
 

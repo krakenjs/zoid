@@ -52,7 +52,6 @@ export type ComponentOptionsType<P> = {
     defaultLogLevel? : string,
     allowedParentDomains? : StringMatcherType,
 
-    version? : string,
     defaultEnv? : string,
 
     contexts? : { iframe? : boolean, popup? : boolean },
@@ -94,7 +93,6 @@ export class Component<P> extends BaseComponent<P> {
     defaultLogLevel : string
     allowedParentDomains : StringMatcherType
 
-    version : string
     defaultEnv : ?string
     buildUrl : (BuiltInPropsType & P) => string
 
@@ -152,8 +150,6 @@ export class Component<P> extends BaseComponent<P> {
         this.addProp(options, 'dimensions');
         this.addProp(options, 'scrolling');
         this.addProp(options, 'listenForResize');
-
-        this.addProp(options, 'version', 'latest');
 
         // The default environment we should render to if none is specified in the parent
 
