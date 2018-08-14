@@ -36,7 +36,7 @@ export type ComponentOptionsType<P> = {
     tag : string,
 
     url? : EnvString,
-    buildUrl? : (BuiltInPropsType & P) => string | ZalgoPromise<string>,
+    buildUrl? : (BuiltInPropsType & P) => string,
 
     domain? : EnvStringRegExp,
     bridgeUrl? : EnvString,
@@ -95,8 +95,8 @@ export class Component<P> extends BaseComponent<P> {
     allowedParentDomains : StringMatcherType
 
     version : string
-    defaultEnv : string
-    buildUrl : (BuiltInPropsType & P) => string | ZalgoPromise<string>
+    defaultEnv : ?string
+    buildUrl : (BuiltInPropsType & P) => string
 
     contexts : { iframe? : boolean, popup? : boolean }
     defaultContext : string
@@ -402,7 +402,7 @@ export class Component<P> extends BaseComponent<P> {
         }
     }
 
-    getUrl(env : string, props : BuiltInPropsType & P) : (string | ZalgoPromise<string>) {
+    getUrl(env : string, props : BuiltInPropsType & P) : string {
 
         // $FlowFixMe
         let url = this.getForEnv(this.url, env);

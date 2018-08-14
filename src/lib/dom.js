@@ -373,25 +373,6 @@ export function addEventListener(obj : HTMLElement, event : string, handler : (e
     };
 }
 
-/*  Scan For Javascript
-    -------------------
-
-    Check if the string contains anything which could conceivably be run as javascript if the string is set to innerHTML
-*/
-
-export function scanForJavascript(str : string) : string {
-
-    if (!str) {
-        return str;
-    }
-
-    if (str.match(/<script|on\w+\s*=|javascript:|expression\s*\(|eval\(|new\s*Function/)) {
-        throw new Error(`HTML contains potential javascript: ${ str }`);
-    }
-
-    return str;
-}
-
 export let parseQuery = memoize((queryString : string) : { [ string ] : string } => {
 
     let params = {};
@@ -414,11 +395,6 @@ export let parseQuery = memoize((queryString : string) : { [ string ] : string }
 
     return params;
 });
-
-
-export function getQueryParam(name : string) : ?string {
-    return parseQuery(window.location.search.slice(1))[name];
-}
 
 export function formatQuery(obj : { [ string ] : string } = {}) : string {
 
@@ -948,9 +924,13 @@ export function fixScripts(el : HTMLElement, doc : Document = window.document) {
     }
 }
 
-export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content : ElementRefType) : HTMLElement {
+export function jsxDom(element : string | Function, props : ?{ [ string ] : mixed }, ...children : Array<ElementRefType>) : HTMLElement {
 
-    name = name.toLowerCase();
+    if (typeof element === 'function') {
+        return element(props, children);
+    }
+
+    let name = element.toLowerCase();
 
     let doc = (this && this.createElement)
         ? this
@@ -969,13 +949,15 @@ export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content :
         }
     }
 
+    let [ content, ...remaining ] = children;
+
     if (name === 'style') {
 
         if (typeof content !== 'string') {
             throw new TypeError(`Expected ${ name } tag content to be string, got ${ typeof content }`);
         }
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error(`Expected only text content for ${ name } tag`);
         }
 
@@ -983,7 +965,7 @@ export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content :
 
     } else if (name === 'iframe') {
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error(`Expected only single child node for iframe`);
         }
 
@@ -1007,19 +989,19 @@ export function jsxDom(name : string, props : ?{ [ string ] : mixed }, content :
             throw new TypeError(`Expected ${ name } tag content to be string, got ${ typeof content }`);
         }
 
-        if (arguments.length > 3) {
+        if (remaining.length) {
             throw new Error(`Expected only text content for ${ name } tag`);
         }
 
         el.text = content;
 
     } else {
-        for (let i = 2; i < arguments.length; i++) {
-            if (typeof arguments[i] === 'string') {
-                let textNode = document.createTextNode(arguments[i]);
+        for (let i = 0; i < children.length; i++) {
+            if (typeof children[i] === 'string') {
+                let textNode = document.createTextNode(children[i]);
                 appendChild(el, textNode);
             } else {
-                appendChild(el, arguments[i]);
+                appendChild(el, children[i]);
             }
         }
     }

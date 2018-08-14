@@ -6,7 +6,7 @@ import { testComponent } from '../component';
 
 describe('zoid templates and styles', () => {
 
-    it('should focus an zoid popup on click of the overlay', done => {
+    it('should focus a zoid popup on click of the overlay', done => {
         testComponent.renderPopup({
 
             onEnter() {
@@ -21,7 +21,7 @@ describe('zoid templates and styles', () => {
         });
     });
 
-    it('should close an zoid popup on click of the overlay close button', done => {
+    it('should close a zoid popup on click of the overlay close button', done => {
 
         testComponent.renderPopup({
 
@@ -40,7 +40,7 @@ describe('zoid templates and styles', () => {
     });
 
 
-    it('should close an zoid iframe on click of the overlay close button', done => {
+    it('should close a zoid iframe on click of the overlay close button', done => {
 
         testComponent.renderIframe({
 

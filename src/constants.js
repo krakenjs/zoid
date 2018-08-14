@@ -25,7 +25,8 @@ export const PROP_TYPES = {
     OBJECT:   `object`,
     FUNCTION: `function`,
     BOOLEAN:  `boolean`,
-    NUMBER:   `number`
+    NUMBER:   `number`,
+    ARRAY:    `array`
 };
 
 export const INITIAL_PROPS = {

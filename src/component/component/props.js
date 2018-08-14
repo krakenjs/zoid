@@ -1,39 +1,37 @@
 /* @flow */
 
-import { type ZalgoPromise } from 'zalgo-promise/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { uniqueID } from '../../lib';
+import { uniqueID, once, memoize, noop, promisify } from '../../lib';
 import { type DimensionsType } from '../../types';
 
-type PropDefinitionType<T, P, S : string> = {
+import type { Component } from './index';
+
+type PropDefinitionType<T, P, S : string> = {|
     type : S,
     alias? : string,
-    value? : T,
+    value? : () => ?T,
     required? : boolean,
-    noop? : boolean,
-    once? : boolean,
-    memoize? : boolean,
-    promisify? : boolean,
     queryParam? : boolean | string | (T) => (string | ZalgoPromise<string>),
     queryValue? : (T) => (ZalgoPromise<mixed> | mixed),
     sendToChild? : boolean,
     allowDelegate? : boolean,
     validate? : (T, PropsType & P) => void,
-    decorate? : (T, PropsType & P) => (void | ZalgoPromise<T> | T),
-    def? : (P) => ?T,
+    decorate? : (T, PropsType & P) => (T | void),
+    def? : (P, Component<P>) => ? T,
     sameDomain? : boolean,
     serialization? : 'json' | 'dotify',
-    childDecorate? : (T) => ?T,
-    denodeify? : boolean
-};
+    childDecorate? : (T) => ?T
+|};
 
 export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;
 export type StringPropDefinitionType<T : string, P> = PropDefinitionType<T, P, 'string'>;
 export type NumberPropDefinitionType<T : number, P> = PropDefinitionType<T, P, 'number'>;
 export type FunctionPropDefinitionType<T : Function, P> = PropDefinitionType<T, P, 'function'>;
+export type ArrayPropDefinitionType<T : Array<*>, P> = PropDefinitionType<T, P, 'array'>;
 export type ObjectPropDefinitionType<T : Object, P> = PropDefinitionType<T, P, 'object'>;
 
-export type MixedPropDefinitionType<P> = BooleanPropDefinitionType<*, P> | StringPropDefinitionType<*, P> | NumberPropDefinitionType<*, P> | FunctionPropDefinitionType<*, P> | ObjectPropDefinitionType<*, P>;
+export type MixedPropDefinitionType<P> = BooleanPropDefinitionType<*, P> | StringPropDefinitionType<*, P> | NumberPropDefinitionType<*, P> | FunctionPropDefinitionType<*, P> | ObjectPropDefinitionType<*, P> | ArrayPropDefinitionType<*, P>;
 
 export type UserPropsDefinitionType<P> = {
     [string] : MixedPropDefinitionType<P>
@@ -59,7 +57,6 @@ type onErrorPropType = EventHandlerType<mixed>;
 export type BuiltInPropsType = {
     env : envPropType,
     uid : uidPropType,
-    url? : urlPropType,
     version? : versionPropType,
     timeout? : timeoutPropType,
     logLevel : logLevelPropType,
@@ -93,7 +90,6 @@ export type PropsType = {
 export type BuiltInPropsDefinitionType<P> = {
     env : StringPropDefinitionType<envPropType, P>,
     uid : StringPropDefinitionType<uidPropType, P>,
-    url : StringPropDefinitionType<urlPropType, P>,
     version : StringPropDefinitionType<versionPropType, P>,
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     logLevel : StringPropDefinitionType<logLevelPropType, P>,
@@ -121,10 +117,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
 
         env: {
             type:       'string',
-            required:   false,
             queryParam: true,
-            def() : string {
-                return this.defaultEnv;
+            required:   false,
+            def(props, component) : ?string {
+                return component.defaultEnv;
             }
         },
 
@@ -138,20 +134,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
 
         logLevel: {
             type:       'string',
-            required:   false,
             queryParam: true,
-            def() : string {
-                return this.defaultLogLevel;
+            def(props, component) : string {
+                return component.defaultLogLevel;
             }
-        },
-
-        // A custom url to use to render the component
-
-        url: {
-            type:        'string',
-            required:    false,
-            promise:     true,
-            sendToChild: false
         },
 
         dimensions: {
@@ -163,8 +149,8 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             type:       'string',
             required:   false,
             queryParam: true,
-            def() : string {
-                return this.version;
+            def(props, component) : string {
+                return component.version;
             }
         },
 
@@ -179,18 +165,29 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         onDisplay: {
             type:        'function',
             required:    false,
-            noop:        true,
-            promisify:   true,
-            memoize:     true,
-            sendToChild: false
+            sendToChild: false,
+
+            def() : Function {
+                return noop;
+            },
+
+            decorate(onDisplay : Function) : Function {
+                return memoize(promisify(onDisplay));
+            }
         },
 
         onEnter: {
             type:        'function',
             required:    false,
-            noop:        true,
-            promisify:   true,
-            sendToChild: false
+            sendToChild: false,
+
+            def() : Function {
+                return noop;
+            },
+
+            decorate(onEnter : Function) : Function {
+                return promisify(onEnter);
+            }
         },
 
         // When we get an INIT message from the child
@@ -198,9 +195,15 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         onRender: {
             type:        'function',
             required:    false,
-            noop:        true,
-            promisify:   true,
-            sendToChild: false
+            sendToChild: false,
+
+            def() : Function {
+                return noop;
+            },
+
+            decorate(onRender : Function) : Function {
+                return promisify(onRender);
+            }
         },
 
         // When the user closes the component.
@@ -208,10 +211,15 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         onClose: {
             type:        'function',
             required:    false,
-            noop:        true,
-            once:        true,
-            promisify:   true,
-            sendToChild: false
+            sendToChild: false,
+
+            def() : Function {
+                return noop;
+            },
+
+            decorate(onClose : Function) : Function {
+                return once(promisify(onClose));
+            }
         },
 
         // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
@@ -219,16 +227,14 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         onTimeout: {
             type:        'function',
             required:    false,
-            memoize:     true,
-            promisify:   true,
             sendToChild: false,
-            def() : (() => void) {
+            def() : Function {
                 return function onTimeout(err : mixed) : void {
-                    if (this.props.onError) {
-                        return this.props.onError(err);
-                    }
-                    throw err;
+                    return this.props.onError(err);
                 };
+            },
+            decorate(onTimeout : Function) : Function {
+                return memoize(promisify(onTimeout));
             }
         },
 
@@ -237,15 +243,17 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         onError: {
             type:        'function',
             required:    false,
-            promisify:   true,
             sendToChild: true,
-            once:        true,
             def() : (() => void) {
                 return function onError(err : mixed) {
                     setTimeout(() => {
                         throw err;
                     });
                 };
+            },
+
+            decorate(onError : Function) : Function {
+                return once(promisify(onError));
             }
         }
     };

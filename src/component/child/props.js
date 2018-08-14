@@ -30,6 +30,7 @@ export function normalizeChildProps<P>(component : Component<P>, props : (BuiltI
 
     let result = {};
 
+    // $FlowFixMe
     for (let key of Object.keys(props)) {
 
         let prop = component.getProp(key);

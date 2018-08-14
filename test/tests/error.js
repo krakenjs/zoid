@@ -181,7 +181,7 @@ describe('zoid error cases', () => {
         }
     });
 
-    it('should call onclose when a popup is closed by someone other than zoid', done => {
+    it('should call onclose when a popup is closed by someone other tha zoid', done => {
 
         testComponent.renderPopup({
 
@@ -197,7 +197,7 @@ describe('zoid error cases', () => {
         });
     });
 
-    it('should call onclose when an iframe is closed by someone other than zoid', done => {
+    it('should call onclose when an iframe is closed by someone other tha zoid', done => {
 
         testComponent.renderIframe({
 

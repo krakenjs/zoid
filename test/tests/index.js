@@ -5,7 +5,6 @@ import './actions';
 import './drivers';
 import './error';
 import './templates';
-import './hijack';
 import './options';
 import './parent';
 import './validation';

@@ -1,6 +1,7 @@
 /* @flow */
 /* eslint max-lines: off */
 
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import type { CancelableType } from '../types';
@@ -553,5 +554,21 @@ export function eventEmitter() : EventEmitterType {
             triggered[eventName] = true;
             this.trigger(eventName);
         }
+    };
+}
+
+export function isDefined(value : ?mixed) : boolean {
+    return value !== null && value !== undefined;
+}
+
+export function cycle(method : Function) : ZalgoPromise<void> {
+    return ZalgoPromise.try(method).then(() => cycle(method));
+}
+
+export function promisify<T>(method : (...args : Array<mixed>) => T | ZalgoPromise<T>) : (...args : Array<mixed>) => ZalgoPromise<T> {
+    return function promisifyWRapper() : ZalgoPromise<T> {
+        return ZalgoPromise.try(() => {
+            return method.apply(this, arguments);
+        });
     };
 }

@@ -6,7 +6,7 @@ import { testComponent } from '../component';
 
 describe('zoid actions', () => {
 
-    it('should close an zoid popup', done => {
+    it('should close a zoid popup', done => {
 
         testComponent.renderPopup({
 
@@ -24,7 +24,7 @@ describe('zoid actions', () => {
         });
     });
 
-    it('should close an zoid iframe', done => {
+    it('should close a zoid iframe', done => {
 
         testComponent.renderIframe({
 
@@ -39,7 +39,7 @@ describe('zoid actions', () => {
         }, document.body);
     });
 
-    it('should focus an zoid popup', done => {
+    it('should focus a zoid popup', done => {
 
         testComponent.renderPopup({
 

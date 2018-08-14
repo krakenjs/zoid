@@ -125,7 +125,7 @@ describe('zoid render to parent', () => {
         }, document.body);
     });
 
-    it('should close an zoid renderToParent iframe on click of the overlay close button', done => {
+    it('should close a zoid renderToParent iframe on click of the overlay close button', done => {
 
         testComponent.renderIframe({
             childEntered: () => {
@@ -162,7 +162,7 @@ describe('zoid render to parent', () => {
         }, document.body);
     });
 
-    it('should close an zoid renderToParent popup on click of the overlay close button', done => {
+    it('should close a zoid renderToParent popup on click of the overlay close button', done => {
 
         testComponent.renderIframe({
 
@@ -197,7 +197,7 @@ describe('zoid render to parent', () => {
         }, document.body);
     });
 
-    it('should focus an zoid renderToParent popup on click of the overlay', done => {
+    it('should focus a zoid renderToParent popup on click of the overlay', done => {
 
         testComponent.renderIframe({
 

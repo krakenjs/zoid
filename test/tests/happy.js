@@ -1,9 +1,8 @@
 /* @flow */
 
 import { assert } from 'chai';
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import { testComponent, testComponent4 } from '../component';
+import { testComponent } from '../component';
 
 describe('zoid happy cases', () => {
 
@@ -12,88 +11,6 @@ describe('zoid happy cases', () => {
         testComponent.renderIframe({
             onEnter: done
         }, document.body);
-    });
-
-    it.skip('should enter a component rendered as an iframe with the correct dimensions', done => {
-
-        testComponent.renderIframe({
-            onEnter() {
-                if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
-                    throw new Error(`The parent and child window dimensions do not match ${ window.innerWidth }`);
-                } else {
-                    done();
-                }
-            }
-        });
-    });
-
-    it.skip('should enter a component rendered as a popup with the correct dimensions', done => {
-
-        let open = window.open;
-        window.open = function windowOpen(url, name, options) : CrossDomainWindowType {
-            assert.isTrue(options.indexOf(`width=${ testComponent.dimensions.width }`) !== -1, 'Expected width passed to window.open to be correct');
-            assert.isTrue(options.indexOf(`height=${ testComponent.dimensions.height }`) !== -1, 'Expected height passed to window.open to be correct');
-            return open.apply(this, arguments);
-        };
-
-        testComponent.renderPopup({
-            onEnter() {
-                done();
-
-                /* For some reason karma/phantomjs don't respect the passed dimensions, so can't check them this way
-
-                if (!(this.window.innerWidth === this.component.dimensions.width && this.window.innerHeight === this.component.dimensions.height)) {
-                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
-                } else {
-                    done();
-                }
-
-                */
-            }
-        });
-
-        window.open = open;
-    });
-
-    it.skip('should enter a component rendered as an iframe with no dimensions', done => {
-
-        testComponent4.renderIframe({
-            onEnter() {
-                if (!(window.innerWidth === this.window.innerWidth && window.innerHeight === this.window.innerHeight)) {
-                    throw new Error(`The parent and child window dimensions do not match ${ window.innerWidth }`);
-                } else {
-                    done();
-                }
-            }
-        });
-    });
-
-    it.skip('should enter a component rendered as a popup with no dimensions', done => {
-
-        let open = window.open;
-        window.open = function windowOpen(url, name, options) : CrossDomainWindowType {
-            assert.isTrue(options.indexOf(`width=`) === -1, 'Expected width not to be passed to window.open');
-            assert.isTrue(options.indexOf(`height=`) === -1, 'Expected height not to be passed to window.open');
-            return open.apply(this, arguments);
-        };
-
-        testComponent4.renderPopup({
-            onEnter() {
-                done();
-
-                /* Chrome opens up a new window with different dimensions to the parent, so this doesn't work
-
-                if (!(window.top.innerWidth === this.window.innerWidth && window.top.innerHeight === this.window.innerHeight)) {
-                    throw new Error('The parent and child window dimensions do not match'+'|'+ window.innerWidth);
-                } else {
-                    done();
-                }
-
-                */
-            }
-        });
-
-        window.open = open;
     });
 
     it('should enter a component rendered as an iframe and call a prop', done => {
@@ -323,23 +240,6 @@ describe('zoid happy cases', () => {
         }, document.body);
     });
 
-    it('should enter a component and call back with a parseInted number prop', done => {
-
-        testComponent.renderIframe({
-
-            numberProp: '123',
-
-            foo(result) {
-                assert.equal(result, 123);
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.numberProp);
-            `
-        }, document.body);
-    });
-
     it('should enter a component and call back with a boolean prop', done => {
 
         testComponent.renderIframe({
@@ -348,40 +248,6 @@ describe('zoid happy cases', () => {
 
             foo(result) {
                 assert.equal(result, true);
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.booleanProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with a truthy boolean prop', done => {
-
-        testComponent.renderIframe({
-
-            booleanProp: 1,
-
-            foo(result) {
-                assert.equal(result, true);
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.booleanProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with a falsy boolean prop', done => {
-
-        testComponent.renderIframe({
-
-            booleanProp: 0,
-
-            foo(result) {
-                assert.equal(result, false);
                 done();
             },
 

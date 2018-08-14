@@ -22,7 +22,6 @@ import type { ChildExportsType } from '../child';
 import type { CancelableType, Jsx, DimensionsType, ElementRefType } from '../../types';
 
 import { RENDER_DRIVERS, type ContextDriverType } from './drivers';
-import { validateProps } from './validate';
 import { propsToQuery, normalizeProps } from './props';
 
 global.props = global.props || {};
@@ -418,9 +417,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Normalize props and generate the url we'll use to render the component
     */
 
-    setProps(props : (PropsType & P), required : boolean = true) {
+    setProps(props : (PropsType & P), isUpdate : boolean = false) {
 
-        validateProps(this.component, props, required);
         if (this.component.validate) {
             this.component.validate(this.component, props);
         }
@@ -428,7 +426,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         // $FlowFixMe
         this.props = this.props || {};
 
-        extend(this.props, normalizeProps(this.component, this, props));
+        extend(this.props, normalizeProps(this.component, this, props, isUpdate));
     }
 
 
@@ -441,43 +439,18 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     @memoized
     buildUrl() : ZalgoPromise<string> {
-
-        let propUrl : (string | void) = this.props.url;
-
-        return ZalgoPromise.all([
-
-            propUrl,
-            // $FlowFixMe
-            propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
-
-        ]).then(([ url, query ]) => {
-
-            // Do not extend the url if it is for a different domain
-
-            if (url && !this.component.getValidDomain(url)) {
-                return url;
-            }
-
-            return ZalgoPromise.try(() => {
-
-                return url || this.component.getUrl(this.props.env, this.props);
-
-            }).then(finalUrl => {
-
-                query.xcomponent = '1';
-                return extendUrl(finalUrl, { query });
+        return propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
+            .then(query => {
+                let url = this.component.getUrl(this.props.env, this.props);
+                return extendUrl(url, { query: { ...query, xcomponent: '1' } });
             });
-        });
     }
 
 
     getDomain() : ZalgoPromise<string | RegExp> {
         return ZalgoPromise.try(() => {
-            return this.props.url;
 
-        }).then(url => {
-
-            let domain = this.component.getDomain(url, this.props.env);
+            let domain = this.component.getDomain(null, this.props.env);
 
             if (domain) {
                 return domain;
@@ -507,6 +480,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             let prop = this.component.getProp(key);
 
             if (!prop || prop.sendToChild !== false) {
+                // $FlowFixMe
                 result[key] = this.props[key];
             }
         }
@@ -523,7 +497,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     */
 
     updateProps(props : (PropsType & P)) : ZalgoPromise<void> {
-        this.setProps(props, false);
+        this.setProps(props, true);
 
         return this.onInit.then(() => {
             if (this.childExports) {
@@ -767,11 +741,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
             return this.driver.loadUrl.call(this, url);
         });
-    }
-
-
-    hijack(targetElement : HTMLFormElement | HTMLAnchorElement) {
-        targetElement.target = this.childWindowName;
     }
 
     /*  Run Timeout

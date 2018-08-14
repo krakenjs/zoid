@@ -92,7 +92,7 @@ Implement the component in the iframe:
 
 - [Introducing zoid](https://medium.com/@bluepnume/introducing-zoid-seamless-cross-domain-web-components-from-paypal-c0144f3e82bf#.ikbg9r1ml)
 - [Turn your web-app into a cross-domain component with five lines of code](https://medium.com/@bluepnume/turn-your-web-app-into-a-cross-domain-component-with-5-lines-of-code-ced01e6795f9#.w8ea7h6ky)
-- [A full example of how to implement and use an zoid](./docs/example.md)
+- [A full example of how to implement and use a zoid](./docs/example.md)
 - [Building PayPal's Button with zoid](https://medium.com/@bluepnume/less-is-more-reducing-thousands-of-paypal-buttons-into-a-single-iframe-using-zoid-d902d71d8875#.o3ib7y58n)
 - [PayPal Checkout - zoid powered Button and Checkout components](https://github.com/paypal/paypal-checkout)
 - [Post-Robot - the cross-domain messaging library which powers zoid](https://github.com/krakenjs/post-robot)

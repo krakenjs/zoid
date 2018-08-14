@@ -191,50 +191,6 @@ props: {
   }
   ```
 
-- **promisify** `boolean`
-
-  Should a function prop be turned into a promise-returning function
-
-  ```javascript
-  onLogin: {
-      type: 'function',
-      promisify: true
-  }
-  ```
-
-- **noop** `boolean`
-
-  Should a function prop default to noop
-
-  ```javascript
-  onLogin: {
-      type: 'function',
-      noop: true
-  }
-  ```
-
-- **once** `boolean`
-
-  Should a function prop be turned into a one-time function
-
-  ```javascript
-  onLogin: {
-      type: 'function',
-      once: true
-  }
-  ```
-
-- **memoize** `boolean`
-
-  Should a function prop be turned into a memoizing function
-
-  ```javascript
-  getExpensiveData: {
-      type: 'function',
-      memoize: true
-  }
-  ```
-
 - **serialization** `string`
 
   If `'json'`, the prop will be JSON stringified before being inserted into the url, otherwise the prop will be converted to dot-notation.
