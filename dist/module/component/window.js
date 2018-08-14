@@ -42,26 +42,21 @@ function decode(str) {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-function buildChildWindowName(name, version) {
-    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+function buildChildWindowName(name) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 
     options.id = (0, _lib.uniqueID)();
     options.domain = (0, _src.getDomain)(window);
 
     var encodedName = normalize(name);
-    var encodedVersion = normalize(version);
     var encodedOptions = encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
     }
 
-    if (!encodedVersion) {
-        throw new Error('Invalid version: ' + version + ' - must contain alphanumeric characters');
-    }
-
-    return ['xcomponent', encodedName, encodedVersion, encodedOptions, ''].join('__');
+    return ['xcomponent', encodedName, encodedOptions, ''].join('__');
 }
 
 var isZoidComponentWindow = exports.isZoidComponentWindow = (0, _lib.memoize)(function () {
@@ -95,8 +90,7 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
     var _window$name$split2 = window.name.split('__'),
         zoidcomp = _window$name$split2[0],
         name = _window$name$split2[1],
-        version = _window$name$split2[2],
-        encodedOptions = _window$name$split2[3];
+        encodedOptions = _window$name$split2[2];
 
     if (zoidcomp !== 'xcomponent') {
         throw new Error('Window not rendered by zoid - got ' + zoidcomp);
@@ -111,7 +105,6 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
     }
 
     componentMeta.name = name;
-    componentMeta.version = version.replace(/_/g, '.');
 
     return componentMeta;
 });

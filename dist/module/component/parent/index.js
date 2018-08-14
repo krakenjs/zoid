@@ -399,7 +399,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             });
         }
 
-        return (0, _window.buildChildWindowName)(this.component.name, this.component.version, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props });
+        return (0, _window.buildChildWindowName)(this.component.name, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props });
     };
 
     /*  Send to Parent
@@ -555,8 +555,6 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
                 return;
             }
-
-            bridgeUrl = (0, _lib.extendUrl)(bridgeUrl, { query: { version: _this10.component.version } });
 
             var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
 

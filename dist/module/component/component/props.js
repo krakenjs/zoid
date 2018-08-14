@@ -52,15 +52,6 @@ function getInternalProps() {
             required: false
         },
 
-        version: {
-            type: 'string',
-            required: false,
-            queryParam: true,
-            def: function def(props, component) {
-                return component.version;
-            }
-        },
-
         // A millisecond timeout before onTimeout is called
 
         timeout: {

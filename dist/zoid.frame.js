@@ -4568,7 +4568,6 @@
                     _this.addProp(options, "dimensions");
                     _this.addProp(options, "scrolling");
                     _this.addProp(options, "listenForResize");
-                    _this.addProp(options, "version", "latest");
                     _this.addProp(options, "defaultEnv");
                     _this.addProp(options, "buildUrl");
                     _this.addProp(options, "url");
@@ -4865,14 +4864,6 @@
                     dimensions: {
                         type: "object",
                         required: !1
-                    },
-                    version: {
-                        type: "string",
-                        required: !1,
-                        queryParam: !0,
-                        def: function(props, component) {
-                            return component.version;
-                        }
                     },
                     timeout: {
                         type: "number",
@@ -5653,7 +5644,7 @@
                             delete _lib.global.props[uid];
                         });
                     }
-                    return (0, _window.buildChildWindowName)(this.component.name, this.component.version, {
+                    return (0, _window.buildChildWindowName)(this.component.name, {
                         uid: uid,
                         tag: tag,
                         componentParent: componentParent,
@@ -5733,11 +5724,6 @@
                             domain && (needsBridgeParams.domain = domain);
                             var needsBridge = _src.bridge.needsBridge(needsBridgeParams), bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
                             if (bridgeUrl) {
-                                bridgeUrl = (0, _lib.extendUrl)(bridgeUrl, {
-                                    query: {
-                                        version: _this10.component.version
-                                    }
-                                });
                                 var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
                                 if (!bridgeDomain) throw new Error("Can not determine domain for bridge");
                                 return needsBridge ? _src.bridge.openBridge(bridgeUrl, bridgeDomain).then(function(result) {
@@ -6326,16 +6312,16 @@
             "use strict";
             exports.__esModule = !0;
             exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isZoidComponentWindow = void 0;
-            exports.buildChildWindowName = function(name, version) {
-                var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
+            exports.buildChildWindowName = function(name) {
+                var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                 options.id = (0, _lib.uniqueID)();
                 options.domain = (0, _src.getDomain)(window);
-                var encodedName = normalize(name), encodedVersion = normalize(version), encodedOptions = (str = JSON.stringify(options), 
-                _hiBase2.default.encode(str).replace(/\=/g, "").toLowerCase());
+                var encodedName = (str = name, str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_")), encodedOptions = function(str) {
+                    return _hiBase2.default.encode(str).replace(/\=/g, "").toLowerCase();
+                }(JSON.stringify(options));
                 var str;
                 if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
-                if (!encodedVersion) throw new Error("Invalid version: " + version + " - must contain alphanumeric characters");
-                return [ "xcomponent", encodedName, encodedVersion, encodedOptions, "" ].join("__");
+                return [ "xcomponent", encodedName, encodedOptions, "" ].join("__");
             };
             exports.getParentDomain = function() {
                 return getComponentMeta().domain;
@@ -6352,15 +6338,12 @@
             var obj, _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _hiBase = __webpack_require__("./node_modules/hi-base32/src/base32.js"), _hiBase2 = (obj = _hiBase) && obj.__esModule ? obj : {
                 default: obj
             }, _lib = __webpack_require__("./src/lib/index.js"), _constants = __webpack_require__("./src/constants.js");
-            function normalize(str) {
-                return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_");
-            }
             exports.isZoidComponentWindow = (0, _lib.memoize)(function() {
                 return !!window.name && "xcomponent" === window.name.split("__")[0];
             });
             var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function() {
                 if (!window.name) throw new Error("Can not get component meta without window name");
-                var _window$name$split2 = window.name.split("__"), zoidcomp = _window$name$split2[0], name = _window$name$split2[1], version = _window$name$split2[2], encodedOptions = _window$name$split2[3];
+                var _window$name$split2 = window.name.split("__"), zoidcomp = _window$name$split2[0], name = _window$name$split2[1], encodedOptions = _window$name$split2[2];
                 if ("xcomponent" !== zoidcomp) throw new Error("Window not rendered by zoid - got " + zoidcomp);
                 var str, componentMeta = void 0;
                 try {
@@ -6369,7 +6352,6 @@
                     throw new Error("Can not decode component-meta: " + encodedOptions + " " + (0, _lib.stringifyError)(err));
                 }
                 componentMeta.name = name;
-                componentMeta.version = version.replace(/_/g, ".");
                 return componentMeta;
             });
             function getWindowByRef(_ref) {

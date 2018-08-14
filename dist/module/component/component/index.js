@@ -129,8 +129,6 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
         _this.addProp(options, 'scrolling');
         _this.addProp(options, 'listenForResize');
 
-        _this.addProp(options, 'version', 'latest');
-
         // The default environment we should render to if none is specified in the parent
 
         _this.addProp(options, 'defaultEnv');
