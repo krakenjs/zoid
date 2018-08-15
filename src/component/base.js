@@ -9,15 +9,15 @@ import type { CancelableType } from '../types';
 
 import type { Component } from './component';
 
-type CleanupType = {
-    set : <T : mixed >(string, T) => T,
+type CleanupType<T : mixed> = {
+    set : (string, T) => T,
     register : (string | Function, ?Function) => void,
     hasTasks : () => boolean,
     all : () => ZalgoPromise<void>,
     run : (string) => ZalgoPromise<void>
 };
 
-function cleanup(obj : Object) : CleanupType {
+function cleanup(obj : Object) : CleanupType<*> {
 
     let tasks = [];
     let cleaned = false;
@@ -113,7 +113,7 @@ function cleanup(obj : Object) : CleanupType {
 
 export class BaseComponent<P> {
 
-    clean : CleanupType
+    clean : CleanupType<*>
     event : EventEmitterType
     component : Component<P>
 
