@@ -77,7 +77,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     prerenderWindow : SameDomainWindowType
 
     childExports : ?ChildExportsType<P>
-    timeout : ?TimeoutID
+    timeout : ?TimeoutID // eslint-disable-line no-undef
 
     constructor(component : Component<P>, context : string, { props } : { props : (PropsType & P) }) {
         super();
@@ -443,6 +443,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     buildUrl() : ZalgoPromise<string> {
         return ZalgoPromise.all([
 
+            // $FlowFixMe
             this.props.url,
             // $FlowFixMe
             propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)

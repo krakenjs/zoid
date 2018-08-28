@@ -21,7 +21,6 @@ describe('xcomponent drivers', () => {
                     // $FlowFixMe
                     window.React.createElement(testComponent.react, {
                         onEnter() {
-                            // eslint-disable-next-line promise/catch-or-return
                             this.close().then(done);
                         }
                     })
@@ -54,7 +53,6 @@ describe('xcomponent drivers', () => {
 
                         foo(bar) {
                             assert.equal(bar, 'bar');
-                            // eslint-disable-next-line promise/catch-or-return
                             this.close().then(done);
                         },
 
@@ -86,7 +84,6 @@ describe('xcomponent drivers', () => {
         let $scope = $rootScope.$new();
 
         $scope.onEnter = function onEnter() {
-            // eslint-disable-next-line promise/catch-or-return
             this.close().then(done);
         };
 
@@ -110,7 +107,6 @@ describe('xcomponent drivers', () => {
 
         $scope.foo = function foo(bar) {
             assert.equal(bar, 'bar');
-            // eslint-disable-next-line promise/catch-or-return
             this.close().then(done);
         };
 
@@ -137,7 +133,6 @@ describe('xcomponent drivers', () => {
         document.body.appendChild(container);
 
         window.done = function windowDone() {
-            // eslint-disable-next-line promise/catch-or-return
             this.close().then(done);
         };
 
@@ -160,7 +155,6 @@ describe('xcomponent drivers', () => {
 
         window.foo = function foo(bar) {
             assert.equal(bar, 'bar');
-            // eslint-disable-next-line promise/catch-or-return
             this.close().then(done);
         };
 
