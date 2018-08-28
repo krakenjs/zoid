@@ -1,37 +1,8 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 /* eslint max-lines: off */
 
-exports.urlEncode = urlEncode;
-exports.camelToDasherize = camelToDasherize;
-exports.dasherizeToCamel = dasherizeToCamel;
-exports.extend = extend;
-exports.values = values;
-exports.uniqueID = uniqueID;
-exports.stringifyWithFunctions = stringifyWithFunctions;
-exports.safeGet = safeGet;
-exports.capitalizeFirstLetter = capitalizeFirstLetter;
-exports.get = get;
-exports.safeInterval = safeInterval;
-exports.safeTimeout = safeTimeout;
-exports.each = each;
-exports.replaceObject = replaceObject;
-exports.copyProp = copyProp;
-exports.dotify = dotify;
-exports.getObjectID = getObjectID;
-exports.regex = regex;
-exports.regexAll = regexAll;
-exports.count = count;
-exports.stringify = stringify;
-exports.stringifyError = stringifyError;
-exports.eventEmitter = eventEmitter;
-
-var _src = require('cross-domain-safe-weakmap/src');
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 /*  Url Encode
     ----------
@@ -39,7 +10,7 @@ var _src = require('cross-domain-safe-weakmap/src');
     Replace ? and & with encoded values. Allows other values (to create more readable urls than encodeUriComponent)
 */
 
-function urlEncode(str) {
+export function urlEncode(str) {
     return str.replace(/\?/g, '%3F').replace(/&/g, '%26').replace(/#/g, '%23').replace(/\+/g, '%2B');
 }
 
@@ -49,7 +20,7 @@ function urlEncode(str) {
     Convert camelCaseText to dasherized-text
 */
 
-function camelToDasherize(string) {
+export function camelToDasherize(string) {
     return string.replace(/([A-Z])/g, function (g) {
         return '-' + g.toLowerCase();
     });
@@ -61,7 +32,7 @@ function camelToDasherize(string) {
     Convert dasherized-text to camelCaseText
 */
 
-function dasherizeToCamel(string) {
+export function dasherizeToCamel(string) {
     return string.replace(/-([a-z])/g, function (g) {
         return g[1].toUpperCase();
     });
@@ -73,7 +44,7 @@ function dasherizeToCamel(string) {
     Extend one object with another
 */
 
-function extend(obj, source) {
+export function extend(obj, source) {
     if (!source) {
         return obj;
     }
@@ -93,7 +64,7 @@ function extend(obj, source) {
     Get all of the values from an object as an array
 */
 
-function values(obj) {
+export function values(obj) {
     var results = [];
 
     for (var key in obj) {
@@ -111,7 +82,7 @@ function values(obj) {
     Generate a unique, random hex id
 */
 
-function uniqueID() {
+export function uniqueID() {
 
     var chars = '0123456789abcdef';
 
@@ -126,7 +97,7 @@ function uniqueID() {
     JSON Stringify with added support for functions
 */
 
-function stringifyWithFunctions(obj) {
+export function stringifyWithFunctions(obj) {
     return JSON.stringify(obj, function (key, val) {
         if (typeof val === 'function') {
             return val.toString();
@@ -141,7 +112,7 @@ function stringifyWithFunctions(obj) {
     Get a property without throwing error
 */
 
-function safeGet(obj, prop) {
+export function safeGet(obj, prop) {
 
     var result = void 0;
 
@@ -158,7 +129,7 @@ function safeGet(obj, prop) {
    -----------------------
 */
 
-function capitalizeFirstLetter(string) {
+export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
@@ -168,7 +139,7 @@ function capitalizeFirstLetter(string) {
     Recursively gets a deep path from an object, returning a default value if any level is not found
 */
 
-function get(item, path, def) {
+export function get(item, path, def) {
 
     if (!path) {
         return def;
@@ -202,7 +173,7 @@ function get(item, path, def) {
     Implement setInterval using setTimeout, to avoid stacking up calls from setInterval
 */
 
-function safeInterval(method, time) {
+export function safeInterval(method, time) {
 
     var timeout = void 0;
 
@@ -226,7 +197,7 @@ function safeInterval(method, time) {
     Run timeouts at 100ms intervals so we can account for busy browsers
 */
 
-function safeTimeout(method, time) {
+export function safeTimeout(method, time) {
 
     var interval = safeInterval(function () {
         time -= 100;
@@ -237,7 +208,7 @@ function safeTimeout(method, time) {
     }, 100);
 }
 
-function each(item, callback) {
+export function each(item, callback) {
 
     if (!item) {
         return;
@@ -258,7 +229,7 @@ function each(item, callback) {
     }
 }
 
-function replaceObject(item, replacers) {
+export function replaceObject(item, replacers) {
     var fullKey = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
 
@@ -371,7 +342,7 @@ function replaceObject(item, replacers) {
     }
 }
 
-function copyProp(source, target, name, def) {
+export function copyProp(source, target, name, def) {
     if (source.hasOwnProperty(name)) {
         var descriptor = Object.getOwnPropertyDescriptor(source, name);
         // $FlowFixMe
@@ -381,7 +352,7 @@ function copyProp(source, target, name, def) {
     }
 }
 
-function dotify(obj) {
+export function dotify(obj) {
     var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
     var newobj = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
@@ -402,9 +373,9 @@ function dotify(obj) {
     return newobj;
 }
 
-var objectIDs = new _src.WeakMap();
+var objectIDs = new WeakMap();
 
-function getObjectID(obj) {
+export function getObjectID(obj) {
 
     if (obj === null || obj === undefined || (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object' && typeof obj !== 'function') {
         throw new Error('Invalid object');
@@ -420,7 +391,7 @@ function getObjectID(obj) {
     return uid;
 }
 
-function regex(pattern, string) {
+export function regex(pattern, string) {
     var start = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
 
@@ -457,7 +428,7 @@ function regex(pattern, string) {
     };
 }
 
-function regexAll(pattern, string) {
+export function regexAll(pattern, string) {
 
     var matches = [];
     var start = 0;
@@ -477,7 +448,7 @@ function regexAll(pattern, string) {
     return matches;
 }
 
-function count(str, substr) {
+export function count(str, substr) {
 
     var startIndex = 0;
     var itemCount = 0;
@@ -497,7 +468,7 @@ function count(str, substr) {
     return itemCount;
 }
 
-function stringify(item) {
+export function stringify(item) {
     if (typeof item === 'string') {
         return item;
     }
@@ -509,7 +480,7 @@ function stringify(item) {
     return Object.prototype.toString.call(item);
 }
 
-function stringifyError(err) {
+export function stringifyError(err) {
     if (err) {
         // $FlowFixMe
         var stack = err.stack,
@@ -528,7 +499,7 @@ function stringifyError(err) {
     return stringify(err);
 }
 
-function eventEmitter() {
+export function eventEmitter() {
 
     var triggered = {};
     var handlers = {};
@@ -565,20 +536,8 @@ function eventEmitter() {
             var handlerList = handlers[eventName];
 
             if (handlerList) {
-                for (var _iterator = handlerList, _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                    var _ref;
-
-                    if (_isArray) {
-                        if (_i2 >= _iterator.length) break;
-                        _ref = _iterator[_i2++];
-                    } else {
-                        _i2 = _iterator.next();
-                        if (_i2.done) break;
-                        _ref = _i2.value;
-                    }
-
-                    var _handler = _ref;
-
+                for (var _i3 = 0, _length2 = handlerList == null ? 0 : handlerList.length; _i3 < _length2; _i3++) {
+                    var _handler = handlerList[_i3];
                     _handler();
                 }
             }

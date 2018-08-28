@@ -1,30 +1,21 @@
-'use strict';
+import { isSameDomain } from 'cross-domain-utils/src';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.global = undefined;
-exports.globalFor = globalFor;
-exports.localGlobal = localGlobal;
+import { __XCOMPONENT__ } from '../constants';
 
-var _src = require('cross-domain-utils/src');
+export function globalFor(win) {
 
-var _constants = require('../constants');
-
-function globalFor(win) {
-
-    if (!(0, _src.isSameDomain)(win)) {
+    if (!isSameDomain(win)) {
         return;
     }
 
-    if (!win[_constants.__XCOMPONENT__]) {
-        win[_constants.__XCOMPONENT__] = {};
+    if (!win[__XCOMPONENT__]) {
+        win[__XCOMPONENT__] = {};
     }
 
-    return win[_constants.__XCOMPONENT__];
+    return win[__XCOMPONENT__];
 }
 
-function localGlobal() {
+export function localGlobal() {
     var global = globalFor(window);
 
     if (!global) {
@@ -34,4 +25,4 @@ function localGlobal() {
     return global;
 }
 
-var global = exports.global = localGlobal();
+export var global = localGlobal();

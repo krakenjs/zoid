@@ -1,20 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-exports.normalizeProp = normalizeProp;
-exports.normalizeProps = normalizeProps;
-exports.propsToQuery = propsToQuery;
+import { noop, denodeify, once, memoize, promisify, dotify } from '../../lib';
 
-var _src = require('zalgo-promise/src');
-
-var _lib = require('../../lib');
 
 function isDefined(value) {
     return value !== null && value !== undefined && value !== '';
@@ -27,7 +16,7 @@ function isDefined(value) {
 */
 
 // $FlowFixMe
-function normalizeProp(component, instance, props, key, value) {
+export function normalizeProp(component, instance, props, key, value) {
     // eslint-disable-line complexity
 
     var prop = component.getProp(key);
@@ -62,11 +51,11 @@ function normalizeProp(component, instance, props, key, value) {
 
         if (!resultValue && prop.noop) {
             // $FlowFixMe
-            resultValue = _lib.noop;
+            resultValue = noop;
 
             if (!decorated && prop.decorate) {
                 // $FlowFixMe
-                resultValue = prop.decorate.call(instance, _lib.noop, props);
+                resultValue = prop.decorate.call(instance, noop, props);
             }
         }
 
@@ -78,12 +67,12 @@ function normalizeProp(component, instance, props, key, value) {
 
             if (prop.denodeify) {
                 // $FlowFixMe
-                resultValue = (0, _lib.denodeify)(resultValue);
+                resultValue = denodeify(resultValue);
             }
 
             if (prop.promisify) {
                 // $FlowFixMe
-                resultValue = (0, _lib.promisify)(resultValue);
+                resultValue = promisify(resultValue);
             }
 
             // Wrap the function in order to log when it is called
@@ -99,14 +88,14 @@ function normalizeProp(component, instance, props, key, value) {
 
             if (prop.once) {
                 // $FlowFixMe
-                resultValue = (0, _lib.once)(resultValue);
+                resultValue = once(resultValue);
             }
 
             // If prop.memoize is set, ensure the function is memoized (first return resultValue is cached and returned for any future calls)
 
             if (prop.memoize) {
                 // $FlowFixMe
-                resultValue = (0, _lib.memoize)(resultValue);
+                resultValue = memoize(resultValue);
             }
         }
     } else if (type === 'string') {
@@ -132,27 +121,15 @@ function normalizeProp(component, instance, props, key, value) {
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-function normalizeProps(component, instance, props) {
+export function normalizeProps(component, instance, props) {
 
     var result = {};
 
     // $FlowFixMe
     props = props || {};
 
-    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-        var _ref;
-
-        if (_isArray) {
-            if (_i >= _iterator.length) break;
-            _ref = _iterator[_i++];
-        } else {
-            _i = _iterator.next();
-            if (_i.done) break;
-            _ref = _i.value;
-        }
-
-        var key = _ref;
-
+    for (var _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+        var key = _Object$keys2[_i2];
         if (component.getPropNames().indexOf(key) !== -1) {
             // $FlowFixMe
             result[key] = normalizeProp(component, instance, props, key, props[key]);
@@ -161,20 +138,8 @@ function normalizeProps(component, instance, props) {
         }
     }
 
-    for (var _iterator2 = component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-        var _ref2;
-
-        if (_isArray2) {
-            if (_i2 >= _iterator2.length) break;
-            _ref2 = _iterator2[_i2++];
-        } else {
-            _i2 = _iterator2.next();
-            if (_i2.done) break;
-            _ref2 = _i2.value;
-        }
-
-        var _key = _ref2;
-
+    for (var _i4 = 0, _component$getPropNam2 = component.getPropNames(), _length4 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
+        var _key = _component$getPropNam2[_i4];
         if (!props.hasOwnProperty(_key) && (!instance.props || !instance.props.hasOwnProperty(_key))) {
 
             // $FlowFixMe
@@ -187,6 +152,8 @@ function normalizeProps(component, instance, props) {
     }
 
     // $FlowFixMe
+
+
     return result;
 }
 
@@ -203,7 +170,7 @@ function normalizeProps(component, instance, props) {
 
 // $FlowFixMe
 function getQueryParam(prop, key, value) {
-    return _src.ZalgoPromise['try'](function () {
+    return ZalgoPromise['try'](function () {
         if (typeof prop.queryParam === 'function') {
             return prop.queryParam(value);
         } else if (typeof prop.queryParam === 'string') {
@@ -216,7 +183,7 @@ function getQueryParam(prop, key, value) {
 
 // $FlowFixMe
 function getQueryValue(prop, key, value) {
-    return _src.ZalgoPromise['try'](function () {
+    return ZalgoPromise['try'](function () {
         if (typeof prop.queryValue === 'function') {
             return prop.queryValue(value);
         } else {
@@ -225,11 +192,11 @@ function getQueryValue(prop, key, value) {
     });
 }
 
-function propsToQuery(propsDef, props) {
+export function propsToQuery(propsDef, props) {
 
     var params = {};
 
-    return _src.ZalgoPromise.all(Object.keys(props).map(function (key) {
+    return ZalgoPromise.all(Object.keys(props).map(function (key) {
 
         var prop = propsDef[key];
 
@@ -237,7 +204,7 @@ function propsToQuery(propsDef, props) {
             return; // eslint-disable-line array-callback-return
         }
 
-        return _src.ZalgoPromise.resolve().then(function () {
+        return ZalgoPromise.resolve().then(function () {
 
             var value = props[key];
 
@@ -256,14 +223,14 @@ function propsToQuery(propsDef, props) {
                 return;
             }
 
-            return _src.ZalgoPromise.all([
+            return ZalgoPromise.all([
             // $FlowFixMe
             getQueryParam(prop, key, value),
             // $FlowFixMe
-            getQueryValue(prop, key, value)]).then(function (_ref3) {
-                var _ref4 = _slicedToArray(_ref3, 2),
-                    queryParam = _ref4[0],
-                    queryValue = _ref4[1];
+            getQueryValue(prop, key, value)]).then(function (_ref) {
+                var queryParam = _ref[0],
+                    queryValue = _ref[1];
+
 
                 var result = void 0;
 
@@ -278,22 +245,10 @@ function propsToQuery(propsDef, props) {
                     if (prop.serialization === 'json') {
                         result = JSON.stringify(queryValue);
                     } else {
-                        result = (0, _lib.dotify)(queryValue, key);
+                        result = dotify(queryValue, key);
 
-                        for (var _iterator3 = Object.keys(result), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                            var _ref5;
-
-                            if (_isArray3) {
-                                if (_i3 >= _iterator3.length) break;
-                                _ref5 = _iterator3[_i3++];
-                            } else {
-                                _i3 = _iterator3.next();
-                                if (_i3.done) break;
-                                _ref5 = _i3.value;
-                            }
-
-                            var dotkey = _ref5;
-
+                        for (var _i6 = 0, _Object$keys4 = Object.keys(result), _length6 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
+                            var dotkey = _Object$keys4[_i6];
                             params[dotkey] = result[dotkey];
                         }
 

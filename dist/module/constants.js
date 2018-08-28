@@ -1,13 +1,8 @@
-'use strict';
+export var XCOMPONENT = 'xcomponent';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var XCOMPONENT = exports.XCOMPONENT = 'xcomponent';
+export var __XCOMPONENT__ = '__' + XCOMPONENT + '__';
 
-var __XCOMPONENT__ = exports.__XCOMPONENT__ = '__' + XCOMPONENT + '__';
-
-var POST_MESSAGE = exports.POST_MESSAGE = {
+export var POST_MESSAGE = {
     INIT: XCOMPONENT + '_init',
     PROPS: XCOMPONENT + '_props',
     PROP_CALLBACK: XCOMPONENT + '_prop_callback',
@@ -23,7 +18,7 @@ var POST_MESSAGE = exports.POST_MESSAGE = {
     SHOW: XCOMPONENT + '_show'
 };
 
-var PROP_TYPES = exports.PROP_TYPES = {
+export var PROP_TYPES = {
     STRING: 'string',
     OBJECT: 'object',
     FUNCTION: 'function',
@@ -31,28 +26,28 @@ var PROP_TYPES = exports.PROP_TYPES = {
     NUMBER: 'number'
 };
 
-var INITIAL_PROPS = exports.INITIAL_PROPS = {
+export var INITIAL_PROPS = {
     RAW: 'raw',
     UID: 'uid'
 };
 
-var WINDOW_REFERENCES = exports.WINDOW_REFERENCES = {
+export var WINDOW_REFERENCES = {
     OPENER: 'opener',
     TOP: 'top',
     PARENT: 'parent',
     GLOBAL: 'global'
 };
 
-var PROP_TYPES_LIST = exports.PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
+export var PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
     return PROP_TYPES[key];
 });
 
-var CONTEXT_TYPES = exports.CONTEXT_TYPES = {
+export var CONTEXT_TYPES = {
     IFRAME: 'iframe',
     POPUP: 'popup'
 };
 
-var CLASS_NAMES = exports.CLASS_NAMES = {
+export var CLASS_NAMES = {
     XCOMPONENT: '' + XCOMPONENT,
     OUTLET: XCOMPONENT + '-outlet',
     COMPONENT_FRAME: XCOMPONENT + '-component-frame',
@@ -61,26 +56,26 @@ var CLASS_NAMES = exports.CLASS_NAMES = {
     INVISIBLE: XCOMPONENT + '-invisible'
 };
 
-var EVENTS = exports.EVENTS = {
+export var EVENTS = {
     CLOSE: XCOMPONENT + '-close'
 };
 
-var ATTRIBUTES = exports.ATTRIBUTES = {
+export var ATTRIBUTES = {
     IFRAME_PLACEHOLDER: 'data-xcomponent-' + XCOMPONENT + '-placeholder'
 };
 
-var ANIMATION_NAMES = exports.ANIMATION_NAMES = {
+export var ANIMATION_NAMES = {
     SHOW_CONTAINER: XCOMPONENT + '-show-container',
     SHOW_COMPONENT: XCOMPONENT + '-show-component',
     HIDE_CONTAINER: XCOMPONENT + '-hide-container',
     HIDE_COMPONENT: XCOMPONENT + '-hide-component'
 };
 
-var EVENT_NAMES = exports.EVENT_NAMES = {
+export var EVENT_NAMES = {
     CLICK: 'click'
 };
 
-var CLOSE_REASONS = exports.CLOSE_REASONS = {
+export var CLOSE_REASONS = {
     PARENT_CALL: 'parent_call',
     CHILD_CALL: 'child_call',
     CLOSE_DETECTED: 'close_detected',
@@ -88,18 +83,18 @@ var CLOSE_REASONS = exports.CLOSE_REASONS = {
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 
-var CONTEXT_TYPES_LIST = exports.CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(function (key) {
+export var CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(function (key) {
     return CONTEXT_TYPES[key];
 });
 
-var DELEGATE = exports.DELEGATE = {
+export var DELEGATE = {
     CALL_ORIGINAL: 'call_original',
     CALL_DELEGATE: 'call_delegate'
 };
 
-var WILDCARD = exports.WILDCARD = '*';
+export var WILDCARD = '*';
 
-var DEFAULT_DIMENSIONS = exports.DEFAULT_DIMENSIONS = {
+export var DEFAULT_DIMENSIONS = {
     WIDTH: 300,
     HEIGHT: 150
 };

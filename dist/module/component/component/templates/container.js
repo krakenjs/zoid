@@ -1,13 +1,9 @@
-'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.defaultContainerTemplate = defaultContainerTemplate;
+/* @jsx jsxDom */
 
-require('../../parent');
+import '../../parent';
 
-function defaultContainerTemplate(_ref) {
+export function defaultContainerTemplate(_ref) {
     var id = _ref.id,
         tag = _ref.tag,
         context = _ref.context,
@@ -30,4 +26,3 @@ function defaultContainerTemplate(_ref) {
         outlet
     );
 }
-/* @jsx jsxDom */

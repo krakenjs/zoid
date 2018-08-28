@@ -1,30 +1,19 @@
-'use strict';
+import { CONFIG } from 'post-robot/src';
+import { config, logLevels, info as logInfo, warn as logWarn, error as logError } from 'beaver-logger/client';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.setLogLevel = setLogLevel;
-exports.info = info;
-exports.warn = warn;
-exports.error = error;
-
-var _src = require('post-robot/src');
-
-var _client = require('beaver-logger/client');
-
-function setLogLevel(logLevel) {
-    if (_client.logLevels.indexOf(logLevel) === -1) {
+export function setLogLevel(logLevel) {
+    if (logLevels.indexOf(logLevel) === -1) {
         throw new Error('Invalid logLevel: ' + logLevel);
     }
-    _client.config.logLevel = logLevel;
-    _src.CONFIG.LOG_LEVEL = logLevel;
+    config.logLevel = logLevel;
+    CONFIG.LOG_LEVEL = logLevel;
     window.LOG_LEVEL = logLevel;
 }
 
-function info(name, event) {
+export function info(name, event) {
     var payload = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-    (0, _client.info)('xc_' + name + '_' + event, payload);
+    logInfo('xc_' + name + '_' + event, payload);
 }
 
 /*  Log Warning
@@ -33,10 +22,10 @@ function info(name, event) {
     Log a warning
 */
 
-function warn(name, event) {
+export function warn(name, event) {
     var payload = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-    (0, _client.warn)('xc_' + name + '_' + event, payload);
+    logWarn('xc_' + name + '_' + event, payload);
 }
 
 /*  Log Error
@@ -45,8 +34,8 @@ function warn(name, event) {
     Log an error
 */
 
-function error(name, event) {
+export function error(name, event) {
     var payload = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-    (0, _client.error)('xc_' + name + '_' + event, payload);
+    logError('xc_' + name + '_' + event, payload);
 }

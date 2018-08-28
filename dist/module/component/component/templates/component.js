@@ -1,13 +1,9 @@
-"use strict";
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.defaultPrerenderTemplate = defaultPrerenderTemplate;
+/* @jsx jsxDom */
 
-require("../../parent");
+import '../../parent';
 
-function defaultPrerenderTemplate(_ref) {
+export function defaultPrerenderTemplate(_ref) {
     var jsxDom = _ref.jsxDom;
 
     return jsxDom(
@@ -33,4 +29,3 @@ function defaultPrerenderTemplate(_ref) {
         )
     );
 }
-/* @jsx jsxDom */

@@ -1,13 +1,7 @@
-'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.vue = undefined;
+import { extend } from '../lib';
 
-var _lib = require('../lib');
-
-var vue = exports.vue = {
+export var vue = {
     global: function global() {
         // pass
     },
@@ -22,14 +16,14 @@ var vue = exports.vue = {
                 var el = this.$el;
 
                 // $FlowFixMe
-                this.parent = component.init((0, _lib.extend)({}, this.$attrs), null, el);
+                this.parent = component.init(extend({}, this.$attrs), null, el);
 
                 this.parent.render(el);
             },
             beforeUpdate: function beforeUpdate() {
 
                 if (this.parent && this.$attrs) {
-                    this.parent.updateProps((0, _lib.extend)({}, this.$attrs));
+                    this.parent.updateProps(extend({}, this.$attrs));
                 }
             }
         };

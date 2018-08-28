@@ -1,14 +1,6 @@
-'use strict';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.memoized = memoized;
-exports.promise = promise;
-
-var _src = require('zalgo-promise/src');
-
-function memoized(target, name, descriptor) {
+export function memoized(target, name, descriptor) {
     var method = descriptor.value;
 
     descriptor.value = function memoizedFunction() {
@@ -25,11 +17,11 @@ function memoized(target, name, descriptor) {
     descriptor.value.displayName = name + ':memoized';
 }
 
-function promise(target, name, descriptor) {
+export function promise(target, name, descriptor) {
     var method = descriptor.value;
 
     descriptor.value = function promisifiedFunction() {
-        return _src.ZalgoPromise['try'](method, this, arguments);
+        return ZalgoPromise['try'](method, this, arguments);
     };
 
     descriptor.value.displayName = name + ':promisified';

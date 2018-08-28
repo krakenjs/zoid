@@ -1,38 +1,20 @@
-'use strict';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain } from 'cross-domain-utils/src';
+import base32 from 'hi-base32';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.getParentRenderWindow = exports.getParentComponentWindow = exports.getComponentMeta = exports.isXComponentWindow = undefined;
+import { memoize, uniqueID, globalFor, stringifyError } from '../lib';
+import { XCOMPONENT, WINDOW_REFERENCES } from '../constants';
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-exports.buildChildWindowName = buildChildWindowName;
-exports.getParentDomain = getParentDomain;
-exports.getPosition = getPosition;
-
-var _src = require('cross-domain-utils/src');
-
-var _hiBase = require('hi-base32');
-
-var _hiBase2 = _interopRequireDefault(_hiBase);
-
-var _lib = require('../lib');
-
-var _constants = require('../constants');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function normalize(str) {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
 }
 
 function encode(str) {
-    return _hiBase2['default'].encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
+    return base32.encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
 }
 
 function decode(str) {
-    return _hiBase2['default'].decode(str.toUpperCase());
+    return base32.decode(str.toUpperCase());
 }
 
 /*  Build Child Window Name
@@ -47,12 +29,12 @@ function decode(str) {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-function buildChildWindowName(name, version) {
+export function buildChildWindowName(name, version) {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
 
-    options.id = (0, _lib.uniqueID)();
-    options.domain = (0, _src.getDomain)(window);
+    options.id = uniqueID();
+    options.domain = getDomain(window);
 
     var encodedName = normalize(name);
     var encodedVersion = normalize(version);
@@ -66,19 +48,18 @@ function buildChildWindowName(name, version) {
         throw new Error('Invalid version: ' + version + ' - must contain alphanumeric characters');
     }
 
-    return [_constants.XCOMPONENT, encodedName, encodedVersion, encodedOptions, ''].join('__');
+    return [XCOMPONENT, encodedName, encodedVersion, encodedOptions, ''].join('__');
 }
 
-var isXComponentWindow = exports.isXComponentWindow = (0, _lib.memoize)(function () {
+export var isXComponentWindow = memoize(function () {
     if (!window.name) {
         return false;
     }
 
     var _window$name$split = window.name.split('__'),
-        _window$name$split2 = _slicedToArray(_window$name$split, 1),
-        xcomp = _window$name$split2[0];
+        xcomp = _window$name$split[0];
 
-    if (xcomp !== _constants.XCOMPONENT) {
+    if (xcomp !== XCOMPONENT) {
         return false;
     }
 
@@ -92,20 +73,19 @@ var isXComponentWindow = exports.isXComponentWindow = (0, _lib.memoize)(function
     passed down, including the parent name. Only accepts window names built by xcomponent
 */
 
-var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () {
+export var getComponentMeta = memoize(function () {
 
     if (!window.name) {
         throw new Error('Can not get component meta without window name');
     }
 
-    var _window$name$split3 = window.name.split('__'),
-        _window$name$split4 = _slicedToArray(_window$name$split3, 4),
-        xcomp = _window$name$split4[0],
-        name = _window$name$split4[1],
-        version = _window$name$split4[2],
-        encodedOptions = _window$name$split4[3];
+    var _window$name$split2 = window.name.split('__'),
+        xcomp = _window$name$split2[0],
+        name = _window$name$split2[1],
+        version = _window$name$split2[2],
+        encodedOptions = _window$name$split2[3];
 
-    if (xcomp !== _constants.XCOMPONENT) {
+    if (xcomp !== XCOMPONENT) {
         throw new Error('Window not rendered by xcomponent - got ' + xcomp);
     }
 
@@ -114,7 +94,7 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
     try {
         componentMeta = JSON.parse(decode(encodedOptions));
     } catch (err) {
-        throw new Error('Can not decode component-meta: ' + encodedOptions + ' ' + (0, _lib.stringifyError)(err));
+        throw new Error('Can not decode component-meta: ' + encodedOptions + ' ' + stringifyError(err));
     }
 
     componentMeta.name = name;
@@ -123,7 +103,7 @@ var getComponentMeta = exports.getComponentMeta = (0, _lib.memoize)(function () 
     return componentMeta;
 });
 
-function getParentDomain() {
+export function getParentDomain() {
     return getComponentMeta().domain; // How does this work for renderTo..?
 }
 
@@ -135,38 +115,26 @@ function getWindowByRef(_ref) {
 
     var result = void 0;
 
-    if (ref === _constants.WINDOW_REFERENCES.OPENER) {
-        result = (0, _src.getOpener)(window);
-    } else if (ref === _constants.WINDOW_REFERENCES.TOP) {
-        result = (0, _src.getTop)(window);
-    } else if (ref === _constants.WINDOW_REFERENCES.PARENT) {
+    if (ref === WINDOW_REFERENCES.OPENER) {
+        result = getOpener(window);
+    } else if (ref === WINDOW_REFERENCES.TOP) {
+        result = getTop(window);
+    } else if (ref === WINDOW_REFERENCES.PARENT) {
 
         if (distance) {
-            result = (0, _src.getNthParentFromTop)(window, distance);
+            result = getNthParentFromTop(window, distance);
         } else {
-            result = (0, _src.getParent)(window);
+            result = getParent(window);
         }
     }
 
-    if (ref === _constants.WINDOW_REFERENCES.GLOBAL) {
-        var ancestor = (0, _src.getAncestor)(window);
+    if (ref === WINDOW_REFERENCES.GLOBAL) {
+        var ancestor = getAncestor(window);
 
         if (ancestor) {
-            for (var _iterator = (0, _src.getAllFramesInWindow)(ancestor), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                var _ref2;
-
-                if (_isArray) {
-                    if (_i >= _iterator.length) break;
-                    _ref2 = _iterator[_i++];
-                } else {
-                    _i = _iterator.next();
-                    if (_i.done) break;
-                    _ref2 = _i.value;
-                }
-
-                var frame = _ref2;
-
-                var global = (0, _lib.globalFor)(frame);
+            for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor), _length2 = _getAllFramesInWindow2 == null ? 0 : _getAllFramesInWindow2.length; _i2 < _length2; _i2++) {
+                var frame = _getAllFramesInWindow2[_i2];
+                var global = globalFor(frame);
 
                 if (global && global.windows && global.windows[uid]) {
                     result = global.windows[uid];
@@ -189,7 +157,7 @@ function getWindowByRef(_ref) {
     Get the parent component window, which may be different from the actual parent window
 */
 
-var getParentComponentWindow = exports.getParentComponentWindow = (0, _lib.memoize)(function () {
+export var getParentComponentWindow = memoize(function () {
 
     var componentMeta = getComponentMeta();
 
@@ -200,7 +168,7 @@ var getParentComponentWindow = exports.getParentComponentWindow = (0, _lib.memoi
     return getWindowByRef(componentMeta.componentParent);
 });
 
-var getParentRenderWindow = exports.getParentRenderWindow = (0, _lib.memoize)(function () {
+export var getParentRenderWindow = memoize(function () {
 
     var componentMeta = getComponentMeta();
 
@@ -223,9 +191,9 @@ var getParentRenderWindow = exports.getParentRenderWindow = (0, _lib.memoize)(fu
     I'd love to do this with pure css, but alas... popup windows :(
 */
 
-function getPosition(_ref3) {
-    var width = _ref3.width,
-        height = _ref3.height;
+export function getPosition(_ref2) {
+    var width = _ref2.width,
+        height = _ref2.height;
 
 
     var x = 0;

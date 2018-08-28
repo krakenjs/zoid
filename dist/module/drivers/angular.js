@@ -1,36 +1,18 @@
-'use strict';
+import { dasherizeToCamel, replaceObject } from '../lib';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.angular = undefined;
 
-var _lib = require('../lib');
-
-var angular = exports.angular = {
+export var angular = {
     global: function global() {
         return window.angular;
     },
     register: function register(component, ng) {
 
-        var module = ng.module(component.tag, []).directive((0, _lib.dasherizeToCamel)(component.tag), function () {
+        var module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), function () {
 
             var scope = {};
 
-            for (var _iterator = component.getPropNames(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                var _ref;
-
-                if (_isArray) {
-                    if (_i >= _iterator.length) break;
-                    _ref = _iterator[_i++];
-                } else {
-                    _i = _iterator.next();
-                    if (_i.done) break;
-                    _ref = _i.value;
-                }
-
-                var key = _ref;
-
+            for (var _i2 = 0, _component$getPropNam2 = component.getPropNames(), _length2 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
+                var key = _component$getPropNam2[_i2];
                 scope[key] = '=';
             }
 
@@ -69,27 +51,16 @@ var angular = exports.angular = {
                             scopeProps = $scope.props;
                         } else {
                             scopeProps = {};
-                            for (var _iterator2 = Object.keys(scope), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-                                var _ref2;
 
-                                if (_isArray2) {
-                                    if (_i2 >= _iterator2.length) break;
-                                    _ref2 = _iterator2[_i2++];
-                                } else {
-                                    _i2 = _iterator2.next();
-                                    if (_i2.done) break;
-                                    _ref2 = _i2.value;
-                                }
-
-                                var key = _ref2;
-
-                                if ($scope[key] !== undefined) {
-                                    scopeProps[key] = $scope[key];
+                            for (var _i4 = 0, _Object$keys2 = Object.keys(scope), _length4 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+                                var _key = _Object$keys2[_i4];
+                                if ($scope[_key] !== undefined) {
+                                    scopeProps[_key] = $scope[_key];
                                 }
                             }
                         }
 
-                        scopeProps = (0, _lib.replaceObject)(scopeProps, {
+                        scopeProps = replaceObject(scopeProps, {
                             'function': function _function(value) {
                                 return function angularWrapped() {
                                     var result = value.apply(this, arguments);

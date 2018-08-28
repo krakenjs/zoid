@@ -1,24 +1,16 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.PopupOpenError = PopupOpenError;
-exports.IntegrationError = IntegrationError;
-exports.RenderError = RenderError;
-function PopupOpenError(message) {
+export function PopupOpenError(message) {
     this.message = message;
 }
 
 PopupOpenError.prototype = Object.create(Error.prototype);
 
-function IntegrationError(message) {
+export function IntegrationError(message) {
     this.message = message;
 }
 
 IntegrationError.prototype = Object.create(Error.prototype);
 
-function RenderError(message) {
+export function RenderError(message) {
     this.message = message;
 }
 
