@@ -10,7 +10,7 @@ import type { CancelableType } from '../types';
 import type { Component } from './component';
 
 type CleanupType = {
-    set : <T : mixed >(string, T) => T,
+    set : <T : mixed >(string, T) => T, // eslint-disable-line no-undef
     register : (string | Function, ?Function) => void,
     hasTasks : () => boolean,
     all : () => ZalgoPromise<void>,

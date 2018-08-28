@@ -77,7 +77,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     prerenderWindow : SameDomainWindowType
 
     childExports : ?ChildExportsType<P>
-    timeout : ?TimeoutID
+    timeout : ?TimeoutID // eslint-disable-line no-undef
 
     constructor(component : Component<P>, context : string, { props } : { props : (PropsType & P) }) {
         super();
