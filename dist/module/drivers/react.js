@@ -1,17 +1,13 @@
-'use strict';
-
-exports.__esModule = true;
-exports.react = undefined;
-
-var _lib = require('../lib');
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var react = exports.react = {
+import { extend } from '../lib';
+
+
+export var react = {
     global: function global() {
         if (window.React && window.ReactDOM) {
             return {
@@ -37,7 +33,7 @@ var react = exports.react = {
 
                     var el = ReactDOM.findDOMNode(this);
 
-                    var parent = component.init((0, _lib.extend)({}, this.props), null, el);
+                    var parent = component.init(extend({}, this.props), null, el);
 
                     this.setState({ parent: parent });
 
@@ -46,7 +42,7 @@ var react = exports.react = {
                 componentDidUpdate: function componentDidUpdate() {
 
                     if (this.state && this.state.parent) {
-                        this.state.parent.updateProps((0, _lib.extend)({}, this.props));
+                        this.state.parent.updateProps(extend({}, this.props));
                     }
                 }
             });
@@ -70,7 +66,7 @@ var react = exports.react = {
 
                     var el = ReactDOM.findDOMNode(this);
 
-                    var parent = component.init((0, _lib.extend)({}, this.props), null, el);
+                    var parent = component.init(extend({}, this.props), null, el);
 
                     this.setState({ parent: parent });
 
@@ -80,7 +76,7 @@ var react = exports.react = {
                 _class.prototype.componentDidUpdate = function componentDidUpdate() {
 
                     if (this.state && this.state.parent) {
-                        this.state.parent.updateProps((0, _lib.extend)({}, this.props));
+                        this.state.parent.updateProps(extend({}, this.props));
                     }
                 };
 

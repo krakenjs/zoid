@@ -1,40 +1,6 @@
-'use strict';
-
-exports.__esModule = true;
-exports.Component = undefined;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _desc, _value, _class;
-/* eslint max-lines: 0 */
-
-var _src = require('post-robot/src');
-
-var _src2 = require('zalgo-promise/src');
-
-var _src3 = require('cross-domain-utils/src');
-
-var _base = require('../base');
-
-var _child = require('../child');
-
-var _parent = require('../parent');
-
-var _delegate = require('../delegate');
-
-var _window = require('../window');
-
-var _constants = require('../../constants');
-
-var _index = require('../../drivers/index');
-
-var _lib = require('../../lib');
-
-var _validate = require('./validate');
-
-var _templates = require('./templates');
-
-var _props = require('./props');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -71,7 +37,27 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
     return desc;
 }
 
-var drivers = { angular: _index.angular, angular2: _index.angular2, glimmer: _index.glimmer, react: _index.react, vue: _index.vue, script: _index.script };
+/* eslint max-lines: 0 */
+
+import { on, send } from 'post-robot/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
+
+import { BaseComponent } from '../base';
+import { ChildComponent } from '../child';
+import { ParentComponent } from '../parent';
+import { DelegateComponent } from '../delegate';
+import { isZoidComponentWindow, getComponentMeta } from '../window';
+import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
+import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
+import { info, error, warn, memoize } from '../../lib';
+
+
+import { validate } from './validate';
+import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
+import { getInternalProps } from './props';
+
+var drivers = { angular: angular, angular2: angular2, glimmer: glimmer, react: react, vue: vue, script: script };
 
 /*  Component
     ---------
@@ -83,7 +69,7 @@ var drivers = { angular: _index.angular, angular2: _index.angular2, glimmer: _in
     contains all of the configuration needed for them to set themselves up.
 */
 
-var Component = exports.Component = (_class = function (_BaseComponent) {
+export var Component = (_class = function (_BaseComponent) {
     _inherits(Component, _BaseComponent);
 
     function Component(options) {
@@ -91,19 +77,14 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
 
         var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
 
-        (0, _validate.validate)(options);
+        validate(options);
 
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
         _this.addProp(options, 'tag');
 
-        _this.addProp(options, 'defaultLogLevel', 'info');
-
-        _this.addProp(options, 'allowedParentDomains', _constants.WILDCARD);
-
-        // initially set log level to default log level configured when creating component
-        (0, _lib.setLogLevel)(_this.defaultLogLevel);
+        _this.addProp(options, 'allowedParentDomains', WILDCARD);
 
         if (Component.components[_this.tag]) {
             throw new Error('Can not register multiple components with the same tag');
@@ -116,7 +97,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
 
-        _this.builtinProps = (0, _props.getInternalProps)();
+        _this.builtinProps = getInternalProps();
         _this.props = options.props || {};
 
         if (!options.props) {
@@ -162,8 +143,8 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        _this.addProp(options, 'containerTemplate', _templates.defaultContainerTemplate);
-        _this.addProp(options, 'prerenderTemplate', _templates.defaultPrerenderTemplate);
+        _this.addProp(options, 'containerTemplate', defaultContainerTemplate);
+        _this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
 
         // Validation
 
@@ -189,20 +170,8 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.getPropNames = function getPropNames() {
         var props = Object.keys(this.props);
 
-        for (var _iterator = Object.keys(this.builtinProps), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var key = _ref;
-
+        for (var _i2 = 0, _Object$keys2 = Object.keys(this.builtinProps), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+            var key = _Object$keys2[_i2];
             if (props.indexOf(key) === -1) {
                 props.push(key);
             }
@@ -222,20 +191,8 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.registerDrivers = function registerDrivers() {
         this.driverCache = {};
 
-        for (var _iterator2 = Object.keys(drivers), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref2;
-
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) break;
-                _ref2 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) break;
-                _ref2 = _i2.value;
-            }
-
-            var driverName = _ref2;
-
+        for (var _i4 = 0, _Object$keys4 = Object.keys(drivers), _length4 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i4 < _length4; _i4++) {
+            var driverName = _Object$keys4[_i4];
             if (driverName.indexOf('_') === 0) {
                 continue;
             }
@@ -263,9 +220,9 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.registerChild = function registerChild() {
         var _this2 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this2.isChild()) {
-                return new _child.ChildComponent(_this2);
+                return new ChildComponent(_this2);
             }
         });
     };
@@ -273,14 +230,14 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.listenDelegate = function listenDelegate() {
         var _this3 = this;
 
-        (0, _src.on)(_constants.POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name, function () {
+        on(POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name, function () {
             return true;
         });
 
-        (0, _src.on)(_constants.POST_MESSAGE.DELEGATE + '_' + this.name, function (_ref3) {
-            var source = _ref3.source,
-                origin = _ref3.origin,
-                data = _ref3.data;
+        on(POST_MESSAGE.DELEGATE + '_' + this.name, function (_ref) {
+            var source = _ref.source,
+                origin = _ref.origin,
+                data = _ref.data;
 
 
             var domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
@@ -289,7 +246,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
                 throw new Error('Could not determine domain to allow remote render');
             }
 
-            if (!(0, _src3.matchDomain)(domain, origin)) {
+            if (!matchDomain(domain, origin)) {
                 throw new Error('Can not render from ' + origin + ' - expected ' + domain.toString());
             }
 
@@ -305,8 +262,8 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     };
 
     Component.prototype.canRenderTo = function canRenderTo(win) {
-        return (0, _src.send)(win, _constants.POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name).then(function (_ref4) {
-            var data = _ref4.data;
+        return send(win, POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name).then(function (_ref2) {
+            var data = _ref2.data;
 
             return data;
         })['catch'](function () {
@@ -320,7 +277,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
             return;
         }
 
-        var domain = (0, _src3.getDomainFromUrl)(url);
+        var domain = getDomainFromUrl(url);
 
         if (typeof this.domain === 'string' && domain === this.domain) {
             return domain;
@@ -329,20 +286,8 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
         var domains = this.domain;
 
         if (domains && (typeof domains === 'undefined' ? 'undefined' : _typeof(domains)) === 'object' && !(domains instanceof RegExp)) {
-            for (var _iterator3 = Object.keys(domains), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-                var _ref5;
-
-                if (_isArray3) {
-                    if (_i3 >= _iterator3.length) break;
-                    _ref5 = _iterator3[_i3++];
-                } else {
-                    _i3 = _iterator3.next();
-                    if (_i3.done) break;
-                    _ref5 = _i3.value;
-                }
-
-                var env = _ref5;
-
+            for (var _i6 = 0, _Object$keys6 = Object.keys(domains), _length6 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
+                var env = _Object$keys6[_i6];
 
                 if (env === 'test') {
                     continue;
@@ -374,11 +319,11 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
 
         if (envUrl) {
             // $FlowFixMe
-            return (0, _src3.getDomainFromUrl)(envUrl);
+            return getDomainFromUrl(envUrl);
         }
 
         if (url) {
-            return (0, _src3.getDomainFromUrl)(url);
+            return getDomainFromUrl(url);
         }
     };
 
@@ -423,7 +368,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
         var bridgeUrl = this.getBridgeUrl(env);
 
         if (bridgeUrl) {
-            return (0, _src3.getDomainFromUrl)(bridgeUrl);
+            return getDomainFromUrl(bridgeUrl);
         }
     };
 
@@ -445,11 +390,11 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     };
 
     Component.prototype.isZoidComponent = function isZoidComponent() {
-        return (0, _window.isZoidComponentWindow)();
+        return isZoidComponentWindow();
     };
 
     Component.prototype.isChild = function isChild() {
-        return (0, _window.isZoidComponentWindow)() && (0, _window.getComponentMeta)().tag === this.tag;
+        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
     };
 
     Component.prototype.createError = function createError(message, tag) {
@@ -462,11 +407,11 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     */
 
     Component.prototype.init = function init(props, context, element) {
-        return new _parent.ParentComponent(this, this.getRenderContext(context, element), { props: props });
+        return new ParentComponent(this, this.getRenderContext(context, element), { props: props });
     };
 
     Component.prototype.delegate = function delegate(source, options) {
-        return new _delegate.DelegateComponent(this, source, options);
+        return new DelegateComponent(this, source, options);
     };
 
     Component.prototype.validateRenderContext = function validateRenderContext(context, element) {
@@ -474,18 +419,18 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
             throw new Error('[' + this.tag + '] Can not render to ' + context);
         }
 
-        if (!element && context === _constants.CONTEXT_TYPES.IFRAME) {
-            throw new Error('[' + this.tag + '] Context type ' + _constants.CONTEXT_TYPES.IFRAME + ' requires an element selector');
+        if (!element && context === CONTEXT_TYPES.IFRAME) {
+            throw new Error('[' + this.tag + '] Context type ' + CONTEXT_TYPES.IFRAME + ' requires an element selector');
         }
     };
 
     Component.prototype.getDefaultContext = function getDefaultContext() {
         if (this.defaultContext) {
             return this.defaultContext;
-        } else if (this.contexts[_constants.CONTEXT_TYPES.IFRAME]) {
-            return _constants.CONTEXT_TYPES.IFRAME;
-        } else if (this.contexts[_constants.CONTEXT_TYPES.POPUP]) {
-            return _constants.CONTEXT_TYPES.POPUP;
+        } else if (this.contexts[CONTEXT_TYPES.IFRAME]) {
+            return CONTEXT_TYPES.IFRAME;
+        } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
+            return CONTEXT_TYPES.POPUP;
         }
 
         throw new Error('Can not determine default context');
@@ -505,53 +450,53 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.render = function render(props, element) {
         var _this4 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this4, _this4.getRenderContext(null, element), { props: props }).render(element);
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this4, _this4.getRenderContext(null, element), { props: props }).render(element);
         });
     };
 
     Component.prototype.renderIframe = function renderIframe(props, element) {
         var _this5 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this5, _this5.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), { props: props }).render(element);
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this5, _this5.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).render(element);
         });
     };
 
     Component.prototype.renderPopup = function renderPopup(props) {
         var _this6 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this6, _this6.getRenderContext(_constants.CONTEXT_TYPES.POPUP), { props: props }).render();
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this6, _this6.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).render();
         });
     };
 
     Component.prototype.renderTo = function renderTo(win, props, element) {
         var _this7 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this7, _this7.getRenderContext(null, element), { props: props }).renderTo(win, element);
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this7, _this7.getRenderContext(null, element), { props: props }).renderTo(win, element);
         });
     };
 
     Component.prototype.renderIframeTo = function renderIframeTo(win, props, element) {
         var _this8 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this8, _this8.getRenderContext(_constants.CONTEXT_TYPES.IFRAME, element), { props: props }).renderTo(win, element);
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this8, _this8.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).renderTo(win, element);
         });
     };
 
     Component.prototype.renderPopupTo = function renderPopupTo(win, props) {
         var _this9 = this;
 
-        return _src2.ZalgoPromise['try'](function () {
-            return new _parent.ParentComponent(_this9, _this9.getRenderContext(_constants.CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
+        return ZalgoPromise['try'](function () {
+            return new ParentComponent(_this9, _this9.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
         });
     };
 
     Component.prototype.prerender = function prerender(props, element) {
-        var instance = new _parent.ParentComponent(this, this.getRenderContext(null, element), { props: props });
+        var instance = new ParentComponent(this, this.getRenderContext(null, element), { props: props });
         instance.prefetch();
 
         return {
@@ -589,7 +534,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     Component.prototype.log = function log(event) {
         var payload = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        (0, _lib.info)(this.name, event, payload);
+        info(this.name, event, payload);
     };
 
     /*  Log Warning
@@ -598,7 +543,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     */
 
     Component.prototype.logWarning = function logWarning(event, payload) {
-        (0, _lib.warn)(this.name, event, payload);
+        warn(this.name, event, payload);
     };
 
     /*  Log Error
@@ -607,7 +552,7 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     */
 
     Component.prototype.logError = function logError(event, payload) {
-        (0, _lib.error)(this.name, event, payload);
+        error(this.name, event, payload);
     };
 
     Component.getByTag = function getByTag(tag) {
@@ -615,5 +560,5 @@ var Component = exports.Component = (_class = function (_BaseComponent) {
     };
 
     return Component;
-}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getPropNames', [_lib.memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'getPropNames'), _class.prototype)), _class);
+}(BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getPropNames', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'getPropNames'), _class.prototype)), _class);
 Component.components = {};

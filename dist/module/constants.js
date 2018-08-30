@@ -1,11 +1,8 @@
-'use strict';
+export var ZOID = 'zoid';
 
-exports.__esModule = true;
-var ZOID = exports.ZOID = 'zoid';
+export var __ZOID__ = '__' + ZOID + '__';
 
-var __ZOID__ = exports.__ZOID__ = '__' + ZOID + '__';
-
-var POST_MESSAGE = exports.POST_MESSAGE = {
+export var POST_MESSAGE = {
     INIT: ZOID + '_init',
     PROPS: ZOID + '_props',
     PROP_CALLBACK: ZOID + '_prop_callback',
@@ -21,7 +18,7 @@ var POST_MESSAGE = exports.POST_MESSAGE = {
     SHOW: ZOID + '_show'
 };
 
-var PROP_TYPES = exports.PROP_TYPES = {
+export var PROP_TYPES = {
     STRING: 'string',
     OBJECT: 'object',
     FUNCTION: 'function',
@@ -30,28 +27,28 @@ var PROP_TYPES = exports.PROP_TYPES = {
     ARRAY: 'array'
 };
 
-var INITIAL_PROPS = exports.INITIAL_PROPS = {
+export var INITIAL_PROPS = {
     RAW: 'raw',
     UID: 'uid'
 };
 
-var WINDOW_REFERENCES = exports.WINDOW_REFERENCES = {
+export var WINDOW_REFERENCES = {
     OPENER: 'opener',
     TOP: 'top',
     PARENT: 'parent',
     GLOBAL: 'global'
 };
 
-var PROP_TYPES_LIST = exports.PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
+export var PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
     return PROP_TYPES[key];
 });
 
-var CONTEXT_TYPES = exports.CONTEXT_TYPES = {
+export var CONTEXT_TYPES = {
     IFRAME: 'iframe',
     POPUP: 'popup'
 };
 
-var CLASS_NAMES = exports.CLASS_NAMES = {
+export var CLASS_NAMES = {
     ZOID: '' + ZOID,
     OUTLET: ZOID + '-outlet',
     COMPONENT_FRAME: ZOID + '-component-frame',
@@ -60,26 +57,26 @@ var CLASS_NAMES = exports.CLASS_NAMES = {
     INVISIBLE: ZOID + '-invisible'
 };
 
-var EVENTS = exports.EVENTS = {
+export var EVENTS = {
     CLOSE: ZOID + '-close'
 };
 
-var ATTRIBUTES = exports.ATTRIBUTES = {
+export var ATTRIBUTES = {
     IFRAME_PLACEHOLDER: 'data-zoid-' + ZOID + '-placeholder'
 };
 
-var ANIMATION_NAMES = exports.ANIMATION_NAMES = {
+export var ANIMATION_NAMES = {
     SHOW_CONTAINER: ZOID + '-show-container',
     SHOW_COMPONENT: ZOID + '-show-component',
     HIDE_CONTAINER: ZOID + '-hide-container',
     HIDE_COMPONENT: ZOID + '-hide-component'
 };
 
-var EVENT_NAMES = exports.EVENT_NAMES = {
+export var EVENT_NAMES = {
     CLICK: 'click'
 };
 
-var CLOSE_REASONS = exports.CLOSE_REASONS = {
+export var CLOSE_REASONS = {
     PARENT_CALL: 'parent_call',
     CHILD_CALL: 'child_call',
     CLOSE_DETECTED: 'close_detected',
@@ -87,18 +84,18 @@ var CLOSE_REASONS = exports.CLOSE_REASONS = {
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 
-var CONTEXT_TYPES_LIST = exports.CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(function (key) {
+export var CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(function (key) {
     return CONTEXT_TYPES[key];
 });
 
-var DELEGATE = exports.DELEGATE = {
+export var DELEGATE = {
     CALL_ORIGINAL: 'call_original',
     CALL_DELEGATE: 'call_delegate'
 };
 
-var WILDCARD = exports.WILDCARD = '*';
+export var WILDCARD = '*';
 
-var DEFAULT_DIMENSIONS = exports.DEFAULT_DIMENSIONS = {
+export var DEFAULT_DIMENSIONS = {
     WIDTH: 300,
     HEIGHT: 150
 };

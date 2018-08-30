@@ -1,14 +1,7 @@
-'use strict';
-
-exports.__esModule = true;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.validate = validate;
-
-var _constants = require('../../constants');
-
-var _lib = require('../../lib');
+import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
+import { isPerc, isPx } from '../../lib';
 
 function validatePropDefinitions(options) {
 
@@ -17,20 +10,8 @@ function validatePropDefinitions(options) {
     }
 
     if (options.props) {
-        for (var _iterator = Object.keys(options.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var key = _ref;
-
+        for (var _i2 = 0, _Object$keys2 = Object.keys(options.props), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+            var key = _Object$keys2[_i2];
 
             // $FlowFixMe
             var prop = options.props[key];
@@ -43,8 +24,8 @@ function validatePropDefinitions(options) {
                 throw new Error('Expected prop.type');
             }
 
-            if (_constants.PROP_TYPES_LIST.indexOf(prop.type) === -1) {
-                throw new Error('Expected prop.type to be one of ' + _constants.PROP_TYPES_LIST.join(', '));
+            if (PROP_TYPES_LIST.indexOf(prop.type) === -1) {
+                throw new Error('Expected prop.type to be one of ' + PROP_TYPES_LIST.join(', '));
             }
 
             if (prop.required && prop.def) {
@@ -55,7 +36,7 @@ function validatePropDefinitions(options) {
 }
 
 // eslint-disable-next-line complexity
-function validate(options) {
+export function validate(options) {
     // eslint-ignore-line
 
     if (!options) {
@@ -69,11 +50,11 @@ function validate(options) {
     validatePropDefinitions(options);
 
     if (options.dimensions) {
-        if (options.dimensions && !(0, _lib.isPx)(options.dimensions.width) && !(0, _lib.isPerc)(options.dimensions.width)) {
+        if (options.dimensions && !isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
             throw new Error('Expected options.dimensions.width to be a px or % string value');
         }
 
-        if (options.dimensions && !(0, _lib.isPx)(options.dimensions.height) && !(0, _lib.isPerc)(options.dimensions.height)) {
+        if (options.dimensions && !isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
             throw new Error('Expected options.dimensions.height to be a px or % string value');
         }
     }
@@ -86,22 +67,10 @@ function validate(options) {
 
         var anyEnabled = false;
 
-        for (var _iterator2 = Object.keys(options.contexts), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref2;
+        for (var _i4 = 0, _Object$keys4 = Object.keys(options.contexts), _length4 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i4 < _length4; _i4++) {
+            var context = _Object$keys4[_i4];
 
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) break;
-                _ref2 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) break;
-                _ref2 = _i2.value;
-            }
-
-            var context = _ref2;
-
-
-            if (_constants.CONTEXT_TYPES_LIST.indexOf(context) === -1) {
+            if (CONTEXT_TYPES_LIST.indexOf(context) === -1) {
                 throw new Error('Unsupported context type: ' + context);
             }
 
@@ -116,7 +85,7 @@ function validate(options) {
     }
 
     if (options.defaultContext) {
-        if (_constants.CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) {
+        if (CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) {
             throw new Error('Unsupported context type: ' + (options.defaultContext || 'unknown'));
         }
 
@@ -149,20 +118,8 @@ function validate(options) {
             throw new Error('Must pass options.defaultEnv with env->url mapping');
         }
 
-        for (var _iterator3 = Object.keys(options.url), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref3;
-
-            if (_isArray3) {
-                if (_i3 >= _iterator3.length) break;
-                _ref3 = _iterator3[_i3++];
-            } else {
-                _i3 = _iterator3.next();
-                if (_i3.done) break;
-                _ref3 = _i3.value;
-            }
-
-            var env = _ref3;
-
+        for (var _i6 = 0, _Object$keys6 = Object.keys(options.url), _length6 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
+            var env = _Object$keys6[_i6];
             if (!options.url[env]) {
                 throw new Error('No url specified for env: ' + env);
             }

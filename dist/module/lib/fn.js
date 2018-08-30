@@ -1,14 +1,4 @@
-'use strict';
-
-exports.__esModule = true;
-exports.noop = noop;
-exports.once = once;
-exports.memoize = memoize;
-exports.debounce = debounce;
-exports.serializeFunctions = serializeFunctions;
-exports.deserializeFunctions = deserializeFunctions;
-
-var _util = require('./util');
+import { getObjectID, replaceObject } from './util';
 
 /*  Noop
     ----
@@ -16,7 +6,7 @@ var _util = require('./util');
     Do nothing, zilch, nada, zip
 */
 
-function noop() {}
+export function noop() {}
 // pass
 
 
@@ -26,7 +16,7 @@ function noop() {}
     Create a wrapper function which only allows the inner function to run once, otherwise is a noop
 */
 
-function once(method) {
+export function once(method) {
 
     var called = false;
     var result = void 0;
@@ -53,7 +43,7 @@ function once(method) {
     Create a wrapper function which caches the result of the first call, then for subsequent calls returns the cached value
 */
 
-function memoize(method) {
+export function memoize(method) {
 
     var results = {};
 
@@ -69,7 +59,7 @@ function memoize(method) {
             cacheKey = JSON.stringify(Array.prototype.slice.call(arguments), function (key, val) {
 
                 if (typeof val === 'function') {
-                    return 'zoid:memoize[' + (0, _util.getObjectID)(val) + ']';
+                    return 'zoid:memoize[' + getObjectID(val) + ']';
                 }
 
                 return val;
@@ -86,7 +76,7 @@ function memoize(method) {
     };
 }
 
-function debounce(method) {
+export function debounce(method) {
     var time = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
 
 
@@ -104,8 +94,8 @@ function debounce(method) {
     };
 }
 
-function serializeFunctions(obj) {
-    return (0, _util.replaceObject)(obj, {
+export function serializeFunctions(obj) {
+    return replaceObject(obj, {
         'function': function _function() {
             return {
                 __type__: '__function__'
@@ -114,8 +104,8 @@ function serializeFunctions(obj) {
     });
 }
 
-function deserializeFunctions(obj, handler) {
-    return (0, _util.replaceObject)(obj, {
+export function deserializeFunctions(obj, handler) {
+    return replaceObject(obj, {
         'object': function object(value, key, fullKey) {
             if (value && value.__type__ === '__function__') {
                 return function deserializedFunctionWrapper() {

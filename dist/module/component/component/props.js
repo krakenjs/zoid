@@ -1,13 +1,7 @@
-'use strict';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-exports.__esModule = true;
-exports.getInternalProps = getInternalProps;
-
-var _src = require('zalgo-promise/src');
-
-var _lib = require('../../lib');
-
-require('../../types');
+import { uniqueID, once, memoize, noop, promisify } from '../../lib';
+import '../../types';
 
 /*  Internal Props
     --------------
@@ -16,7 +10,7 @@ require('../../types');
     These follow the same format as regular props, and are classed as reserved words that may not be overriden by users.
 */
 
-function getInternalProps() {
+export function getInternalProps() {
     return {
 
         // The desired env in which the component is being rendered. Used to determine the correct url
@@ -33,18 +27,10 @@ function getInternalProps() {
         uid: {
             type: 'string',
             def: function def() {
-                return (0, _lib.uniqueID)();
+                return uniqueID();
             },
 
             queryParam: true
-        },
-
-        logLevel: {
-            type: 'string',
-            queryParam: true,
-            def: function def(props, component) {
-                return component.defaultLogLevel;
-            }
         },
 
         dimensions: {
@@ -66,10 +52,10 @@ function getInternalProps() {
             sendToChild: false,
 
             def: function def() {
-                return _lib.noop;
+                return noop;
             },
             decorate: function decorate(onDisplay) {
-                return (0, _lib.memoize)((0, _lib.promisify)(onDisplay));
+                return memoize(promisify(onDisplay));
             }
         },
 
@@ -79,10 +65,10 @@ function getInternalProps() {
             sendToChild: false,
 
             def: function def() {
-                return _lib.noop;
+                return noop;
             },
             decorate: function decorate(onEnter) {
-                return (0, _lib.promisify)(onEnter);
+                return promisify(onEnter);
             }
         },
 
@@ -94,10 +80,10 @@ function getInternalProps() {
             sendToChild: false,
 
             def: function def() {
-                return _lib.noop;
+                return noop;
             },
             decorate: function decorate(onRender) {
-                return (0, _lib.promisify)(onRender);
+                return promisify(onRender);
             }
         },
 
@@ -109,10 +95,10 @@ function getInternalProps() {
             sendToChild: false,
 
             def: function def() {
-                return _lib.noop;
+                return noop;
             },
             decorate: function decorate(onClose) {
-                return (0, _lib.once)((0, _lib.promisify)(onClose));
+                return once(promisify(onClose));
             }
         },
 
@@ -128,7 +114,7 @@ function getInternalProps() {
                 };
             },
             decorate: function decorate(onTimeout) {
-                return (0, _lib.memoize)((0, _lib.promisify)(onTimeout));
+                return memoize(promisify(onTimeout));
             }
         },
 
@@ -146,7 +132,7 @@ function getInternalProps() {
                 };
             },
             decorate: function decorate(onError) {
-                return (0, _lib.once)((0, _lib.promisify)(onError));
+                return once(promisify(onError));
             }
         }
     };

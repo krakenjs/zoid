@@ -1,21 +1,4 @@
-'use strict';
-
-exports.__esModule = true;
-exports.DelegateComponent = undefined;
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _src = require('cross-domain-utils/src');
-
-var _src2 = require('zalgo-promise/src');
-
-var _base = require('../base');
-
-var _parent = require('../parent');
-
-var _drivers = require('../parent/drivers');
-
-var _lib = require('../../lib');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -23,7 +6,17 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
+import { onCloseWindow } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+
+import { BaseComponent } from '../base';
+import { ParentComponent } from '../parent';
+import { RENDER_DRIVERS } from '../parent/drivers';
+
+import { noop } from '../../lib';
+
+
+export var DelegateComponent = function (_BaseComponent) {
     _inherits(DelegateComponent, _BaseComponent);
 
     function DelegateComponent(component, source, options) {
@@ -43,20 +36,8 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
             onDisplay: options.props.onDisplay
         };
 
-        for (var _iterator = component.getPropNames(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var propName = _ref;
-
+        for (var _i2 = 0, _component$getPropNam2 = component.getPropNames(), _length2 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
+            var propName = _component$getPropNam2[_i2];
             // $FlowFixMe
             var prop = _this.component.getProp(propName);
 
@@ -71,7 +52,7 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
 
         _this.clean.register('destroyFocusOverride', function () {
             // $FlowFixMe
-            _this.focus = _lib.noop;
+            _this.focus = noop;
         });
 
         _this.userClose = options.overrides.userClose;
@@ -79,29 +60,17 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
         _this.error = options.overrides.error;
         _this.on = options.overrides.on;
 
-        var delegateOverrides = _drivers.RENDER_DRIVERS[options.context].delegateOverrides;
+        var delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
 
-        for (var _iterator2 = Object.keys(delegateOverrides), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref2;
-
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) break;
-                _ref2 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) break;
-                _ref2 = _i2.value;
-            }
-
-            var key = _ref2;
-
+        for (var _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+            var key = _Object$keys2[_i4];
             // $FlowFixMe
-            _this[key] = _parent.ParentComponent.prototype[key];
+            _this[key] = ParentComponent.prototype[key];
         }
 
         _this.childWindowName = options.childWindowName;
 
-        _parent.ParentComponent.prototype.registerActiveComponent.call(_this);
+        ParentComponent.prototype.registerActiveComponent.call(_this);
 
         _this.watchForClose();
         return _this;
@@ -110,7 +79,7 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
     DelegateComponent.prototype.watchForClose = function watchForClose() {
         var _this2 = this;
 
-        var closeWindowListener = (0, _src.onCloseWindow)(this.source, function () {
+        var closeWindowListener = onCloseWindow(this.source, function () {
             return _this2.destroy();
         }, 3000);
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
@@ -118,36 +87,22 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
 
     DelegateComponent.prototype.getOverrides = function getOverrides(context) {
 
-        var delegateOverrides = _drivers.RENDER_DRIVERS[context].delegateOverrides;
+        var delegateOverrides = RENDER_DRIVERS[context].delegateOverrides;
 
         var overrides = {};
 
         var self = this;
 
-        var _loop = function _loop() {
-            if (_isArray3) {
-                if (_i3 >= _iterator3.length) return 'break';
-                _ref3 = _iterator3[_i3++];
-            } else {
-                _i3 = _iterator3.next();
-                if (_i3.done) return 'break';
-                _ref3 = _i3.value;
-            }
-
-            var key = _ref3;
-
+        var _loop = function _loop(_i6, _Object$keys4, _length6) {
+            var key = _Object$keys4[_i6];
             overrides[key] = function delegateOverride() {
                 // $FlowFixMe
-                return _parent.ParentComponent.prototype[key].apply(self, arguments);
+                return ParentComponent.prototype[key].apply(self, arguments);
             };
         };
 
-        for (var _iterator3 = Object.keys(delegateOverrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref3;
-
-            var _ret = _loop();
-
-            if (_ret === 'break') break;
+        for (var _i6 = 0, _Object$keys4 = Object.keys(delegateOverrides), _length6 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
+            _loop(_i6, _Object$keys4, _length6);
         }
 
         return overrides;
@@ -165,9 +120,9 @@ var DelegateComponent = exports.DelegateComponent = function (_BaseComponent) {
                 throw new Error('Context not set');
             }
 
-            return _drivers.RENDER_DRIVERS[this.context];
+            return RENDER_DRIVERS[this.context];
         }
     }]);
 
     return DelegateComponent;
-}(_base.BaseComponent);
+}(BaseComponent);
