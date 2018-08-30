@@ -272,33 +272,6 @@ export let testComponent5 = zoid.create({
 });
 
 
-export let testComponent_no_logLevel_configured = zoid.create({
-
-    tag: 'test-component-no-log-level',
-
-    url: {
-        dev:    '/base/test/child.htm?devenv=true',
-        custom: '/base/test/child.htm?customenv=true'
-    },
-
-    defaultEnv: 'dev'
-});
-
-export let testComponent_logLevel_configured = zoid.create({
-
-    tag: 'test-component-log-level',
-
-    defaultLogLevel: 'error',
-
-    url: {
-        dev:    '/base/test/child.htm?devenv=true',
-        custom: '/base/test/child.htm?customenv=true'
-    },
-
-    defaultEnv: 'dev'
-});
-
-
 export let testComponent_parentDomains_string = zoid.create({
     tag: 'test-component-parent-domains-string',
 

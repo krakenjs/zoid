@@ -155,7 +155,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
 
         }).then(value => {
 
-            if (!value) {
+            if (value === null || typeof value === 'undefined') {
                 return;
             }
 
@@ -169,7 +169,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
                 let result;
 
                 if (typeof queryValue === 'boolean') {
-                    result = '1';
+                    result = queryValue.toString();
                 } else if (typeof queryValue === 'string') {
                     result = queryValue.toString();
                 } else if (typeof queryValue === 'function') {

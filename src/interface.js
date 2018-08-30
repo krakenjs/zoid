@@ -17,7 +17,7 @@ export function getByTag<P>(tag : string) : Component<P> {
     return Component.getByTag(tag);
 }
 
-export { getCurrentScriptDir } from './lib';
+export { getCurrentScriptDir, useLogger } from './lib';
 
 export function destroyAll() : ZalgoPromise<void> {
     return ParentComponent.destroyAll();

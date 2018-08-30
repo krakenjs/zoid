@@ -8,7 +8,6 @@ import './templates';
 import './options';
 import './parent';
 import './validation';
-import './logging';
 import './parentDomainCheck';
 import './angular2';
 import './vue';

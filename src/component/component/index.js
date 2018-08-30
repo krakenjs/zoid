@@ -12,7 +12,7 @@ import { DelegateComponent, type DelegateOptionsType } from '../delegate';
 import { isZoidComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
-import { info, error, warn, setLogLevel, memoize } from '../../lib';
+import { info, error, warn, memoize } from '../../lib';
 import type { EnvStringRegExp, CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
 
 import { validate } from './validate';
@@ -49,7 +49,6 @@ export type ComponentOptionsType<P> = {
     autoResize? : boolean | { width? : boolean, height? : boolean, element? : string },
     listenForResize? : boolean,
 
-    defaultLogLevel? : string,
     allowedParentDomains? : StringMatcherType,
 
     defaultEnv? : string,
@@ -90,7 +89,6 @@ export class Component<P> extends BaseComponent<P> {
     autoResize : ?(boolean | { width? : boolean, height? : boolean, element? : string })
     listenForResize : ?boolean
 
-    defaultLogLevel : string
     allowedParentDomains : StringMatcherType
 
     defaultEnv : ?string
@@ -120,12 +118,7 @@ export class Component<P> extends BaseComponent<P> {
 
         this.addProp(options, 'tag');
 
-        this.addProp(options, 'defaultLogLevel', 'info');
-
         this.addProp(options, 'allowedParentDomains', WILDCARD);
-
-        // initially set log level to default log level configured when creating component
-        setLogLevel(this.defaultLogLevel);
 
         if (Component.components[this.tag]) {
             throw new Error(`Can not register multiple components with the same tag`);

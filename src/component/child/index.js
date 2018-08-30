@@ -1,7 +1,6 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { flush } from 'beaver-logger/client';
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -9,7 +8,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
 import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-    cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
+    cycle, globalFor, getElement, documentReady, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
@@ -202,9 +201,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
         this.props = this.props || {};
         let normalizedProps = normalizeChildProps(this.component, props, origin, required);
         extend(this.props, normalizedProps);
-        if (this.props.logLevel) {
-            setLogLevel(this.props.logLevel);
-        }
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
@@ -469,7 +465,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
 
     destroy() : ZalgoPromise<void> {
-        return flush().then(() => {
+        return ZalgoPromise.try(() => {
             window.close();
         });
     }

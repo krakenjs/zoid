@@ -1,7 +1,6 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -12,7 +11,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
     addClass, extend, serializeFunctions, extendUrl, jsxDom,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-    global, writeToWindow, setLogLevel, once,
+    global, writeToWindow, once,
     prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
@@ -87,10 +86,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         this.context = context;
         this.setProps(props);
-
-        if (this.props.logLevel) {
-            setLogLevel(this.props.logLevel);
-        }
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });
 
@@ -442,7 +437,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
             .then(query => {
                 let url = this.component.getUrl(this.props.env, this.props);
-                return extendUrl(url, { query: { ...query, xcomponent: '1' } });
+                return extendUrl(url, { query: { ...query } });
             });
     }
 
@@ -708,7 +703,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         let onunload = once(() => {
             this.component.log(`navigate_away`);
-            flush();
             this.destroyComponent();
         });
 
@@ -1232,7 +1226,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             if (this.clean.hasTasks()) {
                 this.component.log(`destroy`);
-                flush();
                 return this.clean.all();
             }
         });

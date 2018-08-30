@@ -1,19 +1,22 @@
 /* @flow */
 
-import { CONFIG } from 'post-robot/src';
-import { config, logLevels, info as logInfo, warn as logWarn, error as logError } from 'beaver-logger/client';
+type Logger = {
+    debug : (string, { [string] : string }) => void,
+    info : (string, { [string] : string }) => void,
+    warn : (string, { [string] : string }) => void,
+    error : (string, { [string] : string }) => void
+};
 
-export function setLogLevel(logLevel : string) {
-    if (logLevels.indexOf(logLevel) === -1) {
-        throw new Error(`Invalid logLevel: ${ logLevel }`);
-    }
-    config.logLevel = logLevel;
-    CONFIG.LOG_LEVEL = logLevel;
-    window.LOG_LEVEL = logLevel;
+let logger : ?Logger;
+
+export function useLogger(newLogger : Logger) {
+    logger = newLogger;
 }
 
 export function info(name : string, event : string, payload : Object = {}) {
-    logInfo(`xc_${ name }_${ event }`, payload);
+    if (logger) {
+        logger.info(`xc_${ name }_${ event }`, payload);
+    }
 }
 
 
@@ -24,7 +27,9 @@ export function info(name : string, event : string, payload : Object = {}) {
 */
 
 export function warn(name : string, event : string, payload : Object = {}) {
-    logWarn(`xc_${ name }_${ event }`, payload);
+    if (logger) {
+        logger.warn(`xc_${ name }_${ event }`, payload);
+    }
 }
 
 
@@ -35,5 +40,7 @@ export function warn(name : string, event : string, payload : Object = {}) {
 */
 
 export function error(name : string, event : string, payload : Object = {}) {
-    logError(`xc_${ name }_${ event }`, payload);
+    if (logger) {
+        logger.error(`xc_${ name }_${ event }`, payload);
+    }
 }

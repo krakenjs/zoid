@@ -43,7 +43,6 @@ type envPropType = string;
 type uidPropType = string;
 type urlPropType = string;
 type timeoutPropType = number;
-type logLevelPropType = string;
 type dimensionsPropType = DimensionsType;
 
 type onDisplayPropType = EventHandlerType<void>;
@@ -57,7 +56,6 @@ export type BuiltInPropsType = {
     env : envPropType,
     uid : uidPropType,
     timeout? : timeoutPropType,
-    logLevel : logLevelPropType,
     dimensions? : dimensionsPropType,
 
     onDisplay : onDisplayPropType,
@@ -73,7 +71,6 @@ export type PropsType = {
     uid? : uidPropType,
     url? : urlPropType,
     timeout? : timeoutPropType,
-    logLevel? : logLevelPropType,
     dimensions? : dimensionsPropType,
 
     onDisplay? : onDisplayPropType,
@@ -88,7 +85,6 @@ export type BuiltInPropsDefinitionType<P> = {
     env : StringPropDefinitionType<envPropType, P>,
     uid : StringPropDefinitionType<uidPropType, P>,
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
-    logLevel : StringPropDefinitionType<logLevelPropType, P>,
     dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P>,
@@ -126,14 +122,6 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
                 return uniqueID();
             },
             queryParam: true
-        },
-
-        logLevel: {
-            type:       'string',
-            queryParam: true,
-            def(props, component) : string {
-                return component.defaultLogLevel;
-            }
         },
 
         dimensions: {
