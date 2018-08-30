@@ -1,10 +1,10 @@
 /* @flow */
 
 type Logger = {
-    debug : (string, { [string] : string }) => void,
-    info : (string, { [string] : string }) => void,
-    warn : (string, { [string] : string }) => void,
-    error : (string, { [string] : string }) => void
+    debug : (event : string, payload? : { [string] : ?string }) => void,
+    info : (event : string, payload? : { [string] : ?string }) => void,
+    warn : (event : string, payload? : { [string] : ?string }) => void,
+    error : (event : string, payload? : { [string] : ?string }) => void
 };
 
 let logger : ?Logger;
