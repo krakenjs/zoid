@@ -998,7 +998,7 @@ export function jsxDom(element : string | Function, props : ?{ [ string ] : mixe
     } else {
         for (let i = 0; i < children.length; i++) {
             if (typeof children[i] === 'string') {
-                let textNode = document.createTextNode(children[i]);
+                let textNode = doc.createTextNode(children[i]);
                 appendChild(el, textNode);
             } else {
                 appendChild(el, children[i]);
