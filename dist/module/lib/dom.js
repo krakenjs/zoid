@@ -1047,7 +1047,7 @@ export function jsxDom(name, props, content) {
     } else {
         for (var i = 2; i < arguments.length; i++) {
             if (typeof arguments[i] === 'string') {
-                var textNode = document.createTextNode(arguments[i]);
+                var textNode = doc.createTextNode(arguments[i]);
                 appendChild(el, textNode);
             } else {
                 appendChild(el, arguments[i]);

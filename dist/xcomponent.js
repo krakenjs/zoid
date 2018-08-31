@@ -1020,7 +1020,7 @@
                 if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
                 if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
                     var parent = getParent(win);
-                    return parent && canReadFromWindow(win) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
                 }
                 var host = location.host;
                 if (!host) throw new Error("Can not read window host");
@@ -1139,7 +1139,8 @@
             }
             function getAllFramesInWindow(win) {
                 var top = getTop(win);
-                return getAllChildFrames(top).concat(top);
+                if (!top) throw new Error("Can not determine top window");
+                return [].concat(getAllChildFrames(top), [ top ]);
             }
             function isFrameWindowClosed(frame) {
                 if (!frame.contentWindow) return !0;
@@ -6989,7 +6990,7 @@
                     if (arguments.length > 3) throw new Error("Expected only text content for " + name + " tag");
                     el.text = content;
                 } else for (var i = 2; i < arguments.length; i++) if ("string" == typeof arguments[i]) {
-                    var textNode = document.createTextNode(arguments[i]);
+                    var textNode = doc.createTextNode(arguments[i]);
                     appendChild(el, textNode);
                 } else appendChild(el, arguments[i]);
                 return el;
