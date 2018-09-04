@@ -157,13 +157,18 @@ describe('zoid happy cases', () => {
 
     it('should enter a component, update a prop, and call a prop', done => {
 
+        let isDone = false;
+
         testComponent.renderIframe({
 
             foo() {
                 this.updateProps({
                     foo(bar) {
-                        assert.equal(bar, 'bar');
-                        done();
+                        if (!isDone) {
+                            assert.equal(bar, 'bar');
+                            done();
+                            isDone = true;
+                        }
                     }
                 });
             },
