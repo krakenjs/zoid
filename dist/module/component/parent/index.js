@@ -1129,15 +1129,24 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                     return;
                 }
 
-                var el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                    jsxDom: jsxDom.bind(doc),
-                    document: doc
-                });
+                var el = void 0;
+
+                try {
+                    el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                        jsxDom: jsxDom.bind(doc),
+                        document: doc
+                    });
+                } catch (err) {
+                    _this31.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
+                    return;
+                }
 
                 try {
                     writeElementToWindow(win, el);
                 } catch (err) {
-                    // pass
+                    _this31.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
                 }
             });
         });

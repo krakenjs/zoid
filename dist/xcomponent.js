@@ -5410,13 +5410,27 @@
                             } catch (err) {
                                 return;
                             }
-                            var el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                                jsxDom: lib.F.bind(doc),
-                                document: doc
-                            });
+                            var el = void 0;
+                            try {
+                                el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                                    jsxDom: lib.F.bind(doc),
+                                    document: doc
+                                });
+                            } catch (err) {
+                                _this31.component.logError("preprender_error", {
+                                    err: err.stack ? err.stack : err.toString()
+                                });
+                                console.error(err.stack ? err.stack : err);
+                                return;
+                            }
                             try {
                                 Object(lib._3)(win, el);
-                            } catch (err) {}
+                            } catch (err) {
+                                _this31.component.logError("preprender_error", {
+                                    err: err.stack ? err.stack : err.toString()
+                                });
+                                console.error(err.stack ? err.stack : err);
+                            }
                         }) : src.a.resolve();
                     });
                 };
