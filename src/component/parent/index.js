@@ -1147,15 +1147,24 @@ export class ParentComponent<P> extends BaseComponent<P> {
                     return;
                 }
 
-                let el = this.renderTemplate(this.component.prerenderTemplate, {
-                    jsxDom:   jsxDom.bind(doc),
-                    document: doc
-                });
+                let el;
+
+                try {
+                    el = this.renderTemplate(this.component.prerenderTemplate, {
+                        jsxDom:   jsxDom.bind(doc),
+                        document: doc
+                    });
+                } catch (err) {
+                    this.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
+                    return;
+                }
 
                 try {
                     writeElementToWindow(win, el);
                 } catch (err) {
-                    // pass
+                    this.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
                 }
             });
         });
