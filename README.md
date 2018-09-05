@@ -7,8 +7,9 @@ A cross-domain component toolkit, supporting:
 - Render an iframe or popup on a different domain, and pass down props, including objects and functions
 - Call callbacks natively from the child window without worrying about post-messaging or cross-domain restrictions
 - Create and expose components to share functionality from your site to others!
+- Render your component directly as a React, Vue or Angular component!
 
-It's 'data-down, actions up', but 100% cross-domain! You can even use it directly with libraries like React and Angular.
+It's 'data-down, actions up' style components, but 100% cross-domain using iframes and popups!
 
 -----
 
