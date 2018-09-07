@@ -51,7 +51,7 @@
     "flow-bin": "^0.76",
     "grumbler-scripts": "^2.0.19",
     "mocha": "^4",
-    "serve": "^6.5.6"
+    "serve": "^10.0.0"
   },
   "dependencies": {
     "beaver-logger": "^3.0.11",
