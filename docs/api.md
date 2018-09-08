@@ -114,7 +114,7 @@ props: {
 
 - **validate** `(value, props) => void`
 
-  A function to validate the passed value. Should throw an appopriate error if invalid.
+  A function to validate the passed value. Should throw an appropriate error if invalid.
 
   ```javascript
   email: {
@@ -226,7 +226,7 @@ A function which should return a DOM element, rendered on the parent page and co
 
 zoid will pass `opts.outlet` to this function, which is a pre-generated element your component will be rendered into. This must be inserted somewhere into the DOM element you return. For popup components, you don't need to use `opts.outlet`
 
-Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javacript.
+Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javascript.
 
 ```javascript
 /* @jsx jsxDom */
@@ -283,7 +283,7 @@ A function which should return a DOM element, rendered in place of the iframe el
 
 Useful if you want to display a loading spinner or pre-render some content as the component loads.
 
-Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javacript.
+Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javascript.
 
 ```javascript
 /* @jsx jsxDom */
