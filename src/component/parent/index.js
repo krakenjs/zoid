@@ -37,7 +37,7 @@ export type RenderOptionsType = {
     CONTEXT : typeof CONTEXT_TYPES,
     EVENT : typeof EVENTS,
     actions : {
-        close : (string) => ZalgoPromise<void>,
+        close : (?string) => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>
     },
     on : (string, () => void) => CancelableType,
@@ -918,7 +918,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     */
 
     @memoized
-    close(reason : string = CLOSE_REASONS.PARENT_CALL) : ZalgoPromise<void> {
+    close(reason? : string = CLOSE_REASONS.PARENT_CALL) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
 
             this.component.log(`close`, { reason });

@@ -77,11 +77,11 @@ export const EVENT_NAMES = {
 };
 
 export const CLOSE_REASONS = {
-    PARENT_CALL:           'parent_call',
-    CHILD_CALL:            'child_call',
-    CLOSE_DETECTED:        'close_detected',
-    USER_CLOSED:           'user_closed',
-    PARENT_CLOSE_DETECTED: 'parent_close_detected'
+    PARENT_CALL:           ('parent_call' : 'parent_call'),
+    CHILD_CALL:            ('child_call' : 'child_call'),
+    CLOSE_DETECTED:        ('close_detected' : 'close_detected'),
+    USER_CLOSED:           ('user_closed' : 'user_closed'),
+    PARENT_CLOSE_DETECTED: ('parent_close_detected' : 'parent_close_detected')
 };
 
 export const CONTEXT_TYPES_LIST : Array<string> = Object.keys(CONTEXT_TYPES).map(key => CONTEXT_TYPES[key]);
