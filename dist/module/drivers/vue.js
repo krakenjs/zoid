@@ -1,5 +1,4 @@
-
-import { extend } from '../lib';
+import { extend } from 'belter/src';
 
 export var vue = {
     global: function global() {

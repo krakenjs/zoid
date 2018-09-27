@@ -7,6 +7,8 @@ import { ParentComponent } from './component/parent';
 // eslint-disable-next-line import/no-namespace
 import * as _CONSTANTS from './constants';
 
+export { PopupOpenError } from 'belter/src';
+
 export function create(options) {
     return new Component(options);
 }

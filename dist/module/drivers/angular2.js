@@ -2,8 +2,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 /* eslint new-cap: 0 */
 
-import { replaceObject } from '../lib';
-
+import { replaceObject } from 'belter/src';
 
 export var angular2 = {
     global: function global() {

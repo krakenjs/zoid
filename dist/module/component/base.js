@@ -3,9 +3,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 import 'cross-domain-utils/src';
-
-import { copyProp, eventEmitter, stringifyError, noop } from '../lib';
-
+import { copyProp, eventEmitter, stringifyError, noop } from 'belter/src';
 
 function cleanup(obj) {
 

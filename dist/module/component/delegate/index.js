@@ -8,12 +8,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { onCloseWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { noop } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS } from '../parent/drivers';
-
-import { noop } from '../../lib';
 
 
 export var DelegateComponent = function (_BaseComponent) {

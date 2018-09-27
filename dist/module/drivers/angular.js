@@ -1,5 +1,4 @@
-import { dasherizeToCamel, replaceObject } from '../lib';
-
+import { dasherizeToCamel, replaceObject } from 'belter/src';
 
 export var angular = {
     global: function global() {

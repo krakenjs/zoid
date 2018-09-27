@@ -42,6 +42,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
+import { memoize } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -50,7 +51,7 @@ import { DelegateComponent } from '../delegate';
 import { isZoidComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
-import { info, error, warn, memoize } from '../../lib';
+import { info, error, warn } from '../../lib';
 
 
 import { validate } from './validate';

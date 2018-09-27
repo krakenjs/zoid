@@ -13,10 +13,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { isSameDomain, matchDomain, getDomain } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { extend, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify, cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow as _getParentComponentWindow, getComponentMeta, getParentDomain as _getParentDomain, getParentRenderWindow as _getParentRenderWindow } from '../window';
-import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify, cycle, globalFor, getElement, documentReady, noop, stringifyError } from '../../lib';
+import { deserializeFunctions, globalFor } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 
@@ -368,8 +369,7 @@ export var ChildComponent = function (_BaseComponent) {
         this.watchingForResize = true;
 
         return ZalgoPromise['try'](function () {
-
-            return documentReady;
+            return waitForDocumentReady();
         }).then(function () {
 
             // $FlowFixMe

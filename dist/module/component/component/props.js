@@ -1,6 +1,6 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { uniqueID, once, memoize, noop, promisify } from 'belter/src';
 
-import { uniqueID, once, memoize, noop, promisify } from '../../lib';
 import '../../types';
 
 /*  Internal Props
