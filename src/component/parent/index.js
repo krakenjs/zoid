@@ -4,18 +4,18 @@
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { addEventListener, uniqueID, elementReady, writeElementToWindow,
+    noop, showAndAnimate, animateAndHide, showElement, hideElement,
+    addClass, extend, extendUrl, jsxDom,
+    setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
+    writeToWindow, once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { addEventListener, uniqueID, elementReady, writeElementToWindow,
-    noop, showAndAnimate, animateAndHide, showElement, hideElement,
-    addClass, extend, serializeFunctions, extendUrl, jsxDom,
-    setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-    global, writeToWindow, once,
-    prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
+import { serializeFunctions, global } from '../../lib';
 import type { PropsType, BuiltInPropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { CancelableType, Jsx, DimensionsType, ElementRefType } from '../../types';
@@ -242,31 +242,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
             this.delegate(win);
 
             return this.render(element);
-        });
-    }
-
-    @memoized
-    prefetch() : ZalgoPromise<void> {
-        return ZalgoPromise.try(() => {
-            this.html = this.buildUrl().then(url => {
-                return prefetchPage(url).then(html => {
-
-                    let host = `${ url.split('/').slice(0, 3).join('/') }`;
-                    let uri = `/${ url.split('/').slice(3).join('/') }`;
-
-                    return `
-                        <base href="${ host }">
-
-                        ${ html }
-
-                        <script>
-                            if (window.history && window.history.pushState) {
-                                window.history.pushState({}, '', '${ uri }');
-                            }
-                        </script>
-                    `;
-                });
-            });
         });
     }
 
@@ -1158,7 +1133,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-    @memoized
     openContainer(element : ?HTMLElement) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             let el;

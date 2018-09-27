@@ -1,8 +1,8 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { dotify, isDefined } from 'belter/src';
 
-import { dotify, isDefined } from '../../lib';
 import type { Component } from '../component';
 import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, MixedPropDefinitionType } from '../component/props';
 

@@ -1,7 +1,8 @@
 /* @flow */
 
+import { extend } from 'belter/src';
+
 import type { Component, ComponentDriverType } from '../component/component';
-import { extend } from '../lib';
 
 type VueComponent = {
     render : (Function) => Element,

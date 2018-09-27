@@ -1,6 +1,7 @@
 /* @flow */
 
-import { dasherizeToCamel, replaceObject } from '../lib';
+import { dasherizeToCamel, replaceObject } from 'belter/src';
+
 import type { Component, ComponentDriverType } from '../component/component';
 
 type AngularModule = {

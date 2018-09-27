@@ -12,7 +12,7 @@ describe('zoid options', () => {
             env: 'custom',
 
             sendUrl(url) {
-                assert.isTrue(url.indexOf('customenv') !== -1, 'Expected url to be custom env url');
+                assert.isTrue(url.indexOf('customenv') !== -1, `Expected url to be custom env url, got ${ url }`);
                 done();
             },
 

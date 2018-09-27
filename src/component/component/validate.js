@@ -1,7 +1,8 @@
 /* @flow */
 
+import { isPerc, isPx } from 'belter/src';
+
 import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
-import { isPerc, isPx } from '../../lib';
 
 import type { ComponentOptionsType } from './index';
 

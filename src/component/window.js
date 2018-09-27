@@ -2,8 +2,9 @@
 
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import base32 from 'hi-base32';
+import { memoize, uniqueID, stringifyError } from 'belter/src';
 
-import { memoize, uniqueID, globalFor, stringifyError } from '../lib';
+import { globalFor } from '../lib';
 import { WINDOW_REFERENCES } from '../constants';
 import type { DimensionsType, PositionType } from '../types';
 

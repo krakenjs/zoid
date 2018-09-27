@@ -1,7 +1,8 @@
 /* @flow */
 /* eslint new-cap: 0 */
 
-import { replaceObject } from '../lib';
+import { replaceObject } from 'belter/src';
+
 import type { Component, ComponentDriverType } from '../component/component';
 
 type Angular2Injection = {};

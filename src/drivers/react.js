@@ -1,6 +1,7 @@
 /* @flow */
 
-import { extend } from '../lib';
+import { extend } from 'belter/src';
+
 import type { Component, ComponentDriverType } from '../component/component';
 
 declare class ReactClassType {

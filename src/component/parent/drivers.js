@@ -3,10 +3,10 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName, isSameDomain } from 'cross-domain-utils/src';
-
 import { iframe, popup, toCSS, showElement, hideElement,
     destroyElement, normalizeDimension, watchElementForClose,
-    awaitFrameWindow, addClass, removeClass, noop } from '../../lib';
+    awaitFrameWindow, addClass, removeClass, noop } from 'belter/src';
+
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
 

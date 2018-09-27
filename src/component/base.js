@@ -3,8 +3,8 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { on } from 'post-robot/src';
 import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { copyProp, eventEmitter, type EventEmitterType, stringifyError, noop } from 'belter/src';
 
-import { copyProp, eventEmitter, type EventEmitterType, stringifyError, noop } from '../lib';
 import type { CancelableType } from '../types';
 
 import type { Component } from './component';

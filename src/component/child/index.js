@@ -4,11 +4,12 @@
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { extend, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
+    cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
-import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-    cycle, globalFor, getElement, documentReady, noop, stringifyError } from '../../lib';
+import { deserializeFunctions, globalFor } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
@@ -330,8 +331,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         this.watchingForResize = true;
 
         return ZalgoPromise.try(() => {
-
-            return documentReady;
+            return waitForDocumentReady();
 
         }).then(() => {
 
@@ -351,7 +351,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
             });
         });
     }
-
 
     exports() : ChildExportsType<P> {
 

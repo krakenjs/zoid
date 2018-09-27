@@ -1,8 +1,8 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { uniqueID, once, memoize, noop, promisify } from 'belter/src';
 
-import { uniqueID, once, memoize, noop, promisify } from '../../lib';
 import { type DimensionsType } from '../../types';
 
 import type { Component } from './index';

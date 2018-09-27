@@ -1,11 +1,5 @@
 /* @flow */
 
-export function PopupOpenError(message : string) {
-    this.message = message;
-}
-
-PopupOpenError.prototype = Object.create(Error.prototype);
-
 export function IntegrationError(message : string) {
     this.message = message;
 }

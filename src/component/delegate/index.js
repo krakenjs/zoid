@@ -2,12 +2,12 @@
 
 import { onCloseWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { noop } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
 import type { Component } from '../component';
-import { noop } from '../../lib';
 import type { CancelableType, DimensionsType } from '../../types';
 
 export type DelegatePropsType = {
