@@ -12,8 +12,8 @@ if ! git diff-index --quiet --cached HEAD; then
     exit 1;
 fi;
 
-rm -rf node_modules/post-robot node_modules/zalgo-promise node_modules/beaver-logger node_modules/cross-domain-safe-weakmap node_modules/cross-domain-utils;
-npm install post-robot zalgo-promise beaver-logger cross-domain-safe-weakmap cross-domain-utils;
+rm -rf node_modules/post-robot node_modules/zalgo-promise node_modules/beaver-logger node_modules/cross-domain-safe-weakmap node_modules/cross-domain-utils node_modules/belter;
+npm install post-robot zalgo-promise beaver-logger cross-domain-safe-weakmap cross-domain-utils belter;
 
 git checkout dist;
 rm -rf dist/*;
