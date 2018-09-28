@@ -18,19 +18,18 @@ export var angular2 = {
         zoid.log('initializing angular2 component');
 
         var getProps = function getProps(component) {
-            return replaceObject(_extends({}, component.internalProps, component.props), {
-                'function': function _function(value) {
-                    if (typeof value === 'function') {
-                        return function angular2Wrapped() {
-                            var _this = this,
-                                _arguments = arguments;
+            return replaceObject(_extends({}, component.internalProps, component.props), function (item) {
+                if (typeof item === 'function') {
+                    return function angular2Wrapped() {
+                        var _this = this,
+                            _arguments = arguments;
 
-                            return component.zone.run(function () {
-                                return value.apply(_this, _arguments);
-                            });
-                        };
-                    }
+                        return component.zone.run(function () {
+                            return item.apply(_this, _arguments);
+                        });
+                    };
                 }
+                return item;
             });
         };
 

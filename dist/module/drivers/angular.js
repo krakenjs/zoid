@@ -59,14 +59,15 @@ export var angular = {
                             }
                         }
 
-                        scopeProps = replaceObject(scopeProps, {
-                            'function': function _function(value) {
+                        scopeProps = replaceObject(scopeProps, function (item) {
+                            if (typeof item === 'function') {
                                 return function angularWrapped() {
-                                    var result = value.apply(this, arguments);
+                                    var result = item.apply(this, arguments);
                                     safeApply();
                                     return result;
                                 };
                             }
+                            return item;
                         });
 
                         return scopeProps;

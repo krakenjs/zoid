@@ -1,24 +1,24 @@
 import { replaceObject } from 'belter/src';
 
 export function serializeFunctions(obj) {
-    return replaceObject(obj, {
-        'function': function _function() {
+    return replaceObject(obj, function (item) {
+        if (typeof item === 'function') {
             return {
                 __type__: '__function__'
             };
         }
+        return item;
     });
 }
 
 export function deserializeFunctions(obj, handler) {
-    return replaceObject(obj, {
-        'object': function object(value, key, fullKey) {
-            if (value && value.__type__ === '__function__') {
-                return function deserializedFunctionWrapper() {
-                    return handler({ key: key, fullKey: fullKey, self: this, args: arguments });
-                };
-            }
+    return replaceObject(obj, function (item, key, fullKey) {
+        if (item && item.__type__ === '__function__') {
+            return function deserializedFunctionWrapper() {
+                return handler({ key: key, fullKey: fullKey, self: this, args: arguments });
+            };
         }
+        return item;
     });
 }
 

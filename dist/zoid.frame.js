@@ -62,7 +62,7 @@
         "./node_modules/belter/src/decorators.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             __webpack_exports__.a = function(target, name, descriptor) {
-                descriptor.value = Object(__WEBPACK_IMPORTED_MODULE_0__util__.m)(descriptor.value, {
+                descriptor.value = Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)(descriptor.value, {
                     name: name,
                     thisNamespace: !0
                 });
@@ -122,7 +122,7 @@
             __webpack_exports__.n = getElement;
             __webpack_exports__.j = function(id) {
                 return new src.a(function(resolve, reject) {
-                    var name = Object(util.u)(id), el = getElementSafe(id);
+                    var name = Object(util.v)(id), el = getElementSafe(id);
                     if (el) return resolve(el);
                     if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
                     var interval = setInterval(function() {
@@ -280,9 +280,9 @@
                 element.classList ? element.classList.remove(name) : -1 !== element.className.split(/\s+/).indexOf(name) && (element.className = element.className.replace(name, ""));
             };
             __webpack_exports__.z = function(element, handler) {
-                handler = Object(util.o)(handler);
+                handler = Object(util.p)(handler);
                 var interval = void 0;
-                isElementClosed(element) ? handler() : interval = Object(util.t)(function() {
+                isElementClosed(element) ? handler() : interval = Object(util.u)(function() {
                     if (isElementClosed(element)) {
                         interval.cancel();
                         handler();
@@ -364,7 +364,7 @@
             function getElement(id) {
                 var element = getElementSafe(id);
                 if (element) return element;
-                throw new Error("Can not find element: " + Object(util.u)(id));
+                throw new Error("Can not find element: " + Object(util.v)(id));
             }
             function PopupOpenError(message) {
                 this.message = message;
@@ -432,13 +432,13 @@
                 };
             }
             function bindEvents(element, eventNames, handler) {
-                handler = Object(util.o)(handler);
+                handler = Object(util.p)(handler);
                 for (var _i8 = 0, _length8 = null == eventNames ? 0 : eventNames.length; _i8 < _length8; _i8++) {
                     var eventName = eventNames[_i8];
                     element.addEventListener(eventName, handler);
                 }
                 return {
-                    cancel: Object(util.o)(function() {
+                    cancel: Object(util.p)(function() {
                         for (var _i10 = 0, _length10 = null == eventNames ? 0 : eventNames.length; _i10 < _length10; _i10++) {
                             var _eventName = eventNames[_i10];
                             element.removeEventListener(_eventName, handler);
@@ -653,29 +653,38 @@
             __webpack_require__.d(__webpack_exports__, "isDefined", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.l;
             });
-            __webpack_require__.d(__webpack_exports__, "memoize", function() {
+            __webpack_require__.d(__webpack_exports__, "isRegex", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.m;
             });
-            __webpack_require__.d(__webpack_exports__, "noop", function() {
+            __webpack_require__.d(__webpack_exports__, "memoize", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.n;
             });
-            __webpack_require__.d(__webpack_exports__, "once", function() {
+            __webpack_require__.d(__webpack_exports__, "noop", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.o;
             });
-            __webpack_require__.d(__webpack_exports__, "promisify", function() {
+            __webpack_require__.d(__webpack_exports__, "once", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.p;
             });
-            __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.s;
+            __webpack_require__.d(__webpack_exports__, "promisify", function() {
+                return __WEBPACK_IMPORTED_MODULE_6__util__.q;
             });
-            __webpack_require__.d(__webpack_exports__, "stringify", function() {
+            __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
+                return __WEBPACK_IMPORTED_MODULE_6__util__.t;
+            });
+            __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.u;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
+            __webpack_require__.d(__webpack_exports__, "stringify", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.v;
             });
+            __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
+                return __WEBPACK_IMPORTED_MODULE_6__util__.w;
+            });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.x;
+                return __WEBPACK_IMPORTED_MODULE_6__util__.y;
+            });
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
+                return __WEBPACK_IMPORTED_MODULE_6__util__.z;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_8__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -832,9 +841,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.j)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.x)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.x)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.j)()[STORAGE_KEY] = storage;
@@ -846,7 +855,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.x)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -883,14 +892,14 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.x = uniqueID;
+            __webpack_exports__.y = uniqueID;
             __webpack_exports__.j = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof global) return global;
                 throw new Error("No global found");
             };
-            __webpack_exports__.m = function(method) {
+            __webpack_exports__.n = function(method) {
                 var _this = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, cacheMap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
                 function memoizedFunction() {
                     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
@@ -914,7 +923,7 @@
                 options.name && (memoizedFunction.displayName = options.name + ":memoized");
                 return memoizedFunction;
             };
-            __webpack_exports__.p = function(method) {
+            __webpack_exports__.q = function(method) {
                 var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                 function promisifiedFunction() {
                     return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(method, this, arguments);
@@ -926,8 +935,8 @@
                 var args = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : [], cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {}, key = serializeArgs(args);
                 return cache.hasOwnProperty(key) ? cache[key] : cache[key] = logic.apply(void 0, args);
             };
-            __webpack_exports__.n = function() {};
-            __webpack_exports__.o = function(method) {
+            __webpack_exports__.o = function() {};
+            __webpack_exports__.p = function(method) {
                 var called = !1;
                 return function() {
                     if (!called) {
@@ -936,7 +945,7 @@
                     }
                 };
             };
-            __webpack_exports__.v = function stringifyError(err) {
+            __webpack_exports__.w = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -953,7 +962,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.u = function(item) {
+            __webpack_exports__.v = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.h = function(obj, source) {
@@ -962,17 +971,17 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.q = function(str, regexp, handler) {
+            __webpack_exports__.r = function(str, regexp, handler) {
                 var results = [];
                 str.replace(regexp, function(item) {
                     results.push(handler ? handler.apply(null, arguments) : item);
                 });
                 return results;
             };
-            __webpack_exports__.w = function(svg) {
+            __webpack_exports__.x = function(svg) {
                 return "data:image/svg+xml;base64," + base64encode(svg);
             };
-            __webpack_exports__.r = function(text, regexp) {
+            __webpack_exports__.s = function(text, regexp) {
                 var result = [];
                 text.replace(regexp, function(token) {
                     result.push(token);
@@ -980,7 +989,7 @@
                 });
                 return result;
             };
-            __webpack_exports__.t = function(method, time) {
+            __webpack_exports__.u = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -1054,78 +1063,31 @@
                 }
                 return void 0 === item ? def : item;
             };
-            __webpack_exports__.s = function replaceObject(item, replacers) {
+            __webpack_exports__.t = function replaceObject(item, replacer) {
                 var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
                 if (Array.isArray(item)) {
-                    var _ret = function() {
-                        for (var length = item.length, result = [], _loop = function(i) {
-                            Object.defineProperty(result, i, {
-                                configurable: !0,
-                                enumerable: !0,
-                                get: function() {
-                                    var itemKey = fullKey ? fullKey + "." + i : "" + i, child = item[i], type = void 0 === child ? "undefined" : _typeof(child), replacer = replacers[type];
-                                    if (replacer) {
-                                        var replaced = replacer(child, i, itemKey);
-                                        if (void 0 !== replaced) {
-                                            result[i] = replaced;
-                                            return result[i];
-                                        }
-                                    }
-                                    if ("object" === (void 0 === child ? "undefined" : _typeof(child)) && null !== child) {
-                                        result[i] = replaceObject(child, replacers, itemKey);
-                                        return result[i];
-                                    }
-                                    result[i] = child;
-                                    return result[i];
-                                },
-                                set: function(value) {
-                                    delete result[i];
-                                    result[i] = value;
-                                }
-                            });
-                        }, i = 0; i < length; i++) _loop(i);
-                        return {
-                            v: result
-                        };
-                    }();
-                    if ("object" === (void 0 === _ret ? "undefined" : _typeof(_ret))) return _ret.v;
-                } else {
-                    if ("object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item) throw new Error("Pass an object or array");
-                    var _ret3 = function() {
-                        var result = {}, _loop2 = function(key) {
-                            if (!item.hasOwnProperty(key)) return "continue";
-                            Object.defineProperty(result, key, {
-                                configurable: !0,
-                                enumerable: !0,
-                                get: function() {
-                                    var itemKey = fullKey ? fullKey + "." + key : "" + key, child = item[key], type = void 0 === child ? "undefined" : _typeof(child), replacer = replacers[type];
-                                    if (replacer) {
-                                        var replaced = replacer(child, key, itemKey);
-                                        if (void 0 !== replaced) {
-                                            result[key] = replaced;
-                                            return result[key];
-                                        }
-                                    }
-                                    if ("object" === (void 0 === child ? "undefined" : _typeof(child)) && null !== child) {
-                                        result[key] = replaceObject(child, replacers, itemKey);
-                                        return result[key];
-                                    }
-                                    result[key] = child;
-                                    return result[key];
-                                },
-                                set: function(value) {
-                                    delete result[key];
-                                    result[key] = value;
-                                }
-                            });
-                        };
-                        for (var key in item) _loop2(key);
-                        return {
-                            v: result
-                        };
-                    }();
-                    if ("object" === (void 0 === _ret3 ? "undefined" : _typeof(_ret3))) return _ret3.v;
+                    for (var _length3 = item.length, result = [], _loop = function(i) {
+                        defineLazyProp(result, i, function() {
+                            var itemKey = fullKey ? fullKey + "." + i : "" + i, el = item[i], child = replacer(el, i, itemKey);
+                            (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
+                            return child;
+                        });
+                    }, i = 0; i < _length3; i++) _loop(i);
+                    return result;
                 }
+                if (isPlainObject(item)) {
+                    var _result = {}, _loop2 = function(key) {
+                        if (!item.hasOwnProperty(key)) return "continue";
+                        defineLazyProp(_result, key, function() {
+                            var itemKey = fullKey ? fullKey + "." + key : "" + key, el = item[key], child = replacer(el, key, itemKey);
+                            (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
+                            return child;
+                        });
+                    };
+                    for (var key in item) _loop2(key);
+                    return _result;
+                }
+                throw new Error("Pass an object or array");
             };
             __webpack_exports__.b = function(source, target, name, def) {
                 if (source.hasOwnProperty(name)) {
@@ -1151,6 +1113,12 @@
                     }, time);
                 };
             };
+            __webpack_exports__.m = function(item) {
+                return "[object RegExp]" === Object.prototype.toString.call(item);
+            };
+            __webpack_require__.d(__webpack_exports__, "z", function() {
+                return weakMapMemoize;
+            });
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -1184,6 +1152,45 @@
                     throw new Error("Arguments not serializable -- can not be used to memoize");
                 }
             }
+            function defineLazyProp(obj, key, getter) {
+                if (Array.isArray(obj)) {
+                    if ("number" != typeof key) throw new TypeError("Array key must be number");
+                } else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj && "string" != typeof key) throw new TypeError("Object key must be string");
+                Object.defineProperty(obj, key, {
+                    configurable: !0,
+                    enumerable: !0,
+                    get: function() {
+                        delete obj[key];
+                        var value = getter();
+                        obj[key] = value;
+                        return value;
+                    },
+                    set: function(value) {
+                        delete obj[key];
+                        obj[key] = value;
+                    }
+                });
+            }
+            function isObjectObject(obj) {
+                return "object" === (void 0 === (item = obj) ? "undefined" : _typeof(item)) && null !== item && "[object Object]" === Object.prototype.toString.call(obj);
+                var item;
+            }
+            function isPlainObject(obj) {
+                if (!isObjectObject(obj)) return !1;
+                var constructor = obj.constructor;
+                if ("function" != typeof constructor) return !1;
+                var prototype = constructor.prototype;
+                return !!isObjectObject(prototype) && !!prototype.hasOwnProperty("isPrototypeOf");
+            }
+            var weakMapMemoize = function(method) {
+                var weakmap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
+                return function(arg) {
+                    var result = weakmap.get(arg);
+                    if (void 0 !== result) return result;
+                    void 0 !== (result = method.call(this, arg)) && weakmap.set(arg, result);
+                    return result;
+                };
+            };
         },
         "./node_modules/cross-domain-safe-weakmap/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -2107,7 +2114,7 @@
             Object.defineProperty(__webpack_exports__, "__esModule", {
                 value: !0
             });
-            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js");
+            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js");
             global.a.tunnelWindows = global.a.tunnelWindows || {};
             global.a.tunnelWindowId = 0;
             function deleteTunnelWindow(id) {
@@ -2125,7 +2132,7 @@
                         for (var tunnelWindows = global.a.tunnelWindows, _i2 = 0, _Object$keys2 = Object.keys(tunnelWindows), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
                             var key = _Object$keys2[_i2], tunnelWindow = tunnelWindows[key];
                             try {
-                                Object(lib.j)(tunnelWindow.source);
+                                Object(belter_src.noop)(tunnelWindow.source);
                             } catch (err) {
                                 deleteTunnelWindow(key);
                                 continue;
@@ -2154,7 +2161,7 @@
                             return global.a.tunnelWindows[id];
                         }(id);
                         try {
-                            Object(lib.j)(tunnelWindow && tunnelWindow.source);
+                            Object(belter_src.noop)(tunnelWindow && tunnelWindow.source);
                         } catch (err) {
                             deleteTunnelWindow(id);
                             return;
@@ -2239,7 +2246,7 @@
                     return sendMessage(win, message, domain);
                 });
             }
-            var awaitRemoteBridgeForWindow = Object(lib.r)(function(win) {
+            var awaitRemoteBridgeForWindow = Object(belter_src.weakMapMemoize)(function(win) {
                 return src.a.try(function() {
                     for (var _i2 = 0, _getFrames2 = Object(cross_domain_utils_src.getFrames)(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i2 < _length2; _i2++) {
                         var frame = _getFrames2[_i2];
@@ -2283,7 +2290,7 @@
                                 canary: function() {},
                                 sendMessage: function(message) {
                                     try {
-                                        Object(lib.j)(window);
+                                        Object(belter_src.noop)(window);
                                     } catch (err) {
                                         return;
                                     }
@@ -2309,6 +2316,7 @@
                     }
                 });
             }
+            var lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js");
             global.a.bridges = global.a.bridges || {};
             global.a.bridgeFrames = global.a.bridgeFrames || {};
             global.a.popupWindowsByWin = global.a.popupWindowsByWin || new cross_domain_safe_weakmap_src.a();
@@ -2379,7 +2387,7 @@
                             iframe.onload = resolve;
                             iframe.onerror = reject;
                         }).then(function() {
-                            return Object(lib.k)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                            return Object(lib.f)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
                         }).then(function() {
                             return bridge;
                         });
@@ -2613,141 +2621,20 @@
         },
         "./node_modules/post-robot/src/lib/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            var src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-                return typeof obj;
-            } : function(obj) {
-                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            };
-            function stringifyError(err) {
-                var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
-                if (level >= 3) return "stringifyError stack overflow";
-                try {
-                    if (!err) return "<unknown error: " + Object.prototype.toString.call(err) + ">";
-                    if ("string" == typeof err) return err;
-                    if (err instanceof Error) {
-                        var stack = err && err.stack, message = err && err.message;
-                        if (stack && message) return -1 !== stack.indexOf(message) ? stack : message + "\n" + stack;
-                        if (stack) return stack;
-                        if (message) return message;
-                    }
-                    return "function" == typeof err.toString ? err.toString() : Object.prototype.toString.call(err);
-                } catch (newErr) {
-                    return "Error while stringifying error: " + stringifyError(newErr, level + 1);
-                }
-            }
-            var once = function(method) {
-                if (!method) return method;
-                var called = !1;
-                return function() {
-                    if (!called) {
-                        called = !0;
-                        return method.apply(this, arguments);
-                    }
-                };
-            };
-            function noop() {}
-            function addEventListener(obj, event, handler) {
-                obj.addEventListener ? obj.addEventListener(event, handler) : obj.attachEvent("on" + event, handler);
-                return {
-                    cancel: function() {
-                        obj.removeEventListener ? obj.removeEventListener(event, handler) : obj.detachEvent("on" + event, handler);
-                    }
-                };
-            }
-            function uniqueID() {
-                var chars = "0123456789abcdef";
-                return "xxxxxxxxxx".replace(/./g, function() {
-                    return chars.charAt(Math.floor(Math.random() * chars.length));
-                });
-            }
-            function eachArray(item, callback) {
-                for (var i = 0; i < item.length; i++) callback(item[i], i);
-            }
-            function eachObject(item, callback) {
-                for (var _key in item) item.hasOwnProperty(_key) && callback(item[_key], _key);
-            }
-            function each(item, callback) {
-                Array.isArray(item) ? eachArray(item, callback) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && eachObject(item, callback);
-            }
-            function replaceObject(item, callback) {
-                var depth = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1;
-                if (depth >= 100) throw new Error("Self-referential object passed, or object contained too many layers");
-                var newobj = void 0;
-                if ("object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item || Array.isArray(item)) {
-                    if (!Array.isArray(item)) throw new TypeError("Invalid type: " + (void 0 === item ? "undefined" : _typeof(item)));
-                    newobj = [];
-                } else newobj = {};
-                each(item, function(childItem, key) {
-                    var result = callback(childItem, key);
-                    void 0 !== result ? newobj[key] = result : "object" === (void 0 === childItem ? "undefined" : _typeof(childItem)) && null !== childItem ? newobj[key] = replaceObject(childItem, callback, depth + 1) : newobj[key] = childItem;
-                });
-                return newobj;
-            }
-            function safeInterval(method, time) {
-                var timeout = void 0;
-                timeout = setTimeout(function runInterval() {
-                    timeout = setTimeout(runInterval, time);
-                    method.call();
-                }, time);
-                return {
-                    cancel: function() {
-                        clearTimeout(timeout);
-                    }
-                };
-            }
-            function isRegex(item) {
-                return "[object RegExp]" === Object.prototype.toString.call(item);
-            }
-            var util_weakMapMemoize = function(method) {
-                var weakmap = new src.a();
-                return function(arg) {
-                    var result = weakmap.get(arg);
-                    if (void 0 !== result) return result;
-                    void 0 !== (result = method.call(this, arg)) && weakmap.set(arg, result);
-                    return result;
-                };
-            };
+            var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js");
             function getWindowType() {
-                return Object(cross_domain_utils_src.isPopup)() ? conf.b.WINDOW_TYPES.POPUP : Object(cross_domain_utils_src.isIframe)() ? conf.b.WINDOW_TYPES.IFRAME : conf.b.WINDOW_TYPES.FULLPAGE;
-            }
-            function jsonStringify(obj, replacer, indent) {
-                var objectToJSON = void 0, arrayToJSON = void 0;
-                try {
-                    if ("{}" !== JSON.stringify({})) {
-                        objectToJSON = Object.prototype.toJSON;
-                        delete Object.prototype.toJSON;
-                    }
-                    if ("{}" !== JSON.stringify({})) throw new Error("Can not correctly serialize JSON objects");
-                    if ("[]" !== JSON.stringify([])) {
-                        arrayToJSON = Array.prototype.toJSON;
-                        delete Array.prototype.toJSON;
-                    }
-                    if ("[]" !== JSON.stringify([])) throw new Error("Can not correctly serialize JSON objects");
-                } catch (err) {
-                    throw new Error("Can not repair JSON.stringify: " + err.message);
-                }
-                var result = JSON.stringify.call(this, obj, replacer, indent);
-                try {
-                    objectToJSON && (Object.prototype.toJSON = objectToJSON);
-                    arrayToJSON && (Array.prototype.toJSON = arrayToJSON);
-                } catch (err) {
-                    throw new Error("Can not repair JSON.stringify: " + err.message);
-                }
-                return result;
-            }
-            function jsonParse(item) {
-                return JSON.parse(item);
+                return Object(src.isPopup)() ? conf.b.WINDOW_TYPES.POPUP : Object(src.isIframe)() ? conf.b.WINDOW_TYPES.IFRAME : conf.b.WINDOW_TYPES.FULLPAGE;
             }
             function needsGlobalMessagingForBrowser() {
-                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.a.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.a.ALLOW_POSTMESSAGE_POPUP;
             }
-            var zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js"), serialize__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
-            global.a.methods = global.a.methods || new src.a();
-            var listenForMethods = once(function() {
+            global.a.methods = global.a.methods || new cross_domain_safe_weakmap_src.a();
+            var listenForMethods = Object(belter_src.once)(function() {
                 global.a.on(conf.b.POST_MESSAGE_NAMES.METHOD, {
                     origin: conf.b.WILDCARD
                 }, function(_ref) {
@@ -2755,7 +2642,7 @@
                     if (!methods) throw new Error("Could not find any methods this window has privileges to call");
                     var meth = methods[data.id];
                     if (!meth) throw new Error("Could not find method with id: " + data.id);
-                    if (!Object(cross_domain_utils_src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                    if (!Object(src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                     return zalgo_promise_src.a.try(function() {
                         return meth.method.apply({
                             source: source,
@@ -2772,10 +2659,10 @@
                 });
             });
             function isSerialized(item, type) {
-                return "object" === (void 0 === item ? "undefined" : serialize__typeof(item)) && null !== item && item.__type__ === type;
+                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
             }
             function serializeMethod(destination, domain, method, name) {
-                var id = uniqueID(), methods = global.a.methods.get(destination);
+                var id = Object(belter_src.uniqueID)(), methods = global.a.methods.get(destination);
                 if (!methods) {
                     methods = {};
                     global.a.methods.set(destination, methods);
@@ -2791,13 +2678,13 @@
                 };
             }
             function serializeMethods(destination, domain, obj) {
-                return replaceObject({
+                return Object(belter_src.replaceObject)({
                     obj: obj
                 }, function(item, key) {
                     return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? (err = item, 
                     {
                         __type__: conf.b.SERIALIZATION_TYPES.ERROR,
-                        __message__: stringifyError(err),
+                        __message__: Object(belter_src.stringifyError)(err),
                         __code__: err.code
                     }) : window.Promise && item instanceof window.Promise ? function(destination, domain, promise, name) {
                         return {
@@ -2813,10 +2700,11 @@
                                 return promise.then(resolve, reject);
                             }, name + ".then")
                         };
-                    }(destination, domain, item, key.toString()) : isRegex(item) ? (regex = item, {
+                    }(destination, domain, item, key.toString()) : Object(belter_src.isRegex)(item) ? (regex = item, 
+                    {
                         __type__: conf.b.SERIALIZATION_TYPES.REGEX,
                         __source__: regex.source
-                    }) : void 0;
+                    }) : item;
                     var err, regex;
                 }).obj;
             }
@@ -2861,13 +2749,13 @@
                 return new RegExp(item.__source__);
             }
             function deserializeMethods(source, origin, obj) {
-                return replaceObject({
+                return Object(belter_src.replaceObject)({
                     obj: obj
                 }, function(item) {
-                    if ("object" === (void 0 === item ? "undefined" : serialize__typeof(item)) && null !== item) return isSerialized(item, conf.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(0, 0, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.REGEX) ? deserializeRegex(0, 0, item) : void 0;
+                    return "object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item ? item : isSerialized(item, conf.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(0, 0, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.REGEX) ? deserializeRegex(0, 0, item) : item;
                 }).obj;
             }
-            global.a.readyPromises = global.a.readyPromises || new src.a();
+            global.a.readyPromises = global.a.readyPromises || new cross_domain_safe_weakmap_src.a();
             function onHello(handler) {
                 global.a.on(conf.b.POST_MESSAGE_NAMES.HELLO, {
                     domain: conf.b.WILDCARD
@@ -2897,8 +2785,8 @@
                     });
                     global.a.readyPromises.set(source, promise);
                 });
-                var parent = Object(cross_domain_utils_src.getAncestor)();
-                parent && sayHello(parent).catch(noop);
+                var parent = Object(src.getAncestor)();
+                parent && sayHello(parent).catch(belter_src.noop);
             }
             function onChildWindowReady(win) {
                 var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = global.a.readyPromises.get(win);
@@ -2910,61 +2798,19 @@
                 }, timeout);
                 return promise;
             }
-            __webpack_require__.d(__webpack_exports__, "p", function() {
-                return stringifyError;
-            });
-            __webpack_require__.d(__webpack_exports__, "l", function() {
-                return once;
-            });
-            __webpack_require__.d(__webpack_exports__, "j", function() {
-                return noop;
-            });
-            __webpack_require__.d(__webpack_exports__, "a", function() {
-                return addEventListener;
-            });
-            __webpack_require__.d(__webpack_exports__, "q", function() {
-                return uniqueID;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return eachArray;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return eachObject;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return each;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return replaceObject;
-            });
-            __webpack_require__.d(__webpack_exports__, "m", function() {
-                return safeInterval;
-            });
-            __webpack_require__.d(__webpack_exports__, "e", function() {
-                return isRegex;
-            });
-            __webpack_require__.d(__webpack_exports__, "r", function() {
-                return util_weakMapMemoize;
-            });
-            __webpack_require__.d(__webpack_exports__, "c", function() {
+            __webpack_require__.d(__webpack_exports__, "b", function() {
                 return getWindowType;
             });
-            __webpack_require__.d(__webpack_exports__, "g", function() {
-                return jsonStringify;
-            });
-            __webpack_require__.d(__webpack_exports__, "f", function() {
-                return jsonParse;
-            });
-            __webpack_require__.d(__webpack_exports__, "i", function() {
+            __webpack_require__.d(__webpack_exports__, "e", function() {
                 return needsGlobalMessagingForBrowser;
             });
-            __webpack_require__.d(__webpack_exports__, "h", function() {
+            __webpack_require__.d(__webpack_exports__, "d", function() {
                 return listenForMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return serializeMethod;
             });
-            __webpack_require__.d(__webpack_exports__, "o", function() {
+            __webpack_require__.d(__webpack_exports__, "h", function() {
                 return serializeMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
@@ -2982,19 +2828,19 @@
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return deserializeRegex;
             });
-            __webpack_require__.d(__webpack_exports__, "b", function() {
+            __webpack_require__.d(__webpack_exports__, "a", function() {
                 return deserializeMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return onHello;
             });
-            __webpack_require__.d(__webpack_exports__, "n", function() {
+            __webpack_require__.d(__webpack_exports__, "g", function() {
                 return sayHello;
             });
-            __webpack_require__.d(__webpack_exports__, "d", function() {
+            __webpack_require__.d(__webpack_exports__, "c", function() {
                 return initOnReady;
             });
-            __webpack_require__.d(__webpack_exports__, "k", function() {
+            __webpack_require__.d(__webpack_exports__, "f", function() {
                 return onChildWindowReady;
             });
         },
@@ -3334,18 +3180,16 @@
                                             void 0 !== $scope[_key] && (scopeProps[_key] = $scope[_key]);
                                         }
                                     }
-                                    return Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.replaceObject)(scopeProps, {
-                                        function: function(value) {
-                                            return function() {
-                                                var result = value.apply(this, arguments);
-                                                !function() {
-                                                    if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
-                                                        $scope.$apply();
-                                                    } catch (err) {}
-                                                }();
-                                                return result;
-                                            };
-                                        }
+                                    return Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.replaceObject)(scopeProps, function(item) {
+                                        return "function" == typeof item ? function() {
+                                            var result = item.apply(this, arguments);
+                                            !function() {
+                                                if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
+                                                    $scope.$apply();
+                                                } catch (err) {}
+                                            }();
+                                            return result;
+                                        } : item;
                                     });
                                 }, parent = component.init(getProps(), null, $element[0]);
                                 parent.render($element[0]);
@@ -3375,15 +3219,13 @@
                     var AngularComponent = _ref.Component, NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
                     zoid.log("initializing angular2 component");
                     var getProps = function(component) {
-                        return Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.replaceObject)(_extends({}, component.internalProps, component.props), {
-                            function: function(value) {
-                                if ("function" == typeof value) return function() {
-                                    var _this = this, _arguments = arguments;
-                                    return component.zone.run(function() {
-                                        return value.apply(_this, _arguments);
-                                    });
-                                };
-                            }
+                        return Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.replaceObject)(_extends({}, component.internalProps, component.props), function(item) {
+                            return "function" == typeof item ? function() {
+                                var _this = this, _arguments = arguments;
+                                return component.zone.run(function() {
+                                    return item.apply(_this, _arguments);
+                                });
+                            } : item;
                         });
                     }, ComponentInstance = AngularComponent({
                         selector: zoid.tag,
@@ -3814,7 +3656,7 @@
             __webpack_require__.d(src_interface_namespaceObject, "RenderError", function() {
                 return RenderError;
             });
-            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), src_global = __webpack_require__("./node_modules/post-robot/src/global.js"), SEND_MESSAGE_STRATEGIES = {};
+            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), src_global = __webpack_require__("./node_modules/post-robot/src/global.js"), SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
                 try {
                     __webpack_require__("./node_modules/post-robot/src/compat/index.js").emulateIERestrictions(window, win);
@@ -3841,7 +3683,7 @@
                 }
             };
             SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
-                if (Object(lib.i)()) {
+                if (Object(lib.e)()) {
                     if (!Object(cross_domain_utils_src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
                     if (!1 !== Object(cross_domain_utils_src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
                     var foreignGlobal = win[conf.b.WINDOW_PROPS.POSTROBOT];
@@ -3862,22 +3704,22 @@
             };
             function sendMessage(win, message, domain) {
                 return src.a.try(function() {
-                    var _jsonStringify;
+                    var _JSON$stringify;
                     message = function(win, message) {
-                        var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = Object(lib.q)(), type = Object(lib.c)(), sourceDomain = Object(cross_domain_utils_src.getDomain)(window);
+                        var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = Object(belter_src.uniqueID)(), type = Object(lib.b)(), sourceDomain = Object(cross_domain_utils_src.getDomain)(window);
                         return _extends({}, message, options, {
                             sourceDomain: sourceDomain,
                             id: message.id || id,
                             windowType: type
                         });
                     }(win, message, {
-                        data: Object(lib.o)(win, domain, message.data),
+                        data: Object(lib.h)(win, domain, message.data),
                         domain: domain
                     });
                     if (win === window && !conf.a.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Window is closed");
-                    var messages = [], serializedMessage = Object(lib.g)(((_jsonStringify = {})[conf.b.WINDOW_PROPS.POSTROBOT] = message, 
-                    _jsonStringify), null, 2);
+                    var messages = [], serializedMessage = JSON.stringify(((_JSON$stringify = {})[conf.b.WINDOW_PROPS.POSTROBOT] = message, 
+                    _JSON$stringify), null, 2);
                     return src.a.map(Object.keys(SEND_MESSAGE_STRATEGIES), function(strategyName) {
                         return src.a.try(function() {
                             if (!conf.a.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
@@ -3886,7 +3728,7 @@
                             messages.push(strategyName + ": success");
                             return !0;
                         }, function(err) {
-                            messages.push(strategyName + ": " + Object(lib.p)(err) + "\n");
+                            messages.push(strategyName + ": " + Object(belter_src.stringifyError)(err) + "\n");
                             return !1;
                         });
                     }).then(function(results) {
@@ -3974,14 +3816,14 @@
                         data: data
                     });
                 }, function(err) {
-                    var error = Object(lib.p)(err).replace(/^Error: /, ""), code = err.code;
+                    var error = Object(belter_src.stringifyError)(err).replace(/^Error: /, ""), code = err.code;
                     return respond({
                         type: conf.b.POST_MESSAGE_TYPE.RESPONSE,
                         ack: conf.b.POST_MESSAGE_ACK.ERROR,
                         error: error,
                         code: code
                     });
-                }) ]).then(lib.j).catch(function(err) {
+                }) ]).then(belter_src.noop).catch(function(err) {
                     if (options && options.handleError) return options.handleError(err);
                     throw err;
                 });
@@ -4021,7 +3863,7 @@
                 var source = event.source, origin = event.origin, message = function(message) {
                     var parsedMessage = void 0;
                     try {
-                        parsedMessage = Object(lib.f)(message);
+                        parsedMessage = JSON.parse(message);
                     } catch (err) {
                         return;
                     }
@@ -4033,7 +3875,7 @@
                     if (-1 === src_global.a.receivedMessages.indexOf(message.id)) {
                         src_global.a.receivedMessages.push(message.id);
                         if (!Object(cross_domain_utils_src.isWindowClosed)(source) || message.fireAndForget) {
-                            message.data && (message.data = Object(lib.b)(source, origin, message.data));
+                            message.data && (message.data = Object(lib.a)(source, origin, message.data));
                             RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
                         }
                     }
@@ -4041,7 +3883,7 @@
             }
             function messageListener(event) {
                 try {
-                    Object(lib.j)(event.source);
+                    Object(belter_src.noop)(event.source);
                 } catch (err) {
                     return;
                 }
@@ -4077,7 +3919,7 @@
                     if (!targetWindow) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
                     var win = targetWindow;
                     domain = options.domain || conf.b.WILDCARD;
-                    var hash = options.name + "_" + Object(lib.q)();
+                    var hash = options.name + "_" + Object(belter_src.uniqueID)();
                     if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Target window is closed");
                     var hasResult = !1, requestPromises = src_global.a.requestPromises.get(win);
                     if (!requestPromises) {
@@ -4085,13 +3927,13 @@
                         src_global.a.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = src.a.try(function() {
-                        if (Object(cross_domain_utils_src.isAncestor)(window, win)) return Object(lib.k)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
+                        if (Object(cross_domain_utils_src.isAncestor)(window, win)) return Object(lib.f)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (Object(lib.e)(domain) && !origin) return Object(lib.n)(win);
+                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.g)(win);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (Object(lib.e)(domain)) {
+                        if (Object(belter_src.isRegex)(domain)) {
                             if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.toString());
                             domain = origin;
                         }
@@ -4240,7 +4082,7 @@
                         nameListeners.set(win, winListeners);
                     }
                     var strDomain = domain.toString(), regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
-                    if (Object(lib.e)(domain)) {
+                    if (Object(belter_src.isRegex)(domain)) {
                         if (!regexListeners) {
                             regexListeners = [];
                             winListeners[__DOMAIN_REGEX__] = regexListeners;
@@ -4267,12 +4109,12 @@
                 }, listenerOptions);
                 if (options.once) {
                     var _handler = listenerOptions.handler;
-                    listenerOptions.handler = Object(lib.l)(function() {
+                    listenerOptions.handler = Object(belter_src.once)(function() {
                         requestListener.cancel();
                         return _handler.apply(this, arguments);
                     });
                 }
-                if (listenerOptions.window && options.errorOnClose) var interval = Object(lib.m)(function() {
+                if (listenerOptions.window && options.errorOnClose) var interval = Object(belter_src.safeInterval)(function() {
                     if (win && "object" === (void 0 === win ? "undefined" : server__typeof(win)) && Object(cross_domain_utils_src.isWindowClosed)(win)) {
                         interval.cancel();
                         listenerOptions.handleError(new Error("Post message target window is closed"));
@@ -4342,10 +4184,10 @@
             var bridge = __webpack_require__("./node_modules/post-robot/src/bridge/interface.js");
             function interface_init() {
                 if (!src_global.a.initialized) {
-                    Object(lib.a)(window, "message", messageListener);
+                    Object(belter_src.addEventListener)(window, "message", messageListener);
                     __webpack_require__("./node_modules/post-robot/src/bridge/index.js").openTunnelToOpener();
-                    Object(lib.d)();
-                    Object(lib.h)({
+                    Object(lib.c)();
+                    Object(lib.d)({
                         on: _on,
                         send: _send
                     });
@@ -4353,7 +4195,7 @@
                 src_global.a.initialized = !0;
             }
             interface_init();
-            var post_robot_src = interface_namespaceObject, belter_src = __webpack_require__("./node_modules/belter/src/index.js"), base_BaseComponent = function() {
+            var post_robot_src = interface_namespaceObject, base_BaseComponent = function() {
                 function BaseComponent() {
                     !function(instance, Constructor) {
                         if (!(instance instanceof BaseComponent)) throw new TypeError("Cannot call a class as a function");
@@ -4719,17 +4561,15 @@
                             if ("function" != typeof func) throw new TypeError("Expected " + fullKey + " to be function, got " + (void 0 === func ? "undefined" : child__typeof(func)));
                             return func.apply(self, args);
                         });
-                    }, Object(belter_src.replaceObject)(obj, {
-                        object: function(value, key, fullKey) {
-                            if (value && "__function__" === value.__type__) return function() {
-                                return handler({
-                                    key: key,
-                                    fullKey: fullKey,
-                                    self: this,
-                                    args: arguments
-                                });
-                            };
-                        }
+                    }, Object(belter_src.replaceObject)(obj, function(item, key, fullKey) {
+                        return item && "__function__" === item.__type__ ? function() {
+                            return handler({
+                                key: key,
+                                fullKey: fullKey,
+                                self: this,
+                                args: arguments
+                            });
+                        } : item;
                     });
                 };
                 ChildComponent.prototype.setProps = function(props, origin) {
@@ -5290,12 +5130,10 @@
                 };
                 ParentComponent.prototype.buildChildWindowName = function() {
                     var obj, _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(cross_domain_utils_src.isSameDomain)(renderTo), uid = Object(belter_src.uniqueID)(), tag = this.component.tag, sProps = (obj = this.getPropsForChild(), 
-                    Object(belter_src.replaceObject)(obj, {
-                        function: function() {
-                            return {
-                                __type__: "__function__"
-                            };
-                        }
+                    Object(belter_src.replaceObject)(obj, function(item) {
+                        return "function" == typeof item ? {
+                            __type__: "__function__"
+                        } : item;
                     })), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
                         type: INITIAL_PROPS.RAW,
                         value: sProps
