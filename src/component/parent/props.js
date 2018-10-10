@@ -45,7 +45,7 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
             value = props[propDef.alias];
         }
 
-        if (!isDefined(value) && propDef.value) {
+        if (propDef.value) {
             value = propDef.value();
         }
 
