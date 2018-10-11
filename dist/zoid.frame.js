@@ -3589,6 +3589,9 @@
             __webpack_require__.d(constants_namespaceObject, "WINDOW_REFERENCES", function() {
                 return WINDOW_REFERENCES;
             });
+            __webpack_require__.d(constants_namespaceObject, "PROP_SERIALIZATION", function() {
+                return PROP_SERIALIZATION;
+            });
             __webpack_require__.d(constants_namespaceObject, "PROP_TYPES_LIST", function() {
                 return PROP_TYPES_LIST;
             });
@@ -4331,6 +4334,10 @@
                 TOP: "top",
                 PARENT: "parent",
                 GLOBAL: "global"
+            }, PROP_SERIALIZATION = {
+                JSON: "json",
+                DOTIFY: "dotify",
+                BASE64: "base64"
             }, PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function(key) {
                 return PROP_TYPES[key];
             }), constants_CONTEXT_TYPES = {
@@ -5231,7 +5238,7 @@
                                 if ("boolean" == typeof queryValue) result = queryValue.toString(); else if ("string" == typeof queryValue) result = queryValue.toString(); else {
                                     if ("function" == typeof queryValue) return;
                                     if ("object" === (void 0 === queryValue ? "undefined" : props__typeof(queryValue)) && null !== queryValue) {
-                                        if ("json" !== prop.serialization) {
+                                        if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = btoa(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                                             result = Object(belter_src.dotify)(queryValue, key);
                                             for (var _i8 = 0, _Object$keys6 = Object.keys(result), _length8 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i8 < _length8; _i8++) {
                                                 var dotkey = _Object$keys6[_i8];
@@ -5239,7 +5246,6 @@
                                             }
                                             return;
                                         }
-                                        result = JSON.stringify(queryValue);
                                     } else "number" == typeof queryValue && (result = queryValue.toString());
                                 }
                                 params[queryParam] = result;
