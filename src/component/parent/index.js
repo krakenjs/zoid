@@ -644,7 +644,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                         return val(original, override).apply(this, arguments);
                     }
 
-                    throw new Error(`Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
+                    throw new Error(`Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
                 });
             };
         }

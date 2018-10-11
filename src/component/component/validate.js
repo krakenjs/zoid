@@ -41,7 +41,7 @@ function validatePropDefinitions<P>(options : ComponentOptionsType<P>) {
 export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-ignore-line
 
     if (!options) {
-        throw new Error(`Expecred options to be passed`);
+        throw new Error(`Expected options to be passed`);
     }
 
     if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) {
