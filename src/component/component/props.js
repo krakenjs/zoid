@@ -4,6 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, once, memoize, noop, promisify } from 'belter/src';
 
 import { type DimensionsType } from '../../types';
+import { PROP_SERIALIZATION } from '../../constants';
 
 import type { Component } from './index';
 
@@ -20,7 +21,7 @@ type PropDefinitionType<T, P, S : string> = {|
     decorate? : (T, PropsType & P) => (T | void),
     def? : (P, Component<P>) => ? T,
     sameDomain? : boolean,
-    serialization? : 'json' | 'dotify',
+    serialization? : $Values<typeof PROP_SERIALIZATION>,
     childDecorate? : (T) => ?T
 |};
 
