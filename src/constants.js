@@ -41,6 +41,12 @@ export const WINDOW_REFERENCES = {
     GLOBAL: `global`
 };
 
+export const PROP_SERIALIZATION = {
+    JSON:   ('json' : 'json'),
+    DOTIFY: ('dotify' : 'dotify'),
+    BASE64: ('base64' : 'base64')
+};
+
 export const PROP_TYPES_LIST : Array<string> = Object.keys(PROP_TYPES).map(key => PROP_TYPES[key]);
 
 export const CONTEXT_TYPES = {

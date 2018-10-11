@@ -5,6 +5,7 @@ import { dotify, isDefined } from 'belter/src';
 
 import type { Component } from '../component';
 import type { BuiltInPropsDefinitionType, PropsType, BuiltInPropsType, MixedPropDefinitionType } from '../component/props';
+import { PROP_SERIALIZATION } from '../../constants';
 
 import type { ParentComponent } from './index';
 
@@ -176,9 +177,11 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
                     return;
                 } else if (typeof queryValue === 'object' && queryValue !== null) {
 
-                    if (prop.serialization === 'json') {
+                    if (prop.serialization === PROP_SERIALIZATION.JSON) {
                         result = JSON.stringify(queryValue);
-                    } else {
+                    } else if (prop.serialization === PROP_SERIALIZATION.BASE64) {
+                        result = btoa(JSON.stringify(queryValue));
+                    } else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                         result = dotify(queryValue, key);
 
                         for (let dotkey of Object.keys(result)) {
