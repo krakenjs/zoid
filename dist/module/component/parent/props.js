@@ -3,6 +3,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { dotify, isDefined } from 'belter/src';
 
+import { PROP_SERIALIZATION } from '../../constants';
+
 /*  Normalize Props
     ---------------
 
@@ -179,9 +181,11 @@ export function propsToQuery(propsDef, props) {
                     return;
                 } else if ((typeof queryValue === 'undefined' ? 'undefined' : _typeof(queryValue)) === 'object' && queryValue !== null) {
 
-                    if (prop.serialization === 'json') {
+                    if (prop.serialization === PROP_SERIALIZATION.JSON) {
                         result = JSON.stringify(queryValue);
-                    } else {
+                    } else if (prop.serialization === PROP_SERIALIZATION.BASE64) {
+                        result = btoa(JSON.stringify(queryValue));
+                    } else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                         result = dotify(queryValue, key);
 
                         for (var _i8 = 0, _Object$keys6 = Object.keys(result), _length8 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i8 < _length8; _i8++) {

@@ -39,6 +39,12 @@ export var WINDOW_REFERENCES = {
     GLOBAL: 'global'
 };
 
+export var PROP_SERIALIZATION = {
+    JSON: 'json',
+    DOTIFY: 'dotify',
+    BASE64: 'base64'
+};
+
 export var PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
     return PROP_TYPES[key];
 });
