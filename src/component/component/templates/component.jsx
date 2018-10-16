@@ -3,7 +3,7 @@
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultPrerenderTemplate({ jsxDom } : RenderOptionsType) : HTMLElement {
+export function defaultPrerenderTemplate({ jsxDom } : RenderOptionsType<{}>) : HTMLElement {
     return (
         <html>
             <head>

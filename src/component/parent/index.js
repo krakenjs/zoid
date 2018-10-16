@@ -2,7 +2,9 @@
 /* eslint max-lines: 0 */
 
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain,
+    getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType,
+    type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
@@ -12,13 +14,14 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES,
+    CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
 import { serializeFunctions, global } from '../../lib';
 import type { PropsType, BuiltInPropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
-import type { CancelableType, Jsx, DimensionsType, ElementRefType } from '../../types';
+import type { CancelableType, DimensionsType, ElementRefType } from '../../types';
 
 import { RENDER_DRIVERS, type ContextDriverType } from './drivers';
 import { propsToQuery, normalizeProps } from './props';
@@ -26,9 +29,9 @@ import { propsToQuery, normalizeProps } from './props';
 global.props = global.props || {};
 global.windows = global.windows || {};
 
-export type RenderOptionsType = {
+export type RenderOptionsType<P> = {
     id : string,
-    props : PropsType,
+    props : PropsType & P,
     tag : string,
     context : string,
     outlet : HTMLElement,
@@ -41,7 +44,7 @@ export type RenderOptionsType = {
         focus : () => ZalgoPromise<void>
     },
     on : (string, () => void) => CancelableType,
-    jsxDom : Jsx<HTMLElement>,
+    jsxDom : typeof jsxDom,
     document : Document,
     container : HTMLElement,
     dimensions : DimensionsType
@@ -1104,7 +1107,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Create a template and stylesheet for the parent template behind the element
     */
 
-    renderTemplate(renderer : (RenderOptionsType) => HTMLElement, options : Object = {}) : HTMLElement {
+    renderTemplate(renderer : (RenderOptionsType<P>) => HTMLElement, options : Object = {}) : HTMLElement {
 
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,

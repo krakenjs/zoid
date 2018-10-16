@@ -57,8 +57,8 @@ export type ComponentOptionsType<P> = {
     contexts? : { iframe? : boolean, popup? : boolean },
     defaultContext? : string,
 
-    containerTemplate? : (RenderOptionsType) => HTMLElement,
-    prerenderTemplate? : (RenderOptionsType) => HTMLElement,
+    containerTemplate? : (RenderOptionsType<P>) => HTMLElement,
+    prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement,
 
     validate? : (Component<P>, PropsType) => void,
 
@@ -98,8 +98,8 @@ export class Component<P> extends BaseComponent<P> {
     contexts : { iframe? : boolean, popup? : boolean }
     defaultContext : string
 
-    containerTemplate : (RenderOptionsType) => HTMLElement
-    prerenderTemplate : (RenderOptionsType) => HTMLElement
+    containerTemplate : (RenderOptionsType<P>) => HTMLElement
+    prerenderTemplate : (RenderOptionsType<P>) => HTMLElement
 
     validate : (Component<P>, (PropsType & P)) => void
 
