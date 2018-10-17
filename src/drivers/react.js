@@ -61,6 +61,12 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
                     if (this.state && this.state.parent) {
                         this.state.parent.updateProps(extend({}, this.props));
                     }
+                },
+
+                componentWillUnmount() {
+                    if (this.state && this.state.parent) {
+                        this.state.parent.destroy();
+                    }
                 }
             });
         } else {
@@ -86,6 +92,12 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
 
                     if (this.state && this.state.parent) {
                         this.state.parent.updateProps(extend({}, this.props));
+                    }
+                }
+
+                componentWillUnmount() {
+                    if (this.state && this.state.parent) {
+                        this.state.parent.destroy();
                     }
                 }
             };
