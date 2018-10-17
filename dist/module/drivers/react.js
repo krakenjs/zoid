@@ -44,6 +44,11 @@ export var react = {
                     if (this.state && this.state.parent) {
                         this.state.parent.updateProps(extend({}, this.props));
                     }
+                },
+                componentWillUnmount: function componentWillUnmount() {
+                    if (this.state && this.state.parent) {
+                        this.state.parent.destroy();
+                    }
                 }
             });
         } else {
@@ -77,6 +82,12 @@ export var react = {
 
                     if (this.state && this.state.parent) {
                         this.state.parent.updateProps(extend({}, this.props));
+                    }
+                };
+
+                _class.prototype.componentWillUnmount = function componentWillUnmount() {
+                    if (this.state && this.state.parent) {
+                        this.state.parent.destroy();
                     }
                 };
 
