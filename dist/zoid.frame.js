@@ -5385,7 +5385,7 @@
                                 var override = data.overrides[key];
                                 if (val === constants_DELEGATE.CALL_DELEGATE) return override.apply(_this14, _arguments);
                                 if ("function" == typeof val) return val(original, override).apply(_this14, _arguments);
-                                throw new Error("Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
+                                throw new Error("Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method");
                             });
                         };
                     }, _i6 = 0, _Object$keys4 = Object.keys(overrides), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) _loop(_i6, _Object$keys4);
@@ -5901,7 +5901,7 @@
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
                     }(this, _BaseComponent.call(this));
                     !function(options) {
-                        if (!options) throw new Error("Expecred options to be passed");
+                        if (!options) throw new Error("Expected options to be passed");
                         if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) throw new Error("Invalid options.tag: " + options.tag);
                         !function(options) {
                             if (options.props && "object" !== validate__typeof(options.props)) throw new Error("Expected options.props to be an object");

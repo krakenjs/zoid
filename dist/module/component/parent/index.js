@@ -667,7 +667,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                         return val(original, override).apply(_this14, _arguments);
                     }
 
-                    throw new Error('Expected delgate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method');
+                    throw new Error('Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method');
                 });
             };
         };
