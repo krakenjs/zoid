@@ -265,6 +265,9 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
         });
 
     })).then(() => {
+        Object.keys(params).forEach(key => {
+            params[key] = escape(params[key]);
+        });
         return params;
     });
 }
