@@ -181,6 +181,42 @@ describe('zoid error cases', () => {
         }
     });
 
+    it('should run validate function on props, and pass up error when thrown', done => {
+        testComponent.renderPopup({
+            validateProp: 'foo'
+        }).catch(() => {
+            done();
+        });
+    });
+
+    it('should run validate function on props, and call onError when error is thrown', done => {
+        testComponent.renderPopup({
+            validateProp: 'foo',
+
+            onError() {
+                done();
+            }
+        });
+    });
+
+    it('should run validate function on component, and pass up error when thrown', done => {
+        testComponent.renderPopup({
+            invalidate: true
+        }).catch(() => {
+            done();
+        });
+    });
+
+    it('should run validate function on props, and call onError when error is thrown', done => {
+        testComponent.renderPopup({
+            invalidate: true,
+
+            onError() {
+                done();
+            }
+        });
+    });
+
     it('should call onclose when a popup is closed by someone other tha zoid', done => {
 
         testComponent.renderPopup({

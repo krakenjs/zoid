@@ -60,7 +60,7 @@ export type ComponentOptionsType<P> = {
     containerTemplate? : (RenderOptionsType<P>) => HTMLElement,
     prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement,
 
-    validate? : (Component<P>, PropsType) => void,
+    validate? : (Component<P>, UserPropsDefinitionType<P>) => void,
 
     unsafeRenderTo? : boolean
 };
