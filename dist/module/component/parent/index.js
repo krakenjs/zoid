@@ -1,8 +1,3 @@
-'use strict';
-
-exports.__esModule = true;
-exports.ParentComponent = undefined;
-
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -10,31 +5,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _desc, _value, _class;
-/* eslint max-lines: 0 */
-
-var _client = require('beaver-logger/client');
-
-var _src = require('post-robot/src');
-
-var _src2 = require('cross-domain-utils/src');
-
-var _src3 = require('zalgo-promise/src');
-
-var _base = require('../base');
-
-var _window = require('../window');
-
-var _lib = require('../../lib');
-
-var _constants = require('../../constants');
-
-var _error = require('../../error');
-
-var _drivers = require('./drivers');
-
-var _validate = require('./validate');
-
-var _props = require('./props');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -71,8 +41,26 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
     return desc;
 }
 
-_lib.global.props = _lib.global.props || {};
-_lib.global.windows = _lib.global.windows || {};
+/* eslint max-lines: 0 */
+
+import { flush } from 'beaver-logger/client';
+import { send, bridge } from 'post-robot/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+
+import { BaseComponent } from '../base';
+import { buildChildWindowName as _buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
+import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, serializeFunctions, extendUrl, jsxDom, setOverflow, elementStoppedMoving, getElement, memoized, appendChild, global, writeToWindow, setLogLevel, once, prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
+import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
+import { RenderError } from '../../error';
+
+
+import { RENDER_DRIVERS } from './drivers';
+import { validateProps } from './validate';
+import { propsToQuery, normalizeProps } from './props';
+
+global.props = global.props || {};
+global.windows = global.windows || {};
 
 /*  Parent Component
     ----------------
@@ -82,8 +70,10 @@ _lib.global.windows = _lib.global.windows || {};
     It handles opening the necessary windows/iframes, launching the component's url, and listening for messages back from the component.
 */
 
-var ParentComponent = exports.ParentComponent = (_class = function (_BaseComponent) {
+export var ParentComponent = (_class = function (_BaseComponent) {
     _inherits(ParentComponent, _BaseComponent);
+
+    // eslint-disable-line no-undef
 
     function ParentComponent(component, context, _ref) {
         var props = _ref.props;
@@ -100,7 +90,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         _this.setProps(props);
 
         if (_this.props.logLevel) {
-            (0, _lib.setLogLevel)(_this.props.logLevel);
+            setLogLevel(_this.props.logLevel);
         }
 
         _this.childWindowName = _this.buildChildWindowName({ renderTo: window });
@@ -114,7 +104,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         _this.watchForUnload();
 
-        _this.onInit = new _src3.ZalgoPromise();
+        _this.onInit = new ZalgoPromise();
 
         _this.onInit['catch'](function (err) {
             return _this.error(err);
@@ -129,7 +119,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         return this.tryInit(function () {
 
-            _this2.component.log('render_' + _this2.context, { context: _this2.context, element: element, loadUrl: (0, _lib.stringify)(loadUrl) });
+            _this2.component.log('render_' + _this2.context, { context: _this2.context, element: element, loadUrl: stringify(loadUrl) });
 
             var tasks = {};
 
@@ -137,7 +127,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
             tasks.getDomain = _this2.getDomain();
 
-            tasks.elementReady = _src3.ZalgoPromise['try'](function () {
+            tasks.elementReady = ZalgoPromise['try'](function () {
                 if (element) {
                     return _this2.elementReady(element);
                 }
@@ -155,7 +145,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 return _this2.openPrerender();
             });
 
-            tasks.switchPrerender = _src3.ZalgoPromise.all([tasks.openPrerender, _this2.onInit]).then(function () {
+            tasks.switchPrerender = ZalgoPromise.all([tasks.openPrerender, _this2.onInit]).then(function () {
                 return _this2.switchPrerender();
             });
 
@@ -163,7 +153,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 return _this2.open();
             });
 
-            tasks.listen = _src3.ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref2) {
+            tasks.listen = ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref2) {
                 var domain = _ref2[0];
 
                 _this2.listen(_this2.window, domain);
@@ -173,11 +163,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 return _this2.watchForClose();
             });
 
-            tasks.linkDomain = _src3.ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref3) {
+            tasks.linkDomain = ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref3) {
                 var domain = _ref3[0];
 
-                if (_src.bridge && typeof domain === 'string') {
-                    return _src.bridge.linkUrl(_this2.window, domain);
+                if (bridge && typeof domain === 'string') {
+                    return bridge.linkUrl(_this2.window, domain);
                 }
             });
 
@@ -191,7 +181,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 });
             }
 
-            tasks.openBridge = _src3.ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref4) {
+            tasks.openBridge = ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref4) {
                 var domain = _ref4[0];
 
                 return _this2.openBridge(typeof domain === 'string' ? domain : null);
@@ -204,7 +194,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             } else if (loadUrl) {
                 tasks.buildUrl = _this2.buildUrl();
 
-                tasks.loadUrl = _src3.ZalgoPromise.all([tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate]).then(function (_ref5) {
+                tasks.loadUrl = ZalgoPromise.all([tasks.buildUrl, tasks.open, tasks.linkDomain, tasks.listen, tasks.open, tasks.openBridge, tasks.createPrerenderTemplate]).then(function (_ref5) {
                     var url = _ref5[0];
 
                     return _this2.loadUrl(url);
@@ -215,7 +205,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 });
             }
 
-            return _src3.ZalgoPromise.hash(tasks);
+            return ZalgoPromise.hash(tasks);
         }).then(function () {
             return _this2.props.onEnter();
         }).then(function () {
@@ -225,14 +215,14 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
     ParentComponent.prototype.getOutlet = function getOutlet() {
         var outlet = document.createElement('div');
-        (0, _lib.addClass)(outlet, _constants.CLASS_NAMES.OUTLET);
+        addClass(outlet, CLASS_NAMES.OUTLET);
         return outlet;
     };
 
     ParentComponent.prototype.validateParentDomain = function validateParentDomain() {
-        var domain = (0, _src2.getDomain)();
-        if (!(0, _src2.matchDomain)(this.component.allowedParentDomains, domain)) {
-            throw new _error.RenderError('Can not be rendered by domain: ' + domain);
+        var domain = getDomain();
+        if (!matchDomain(this.component.allowedParentDomains, domain)) {
+            throw new RenderError('Can not be rendered by domain: ' + domain);
         }
     };
 
@@ -245,7 +235,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 return _this3.render(element);
             }
 
-            if (!(0, _src2.isSameTopWindow)(window, win)) {
+            if (!isSameTopWindow(window, win)) {
                 throw new Error('Can only renderTo an adjacent frame');
             }
 
@@ -255,7 +245,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
             _this3.checkAllowRenderTo(win);
 
-            _this3.component.log('render_' + _this3.context + '_to_win', { element: (0, _lib.stringify)(element), context: _this3.context });
+            _this3.component.log('render_' + _this3.context + '_to_win', { element: stringify(element), context: _this3.context });
 
             _this3.childWindowName = _this3.buildChildWindowName({ renderTo: win });
 
@@ -268,9 +258,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.prefetch = function prefetch() {
         var _this4 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             _this4.html = _this4.buildUrl().then(function (url) {
-                return (0, _lib.prefetchPage)(url).then(function (html) {
+                return prefetchPage(url).then(function (html) {
 
                     var host = '' + url.split('/').slice(0, 3).join('/');
                     var uri = '/' + url.split('/').slice(3).join('/');
@@ -284,14 +274,14 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.loadHTML = function loadHTML() {
         var _this5 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (!_this5.html) {
                 throw new Error('Html not prefetched');
             }
 
             return _this5.html.then(function (html) {
                 // $FlowFixMe
-                return (0, _lib.writeToWindow)(_this5.window, html);
+                return writeToWindow(_this5.window, html);
             });
         });
     };
@@ -302,18 +292,18 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             throw this.component.createError('Must pass window to renderTo');
         }
 
-        if ((0, _src2.isSameDomain)(win)) {
+        if (isSameDomain(win)) {
             return;
         }
 
-        var origin = (0, _src2.getDomain)();
+        var origin = getDomain();
         var domain = this.component.getDomain(null, this.props.env);
 
         if (!domain) {
             throw new Error('Could not determine domain to allow remote render');
         }
 
-        if ((0, _src2.matchDomain)(domain, origin)) {
+        if (matchDomain(domain, origin)) {
             return;
         }
 
@@ -334,27 +324,27 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var renderToWindow = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
 
 
-        if (this.context === _constants.CONTEXT_TYPES.POPUP) {
-            return { ref: _constants.WINDOW_REFERENCES.OPENER };
+        if (this.context === CONTEXT_TYPES.POPUP) {
+            return { ref: WINDOW_REFERENCES.OPENER };
         }
 
         if (renderToWindow === window) {
 
-            if ((0, _src2.isTop)(window)) {
-                return { ref: _constants.WINDOW_REFERENCES.TOP };
+            if (isTop(window)) {
+                return { ref: WINDOW_REFERENCES.TOP };
             }
 
-            return { ref: _constants.WINDOW_REFERENCES.PARENT, distance: (0, _src2.getDistanceFromTop)(window) };
+            return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
         }
 
-        var uid = (0, _lib.uniqueID)();
-        _lib.global.windows[uid] = window;
+        var uid = uniqueID();
+        global.windows[uid] = window;
 
         this.clean.register(function () {
-            delete _lib.global.windows[uid];
+            delete global.windows[uid];
         });
 
-        return { ref: _constants.WINDOW_REFERENCES.GLOBAL, uid: uid };
+        return { ref: WINDOW_REFERENCES.GLOBAL, uid: uid };
     };
 
     ParentComponent.prototype.getRenderParentRef = function getRenderParentRef() {
@@ -365,14 +355,14 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             return this.getComponentParentRef(renderToWindow);
         }
 
-        var uid = (0, _lib.uniqueID)();
-        _lib.global.windows[uid] = renderToWindow;
+        var uid = uniqueID();
+        global.windows[uid] = renderToWindow;
 
         this.clean.register(function () {
-            delete _lib.global.windows[uid];
+            delete global.windows[uid];
         });
 
-        return { ref: _constants.WINDOW_REFERENCES.GLOBAL, uid: uid };
+        return { ref: WINDOW_REFERENCES.GLOBAL, uid: uid };
     };
 
     ParentComponent.prototype.buildChildWindowName = function buildChildWindowName() {
@@ -380,28 +370,28 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             _ref6$renderTo = _ref6.renderTo,
             renderTo = _ref6$renderTo === undefined ? window : _ref6$renderTo;
 
-        var sameDomain = (0, _src2.isSameDomain)(renderTo);
+        var sameDomain = isSameDomain(renderTo);
 
-        var uid = (0, _lib.uniqueID)();
+        var uid = uniqueID();
         var tag = this.component.tag;
-        var sProps = (0, _lib.serializeFunctions)(this.getPropsForChild());
+        var sProps = serializeFunctions(this.getPropsForChild());
 
         var componentParent = this.getComponentParentRef(renderTo);
         var renderParent = this.getRenderParentRef(renderTo);
 
         var secureProps = !sameDomain && !this.component.unsafeRenderTo;
 
-        var props = secureProps ? { type: _constants.INITIAL_PROPS.UID, uid: uid } : { type: _constants.INITIAL_PROPS.RAW, value: sProps };
+        var props = secureProps ? { type: INITIAL_PROPS.UID, uid: uid } : { type: INITIAL_PROPS.RAW, value: sProps };
 
-        if (props.type === _constants.INITIAL_PROPS.UID) {
-            _lib.global.props[uid] = JSON.stringify(sProps);
+        if (props.type === INITIAL_PROPS.UID) {
+            global.props[uid] = JSON.stringify(sProps);
 
             this.clean.register(function () {
-                delete _lib.global.props[uid];
+                delete global.props[uid];
             });
         }
 
-        return (0, _window.buildChildWindowName)(this.component.name, this.component.version, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props });
+        return _buildChildWindowName(this.component.name, this.component.version, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props });
     };
 
     /*  Send to Parent
@@ -410,7 +400,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     */
 
     ParentComponent.prototype.sendToParent = function sendToParent(name, data) {
-        var parentWindow = (0, _window.getParentComponentWindow)();
+        var parentWindow = getParentComponentWindow();
 
         if (!parentWindow) {
             throw new Error('Can not find parent component window to message');
@@ -418,7 +408,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         this.component.log('send_to_parent_' + name);
 
-        return (0, _src.send)((0, _window.getParentComponentWindow)(), name, data, { domain: (0, _window.getParentDomain)() });
+        return send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
     };
 
     /*  Set Props
@@ -430,7 +420,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var required = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
 
-        (0, _validate.validateProps)(this.component, props, required);
+        validateProps(this.component, props, required);
         if (this.component.validate) {
             this.component.validate(this.component, props);
         }
@@ -438,7 +428,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         // $FlowFixMe
         this.props = this.props || {};
 
-        (0, _lib.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props));
+        extend(this.props, normalizeProps(this.component, this, props));
     };
 
     /*  Build Url
@@ -452,9 +442,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         var propUrl = this.props.url;
 
-        return _src3.ZalgoPromise.all([propUrl,
+        return ZalgoPromise.all([propUrl,
         // $FlowFixMe
-        (0, _props.propsToQuery)(_extends({}, this.component.props, this.component.builtinProps), this.props)]).then(function (_ref7) {
+        propsToQuery(_extends({}, this.component.props, this.component.builtinProps), this.props)]).then(function (_ref7) {
             var url = _ref7[0],
                 query = _ref7[1];
 
@@ -465,13 +455,13 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 return url;
             }
 
-            return _src3.ZalgoPromise['try'](function () {
+            return ZalgoPromise['try'](function () {
 
                 return url || _this7.component.getUrl(_this7.props.env, _this7.props);
             }).then(function (finalUrl) {
 
                 query.xcomponent = '1';
-                return (0, _lib.extendUrl)(finalUrl, { query: query });
+                return extendUrl(finalUrl, { query: query });
             });
         });
     };
@@ -479,7 +469,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.getDomain = function getDomain() {
         var _this8 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             return _this8.props.url;
         }).then(function (url) {
 
@@ -490,7 +480,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             }
 
             if (_this8.component.buildUrl) {
-                return _src3.ZalgoPromise['try'](function () {
+                return ZalgoPromise['try'](function () {
                     return _this8.component.buildUrl(_this8.props);
                 }).then(function (builtUrl) {
                     return _this8.component.getDomain(builtUrl, _this8.props.env);
@@ -510,20 +500,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         var result = {};
 
-        for (var _iterator = Object.keys(this.props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref8;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref8 = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref8 = _i.value;
-            }
-
-            var key = _ref8;
-
+        for (var _i2 = 0, _Object$keys2 = Object.keys(this.props), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+            var key = _Object$keys2[_i2];
             var prop = this.component.getProp(key);
 
             if (!prop || prop.sendToChild !== false) {
@@ -532,6 +510,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         }
 
         // $FlowFixMe
+
+
         return result;
     };
 
@@ -557,8 +537,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.openBridge = function openBridge(domain) {
         var _this10 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
-            if (!_src.bridge || !_this10.driver.needsBridge) {
+        return ZalgoPromise['try'](function () {
+            if (!bridge || !_this10.driver.needsBridge) {
                 return;
             }
 
@@ -567,20 +547,20 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 needsBridgeParams.domain = domain;
             }
 
-            var needsBridge = _src.bridge.needsBridge(needsBridgeParams);
+            var needsBridge = bridge.needsBridge(needsBridgeParams);
 
             var bridgeUrl = _this10.component.getBridgeUrl(_this10.props.env);
 
             if (!bridgeUrl) {
 
-                if (needsBridge && domain && !_src.bridge.hasBridge(domain, domain)) {
+                if (needsBridge && domain && !bridge.hasBridge(domain, domain)) {
                     throw new Error('Bridge url needed to render ' + _this10.context);
                 }
 
                 return;
             }
 
-            bridgeUrl = (0, _lib.extendUrl)(bridgeUrl, { query: { version: _this10.component.version } });
+            bridgeUrl = extendUrl(bridgeUrl, { query: { version: _this10.component.version } });
 
             var bridgeDomain = _this10.component.getBridgeDomain(_this10.props.env);
 
@@ -589,7 +569,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             }
 
             if (needsBridge) {
-                return _src.bridge.openBridge(bridgeUrl, bridgeDomain).then(function (result) {
+                return bridge.openBridge(bridgeUrl, bridgeDomain).then(function (result) {
                     if (result) {
                         return result;
                     }
@@ -606,7 +586,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.open = function open() {
         var _this11 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             _this11.component.log('open_' + _this11.context, { windowName: _this11.childWindowName });
             return _this11.driver.open.call(_this11);
         });
@@ -615,7 +595,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.openPrerender = function openPrerender() {
         var _this12 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this12.component.prerenderTemplate) {
                 return _this12.driver.openPrerender.call(_this12);
             }
@@ -625,7 +605,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.switchPrerender = function switchPrerender() {
         var _this13 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this13.prerenderWindow && _this13.driver.switchPrerender) {
                 return _this13.driver.switchPrerender.call(_this13);
             }
@@ -633,7 +613,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     };
 
     ParentComponent.prototype.elementReady = function elementReady(element) {
-        return (0, _lib.elementReady)(element).then(_lib.noop);
+        return _elementReady(element).then(noop);
     };
 
     ParentComponent.prototype.delegate = function delegate(win) {
@@ -648,20 +628,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             onDisplay: this.props.onDisplay
         };
 
-        for (var _iterator2 = this.component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref9;
-
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) break;
-                _ref9 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) break;
-                _ref9 = _i2.value;
-            }
-
-            var propName = _ref9;
-
+        for (var _i4 = 0, _component$getPropNam2 = this.component.getPropNames(), _length4 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
+            var propName = _component$getPropNam2[_i4];
             var prop = this.component.getProp(propName);
 
             if (prop.allowDelegate) {
@@ -669,7 +637,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             }
         }
 
-        var delegate = (0, _src.send)(win, _constants.POST_MESSAGE.DELEGATE + '_' + this.component.name, {
+        var delegate = send(win, POST_MESSAGE.DELEGATE + '_' + this.component.name, {
 
             context: this.context,
             env: this.props.env,
@@ -702,34 +670,24 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 }
             }
 
-        }).then(function (_ref10) {
-            var data = _ref10.data;
+        }).then(function (_ref8) {
+            var data = _ref8.data;
 
 
             _this14.clean.register(data.destroy);
             return data;
         })['catch'](function (err) {
 
-            throw new Error('Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n' + (0, _lib.stringifyError)(err));
+            throw new Error('Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n' + stringifyError(err));
         });
 
         var overrides = this.driver.delegateOverrides;
 
-        var _loop = function _loop() {
-            if (_isArray3) {
-                if (_i3 >= _iterator3.length) return 'break';
-                _ref11 = _iterator3[_i3++];
-            } else {
-                _i3 = _iterator3.next();
-                if (_i3.done) return 'break';
-                _ref11 = _i3.value;
-            }
-
-            var key = _ref11;
-
+        var _loop = function _loop(_i6, _Object$keys4, _length6) {
+            var key = _Object$keys4[_i6];
             var val = overrides[key];
 
-            if (val === _constants.DELEGATE.CALL_ORIGINAL) {
+            if (val === DELEGATE.CALL_ORIGINAL) {
                 return 'continue';
             }
 
@@ -745,7 +703,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
                     var override = data.overrides[key];
 
-                    if (val === _constants.DELEGATE.CALL_DELEGATE) {
+                    if (val === DELEGATE.CALL_DELEGATE) {
                         return override.apply(_this15, _arguments);
                     }
 
@@ -758,17 +716,10 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             };
         };
 
-        _loop2: for (var _iterator3 = Object.keys(overrides), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref11;
+        for (var _i6 = 0, _Object$keys4 = Object.keys(overrides), _length6 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
+            var _ret = _loop(_i6, _Object$keys4, _length6);
 
-            var _ret = _loop();
-
-            switch (_ret) {
-                case 'break':
-                    break _loop2;
-
-                case 'continue':
-                    continue;}
+            if (_ret === 'continue') continue;
         }
     };
 
@@ -781,11 +732,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.watchForClose = function watchForClose() {
         var _this16 = this;
 
-        var closeWindowListener = (0, _src2.onCloseWindow)(this.window, function () {
+        var closeWindowListener = onCloseWindow(this.window, function () {
             _this16.component.log('detect_close_child');
 
-            return _src3.ZalgoPromise['try'](function () {
-                return _this16.props.onClose(_constants.CLOSE_REASONS.CLOSE_DETECTED);
+            return ZalgoPromise['try'](function () {
+                return _this16.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
             })['finally'](function () {
                 return _this16.destroy();
             });
@@ -800,13 +751,13 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
 
-        var onunload = (0, _lib.once)(function () {
+        var onunload = once(function () {
             _this17.component.log('navigate_away');
-            (0, _client.flush)();
+            flush();
             _this17.destroyComponent();
         });
 
-        var unloadWindowListener = (0, _lib.addEventListener)(window, 'unload', onunload);
+        var unloadWindowListener = addEventListener(window, 'unload', onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     };
@@ -820,14 +771,14 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.loadUrl = function loadUrl(url) {
         var _this18 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             _this18.component.log('load_url');
 
             if (window.location.href.split('#')[0] === url.split('#')[0]) {
                 var _query;
 
-                url = (0, _lib.extendUrl)(url, {
-                    query: (_query = {}, _query[(0, _lib.uniqueID)()] = '1', _query)
+                url = extendUrl(url, {
+                    query: (_query = {}, _query[uniqueID()] = '1', _query)
                 });
             }
 
@@ -873,9 +824,9 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     */
 
     ParentComponent.prototype.listeners = function listeners() {
-        var _ref12;
+        var _ref9;
 
-        return _ref12 = {}, _ref12[_constants.POST_MESSAGE.INIT] = function (source, data) {
+        return _ref9 = {}, _ref9[POST_MESSAGE.INIT] = function (source, data) {
 
             this.childExports = data.exports;
 
@@ -889,27 +840,27 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 props: this.getPropsForChild(),
                 context: this.context
             };
-        }, _ref12[_constants.POST_MESSAGE.CLOSE] = function (source, data) {
+        }, _ref9[POST_MESSAGE.CLOSE] = function (source, data) {
             this.close(data.reason);
-        }, _ref12[_constants.POST_MESSAGE.CHECK_CLOSE] = function () {
+        }, _ref9[POST_MESSAGE.CHECK_CLOSE] = function () {
             this.checkClose();
-        }, _ref12[_constants.POST_MESSAGE.RESIZE] = function (source, data) {
+        }, _ref9[POST_MESSAGE.RESIZE] = function (source, data) {
             var _this20 = this;
 
-            return _src3.ZalgoPromise['try'](function () {
+            return ZalgoPromise['try'](function () {
                 if (_this20.driver.allowResize) {
                     return _this20.resize(data.width, data.height);
                 }
             });
-        }, _ref12[_constants.POST_MESSAGE.ONRESIZE] = function () {
+        }, _ref9[POST_MESSAGE.ONRESIZE] = function () {
             this.event.trigger('resize');
-        }, _ref12[_constants.POST_MESSAGE.HIDE] = function () {
+        }, _ref9[POST_MESSAGE.HIDE] = function () {
             this.hide();
-        }, _ref12[_constants.POST_MESSAGE.SHOW] = function () {
+        }, _ref9[POST_MESSAGE.SHOW] = function () {
             this.show();
-        }, _ref12[_constants.POST_MESSAGE.ERROR] = function (source, data) {
+        }, _ref9[POST_MESSAGE.ERROR] = function (source, data) {
             this.error(new Error(data.error));
-        }, _ref12;
+        }, _ref9;
     };
 
     /*  Resize
@@ -920,12 +871,12 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.resize = function resize(width, height) {
         var _this21 = this;
 
-        var _ref13 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-            _ref13$waitForTransit = _ref13.waitForTransition,
-            waitForTransition = _ref13$waitForTransit === undefined ? true : _ref13$waitForTransit;
+        var _ref10 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+            _ref10$waitForTransit = _ref10.waitForTransition,
+            waitForTransition = _ref10$waitForTransit === undefined ? true : _ref10$waitForTransit;
 
-        return _src3.ZalgoPromise['try'](function () {
-            _this21.component.log('resize', { height: (0, _lib.stringify)(height), width: (0, _lib.stringify)(width) });
+        return ZalgoPromise['try'](function () {
+            _this21.component.log('resize', { height: stringify(height), width: stringify(width) });
             _this21.driver.resize.call(_this21, width, height);
 
             if (!waitForTransition) {
@@ -937,10 +888,10 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 var overflow = void 0;
 
                 if (_this21.element) {
-                    overflow = (0, _lib.setOverflow)(_this21.element, 'hidden');
+                    overflow = setOverflow(_this21.element, 'hidden');
                 }
 
-                return (0, _lib.elementStoppedMoving)(_this21.element || _this21.iframe).then(function () {
+                return elementStoppedMoving(_this21.element || _this21.iframe).then(function () {
 
                     if (overflow) {
                         overflow.reset();
@@ -958,7 +909,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.hide = function hide() {
 
         if (this.container) {
-            (0, _lib.hideElement)(this.container);
+            hideElement(this.container);
         }
 
         return this.driver.hide.call(this);
@@ -967,7 +918,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.show = function show() {
 
         if (this.container) {
-            (0, _lib.showElement)(this.container);
+            showElement(this.container);
         }
 
         return this.driver.show.call(this);
@@ -976,7 +927,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.checkClose = function checkClose() {
         var _this22 = this;
 
-        var closeWindowListener = (0, _src2.onCloseWindow)(this.window, function () {
+        var closeWindowListener = onCloseWindow(this.window, function () {
             _this22.userClose();
         }, 50, 500);
 
@@ -984,7 +935,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     };
 
     ParentComponent.prototype.userClose = function userClose() {
-        return this.close(_constants.CLOSE_REASONS.USER_CLOSED);
+        return this.close(CLOSE_REASONS.USER_CLOSED);
     };
 
     /*  Close
@@ -995,17 +946,17 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.close = function close() {
         var _this23 = this;
 
-        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
+        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
 
             _this23.component.log('close', { reason: reason });
 
-            _this23.event.triggerOnce(_constants.EVENTS.CLOSE);
+            _this23.event.triggerOnce(EVENTS.CLOSE);
             return _this23.props.onClose(reason);
         }).then(function () {
 
-            return _src3.ZalgoPromise.all([_this23.closeComponent(), _this23.closeContainer()]);
+            return ZalgoPromise.all([_this23.closeComponent(), _this23.closeContainer()]);
         }).then(function () {
 
             return _this23.destroy();
@@ -1015,15 +966,15 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.closeContainer = function closeContainer() {
         var _this24 = this;
 
-        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
+        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
 
-            _this24.event.triggerOnce(_constants.EVENTS.CLOSE);
+            _this24.event.triggerOnce(EVENTS.CLOSE);
             return _this24.props.onClose(reason);
         }).then(function () {
 
-            return _src3.ZalgoPromise.all([_this24.closeComponent(reason), _this24.hideContainer()]);
+            return ZalgoPromise.all([_this24.closeComponent(reason), _this24.hideContainer()]);
         }).then(function () {
 
             return _this24.destroyContainer();
@@ -1033,7 +984,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.destroyContainer = function destroyContainer() {
         var _this25 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             _this25.clean.run('destroyContainerEvents');
             _this25.clean.run('destroyContainerTemplate');
         });
@@ -1042,17 +993,17 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.closeComponent = function closeComponent() {
         var _this26 = this;
 
-        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _constants.CLOSE_REASONS.PARENT_CALL;
+        var reason = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
 
 
         var win = this.window;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
 
             return _this26.cancelContainerEvents();
         }).then(function () {
 
-            _this26.event.triggerOnce(_constants.EVENTS.CLOSE);
+            _this26.event.triggerOnce(EVENTS.CLOSE);
             return _this26.props.onClose(reason);
         }).then(function () {
 
@@ -1064,8 +1015,8 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
             // IE in metro mode -- child window needs to close itself, or close will hang
 
-            if (_this26.childExports && _this26.context === _constants.CONTEXT_TYPES.POPUP && !(0, _src2.isWindowClosed)(win)) {
-                _this26.childExports.close()['catch'](_lib.noop);
+            if (_this26.childExports && _this26.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
+                _this26.childExports.close()['catch'](noop);
             }
         });
     };
@@ -1080,13 +1031,13 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.showContainer = function showContainer() {
         var _this27 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this27.props.onDisplay) {
                 return _this27.props.onDisplay();
             }
         }).then(function () {
             if (_this27.container) {
-                return (0, _lib.showAndAnimate)(_this27.container, _constants.ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
+                return showAndAnimate(_this27.container, ANIMATION_NAMES.SHOW_CONTAINER, _this27.clean.register);
             }
         });
     };
@@ -1094,13 +1045,13 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.showComponent = function showComponent() {
         var _this28 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this28.props.onDisplay) {
                 return _this28.props.onDisplay();
             }
         }).then(function () {
             if (_this28.element) {
-                return (0, _lib.showAndAnimate)(_this28.element, _constants.ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
+                return showAndAnimate(_this28.element, ANIMATION_NAMES.SHOW_COMPONENT, _this28.clean.register);
             }
         });
     };
@@ -1108,11 +1059,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.hideContainer = function hideContainer() {
         var _this29 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this29.container) {
-                return (0, _lib.animateAndHide)(_this29.container, _constants.ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register);
+                return animateAndHide(_this29.container, ANIMATION_NAMES.HIDE_CONTAINER, _this29.clean.register);
             } else {
-                return _src3.ZalgoPromise.resolve();
+                return ZalgoPromise.resolve();
             }
         });
     };
@@ -1120,11 +1071,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.hideComponent = function hideComponent() {
         var _this30 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this30.element) {
-                return (0, _lib.animateAndHide)(_this30.element, _constants.ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register);
+                return animateAndHide(_this30.element, ANIMATION_NAMES.HIDE_COMPONENT, _this30.clean.register);
             } else {
-                return _src3.ZalgoPromise.resolve();
+                return ZalgoPromise.resolve();
             }
         });
     };
@@ -1136,7 +1087,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
     ParentComponent.prototype.focus = function focus() {
 
-        if (this.window && !(0, _src2.isWindowClosed)(this.window)) {
+        if (this.window && !isWindowClosed(this.window)) {
             this.component.log('focus');
             this.window.focus();
         } else {
@@ -1153,15 +1104,15 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.createPrerenderTemplate = function createPrerenderTemplate() {
         var _this31 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (!_this31.component.prerenderTemplate) {
-                return _src3.ZalgoPromise.resolve();
+                return ZalgoPromise.resolve();
             }
 
-            return _src3.ZalgoPromise['try'](function () {
+            return ZalgoPromise['try'](function () {
 
                 if (_this31.prerenderIframe) {
-                    return (0, _lib.awaitFrameLoad)(_this31.prerenderIframe).then(function () {
+                    return awaitFrameLoad(_this31.prerenderIframe).then(function () {
                         return _this31.prerenderWindow;
                     });
                 } else {
@@ -1177,13 +1128,24 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                     return;
                 }
 
+                var el = void 0;
+
                 try {
-                    (0, _lib.writeElementToWindow)(win, _this31.renderTemplate(_this31.component.prerenderTemplate, {
-                        jsxDom: _lib.jsxDom.bind(doc),
+                    el = _this31.renderTemplate(_this31.component.prerenderTemplate, {
+                        jsxDom: jsxDom.bind(doc),
                         document: doc
-                    }));
+                    });
                 } catch (err) {
-                    // pass
+                    _this31.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
+                    return;
+                }
+
+                try {
+                    writeElementToWindow(win, el);
+                } catch (err) {
+                    _this31.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
+                    console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
                 }
             });
         });
@@ -1199,22 +1161,22 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
 
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var _ref14 = this.component.dimensions || {},
-            _ref14$width = _ref14.width,
-            width = _ref14$width === undefined ? _constants.DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref14$width,
-            _ref14$height = _ref14.height,
-            height = _ref14$height === undefined ? _constants.DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref14$height;
+        var _ref11 = this.component.dimensions || {},
+            _ref11$width = _ref11.width,
+            width = _ref11$width === undefined ? DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref11$width,
+            _ref11$height = _ref11.height,
+            height = _ref11$height === undefined ? DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref11$height;
 
         return renderer.call(this, _extends({
-            id: _constants.CLASS_NAMES.ZOID + '-' + this.component.tag + '-' + this.props.uid,
+            id: CLASS_NAMES.ZOID + '-' + this.component.tag + '-' + this.props.uid,
             props: renderer.__xdomain__ ? null : this.props,
             tag: this.component.tag,
             context: this.context,
             outlet: this.getOutlet(),
-            CLASS: _constants.CLASS_NAMES,
-            ANIMATION: _constants.ANIMATION_NAMES,
-            CONTEXT: _constants.CONTEXT_TYPES,
-            EVENT: _constants.EVENTS,
+            CLASS: CLASS_NAMES,
+            ANIMATION: ANIMATION_NAMES,
+            CONTEXT: CONTEXT_TYPES,
+            EVENT: EVENTS,
             actions: {
                 close: function close() {
                     return _this32.userClose();
@@ -1226,7 +1188,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             on: function on(eventName, handler) {
                 return _this32.on(eventName, handler);
             },
-            jsxDom: _lib.jsxDom,
+            jsxDom: jsxDom,
             document: document,
             dimensions: { width: width, height: height }
         }, options));
@@ -1235,11 +1197,11 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.openContainer = function openContainer(element) {
         var _this33 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             var el = void 0;
 
             if (element) {
-                el = (0, _lib.getElement)(element);
+                el = getElement(element);
             } else {
                 el = document.body;
             }
@@ -1261,18 +1223,18 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             });
 
             _this33.container = container;
-            (0, _lib.hideElement)(_this33.container);
-            (0, _lib.appendChild)(el, _this33.container);
+            hideElement(_this33.container);
+            appendChild(el, _this33.container);
 
             if (_this33.driver.renderedIntoContainerTemplate) {
                 _this33.element = _this33.getOutlet();
-                (0, _lib.hideElement)(_this33.element);
+                hideElement(_this33.element);
 
                 if (!_this33.element) {
                     throw new Error('Could not find element to render component into');
                 }
 
-                (0, _lib.hideElement)(_this33.element);
+                hideElement(_this33.element);
             }
 
             _this33.clean.register('destroyContainerTemplate', function () {
@@ -1298,10 +1260,10 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.destroy = function destroy() {
         var _this34 = this;
 
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             if (_this34.clean.hasTasks()) {
                 _this34.component.log('destroy');
-                (0, _client.flush)();
+                flush();
                 return _this34.clean.all();
             }
         });
@@ -1310,7 +1272,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
     ParentComponent.prototype.tryInit = function tryInit(method) {
         var _this35 = this;
 
-        return _src3.ZalgoPromise['try'](method)['catch'](function (err) {
+        return ZalgoPromise['try'](method)['catch'](function (err) {
             _this35.onInit.reject(err);
         }).then(function () {
             return _this35.onInit;
@@ -1326,7 +1288,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         var _this36 = this;
 
         // eslint-disable-next-line promise/no-promise-in-callback
-        return _src3.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
 
             _this36.handledErrors = _this36.handledErrors || [];
 
@@ -1348,7 +1310,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
         })['catch'](function (errErr) {
             // eslint-disable-line unicorn/catch-error-name
 
-            throw new Error('An error was encountered while handling error:\n\n ' + (0, _lib.stringifyError)(err) + '\n\n' + (0, _lib.stringifyError)(errErr));
+            throw new Error('An error was encountered while handling error:\n\n ' + stringifyError(err) + '\n\n' + stringifyError(errErr));
         }).then(function () {
 
             if (!_this36.props.onError) {
@@ -1364,7 +1326,7 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
             results.push(ParentComponent.activeComponents[0].destroy());
         }
 
-        return _src3.ZalgoPromise.all(results).then(_lib.noop);
+        return ZalgoPromise.all(results).then(noop);
     };
 
     _createClass(ParentComponent, [{
@@ -1375,10 +1337,10 @@ var ParentComponent = exports.ParentComponent = (_class = function (_BaseCompone
                 throw new Error('Context not set');
             }
 
-            return _drivers.RENDER_DRIVERS[this.context];
+            return RENDER_DRIVERS[this.context];
         }
     }]);
 
     return ParentComponent;
-}(_base.BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getOutlet', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'getOutlet'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'prefetch', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'prefetch'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadHTML', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'loadHTML'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'buildUrl', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'buildUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openPrerender', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'openPrerender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'switchPrerender', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'switchPrerender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createPrerenderTemplate', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'createPrerenderTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [_lib.memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
+}(BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getOutlet', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'getOutlet'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'prefetch', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'prefetch'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadHTML', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'loadHTML'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'buildUrl', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'buildUrl'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'open', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'open'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openPrerender', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'openPrerender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'switchPrerender', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'switchPrerender'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'close', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'close'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeContainer', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'closeContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'destroyContainer', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'destroyContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'closeComponent', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'closeComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showContainer', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'showContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'showComponent', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'showComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideContainer', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'hideContainer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hideComponent', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'hideComponent'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'createPrerenderTemplate', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'createPrerenderTemplate'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openContainer', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'openContainer'), _class.prototype)), _class);
 ParentComponent.activeComponents = [];

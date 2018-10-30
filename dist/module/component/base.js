@@ -1,17 +1,11 @@
-'use strict';
-
-exports.__esModule = true;
-exports.BaseComponent = undefined;
-
-var _src = require('zalgo-promise/src');
-
-var _src2 = require('post-robot/src');
-
-require('cross-domain-utils/src');
-
-var _lib = require('../lib');
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { on } from 'post-robot/src';
+import 'cross-domain-utils/src';
+
+import { copyProp, eventEmitter, stringifyError, noop } from '../lib';
+
 
 function cleanup(obj) {
 
@@ -80,31 +74,19 @@ function cleanup(obj) {
                 results.push(tasks.pop().run());
             }
 
-            return _src.ZalgoPromise.all(results).then(function () {/* pass */});
+            return ZalgoPromise.all(results).then(function () {/* pass */});
         },
         run: function run(name) {
             var results = [];
 
-            for (var _iterator = tasks, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                var _ref;
-
-                if (_isArray) {
-                    if (_i >= _iterator.length) break;
-                    _ref = _iterator[_i++];
-                } else {
-                    _i = _iterator.next();
-                    if (_i.done) break;
-                    _ref = _i.value;
-                }
-
-                var item = _ref;
-
+            for (var _i2 = 0, _length2 = tasks == null ? 0 : tasks.length; _i2 < _length2; _i2++) {
+                var item = tasks[_i2];
                 if (item.name === name) {
                     results.push(item.run());
                 }
             }
 
-            return _src.ZalgoPromise.all(results).then(_lib.noop);
+            return ZalgoPromise.all(results).then(noop);
         }
     };
 }
@@ -116,16 +98,16 @@ function cleanup(obj) {
     a separate library.
 */
 
-var BaseComponent = exports.BaseComponent = function () {
+export var BaseComponent = function () {
     function BaseComponent() {
         _classCallCheck(this, BaseComponent);
 
         this.clean = cleanup(this);
-        this.event = (0, _lib.eventEmitter)();
+        this.event = eventEmitter();
     }
 
     BaseComponent.prototype.addProp = function addProp(options, name, def) {
-        (0, _lib.copyProp)(options, this, name, def);
+        copyProp(options, this, name, def);
     };
 
     BaseComponent.prototype.on = function on(eventName, handler) {
@@ -137,7 +119,7 @@ var BaseComponent = exports.BaseComponent = function () {
     };
 
     BaseComponent.prototype.error = function error(err) {
-        throw new Error('Expected error to be implemented - got ' + (0, _lib.stringifyError)(err));
+        throw new Error('Expected error to be implemented - got ' + stringifyError(err));
     };
 
     /*  Listen
@@ -164,18 +146,8 @@ var BaseComponent = exports.BaseComponent = function () {
 
         var listeners = this.listeners();
 
-        var _loop = function _loop() {
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) return 'break';
-                _ref2 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) return 'break';
-                _ref2 = _i2.value;
-            }
-
-            var listenerName = _ref2;
-
+        var _loop = function _loop(_i4, _Object$keys2, _length4) {
+            var listenerName = _Object$keys2[_i4];
 
             var name = listenerName.replace(/^zoid_/, '');
 
@@ -183,16 +155,16 @@ var BaseComponent = exports.BaseComponent = function () {
                 _this.error(err);
             };
 
-            var listener = (0, _src2.on)(listenerName, { window: win, domain: domain, errorHandler: errorHandler }, function (_ref3) {
-                var source = _ref3.source,
-                    data = _ref3.data;
+            var listener = on(listenerName, { window: win, domain: domain, errorHandler: errorHandler }, function (_ref) {
+                var source = _ref.source,
+                    data = _ref.data;
 
                 _this.component.log('listener_' + name);
                 return listeners[listenerName].call(_this, source, data);
             });
 
-            var errorListener = (0, _src2.on)(listenerName, { window: win, errorHandler: errorHandler }, function (_ref4) {
-                var origin = _ref4.origin;
+            var errorListener = on(listenerName, { window: win, errorHandler: errorHandler }, function (_ref2) {
+                var origin = _ref2.origin;
 
                 _this.component.logError('unexpected_listener_' + name, { origin: origin, domain: domain.toString() });
                 _this.error(new Error('Unexpected ' + name + ' message from domain ' + origin + ' -- expected message from ' + domain.toString()));
@@ -204,12 +176,8 @@ var BaseComponent = exports.BaseComponent = function () {
             });
         };
 
-        for (var _iterator2 = Object.keys(listeners), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref2;
-
-            var _ret = _loop();
-
-            if (_ret === 'break') break;
+        for (var _i4 = 0, _Object$keys2 = Object.keys(listeners), _length4 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+            _loop(_i4, _Object$keys2, _length4);
         }
     };
 

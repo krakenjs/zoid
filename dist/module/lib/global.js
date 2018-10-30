@@ -1,28 +1,21 @@
-'use strict';
+import { isSameDomain } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.global = undefined;
-exports.globalFor = globalFor;
-exports.localGlobal = localGlobal;
+import { __ZOID__ } from '../constants';
 
-var _src = require('cross-domain-utils/src');
+export function globalFor(win) {
 
-var _constants = require('../constants');
-
-function globalFor(win) {
-
-    if (!(0, _src.isSameDomain)(win)) {
+    if (!isSameDomain(win)) {
         return;
     }
 
-    if (!win[_constants.__ZOID__]) {
-        win[_constants.__ZOID__] = {};
+    if (!win[__ZOID__]) {
+        win[__ZOID__] = {};
     }
 
-    return win[_constants.__ZOID__];
+    return win[__ZOID__];
 }
 
-function localGlobal() {
+export function localGlobal() {
     var global = globalFor(window);
 
     if (!global) {
@@ -32,4 +25,4 @@ function localGlobal() {
     return global;
 }
 
-var global = exports.global = localGlobal();
+export var global = localGlobal();

@@ -1,12 +1,4 @@
-'use strict';
-
-exports.__esModule = true;
-exports.denodeify = denodeify;
-exports.promisify = promisify;
-exports.delay = delay;
-exports.cycle = cycle;
-
-var _src = require('zalgo-promise/src');
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 /*  DeNodeify
     ---------
@@ -14,7 +6,7 @@ var _src = require('zalgo-promise/src');
     Turns a method from a function which accepts a callback, into a function which returns a promise.
 */
 
-function denodeify(method) {
+export function denodeify(method) {
 
     return function denodeifyWrapper() {
 
@@ -22,10 +14,10 @@ function denodeify(method) {
         var args = Array.prototype.slice.call(arguments);
 
         if (args.length >= method.length) {
-            return _src.ZalgoPromise.resolve(method.apply(self, args));
+            return ZalgoPromise.resolve(method.apply(self, args));
         }
 
-        return new _src.ZalgoPromise(function (resolve, reject) {
+        return new ZalgoPromise(function (resolve, reject) {
             args.push(function (err, result) {
 
                 if (err && !(err instanceof Error)) {
@@ -39,27 +31,27 @@ function denodeify(method) {
     };
 }
 
-function promisify(method) {
+export function promisify(method) {
     return function promisifyWRapper() {
         var _this = this,
             _arguments = arguments;
 
-        return _src.ZalgoPromise['try'](function () {
+        return ZalgoPromise['try'](function () {
             return method.apply(_this, _arguments);
         });
     };
 }
 
-function delay() {
+export function delay() {
     var time = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
-    return new _src.ZalgoPromise(function (resolve) {
+    return new ZalgoPromise(function (resolve) {
         setTimeout(resolve, time);
     });
 }
 
-function cycle(method) {
-    return _src.ZalgoPromise['try'](method).then(function () {
+export function cycle(method) {
+    return ZalgoPromise['try'](method).then(function () {
         return cycle(method);
     });
 }

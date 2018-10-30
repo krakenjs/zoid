@@ -1,12 +1,6 @@
-'use strict';
+import { getDomain } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.normalizeChildProp = normalizeChildProp;
-exports.normalizeChildProps = normalizeChildProps;
-
-var _src = require('cross-domain-utils/src');
-
-function normalizeChildProp(component, props, key, value) {
+export function normalizeChildProp(component, props, key, value) {
 
     // $FlowFixMe
     var prop = component.getProp(key);
@@ -26,35 +20,23 @@ function normalizeChildProp(component, props, key, value) {
     return value;
 }
 
-function normalizeChildProps(component, props, origin) {
+export function normalizeChildProps(component, props, origin) {
     var required = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
 
     var result = {};
 
-    for (var _iterator = Object.keys(props), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-        var _ref;
+    for (var _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+        var key = _Object$keys2[_i2];
 
-        if (_isArray) {
-            if (_i >= _iterator.length) break;
-            _ref = _iterator[_i++];
-        } else {
-            _i = _iterator.next();
-            if (_i.done) break;
-            _ref = _i.value;
-        }
+        var prop = component.getProp(key);
+        var value = props[key];
 
-        var _key = _ref;
-
-
-        var prop = component.getProp(_key);
-        var value = props[_key];
-
-        if (prop && prop.sameDomain && origin !== (0, _src.getDomain)(window)) {
+        if (prop && prop.sameDomain && origin !== getDomain(window)) {
             continue;
         }
 
-        result[_key] = normalizeChildProp(component, props, _key, value);
+        result[key] = normalizeChildProp(component, props, key, value);
 
         if (prop && prop.alias && !result[prop.alias]) {
             result[prop.alias] = value;
@@ -62,22 +44,10 @@ function normalizeChildProps(component, props, origin) {
     }
 
     if (required) {
-        for (var _iterator2 = component.getPropNames(), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-            var _ref2;
-
-            if (_isArray2) {
-                if (_i2 >= _iterator2.length) break;
-                _ref2 = _iterator2[_i2++];
-            } else {
-                _i2 = _iterator2.next();
-                if (_i2.done) break;
-                _ref2 = _i2.value;
-            }
-
-            var key = _ref2;
-
-            if (!props.hasOwnProperty(key)) {
-                result[key] = normalizeChildProp(component, props, key, props[key]);
+        for (var _i4 = 0, _component$getPropNam2 = component.getPropNames(), _length4 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
+            var _key = _component$getPropNam2[_i4];
+            if (!props.hasOwnProperty(_key)) {
+                result[_key] = normalizeChildProp(component, props, _key, props[_key]);
             }
         }
     }

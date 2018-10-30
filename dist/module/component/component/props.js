@@ -1,13 +1,7 @@
-'use strict';
+import 'zalgo-promise/src';
 
-exports.__esModule = true;
-exports.getInternalProps = getInternalProps;
-
-require('zalgo-promise/src');
-
-var _lib = require('../../lib');
-
-require('../../types');
+import { uniqueID } from '../../lib';
+import '../../types';
 
 /*  Internal Props
     --------------
@@ -16,7 +10,7 @@ require('../../types');
     These follow the same format as regular props, and are classed as reserved words that may not be overriden by users.
 */
 
-function getInternalProps() {
+export function getInternalProps() {
     return {
 
         // The desired env in which the component is being rendered. Used to determine the correct url
@@ -33,7 +27,7 @@ function getInternalProps() {
         uid: {
             type: 'string',
             def: function def() {
-                return (0, _lib.uniqueID)();
+                return uniqueID();
             },
 
             queryParam: true
