@@ -42,7 +42,6 @@ export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 
 type envPropType = string;
 type uidPropType = string;
-type urlPropType = string;
 type timeoutPropType = number;
 type dimensionsPropType = DimensionsType;
 
@@ -70,7 +69,6 @@ export type BuiltInPropsType = {
 export type PropsType = {
     env? : envPropType,
     uid? : uidPropType,
-    url? : urlPropType,
     timeout? : timeoutPropType,
     dimensions? : dimensionsPropType,
 
