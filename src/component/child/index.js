@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { send } from 'post-robot/src';
+import { send, markWindowKnown } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
     cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
@@ -93,6 +93,9 @@ export class ChildComponent<P> extends BaseComponent<P> {
         //
         // - What context are we
         // - What props has the parent specified
+
+        markWindowKnown(this.getParentComponentWindow());
+        markWindowKnown(this.getParentRenderWindow());
 
         this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
 
