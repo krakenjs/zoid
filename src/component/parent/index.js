@@ -88,7 +88,15 @@ export class ParentComponent<P> extends BaseComponent<P> {
         this.validateParentDomain();
 
         this.context = context;
-        this.setProps(props);
+
+        try {
+            this.setProps(props);
+        } catch (err) {
+            if (props.onError) {
+                props.onError(err);
+            }
+            throw err;
+        }
 
         this.childWindowName = this.buildChildWindowName({ renderTo: window });
 

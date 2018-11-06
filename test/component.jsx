@@ -114,6 +114,12 @@ export let testComponent = zoid.create({
 
     containerTemplate,
 
+    validate(component, { invalidate }) {
+        if (invalidate === true) {
+            throw new Error('Invalidated prop is defined as true');
+        }
+    },
+
     props: {
         childEntered: {
             type:     'function',
@@ -163,6 +169,22 @@ export let testComponent = zoid.create({
         run: {
             type:     'string',
             required: false
+        },
+
+        invalidate: {
+            type:     'boolean',
+            required: false
+        },
+
+        validateProp: {
+            type:     'string',
+            required: false,
+
+            validate(validate) {
+                if (validate && validate !== 'validate') {
+                    throw new Error('String does not equal "validate"');
+                }
+            }
         }
     }
 });
