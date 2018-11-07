@@ -1,9 +1,11 @@
 /* @flow */
-/* @jsx jsxDom */
+/* @jsx node */
+
+import { node, dom } from 'jsx-pragmatic/src';
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultPrerenderTemplate({ jsxDom } : RenderOptionsType<{}>) : HTMLElement {
+export function defaultPrerenderTemplate({ document } : RenderOptionsType<{}>) : HTMLElement {
     return (
         <html>
             <head>
@@ -59,5 +61,5 @@ export function defaultPrerenderTemplate({ jsxDom } : RenderOptionsType<{}>) : H
                 </div>
             </body>
         </html>
-    );
+    ).render(dom({ doc: document }));
 }

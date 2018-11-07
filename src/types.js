@@ -25,5 +25,3 @@ export type StringMatcherType = string | RegExp | Array<string>;
 
 export type EnvString = string | { [string] : string };
 export type EnvStringRegExp = string | RegExp | { [string] : string | RegExp };
-
-export type Jsx<T> = (string, ?{ [string] : mixed }, ...children : Array<string | T>) => T;

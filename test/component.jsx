@@ -24,7 +24,7 @@ function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, 
 
             <a href="#" onClick={ close } class={ `${ CLASS.ZOID }-close` }></a>
 
-            { outlet }
+            <node el={ outlet } />
 
             <style>
                 {`

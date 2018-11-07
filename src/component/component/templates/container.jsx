@@ -1,9 +1,11 @@
 /* @flow */
-/* @jsx jsxDom */
+/* @jsx node */
+
+import { node, dom } from 'jsx-pragmatic/src';
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxDom, dimensions : { width, height } } : RenderOptionsType<{}>) : HTMLElement {
+export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, document, dimensions : { width, height } } : RenderOptionsType<{}>) : HTMLElement {
 
     return (
         <div id={ id } class={ `${ CLASS.ZOID } ${ CLASS.ZOID }-tag-${ tag } ${ CLASS.ZOID }-context-${ context }` }>
@@ -38,7 +40,7 @@ export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, jsxD
                 `}
             </style>
 
-            { outlet }
+            <node el={ outlet } />
         </div>
-    );
+    ).render(dom({ doc: document }));
 }

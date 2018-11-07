@@ -8,9 +8,10 @@ import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
-    addClass, extend, extendUrl, jsxDom,
+    addClass, extend, extendUrl,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
     writeToWindow, once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
+import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
@@ -44,7 +45,7 @@ export type RenderOptionsType<P> = {
         focus : () => ZalgoPromise<void>
     },
     on : (string, () => void) => CancelableType,
-    jsxDom : typeof jsxDom,
+    jsxDom : typeof node,
     document : Document,
     container : HTMLElement,
     dimensions : DimensionsType
@@ -1095,9 +1096,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 }
 
                 let el = this.renderTemplate(this.component.prerenderTemplate, {
-                    jsxDom:   jsxDom.bind(doc),
                     document: doc
                 });
+
+                if (el instanceof ElementNode) {
+                    el = el.render(dom({ doc }));
+                }
 
                 try {
                     writeElementToWindow(win, el);
@@ -1115,7 +1119,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Create a template and stylesheet for the parent template behind the element
     */
 
-    renderTemplate(renderer : (RenderOptionsType<P>) => HTMLElement, options : Object = {}) : HTMLElement {
+    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, options : Object = {}) : T {
 
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
@@ -1137,7 +1141,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 focus: () => this.focus()
             },
             on:         (eventName, handler) => this.on(eventName, handler),
-            jsxDom,
+            jsxDom:     node,
             document,
             dimensions: { width, height },
             ...options
@@ -1169,6 +1173,10 @@ export class ParentComponent<P> extends BaseComponent<P> {
             let container = this.renderTemplate(this.component.containerTemplate, {
                 container: el
             });
+
+            if (container instanceof ElementNode) {
+                container = container.render(dom({ doc: document }));
+            }
 
             this.container = container;
             hideElement(this.container);

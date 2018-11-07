@@ -5,6 +5,7 @@ import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { memoize } from 'belter/src';
+import { type ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -57,8 +58,8 @@ export type ComponentOptionsType<P> = {
     contexts? : { iframe? : boolean, popup? : boolean },
     defaultContext? : string,
 
-    containerTemplate? : (RenderOptionsType<P>) => HTMLElement,
-    prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement,
+    containerTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
+    prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
 
     validate? : (Component<P>, UserPropsDefinitionType<P>) => void,
 
@@ -98,8 +99,8 @@ export class Component<P> extends BaseComponent<P> {
     contexts : { iframe? : boolean, popup? : boolean }
     defaultContext : string
 
-    containerTemplate : (RenderOptionsType<P>) => HTMLElement
-    prerenderTemplate : (RenderOptionsType<P>) => HTMLElement
+    containerTemplate : (RenderOptionsType<P>) => HTMLElement | ElementNode
+    prerenderTemplate : (RenderOptionsType<P>) => HTMLElement | ElementNode
 
     validate : (Component<P>, (PropsType & P)) => void
 
