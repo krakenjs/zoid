@@ -648,12 +648,8 @@
             __webpack_require__.d(__webpack_exports__, "writeToWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.C;
             });
-            __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js");
-            var __WEBPACK_IMPORTED_MODULE_4__jsx__ = __webpack_require__("./node_modules/belter/src/jsx.jsx");
-            __webpack_require__.d(__webpack_exports__, "jsxDom", function() {
-                return __WEBPACK_IMPORTED_MODULE_4__jsx__.a;
-            });
-            __webpack_require__("./node_modules/belter/src/storage.js");
+            __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js"), 
+            __webpack_require__("./node_modules/belter/src/jsx.jsx"), __webpack_require__("./node_modules/belter/src/storage.js");
             var __WEBPACK_IMPORTED_MODULE_6__util__ = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__.d(__webpack_exports__, "copyProp", function() {
                 return __WEBPACK_IMPORTED_MODULE_6__util__.b;
@@ -750,49 +746,11 @@
         },
         "./node_modules/belter/src/jsx.jsx": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.a = function(element, props) {
-                for (var _len2 = arguments.length, children = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) children[_key2 - 2] = arguments[_key2];
-                if ("function" == typeof element) return element(props, children);
-                var name = element.toLowerCase(), doc = this && this.createElement ? this : window.document, el = doc.createElement(name);
-                for (var prop in props) if (prop in JSX_EVENTS) el.addEventListener(JSX_EVENTS[prop], props[prop]); else if ("innerHTML" === prop) {
-                    el.innerHTML = props[prop];
-                    Object(__WEBPACK_IMPORTED_MODULE_1__dom__.m)(el, doc);
-                } else el.setAttribute(prop, props[prop]);
-                var content = children[0], remaining = children.slice(1);
-                if ("style" === name) {
-                    if ("string" != typeof content) throw new TypeError("Expected " + name + " tag content to be string, got " + (void 0 === content ? "undefined" : _typeof(content)));
-                    if (remaining.length) throw new Error("Expected only text content for " + name + " tag");
-                    Object(__WEBPACK_IMPORTED_MODULE_1__dom__.v)(el, content, doc);
-                } else if ("iframe" === name) {
-                    if (remaining.length) throw new Error("Expected only single child node for iframe");
-                    el.addEventListener("load", function() {
-                        var win = el.contentWindow;
-                        if (!win) throw new Error("Expected frame to have contentWindow");
-                        "string" == typeof content ? Object(__WEBPACK_IMPORTED_MODULE_1__dom__.C)(win, content) : Object(__WEBPACK_IMPORTED_MODULE_1__dom__.B)(win, content);
-                    });
-                } else if ("script" === name) {
-                    if ("string" != typeof content) throw new TypeError("Expected " + name + " tag content to be string, got " + (void 0 === content ? "undefined" : _typeof(content)));
-                    if (remaining.length) throw new Error("Expected only text content for " + name + " tag");
-                    el.text = content;
-                } else for (var i = 0; i < children.length; i++) if ("string" == typeof children[i]) {
-                    var textNode = doc.createTextNode(children[i]);
-                    Object(__WEBPACK_IMPORTED_MODULE_1__dom__.e)(el, textNode);
-                } else Object(__WEBPACK_IMPORTED_MODULE_1__dom__.e)(el, children[i]);
-                return el;
-            };
-            __webpack_require__("./node_modules/belter/src/util.js");
-            var __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__("./node_modules/belter/src/dom.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-                return typeof obj;
-            } : function(obj) {
-                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            };
-            Object.assign;
+            __webpack_require__("./node_modules/belter/src/util.js"), __webpack_require__("./node_modules/belter/src/dom.js"), 
+            "function" == typeof Symbol && Symbol.iterator, Object.assign;
             function _classCallCheck(instance, Constructor) {
                 if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
             }
-            var JSX_EVENTS = {
-                onClick: "click"
-            };
             function htmlEncode() {
                 return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/\//g, "&#x2F;");
             }
@@ -1782,7 +1740,7 @@
                 if (!frame.contentWindow) return !0;
                 if (!frame.parentNode) return !0;
                 var doc = frame.ownerDocument;
-                return !(!doc || !doc.body || doc.body.contains(frame));
+                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
             }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
@@ -2419,7 +2377,7 @@
                             iframe.onload = resolve;
                             iframe.onerror = reject;
                         }).then(function() {
-                            return Object(lib.f)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                            return Object(lib.h)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
                         }).then(function() {
                             return bridge;
                         });
@@ -2622,12 +2580,12 @@
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
-                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
+                ACK_TIMEOUT: 2e3,
+                ACK_TIMEOUT_KNOWN: 1e4,
                 RES_TIMEOUT: -1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
                 _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
-                _ALLOWED_POST_MESSAGE),
-                ALLOW_SAME_ORIGIN: !1
+                _ALLOWED_POST_MESSAGE)
             };
             0 === window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
             __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -2788,6 +2746,7 @@
                 }).obj;
             }
             global.a.readyPromises = global.a.readyPromises || new cross_domain_safe_weakmap_src.a();
+            global.a.knownWindows = global.a.knownWindows || new cross_domain_safe_weakmap_src.a();
             function onHello(handler) {
                 global.a.on(conf.b.POST_MESSAGE_NAMES.HELLO, {
                     domain: conf.b.WILDCARD
@@ -2808,6 +2767,12 @@
                         origin: _ref2.origin
                     };
                 });
+            }
+            function markWindowKnown(win) {
+                global.a.knownWindows.set(win, !0);
+            }
+            function isWindowKnown(win) {
+                return global.a.knownWindows.get(win);
             }
             function initOnReady() {
                 onHello(function(_ref3) {
@@ -2833,16 +2798,16 @@
             __webpack_require__.d(__webpack_exports__, "b", function() {
                 return getWindowType;
             });
-            __webpack_require__.d(__webpack_exports__, "e", function() {
+            __webpack_require__.d(__webpack_exports__, "g", function() {
                 return needsGlobalMessagingForBrowser;
             });
-            __webpack_require__.d(__webpack_exports__, "d", function() {
+            __webpack_require__.d(__webpack_exports__, "e", function() {
                 return listenForMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return serializeMethod;
             });
-            __webpack_require__.d(__webpack_exports__, "h", function() {
+            __webpack_require__.d(__webpack_exports__, "j", function() {
                 return serializeMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
@@ -2866,13 +2831,19 @@
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return onHello;
             });
-            __webpack_require__.d(__webpack_exports__, "g", function() {
+            __webpack_require__.d(__webpack_exports__, "i", function() {
                 return sayHello;
+            });
+            __webpack_require__.d(__webpack_exports__, "f", function() {
+                return markWindowKnown;
+            });
+            __webpack_require__.d(__webpack_exports__, "d", function() {
+                return isWindowKnown;
             });
             __webpack_require__.d(__webpack_exports__, "c", function() {
                 return initOnReady;
             });
-            __webpack_require__.d(__webpack_exports__, "f", function() {
+            __webpack_require__.d(__webpack_exports__, "h", function() {
                 return onChildWindowReady;
             });
         },
@@ -3502,6 +3473,9 @@
                 value: !0
             });
             var interface_namespaceObject = {};
+            __webpack_require__.d(interface_namespaceObject, "markWindowKnown", function() {
+                return lib.f;
+            });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -3553,6 +3527,9 @@
             var src_namespaceObject = {};
             __webpack_require__.d(src_namespaceObject, "default", function() {
                 return post_robot_src;
+            });
+            __webpack_require__.d(src_namespaceObject, "markWindowKnown", function() {
+                return lib.f;
             });
             __webpack_require__.d(src_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
@@ -3718,7 +3695,7 @@
                 }
             };
             SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
-                if (Object(lib.e)()) {
+                if (Object(lib.g)()) {
                     if (!Object(cross_domain_utils_src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
                     if (!1 !== Object(cross_domain_utils_src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
                     var foreignGlobal = win[conf.b.WINDOW_PROPS.POSTROBOT];
@@ -3748,10 +3725,9 @@
                             windowType: type
                         });
                     }(win, message, {
-                        data: Object(lib.h)(win, domain, message.data),
+                        data: Object(lib.j)(win, domain, message.data),
                         domain: domain
                     });
-                    if (win === window && !conf.a.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Window is closed");
                     var messages = [], serializedMessage = JSON.stringify(((_JSON$stringify = {})[conf.b.WINDOW_PROPS.POSTROBOT] = message, 
                     _JSON$stringify), null, 2);
@@ -3905,6 +3881,7 @@
                     if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.b.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
                 }(event.data);
                 if (message) {
+                    Object(lib.f)(source);
                     if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
                     0 !== message.sourceDomain.indexOf(conf.b.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(conf.b.FILE_PROTOCOL) || (origin = message.sourceDomain);
                     if (-1 === src_global.a.receivedMessages.indexOf(message.id)) {
@@ -3962,10 +3939,10 @@
                         src_global.a.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = src.a.try(function() {
-                        if (Object(cross_domain_utils_src.isAncestor)(window, win)) return Object(lib.f)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
+                        if (Object(cross_domain_utils_src.isAncestor)(window, win)) return Object(lib.h)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.g)(win);
+                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.i)(win);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
                         if (Object(belter_src.isRegex)(domain)) {
@@ -3998,7 +3975,7 @@
                                 fireAndForget: options.fireAndForget
                             }, actualDomain).catch(reject);
                             if (options.fireAndForget) return resolve();
-                            var ackTimeout = conf.a.ACK_TIMEOUT, resTimeout = options.timeout || conf.a.RES_TIMEOUT, cycleTime = 100;
+                            var totalAckTimeout = Object(lib.d)(win) ? conf.a.ACK_TIMEOUT_KNOWN : conf.a.ACK_TIMEOUT, totalResTimeout = options.timeout || conf.a.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if (Object(cross_domain_utils_src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
@@ -4008,8 +3985,8 @@
                                         if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + conf.a.ACK_TIMEOUT + "ms"));
-                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + (options.timeout || conf.a.RES_TIMEOUT) + "ms"));
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + totalAckTimeout + "ms"));
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + totalResTimeout + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
                                 }
@@ -4222,7 +4199,7 @@
                     Object(belter_src.addEventListener)(window, "message", messageListener);
                     __webpack_require__("./node_modules/post-robot/src/bridge/index.js").openTunnelToOpener();
                     Object(lib.c)();
-                    Object(lib.d)({
+                    Object(lib.e)({
                         on: _on,
                         send: _send
                     });
@@ -4230,7 +4207,303 @@
                 src_global.a.initialized = !0;
             }
             interface_init();
-            var post_robot_src = interface_namespaceObject, base_BaseComponent = function() {
+            var post_robot_src = interface_namespaceObject, node__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+                return typeof obj;
+            } : function(obj) {
+                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+            };
+            function _possibleConstructorReturn(self, call) {
+                if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                return !call || "object" != typeof call && "function" != typeof call ? self : call;
+            }
+            function _inherits(subClass, superClass) {
+                if ("function" != typeof superClass && null !== superClass) throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+                subClass.prototype = Object.create(superClass && superClass.prototype, {
+                    constructor: {
+                        value: subClass,
+                        enumerable: !1,
+                        writable: !0,
+                        configurable: !0
+                    }
+                });
+                superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
+            }
+            function _classCallCheck(instance, Constructor) {
+                if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
+            }
+            var Node = function() {
+                function Node() {
+                    _classCallCheck(this, Node);
+                }
+                Node.prototype.isElementNode = function() {
+                    return !1;
+                };
+                Node.prototype.isTextNode = function() {
+                    return !1;
+                };
+                Node.prototype.isFragmentNode = function() {
+                    return !1;
+                };
+                return Node;
+            }(), ElementNode = function(_Node) {
+                _inherits(ElementNode, _Node);
+                function ElementNode(name, props, children) {
+                    _classCallCheck(this, ElementNode);
+                    var _this = _possibleConstructorReturn(this, _Node.call(this));
+                    _this.name = name;
+                    _this.props = props;
+                    _this.children = children;
+                    if ("function" == typeof props.onRender) {
+                        _this.onRender = props.onRender;
+                        delete props.onRender;
+                    }
+                    return _this;
+                }
+                ElementNode.prototype.getTag = function() {
+                    return this.name;
+                };
+                ElementNode.prototype.isTag = function(name) {
+                    return name === this.name;
+                };
+                ElementNode.prototype.isElementNode = function() {
+                    return !0;
+                };
+                ElementNode.prototype.render = function(renderer) {
+                    var element = renderer(this.name, this.props, this.children);
+                    this.onRender && this.onRender(element);
+                    return element;
+                };
+                ElementNode.prototype.getText = function() {
+                    throw new Error("Can not get text of an element node");
+                };
+                return ElementNode;
+            }(Node), TextNode = function(_Node2) {
+                _inherits(TextNode, _Node2);
+                function TextNode(text) {
+                    _classCallCheck(this, TextNode);
+                    var _this2 = _possibleConstructorReturn(this, _Node2.call(this));
+                    _this2.text = text;
+                    return _this2;
+                }
+                TextNode.prototype.getTag = function() {
+                    throw new Error("Can not get tag of text node");
+                };
+                TextNode.prototype.isTag = function(name) {
+                    throw new Error("Can not check tag of text node");
+                };
+                TextNode.prototype.isTextNode = function() {
+                    return !0;
+                };
+                TextNode.prototype.render = function(renderer) {
+                    throw new Error("Can not render a text node");
+                };
+                TextNode.prototype.getText = function() {
+                    return this.text;
+                };
+                return TextNode;
+            }(Node), FragmentNode = function(_Node3) {
+                _inherits(FragmentNode, _Node3);
+                function FragmentNode(children) {
+                    _classCallCheck(this, FragmentNode);
+                    var _this3 = _possibleConstructorReturn(this, _Node3.call(this));
+                    _this3.children = children;
+                    return _this3;
+                }
+                FragmentNode.prototype.getTag = function() {
+                    throw new Error("Can not get tag of fragment node");
+                };
+                FragmentNode.prototype.isTag = function(name) {
+                    throw new Error("Can not check tag of fragment node");
+                };
+                FragmentNode.prototype.isFragmentNode = function() {
+                    return !0;
+                };
+                FragmentNode.prototype.render = function(renderer) {
+                    throw new Error("Can not render a fragment node");
+                };
+                FragmentNode.prototype.getText = function() {
+                    throw new Error("Can not get text of a fragment node");
+                };
+                return FragmentNode;
+            }(Node);
+            function normalizeChild(child) {
+                if ("string" == typeof child) return new TextNode(child);
+                if (child instanceof ElementNode || child instanceof TextNode || child instanceof FragmentNode) return child;
+                if (Array.isArray(child)) return new FragmentNode(normalizeChildren(child));
+                if (null !== child && void 0 !== child) throw new Error("Child node must be string or instance of jsx-pragmatic node; got " + (void 0 === child ? "undefined" : node__typeof(child)));
+            }
+            function normalizeChildren(children) {
+                for (var result = [], _i2 = 0, _length2 = null == children ? 0 : children.length; _i2 < _length2; _i2++) {
+                    var normalizedChild = normalizeChild(children[_i2]);
+                    if (normalizedChild) if (normalizedChild instanceof FragmentNode) for (var _i4 = 0, _normalizedChild$chil2 = normalizedChild.children, _length4 = null == _normalizedChild$chil2 ? 0 : _normalizedChild$chil2.length; _i4 < _length4; _i4++) {
+                        var subchild = _normalizedChild$chil2[_i4];
+                        result.push(subchild);
+                    } else result.push(normalizedChild);
+                }
+                return result;
+            }
+            var _CREATE_ELEMENT, _ADD_CHILDREN, node = function(element, props) {
+                for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) children[_key - 2] = arguments[_key];
+                if ("string" == typeof element) return new ElementNode(element, props || {}, normalizeChildren(children));
+                if ("function" == typeof element) return normalizeChild(element(props || {}, normalizeChildren(children)));
+                throw new TypeError("Expected jsx Element to be a string or a function");
+            }, dom__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+                return typeof obj;
+            } : function(obj) {
+                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+            }, DOM_EVENT = {
+                onBlur: "blur",
+                onCancel: "cancel",
+                onClick: "click",
+                onClose: "close",
+                onContextMenu: "contextMenu",
+                onCopy: "copy",
+                onCut: "cut",
+                onAuxClick: "auxClick",
+                onDoubleClick: "doubleClick",
+                onDragEnd: "dragEnd",
+                onDragStart: "dragStart",
+                onDrop: "drop",
+                onFocus: "focus",
+                onInput: "input",
+                onInvalid: "invalid",
+                onKeyDown: "keyDown",
+                onKeyPress: "keyPress",
+                onKeyUp: "keyUp",
+                onMouseDown: "mouseDown",
+                onMouseUp: "mouseUp",
+                onPaste: "paste",
+                onPause: "pause",
+                onPlay: "play",
+                onPointerCancel: "pointerCancel",
+                onPointerDown: "pointerDown",
+                onPointerUp: "pointerUp",
+                onRateChange: "rateChange",
+                onReset: "reset",
+                onSeeked: "seeked",
+                onSubmit: "submit",
+                onTouchCancel: "touchCancel",
+                onTouchEnd: "touchEnd",
+                onTouchStart: "touchStart",
+                onVolumeChange: "volumeChange",
+                onAbort: "abort",
+                onAnimationEnd: "animationEnd",
+                onAnimationIteration: "animationIteration",
+                onAnimationStart: "animationStart",
+                onCanPlay: "canPlay",
+                onCanPlayThrough: "canPlayThrough",
+                onDrag: "drag",
+                onDragEnter: "dragEnter",
+                onDragExit: "dragExit",
+                onDragLeave: "dragLeave",
+                onDragOver: "dragOver",
+                onDurationChange: "durationChange",
+                onEmptied: "emptied",
+                onEncrypted: "encrypted",
+                onEnded: "ended",
+                onError: "error",
+                onGotPointerCapture: "gotPointerCapture",
+                onLoad: "load",
+                onLoadedData: "loadedData",
+                onLoadedMetadata: "loadedMetadata",
+                onLoadStart: "loadStart",
+                onLostPointerCapture: "lostPointerCapture",
+                onMouseMove: "mouseMove",
+                onMouseOut: "mouseOut",
+                onMouseOver: "mouseOver",
+                onPlaying: "playing",
+                onPointerMove: "pointerMove",
+                onPointerOut: "pointerOut",
+                onPointerOver: "pointerOver",
+                onProgress: "progress",
+                onScroll: "scroll",
+                onSeeking: "seeking",
+                onStalled: "stalled",
+                onSuspend: "suspend",
+                onTimeUpdate: "timeUpdate",
+                onToggle: "toggle",
+                onTouchMove: "touchMove",
+                onTransitionEnd: "transitionEnd",
+                onWaiting: "waiting",
+                onWheel: "wheel"
+            };
+            function fixScripts(el) {
+                for (var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document, _i2 = 0, _el$querySelectorAll2 = el.querySelectorAll("script"), _length2 = null == _el$querySelectorAll2 ? 0 : _el$querySelectorAll2.length; _i2 < _length2; _i2++) {
+                    var script = _el$querySelectorAll2[_i2], parentNode = script.parentNode;
+                    if (parentNode) {
+                        var newScript = doc.createElement("script");
+                        newScript.text = script.textContent;
+                        parentNode.replaceChild(newScript, script);
+                    }
+                }
+            }
+            var CREATE_ELEMENT = ((_CREATE_ELEMENT = {}).node = function(_ref) {
+                var props = _ref.props;
+                if (!props.el) throw new Error("Must pass el prop to node element");
+                if (Object.keys(props).length > 1) throw new Error("Must not pass any prop other than el to node element");
+                return props.el;
+            }, _CREATE_ELEMENT.default = function(_ref2) {
+                var name = _ref2.name;
+                return _ref2.doc.createElement(name);
+            }, _CREATE_ELEMENT), ADD_CHILDREN = ((_ADD_CHILDREN = {}).iframe = function(_ref4) {
+                var el = _ref4.el, children = _ref4.children, firstChild = children[0];
+                if (children.length > 1 || !firstChild.isElementNode()) throw new Error("Expected only single element node as child of iframe element");
+                if (!firstChild.isTag("html")) throw new Error("Expected element to be inserted into frame to be html, got " + firstChild.getTag());
+                el.addEventListener("load", function() {
+                    var win = el.contentWindow;
+                    if (!win) throw new Error("Expected frame to have contentWindow");
+                    for (var doc = win.document, docElement = doc.documentElement; docElement.children && docElement.children.length; ) docElement.removeChild(docElement.children[0]);
+                    for (var child = firstChild.render(dom_dom({
+                        doc: doc
+                    })); child.children.length; ) docElement.appendChild(child.children[0]);
+                });
+            }, _ADD_CHILDREN.script = function(_ref5) {
+                var el = _ref5.el, children = _ref5.children, firstChild = children[0];
+                if (1 !== children.length || !firstChild.isTextNode()) throw new Error("Expected only single text node as child of script element");
+                el.text = firstChild.getText();
+            }, _ADD_CHILDREN.default = function(_ref6) {
+                for (var el = _ref6.el, children = _ref6.children, doc = _ref6.doc, domRenderer = _ref6.domRenderer, _i6 = 0, _length6 = null == children ? 0 : children.length; _i6 < _length6; _i6++) {
+                    var child = children[_i6];
+                    child.isTextNode() ? el.appendChild(doc.createTextNode(child.getText())) : el.appendChild(child.render(domRenderer));
+                }
+            }, _ADD_CHILDREN), dom_dom = function() {
+                var _ref7$doc = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).doc, doc = void 0 === _ref7$doc ? document : _ref7$doc;
+                return function domRenderer(name, props, children) {
+                    var createElement = CREATE_ELEMENT[name] || CREATE_ELEMENT.default, addChildren = ADD_CHILDREN[name] || ADD_CHILDREN.default, el = createElement({
+                        name: name,
+                        props: props,
+                        doc: doc
+                    });
+                    !function(_ref3) {
+                        for (var el = _ref3.el, props = _ref3.props, doc = _ref3.doc, _i4 = 0, _Object$keys2 = Object.keys(props), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+                            var prop = _Object$keys2[_i4], val = props[prop];
+                            if (null !== val && void 0 !== val && "el" !== prop) if (DOM_EVENT.hasOwnProperty(prop)) {
+                                if ("function" != typeof val) throw new TypeError("Prop " + prop + " must be function");
+                                el.addEventListener(DOM_EVENT[prop], val);
+                            } else if ("string" == typeof val || "number" == typeof val) if ("innerHTML" === prop) {
+                                el.innerHTML = val.toString();
+                                fixScripts(el, doc);
+                            } else el.setAttribute(prop, val.toString()); else {
+                                if ("boolean" != typeof val) throw new TypeError("Can not render prop " + prop + " of type " + (void 0 === val ? "undefined" : dom__typeof(val)));
+                                !0 === val && el.setAttribute(prop, "");
+                            }
+                        }
+                    }({
+                        el: el,
+                        props: props,
+                        doc: doc
+                    });
+                    addChildren({
+                        el: el,
+                        children: children,
+                        doc: doc,
+                        domRenderer: domRenderer
+                    });
+                    return el;
+                };
+            };
+            "function" == typeof Symbol && Symbol.iterator;
+            var base_BaseComponent = function() {
                 function BaseComponent() {
                     !function(instance, Constructor) {
                         if (!(instance instanceof BaseComponent)) throw new TypeError("Cannot call a class as a function");
@@ -4484,7 +4757,7 @@
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
-            function _possibleConstructorReturn(self, call) {
+            function child__possibleConstructorReturn(self, call) {
                 if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                 return !call || "object" != typeof call && "function" != typeof call ? self : call;
             }
@@ -4505,11 +4778,11 @@
                     !function(instance, Constructor) {
                         if (!(instance instanceof ChildComponent)) throw new TypeError("Cannot call a class as a function");
                     }(this);
-                    var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
+                    var _this = child__possibleConstructorReturn(this, _BaseComponent.call(this));
                     _this.component = component;
                     if (!_this.hasValidParentDomain()) {
                         _this.error(new RenderError("Can not be rendered by domain: " + _this.getParentDomain()));
-                        return _possibleConstructorReturn(_this);
+                        return child__possibleConstructorReturn(_this);
                     }
                     _this.component.log("construct_child");
                     _this.onPropHandlers = [];
@@ -4534,6 +4807,8 @@
                     _this.component.log("init_child");
                     _this.setWindows();
                     _this.listenForResize();
+                    Object(lib.f)(_this.getParentComponentWindow());
+                    Object(lib.f)(_this.getParentRenderWindow());
                     _this.onInit = _this.sendToParent(POST_MESSAGE.INIT, {
                         exports: _this.exports()
                     }).then(function(_ref5) {
@@ -5083,7 +5358,12 @@
                     _this.component = component;
                     _this.validateParentDomain();
                     _this.context = context;
-                    _this.setProps(props);
+                    try {
+                        _this.setProps(props);
+                    } catch (err) {
+                        props.onError && props.onError(err);
+                        throw err;
+                    }
                     _this.childWindowName = _this.buildChildWindowName({
                         renderTo: window
                     });
@@ -5719,9 +5999,11 @@
                                 return;
                             }
                             var el = _this30.renderTemplate(_this30.component.prerenderTemplate, {
-                                jsxDom: belter_src.jsxDom.bind(doc),
                                 document: doc
                             });
+                            el instanceof ElementNode && (el = el.render(dom_dom({
+                                doc: doc
+                            })));
                             try {
                                 Object(belter_src.writeElementToWindow)(win, el);
                             } catch (err) {}
@@ -5751,7 +6033,7 @@
                         on: function(eventName, handler) {
                             return _this31.on(eventName, handler);
                         },
-                        jsxDom: belter_src.jsxDom,
+                        jsxDom: node,
                         document: document,
                         dimensions: {
                             width: width,
@@ -5768,6 +6050,9 @@
                             var container = _this32.renderTemplate(_this32.component.containerTemplate, {
                                 container: el
                             });
+                            container instanceof ElementNode && (container = container.render(dom_dom({
+                                doc: document
+                            })));
                             _this32.container = container;
                             Object(belter_src.hideElement)(_this32.container);
                             Object(belter_src.appendChild)(el, _this32.container);
@@ -5950,20 +6235,26 @@
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
             function defaultContainerTemplate(_ref) {
-                var id = _ref.id, tag = _ref.tag, context = _ref.context, CLASS = _ref.CLASS, outlet = _ref.outlet, jsxDom = _ref.jsxDom, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
-                return jsxDom("div", {
+                var id = _ref.id, tag = _ref.tag, context = _ref.context, CLASS = _ref.CLASS, outlet = _ref.outlet, document = _ref.document, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
+                return node("div", {
                     id: id,
                     class: CLASS.ZOID + " " + CLASS.ZOID + "-tag-" + tag + " " + CLASS.ZOID + "-context-" + context
-                }, jsxDom("style", null, "\n                    #" + id + ", #" + id + " > ." + CLASS.OUTLET + " {\n                        width: " + width + ";\n                        height: " + height + ";\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        position: relative;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), outlet);
+                }, node("style", null, "\n                    #" + id + ", #" + id + " > ." + CLASS.OUTLET + " {\n                        width: " + width + ";\n                        height: " + height + ";\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        position: relative;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + id + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), node("node", {
+                    el: outlet
+                })).render(dom_dom({
+                    doc: document
+                }));
             }
             function defaultPrerenderTemplate(_ref) {
-                var jsxDom = _ref.jsxDom;
-                return jsxDom("html", null, jsxDom("head", null, jsxDom("style", null, "\n                        html, body {\n                            width: 100%;\n                            height: 100%;\n                            overflow: hidden;\n                            top: 0;\n                            left: 0;\n                            margin: 0;\n                            text-align: center;\n                        }\n\n                        .spinner {\n                            position: absolute;\n                            max-height: 60vmin;\n                            max-width: 60vmin;\n                            height: 40px;\n                            width: 40px;\n                            top: 50%;\n                            left: 50%;\n                            transform: translateX(-50%) translateY(-50%);\n                            z-index: 10;\n                        }\n\n                        .spinner .loader {\n                            height: 100%;\n                            width: 100%;\n                            box-sizing: border-box;\n                            border: 3px solid rgba(0, 0, 0, .2);\n                            border-top-color: rgba(33, 128, 192, 0.8);\n                            border-radius: 100%;\n                            animation: rotation .7s infinite linear;\n\n                        }\n\n                        @keyframes rotation {\n                            from {\n                                transform: rotate(0deg)\n                            }\n                            to {\n                                transform: rotate(359deg)\n                            }\n                        }\n                    ")), jsxDom("body", null, jsxDom("div", {
+                var document = _ref.document;
+                return node("html", null, node("head", null, node("style", null, "\n                        html, body {\n                            width: 100%;\n                            height: 100%;\n                            overflow: hidden;\n                            top: 0;\n                            left: 0;\n                            margin: 0;\n                            text-align: center;\n                        }\n\n                        .spinner {\n                            position: absolute;\n                            max-height: 60vmin;\n                            max-width: 60vmin;\n                            height: 40px;\n                            width: 40px;\n                            top: 50%;\n                            left: 50%;\n                            transform: translateX(-50%) translateY(-50%);\n                            z-index: 10;\n                        }\n\n                        .spinner .loader {\n                            height: 100%;\n                            width: 100%;\n                            box-sizing: border-box;\n                            border: 3px solid rgba(0, 0, 0, .2);\n                            border-top-color: rgba(33, 128, 192, 0.8);\n                            border-radius: 100%;\n                            animation: rotation .7s infinite linear;\n\n                        }\n\n                        @keyframes rotation {\n                            from {\n                                transform: rotate(0deg)\n                            }\n                            to {\n                                transform: rotate(359deg)\n                            }\n                        }\n                    ")), node("body", null, node("div", {
                     class: "spinner"
-                }, jsxDom("div", {
+                }, node("div", {
                     id: "loader",
                     class: "loader"
-                }))));
+                })))).render(dom_dom({
+                    doc: document
+                }));
             }
             __webpack_require__("./src/types.js");
             var component__class, component__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {

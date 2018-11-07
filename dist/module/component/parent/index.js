@@ -46,7 +46,8 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, extendUrl, jsxDom, setOverflow, elementStoppedMoving, getElement, memoized, appendChild, writeToWindow, once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
+import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, extendUrl, setOverflow, elementStoppedMoving, getElement, memoized, appendChild, writeToWindow, once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
+import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName as _buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
@@ -87,7 +88,15 @@ export var ParentComponent = (_class = function (_BaseComponent) {
         _this.validateParentDomain();
 
         _this.context = context;
-        _this.setProps(props);
+
+        try {
+            _this.setProps(props);
+        } catch (err) {
+            if (props.onError) {
+                props.onError(err);
+            }
+            throw err;
+        }
 
         _this.childWindowName = _this.buildChildWindowName({ renderTo: window });
 
@@ -1080,9 +1089,12 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                 }
 
                 var el = _this30.renderTemplate(_this30.component.prerenderTemplate, {
-                    jsxDom: jsxDom.bind(doc),
                     document: doc
                 });
+
+                if (el instanceof ElementNode) {
+                    el = el.render(dom({ doc: doc }));
+                }
 
                 try {
                     writeElementToWindow(win, el);
@@ -1130,7 +1142,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
             on: function on(eventName, handler) {
                 return _this31.on(eventName, handler);
             },
-            jsxDom: jsxDom,
+            jsxDom: node,
             document: document,
             dimensions: { width: width, height: height }
         }, options));
@@ -1163,6 +1175,10 @@ export var ParentComponent = (_class = function (_BaseComponent) {
             var container = _this32.renderTemplate(_this32.component.containerTemplate, {
                 container: el
             });
+
+            if (container instanceof ElementNode) {
+                container = container.render(dom({ doc: document }));
+            }
 
             _this32.container = container;
             hideElement(_this32.container);

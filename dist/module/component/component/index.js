@@ -43,6 +43,7 @@ import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
 import { memoize } from 'belter/src';
+import 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
