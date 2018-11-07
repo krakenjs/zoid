@@ -4578,7 +4578,12 @@
                     _this.component = component;
                     _this.validateParentDomain();
                     _this.context = context;
-                    _this.setProps(props);
+                    try {
+                        _this.setProps(props);
+                    } catch (err) {
+                        props.onError && props.onError(err);
+                        throw err;
+                    }
                     _this.props.logLevel && Object(lib.Q)(_this.props.logLevel);
                     _this.childWindowName = _this.buildChildWindowName({
                         renderTo: window

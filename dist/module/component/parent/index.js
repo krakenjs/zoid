@@ -87,7 +87,15 @@ export var ParentComponent = (_class = function (_BaseComponent) {
         _this.validateParentDomain();
 
         _this.context = context;
-        _this.setProps(props);
+
+        try {
+            _this.setProps(props);
+        } catch (err) {
+            if (props.onError) {
+                props.onError(err);
+            }
+            throw err;
+        }
 
         if (_this.props.logLevel) {
             setLogLevel(_this.props.logLevel);
