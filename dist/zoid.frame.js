@@ -79,7 +79,7 @@
             "use strict";
             var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), util = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__("./node_modules/belter/src/device.js");
-            __webpack_exports__.y = function waitForDocumentReady() {
+            __webpack_exports__.w = function waitForDocumentReady() {
                 return Object(util.k)(waitForDocumentReady, function() {
                     return new src.a(function(resolve) {
                         if (isDocumentReady()) return resolve();
@@ -103,7 +103,7 @@
                 hashString && (originalUrl = originalUrl + "#" + hashString);
                 return originalUrl;
             };
-            __webpack_exports__.q = function isLocalStorageEnabled() {
+            __webpack_exports__.p = function isLocalStorageEnabled() {
                 return Object(util.k)(isLocalStorageEnabled, function() {
                     try {
                         if ("undefined" == typeof window) return !1;
@@ -119,10 +119,10 @@
                 });
             };
             __webpack_exports__.e = appendChild;
-            __webpack_exports__.n = getElement;
+            __webpack_exports__.m = getElement;
             __webpack_exports__.j = function(id) {
                 return new src.a(function(resolve, reject) {
-                    var name = Object(util.v)(id), el = getElementSafe(id);
+                    var name = Object(util.t)(id), el = getElementSafe(id);
                     if (el) return resolve(el);
                     if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
                     var interval = setInterval(function() {
@@ -138,14 +138,13 @@
                 });
             };
             __webpack_exports__.a = PopupOpenError;
-            __webpack_exports__.B = writeToWindow;
-            __webpack_exports__.A = function(win, el) {
+            __webpack_exports__.z = writeToWindow;
+            __webpack_exports__.y = function(win, el) {
                 var tag = el.tagName.toLowerCase();
                 if ("html" !== tag) throw new Error("Expected element to be html, got " + tag);
                 for (var documentElement = win.document.documentElement; documentElement.children && documentElement.children.length; ) documentElement.removeChild(documentElement.children[0]);
                 for (;el.children.length; ) documentElement.appendChild(el.children[0]);
             };
-            __webpack_exports__.u = setStyle;
             __webpack_exports__.f = awaitFrameLoad;
             __webpack_exports__.g = function(frame) {
                 return frame.contentWindow ? src.a.resolve(frame.contentWindow) : awaitFrameLoad(frame).then(function(loadedFrame) {
@@ -153,7 +152,7 @@
                     return loadedFrame.contentWindow;
                 });
             };
-            __webpack_exports__.p = function() {
+            __webpack_exports__.o = function() {
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, el = getElement(arguments[1]), attributes = options.attributes || {}, style = options.style || {}, frame = function() {
                     var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, container = arguments[2];
                     tag = tag.toLowerCase();
@@ -164,7 +163,10 @@
                         var key = _Object$keys2[_i6];
                         element.setAttribute(key, options.attributes[key]);
                     }
-                    options.styleSheet && setStyle(element, options.styleSheet);
+                    options.styleSheet && function(el, styleText) {
+                        var doc = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : window.document;
+                        el.styleSheet ? el.styleSheet.cssText = styleText : el.appendChild(doc.createTextNode(styleText));
+                    }(element, options.styleSheet);
                     container && appendChild(container, element);
                     if (options.html) if ("iframe" === tag) {
                         if (!container || !element.contentWindow) throw new Error("Iframe html can not be written unless container provided and iframe in DOM");
@@ -214,7 +216,7 @@
                     }, timeout);
                 });
             };
-            __webpack_exports__.t = function(el) {
+            __webpack_exports__.s = function(el) {
                 var value = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "auto", _el$style = el.style, overflow = _el$style.overflow, overflowX = _el$style.overflowX, overflowY = _el$style.overflowY;
                 el.style.overflow = el.style.overflowX = el.style.overflowY = value;
                 return {
@@ -225,8 +227,8 @@
                     }
                 };
             };
-            __webpack_exports__.x = trackDimensions;
-            __webpack_exports__.r = function(el, _ref4) {
+            __webpack_exports__.v = trackDimensions;
+            __webpack_exports__.q = function(el, _ref4) {
                 var _ref4$width = _ref4.width, width = void 0 === _ref4$width || _ref4$width, _ref4$height = _ref4.height, height = void 0 === _ref4$height || _ref4$height, _ref4$delay = _ref4.delay, delay = void 0 === _ref4$delay ? 50 : _ref4$delay, _ref4$threshold = _ref4.threshold, threshold = void 0 === _ref4$threshold ? 0 : _ref4$threshold;
                 return new src.a(function(resolve) {
                     var tracker = trackDimensions(el, {
@@ -258,12 +260,12 @@
                 var width = _ref5.width, height = _ref5.height, dimensions = getCurrentDimensions(el);
                 return !(width && dimensions.width !== window.innerWidth || height && dimensions.height !== window.innerHeight);
             };
-            __webpack_exports__.w = showElement;
-            __webpack_exports__.o = hideElement;
+            __webpack_exports__.u = showElement;
+            __webpack_exports__.n = hideElement;
             __webpack_exports__.h = function(element) {
                 element.parentNode && element.parentNode.removeChild(element);
             };
-            __webpack_exports__.v = function(element, name, clean) {
+            __webpack_exports__.t = function(element, name, clean) {
                 var animation = animate(element, name, clean);
                 showElement(element);
                 return animation;
@@ -276,13 +278,13 @@
             __webpack_exports__.b = function(element, name) {
                 element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
             };
-            __webpack_exports__.s = function(element, name) {
+            __webpack_exports__.r = function(element, name) {
                 element.classList ? element.classList.remove(name) : -1 !== element.className.split(/\s+/).indexOf(name) && (element.className = element.className.replace(name, ""));
             };
-            __webpack_exports__.z = function(element, handler) {
+            __webpack_exports__.x = function(element, handler) {
                 handler = Object(util.p)(handler);
                 var interval = void 0;
-                isElementClosed(element) ? handler() : interval = Object(util.u)(function() {
+                isElementClosed(element) ? handler() : interval = Object(util.s)(function() {
                     if (isElementClosed(element)) {
                         interval.cancel();
                         handler();
@@ -293,19 +295,6 @@
                         interval && interval.cancel();
                     }
                 };
-            };
-            __webpack_exports__.m = function(el) {
-                for (var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document, _i14 = 0, _querySelectorAll2 = function(selector) {
-                    var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document;
-                    return Array.prototype.slice.call(doc.querySelectorAll(selector));
-                }("script", el), _length14 = null == _querySelectorAll2 ? 0 : _querySelectorAll2.length; _i14 < _length14; _i14++) {
-                    var script = _querySelectorAll2[_i14], parentNode = script.parentNode;
-                    if (parentNode) {
-                        var newScript = doc.createElement("script");
-                        newScript.text = script.textContent;
-                        parentNode.replaceChild(newScript, script);
-                    }
-                }
             };
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -364,7 +353,7 @@
             function getElement(id) {
                 var element = getElementSafe(id);
                 if (element) return element;
-                throw new Error("Can not find element: " + Object(util.v)(id));
+                throw new Error("Can not find element: " + Object(util.t)(id));
             }
             function PopupOpenError(message) {
                 this.message = message;
@@ -380,10 +369,6 @@
                         win.location = "javascript: document.open(); document.write(" + JSON.stringify(html) + "); document.close();";
                     } catch (err2) {}
                 }
-            }
-            function setStyle(el, styleText) {
-                var doc = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : window.document;
-                el.styleSheet ? el.styleSheet.cssText = styleText : el.appendChild(doc.createTextNode(styleText));
             }
             var awaitFrameLoadPromises = void 0;
             function awaitFrameLoad(frame) {
@@ -584,205 +569,133 @@
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.l;
             });
             __webpack_require__.d(__webpack_exports__, "getElement", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.n;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.m;
             });
             __webpack_require__.d(__webpack_exports__, "hideElement", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.o;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.n;
             });
             __webpack_require__.d(__webpack_exports__, "iframe", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.p;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.o;
             });
             __webpack_require__.d(__webpack_exports__, "onDimensionsChange", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.r;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.q;
             });
             __webpack_require__.d(__webpack_exports__, "removeClass", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.s;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.r;
             });
             __webpack_require__.d(__webpack_exports__, "setOverflow", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.t;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.s;
             });
             __webpack_require__.d(__webpack_exports__, "showAndAnimate", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.v;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.t;
             });
             __webpack_require__.d(__webpack_exports__, "showElement", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.w;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.u;
             });
             __webpack_require__.d(__webpack_exports__, "trackDimensions", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.x;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.v;
             });
             __webpack_require__.d(__webpack_exports__, "waitForDocumentReady", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.y;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.w;
             });
             __webpack_require__.d(__webpack_exports__, "watchElementForClose", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.z;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.x;
             });
             __webpack_require__.d(__webpack_exports__, "writeElementToWindow", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.A;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.y;
             });
             __webpack_require__.d(__webpack_exports__, "writeToWindow", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.B;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.z;
             });
             __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js"), 
-            __webpack_require__("./node_modules/belter/src/jsx.jsx"), __webpack_require__("./node_modules/belter/src/storage.js");
-            var __WEBPACK_IMPORTED_MODULE_6__util__ = __webpack_require__("./node_modules/belter/src/util.js");
+            __webpack_require__("./node_modules/belter/src/storage.js");
+            var __WEBPACK_IMPORTED_MODULE_5__util__ = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__.d(__webpack_exports__, "copyProp", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.b;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.b;
             });
             __webpack_require__.d(__webpack_exports__, "cycle", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.c;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.c;
             });
             __webpack_require__.d(__webpack_exports__, "dasherizeToCamel", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.d;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.d;
             });
             __webpack_require__.d(__webpack_exports__, "dotify", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.f;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.f;
             });
             __webpack_require__.d(__webpack_exports__, "eventEmitter", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.g;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.g;
             });
             __webpack_require__.d(__webpack_exports__, "extend", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.h;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
             });
             __webpack_require__.d(__webpack_exports__, "get", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.i;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.i;
             });
             __webpack_require__.d(__webpack_exports__, "isDefined", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.l;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
             });
             __webpack_require__.d(__webpack_exports__, "isRegex", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.m;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.m;
             });
             __webpack_require__.d(__webpack_exports__, "memoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "noop", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.o;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__.d(__webpack_exports__, "once", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.p;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
             });
             __webpack_require__.d(__webpack_exports__, "promisify", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.q;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.q;
             });
             __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.t;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.r;
             });
             __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.u;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.s;
             });
             __webpack_require__.d(__webpack_exports__, "stringify", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.v;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.t;
             });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.w;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.u;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.y;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.v;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.z;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.w;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
-            var __WEBPACK_IMPORTED_MODULE_8__types__ = __webpack_require__("./node_modules/belter/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__types__);
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_8__types__, "isPerc") && __webpack_require__.d(__webpack_exports__, "isPerc", function() {
-                return __WEBPACK_IMPORTED_MODULE_8__types__.isPerc;
+            var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__types__);
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_7__types__, "isPerc") && __webpack_require__.d(__webpack_exports__, "isPerc", function() {
+                return __WEBPACK_IMPORTED_MODULE_7__types__.isPerc;
             });
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_8__types__, "isPx") && __webpack_require__.d(__webpack_exports__, "isPx", function() {
-                return __WEBPACK_IMPORTED_MODULE_8__types__.isPx;
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_7__types__, "isPx") && __webpack_require__.d(__webpack_exports__, "isPx", function() {
+                return __WEBPACK_IMPORTED_MODULE_7__types__.isPx;
             });
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_8__types__, "memoized") && __webpack_require__.d(__webpack_exports__, "memoized", function() {
-                return __WEBPACK_IMPORTED_MODULE_8__types__.memoized;
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_7__types__, "memoized") && __webpack_require__.d(__webpack_exports__, "memoized", function() {
+                return __WEBPACK_IMPORTED_MODULE_7__types__.memoized;
             });
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_8__types__, "toCSS") && __webpack_require__.d(__webpack_exports__, "toCSS", function() {
-                return __WEBPACK_IMPORTED_MODULE_8__types__.toCSS;
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_7__types__, "toCSS") && __webpack_require__.d(__webpack_exports__, "toCSS", function() {
+                return __WEBPACK_IMPORTED_MODULE_7__types__.toCSS;
             });
-            var __WEBPACK_IMPORTED_MODULE_9__decorators__ = __webpack_require__("./node_modules/belter/src/decorators.js");
+            var __WEBPACK_IMPORTED_MODULE_8__decorators__ = __webpack_require__("./node_modules/belter/src/decorators.js");
             __webpack_require__.d(__webpack_exports__, "memoized", function() {
-                return __WEBPACK_IMPORTED_MODULE_9__decorators__.a;
+                return __WEBPACK_IMPORTED_MODULE_8__decorators__.a;
             });
-            var __WEBPACK_IMPORTED_MODULE_10__css__ = __webpack_require__("./node_modules/belter/src/css.js");
+            var __WEBPACK_IMPORTED_MODULE_9__css__ = __webpack_require__("./node_modules/belter/src/css.js");
             __webpack_require__.d(__webpack_exports__, "isPerc", function() {
-                return __WEBPACK_IMPORTED_MODULE_10__css__.a;
+                return __WEBPACK_IMPORTED_MODULE_9__css__.a;
             });
             __webpack_require__.d(__webpack_exports__, "isPx", function() {
-                return __WEBPACK_IMPORTED_MODULE_10__css__.b;
+                return __WEBPACK_IMPORTED_MODULE_9__css__.b;
             });
             __webpack_require__.d(__webpack_exports__, "toCSS", function() {
-                return __WEBPACK_IMPORTED_MODULE_10__css__.c;
+                return __WEBPACK_IMPORTED_MODULE_9__css__.c;
             });
-        },
-        "./node_modules/belter/src/jsx.jsx": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            __webpack_require__("./node_modules/belter/src/util.js"), __webpack_require__("./node_modules/belter/src/dom.js"), 
-            "function" == typeof Symbol && Symbol.iterator, Object.assign;
-            function _classCallCheck(instance, Constructor) {
-                if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
-            }
-            function htmlEncode() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/\//g, "&#x2F;");
-            }
-            !function(_JsxHTMLNode) {
-                !function(subClass, superClass) {
-                    if ("function" != typeof superClass && null !== superClass) throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-                    subClass.prototype = Object.create(superClass && superClass.prototype, {
-                        constructor: {
-                            value: subClass,
-                            enumerable: !1,
-                            writable: !0,
-                            configurable: !0
-                        }
-                    });
-                    superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(JsxHTMLNodeContainer, _JsxHTMLNode);
-                function JsxHTMLNodeContainer(children) {
-                    _classCallCheck(this, JsxHTMLNodeContainer);
-                    return function(self, call) {
-                        if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-                        return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                    }(this, _JsxHTMLNode.call(this, "", {}, children));
-                }
-                JsxHTMLNodeContainer.prototype.toString = function() {
-                    return this.childrenToString();
-                };
-            }(function() {
-                function JsxHTMLNode(name, props, children) {
-                    _classCallCheck(this, JsxHTMLNode);
-                    this.name = name;
-                    this.props = props;
-                    this.children = children;
-                }
-                JsxHTMLNode.prototype.toString = function() {
-                    var name = this.name, props = this.propsToString(), children = this.childrenToString();
-                    return "<" + name + (props ? " " : "") + props + ">" + children + "</" + name + ">";
-                };
-                JsxHTMLNode.prototype.propsToString = function() {
-                    var props = this.props;
-                    return props ? Object.keys(props).filter(function(key) {
-                        return "innerHTML" !== key && props && !1 !== props[key];
-                    }).map(function(key) {
-                        if (props) {
-                            var val = props[key];
-                            if (!0 === val) return "" + htmlEncode(key);
-                            if ("string" == typeof val) return htmlEncode(key) + '="' + htmlEncode(val) + '"';
-                        }
-                        return "";
-                    }).filter(Boolean).join(" ") : "";
-                };
-                JsxHTMLNode.prototype.childrenToString = function() {
-                    if (this.props && this.props.innerHTML) return this.props.innerHTML;
-                    if (!this.children) return "";
-                    var result = "";
-                    !function iterate(children) {
-                        for (var _i2 = 0, _length2 = null == children ? 0 : children.length; _i2 < _length2; _i2++) {
-                            var child = children[_i2];
-                            null !== child && void 0 !== child && (Array.isArray(child) ? iterate(child) : result += child instanceof JsxHTMLNode ? child.toString() : htmlEncode(child));
-                        }
-                    }(this.children);
-                    return result;
-                };
-                return JsxHTMLNode;
-            }());
         },
         "./node_modules/belter/src/storage.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -791,7 +704,7 @@
                 return Object(__WEBPACK_IMPORTED_MODULE_0__util__.k)(getStorage, function() {
                     var STORAGE_KEY = "__" + name + "_" + version + "_storage__", accessedStorage = void 0;
                     function getState(handler) {
-                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.q)(), storage = void 0;
+                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.p)(), storage = void 0;
                         accessedStorage && (storage = accessedStorage);
                         if (!storage && localStorageEnabled) {
                             var rawStorage = window.localStorage.getItem(STORAGE_KEY);
@@ -799,9 +712,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.j)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.v)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.v)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.j)()[STORAGE_KEY] = storage;
@@ -813,7 +726,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.v)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -850,7 +763,7 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.y = uniqueID;
+            __webpack_exports__.v = uniqueID;
             __webpack_exports__.j = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
@@ -903,7 +816,7 @@
                     }
                 };
             };
-            __webpack_exports__.w = function stringifyError(err) {
+            __webpack_exports__.u = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -920,7 +833,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.v = function(item) {
+            __webpack_exports__.t = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.h = function(obj, source) {
@@ -929,25 +842,7 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.r = function(str, regexp, handler) {
-                var results = [];
-                str.replace(regexp, function(item) {
-                    results.push(handler ? handler.apply(null, arguments) : item);
-                });
-                return results;
-            };
-            __webpack_exports__.x = function(svg) {
-                return "data:image/svg+xml;base64," + base64encode(svg);
-            };
-            __webpack_exports__.s = function(text, regexp) {
-                var result = [];
-                text.replace(regexp, function(token) {
-                    result.push(token);
-                    return "";
-                });
-                return result;
-            };
-            __webpack_exports__.u = function(method, time) {
+            __webpack_exports__.s = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -1021,7 +916,7 @@
                 }
                 return void 0 === item ? def : item;
             };
-            __webpack_exports__.t = function replaceObject(item, replacer) {
+            __webpack_exports__.r = function replaceObject(item, replacer) {
                 var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
                 if (Array.isArray(item)) {
                     for (var _length3 = item.length, result = [], _loop = function(i) {
@@ -1074,7 +969,7 @@
             __webpack_exports__.m = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "z", function() {
+            __webpack_require__.d(__webpack_exports__, "w", function() {
                 return weakMapMemoize;
             });
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
@@ -1082,14 +977,11 @@
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
-            function base64encode(str) {
-                return window.btoa(str);
-            }
             function uniqueID() {
-                var chars = "0123456789abcdef";
+                var str, chars = "0123456789abcdef";
                 return "xxxxxxxxxx".replace(/./g, function() {
                     return chars.charAt(Math.floor(Math.random() * chars.length));
-                }) + "_" + base64encode(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                }) + "_" + (str = new Date().toISOString().slice(11, 19).replace("T", "."), window.btoa(str)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
             }
             var objectIDs = void 0;
             function serializeArgs(args) {
@@ -4319,7 +4211,7 @@
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, DOM_EVENT = {
+            }, ELEMENT_TAG_HTML = "html", ELEMENT_TAG_IFRAME = "iframe", ELEMENT_TAG_SCRIPT = "script", ELEMENT_TAG_NODE = "node", ELEMENT_TAG_DEFAULT = "default", ELEMENT_PROP_INNER_HTML = "innerHTML", ELEMENT_PROP_EL = "el", DOM_EVENT = {
                 onBlur: "blur",
                 onCancel: "cancel",
                 onClick: "click",
@@ -4394,29 +4286,18 @@
                 onTransitionEnd: "transitionEnd",
                 onWaiting: "waiting",
                 onWheel: "wheel"
-            };
-            function fixScripts(el) {
-                for (var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document, _i2 = 0, _el$querySelectorAll2 = el.querySelectorAll("script"), _length2 = null == _el$querySelectorAll2 ? 0 : _el$querySelectorAll2.length; _i2 < _length2; _i2++) {
-                    var script = _el$querySelectorAll2[_i2], parentNode = script.parentNode;
-                    if (parentNode) {
-                        var newScript = doc.createElement("script");
-                        newScript.text = script.textContent;
-                        parentNode.replaceChild(newScript, script);
-                    }
-                }
-            }
-            var CREATE_ELEMENT = ((_CREATE_ELEMENT = {}).node = function(_ref) {
+            }, CREATE_ELEMENT = ((_CREATE_ELEMENT = {})[ELEMENT_TAG_NODE] = function(_ref) {
                 var props = _ref.props;
-                if (!props.el) throw new Error("Must pass el prop to node element");
-                if (Object.keys(props).length > 1) throw new Error("Must not pass any prop other than el to node element");
-                return props.el;
-            }, _CREATE_ELEMENT.default = function(_ref2) {
+                if (!props[ELEMENT_PROP_EL]) throw new Error("Must pass " + ELEMENT_PROP_EL + " prop to " + ELEMENT_TAG_NODE + " element");
+                if (Object.keys(props).length > 1) throw new Error("Must not pass any prop other than " + ELEMENT_PROP_EL + " to " + ELEMENT_TAG_NODE + " element");
+                return props[ELEMENT_PROP_EL];
+            }, _CREATE_ELEMENT[ELEMENT_TAG_DEFAULT] = function(_ref2) {
                 var name = _ref2.name;
                 return _ref2.doc.createElement(name);
-            }, _CREATE_ELEMENT), ADD_CHILDREN = ((_ADD_CHILDREN = {}).iframe = function(_ref4) {
-                var el = _ref4.el, children = _ref4.children, firstChild = children[0];
-                if (children.length > 1 || !firstChild.isElementNode()) throw new Error("Expected only single element node as child of iframe element");
-                if (!firstChild.isTag("html")) throw new Error("Expected element to be inserted into frame to be html, got " + firstChild.getTag());
+            }, _CREATE_ELEMENT), ADD_CHILDREN = ((_ADD_CHILDREN = {})[ELEMENT_TAG_IFRAME] = function(_ref5) {
+                var el = _ref5.el, children = _ref5.children, firstChild = children[0];
+                if (children.length > 1 || !firstChild.isElementNode()) throw new Error("Expected only single element node as child of " + ELEMENT_TAG_IFRAME + " element");
+                if (!firstChild.isTag(ELEMENT_TAG_HTML)) throw new Error("Expected element to be inserted into frame to be html, got " + firstChild.getTag());
                 el.addEventListener("load", function() {
                     var win = el.contentWindow;
                     if (!win) throw new Error("Expected frame to have contentWindow");
@@ -4425,44 +4306,76 @@
                         doc: doc
                     })); child.children.length; ) docElement.appendChild(child.children[0]);
                 });
-            }, _ADD_CHILDREN.script = function(_ref5) {
-                var el = _ref5.el, children = _ref5.children, firstChild = children[0];
-                if (1 !== children.length || !firstChild.isTextNode()) throw new Error("Expected only single text node as child of script element");
+            }, _ADD_CHILDREN[ELEMENT_TAG_SCRIPT] = function(_ref6) {
+                var el = _ref6.el, children = _ref6.children, firstChild = children[0];
+                if (1 !== children.length || !firstChild.isTextNode()) throw new Error("Expected only single text node as child of " + ELEMENT_TAG_SCRIPT + " element");
                 el.text = firstChild.getText();
-            }, _ADD_CHILDREN.default = function(_ref6) {
-                for (var el = _ref6.el, children = _ref6.children, doc = _ref6.doc, domRenderer = _ref6.domRenderer, _i6 = 0, _length6 = null == children ? 0 : children.length; _i6 < _length6; _i6++) {
+            }, _ADD_CHILDREN[ELEMENT_TAG_DEFAULT] = function(_ref7) {
+                for (var el = _ref7.el, children = _ref7.children, doc = _ref7.doc, domRenderer = _ref7.domRenderer, _i6 = 0, _length6 = null == children ? 0 : children.length; _i6 < _length6; _i6++) {
                     var child = children[_i6];
                     child.isTextNode() ? el.appendChild(doc.createTextNode(child.getText())) : el.appendChild(child.render(domRenderer));
                 }
             }, _ADD_CHILDREN), dom_dom = function() {
-                var _ref7$doc = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).doc, doc = void 0 === _ref7$doc ? document : _ref7$doc;
+                var _ref9$doc = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).doc, doc = void 0 === _ref9$doc ? document : _ref9$doc;
                 return function domRenderer(name, props, children) {
-                    var createElement = CREATE_ELEMENT[name] || CREATE_ELEMENT.default, addChildren = ADD_CHILDREN[name] || ADD_CHILDREN.default, el = createElement({
+                    var el = function(_ref3) {
+                        var doc = _ref3.doc, name = _ref3.name, props = _ref3.props;
+                        return (CREATE_ELEMENT[name] || CREATE_ELEMENT[ELEMENT_TAG_DEFAULT])({
+                            name: name,
+                            props: props,
+                            doc: doc
+                        });
+                    }({
                         name: name,
                         props: props,
                         doc: doc
                     });
-                    !function(_ref3) {
-                        for (var el = _ref3.el, props = _ref3.props, doc = _ref3.doc, _i4 = 0, _Object$keys2 = Object.keys(props), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+                    !function(_ref4) {
+                        for (var el = _ref4.el, props = _ref4.props, _i4 = 0, _Object$keys2 = Object.keys(props), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
                             var prop = _Object$keys2[_i4], val = props[prop];
-                            if (null !== val && void 0 !== val && "el" !== prop) if (DOM_EVENT.hasOwnProperty(prop)) {
+                            if (null !== val && void 0 !== val && prop !== ELEMENT_PROP_EL && prop !== ELEMENT_PROP_INNER_HTML) if (DOM_EVENT.hasOwnProperty(prop)) {
                                 if ("function" != typeof val) throw new TypeError("Prop " + prop + " must be function");
                                 el.addEventListener(DOM_EVENT[prop], val);
-                            } else if ("string" == typeof val || "number" == typeof val) if ("innerHTML" === prop) {
-                                el.innerHTML = val.toString();
-                                fixScripts(el, doc);
-                            } else el.setAttribute(prop, val.toString()); else {
+                            } else if ("string" == typeof val || "number" == typeof val) el.setAttribute(prop, val.toString()); else {
                                 if ("boolean" != typeof val) throw new TypeError("Can not render prop " + prop + " of type " + (void 0 === val ? "undefined" : dom__typeof(val)));
                                 !0 === val && el.setAttribute(prop, "");
                             }
                         }
                     }({
                         el: el,
-                        props: props,
-                        doc: doc
+                        props: props
                     });
-                    addChildren({
+                    !function(_ref8) {
+                        var el = _ref8.el, name = _ref8.name, props = _ref8.props, children = _ref8.children, doc = _ref8.doc, domRenderer = _ref8.domRenderer;
+                        if (props.hasOwnProperty(ELEMENT_PROP_INNER_HTML)) {
+                            if (children.length >= 1) throw new Error("Expected no children to be passed when " + ELEMENT_PROP_INNER_HTML + " prop is set");
+                            var html = props[ELEMENT_PROP_INNER_HTML];
+                            if ("string" != typeof html) throw new TypeError(ELEMENT_PROP_INNER_HTML + " prop must be string");
+                            if (name === ELEMENT_TAG_SCRIPT) el.text = html; else {
+                                el.innerHTML = html;
+                                !function(el) {
+                                    for (var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document, _i2 = 0, _el$querySelectorAll2 = el.querySelectorAll("script"), _length2 = null == _el$querySelectorAll2 ? 0 : _el$querySelectorAll2.length; _i2 < _length2; _i2++) {
+                                        var script = _el$querySelectorAll2[_i2], parentNode = script.parentNode;
+                                        if (parentNode) {
+                                            var newScript = doc.createElement("script");
+                                            newScript.text = script.textContent;
+                                            parentNode.replaceChild(newScript, script);
+                                        }
+                                    }
+                                }(el, doc);
+                            }
+                        } else (ADD_CHILDREN[name] || ADD_CHILDREN[ELEMENT_TAG_DEFAULT])({
+                            el: el,
+                            name: name,
+                            props: props,
+                            children: children,
+                            doc: doc,
+                            domRenderer: domRenderer
+                        });
+                    }({
                         el: el,
+                        name: name,
+                        props: props,
                         children: children,
                         doc: doc,
                         domRenderer: domRenderer
@@ -6636,5 +6549,4 @@
         "./src/types.js": function(module, exports) {}
     });
 });
-//# sourceMappingURL=zoid.frame.js.map
 //# sourceMappingURL=zoid.frame.js.map
