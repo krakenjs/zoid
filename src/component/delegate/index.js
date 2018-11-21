@@ -20,7 +20,6 @@ export type DelegatePropsType = {
 export type DelegateOptionsType = {
     context : string,
     props : DelegatePropsType,
-    childWindowName : string,
     overrides : {
         focus : () => ZalgoPromise<void>,
         userClose : (string) => ZalgoPromise<void>,
@@ -41,9 +40,7 @@ export class DelegateComponent<P> extends BaseComponent<P> {
     getDomain : () => ZalgoPromise<string>
     error : (mixed) => ZalgoPromise<void>
     on : (string, () => void) => CancelableType
-
-    childWindowName : string
-
+    
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         super();
 
@@ -88,8 +85,6 @@ export class DelegateComponent<P> extends BaseComponent<P> {
             // $FlowFixMe
             this[key] = ParentComponent.prototype[key];
         }
-
-        this.childWindowName = options.childWindowName;
 
         ParentComponent.prototype.registerActiveComponent.call(this);
 

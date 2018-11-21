@@ -5,7 +5,7 @@ import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName, isSameDomain } from 'cross-domain-utils/src';
 import { iframe, popup, toCSS, showElement, hideElement,
     destroyElement, normalizeDimension, watchElementForClose,
-    awaitFrameWindow, addClass, removeClass, noop } from 'belter/src';
+    awaitFrameWindow, addClass, removeClass, noop, uniqueID } from 'belter/src';
 
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
@@ -20,6 +20,7 @@ export type ContextDriverType = {
     needsBridge : boolean,
 
     open : (?string) => ZalgoPromise<void>,
+    setWindowName : (string) => void,
     resize : (number | string, number | string) => void,
     show : () => void,
     hide : () => void,
@@ -69,7 +70,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         this.iframe = iframe({
             url,
             attributes: {
-                name:      this.childWindowName,
                 title:     this.component.name,
                 scrolling: this.component.scrolling ? 'yes' : 'no',
                 ...attributes
@@ -112,13 +112,18 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         });
     },
 
+    setWindowName(name : string) {
+        this.window.name = name;
+        this.iframe.setAttribute('name', name);
+    },
+
     openPrerender() : ZalgoPromise<void> {
 
         let attributes = this.component.attributes.iframe || {};
 
         this.prerenderIframe = iframe({
             attributes: {
-                name:      `__prerender__${ this.childWindowName }`,
+                name:      `__prerender__${ this.component.name }_${ uniqueID() }`,
                 scrolling: this.component.scrolling ? 'yes' : 'no',
                 ...attributes
             },
@@ -176,19 +181,22 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         hijackSubmit:            DELEGATE.CALL_DELEGATE,
         openPrerender:           DELEGATE.CALL_DELEGATE,
         switchPrerender:         DELEGATE.CALL_DELEGATE,
+        open:                    DELEGATE.CALL_DELEGATE,
 
         renderTemplate:          DELEGATE.CALL_ORIGINAL,
         openContainerFrame:      DELEGATE.CALL_ORIGINAL,
         getOutlet:               DELEGATE.CALL_ORIGINAL,
 
-        open(original : () => ZalgoPromise<void>, override : () => ZalgoPromise<void>) : () => ZalgoPromise<void> {
-            return function overrideOpen() : ZalgoPromise<void> {
+        setWindowName(original : () => ZalgoPromise<void>, override : () => ZalgoPromise<void>) : (string) => ZalgoPromise<void> {
+            return function overrideSetWindowName(name : string) : ZalgoPromise<void> {
                 return override.apply(this, arguments).then(() => {
-                    this.clean.set('window', findFrameByName(getParentComponentWindow(), this.childWindowName));
+                    let remoteWindow = findFrameByName(getParentComponentWindow(), name);
 
-                    if (!this.window) {
-                        throw new Error(`Unable to find parent component iframe window`);
+                    if (!remoteWindow) {
+                        throw new Error(`Unable to find remote iframe window`);
                     }
+
+                    this.clean.set('window', remoteWindow);
                 });
             };
         }
@@ -248,7 +256,6 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                 let attributes = this.component.attributes.popup || {};
 
                 this.window = popup(url || '', {
-                    name:       this.childWindowName,
                     width,
                     height,
                     top:        y,
@@ -274,6 +281,10 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
                 this.resize(width, height);
             });
+        },
+
+        setWindowName(name : string) {
+            this.window.name = name;
         },
 
         openPrerender() : ZalgoPromise<void> {

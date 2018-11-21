@@ -65,7 +65,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
     html : ?ZalgoPromise<string>
     context : string
     props : BuiltInPropsType & P
-    childWindowName : string
     onInit : ZalgoPromise<ParentComponent<P>>
     window : CrossDomainWindowType
     handledErrors : Array<mixed>
@@ -99,8 +98,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
             throw err;
         }
 
-        this.childWindowName = this.buildChildWindowName({ renderTo: window });
-
         this.registerActiveComponent();
 
         // Options passed during renderTo. We would not ordinarily expect a user to pass these, since we depend on
@@ -117,13 +114,13 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-    render(element : ElementRefType, loadUrl : boolean = true) : ZalgoPromise<ParentComponent<P>> {
+    render(element : ElementRefType, target? : CrossDomainWindowType = window) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
 
-            this.component.log(`render_${ this.context }`, { context: this.context, element, loadUrl: stringify(loadUrl) });
+            this.component.log(`render_${ this.context }`, { context: this.context, element });
 
             let tasks = {};
-
+            
             tasks.onRender = this.props.onRender();
 
             tasks.getDomain = this.getDomain();
@@ -154,58 +151,54 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 ? this.open()
                 : tasks.openContainer.then(() => this.open());
 
-            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.setWindowName = tasks.open.then(() => {
+                return this.setWindowName(this.buildChildWindowName({ renderTo: target }));
+            });
+
+            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open, tasks.setWindowName ]).then(([ domain ]) => {
                 this.listen(this.window, domain);
             });
 
-            tasks.watchForClose = tasks.open.then(() => {
+            tasks.watchForClose = ZalgoPromise.all([ tasks.open, tasks.setWindowName ]).then(() => {
                 return this.watchForClose();
             });
 
-            tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.linkDomain = ZalgoPromise.all([ tasks.getDomain, tasks.open, tasks.setWindowName ]).then(([ domain ]) => {
                 if (bridge && typeof domain === 'string') {
                     return bridge.linkUrl(this.window, domain);
                 }
             });
 
-            if (!this.html) {
-                tasks.createPrerenderTemplate = tasks.openPrerender.then(() => {
-                    return this.createPrerenderTemplate();
-                });
+            tasks.createPrerenderTemplate = tasks.openPrerender.then(() => {
+                return this.createPrerenderTemplate();
+            });
 
-                tasks.showComponent = tasks.createPrerenderTemplate.then(() => {
-                    return this.showComponent();
-                });
-            }
+            tasks.showComponent = tasks.createPrerenderTemplate.then(() => {
+                return this.showComponent();
+            });
 
-            tasks.openBridge = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.openBridge = ZalgoPromise.all([ tasks.getDomain, tasks.open, tasks.setWindowName ]).then(([ domain ]) => {
                 return this.openBridge(typeof domain === 'string' ? domain : null);
             });
 
-            if (this.html) {
-                tasks.loadHTML = tasks.open.then(() => {
-                    return this.loadHTML();
-                });
+            tasks.buildUrl = this.buildUrl();
 
-            } else if (loadUrl) {
-                tasks.buildUrl = this.buildUrl();
+            tasks.loadUrl = ZalgoPromise.all([
+                tasks.buildUrl,
+                tasks.open,
+                tasks.setWindowName,
+                tasks.linkDomain,
+                tasks.listen,
+                tasks.open,
+                tasks.openBridge,
+                tasks.createPrerenderTemplate
+            ]).then(([ url ]) => {
+                return this.loadUrl(url);
+            });
 
-                tasks.loadUrl = ZalgoPromise.all([
-                    tasks.buildUrl,
-                    tasks.open,
-                    tasks.linkDomain,
-                    tasks.listen,
-                    tasks.open,
-                    tasks.openBridge,
-                    tasks.createPrerenderTemplate
-                ]).then(([ url ]) => {
-                    return this.loadUrl(url);
-                });
-
-                tasks.runTimeout = tasks.loadUrl.then(() => {
-                    return this.runTimeout();
-                });
-            }
+            tasks.runTimeout = tasks.loadUrl.then(() => {
+                return this.runTimeout();
+            });
 
             return ZalgoPromise.hash(tasks);
 
@@ -249,11 +242,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
             this.component.log(`render_${ this.context }_to_win`, { element: stringify(element), context: this.context });
 
-            this.childWindowName = this.buildChildWindowName({ renderTo: win });
-
             this.delegate(win);
 
-            return this.render(element);
+            return this.render(element, win);
         });
     }
 
@@ -541,8 +532,15 @@ export class ParentComponent<P> extends BaseComponent<P> {
     @memoized
     open() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-            this.component.log(`open_${ this.context }`, { windowName: this.childWindowName });
+            this.component.log(`open_${ this.context }`);
             return this.driver.open.call(this);
+        });
+    }
+
+    @memoized
+    setWindowName(name : string) : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            return this.driver.setWindowName.call(this, name);
         });
     }
 
@@ -603,11 +601,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             env:     this.props.env,
 
             options: {
-
                 context: this.context,
-
-                childWindowName: this.childWindowName,
-
                 props,
 
                 overrides: {
