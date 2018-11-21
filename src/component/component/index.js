@@ -510,37 +510,6 @@ export class Component<P> extends BaseComponent<P> {
         });
     }
 
-    prerender(props : (PropsType & P), element : ElementRefType) : { render : ((PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>>, renderTo : (CrossDomainWindowType, (PropsType & P), ElementRefType) => ZalgoPromise<ParentComponent<P>> } {
-        let instance = new ParentComponent(this, this.getRenderContext(null, element), { props });
-        instance.prefetch();
-
-        return {
-            render(innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
-                if (innerProps) {
-                    instance.updateProps(innerProps);
-                }
-
-                return instance.render(innerElement);
-            },
-
-            renderTo(win : CrossDomainWindowType, innerProps : (PropsType & P), innerElement : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
-                if (innerProps) {
-                    instance.updateProps(innerProps);
-                }
-
-                return instance.renderTo(win, innerElement);
-            },
-
-            get html() : ?ZalgoPromise<string> {
-                return instance.html;
-            },
-
-            set html(value) {
-                instance.html = value;
-            }
-        };
-    }
-
     /*  Log
         ---
 

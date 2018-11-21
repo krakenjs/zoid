@@ -10,7 +10,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
     addClass, extend, extendUrl,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-    writeToWindow, once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
+    once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
@@ -62,7 +62,6 @@ export type RenderOptionsType<P> = {
 
 export class ParentComponent<P> extends BaseComponent<P> {
 
-    html : ?ZalgoPromise<string>
     context : string
     props : BuiltInPropsType & P
     onInit : ZalgoPromise<ParentComponent<P>>
@@ -245,20 +244,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
             this.delegate(win);
 
             return this.render(element, win);
-        });
-    }
-
-    @memoized
-    loadHTML() : ZalgoPromise<void> {
-        return ZalgoPromise.try(() => {
-            if (!this.html) {
-                throw new Error(`Html not prefetched`);
-            }
-
-            return this.html.then(html => {
-                // $FlowFixMe
-                return writeToWindow(this.window, html);
-            });
         });
     }
 
