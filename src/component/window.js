@@ -1,8 +1,7 @@
 /* @flow */
 
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import base32 from 'hi-base32';
-import { memoize, uniqueID, stringifyError } from 'belter/src';
+import { memoize, uniqueID, stringifyError, base64encode, base64decode } from 'belter/src';
 
 import { globalFor } from '../lib';
 import { WINDOW_REFERENCES } from '../constants';
@@ -12,15 +11,6 @@ import type { DimensionsType, PositionType } from '../types';
 function normalize(str : string) : string {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
 }
-
-function encode(str : string) : string {
-    return base32.encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
-}
-
-function decode(str : string) : string {
-    return base32.decode(str.toUpperCase());
-}
-
 
 /*  Build Child Window Name
     -----------------------
@@ -40,7 +30,7 @@ export function buildChildWindowName(name : string, options : Object = {}) : str
     options.domain = getDomain(window);
 
     let encodedName = normalize(name);
-    let encodedOptions = encode(JSON.stringify(options));
+    let encodedOptions = base64encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error(`Invalid name: ${ name } - must contain alphanumeric characters`);
@@ -90,7 +80,7 @@ export let getComponentMeta = memoize(() => {
     let componentMeta;
 
     try {
-        componentMeta = JSON.parse(decode(encodedOptions));
+        componentMeta = JSON.parse(base64decode(encodedOptions));
     } catch (err) {
         throw new Error(`Can not decode component-meta: ${ encodedOptions } ${ stringifyError(err) }`);
     }
