@@ -323,8 +323,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     buildChildWindowName({ renderTo = window } : { renderTo : CrossDomainWindowType } = {}) : string {
 
-        let sameDomain = isSameDomain(renderTo);
-
         let uid    = uniqueID();
         let tag    = this.component.tag;
         let sProps = serializeFunctions(this.getPropsForChild());
@@ -332,11 +330,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
         let componentParent = this.getComponentParentRef(renderTo);
         let renderParent    = this.getRenderParentRef(renderTo);
 
-        let secureProps = !sameDomain && !this.component.unsafeRenderTo;
-
-        let props = secureProps
-            ? { type: INITIAL_PROPS.UID, uid }
-            : { type: INITIAL_PROPS.RAW, value: sProps };
+        let props = isSameDomain(renderTo)
+            ? { type: INITIAL_PROPS.RAW, value: sProps }
+            : { type: INITIAL_PROPS.UID, uid };
 
         if (props.type === INITIAL_PROPS.UID) {
             global.props[uid] = JSON.stringify(sProps);
@@ -515,7 +511,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     */
 
     @memoized
-    open() : ZalgoPromise<void> {
+    open() : ZalgoPromise<string> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`);
             return this.driver.open.call(this);

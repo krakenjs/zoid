@@ -61,9 +61,7 @@ export type ComponentOptionsType<P> = {
     containerTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
     prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
 
-    validate? : (Component<P>, UserPropsDefinitionType<P>) => void,
-
-    unsafeRenderTo? : boolean
+    validate? : (Component<P>, UserPropsDefinitionType<P>) => void
 };
 
 export type ComponentDriverType<P, T : mixed> = {
@@ -103,8 +101,6 @@ export class Component<P> extends BaseComponent<P> {
     prerenderTemplate : (RenderOptionsType<P>) => HTMLElement | ElementNode
 
     validate : (Component<P>, (PropsType & P)) => void
-
-    unsafeRenderTo : ?boolean
 
     driverCache : { [string] : mixed }
 
@@ -185,10 +181,6 @@ export class Component<P> extends BaseComponent<P> {
         // Validation
 
         this.addProp(options, 'validate');
-
-        // Security
-
-        this.addProp(options, 'unsafeRenderTo', false);
 
         // A mapping of tag->component so we can reference components by string tag name
 
