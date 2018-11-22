@@ -15,7 +15,7 @@ import { isZoidComponentWindow, getComponentMeta } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
-import type { EnvStringRegExp, CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
+import type { CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
 
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
@@ -40,7 +40,7 @@ export type ComponentOptionsType<P> = {
     url? : EnvString,
     buildUrl? : (BuiltInPropsType & P) => string,
 
-    domain? : EnvStringRegExp,
+    domain? : EnvString,
     bridgeUrl? : EnvString,
     bridgeDomain? : EnvString,
 
@@ -77,7 +77,7 @@ export class Component<P> extends BaseComponent<P> {
     tag : string
     url : EnvString
 
-    domain : EnvStringRegExp
+    domain : EnvString
     bridgeUrl : EnvString
     bridgeDomain : EnvString
 
@@ -284,7 +284,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
 
-    getValidDomain(url : ?string) : ?(string | RegExp) {
+    getValidDomain(url : ?string) : ?string {
 
         if (!url) {
             return;
@@ -298,7 +298,7 @@ export class Component<P> extends BaseComponent<P> {
 
         let domains = this.domain;
 
-        if (domains && typeof domains === 'object' && !(domains instanceof RegExp)) {
+        if (domains && typeof domains === 'object') {
             for (let env of Object.keys(domains)) {
 
                 if (env === 'test') {
@@ -313,7 +313,7 @@ export class Component<P> extends BaseComponent<P> {
     }
 
 
-    getDomain(url : ?string, env : string) : ?(string | RegExp) {
+    getDomain(url : ?string, env : string) : ?(string) {
 
         let domain = this.getForEnv(this.domain, env);
 
@@ -345,13 +345,13 @@ export class Component<P> extends BaseComponent<P> {
         return this.getForEnv(this.bridgeUrl, env);
     }
 
-    getForEnv(item : (string | RegExp) | { [string] : (string | RegExp) }, env : ?string) : ?(string | RegExp) {
+    getForEnv(item : string | { [string] : string }, env : ?string) : ?string {
 
         if (!item) {
             return;
         }
 
-        if (typeof item === 'string' || item instanceof RegExp) {
+        if (typeof item === 'string') {
             return item;
         }
 

@@ -21,7 +21,6 @@ export type CancelableType = {
     cancel : () => void
 };
 
-export type StringMatcherType = string | RegExp | Array<string>;
+export type StringMatcherType = string | Array<string>;
 
 export type EnvString = string | { [string] : string };
-export type EnvStringRegExp = string | RegExp | { [string] : string | RegExp };

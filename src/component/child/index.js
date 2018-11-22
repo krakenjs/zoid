@@ -2,14 +2,14 @@
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { send, markWindowKnown } from 'post-robot/src';
+import { send, markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
+import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
     cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
-import { deserializeFunctions, globalFor } from '../../lib';
+import { globalFor } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
@@ -154,12 +154,11 @@ export class ChildComponent<P> extends BaseComponent<P> {
         let componentMeta = getComponentMeta();
 
         let props = componentMeta.props;
+        let parentComponentWindow = getParentComponentWindow();
 
         if (props.type === INITIAL_PROPS.RAW) {
             props = props.value;
         } else if (props.type === INITIAL_PROPS.UID) {
-
-            let parentComponentWindow = getParentComponentWindow();
 
             if (!isSameDomain(parentComponentWindow)) {
 
@@ -176,7 +175,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
                 throw new Error(`Can not find global for parent component - can not retrieve props`);
             }
 
-            props = JSON.parse(global.props[componentMeta.uid]);
+            props = global.props[componentMeta.uid];
 
         } else {
             throw new Error(`Unrecognized props type: ${ props.type }`);
@@ -185,18 +184,8 @@ export class ChildComponent<P> extends BaseComponent<P> {
         if (!props) {
             throw new Error(`Initial props not found`);
         }
-        
-        return deserializeFunctions(props, ({ fullKey, self, args }) => {
-            return this.onInit.then(() => {
-                let func = get(this.props, fullKey);
 
-                if (typeof func !== 'function') {
-                    throw new TypeError(`Expected ${ fullKey } to be function, got ${ typeof func }`);
-                }
-
-                return func.apply(self, args);
-            });
-        });
+        return deserializeMessage(parentComponentWindow, getParentDomain(), props);
     }
 
 

@@ -147,7 +147,7 @@ export class BaseComponent<P> {
         All post-messaging is done using post-robot.
     */
 
-    listen(win : CrossDomainWindowType, domain : string | RegExp) {
+    listen(win : CrossDomainWindowType, domain : string) {
 
         if (!win) {
             throw this.component.createError(`window to listen to not set`);

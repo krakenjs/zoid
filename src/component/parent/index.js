@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { send, bridge } from 'post-robot/src';
+import { send, bridge, serializeMessage } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain,
     getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType,
     type SameDomainWindowType } from 'cross-domain-utils/src';
@@ -19,7 +19,7 @@ import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES,
     CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
-import { serializeFunctions, global } from '../../lib';
+import { global } from '../../lib';
 import type { PropsType, BuiltInPropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { CancelableType, DimensionsType, ElementRefType } from '../../types';
@@ -150,8 +150,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 ? this.open()
                 : tasks.openContainer.then(() => this.open());
 
-            tasks.setWindowName = tasks.open.then(() => {
-                return this.setWindowName(this.buildChildWindowName({ renderTo: target }));
+            tasks.setWindowName = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+                return this.setWindowName(this.buildChildWindowName({ win: this.window, domain, renderTo: target }));
             });
 
             tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open, tasks.setWindowName ]).then(([ domain ]) => {
@@ -321,11 +321,11 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
-    buildChildWindowName({ renderTo = window } : { renderTo : CrossDomainWindowType } = {}) : string {
+    buildChildWindowName({ win, domain, renderTo = window } : { win : CrossDomainWindowType, domain : string, renderTo : CrossDomainWindowType } = {}) : string {
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
-        let sProps = serializeFunctions(this.getPropsForChild());
+        let sProps = serializeMessage(win, domain, this.getPropsForChild());
 
         let componentParent = this.getComponentParentRef(renderTo);
         let renderParent    = this.getRenderParentRef(renderTo);
@@ -335,7 +335,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             : { type: INITIAL_PROPS.UID, uid };
 
         if (props.type === INITIAL_PROPS.UID) {
-            global.props[uid] = JSON.stringify(sProps);
+            global.props[uid] = sProps;
 
             this.clean.register(() => {
                 delete global.props[uid];
@@ -401,7 +401,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    getDomain() : ZalgoPromise<string | RegExp> {
+    getDomain() : ZalgoPromise<string> {
         return ZalgoPromise.try(() => {
 
             let domain = this.component.getDomain(null, this.props.env);
@@ -732,7 +732,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Post-robot listeners to the child component window
     */
 
-    listeners() : { [string] : (CrossDomainWindowType, Object) => mixed } {
+    listeners() : { [string] : (CrossDomainWindowType, mixed) => mixed } {
         return {
 
             // The child rendered, and the component called .attach()
