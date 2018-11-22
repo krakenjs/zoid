@@ -152,10 +152,6 @@ export var Component = (_class = function (_BaseComponent) {
 
         _this.addProp(options, 'validate');
 
-        // Security
-
-        _this.addProp(options, 'unsafeRenderTo', false);
-
         // A mapping of tag->component so we can reference components by string tag name
 
         Component.components[_this.tag] = _this;
@@ -287,7 +283,7 @@ export var Component = (_class = function (_BaseComponent) {
 
         var domains = this.domain;
 
-        if (domains && (typeof domains === 'undefined' ? 'undefined' : _typeof(domains)) === 'object' && !(domains instanceof RegExp)) {
+        if (domains && (typeof domains === 'undefined' ? 'undefined' : _typeof(domains)) === 'object') {
             for (var _i6 = 0, _Object$keys6 = Object.keys(domains), _length6 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
                 var env = _Object$keys6[_i6];
 
@@ -340,7 +336,7 @@ export var Component = (_class = function (_BaseComponent) {
             return;
         }
 
-        if (typeof item === 'string' || item instanceof RegExp) {
+        if (typeof item === 'string') {
             return item;
         }
 
@@ -495,37 +491,6 @@ export var Component = (_class = function (_BaseComponent) {
         return ZalgoPromise['try'](function () {
             return new ParentComponent(_this9, _this9.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
         });
-    };
-
-    Component.prototype.prerender = function prerender(props, element) {
-        var instance = new ParentComponent(this, this.getRenderContext(null, element), { props: props });
-        instance.prefetch();
-
-        return {
-            render: function render(innerProps, innerElement) {
-                if (innerProps) {
-                    instance.updateProps(innerProps);
-                }
-
-                return instance.render(innerElement);
-            },
-            renderTo: function renderTo(win, innerProps, innerElement) {
-                if (innerProps) {
-                    instance.updateProps(innerProps);
-                }
-
-                return instance.renderTo(win, innerElement);
-            },
-
-
-            get html() {
-                return instance.html;
-            },
-
-            set html(value) {
-                instance.html = value;
-            }
-        };
     };
 
     /*  Log

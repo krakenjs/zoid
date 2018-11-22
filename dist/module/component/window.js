@@ -1,6 +1,5 @@
 import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain } from 'cross-domain-utils/src';
-import base32 from 'hi-base32';
-import { memoize, uniqueID, stringifyError } from 'belter/src';
+import { memoize, uniqueID, stringifyError, base64encode, base64decode } from 'belter/src';
 
 import { globalFor } from '../lib';
 import { WINDOW_REFERENCES } from '../constants';
@@ -8,14 +7,6 @@ import { WINDOW_REFERENCES } from '../constants';
 
 function normalize(str) {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
-}
-
-function encode(str) {
-    return base32.encode(str).replace(/\=/g, '').toLowerCase(); // eslint-disable-line no-useless-escape
-}
-
-function decode(str) {
-    return base32.decode(str.toUpperCase());
 }
 
 /*  Build Child Window Name
@@ -38,7 +29,7 @@ export function buildChildWindowName(name) {
     options.domain = getDomain(window);
 
     var encodedName = normalize(name);
-    var encodedOptions = encode(JSON.stringify(options));
+    var encodedOptions = base64encode(JSON.stringify(options));
 
     if (!encodedName) {
         throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
@@ -87,7 +78,7 @@ export var getComponentMeta = memoize(function () {
     var componentMeta = void 0;
 
     try {
-        componentMeta = JSON.parse(decode(encodedOptions));
+        componentMeta = JSON.parse(base64decode(encodedOptions));
     } catch (err) {
         throw new Error('Can not decode component-meta: ' + encodedOptions + ' ' + stringifyError(err));
     }

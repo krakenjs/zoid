@@ -67,8 +67,6 @@ export var DelegateComponent = function (_BaseComponent) {
             _this[key] = ParentComponent.prototype[key];
         }
 
-        _this.childWindowName = options.childWindowName;
-
         ParentComponent.prototype.registerActiveComponent.call(_this);
 
         _this.watchForClose();

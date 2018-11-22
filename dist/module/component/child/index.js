@@ -1,6 +1,6 @@
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -11,13 +11,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getDomain } from 'cross-domain-utils/src';
-import { send, markWindowKnown } from 'post-robot/src';
+import { send, markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify, cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
+import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify, cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow as _getParentComponentWindow, getComponentMeta, getParentDomain as _getParentDomain, getParentRenderWindow as _getParentRenderWindow } from '../window';
-import { deserializeFunctions, globalFor } from '../../lib';
+import { globalFor } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 
@@ -169,17 +169,14 @@ export var ChildComponent = function (_BaseComponent) {
     };
 
     ChildComponent.prototype.getInitialProps = function getInitialProps() {
-        var _this3 = this;
-
         var componentMeta = getComponentMeta();
 
         var props = componentMeta.props;
+        var parentComponentWindow = _getParentComponentWindow();
 
         if (props.type === INITIAL_PROPS.RAW) {
             props = props.value;
         } else if (props.type === INITIAL_PROPS.UID) {
-
-            var parentComponentWindow = _getParentComponentWindow();
 
             if (!isSameDomain(parentComponentWindow)) {
 
@@ -196,7 +193,7 @@ export var ChildComponent = function (_BaseComponent) {
                 throw new Error('Can not find global for parent component - can not retrieve props');
             }
 
-            props = JSON.parse(global.props[componentMeta.uid]);
+            props = global.props[componentMeta.uid];
         } else {
             throw new Error('Unrecognized props type: ' + props.type);
         }
@@ -205,21 +202,7 @@ export var ChildComponent = function (_BaseComponent) {
             throw new Error('Initial props not found');
         }
 
-        return deserializeFunctions(props, function (_ref6) {
-            var fullKey = _ref6.fullKey,
-                self = _ref6.self,
-                args = _ref6.args;
-
-            return _this3.onInit.then(function () {
-                var func = get(_this3.props, fullKey);
-
-                if (typeof func !== 'function') {
-                    throw new TypeError('Expected ' + fullKey + ' to be function, got ' + (typeof func === 'undefined' ? 'undefined' : _typeof(func)));
-                }
-
-                return func.apply(self, args);
-            });
-        });
+        return deserializeMessage(parentComponentWindow, _getParentDomain(), props);
     };
 
     ChildComponent.prototype.setProps = function setProps(props, origin) {
@@ -302,19 +285,19 @@ export var ChildComponent = function (_BaseComponent) {
     };
 
     ChildComponent.prototype.watchForClose = function watchForClose() {
-        var _this4 = this;
+        var _this3 = this;
 
         window.addEventListener('unload', function () {
-            return _this4.checkClose();
+            return _this3.checkClose();
         });
     };
 
     ChildComponent.prototype.enableAutoResize = function enableAutoResize() {
-        var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref7$width = _ref7.width,
-            width = _ref7$width === undefined ? true : _ref7$width,
-            _ref7$height = _ref7.height,
-            height = _ref7$height === undefined ? true : _ref7$height;
+        var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref6$width = _ref6.width,
+            width = _ref6$width === undefined ? true : _ref6$width,
+            _ref6$height = _ref6.height,
+            height = _ref6$height === undefined ? true : _ref6$height;
 
         this.autoResize = { width: width, height: height };
         this.watchForResize();
@@ -350,7 +333,7 @@ export var ChildComponent = function (_BaseComponent) {
     };
 
     ChildComponent.prototype.watchForResize = function watchForResize() {
-        var _this5 = this;
+        var _this4 = this;
 
         var _getAutoResize = this.getAutoResize(),
             width = _getAutoResize.width,
@@ -378,14 +361,14 @@ export var ChildComponent = function (_BaseComponent) {
             // $FlowFixMe
             if (!dimensionsMatchViewport(element, { width: width, height: height })) {
                 // $FlowFixMe
-                return _this5.resizeToElement(element, { width: width, height: height });
+                return _this4.resizeToElement(element, { width: width, height: height });
             }
         }).then(function () {
 
             return cycle(function () {
                 return onDimensionsChange(element, { width: width, height: height }).then(function () {
                     // $FlowFixMe
-                    return _this5.resizeToElement(element, { width: width, height: height });
+                    return _this4.resizeToElement(element, { width: width, height: height });
                 });
             });
         });
@@ -397,10 +380,10 @@ export var ChildComponent = function (_BaseComponent) {
 
         return {
             updateProps: function updateProps(props) {
-                var _this6 = this;
+                var _this5 = this;
 
                 return ZalgoPromise['try'](function () {
-                    return self.setProps(props, _this6.origin, false);
+                    return self.setProps(props, _this5.origin, false);
                 });
             },
             close: function close() {
@@ -417,25 +400,25 @@ export var ChildComponent = function (_BaseComponent) {
     */
 
     ChildComponent.prototype.resize = function resize(width, height) {
-        var _this7 = this;
+        var _this6 = this;
 
         return ZalgoPromise.resolve().then(function () {
 
-            _this7.component.log('resize', { width: stringify(width), height: stringify(height) });
+            _this6.component.log('resize', { width: stringify(width), height: stringify(height) });
 
-            if (_this7.context === CONTEXT_TYPES.POPUP) {
+            if (_this6.context === CONTEXT_TYPES.POPUP) {
                 return;
             }
 
-            return _this7.sendToParent(POST_MESSAGE.RESIZE, { width: width, height: height }).then(noop);
+            return _this6.sendToParent(POST_MESSAGE.RESIZE, { width: width, height: height }).then(noop);
         });
     };
 
-    ChildComponent.prototype.resizeToElement = function resizeToElement(el, _ref8) {
-        var _this8 = this;
+    ChildComponent.prototype.resizeToElement = function resizeToElement(el, _ref7) {
+        var _this7 = this;
 
-        var width = _ref8.width,
-            height = _ref8.height;
+        var width = _ref7.width,
+            height = _ref7.height;
 
 
         var history = [];
@@ -462,7 +445,7 @@ export var ChildComponent = function (_BaseComponent) {
 
                 history.push({ width: dimensions.width, height: dimensions.height });
 
-                return _this8.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function () {
+                return _this7.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function () {
 
                     if (tracker.check().changed) {
                         return resize();

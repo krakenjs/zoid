@@ -3,7 +3,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow } from 'post-robot/src';
 import { findFrameByName, isSameDomain } from 'cross-domain-utils/src';
-import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, addClass, removeClass, noop } from 'belter/src';
+import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, addClass, removeClass, noop, uniqueID } from 'belter/src';
 
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 import { getPosition, getParentComponentWindow } from '../window';
@@ -41,11 +41,12 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         var _this = this;
 
         var attributes = this.component.attributes.iframe || {};
+        var name = '__zoid_frame__' + this.component.name + '_' + uniqueID() + '__';
 
         this.iframe = iframe({
             url: url,
             attributes: _extends({
-                name: this.childWindowName,
+                name: name,
                 title: this.component.name,
                 scrolling: this.component.scrolling ? 'yes' : 'no'
             }, attributes),
@@ -81,7 +82,13 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
                     delete _this.iframe;
                 }
             });
+
+            return name;
         });
+    },
+    setWindowName: function setWindowName(name) {
+        this.window.name = name;
+        this.iframe.setAttribute('name', name);
     },
     openPrerender: function openPrerender() {
         var _this2 = this;
@@ -90,7 +97,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         this.prerenderIframe = iframe({
             attributes: _extends({
-                name: '__prerender__' + this.childWindowName,
+                name: '__zoid_prerender_frame__' + this.component.name + '_' + uniqueID() + '__',
                 scrolling: this.component.scrolling ? 'yes' : 'no'
             }, attributes),
             'class': [CLASS_NAMES.PRERENDER_FRAME, CLASS_NAMES.VISIBLE]
@@ -145,6 +152,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         hijackSubmit: DELEGATE.CALL_DELEGATE,
         openPrerender: DELEGATE.CALL_DELEGATE,
         switchPrerender: DELEGATE.CALL_DELEGATE,
+        setWindowName: DELEGATE.CALL_DELEGATE,
 
         renderTemplate: DELEGATE.CALL_ORIGINAL,
         openContainerFrame: DELEGATE.CALL_ORIGINAL,
@@ -154,12 +162,16 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             return function overrideOpen() {
                 var _this4 = this;
 
-                return override.apply(this, arguments).then(function () {
-                    _this4.clean.set('window', findFrameByName(getParentComponentWindow(), _this4.childWindowName));
+                return override.apply(this, arguments).then(function (name) {
+                    var remoteWindow = findFrameByName(getParentComponentWindow(), name);
 
-                    if (!_this4.window) {
-                        throw new Error('Unable to find parent component iframe window');
+                    if (!remoteWindow) {
+                        throw new Error('Unable to find remote iframe window');
                     }
+
+                    _this4.clean.set('window', remoteWindow);
+
+                    return name;
                 });
             };
         }
@@ -220,9 +232,10 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                     y = _getPosition.y;
 
                 var attributes = _this5.component.attributes.popup || {};
+                var name = '__zoid_frame__' + _this5.component.name + '_' + uniqueID() + '__';
 
                 _this5.window = popup(url || '', _extends({
-                    name: _this5.childWindowName,
+                    name: name,
                     width: width,
                     height: height,
                     top: y,
@@ -246,7 +259,12 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                 });
 
                 _this5.resize(width, height);
+
+                return name;
             });
+        },
+        setWindowName: function setWindowName(name) {
+            this.window.name = name;
         },
         openPrerender: function openPrerender() {
             return ZalgoPromise['try'](noop);
