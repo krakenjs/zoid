@@ -1,9 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { on } from 'post-robot/src';
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { copyProp, eventEmitter, type EventEmitterType, stringifyError, noop } from 'belter/src';
+import { eventEmitter, type EventEmitterType, stringifyError, noop } from 'belter/src';
 
 import type { CancelableType } from '../types';
 
@@ -122,69 +120,11 @@ export class BaseComponent<P> {
         this.event = eventEmitter();
     }
 
-    addProp(options : Object, name : string, def : mixed) {
-        copyProp(options, this, name, def);
-    }
-
     on(eventName : string, handler : () => void) : CancelableType {
         return this.event.on(eventName, handler);
     }
-
-    listeners() {
-        throw new Error(`Expected listeners to be implemented`);
-    }
-
+    
     error(err : mixed) : ZalgoPromise<void> {
         throw new Error(`Expected error to be implemented - got ${ stringifyError(err) }`);
-    }
-
-    /*  Listen
-        ------
-
-        Listen for any post messages defined in this.listeners(). All (most) of our communication is done via
-        post-messages, so this sets up an easy way to create a collection of listeners in one go.
-
-        All post-messaging is done using post-robot.
-    */
-
-    listen(win : CrossDomainWindowType, domain : string) {
-
-        if (!win) {
-            throw this.component.createError(`window to listen to not set`);
-        }
-
-        if (!domain) {
-            throw new Error(`Must pass domain to listen to`);
-        }
-
-        if (!this.listeners) {
-            return;
-        }
-
-        let listeners = this.listeners();
-
-        for (let listenerName of Object.keys(listeners)) {
-
-            let name = listenerName.replace(/^zoid_/, '');
-
-            let errorHandler = (err) => {
-                this.error(err);
-            };
-
-            let listener = on(listenerName, { window: win, domain, errorHandler }, ({ source, data }) => {
-                this.component.log(`listener_${ name }`);
-                return listeners[listenerName].call(this, source, data);
-            });
-
-            let errorListener = on(listenerName, { window: win, errorHandler }, ({ origin }) => {
-                this.component.logError(`unexpected_listener_${ name }`, { origin, domain: domain.toString() });
-                this.error(new Error(`Unexpected ${ name } message from domain ${ origin } -- expected message from ${ domain.toString() }`));
-            });
-
-            this.clean.register(() => {
-                listener.cancel();
-                errorListener.cancel();
-            });
-        }
     }
 }

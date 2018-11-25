@@ -1,16 +1,21 @@
 /* @flow */
 
-import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { memoize, uniqueID, stringifyError, base64encode, base64decode } from 'belter/src';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { memoize, stringifyError, base64encode, base64decode } from 'belter/src';
 
 import { globalFor } from '../lib';
-import { WINDOW_REFERENCES } from '../constants';
+import { WINDOW_REFERENCES, ZOID, INITIAL_PROPS, CONTEXT_TYPES } from '../constants';
 import type { DimensionsType, PositionType } from '../types';
-
 
 function normalize(str : string) : string {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
 }
+
+export type WindowRef = {
+    ref : string,
+    uid? : string,
+    distance? : number
+};
 
 /*  Build Child Window Name
     -----------------------
@@ -24,10 +29,27 @@ function normalize(str : string) : string {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(name : string, options : Object = {}) : string {
+type PropsType = {
+    type : typeof INITIAL_PROPS.RAW,
+    value : string
+} | {
+    type : typeof INITIAL_PROPS.UID,
+    uid : string
+};
 
-    options.id = uniqueID();
-    options.domain = getDomain(window);
+type ChildWindowNameOptions = {
+    uid : string,
+    tag : string,
+    context : $Values<typeof CONTEXT_TYPES>,
+    componentParent : WindowRef,
+    renderParent : WindowRef,
+    props : PropsType,
+    exports : string,
+    id : string,
+    domain : string
+};
+
+export function buildChildWindowName(name : string, options : ChildWindowNameOptions) : string {
 
     let encodedName = normalize(name);
     let encodedOptions = base64encode(JSON.stringify(options));
@@ -37,7 +59,7 @@ export function buildChildWindowName(name : string, options : Object = {}) : str
     }
 
     return [
-        'xcomponent',
+        ZOID,
         encodedName,
         encodedOptions,
         ''
@@ -51,7 +73,7 @@ export let isZoidComponentWindow = memoize(() => {
 
     let [ zoidcomp ] = window.name.split('__');
 
-    if (zoidcomp !== 'xcomponent') {
+    if (zoidcomp !== ZOID) {
         return false;
     }
 
@@ -65,7 +87,7 @@ export let isZoidComponentWindow = memoize(() => {
     passed down, including the parent name. Only accepts window names built by zoid
 */
 
-export let getComponentMeta = memoize(() => {
+export let getComponentMeta = memoize(() : ChildWindowNameOptions => {
 
     if (!window.name) {
         throw new Error(`Can not get component meta without window name`);
@@ -73,7 +95,7 @@ export let getComponentMeta = memoize(() => {
 
     let [ zoidcomp, name, encodedOptions ] = window.name.split('__');
 
-    if (zoidcomp !== 'xcomponent') {
+    if (zoidcomp !== ZOID) {
         throw new Error(`Window not rendered by zoid - got ${ zoidcomp }`);
     }
 
@@ -94,7 +116,7 @@ export function getParentDomain() : string {
     return getComponentMeta().domain; // How does this work for renderTo..?
 }
 
-function getWindowByRef({ ref, uid, distance } : { ref : string, uid : string, distance : number }) : CrossDomainWindowType {
+function getWindowByRef({ ref, uid, distance } : WindowRef) : CrossDomainWindowType {
 
     let result;
 

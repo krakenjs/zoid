@@ -1,6 +1,9 @@
 /* @flow */
 
+import { onCloseWindow } from 'cross-domain-utils/src';
+
 import { testComponent } from '../component';
+import { onWindowOpen } from '../common';
 
 describe('zoid render to parent', () => {
 
@@ -127,7 +130,15 @@ describe('zoid render to parent', () => {
 
     it('should close a zoid renderToParent iframe on click of the overlay close button', done => {
 
+        let win;
+
         testComponent.renderIframe({
+            foo: () => {
+                onWindowOpen().then(openedWin => {
+                    win = openedWin;
+                });
+            },
+
             childEntered: () => {
                 let closeButton = document.querySelector('.zoid-tag-test-component2 .zoid-close');
 
@@ -135,29 +146,23 @@ describe('zoid render to parent', () => {
                     return done(new Error(`Expected close button to be present`));
                 }
 
+                onCloseWindow(win, () => {
+                    done();
+                }, 50);
+
                 closeButton.click();
             },
 
-            foo: () => done(),
-
             run: `
-                zoid.getByTag('test-component2').renderIframeTo(window.parent, {
+                window.xprops.foo().then(function() {
+                    zoid.getByTag('test-component2').renderIframeTo(window.parent, {
 
-                    onEnter: function() {
-
-                        var win = this.window;
-
-                        var interval = setInterval(function() {
-                            if (win.closed) {
-                                clearInterval(interval);
-                                window.xprops.foo();
-                            }
-                        }, 20);
-
-                        return window.xprops.childEntered();
-                    }
-
-                }, 'body');
+                        onEnter: function() {
+                            return window.xprops.childEntered();
+                        }
+    
+                    }, 'body');
+                });
             `
         }, document.body);
     });
@@ -179,12 +184,18 @@ describe('zoid render to parent', () => {
             foo: () => done(),
 
             run: `
+                var win;
+
+                onWindowOpen().then(function(openedWindow) {
+                    win = openedWindow;
+                });
+
                 zoid.getByTag('test-component2').renderPopupTo(window.parent, {
 
                     onEnter: function() {
 
-                        var winClose = this.window.close;
-                        this.window.close = function() {
+                        var winClose = win.close;
+                        win.close = function() {
                             winClose.apply(this, arguments);
                             window.xprops.foo();
                         };
@@ -214,11 +225,17 @@ describe('zoid render to parent', () => {
             foo: () => done(),
 
             run: `
+                var win;
+
+                onWindowOpen().then(function(openedWindow) {
+                    win = openedWindow;
+                });
+
                 zoid.getByTag('test-component2').renderPopupTo(window.parent, {
 
                     onEnter: function() {
 
-                        this.window.focus = function() {
+                        win.focus = function() {
                             window.xprops.foo();
                         };
 

@@ -5,19 +5,8 @@ export const ZOID = `zoid`;
 export const __ZOID__ = `__${ ZOID }__`;
 
 export const POST_MESSAGE = {
-    INIT:           `${ ZOID }_init`,
-    PROPS:          `${ ZOID }_props`,
-    PROP_CALLBACK:  `${ ZOID }_prop_callback`,
-    CLOSE:          `${ ZOID }_close`,
-    CHECK_CLOSE:    `${ ZOID }_check_close`,
-    REDIRECT:       `${ ZOID }_redirect`,
-    RESIZE:         `${ ZOID }_resize`,
-    ONRESIZE:       `${ ZOID }_onresize`,
     DELEGATE:       `${ ZOID }_delegate`,
-    ALLOW_DELEGATE: `${ ZOID }_allow_delegate`,
-    ERROR:          `${ ZOID }_error`,
-    HIDE:           `${ ZOID }_hide`,
-    SHOW:           `${ ZOID }_show`
+    ALLOW_DELEGATE: `${ ZOID }_allow_delegate`
 };
 
 export const PROP_TYPES = {

@@ -4,6 +4,7 @@ import { assert } from 'chai';
 
 import zoid from '../../src';
 import { testComponent, testComponent3 } from '../component';
+import { onWindowOpen } from '../common';
 
 describe('zoid error cases', () => {
 
@@ -219,14 +220,13 @@ describe('zoid error cases', () => {
 
     it('should call onclose when a popup is closed by someone other tha zoid', done => {
 
+        onWindowOpen().then(openedWindow => {
+            setTimeout(() => {
+                openedWindow.close();
+            }, 50);
+        });
+
         testComponent.renderPopup({
-
-            onEnter() {
-                setTimeout(() => {
-                    this.window.close();
-                });
-            },
-
             onClose() {
                 done();
             }

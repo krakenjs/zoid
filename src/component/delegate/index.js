@@ -2,7 +2,6 @@
 
 import { onCloseWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { noop } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
@@ -21,7 +20,6 @@ export type DelegateOptionsType = {
     context : string,
     props : DelegatePropsType,
     overrides : {
-        focus : () => ZalgoPromise<void>,
         userClose : (string) => ZalgoPromise<void>,
         getDomain : () => ZalgoPromise<string>,
         error : (mixed) => ZalgoPromise<void>,
@@ -35,12 +33,11 @@ export class DelegateComponent<P> extends BaseComponent<P> {
     context : string
     props : DelegatePropsType
 
-    focus : () => ZalgoPromise<void>
     userClose : (string) => ZalgoPromise<void>
     getDomain : () => ZalgoPromise<string>
     error : (mixed) => ZalgoPromise<void>
     on : (string, () => void) => CancelableType
-    
+
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         super();
 
@@ -64,15 +61,6 @@ export class DelegateComponent<P> extends BaseComponent<P> {
                 this.props[propName] = options.props[propName];
             }
         }
-
-        this.focus = () => {
-            return options.overrides.focus.call(this);
-        };
-
-        this.clean.register('destroyFocusOverride', () => {
-            // $FlowFixMe
-            this.focus = noop;
-        });
 
         this.userClose = options.overrides.userClose;
         this.getDomain = options.overrides.getDomain;

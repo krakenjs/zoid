@@ -4,7 +4,7 @@
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { memoize } from 'belter/src';
+import { memoize, copyProp } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
@@ -192,6 +192,10 @@ export class Component<P> extends BaseComponent<P> {
         this.registerDrivers();
         this.registerChild();
         this.listenDelegate();
+    }
+
+    addProp(options : Object, name : string, def : mixed) {
+        copyProp(options, this, name, def);
     }
 
     @memoize

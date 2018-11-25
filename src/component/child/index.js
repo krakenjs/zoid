@@ -2,19 +2,20 @@
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { send, markWindowKnown, deserializeMessage } from 'post-robot/src';
+import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-    cycle, getElement, noop, stringifyError, waitForDocumentReady } from 'belter/src';
+import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
+    cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
 import { globalFor } from '../../lib';
-import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
+import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
 import type { DimensionsType } from '../../types';
+import type { ParentExportsType } from '../parent';
 
 import { normalizeChildProps } from './props';
 
@@ -38,6 +39,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
     component : Component<P>
     props : BuiltInPropsType & P
     context : string
+    parentExports : ParentExportsType<P>
 
     onPropHandlers : Array<(BuiltInPropsType & P) => void>
     onInit : ZalgoPromise<ChildComponent<P>>
@@ -53,7 +55,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
             return;
         }
 
-        this.component.log(`construct_child`);
+        this.component.log(`init_child`);
 
         // The child can specify some default props if none are passed from the parent. This often makes integrations
         // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
@@ -61,57 +63,26 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         this.onPropHandlers = [];
 
-        for (let item of [ this.component, window ]) {
-            for (let [ name, getter ] of [ [ 'xchild', () => this ], [ 'xprops', () => this.props ] ]) {
-                // $FlowFixMe
-                Object.defineProperty(item, name, {
-                    configurable: true,
-                    get:          () => {
-                        if (!this.props) {
-                            this.setProps(this.getInitialProps(), getParentDomain());
-                        }
-                        // $FlowFixMe
-                        delete item[name];
-                        // $FlowFixMe
-                        item[name] = getter();
-                        // $FlowFixMe
-                        return item[name];
-                    }
-                });
-            }
+        if (window.xchild) {
+            throw this.component.createError(`Can not attach multiple components to the same window`);
         }
 
-        this.component.log(`init_child`);
+        let parentDomain = getParentDomain();
+        let parentComponentWindow = this.getParentComponentWindow();
+        let parentRenderWindow = this.getParentRenderWindow();
 
-        this.setWindows();
+        window.xchild = this.component.xchild = this;
+        this.setProps(this.getInitialProps(), getParentDomain());
+        this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
 
+        markWindowKnown(parentComponentWindow);
+        markWindowKnown(parentRenderWindow);
+
+        this.watchForClose();
         this.listenForResize();
+        this.watchForResize();
 
-        // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
-        //
-        // For example:
-        //
-        // - What context are we
-        // - What props has the parent specified
-
-        markWindowKnown(this.getParentComponentWindow());
-        markWindowKnown(this.getParentRenderWindow());
-
-        this.onInit = this.sendToParent(POST_MESSAGE.INIT, {
-
-            exports: this.exports()
-
-        }).then(({ origin, data }) => {
-
-            this.context = data.context;
-            this.setProps(data.props, origin);
-
-            this.watchForResize();
-
-            return this;
-
-        }).catch(err => {
-
+        this.parentExports.init(this.buildExports()).catch(err => {
             this.error(err);
             throw err;
         });
@@ -119,9 +90,9 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
     listenForResize() {
         if (this.component.listenForResize) {
-            this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
+            this.parentExports.trigger.fireAndForget('resize');
             window.addEventListener('resize', () => {
-                this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
+                this.parentExports.trigger.fireAndForget('resize');
             });
         }
     }
@@ -197,73 +168,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
         }
-    }
-
-
-    /*  Send to Parent
-        --------------
-
-        Send a post message to our parent window.
-    */
-
-    sendToParent(name : string, data : ?Object = {}, options : ?Object = {}) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
-        let parentWindow = getParentComponentWindow();
-
-        if (!parentWindow) {
-            throw new Error(`Can not find parent component window to message`);
-        }
-
-        this.component.log(`send_to_parent_${ name }`);
-
-        return send(parentWindow, name, data, { domain: getParentDomain(), ...options });
-    }
-
-
-    /*  Set Windows
-        -----------
-
-        Determine the parent window, and the parent component window. Note -- these may be different, if we were
-        rendered using renderTo.
-    */
-
-    setWindows() {
-
-
-        // Ensure we do not try to .attach() multiple times for the same component on the same page
-
-        if (window.__activeZoidComponent__) {
-            throw this.component.createError(`Can not attach multiple components to the same window`);
-        }
-
-        window.__activeZoidComponent__ = this;
-
-        // Get the direct parent window
-
-        if (!getParentComponentWindow()) {
-            throw this.component.createError(`Can not find parent window`);
-        }
-
-        let componentMeta = getComponentMeta();
-
-        if (componentMeta.tag !== this.component.tag) {
-            throw this.component.createError(`Parent is ${ componentMeta.tag } - can not attach ${ this.component.tag }`);
-        }
-
-        // Note -- getting references to other windows is probably one of the hardest things to do. There's basically
-        // only a few ways of doing it:
-        //
-        // - The window is a direct parent, in which case you can use window.parent or window.opener
-        // - The window is an iframe owned by you or one of your parents, in which case you can use window.frames
-        // - The window sent you a post-message, in which case you can use event.source
-        //
-        // If we didn't rely on winProps.parent here from the window name, we'd have to relay all of our messages through
-        // our actual parent. Which is no fun at all, and pretty error prone even with the help of post-robot. So this
-        // is the lesser of two evils until browsers give us something like getWindowByName(...)
-
-        // If the parent window closes, we need to close ourselves. There's no point continuing to run our component
-        // if there's no parent to message to.
-
-        this.watchForClose();
+        window.xprops = this.component.xprops = this.props;
     }
 
     watchForClose() {
@@ -312,7 +217,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
             return;
         }
 
-        if (this.context === CONTEXT_TYPES.POPUP) {
+        if (getComponentMeta().context === CONTEXT_TYPES.POPUP) {
             return;
         }
 
@@ -344,7 +249,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
         });
     }
 
-    exports() : ChildExportsType<P> {
+    buildExports() : ChildExportsType<P> {
 
         let self = this;
 
@@ -359,26 +264,9 @@ export class ChildComponent<P> extends BaseComponent<P> {
         };
     }
 
-
-    /*  Resize
-        ------
-
-        Resize the child window. Must be done on a user action like a click if we're in a popup
-    */
-
     resize(width : ?number, height : ?number) : ZalgoPromise<void> {
-        return ZalgoPromise.resolve().then(() => {
-
-            this.component.log(`resize`, { width: stringify(width), height: stringify(height) });
-
-            if (this.context === CONTEXT_TYPES.POPUP) {
-                return;
-            }
-
-            return this.sendToParent(POST_MESSAGE.RESIZE, { width, height }).then(noop);
-        });
+        return this.parentExports.resize(width, height);
     }
-
 
     resizeToElement(el : HTMLElement, { width, height } : DimensionsType) : ZalgoPromise<void> {
 
@@ -415,45 +303,25 @@ export class ChildComponent<P> extends BaseComponent<P> {
         return resize();
     }
 
-
-    /*  Hide
-        ----
-
-        Hide the window and any parent template
-    */
-
     hide() : ZalgoPromise<void> {
-        return this.sendToParent(POST_MESSAGE.HIDE).then(noop);
+        return this.parentExports.hide();
     }
 
     show() : ZalgoPromise<void> {
-        return this.sendToParent(POST_MESSAGE.SHOW).then(noop);
+        return this.parentExports.show();
     }
 
-    userClose() : void {
+    userClose() : ZalgoPromise<void> {
         return this.close(CLOSE_REASONS.USER_CLOSED);
     }
 
-
-    /*  Close
-        -----
-
-        Close the child window
-    */
-
-    close(reason : string = CLOSE_REASONS.CHILD_CALL) {
-
-        this.component.log(`close_child`);
-
-        // Ask our parent window to close us
-
-        this.sendToParent(POST_MESSAGE.CLOSE, { reason });
+    close(reason : string = CLOSE_REASONS.CHILD_CALL) : ZalgoPromise<void> {
+        return this.parentExports.close(reason);
     }
 
-    checkClose() {
-        this.sendToParent(POST_MESSAGE.CHECK_CLOSE, {}, { fireAndForget: true });
+    checkClose() : ZalgoPromise<void> {
+        return this.parentExports.checkClose.fireAndForget();
     }
-
 
     destroy() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
@@ -461,34 +329,11 @@ export class ChildComponent<P> extends BaseComponent<P> {
         });
     }
 
-
-    /*  Focus
-        -----
-
-        Focus the child window. Must be done on a user action like a click
-    */
-
     focus() {
-        this.component.log(`focus`);
-
         window.focus();
     }
 
-
-    /*  Error
-        -----
-
-        Send an error back to the parent
-    */
-
     error(err : mixed) : ZalgoPromise<void> {
-
-        let stringifiedError = stringifyError(err);
-
-        this.component.logError(`error`, { error: stringifiedError });
-
-        return this.sendToParent(POST_MESSAGE.ERROR, {
-            error: stringifiedError
-        }).then(noop);
+        return this.parentExports.error(err).then(noop);
     }
 }

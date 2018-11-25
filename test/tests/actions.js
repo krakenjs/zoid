@@ -3,51 +3,77 @@
 import { onCloseWindow } from 'cross-domain-utils/src';
 
 import { testComponent } from '../component';
+import { onWindowOpen } from '../common';
 
 describe('zoid actions', () => {
 
-    it('should close a zoid popup', done => {
+    it('should close a zoid iframe', done => {
 
-        testComponent.renderPopup({
+        let win;
+        let close;
 
-            onEnter() {
-                let close = this.window.close;
+        let originalContainerTemplate = testComponent.containerTemplate;
+        testComponent.containerTemplate = ({ outlet, actions }) => {
+            close = actions.close;
+            testComponent.containerTemplate = originalContainerTemplate;
+            return outlet;
+        };
 
-                this.window.close = function windowClose() {
-                    close.apply(this, arguments);
-                    done();
-                };
+        onWindowOpen().then(openedWindow => {
+            win = openedWindow;
+        });
 
-                this.close();
-            }
-
+        testComponent.renderIframe({}, document.body).then(() => {
+            onCloseWindow(win, () => {
+                done();
+            }, 50);
+            close();
         });
     });
 
-    it('should close a zoid iframe', done => {
+    it('should close a zoid popup', done => {
 
-        testComponent.renderIframe({
+        let win;
+        let close;
 
-            onEnter() {
-                onCloseWindow(this.window, () => {
-                    done();
-                }, 50);
+        let originalContainerTemplate = testComponent.containerTemplate;
+        testComponent.containerTemplate = ({ outlet, actions }) => {
+            close = actions.close;
+            testComponent.containerTemplate = originalContainerTemplate;
+            return outlet;
+        };
 
-                this.close();
-            }
+        onWindowOpen().then(openedWindow => {
+            win = openedWindow;
+        });
 
-        }, document.body);
+        testComponent.renderPopup({}).then(() => {
+            onCloseWindow(win, () => {
+                done();
+            }, 50);
+            close();
+        });
     });
 
     it('should focus a zoid popup', done => {
 
-        testComponent.renderPopup({
+        let win;
+        let focus;
 
-            onEnter() {
-                this.window.focus = done;
-                this.focus();
-            }
+        let originalContainerTemplate = testComponent.containerTemplate;
+        testComponent.containerTemplate = ({ outlet, actions }) => {
+            focus = actions.focus;
+            testComponent.containerTemplate = originalContainerTemplate;
+            return outlet;
+        };
 
+        onWindowOpen().then(openedWindow => {
+            win = openedWindow;
+        });
+
+        testComponent.renderPopup({}).then(() => {
+            win.focus = done;
+            focus();
         });
     });
 });

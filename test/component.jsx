@@ -3,8 +3,6 @@
 
 import zoid from '../src';
 
-window.zoid = zoid;
-
 function containerTemplate({ id, CLASS, CONTEXT, tag, context, actions, outlet, jsxDom }) {
 
     function close(event) {
