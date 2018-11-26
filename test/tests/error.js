@@ -45,17 +45,7 @@ describe('zoid error cases', () => {
         }, document.body);
     });
 
-    it('should enter a component and timeout, then call onTimeout', done => {
-
-        testComponent.renderIframe({
-            timeout: 1,
-            onTimeout() {
-                done();
-            }
-        }, document.body);
-    });
-
-    it('should enter a component and timeout, then call onError in the absense of onTimeout', done => {
+    it('should enter a component and timeout, then call onError', done => {
 
         testComponent.renderIframe({
             timeout: 1,
@@ -63,11 +53,6 @@ describe('zoid error cases', () => {
                 done();
             }
         }, document.body);
-    });
-
-    it.skip('should enter a component and error out when the page name is not valid', () => {
-
-        window.open('/base/test/child.htm', 'INVALIDNAME');
     });
 
     it('should try to render a component to an unsupported context and error out', done => {

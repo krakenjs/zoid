@@ -7,11 +7,9 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
     cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
 
-import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
 import { globalFor } from '../../lib';
 import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
-import { RenderError } from '../../error';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
 import type { DimensionsType } from '../../types';
@@ -34,7 +32,7 @@ export type ChildExportsType<P> = {
     utilize.
 */
 
-export class ChildComponent<P> extends BaseComponent<P> {
+export class ChildComponent<P> {
 
     component : Component<P>
     props : BuiltInPropsType & P
@@ -47,42 +45,34 @@ export class ChildComponent<P> extends BaseComponent<P> {
     autoResize : { width : boolean, height : boolean, element? : string }
 
     constructor(component : Component<P>) {
-        super();
-        this.component = component;
+        ZalgoPromise.try(() => {
+            if (window.xchild || window.xprops) {
+                throw this.component.createError(`Can not attach multiple components to the same window`);
+            }
 
-        if (!this.hasValidParentDomain()) {
-            this.error(new RenderError(`Can not be rendered by domain: ${ this.getParentDomain() }`));
-            return;
-        }
+            let parentDomain = getParentDomain();
+            let parentComponentWindow = this.getParentComponentWindow();
 
-        this.component.log(`init_child`);
+            this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
 
-        // The child can specify some default props if none are passed from the parent. This often makes integrations
-        // a little more seamless, as applicaiton code can call props.foo() without worrying about whether the parent
-        // has provided them or not, and fall-back to some default behavior.
+            this.component = component;
+            this.onPropHandlers = [];
+    
+            window.xchild = this.component.xchild = this;
+            this.setProps(this.getInitialProps(), getParentDomain());
+    
+            this.checkParentDomain();
+    
+            markWindowKnown(parentComponentWindow);
+    
+            this.watchForClose();
+            this.listenForResize();
+            this.watchForResize();
 
-        this.onPropHandlers = [];
+            return this.parentExports.init(this.buildExports());
 
-        if (window.xchild) {
-            throw this.component.createError(`Can not attach multiple components to the same window`);
-        }
-
-        let parentDomain = getParentDomain();
-        let parentComponentWindow = this.getParentComponentWindow();
-
-        window.xchild = this.component.xchild = this;
-        this.setProps(this.getInitialProps(), getParentDomain());
-        this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
-
-        markWindowKnown(parentComponentWindow);
-
-        this.watchForClose();
-        this.listenForResize();
-        this.watchForResize();
-
-        this.parentExports.init(this.buildExports()).catch(err => {
+        }).catch(err => {
             this.error(err);
-            throw err;
         });
     }
 
@@ -95,16 +85,10 @@ export class ChildComponent<P> extends BaseComponent<P> {
         }
     }
 
-    hasValidParentDomain() : boolean {
-        return matchDomain(this.component.allowedParentDomains, this.getParentDomain());
-    }
-
-    init() : ZalgoPromise<ChildComponent<P>> {
-        return this.onInit;
-    }
-
-    getParentDomain() : string {
-        return getParentDomain();
+    checkParentDomain() {
+        if (!matchDomain(this.component.allowedParentDomains, getParentDomain())) {
+            throw new Error(`Can not be rendered by domain: ${ getParentDomain() }`);
+        }
     }
 
     onProps(handler : Function) {
@@ -166,7 +150,9 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     watchForClose() {
-        window.addEventListener('unload', () => this.checkClose());
+        window.addEventListener('unload', () => {
+            return this.parentExports.checkClose.fireAndForget();
+        });
     }
 
     enableAutoResize({ width = true, height = true } : { width : boolean, height : boolean } = {}) {
@@ -312,11 +298,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
     close(reason : string = CLOSE_REASONS.CHILD_CALL) : ZalgoPromise<void> {
         return this.parentExports.close(reason);
     }
-
-    checkClose() : ZalgoPromise<void> {
-        return this.parentExports.checkClose.fireAndForget();
-    }
-
+    
     destroy() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             window.close();
@@ -328,6 +310,11 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     error(err : mixed) : ZalgoPromise<void> {
-        return this.parentExports.error(err).then(noop);
+        // eslint-disable-next-line promise/no-promise-in-callback
+        return this.parentExports.error(err).then(noop).finally(() => {
+            return this.destroy();
+        }).then(() => {
+            throw err;
+        });
     }
 }

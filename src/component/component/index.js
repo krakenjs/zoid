@@ -7,7 +7,6 @@ import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross
 import { memoize, copyProp } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
-import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
@@ -69,7 +68,7 @@ export type ComponentDriverType<P, T : mixed> = {
     register : (Component<P>, T) => mixed
 };
 
-export class Component<P> extends BaseComponent<P> {
+export class Component<P> {
 
     name : string
     looseProps : boolean
@@ -108,7 +107,6 @@ export class Component<P> extends BaseComponent<P> {
     xprops : ?P
 
     constructor(options : ComponentOptionsType<P>) {
-        super();
         validate(options);
 
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,

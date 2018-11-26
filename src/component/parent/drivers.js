@@ -84,10 +84,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             let elementWatcher = watchElementForClose(this.element, detectClose);
 
             this.clean.register('destroyWindow', () => {
-
                 iframeWatcher.cancel();
                 elementWatcher.cancel();
-
                 cleanUpWindow(win);
                 destroyElement(frame);
             });
@@ -154,7 +152,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         show:                    DELEGATE.CALL_DELEGATE,
         resize:                  DELEGATE.CALL_DELEGATE,
         loadUrl:                 DELEGATE.CALL_DELEGATE,
-        hijackSubmit:            DELEGATE.CALL_DELEGATE,
         openPrerender:           DELEGATE.CALL_DELEGATE,
         switchPrerender:         DELEGATE.CALL_DELEGATE,
         setWindowName:           DELEGATE.CALL_DELEGATE,
@@ -213,8 +210,6 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                     win.close();
                     cleanUpWindow(win);
                 });
-
-                this.resize(width, height);
 
                 return ProxyWindow.toProxyWindow(win);
             });

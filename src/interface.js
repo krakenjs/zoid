@@ -26,8 +26,6 @@ export function destroyAll() : ZalgoPromise<void> {
 }
 export let postRobot = _postRobot;
 
-export * from './error';
-
 export const CONSTANTS = _CONSTANTS;
 
 export type ZoidComponent<P> = Component<P>;

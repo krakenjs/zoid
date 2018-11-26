@@ -9,16 +9,14 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
     addClass, extend, extendUrl,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-    once, stringify, stringifyError } from 'belter/src';
+    once, stringify, stringifyError, eventEmitter, type EventEmitterType } from 'belter/src';
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
-import { BaseComponent } from '../base';
 import { buildChildWindowName } from '../window';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES,
     CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
-import { RenderError } from '../../error';
 import type { Component } from '../component';
-import { global } from '../../lib';
+import { global, cleanup, type CleanupType } from '../../lib';
 import type { PropsType, BuiltInPropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { CancelableType, DimensionsType, ElementRefType } from '../../types';
@@ -70,12 +68,16 @@ export type ParentExportsType<P> = {
     It handles opening the necessary windows/iframes, launching the component's url, and listening for messages back from the component.
 */
 
-export class ParentComponent<P> extends BaseComponent<P> {
+export class ParentComponent<P> {
 
+    component : Component<P>
     context : string
+    driver : ContextDriverType
     props : BuiltInPropsType & P
     onInit : ZalgoPromise<ParentComponent<P>>
-    handledErrors : Array<mixed>
+    errored : boolean
+    event : EventEmitterType
+    clean : CleanupType
 
     container : HTMLElement
     element : HTMLElement
@@ -86,36 +88,23 @@ export class ParentComponent<P> extends BaseComponent<P> {
     timeout : ?TimeoutID // eslint-disable-line no-undef
 
     constructor(component : Component<P>, context : string, { props } : { props : (PropsType & P) }) {
-        super();
+        ZalgoPromise.try(() => {
+            this.onInit = new ZalgoPromise();
+            this.clean = cleanup(this);
+            this.event = eventEmitter();
 
-        this.component = component;
-
-        this.validateParentDomain();
-
-        this.context = context;
-
-        try {
+            this.component = component;
+            this.context = context;
+            this.driver = RENDER_DRIVERS[this.context];
+    
             this.setProps(props);
-        } catch (err) {
-            if (props.onError) {
-                props.onError(err);
-            }
-            throw err;
-        }
+            this.registerActiveComponent();
+            this.watchForUnload();
+    
+            return this.onInit;
 
-        this.registerActiveComponent();
-
-        // Options passed during renderTo. We would not ordinarily expect a user to pass these, since we depend on
-        // them only when we're trying to render from a sibling to a sibling
-
-        this.component.log(`construct_parent`);
-
-        this.watchForUnload();
-
-        this.onInit = new ZalgoPromise();
-
-        this.onInit.catch(err => {
-            return this.error(err);
+        }).catch(err => {
+            return this.error(err, props);
         });
     }
 
@@ -205,20 +194,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-    @memoized
-    getOutlet() : HTMLElement {
-        let outlet = document.createElement('div');
-        addClass(outlet, CLASS_NAMES.OUTLET);
-        return outlet;
-    }
-
-    validateParentDomain() {
-        let domain = getDomain();
-        if (!matchDomain(this.component.allowedParentDomains, domain)) {
-            throw new RenderError(`Can not be rendered by domain: ${ domain }`);
-        }
-    }
-
     renderTo(target : CrossDomainWindowType, element : ?string) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
             if (target === window) {
@@ -236,6 +211,17 @@ export class ParentComponent<P> extends BaseComponent<P> {
             this.delegate(target);
             return this.render(element, target);
         });
+    }
+
+    on(eventName : string, handler : () => void) : CancelableType {
+        return this.event.on(eventName, handler);
+    }
+
+    @memoized
+    getOutlet() : HTMLElement {
+        let outlet = document.createElement('div');
+        addClass(outlet, CLASS_NAMES.OUTLET);
+        return outlet;
     }
 
     checkAllowRemoteRender(target : CrossDomainWindowType) {
@@ -328,13 +314,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return buildChildWindowName(this.component.name, { id, context, domain: thisdomain, uid, tag, componentParent, props, exports });
     }
 
-
-    /*  Set Props
-        ---------
-
-        Normalize props and generate the url we'll use to render the component
-    */
-
     setProps(props : (PropsType & P), isUpdate : boolean = false) {
 
         if (this.component.validate) {
@@ -346,14 +325,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         extend(this.props, normalizeProps(this.component, this, props, isUpdate));
     }
-
-
-    /*  Build Url
-        ---------
-
-        We build the props we're passed into the initial url. This means the component server-side can start rendering
-        itself based on whatever props the merchant provides.
-    */
 
     @memoized
     buildUrl() : ZalgoPromise<string> {
@@ -407,13 +378,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return result;
     }
 
-
-    /*  Update Props
-        ------------
-
-        Send new props down to the child
-    */
-
     updateProps(props : (PropsType & P)) : ZalgoPromise<void> {
         this.setProps(props, true);
 
@@ -464,15 +428,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-    get driver() : ContextDriverType {
-
-        if (!this.context) {
-            throw new Error('Context not set');
-        }
-
-        return RENDER_DRIVERS[this.context];
-    }
-
     elementReady(element : ElementRefType) : ZalgoPromise<void> {
         return elementReady(element).then(noop);
     }
@@ -515,31 +470,24 @@ export class ParentComponent<P> extends BaseComponent<P> {
             }
 
         }).then(({ data }) => {
-
             this.clean.register(data.destroy);
             return data;
 
         }).catch(err => {
-
             throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${ stringifyError(err) }`);
         });
 
         let overrides = this.driver.delegateOverrides;
-
         for (let key of Object.keys(overrides)) {
             let val = overrides[key];
 
-            if (val === DELEGATE.CALL_ORIGINAL) {
-                continue;
-            } else if (val === DELEGATE.CALL_DELEGATE) {
+            if (val === DELEGATE.CALL_DELEGATE) {
                 // $FlowFixMe
                 this[key] = function overridenFunction() : ZalgoPromise<mixed> {
                     return delegate.then(data => {
                         return data.overrides[key].apply(this, arguments);
                     });
                 };
-            } else {
-                throw new Error(`Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
             }
         }
     }
@@ -573,38 +521,18 @@ export class ParentComponent<P> extends BaseComponent<P> {
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
 
-
-    /*  Load Url
-        --------
-
-        Load url into the child window. This is separated out because it's quite common for us to have situations
-        where opening the child window and loading the url happen at different points.
-    */
-
     loadUrl(proxyWin : ProxyWindow, url : string) : ZalgoPromise<ProxyWindow> {
         this.component.log(`load_url`);
         return proxyWin.setLocation(url);
     }
-
-    /*  Run Timeout
-        -----------
-
-        Set a timeout on the initial render, and call this.props.onTimeout if we don't get an init call in time.
-    */
 
     runTimeout() {
         let timeout = this.props.timeout;
 
         if (timeout) {
             let id = this.timeout = setTimeout(() => {
-
                 this.component.log(`timed_out`, { timeout: timeout.toString() });
-
-                let error = this.component.createError(`Loading component timed out after ${ timeout } milliseconds`);
-
-                this.onInit.reject(error);
-                this.props.onTimeout(error);
-
+                this.error(this.component.createError(`Loading component timed out after ${ timeout } milliseconds`));
             }, timeout);
 
             this.clean.register(() => {
@@ -981,13 +909,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         this.clean.run('destroyContainerEvents');
     }
 
-
-    /*  Destroy
-        -------
-
-        Close the component and clean up any listeners and state
-    */
-
     destroy() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (this.clean.hasTasks()) {
@@ -1006,43 +927,31 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
+    // $FlowFixMe
+    error(err : mixed, props : PropsType & P = this.props) : ZalgoPromise<void> {
+        if (this.errored) {
+            return;
+        }
 
-    /*  Error
-        -----
+        this.errored = true;
 
-        Handle an error
-    */
-
-    error(err : mixed) : ZalgoPromise<void> {
         // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise.try(() => {
-
-            this.handledErrors = this.handledErrors || [];
-
-            if (this.handledErrors.indexOf(err) !== -1) {
-                // $FlowFixMe
-                return;
-            }
-
-            this.handledErrors.push(err);
-
+            this.onInit = this.onInit || new ZalgoPromise();
             this.onInit.reject(err);
 
             return this.destroy();
 
         }).then(() => {
-
-            if (this.props.onError) {
-                return this.props.onError(err);
+            if (props.onError) {
+                return props.onError(err);
             }
 
         }).catch(errErr => { // eslint-disable-line unicorn/catch-error-name
-
             throw new Error(`An error was encountered while handling error:\n\n ${ stringifyError(err) }\n\n${ stringifyError(errErr) }`);
 
         }).then(() => {
-
-            if (!this.props.onError) {
+            if (!props.onError) {
                 throw err;
             }
         });

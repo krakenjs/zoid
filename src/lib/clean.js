@@ -1,21 +1,17 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { eventEmitter, type EventEmitterType, stringifyError, noop } from 'belter/src';
+import { noop } from 'belter/src';
 
-import type { CancelableType } from '../types';
-
-import type { Component } from './component';
-
-type CleanupType<T : mixed> = {
-    set : (string, T) => T,
+export type CleanupType = {
+    set : <T : mixed>(string, T) => T, // eslint-disable-line no-undef
     register : (string | Function, ?Function) => void,
     hasTasks : () => boolean,
     all : () => ZalgoPromise<void>,
     run : (string) => ZalgoPromise<void>
 };
 
-function cleanup(obj : Object) : CleanupType<*> {
+export function cleanup(obj : Object) : CleanupType {
 
     let tasks = [];
     let cleaned = false;
@@ -99,32 +95,4 @@ function cleanup(obj : Object) : CleanupType<*> {
             return ZalgoPromise.all(results).then(noop);
         }
     };
-}
-
-
-/*  Base Component
-    --------------
-
-    Methods that are common between child and parent components, but are not generic or uncoupled enough to live in
-    a separate library.
-*/
-
-export class BaseComponent<P> {
-
-    clean : CleanupType<*>
-    event : EventEmitterType
-    component : Component<P>
-
-    constructor() {
-        this.clean = cleanup(this);
-        this.event = eventEmitter();
-    }
-
-    on(eventName : string, handler : () => void) : CancelableType {
-        return this.event.on(eventName, handler);
-    }
-    
-    error(err : mixed) : ZalgoPromise<void> {
-        throw new Error(`Expected error to be implemented - got ${ stringifyError(err) }`);
-    }
 }

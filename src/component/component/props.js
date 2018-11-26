@@ -49,7 +49,6 @@ type onDisplayPropType = EventHandlerType<void>;
 type onEnterPropType = EventHandlerType<void>;
 type onRenderPropType = EventHandlerType<void>;
 type onClosePropType = EventHandlerType<string>;
-type onTimeoutPropType = EventHandlerType<Error>;
 type onErrorPropType = EventHandlerType<mixed>;
 
 export type BuiltInPropsType = {
@@ -62,7 +61,6 @@ export type BuiltInPropsType = {
     onEnter : onEnterPropType,
     onRender : onRenderPropType,
     onClose : onClosePropType,
-    onTimeout : onTimeoutPropType,
     onError? : onErrorPropType
 };
 
@@ -76,7 +74,6 @@ export type PropsType = {
     onEnter? : onEnterPropType,
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
-    onTimeout? : onTimeoutPropType,
     onError? : onErrorPropType
 };
 
@@ -90,7 +87,6 @@ export type BuiltInPropsDefinitionType<P> = {
     onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
-    onTimeout : FunctionPropDefinitionType<onTimeoutPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>
 };
 
@@ -127,8 +123,6 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             type:     'object',
             required: false
         },
-
-        // A millisecond timeout before onTimeout is called
 
         timeout: {
             type:        'number',
@@ -193,22 +187,6 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
 
             decorate(onClose : Function) : Function {
                 return once(promisify(onClose));
-            }
-        },
-
-        // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
-
-        onTimeout: {
-            type:        'function',
-            required:    false,
-            sendToChild: false,
-            def() : Function {
-                return function onTimeout(err : mixed) : void {
-                    return this.props.onError(err);
-                };
-            },
-            decorate(onTimeout : Function) : Function {
-                return memoize(promisify(onTimeout));
             }
         },
 

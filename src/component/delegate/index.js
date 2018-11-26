@@ -2,12 +2,13 @@
 
 import { onCloseWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { eventEmitter, type EventEmitterType } from 'belter/src';
 
-import { BaseComponent } from '../base';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
 import type { Component } from '../component';
 import type { CancelableType, DimensionsType } from '../../types';
+import { cleanup, type CleanupType } from '../../lib';
 
 export type DelegatePropsType = {
     uid : string,
@@ -27,11 +28,14 @@ export type DelegateOptionsType = {
     }
 };
 
-export class DelegateComponent<P> extends BaseComponent<P> {
+export class DelegateComponent<P>  {
 
+    component : Component<P>
     source : CrossDomainWindowType
     context : string
     props : DelegatePropsType
+    event : EventEmitterType
+    clean : CleanupType
 
     userClose : (string) => ZalgoPromise<void>
     getDomain : () => ZalgoPromise<string>
@@ -39,11 +43,10 @@ export class DelegateComponent<P> extends BaseComponent<P> {
     on : (string, () => void) => CancelableType
 
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
-        super();
-
         this.component = component;
-
         this.context = options.context;
+        this.clean = cleanup(this);
+        this.event = eventEmitter();
 
         this.props = {
             uid:        options.props.uid,
