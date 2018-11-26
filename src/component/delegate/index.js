@@ -42,7 +42,6 @@ export class DelegateComponent<P> extends BaseComponent<P> {
         super();
 
         this.component = component;
-        this.clean.set('source', source);
 
         this.context = options.context;
 
@@ -76,7 +75,7 @@ export class DelegateComponent<P> extends BaseComponent<P> {
 
         ParentComponent.prototype.registerActiveComponent.call(this);
 
-        this.watchForClose();
+        this.watchForClose(source);
     }
 
     get driver() : ContextDriverType {
@@ -88,8 +87,8 @@ export class DelegateComponent<P> extends BaseComponent<P> {
         return RENDER_DRIVERS[this.context];
     }
 
-    watchForClose() {
-        let closeWindowListener = onCloseWindow(this.source, () => this.destroy(), 3000);
+    watchForClose(source : CrossDomainWindowType) {
+        let closeWindowListener = onCloseWindow(source, () => this.destroy(), 3000);
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 

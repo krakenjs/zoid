@@ -5,7 +5,6 @@ import { memoize, stringifyError, base64encode, base64decode } from 'belter/src'
 
 import { globalFor } from '../lib';
 import { WINDOW_REFERENCES, ZOID, INITIAL_PROPS, CONTEXT_TYPES } from '../constants';
-import type { DimensionsType, PositionType } from '../types';
 
 function normalize(str : string) : string {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
@@ -42,7 +41,6 @@ type ChildWindowNameOptions = {
     tag : string,
     context : $Values<typeof CONTEXT_TYPES>,
     componentParent : WindowRef,
-    renderParent : WindowRef,
     props : PropsType,
     exports : string,
     id : string,
@@ -113,7 +111,7 @@ export let getComponentMeta = memoize(() : ChildWindowNameOptions => {
 });
 
 export function getParentDomain() : string {
-    return getComponentMeta().domain; // How does this work for renderTo..?
+    return getComponentMeta().domain;
 }
 
 function getWindowByRef({ ref, uid, distance } : WindowRef) : CrossDomainWindowType {
@@ -173,52 +171,3 @@ export let getParentComponentWindow = memoize(() => {
 
     return getWindowByRef(componentMeta.componentParent);
 });
-
-
-export let getParentRenderWindow = memoize(() => {
-
-    let componentMeta = getComponentMeta();
-
-    if (!componentMeta) {
-        throw new Error(`Can not get parent component window - window not rendered by zoid`);
-    }
-
-    return getWindowByRef(componentMeta.renderParent);
-});
-
-
-/*  Get Position
-    ------------
-
-    Calculate the position for the popup
-
-    This is either
-    - Specified by the user
-    - The center of the screen
-
-    I'd love to do this with pure css, but alas... popup windows :(
-*/
-
-export function getPosition({ width, height } : DimensionsType) : PositionType {
-
-    let x = 0;
-    let y = 0;
-
-    if (width) {
-        if (window.outerWidth) {
-            x = Math.round((window.outerWidth - width) / 2) + window.screenX;
-        } else if (window.screen.width) {
-            x = Math.round((window.screen.width - width) / 2);
-        }
-    }
-
-    if (height) {
-        if (window.outerHeight) {
-            y = Math.round((window.outerHeight - height) / 2) + window.screenY;
-        } else if (window.screen.height) {
-            y = Math.round((window.screen.height - height) / 2);
-        }
-    }
-
-    return { x, y };
-}

@@ -3,18 +3,17 @@
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
 import { isSameDomain, isTop, isSameTopWindow, matchDomain,
-    getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType,
-    type SameDomainWindowType } from 'cross-domain-utils/src';
+    getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
     addClass, extend, extendUrl,
     setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
-    once, awaitFrameLoad, stringify, stringifyError } from 'belter/src';
+    once, stringify, stringifyError } from 'belter/src';
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { BaseComponent } from '../base';
-import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
+import { buildChildWindowName } from '../window';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES,
     CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
@@ -80,11 +79,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     container : HTMLElement
     element : HTMLElement
-    outlet : HTMLElement;
     iframe : HTMLIFrameElement
-
     prerenderIframe : HTMLIFrameElement
-    prerenderWindow : SameDomainWindowType
 
     childExports : ?ChildExportsType<P>
     timeout : ?TimeoutID // eslint-disable-line no-undef
@@ -141,7 +137,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             });
 
             let focus = () => {
-                return tasks.open.then(win => {
+                return tasks.awaitWindow.then(win => {
                     return win.focus();
                 });
             };
@@ -154,41 +150,31 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 ? tasks.openContainer.then(() => this.open())
                 : this.open();
 
+            tasks.awaitWindow = tasks.open.then(proxyWin => {
+                return proxyWin.awaitWindow();
+            });
+
             tasks.showContainer = tasks.openContainer.then(() => {
                 return this.showContainer();
             });
 
-            tasks.openPrerender = tasks.openContainer.then(() => {
-                return this.openPrerender();
+            tasks.setWindowName = ZalgoPromise.all([ tasks.open, tasks.getDomain ]).then(([ proxyWin, domain ]) => {
+                return this.setWindowName(proxyWin, this.buildChildWindowName({ proxyWin, domain, target }));
             });
 
-            tasks.switchPrerender = ZalgoPromise.all([ tasks.openPrerender, this.onInit ]).then(() => {
-                return this.switchPrerender();
-            });
-
-            tasks.setWindowName = ZalgoPromise.all([ tasks.open, tasks.getDomain ]).then(([ win, domain ]) => {
-                return this.setWindowName(win, this.buildChildWindowName({ win, domain, target }));
-            });
-
-            tasks.watchForClose = ZalgoPromise.all([ tasks.open, tasks.setWindowName ]).then(([ win ]) => {
+            tasks.watchForClose = ZalgoPromise.all([ tasks.awaitWindow, tasks.setWindowName ]).then(([ win ]) => {
                 return this.watchForClose(win);
             });
 
-            tasks.linkDomain = ZalgoPromise.all([ tasks.open, tasks.getDomain, tasks.setWindowName ]).then(([ win, domain ]) => {
-                if (bridge && typeof domain === 'string') {
-                    return bridge.linkUrl(win, domain);
-                }
+            tasks.prerender = ZalgoPromise.all([ tasks.open, tasks.openContainer ]).then(([ proxyWin ]) => {
+                return this.prerender(proxyWin);
             });
 
-            tasks.createPrerenderTemplate = tasks.openPrerender.then(() => {
-                return this.createPrerenderTemplate();
-            });
-
-            tasks.showComponent = tasks.createPrerenderTemplate.then(() => {
+            tasks.showComponent = tasks.prerender.then(() => {
                 return this.showComponent();
             });
 
-            tasks.openBridge = ZalgoPromise.all([ tasks.open, tasks.getDomain, tasks.setWindowName ]).then(([ win, domain ]) => {
+            tasks.openBridge = ZalgoPromise.all([ tasks.awaitWindow, tasks.getDomain, tasks.setWindowName ]).then(([ win, domain ]) => {
                 return this.openBridge(win, domain);
             });
 
@@ -197,11 +183,13 @@ export class ParentComponent<P> extends BaseComponent<P> {
             tasks.loadUrl = ZalgoPromise.all([
                 tasks.open,
                 tasks.buildUrl,
-                tasks.setWindowName,
-                tasks.linkDomain,
-                tasks.openBridge
-            ]).then(([ win, url ]) => {
-                return this.loadUrl(win, url);
+                tasks.setWindowName
+            ]).then(([ proxyWin, url ]) => {
+                return this.loadUrl(proxyWin, url);
+            });
+
+            tasks.switchPrerender = ZalgoPromise.all([ tasks.prerender, this.onInit ]).then(() => {
+                return this.switchPrerender();
             });
 
             tasks.runTimeout = tasks.loadUrl.then(() => {
@@ -233,33 +221,31 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     renderTo(target : CrossDomainWindowType, element : ?string) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
-
             if (target === window) {
                 return this.render(element);
-            }
-
-            if (!isSameTopWindow(window, target)) {
-                throw new Error(`Can only renderTo an adjacent frame`);
             }
 
             if (element && typeof element !== 'string') {
                 throw new Error(`Element passed to renderTo must be a string selector, got ${ typeof element } ${ element }`);
             }
 
-            this.checkAllowRenderTo(target);
+            this.checkAllowRemoteRender(target);
 
             this.component.log(`render_${ this.context }_to_win`, { element: stringify(element), context: this.context });
 
             this.delegate(target);
-
             return this.render(element, target);
         });
     }
 
-    checkAllowRenderTo(target : CrossDomainWindowType) {
+    checkAllowRemoteRender(target : CrossDomainWindowType) {
 
         if (!target) {
             throw this.component.createError(`Must pass window to renderTo`);
+        }
+
+        if (!isSameTopWindow(window, target)) {
+            throw new Error(`Can only renderTo an adjacent frame`);
         }
 
         if (isSameDomain(target)) {
@@ -314,30 +300,13 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
-    getRenderParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
-
-        if (renderToWindow === window) {
-            return this.getComponentParentRef(renderToWindow);
-        }
-
-        let uid = uniqueID();
-        global.windows[uid] = renderToWindow;
-
-        this.clean.register(() => {
-            delete global.windows[uid];
-        });
-
-        return { ref: WINDOW_REFERENCES.GLOBAL, uid };
-    }
-
-    buildChildWindowName({ win, domain, target = window } : { win : CrossDomainWindowType, domain : string, target : CrossDomainWindowType } = {}) : string {
+    buildChildWindowName({ proxyWin, domain, target = window } : { proxyWin : ProxyWindow, domain : string, target : CrossDomainWindowType } = {}) : string {
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
-        let sProps = serializeMessage(win, domain, this.getPropsForChild());
+        let sProps = serializeMessage(proxyWin, domain, this.getPropsForChild());
 
         let componentParent = this.getComponentParentRef(target);
-        let renderParent    = this.getRenderParentRef(target);
 
         let props = isSameDomain(target)
             ? { type: INITIAL_PROPS.RAW, value: sProps }
@@ -351,31 +320,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
             });
         }
         
-        let exports = serializeMessage(win, domain, this.buildParentExports(win));
+        let exports = serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin));
         let id = uniqueID();
         let thisdomain = getDomain(window);
         let context = this.context;
 
-        return buildChildWindowName(this.component.name, { id, context, domain: thisdomain, uid, tag, componentParent, renderParent, props, exports });
-    }
-
-
-    /*  Send to Parent
-        --------------
-
-        Send a post message to our parent window.
-    */
-
-    sendToParent(name : string, data : Object) : ZalgoPromise<{ origin : string, source : CrossDomainWindowType, data : Object }> {
-        let parentWindow = getParentComponentWindow();
-
-        if (!parentWindow) {
-            throw new Error(`Can not find parent component window to message`);
-        }
-
-        this.component.log(`send_to_parent_${ name }`);
-
-        return send(getParentComponentWindow(), name, data, { domain: getParentDomain() });
+        return buildChildWindowName(this.component.name, { id, context, domain: thisdomain, uid, tag, componentParent, props, exports });
     }
 
 
@@ -479,69 +429,36 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     openBridge(win : CrossDomainWindowType, domain : string) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
-            if (!bridge) {
+            if (!bridge || !bridge.needsBridge({ win, domain }) || bridge.hasBridge(domain, domain)) {
                 return;
             }
 
-            let needsBridge = bridge.needsBridge({ win, domain });
             let bridgeUrl = this.component.getBridgeUrl(this.props.env);
-
-            if (!bridgeUrl) {
-                if (needsBridge && !bridge.hasBridge(domain, domain)) {
-                    throw new Error(`Bridge url needed to render ${ this.context }`);
-                }
-
-                return;
-            }
-
             let bridgeDomain = this.component.getBridgeDomain(this.props.env);
 
-            if (!bridgeDomain) {
-                throw new Error(`Can not determine domain for bridge`);
+            if (!bridgeUrl || !bridgeDomain) {
+                throw new Error(`Bridge url and domain needed to render ${ this.context }`);
             }
 
-            if (needsBridge) {
-                return bridge.openBridge(bridgeUrl, bridgeDomain).then(result => {
-                    if (result) {
-                        return result;
-                    }
-                });
-            }
+            bridge.linkUrl(win, domain);
+            return bridge.openBridge(bridgeUrl, bridgeDomain);
         });
     }
-
-
-    /*  Open
-        ----
-
-        Open a new window in the desired context
-    */
-
-    @memoized
-    open() : ZalgoPromise<CrossDomainWindowType> {
+    
+    open() : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`);
             return this.driver.open.call(this);
         });
     }
 
-    setWindowName(win : CrossDomainWindowType | ProxyWindow, name : string) : ZalgoPromise<ProxyWindow> {
-        return ProxyWindow.toProxyWindow(win).setName(name);
+    setWindowName(proxyWin : ProxyWindow, name : string) : ZalgoPromise<ProxyWindow> {
+        return proxyWin.setName(name);
     }
 
-    @memoized
-    openPrerender() : ZalgoPromise<void> {
-        return ZalgoPromise.try(() => {
-            if (this.component.prerenderTemplate) {
-                return this.driver.openPrerender.call(this);
-            }
-        });
-    }
-
-    @memoized
     switchPrerender() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-            if (this.prerenderWindow && this.driver.switchPrerender) {
+            if (this.component.prerenderTemplate && this.driver.switchPrerender) {
                 return this.driver.switchPrerender.call(this);
             }
         });
@@ -614,37 +531,18 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
             if (val === DELEGATE.CALL_ORIGINAL) {
                 continue;
+            } else if (val === DELEGATE.CALL_DELEGATE) {
+                // $FlowFixMe
+                this[key] = function overridenFunction() : ZalgoPromise<mixed> {
+                    return delegate.then(data => {
+                        return data.overrides[key].apply(this, arguments);
+                    });
+                };
+            } else {
+                throw new Error(`Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
             }
-
-            // $FlowFixMe
-            let original = this[key];
-
-            // $FlowFixMe
-            this[key] = function overridenFunction() : ZalgoPromise<mixed> {
-                return delegate.then(data => {
-
-                    let override = data.overrides[key];
-
-                    if (val === DELEGATE.CALL_DELEGATE) {
-                        return override.apply(this, arguments);
-                    }
-
-                    if (typeof val === 'function') {
-                        return val(original, override).apply(this, arguments);
-                    }
-
-                    throw new Error(`Expected delegate to be CALL_ORIGINAL, CALL_DELEGATE, or factory method`);
-                });
-            };
         }
     }
-
-    /*  Watch For Close
-        ---------------
-
-        Watch for the child window closing, so we can cleanup.
-        Also watch for this window changing location, so we can close the component.
-    */
 
     watchForClose(win : CrossDomainWindowType) {
         let closeWindowListener = onCloseWindow(win, () => {
@@ -683,9 +581,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
         where opening the child window and loading the url happen at different points.
     */
 
-    loadUrl(win : CrossDomainWindowType | ProxyWindow, url : string) : ZalgoPromise<ProxyWindow> {
+    loadUrl(proxyWin : ProxyWindow, url : string) : ZalgoPromise<ProxyWindow> {
         this.component.log(`load_url`);
-        return ProxyWindow.toProxyWindow(win).setLocation(url);
+        return proxyWin.setLocation(url);
     }
 
     /*  Run Timeout
@@ -716,7 +614,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         }
     }
 
-    initChild(win : CrossDomainWindowType, childExports : ChildExportsType<P>) : ZalgoPromise<void> {
+    initChild(childExports : ChildExportsType<P>) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.childExports = childExports;
             this.onInit.resolve(this);
@@ -727,9 +625,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-    buildParentExports(win : CrossDomainWindowType) : ParentExportsType<P> {
+    buildParentExports(win : ProxyWindow) : ParentExportsType<P> {
         return {
-            init:       (childExports) => this.initChild(win, childExports),
+            init:       (childExports) => this.initChild(childExports),
             close:      (reason) => this.close(reason),
             checkClose: () => this.checkClose(win),
             resize:     (width, height) => this.resize(width, height),
@@ -799,13 +697,19 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    checkClose(win : CrossDomainWindowType) : ZalgoPromise<void> {
-        return ZalgoPromise.try(() => {
-            let closeWindowListener = onCloseWindow(win, () => {
-                this.userClose();
-            }, 50, 500);
-    
-            this.clean.register(closeWindowListener.cancel);
+    checkClose(win : ProxyWindow) : ZalgoPromise<void> {
+        return win.isClosed().then(closed => {
+            if (closed) {
+                return this.userClose();
+            }
+
+            return ZalgoPromise.delay(200)
+                .then(() => win.isClosed())
+                .then(secondClosed => {
+                    if (secondClosed) {
+                        return this.userClose();
+                    }
+                });
         });
     }
 
@@ -935,8 +839,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             if (this.container) {
                 return animateAndHide(this.container, ANIMATION_NAMES.HIDE_CONTAINER, this.clean.register);
-            } else {
-                return ZalgoPromise.resolve();
             }
         });
     }
@@ -946,8 +848,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             if (this.element) {
                 return animateAndHide(this.element, ANIMATION_NAMES.HIDE_COMPONENT, this.clean.register);
-            } else {
-                return ZalgoPromise.resolve();
             }
         });
     }
@@ -959,40 +859,32 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    createPrerenderTemplate() : ZalgoPromise<void> {
+    prerender(proxyWin : ProxyWindow) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (!this.component.prerenderTemplate) {
-                return ZalgoPromise.resolve();
+                return;
             }
 
             return ZalgoPromise.try(() => {
+                return proxyWin.awaitWindow();
 
-                if (this.prerenderIframe) {
-                    return awaitFrameLoad(this.prerenderIframe).then(() => this.prerenderWindow);
-                } else {
-                    return this.prerenderWindow;
-                }
-
-            }).then(preRenderWin => {
-
-                let doc;
-
-                try {
-                    doc = preRenderWin.document;
-                } catch (err) {
+            }).then(win => {
+                return this.driver.openPrerender.call(this, win);
+                
+            }).then(prerenderWindow => {
+                if (!prerenderWindow) {
                     return;
                 }
-
-                let el = this.renderTemplate(this.component.prerenderTemplate, {
-                    document: doc
-                });
-
+        
+                let doc = prerenderWindow.document;
+                let el = this.renderTemplate(this.component.prerenderTemplate, { document: doc });
+    
                 if (el instanceof ElementNode) {
                     el = el.render(dom({ doc }));
                 }
-
+    
                 try {
-                    writeElementToWindow(preRenderWin, el);
+                    writeElementToWindow(prerenderWindow, el);
                 } catch (err) {
                     // pass
                 }
@@ -1000,14 +892,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         });
     }
 
-
-    /*  Create Parent Template
-        ----------------------
-
-        Create a template and stylesheet for the parent template behind the element
-    */
-
-    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, doc = document } : { focus? : () => ZalgoPromise<void>, container? : HTMLElement, doc? : Document }) : T {
+    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document } : { focus? : () => ZalgoPromise<void>, container? : HTMLElement, document? : Document }) : T {
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
             height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
@@ -1034,8 +919,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             jsxDom:     node,
             document,
             dimensions: { width, height },
-            container,
-            doc
+            container
         });
     }
 
@@ -1061,10 +945,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 return;
             }
 
-            let container = this.renderTemplate(this.component.containerTemplate, {
-                container: el,
-                focus
-            });
+            let container = this.renderTemplate(this.component.containerTemplate, { container: el, focus });
 
             if (container instanceof ElementNode) {
                 container = container.render(dom({ doc: document }));

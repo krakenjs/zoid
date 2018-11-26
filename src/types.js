@@ -12,11 +12,6 @@ export type CssDimensionsType = {
     height : string
 };
 
-export type PositionType = {
-    x : number,
-    y : number
-};
-
 export type CancelableType = {
     cancel : () => void
 };

@@ -8,7 +8,7 @@ import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
     cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
 
 import { BaseComponent } from '../base';
-import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
+import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
 import { globalFor } from '../../lib';
 import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
@@ -69,14 +69,12 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         let parentDomain = getParentDomain();
         let parentComponentWindow = this.getParentComponentWindow();
-        let parentRenderWindow = this.getParentRenderWindow();
 
         window.xchild = this.component.xchild = this;
         this.setProps(this.getInitialProps(), getParentDomain());
         this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
 
         markWindowKnown(parentComponentWindow);
-        markWindowKnown(parentRenderWindow);
 
         this.watchForClose();
         this.listenForResize();
@@ -115,10 +113,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
     getParentComponentWindow() : CrossDomainWindowType {
         return getParentComponentWindow();
-    }
-
-    getParentRenderWindow() : CrossDomainWindowType {
-        return getParentRenderWindow();
     }
 
     getInitialProps() : (BuiltInPropsType & P) {
