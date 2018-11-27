@@ -26,6 +26,7 @@ describe('zoid validation errors', () => {
         });
 
         expectError('Special chars in tag name', () => {
+            // $FlowFixMe
             zoid.create({
                 tag: 'special$%&-chars'
             });
@@ -48,6 +49,7 @@ describe('zoid validation errors', () => {
         });
 
         expectError('Strings passed for dimensions', () => {
+            // $FlowFixMe
             zoid.create({
                 tag:        'my-component',
                 dimensions: {
@@ -276,17 +278,6 @@ describe('zoid validation errors', () => {
                     foo: 'http://www.zombo.com'
                 },
                 defaultEnv: 1234
-            });
-        });
-
-        expectError('Default env passed with no urls', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                defaultEnv: 'moo'
             });
         });
 

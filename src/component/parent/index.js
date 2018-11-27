@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
-import { isSameDomain, isTop, isSameTopWindow, matchDomain,
+import { isSameDomain, isTop, isSameTopWindow, matchDomain, getDomainFromUrl,
     getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
@@ -117,7 +117,7 @@ export class ParentComponent<P> {
             
             tasks.onRender = this.props.onRender();
 
-            tasks.getDomain = this.getDomain();
+            let domain = this.getDomain();
 
             tasks.elementReady = ZalgoPromise.try(() => {
                 if (element) {
@@ -147,7 +147,7 @@ export class ParentComponent<P> {
                 return this.showContainer();
             });
 
-            tasks.setWindowName = ZalgoPromise.all([ tasks.open, tasks.getDomain ]).then(([ proxyWin, domain ]) => {
+            tasks.setWindowName = tasks.open.then(proxyWin => {
                 return this.setWindowName(proxyWin, this.buildChildWindowName({ proxyWin, domain, target }));
             });
 
@@ -163,7 +163,7 @@ export class ParentComponent<P> {
                 return this.showComponent();
             });
 
-            tasks.openBridge = ZalgoPromise.all([ tasks.awaitWindow, tasks.getDomain, tasks.setWindowName ]).then(([ win, domain ]) => {
+            tasks.openBridge = tasks.awaitWindow.then(win => {
                 return this.openBridge(win, domain);
             });
 
@@ -234,22 +234,12 @@ export class ParentComponent<P> {
             throw new Error(`Can only renderTo an adjacent frame`);
         }
 
-        if (isSameDomain(target)) {
-            return;
-        }
-
         let origin = getDomain();
-        let domain = this.component.getDomain(null, this.props.env);
+        let domain = this.getDomain();
 
-        if (!domain) {
-            throw new Error(`Could not determine domain to allow remote render`);
+        if (!matchDomain(domain, origin) && !isSameDomain(target)) {
+            throw new Error(`Can not render remotely to ${ domain.toString() } - can only render to ${ origin }`);
         }
-
-        if (matchDomain(domain, origin)) {
-            return;
-        }
-
-        throw new Error(`Can not render remotely to ${ domain.toString() } - can only render to ${ origin }`);
     }
 
     registerActiveComponent() {
@@ -326,39 +316,17 @@ export class ParentComponent<P> {
         extend(this.props, normalizeProps(this.component, this, props, isUpdate));
     }
 
-    @memoized
     buildUrl() : ZalgoPromise<string> {
         return propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
             .then(query => {
-                let url = this.component.getUrl(this.props.env, this.props);
+                let url = this.component.getUrl(this.props);
                 return extendUrl(url, { query: { ...query } });
             });
     }
 
 
-    getDomain() : ZalgoPromise<string> {
-        return ZalgoPromise.try(() => {
-
-            let domain = this.component.getDomain(null, this.props.env);
-
-            if (domain) {
-                return domain;
-            }
-
-            if (this.component.buildUrl) {
-                return ZalgoPromise.try(() => this.component.buildUrl(this.props)).then(builtUrl => {
-                    return this.component.getDomain(builtUrl, this.props.env);
-                });
-            }
-
-        }).then(domain => {
-
-            if (!domain) {
-                throw new Error(`Could not determine domain`);
-            }
-
-            return domain;
-        });
+    getDomain() : string {
+        return this.component.getDomain(this.props);
     }
 
     getPropsForChild() : (BuiltInPropsType & P) {
@@ -397,13 +365,13 @@ export class ParentComponent<P> {
                 return;
             }
 
-            let bridgeUrl = this.component.getBridgeUrl(this.props.env);
-            let bridgeDomain = this.component.getBridgeDomain(this.props.env);
+            let bridgeUrl = this.component.getBridgeUrl(this.props);
 
-            if (!bridgeUrl || !bridgeDomain) {
+            if (!bridgeUrl) {
                 throw new Error(`Bridge url and domain needed to render ${ this.context }`);
             }
 
+            let bridgeDomain = getDomainFromUrl(bridgeUrl);
             bridge.linkUrl(win, domain);
             return bridge.openBridge(bridgeUrl, bridgeDomain);
         });
@@ -461,11 +429,9 @@ export class ParentComponent<P> {
                 props,
 
                 overrides: {
-                    userClose:            () => this.userClose(),
-                    getDomain:            () => this.getDomain(),
-
-                    error: (err) => this.error(err),
-                    on:    (eventName, handler) => this.on(eventName, handler)
+                    userClose: () => this.userClose(),
+                    error:     (err) => this.error(err),
+                    on:        (eventName, handler) => this.on(eventName, handler)
                 }
             }
 

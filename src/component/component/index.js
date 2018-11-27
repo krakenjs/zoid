@@ -3,7 +3,7 @@
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { memoize, copyProp } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
@@ -36,8 +36,7 @@ export type ComponentOptionsType<P> = {
 
     tag : string,
 
-    url? : EnvString,
-    buildUrl? : (BuiltInPropsType & P) => string,
+    url : EnvString | (props : BuiltInPropsType & P) => string,
 
     domain? : EnvString,
     bridgeUrl? : EnvString,
@@ -74,11 +73,10 @@ export class Component<P> {
     looseProps : boolean
 
     tag : string
-    url : EnvString
-
+    
+    url : EnvString | (props : BuiltInPropsType & P) => string
     domain : EnvString
     bridgeUrl : EnvString
-    bridgeDomain : EnvString
 
     props : UserPropsDefinitionType<P>
     builtinProps : BuiltInPropsDefinitionType<P>
@@ -91,7 +89,6 @@ export class Component<P> {
     allowedParentDomains : StringMatcherType
 
     defaultEnv : ?string
-    buildUrl : (BuiltInPropsType & P) => string
 
     contexts : { iframe? : boolean, popup? : boolean }
     defaultContext : string
@@ -144,16 +141,11 @@ export class Component<P> {
 
         this.addProp(options, 'defaultEnv');
 
-        // A mapping of env->url, used to determine which url to load for which env
-
-        this.addProp(options, 'buildUrl');
-
-        this.addProp(options, 'url');
+        // $FlowFixMe
+        this.addProp(options, 'url', options.buildUrl);
         this.addProp(options, 'domain');
-
         this.addProp(options, 'bridgeUrl');
-        this.addProp(options, 'bridgeDomain');
-
+        
         this.addProp(options, 'attributes', {});
 
         // A url to use by default to render the component, if not using envs
@@ -256,18 +248,7 @@ export class Component<P> {
             return true;
         });
 
-        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, origin, data }) => {
-
-            let domain = this.getDomain(null, data.env || this.defaultEnv);
-
-            if (!domain) {
-                throw new Error(`Could not determine domain to allow remote render`);
-            }
-
-            if (!matchDomain(domain, origin)) {
-                throw new Error(`Can not render from ${ origin } - expected ${ domain.toString() }`);
-            }
-
+        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, data }) => {
             let delegate = this.delegate(source, data.options);
 
             return {
@@ -285,123 +266,47 @@ export class Component<P> {
         });
     }
 
-
-    getValidDomain(url : ?string) : ?string {
-
-        if (!url) {
-            return;
+    getUrl(props : BuiltInPropsType & P) : string {
+        if (typeof this.url === 'function') {
+            return this.url(props);
         }
 
-        let domain = getDomainFromUrl(url);
-
-        if (typeof this.domain === 'string' && domain === this.domain) {
-            return domain;
+        if (typeof this.url === 'string') {
+            return this.url;
         }
 
-        let domains = this.domain;
+        let env = props.env || this.defaultEnv;
+        if (env && typeof this.url === 'object' && this.url[env]) {
+            return this.url[env];
+        }
 
-        if (domains && typeof domains === 'object') {
-            for (let env of Object.keys(domains)) {
+        throw new Error(`Can not find url`);
+    }
 
-                if (env === 'test') {
-                    continue;
-                }
+    getDomain(props : BuiltInPropsType & P) : string {
+        if (typeof this.domain === 'string') {
+            return this.domain;
+        }
 
-                if (domain === domains[env]) {
-                    return domain;
-                }
+        let env = props.env || this.defaultEnv;
+        if (env && typeof this.domain === 'object' && this.domain[env]) {
+            return this.domain[env];
+        }
+
+        return getDomainFromUrl(this.getUrl(props));
+    }
+
+    getBridgeUrl(props : BuiltInPropsType & P) : ?string {
+        if (this.bridgeUrl) {
+            if (typeof this.bridgeUrl === 'string') {
+                return this.bridgeUrl;
+            }
+    
+            let env = props.env || this.defaultEnv;
+            if (env && typeof this.bridgeUrl === 'object' && this.bridgeUrl[env]) {
+                return this.bridgeUrl[env];
             }
         }
-    }
-
-
-    getDomain(url : ?string, env : string) : ?(string) {
-
-        let domain = this.getForEnv(this.domain, env);
-
-        if (domain) {
-            return domain;
-        }
-
-        domain = this.getValidDomain(url);
-
-        if (domain) {
-            return domain;
-        }
-
-        // $FlowFixMe
-        let envUrl = this.getForEnv(this.url, env);
-
-        if (envUrl) {
-            // $FlowFixMe
-            return getDomainFromUrl(envUrl);
-        }
-
-        if (url) {
-            return getDomainFromUrl(url);
-        }
-    }
-
-    getBridgeUrl(env : string) : ?string {
-        // $FlowFixMe
-        return this.getForEnv(this.bridgeUrl, env);
-    }
-
-    getForEnv(item : string | { [string] : string }, env : ?string) : ?string {
-
-        if (!item) {
-            return;
-        }
-
-        if (typeof item === 'string') {
-            return item;
-        }
-
-        if (!env) {
-            env = this.defaultEnv;
-        }
-
-        if (!env) {
-            return;
-        }
-
-        if (env && typeof item === 'object' && item[env]) {
-            return item[env];
-        }
-    }
-
-    getBridgeDomain(env : string) : ?string {
-
-        // $FlowFixMe
-        let bridgeDomain = this.getForEnv(this.bridgeDomain, env);
-
-        if (bridgeDomain) {
-            // $FlowFixMe
-            return bridgeDomain;
-        }
-
-        let bridgeUrl = this.getBridgeUrl(env);
-
-        if (bridgeUrl) {
-            return getDomainFromUrl(bridgeUrl);
-        }
-    }
-
-    getUrl(env : string, props : BuiltInPropsType & P) : string {
-
-        // $FlowFixMe
-        let url = this.getForEnv(this.url, env);
-
-        if (url) {
-            // $FlowFixMe
-            return url;
-        }
-
-        if (this.buildUrl) {
-            return this.buildUrl(props);
-        }
-
-        throw new Error(`Unable to get url`);
     }
 
     isZoidComponent() : boolean {
