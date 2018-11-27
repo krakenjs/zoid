@@ -95,17 +95,13 @@ export function validate(options) {
         }
     }
 
-    if (options.url && options.buildUrl) {
-        throw new Error('Can not pass both options.url and options.buildUrl');
-    }
-
     if (options.defaultEnv) {
         if (typeof options.defaultEnv !== 'string') {
             throw new TypeError('Expected options.defaultEnv to be a string');
         }
 
-        if (!options.buildUrl && _typeof(options.url) !== 'object') {
-            throw new Error('Expected options.url to be an object mapping env->url');
+        if (_typeof(options.url) !== 'object') {
+            throw new TypeError('Expected options.url to be an object mapping env->url');
         }
 
         if (options.url && _typeof(options.url) === 'object' && !options.url[options.defaultEnv]) {
@@ -113,7 +109,11 @@ export function validate(options) {
         }
     }
 
-    if (options.url && _typeof(options.url) === 'object') {
+    if (!options.url) {
+        throw new Error('Must pass url');
+    }
+
+    if (_typeof(options.url) === 'object') {
 
         if (!options.defaultEnv) {
             throw new Error('Must pass options.defaultEnv with env->url mapping');

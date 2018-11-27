@@ -38,7 +38,6 @@ export var DelegateComponent = function () {
         }
 
         this.userClose = options.overrides.userClose;
-        this.getDomain = options.overrides.getDomain;
         this.error = options.overrides.error;
         this.on = options.overrides.on;
 

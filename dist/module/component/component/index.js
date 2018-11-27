@@ -37,7 +37,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
+import { getDomainFromUrl } from 'cross-domain-utils/src';
 import { memoize, copyProp } from 'belter/src';
 import 'jsx-pragmatic/src';
 
@@ -107,15 +107,10 @@ export var Component = (_class = function () {
 
         this.addProp(options, 'defaultEnv');
 
-        // A mapping of env->url, used to determine which url to load for which env
-
-        this.addProp(options, 'buildUrl');
-
-        this.addProp(options, 'url');
+        // $FlowFixMe
+        this.addProp(options, 'url', options.buildUrl);
         this.addProp(options, 'domain');
-
         this.addProp(options, 'bridgeUrl');
-        this.addProp(options, 'bridgeDomain');
 
         this.addProp(options, 'attributes', {});
 
@@ -228,19 +223,7 @@ export var Component = (_class = function () {
 
         on(POST_MESSAGE.DELEGATE + '_' + this.name, function (_ref) {
             var source = _ref.source,
-                origin = _ref.origin,
                 data = _ref.data;
-
-
-            var domain = _this2.getDomain(null, data.env || _this2.defaultEnv);
-
-            if (!domain) {
-                throw new Error('Could not determine domain to allow remote render');
-            }
-
-            if (!matchDomain(domain, origin)) {
-                throw new Error('Can not render from ' + origin + ' - expected ' + domain.toString());
-            }
 
             var delegate = _this2.delegate(source, data.options);
 
@@ -263,122 +246,47 @@ export var Component = (_class = function () {
         });
     };
 
-    Component.prototype.getValidDomain = function getValidDomain(url) {
-
-        if (!url) {
-            return;
+    Component.prototype.getUrl = function getUrl(props) {
+        if (typeof this.url === 'function') {
+            return this.url(props);
         }
 
-        var domain = getDomainFromUrl(url);
-
-        if (typeof this.domain === 'string' && domain === this.domain) {
-            return domain;
+        if (typeof this.url === 'string') {
+            return this.url;
         }
 
-        var domains = this.domain;
+        var env = props.env || this.defaultEnv;
+        if (env && _typeof(this.url) === 'object' && this.url[env]) {
+            return this.url[env];
+        }
 
-        if (domains && (typeof domains === 'undefined' ? 'undefined' : _typeof(domains)) === 'object') {
-            for (var _i6 = 0, _Object$keys6 = Object.keys(domains), _length6 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
-                var env = _Object$keys6[_i6];
+        throw new Error('Can not find url');
+    };
 
-                if (env === 'test') {
-                    continue;
-                }
+    Component.prototype.getDomain = function getDomain(props) {
+        if (typeof this.domain === 'string') {
+            return this.domain;
+        }
 
-                if (domain === domains[env]) {
-                    return domain;
-                }
+        var env = props.env || this.defaultEnv;
+        if (env && _typeof(this.domain) === 'object' && this.domain[env]) {
+            return this.domain[env];
+        }
+
+        return getDomainFromUrl(this.getUrl(props));
+    };
+
+    Component.prototype.getBridgeUrl = function getBridgeUrl(props) {
+        if (this.bridgeUrl) {
+            if (typeof this.bridgeUrl === 'string') {
+                return this.bridgeUrl;
+            }
+
+            var env = props.env || this.defaultEnv;
+            if (env && _typeof(this.bridgeUrl) === 'object' && this.bridgeUrl[env]) {
+                return this.bridgeUrl[env];
             }
         }
-    };
-
-    Component.prototype.getDomain = function getDomain(url, env) {
-
-        var domain = this.getForEnv(this.domain, env);
-
-        if (domain) {
-            return domain;
-        }
-
-        domain = this.getValidDomain(url);
-
-        if (domain) {
-            return domain;
-        }
-
-        // $FlowFixMe
-        var envUrl = this.getForEnv(this.url, env);
-
-        if (envUrl) {
-            // $FlowFixMe
-            return getDomainFromUrl(envUrl);
-        }
-
-        if (url) {
-            return getDomainFromUrl(url);
-        }
-    };
-
-    Component.prototype.getBridgeUrl = function getBridgeUrl(env) {
-        // $FlowFixMe
-        return this.getForEnv(this.bridgeUrl, env);
-    };
-
-    Component.prototype.getForEnv = function getForEnv(item, env) {
-
-        if (!item) {
-            return;
-        }
-
-        if (typeof item === 'string') {
-            return item;
-        }
-
-        if (!env) {
-            env = this.defaultEnv;
-        }
-
-        if (!env) {
-            return;
-        }
-
-        if (env && (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item[env]) {
-            return item[env];
-        }
-    };
-
-    Component.prototype.getBridgeDomain = function getBridgeDomain(env) {
-
-        // $FlowFixMe
-        var bridgeDomain = this.getForEnv(this.bridgeDomain, env);
-
-        if (bridgeDomain) {
-            // $FlowFixMe
-            return bridgeDomain;
-        }
-
-        var bridgeUrl = this.getBridgeUrl(env);
-
-        if (bridgeUrl) {
-            return getDomainFromUrl(bridgeUrl);
-        }
-    };
-
-    Component.prototype.getUrl = function getUrl(env, props) {
-
-        // $FlowFixMe
-        var url = this.getForEnv(this.url, env);
-
-        if (url) {
-            // $FlowFixMe
-            return url;
-        }
-
-        if (this.buildUrl) {
-            return this.buildUrl(props);
-        }
-
-        throw new Error('Unable to get url');
     };
 
     Component.prototype.isZoidComponent = function isZoidComponent() {

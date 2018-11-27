@@ -1747,40 +1747,32 @@
             Object.defineProperty(__webpack_exports__, "__esModule", {
                 value: !0
             });
-            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js");
-            global.a.tunnelWindows = global.a.tunnelWindows || {};
-            global.a.tunnelWindowId = 0;
-            function deleteTunnelWindow(id) {
-                try {
-                    global.a.tunnelWindows[id] && delete global.a.tunnelWindows[id].source;
-                } catch (err) {}
-                delete global.a.tunnelWindows[id];
-            }
+            var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js"), tunnelWindows = Object(global.b)("tunnelWindows");
             global.a.openTunnelToParent = function(_ref2) {
                 var name = _ref2.name, source = _ref2.source, canary = _ref2.canary, sendMessage = _ref2.sendMessage, parentWindow = Object(cross_domain_utils_src.getParent)(window);
                 if (!parentWindow) throw new Error("No parent window found to open tunnel to");
                 var id = function(_ref) {
                     var name = _ref.name, source = _ref.source, canary = _ref.canary, sendMessage = _ref.sendMessage;
                     !function() {
-                        for (var tunnelWindows = global.a.tunnelWindows, _i2 = 0, _Object$keys2 = Object.keys(tunnelWindows), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
-                            var key = _Object$keys2[_i2], tunnelWindow = tunnelWindows[key];
+                        for (var _i2 = 0, _tunnelWindows$keys2 = tunnelWindows.keys(), _length2 = null == _tunnelWindows$keys2 ? 0 : _tunnelWindows$keys2.length; _i2 < _length2; _i2++) {
+                            var key = _tunnelWindows$keys2[_i2], tunnelWindow = tunnelWindows[key];
                             try {
                                 Object(belter_src.noop)(tunnelWindow.source);
                             } catch (err) {
-                                deleteTunnelWindow(key);
+                                tunnelWindows.del(key);
                                 continue;
                             }
-                            Object(cross_domain_utils_src.isWindowClosed)(tunnelWindow.source) && deleteTunnelWindow(key);
+                            Object(cross_domain_utils_src.isWindowClosed)(tunnelWindow.source) && tunnelWindows.del(key);
                         }
                     }();
-                    global.a.tunnelWindowId += 1;
-                    global.a.tunnelWindows[global.a.tunnelWindowId] = {
+                    var id = Object(belter_src.uniqueID)();
+                    tunnelWindows.set(id, {
                         name: name,
                         source: source,
                         canary: canary,
                         sendMessage: sendMessage
-                    };
-                    return global.a.tunnelWindowId;
+                    });
+                    return id;
                 }({
                     name: name,
                     source: source,
@@ -1790,13 +1782,11 @@
                 return global.a.send(parentWindow, conf.d.OPEN_TUNNEL, {
                     name: name,
                     sendMessage: function() {
-                        var tunnelWindow = function(id) {
-                            return global.a.tunnelWindows[id];
-                        }(id);
+                        var tunnelWindow = tunnelWindows.get(id);
                         try {
                             Object(belter_src.noop)(tunnelWindow && tunnelWindow.source);
                         } catch (err) {
-                            deleteTunnelWindow(id);
+                            tunnelWindows.del(id);
                             return;
                         }
                         if (tunnelWindow && tunnelWindow.source && !Object(cross_domain_utils_src.isWindowClosed)(tunnelWindow.source)) {
@@ -1812,7 +1802,6 @@
                     domain: conf.i
                 });
             };
-            var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js");
             function needsBridgeForBrowser() {
                 return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
             }
@@ -1844,38 +1833,31 @@
                         return resolve(window.document.body);
                     }
                 }, 10);
-            });
-            global.a.remoteWindows = global.a.remoteWindows || new cross_domain_safe_weakmap_src.a();
+            }), remoteWindows = Object(global.c)("remoteWindows");
             function registerRemoteWindow(win) {
-                global.a.remoteWindows.set(win, {
-                    sendMessagePromise: new src.a()
+                remoteWindows.getOrSet(win, function() {
+                    return new src.a();
                 });
             }
             function findRemoteWindow(win) {
-                return global.a.remoteWindows.get(win);
+                var remoteWin = remoteWindows.get(win);
+                if (!remoteWin) throw new Error("Remote window not found");
+                return remoteWin;
             }
             function registerRemoteSendMessage(win, domain, sendMessage) {
-                var remoteWindow = findRemoteWindow(win);
-                if (!remoteWindow) throw new Error("Window not found to register sendMessage to");
-                var sendMessageWrapper = function(remoteWin, remoteDomain, message) {
+                findRemoteWindow(win).resolve(function(remoteWin, remoteDomain, message) {
                     if (remoteWin !== win) throw new Error("Remote window does not match window");
                     if (!Object(cross_domain_utils_src.matchDomain)(remoteDomain, domain)) throw new Error("Remote domain " + remoteDomain + " does not match domain " + domain);
                     sendMessage(message);
-                };
-                remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-                remoteWindow.sendMessagePromise = src.a.resolve(sendMessageWrapper);
+                });
             }
             function rejectRemoteSendMessage(win, err) {
-                var remoteWindow = findRemoteWindow(win);
-                if (!remoteWindow) throw new Error("Window not found on which to reject sendMessage");
-                remoteWindow.sendMessagePromise.asyncReject(err);
+                findRemoteWindow(win).reject(err).catch(belter_src.noop);
             }
             function sendBridgeMessage(win, domain, message) {
                 var messagingChild = Object(cross_domain_utils_src.isOpener)(window, win), messagingParent = Object(cross_domain_utils_src.isOpener)(win, window);
                 if (!messagingChild && !messagingParent) throw new Error("Can only send messages to and from parent and popup windows");
-                var remoteWindow = findRemoteWindow(win);
-                if (!remoteWindow) throw new Error("Window not found to send message to");
-                return remoteWindow.sendMessagePromise.then(function(sendMessage) {
+                return findRemoteWindow(win).then(function(sendMessage) {
                     return sendMessage(win, domain, message);
                 });
             }
@@ -1941,84 +1923,79 @@
                     }
                 });
             }
-            var lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js");
-            global.a.bridges = global.a.bridges || {};
-            global.a.bridgeFrames = global.a.bridgeFrames || {};
-            global.a.popupWindowsByWin = global.a.popupWindowsByWin || new cross_domain_safe_weakmap_src.a();
-            global.a.popupWindowsByName = global.a.popupWindowsByName || {};
+            var lib = __webpack_require__("./node_modules/post-robot/src/lib/index.js"), bridges = Object(global.b)("bridges"), bridgeFrames = Object(global.b)("bridgeFrames"), popupWindowsByName = Object(global.b)("popupWindowsByName"), popupWindowsByWin = Object(global.c)("popupWindowsByWin");
             function hasBridge(url, domain) {
-                domain = domain || Object(cross_domain_utils_src.getDomainFromUrl)(url);
-                return Boolean(global.a.bridges[domain]);
+                return bridges.has(domain || Object(cross_domain_utils_src.getDomainFromUrl)(url));
             }
             function openBridge(url, domain) {
                 domain = domain || Object(cross_domain_utils_src.getDomainFromUrl)(url);
-                if (global.a.bridges[domain]) return global.a.bridges[domain];
-                global.a.bridges[domain] = src.a.try(function() {
-                    if (Object(cross_domain_utils_src.getDomain)() === domain) throw new Error("Can not open bridge on the same domain as current domain: " + domain);
-                    var name = getBridgeName(domain);
-                    if (Object(cross_domain_utils_src.getFrameByName)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
-                    var iframe = function(name, url) {
-                        var iframe = document.createElement("iframe");
-                        iframe.setAttribute("name", name);
-                        iframe.setAttribute("id", name);
-                        iframe.setAttribute("style", "display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;");
-                        iframe.setAttribute("frameborder", "0");
-                        iframe.setAttribute("border", "0");
-                        iframe.setAttribute("scrolling", "no");
-                        iframe.setAttribute("allowTransparency", "true");
-                        iframe.setAttribute("tabindex", "-1");
-                        iframe.setAttribute("hidden", "true");
-                        iframe.setAttribute("title", "");
-                        iframe.setAttribute("role", "presentation");
-                        iframe.src = url;
-                        return iframe;
-                    }(name, url);
-                    global.a.bridgeFrames[domain] = iframe;
-                    return documentBodyReady.then(function(body) {
-                        body.appendChild(iframe);
-                        var bridge = iframe.contentWindow;
-                        !function(source, domain) {
-                            global.a.on(conf.d.OPEN_TUNNEL, {
-                                window: source,
-                                domain: domain
-                            }, function(_ref) {
-                                var origin = _ref.origin, data = _ref.data;
-                                if (origin !== domain) throw new Error("Domain " + domain + " does not match origin " + origin);
-                                if (!data.name) throw new Error("Register window expected to be passed window name");
-                                if (!data.sendMessage) throw new Error("Register window expected to be passed sendMessage method");
-                                if (!global.a.popupWindowsByName[data.name]) throw new Error("Window with name " + data.name + " does not exist, or was not opened by this window");
-                                if (!global.a.popupWindowsByName[data.name].domain) throw new Error("We do not have a registered domain for window " + data.name);
-                                if (global.a.popupWindowsByName[data.name].domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + global.a.popupWindowsByName[data.name].domain);
-                                registerRemoteSendMessage(global.a.popupWindowsByName[data.name].win, domain, data.sendMessage);
-                                return {
-                                    sendMessage: function(message) {
-                                        if (window && !window.closed) {
-                                            var winDetails = global.a.popupWindowsByName[data.name];
-                                            if (winDetails) try {
-                                                global.a.receiveMessage({
-                                                    data: message,
-                                                    origin: winDetails.domain,
-                                                    source: winDetails.win
-                                                });
-                                            } catch (err) {
-                                                src.a.reject(err);
+                return bridges.getOrSet(domain, function() {
+                    return src.a.try(function() {
+                        if (Object(cross_domain_utils_src.getDomain)() === domain) throw new Error("Can not open bridge on the same domain as current domain: " + domain);
+                        var name = getBridgeName(domain);
+                        if (Object(cross_domain_utils_src.getFrameByName)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
+                        var iframe = function(name, url) {
+                            var iframe = document.createElement("iframe");
+                            iframe.setAttribute("name", name);
+                            iframe.setAttribute("id", name);
+                            iframe.setAttribute("style", "display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;");
+                            iframe.setAttribute("frameborder", "0");
+                            iframe.setAttribute("border", "0");
+                            iframe.setAttribute("scrolling", "no");
+                            iframe.setAttribute("allowTransparency", "true");
+                            iframe.setAttribute("tabindex", "-1");
+                            iframe.setAttribute("hidden", "true");
+                            iframe.setAttribute("title", "");
+                            iframe.setAttribute("role", "presentation");
+                            iframe.src = url;
+                            return iframe;
+                        }(name, url);
+                        bridgeFrames.set(domain, iframe);
+                        return documentBodyReady.then(function(body) {
+                            body.appendChild(iframe);
+                            var bridge = iframe.contentWindow;
+                            !function(source, domain) {
+                                global.a.on(conf.d.OPEN_TUNNEL, {
+                                    window: source,
+                                    domain: domain
+                                }, function(_ref) {
+                                    var origin = _ref.origin, data = _ref.data;
+                                    if (origin !== domain) throw new Error("Domain " + domain + " does not match origin " + origin);
+                                    if (!data.name) throw new Error("Register window expected to be passed window name");
+                                    if (!data.sendMessage) throw new Error("Register window expected to be passed sendMessage method");
+                                    if (!popupWindowsByName.has(data.name)) throw new Error("Window with name " + data.name + " does not exist, or was not opened by this window");
+                                    if (!popupWindowsByName.get(data.name).domain) throw new Error("We do not have a registered domain for window " + data.name);
+                                    if (popupWindowsByName.get(data.name).domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + popupWindowsByName.get(data.name).domain);
+                                    registerRemoteSendMessage(popupWindowsByName.get(data.name).win, domain, data.sendMessage);
+                                    return {
+                                        sendMessage: function(message) {
+                                            if (window && !window.closed) {
+                                                var winDetails = popupWindowsByName.get(data.name);
+                                                if (winDetails) try {
+                                                    global.a.receiveMessage({
+                                                        data: message,
+                                                        origin: winDetails.domain,
+                                                        source: winDetails.win
+                                                    });
+                                                } catch (err) {
+                                                    src.a.reject(err);
+                                                }
                                             }
                                         }
-                                    }
-                                };
+                                    };
+                                });
+                            }(bridge, domain);
+                            return new src.a(function(resolve, reject) {
+                                iframe.onload = resolve;
+                                iframe.onerror = reject;
+                            }).then(function() {
+                                return Object(lib.a)(bridge, conf.b.BRIDGE_TIMEOUT, "Bridge " + url);
+                            }).then(function() {
+                                return bridge;
                             });
-                        }(bridge, domain);
-                        return new src.a(function(resolve, reject) {
-                            iframe.onload = resolve;
-                            iframe.onerror = reject;
-                        }).then(function() {
-                            return Object(lib.a)(bridge, conf.b.BRIDGE_TIMEOUT, "Bridge " + url);
-                        }).then(function() {
-                            return bridge;
                         });
                     });
                 });
-                return global.a.bridges[domain];
             }
             var windowOpen = window.open;
             window.open = function(url, name, options, last) {
@@ -2032,34 +2009,35 @@
                 var win = windowOpen.call(this, url, name, options, last);
                 if (!win) return win;
                 url && registerRemoteWindow(win);
-                for (var _i2 = 0, _Object$keys2 = Object.keys(global.a.popupWindowsByName), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
-                    var winName = _Object$keys2[_i2];
-                    Object(cross_domain_utils_src.isWindowClosed)(global.a.popupWindowsByName[winName].win) && delete global.a.popupWindowsByName[winName];
+                for (var _i2 = 0, _popupWindowsByName$k2 = popupWindowsByName.keys(), _length2 = null == _popupWindowsByName$k2 ? 0 : _popupWindowsByName$k2.length; _i2 < _length2; _i2++) {
+                    var winName = _popupWindowsByName$k2[_i2];
+                    Object(cross_domain_utils_src.isWindowClosed)(popupWindowsByName.get(winName).win) && popupWindowsByName.del(winName);
                 }
                 if (name && win) {
-                    var winOptions = global.a.popupWindowsByWin.get(win) || global.a.popupWindowsByName[name] || {};
+                    var winOptions = popupWindowsByWin.getOrSet(win, function() {
+                        return {};
+                    });
                     winOptions.name = winOptions.name || name;
                     winOptions.win = winOptions.win || win;
                     winOptions.domain = winOptions.domain || domain;
-                    global.a.popupWindowsByWin.set(win, winOptions);
-                    global.a.popupWindowsByName[name] = winOptions;
+                    popupWindowsByWin.set(win, winOptions);
+                    popupWindowsByName.set(name, winOptions);
                 }
                 return win;
             };
             function linkUrl(win, url) {
-                var winOptions = global.a.popupWindowsByWin.get(win);
-                if (winOptions) {
-                    winOptions.domain = Object(cross_domain_utils_src.getDomainFromUrl)(url);
+                if (popupWindowsByWin.has(win)) {
+                    popupWindowsByWin.get(win).domain = Object(cross_domain_utils_src.getDomainFromUrl)(url);
                     registerRemoteWindow(win);
                 }
             }
             function destroyBridges() {
-                for (var _i4 = 0, _Object$keys4 = Object.keys(global.a.bridgeFrames), _length4 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i4 < _length4; _i4++) {
-                    var domain = _Object$keys4[_i4], frame = global.a.bridgeFrames[domain];
-                    frame.parentNode && frame.parentNode.removeChild(frame);
+                for (var _i4 = 0, _bridgeFrames$keys2 = bridgeFrames.keys(), _length4 = null == _bridgeFrames$keys2 ? 0 : _bridgeFrames$keys2.length; _i4 < _length4; _i4++) {
+                    var domain = _bridgeFrames$keys2[_i4], frame = bridgeFrames.get(domain);
+                    frame && frame.parentNode && frame.parentNode.removeChild(frame);
                 }
-                global.a.bridgeFrames = {};
-                global.a.bridges = {};
+                bridgeFrames.reset();
+                bridges.reset();
             }
             __webpack_require__.d(__webpack_exports__, "openTunnelToOpener", function() {
                 return openTunnelToOpener;
@@ -2240,17 +2218,77 @@
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return global;
             });
-            var __WEBPACK_IMPORTED_MODULE_0__conf__ = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = window[__WEBPACK_IMPORTED_MODULE_0__conf__.j.POSTROBOT] = window[__WEBPACK_IMPORTED_MODULE_0__conf__.j.POSTROBOT] || {};
-            global.registerSelf = function() {};
+            __webpack_exports__.c = function(key) {
+                var defStore = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : getObj;
+                function getStore(win) {
+                    return winStore.getOrSet(win, defStore);
+                }
+                return {
+                    has: function(win) {
+                        return getStore(win).hasOwnProperty(key);
+                    },
+                    get: function(win, defVal) {
+                        var store = getStore(win);
+                        return store.hasOwnProperty(key) ? store[key] : defVal;
+                    },
+                    set: function(win, val) {
+                        getStore(win)[key] = val;
+                        return val;
+                    },
+                    del: function(win) {
+                        delete getStore(win)[key];
+                    },
+                    getOrSet: function(win, getter) {
+                        var store = getStore(win);
+                        if (store.hasOwnProperty(key)) return store[key];
+                        var val = getter();
+                        store[key] = val;
+                        return val;
+                    }
+                };
+            };
+            __webpack_exports__.b = function(key) {
+                var defStore = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : getObj, store = Object(__WEBPACK_IMPORTED_MODULE_2_belter_src__.getOrSet)(global, key, defStore);
+                return {
+                    has: function(storeKey) {
+                        return store.hasOwnProperty(storeKey);
+                    },
+                    get: function(storeKey, defVal) {
+                        return store.hasOwnProperty(storeKey) ? store[storeKey] : defVal;
+                    },
+                    set: function(storeKey, val) {
+                        store[storeKey] = val;
+                        return val;
+                    },
+                    del: function(storeKey) {
+                        delete store[storeKey];
+                    },
+                    getOrSet: function(storeKey, getter) {
+                        if (store.hasOwnProperty(storeKey)) return store[storeKey];
+                        var val = getter();
+                        store[storeKey] = val;
+                        return val;
+                    },
+                    reset: function() {
+                        store = defStore();
+                    },
+                    keys: function() {
+                        return Object.keys(store);
+                    }
+                };
+            };
+            __webpack_require__("./node_modules/cross-domain-utils/src/index.js");
+            var __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), __WEBPACK_IMPORTED_MODULE_2_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = window[__WEBPACK_IMPORTED_MODULE_3__conf__.j.POSTROBOT] = window[__WEBPACK_IMPORTED_MODULE_3__conf__.j.POSTROBOT] || {}, winStore = global.windowStore = global.windowStore || new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a(), getObj = function() {
+                return {};
+            };
         },
         "./node_modules/post-robot/src/lib/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            var src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js");
+            var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./node_modules/post-robot/src/conf/index.js"), global = __webpack_require__("./node_modules/post-robot/src/global.js");
             global.a.instanceID = global.a.instanceID || Object(belter_src.uniqueID)();
-            global.a.helloPromises = global.a.helloPromises || new src.a();
-            global.a.onHello = global.a.onHello || [];
+            var helloPromises = Object(global.c)("helloPromises");
             function getHelloPromise(win) {
-                return global.a.helloPromises.getOrSet(win, function() {
+                return helloPromises.getOrSet(win, function() {
                     return new zalgo_promise_src.a();
                 });
             }
@@ -2294,7 +2332,7 @@
             });
             function initHello() {
                 listenForHello();
-                for (var _i2 = 0, _getAllWindows2 = Object(cross_domain_utils_src.getAllWindows)(), _length2 = null == _getAllWindows2 ? 0 : _getAllWindows2.length; _i2 < _length2; _i2++) {
+                for (var _i2 = 0, _getAllWindows2 = Object(src.getAllWindows)(), _length2 = null == _getAllWindows2 ? 0 : _getAllWindows2.length; _i2 < _length2; _i2++) {
                     var win = _getAllWindows2[_i2];
                     win !== window && sayHello(win).catch(belter_src.noop);
                 }
@@ -2305,14 +2343,14 @@
                 return promise;
             }
             function needsGlobalMessagingForBrowser() {
-                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
             }
-            window.knownWindows = window.knownWindows || new src.a();
+            var knownWindows = Object(global.c)("knownWindows");
             function markWindowKnown(win) {
-                window.knownWindows.set(win, !0);
+                knownWindows.set(win, !0);
             }
             function isWindowKnown(win) {
-                return window.knownWindows.get(win, !1);
+                return knownWindows.get(win, !1);
             }
             __webpack_require__.d(__webpack_exports__, "g", function() {
                 return sayHello;
@@ -2961,6 +2999,9 @@
             __webpack_require__.d(interface_namespaceObject, "send", function() {
                 return _send;
             });
+            __webpack_require__.d(interface_namespaceObject, "requestPromises", function() {
+                return requestPromises;
+            });
             __webpack_require__.d(interface_namespaceObject, "request", function() {
                 return request;
             });
@@ -3018,6 +3059,9 @@
             });
             __webpack_require__.d(post_robot_src_namespaceObject, "send", function() {
                 return _send;
+            });
+            __webpack_require__.d(post_robot_src_namespaceObject, "requestPromises", function() {
+                return requestPromises;
             });
             __webpack_require__.d(post_robot_src_namespaceObject, "request", function() {
                 return request;
@@ -3208,9 +3252,13 @@
                 return val;
             }, _DESERIALIZER[TYPE.NULL] = function(val) {
                 return val;
-            }, _DESERIALIZER), defaultDeserializers = {}, cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), src_global = __webpack_require__("./node_modules/post-robot/src/global.js");
-            src_global.a.winToProxyWindow = src_global.a.winToProxyWindow || new cross_domain_safe_weakmap_src.a();
-            src_global.a.idToProxyWindow = src_global.a.idToProxyWindow || {};
+            }, _DESERIALIZER), defaultDeserializers = {}, src_global = __webpack_require__("./node_modules/post-robot/src/global.js"), winToProxyWindow = Object(src_global.c)("winToProxyWindow"), idToProxyWindow = Object(src_global.b)("idToProxyWindow");
+            function cleanupProxyWindows() {
+                for (var _i2 = 0, _idToProxyWindow$keys2 = idToProxyWindow.keys(), _length2 = null == _idToProxyWindow$keys2 ? 0 : _idToProxyWindow$keys2.length; _i2 < _length2; _i2++) {
+                    var _id = _idToProxyWindow$keys2[_i2];
+                    idToProxyWindow.get(_id).shouldClean() && idToProxyWindow.del(_id);
+                }
+            }
             var window_ProxyWindow = function() {
                 function ProxyWindow(serializedWindow, actualWindow) {
                     !function(instance, Constructor) {
@@ -3291,14 +3339,19 @@
                 ProxyWindow.prototype.serialize = function() {
                     return this.serializedWindow;
                 };
+                ProxyWindow.prototype.shouldClean = function() {
+                    return this.actualWindow && Object(cross_domain_utils_src.isWindowClosed)(this.actualWindow);
+                };
                 ProxyWindow.unwrap = function(win) {
                     return ProxyWindow.isProxyWindow(win) ? win.unwrap() : win;
                 };
                 ProxyWindow.serialize = function(win) {
+                    cleanupProxyWindows();
                     return ProxyWindow.toProxyWindow(win).serialize();
                 };
                 ProxyWindow.deserialize = function(serializedWindow) {
-                    return Object(belter_src.getOrSet)(src_global.a.idToProxyWindow, serializedWindow.id, function() {
+                    cleanupProxyWindows();
+                    return idToProxyWindow.getOrSet(serializedWindow.id, function() {
                         return new ProxyWindow(serializedWindow);
                     });
                 };
@@ -3306,9 +3359,10 @@
                     return obj instanceof ProxyWindow;
                 };
                 ProxyWindow.toProxyWindow = function(win) {
-                    return ProxyWindow.isProxyWindow(win) ? win : src_global.a.winToProxyWindow.getOrSet(win, function() {
+                    cleanupProxyWindows();
+                    return ProxyWindow.isProxyWindow(win) ? win : winToProxyWindow.getOrSet(win, function() {
                         var id = Object(belter_src.uniqueID)();
-                        src_global.a.idToProxyWindow[id] = new ProxyWindow({
+                        return idToProxyWindow.set(id, new ProxyWindow({
                             id: id,
                             getInstanceID: function() {
                                 return Object(lib.b)(win);
@@ -3344,53 +3398,66 @@
                                     win.name = name;
                                 });
                             }
-                        }, win);
-                        return src_global.a.idToProxyWindow[id];
+                        }, win));
                     });
                 };
                 return ProxyWindow;
-            }();
-            src_global.a.methods = src_global.a.methods || new cross_domain_safe_weakmap_src.a();
-            src_global.a.proxyWindowMethods = src_global.a.proxyWindowMethods || {};
+            }(), methodStore = Object(src_global.c)("methodStore"), proxyWindowMethods = Object(src_global.b)("proxyWindowMethods");
+            src_global.a.listeningForFunctions = src_global.a.listeningForFunctions || !1;
             var listenForFunctionCalls = Object(belter_src.once)(function() {
-                src_global.a.on(conf.d.METHOD, {
-                    origin: conf.i
-                }, function(_ref) {
-                    var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
-                    return src.a.try(function() {
-                        var meth = (src_global.a.methods.get(source) || {})[data.id] || src_global.a.proxyWindowMethods[id];
-                        if (!meth) throw new Error("Could not find method with id: " + data.id);
-                        var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                        if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
-                        return proxy ? proxy.matchWindow(source).then(function(match) {
-                            if (!match) throw new Error("Proxy window does not match source");
-                            delete src_global.a.proxyWindowMethods[id];
-                            return val;
-                        }) : val;
-                    }).then(function(method) {
-                        return method.apply({
-                            source: source,
-                            origin: origin,
-                            data: data
-                        }, data.args);
-                    }).then(function(result) {
-                        return {
-                            result: result,
-                            id: id,
-                            name: name
-                        };
+                if (!src_global.a.listeningForFunctions) {
+                    src_global.a.listeningForFunctions = !0;
+                    src_global.a.on(conf.d.METHOD, {
+                        origin: conf.i
+                    }, function(_ref) {
+                        var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
+                        return src.a.try(function() {
+                            var meth = methodStore.get(source, function() {
+                                return {};
+                            })[data.id] || proxyWindowMethods.get(id);
+                            if (!meth) throw new Error("Could not find method with id: " + data.id);
+                            var proxy = meth.proxy, domain = meth.domain, val = meth.val;
+                            if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Method domain " + JSON.stringify(meth.domain) + " does not match origin " + origin);
+                            return proxy ? proxy.matchWindow(source).then(function(match) {
+                                if (!match) throw new Error("Proxy window does not match source");
+                                return val;
+                            }) : val;
+                        }).then(function(method) {
+                            return method.apply({
+                                source: source,
+                                origin: origin,
+                                data: data
+                            }, data.args);
+                        }).then(function(result) {
+                            return {
+                                result: result,
+                                id: id,
+                                name: name
+                            };
+                        });
                     });
-                });
+                }
             });
             function function_serializeFunction(destination, domain, val, key) {
                 listenForFunctionCalls();
                 var id = Object(belter_src.uniqueID)();
                 destination = window_ProxyWindow.unwrap(destination);
-                window_ProxyWindow.isProxyWindow(destination) ? src_global.a.proxyWindowMethods[id] = {
-                    proxy: destination,
-                    domain: domain,
-                    val: val
-                } : src_global.a.methods.getOrSet(destination, function() {
+                if (window_ProxyWindow.isProxyWindow(destination)) {
+                    proxyWindowMethods.set(id, {
+                        proxy: destination,
+                        domain: domain,
+                        val: val
+                    });
+                    destination.awaitWindow().then(function(win) {
+                        proxyWindowMethods.del(id);
+                        methodStore.getOrSet(win, function() {
+                            return {};
+                        })[id] = {
+                            domain: domain,
+                            val: val
+                        };
+                    });
+                } else methodStore.getOrSet(destination, function() {
                     return {};
                 })[id] = {
                     domain: domain,
@@ -3474,8 +3541,6 @@
                             }, {
                                 domain: origin,
                                 fireAndForget: !0
-                            }).then(function(_ref4) {
-                                return _ref4.data.result;
                             });
                         };
                         crossDomainFunctionWrapper.__name__ = name;
@@ -3559,37 +3624,40 @@
                     });
                 });
             }
-            src_global.a.responseListeners = src_global.a.responseListeners || {};
-            src_global.a.requestListeners = src_global.a.requestListeners || {};
+            var responseListeners = Object(src_global.b)("responseListeners"), requestListeners = Object(src_global.c)("requestListeners"), erroredResponseListeners = Object(src_global.b)("erroredResponseListeners");
             src_global.a.WINDOW_WILDCARD = src_global.a.WINDOW_WILDCARD || new function() {}();
-            src_global.a.erroredResponseListeners = src_global.a.erroredResponseListeners || {};
             var _RECEIVE_MESSAGE_TYPE, __DOMAIN_REGEX__ = "__domain_regex__";
             function getResponseListener(hash) {
-                return src_global.a.responseListeners[hash];
+                return responseListeners.get(hash);
             }
             function deleteResponseListener(hash) {
-                delete src_global.a.responseListeners[hash];
+                responseListeners.del(hash);
             }
             function isResponseListenerErrored(hash) {
-                return Boolean(src_global.a.erroredResponseListeners[hash]);
+                return erroredResponseListeners.has(hash);
             }
             function getRequestListener(_ref) {
                 var name = _ref.name, win = _ref.win, domain = _ref.domain;
                 win === conf.i && (win = null);
                 domain === conf.i && (domain = null);
                 if (!name) throw new Error("Name required to get request listener");
-                var nameListeners = src_global.a.requestListeners[name];
-                if (nameListeners) for (var _i2 = 0, _ref3 = [ win, src_global.a.WINDOW_WILDCARD ], _length2 = null == _ref3 ? 0 : _ref3.length; _i2 < _length2; _i2++) {
-                    var winQualifier = _ref3[_i2], winListeners = winQualifier && nameListeners.get(winQualifier);
-                    if (winListeners) {
-                        if (domain && "string" == typeof domain) {
-                            if (winListeners[domain]) return winListeners[domain];
-                            if (winListeners[__DOMAIN_REGEX__]) for (var _i4 = 0, _winListeners$__DOMAI2 = winListeners[__DOMAIN_REGEX__], _length4 = null == _winListeners$__DOMAI2 ? 0 : _winListeners$__DOMAI2.length; _i4 < _length4; _i4++) {
-                                var _ref5 = _winListeners$__DOMAI2[_i4], regex = _ref5.regex, listener = _ref5.listener;
-                                if (Object(cross_domain_utils_src.matchDomain)(regex, domain)) return listener;
+                for (var _i2 = 0, _ref3 = [ win, src_global.a.WINDOW_WILDCARD ], _length2 = null == _ref3 ? 0 : _ref3.length; _i2 < _length2; _i2++) {
+                    var winQualifier = _ref3[_i2];
+                    if (winQualifier) {
+                        var nameListeners = requestListeners.get(winQualifier);
+                        if (nameListeners) {
+                            var domainListeners = nameListeners[name];
+                            if (domainListeners) {
+                                if (domain && "string" == typeof domain) {
+                                    if (domainListeners[domain]) return domainListeners[domain];
+                                    if (domainListeners[__DOMAIN_REGEX__]) for (var _i4 = 0, _domainListeners$__DO2 = domainListeners[__DOMAIN_REGEX__], _length4 = null == _domainListeners$__DO2 ? 0 : _domainListeners$__DO2.length; _i4 < _length4; _i4++) {
+                                        var _ref5 = _domainListeners$__DO2[_i4], regex = _ref5.regex, listener = _ref5.listener;
+                                        if (Object(cross_domain_utils_src.matchDomain)(regex, domain)) return listener;
+                                    }
+                                }
+                                if (domainListeners[conf.i]) return domainListeners[conf.i];
                             }
                         }
-                        if (winListeners[conf.i]) return winListeners[conf.i];
                     }
                 }
             }
@@ -3663,8 +3731,7 @@
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            };
-            src_global.a.receivedMessages = src_global.a.receivedMessages || [];
+            }, receivedMessages = Object(src_global.b)("receivedMessages");
             function receiveMessage(event) {
                 if (!window || window.closed) throw new Error("Message recieved in closed window");
                 try {
@@ -3683,8 +3750,8 @@
                 }(event.data, source, origin);
                 if (message) {
                     Object(lib.e)(source);
-                    if (-1 === src_global.a.receivedMessages.indexOf(message.id)) {
-                        src_global.a.receivedMessages.push(message.id);
+                    if (!receivedMessages.has(message.id)) {
+                        receivedMessages.set(message.id, !0);
                         Object(cross_domain_utils_src.isWindowClosed)(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
                     }
                 }
@@ -3708,7 +3775,7 @@
                 receiveMessage(messageEvent);
             }
             src_global.a.receiveMessage = receiveMessage;
-            src_global.a.requestPromises = src_global.a.requestPromises || new cross_domain_safe_weakmap_src.a();
+            var requestPromises = Object(src_global.c)("requestPromises");
             function request(options) {
                 return src.a.try(function() {
                     if (!options.name) throw new Error("Expected options.name");
@@ -3729,12 +3796,9 @@
                     domain = options.domain || conf.i;
                     var hash = options.name + "_" + Object(belter_src.uniqueID)();
                     if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Target window is closed");
-                    var hasResult = !1, requestPromises = src_global.a.requestPromises.get(win);
-                    if (!requestPromises) {
-                        requestPromises = [];
-                        src_global.a.requestPromises.set(win, requestPromises);
-                    }
-                    var requestPromise = src.a.try(function() {
+                    var hasResult = !1, reqPromises = requestPromises.getOrSet(win, function() {
+                        return [];
+                    }), requestPromise = src.a.try(function() {
                         if (Object(cross_domain_utils_src.isAncestor)(window, win)) return Object(lib.a)(win, options.timeout || conf.b.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).domain;
@@ -3750,7 +3814,7 @@
                         return new src.a(function(resolve, reject) {
                             var responseListener = void 0;
                             options.fireAndForget || function(hash, listener) {
-                                src_global.a.responseListeners[hash] = listener;
+                                responseListeners.set(hash, listener);
                             }(hash, responseListener = {
                                 name: name,
                                 window: win,
@@ -3758,7 +3822,7 @@
                                 respond: function(err, result) {
                                     if (!err) {
                                         hasResult = !0;
-                                        requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                                        reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
                                     }
                                     err ? reject(err) : resolve(result);
                                 }
@@ -3791,11 +3855,11 @@
                     });
                     requestPromise.catch(function() {
                         !function(hash) {
-                            src_global.a.erroredResponseListeners[hash] = !0;
+                            erroredResponseListeners.set(hash, !0);
                         }(hash);
                         deleteResponseListener(hash);
                     });
-                    requestPromises.push(requestPromise);
+                    reqPromises.push(requestPromise);
                     return requestPromise;
                 });
             }
@@ -3879,35 +3943,30 @@
                     win && win !== conf.i || (win = src_global.a.WINDOW_WILDCARD);
                     domain = domain || conf.i;
                     if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for " + (win === src_global.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : win ? new Error("Request listener already exists for " + name + " for " + (win === src_global.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
-                    var requestListeners = src_global.a.requestListeners, nameListeners = requestListeners[name];
-                    if (!nameListeners) {
-                        nameListeners = new cross_domain_safe_weakmap_src.a();
-                        requestListeners[name] = nameListeners;
-                    }
-                    var winListeners = nameListeners.get(win);
-                    if (!winListeners) {
-                        winListeners = {};
-                        nameListeners.set(win, winListeners);
-                    }
-                    var strDomain = domain.toString(), regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
+                    var nameListeners = requestListeners.getOrSet(win, function() {
+                        return {};
+                    }), domainListeners = Object(belter_src.getOrSet)(nameListeners, name, function() {
+                        return {};
+                    }), strDomain = domain.toString(), regexListeners = void 0, regexListener = void 0;
                     if (Object(belter_src.isRegex)(domain)) {
-                        if (!regexListeners) {
-                            regexListeners = [];
-                            winListeners[__DOMAIN_REGEX__] = regexListeners;
-                        }
+                        regexListeners = Object(belter_src.getOrSet)(domainListeners, __DOMAIN_REGEX__, function() {
+                            return [];
+                        });
                         regexListener = {
                             regex: domain,
                             listener: listener
                         };
                         regexListeners.push(regexListener);
-                    } else winListeners[strDomain] = listener;
+                    } else domainListeners[strDomain] = listener;
                     return {
                         cancel: function() {
-                            if (winListeners) {
-                                delete winListeners[strDomain];
-                                win && 0 === Object.keys(winListeners).length && nameListeners.delete(win);
-                                regexListener && regexListeners.splice(regexListeners.indexOf(regexListener, 1));
+                            delete domainListeners[strDomain];
+                            if (regexListener) {
+                                regexListeners.splice(regexListeners.indexOf(regexListener, 1));
+                                regexListeners.length || delete domainListeners[__DOMAIN_REGEX__];
                             }
+                            Object.keys(domainListeners).length || delete nameListeners[name];
+                            win && !Object.keys(nameListeners).length && requestListeners.del(win);
                         }
                     };
                 }({
@@ -3981,13 +4040,7 @@
             }
             var public_parent = Object(cross_domain_utils_src.getAncestor)();
             function cleanUpWindow(win) {
-                var requestPromises = src_global.a.requestPromises.get(win);
-                if (requestPromises) for (var _i2 = 0, _length2 = null == requestPromises ? 0 : requestPromises.length; _i2 < _length2; _i2++) requestPromises[_i2].reject(new Error("No response from window - cleaned up"));
-                src_global.a.popupWindowsByWin && src_global.a.popupWindowsByWin.delete(win);
-                src_global.a.remoteWindows && src_global.a.remoteWindows.delete(win);
-                src_global.a.requestPromises.delete(win);
-                src_global.a.methods.delete(win);
-                src_global.a.helloPromises.delete(win);
+                for (var _i2 = 0, _requestPromises$get2 = requestPromises.get(win, []), _length2 = null == _requestPromises$get2 ? 0 : _requestPromises$get2.length; _i2 < _length2; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response"));
             }
             var bridge = __webpack_require__("./node_modules/post-robot/src/bridge/interface.js");
             if (!src_global.a.initialized) {
@@ -4913,7 +4966,7 @@
                         });
                         var tasks = {};
                         tasks.onRender = _this2.props.onRender();
-                        tasks.getDomain = _this2.getDomain();
+                        var domain = _this2.getDomain();
                         tasks.elementReady = src.a.try(function() {
                             if (element) return _this2.elementReady(element);
                         });
@@ -4936,32 +4989,31 @@
                         tasks.showContainer = tasks.openContainer.then(function() {
                             return _this2.showContainer();
                         });
-                        tasks.setWindowName = src.a.all([ tasks.open, tasks.getDomain ]).then(function(_ref2) {
-                            var proxyWin = _ref2[0], domain = _ref2[1];
+                        tasks.setWindowName = tasks.open.then(function(proxyWin) {
                             return _this2.setWindowName(proxyWin, _this2.buildChildWindowName({
                                 proxyWin: proxyWin,
                                 domain: domain,
                                 target: target
                             }));
                         });
-                        tasks.watchForClose = src.a.all([ tasks.awaitWindow, tasks.setWindowName ]).then(function(_ref3) {
-                            var win = _ref3[0];
+                        tasks.watchForClose = src.a.all([ tasks.awaitWindow, tasks.setWindowName ]).then(function(_ref2) {
+                            var win = _ref2[0];
                             return _this2.watchForClose(win);
                         });
-                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref4) {
-                            var proxyWin = _ref4[0];
+                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref3) {
+                            var proxyWin = _ref3[0];
                             return _this2.prerender(proxyWin);
                         });
                         tasks.showComponent = tasks.prerender.then(function() {
                             return _this2.showComponent();
                         });
-                        tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.getDomain, tasks.setWindowName ]).then(function(_ref5) {
-                            var win = _ref5[0], domain = _ref5[1];
-                            return _this2.openBridge(win, domain);
-                        });
                         tasks.buildUrl = _this2.buildUrl();
-                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
-                            var proxyWin = _ref6[0], url = _ref6[1];
+                        tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.buildUrl ]).then(function(_ref4) {
+                            var win = _ref4[0], url = _ref4[1];
+                            return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url));
+                        });
+                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref5) {
+                            var proxyWin = _ref5[0], url = _ref5[1];
                             return _this2.loadUrl(proxyWin, url);
                         });
                         tasks.switchPrerender = src.a.all([ tasks.prerender, _this2.onInit ]).then(function() {
@@ -5002,11 +5054,8 @@
                 ParentComponent.prototype.checkAllowRemoteRender = function(target) {
                     if (!target) throw this.component.createError("Must pass window to renderTo");
                     if (!Object(cross_domain_utils_src.isSameTopWindow)(window, target)) throw new Error("Can only renderTo an adjacent frame");
-                    if (!Object(cross_domain_utils_src.isSameDomain)(target)) {
-                        var origin = Object(cross_domain_utils_src.getDomain)(), domain = this.component.getDomain(null, this.props.env);
-                        if (!domain) throw new Error("Could not determine domain to allow remote render");
-                        if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
-                    }
+                    var origin = Object(cross_domain_utils_src.getDomain)(), domain = this.getDomain();
+                    if (!Object(cross_domain_utils_src.matchDomain)(domain, origin) && !Object(cross_domain_utils_src.isSameDomain)(target)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
                 };
                 ParentComponent.prototype.registerActiveComponent = function() {
                     var _this4 = this;
@@ -5037,7 +5086,7 @@
                     };
                 };
                 ParentComponent.prototype.buildChildWindowName = function() {
-                    var _ref7 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref7.proxyWin, domain = _ref7.domain, _ref7$target = _ref7.target, target = void 0 === _ref7$target ? window : _ref7$target, uid = Object(belter_src.uniqueID)(), tag = this.component.tag, sProps = serializeMessage(proxyWin, domain, this.getPropsForChild()), componentParent = this.getComponentParentRef(target), props = Object(cross_domain_utils_src.isSameDomain)(target) ? {
+                    var _ref6 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref6.proxyWin, domain = _ref6.domain, _ref6$target = _ref6.target, target = void 0 === _ref6$target ? window : _ref6$target, uid = Object(belter_src.uniqueID)(), tag = this.component.tag, sProps = serializeMessage(proxyWin, domain, this.getPropsForChild()), componentParent = this.getComponentParentRef(target), props = Object(cross_domain_utils_src.isSameDomain)(target) ? {
                         type: INITIAL_PROPS.RAW,
                         value: sProps
                     } : {
@@ -5143,24 +5192,14 @@
                     })).then(function() {
                         return params;
                     })).then(function(query) {
-                        var url = _this5.component.getUrl(_this5.props.env, _this5.props);
+                        var url = _this5.component.getUrl(_this5.props);
                         return Object(belter_src.extendUrl)(url, {
                             query: parent__extends({}, query)
                         });
                     });
                 };
                 ParentComponent.prototype.getDomain = function() {
-                    var _this6 = this;
-                    return src.a.try(function() {
-                        return _this6.component.getDomain(null, _this6.props.env) || (_this6.component.buildUrl ? src.a.try(function() {
-                            return _this6.component.buildUrl(_this6.props);
-                        }).then(function(builtUrl) {
-                            return _this6.component.getDomain(builtUrl, _this6.props.env);
-                        }) : void 0);
-                    }).then(function(domain) {
-                        if (!domain) throw new Error("Could not determine domain");
-                        return domain;
-                    });
+                    return this.component.getDomain(this.props);
                 };
                 ParentComponent.prototype.getPropsForChild = function() {
                     for (var result = {}, _i2 = 0, _Object$keys2 = Object.keys(this.props), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
@@ -5170,48 +5209,49 @@
                     return result;
                 };
                 ParentComponent.prototype.updateProps = function(props) {
-                    var _this7 = this;
+                    var _this6 = this;
                     this.setProps(props, !0);
                     return this.onInit.then(function() {
-                        if (_this7.childExports) return _this7.childExports.updateProps(_this7.getPropsForChild());
+                        if (_this6.childExports) return _this6.childExports.updateProps(_this6.getPropsForChild());
                         throw new Error("Child exports were not available");
                     });
                 };
                 ParentComponent.prototype.openBridge = function(win, domain) {
-                    var _this8 = this;
+                    var _this7 = this;
                     return src.a.try(function() {
                         if (bridge && bridge.needsBridge({
                             win: win,
                             domain: domain
                         }) && !bridge.hasBridge(domain, domain)) {
-                            var bridgeUrl = _this8.component.getBridgeUrl(_this8.props.env), bridgeDomain = _this8.component.getBridgeDomain(_this8.props.env);
-                            if (!bridgeUrl || !bridgeDomain) throw new Error("Bridge url and domain needed to render " + _this8.context);
+                            var bridgeUrl = _this7.component.getBridgeUrl(_this7.props);
+                            if (!bridgeUrl) throw new Error("Bridge url and domain needed to render " + _this7.context);
+                            var bridgeDomain = Object(cross_domain_utils_src.getDomainFromUrl)(bridgeUrl);
                             bridge.linkUrl(win, domain);
                             return bridge.openBridge(bridgeUrl, bridgeDomain);
                         }
                     });
                 };
                 ParentComponent.prototype.open = function() {
-                    var _this9 = this;
+                    var _this8 = this;
                     return src.a.try(function() {
-                        _this9.component.log("open_" + _this9.context);
-                        return _this9.driver.open.call(_this9);
+                        _this8.component.log("open_" + _this8.context);
+                        return _this8.driver.open.call(_this8);
                     });
                 };
                 ParentComponent.prototype.setWindowName = function(proxyWin, name) {
                     return proxyWin.setName(name);
                 };
                 ParentComponent.prototype.switchPrerender = function() {
-                    var _this10 = this;
+                    var _this9 = this;
                     return src.a.try(function() {
-                        if (_this10.component.prerenderTemplate && _this10.driver.switchPrerender) return _this10.driver.switchPrerender.call(_this10);
+                        if (_this9.component.prerenderTemplate && _this9.driver.switchPrerender) return _this9.driver.switchPrerender.call(_this9);
                     });
                 };
                 ParentComponent.prototype.elementReady = function(element) {
                     return Object(belter_src.elementReady)(element).then(belter_src.noop);
                 };
                 ParentComponent.prototype.delegate = function(target) {
-                    var _this11 = this;
+                    var _this10 = this;
                     this.component.log("delegate_" + this.context);
                     for (var props = {
                         uid: this.props.uid,
@@ -5230,50 +5270,47 @@
                             props: props,
                             overrides: {
                                 userClose: function() {
-                                    return _this11.userClose();
-                                },
-                                getDomain: function() {
-                                    return _this11.getDomain();
+                                    return _this10.userClose();
                                 },
                                 error: function(err) {
-                                    return _this11.error(err);
+                                    return _this10.error(err);
                                 },
                                 on: function(eventName, handler) {
-                                    return _this11.on(eventName, handler);
+                                    return _this10.on(eventName, handler);
                                 }
                             }
                         }
-                    }).then(function(_ref8) {
-                        var data = _ref8.data;
-                        _this11.clean.register(data.destroy);
+                    }).then(function(_ref7) {
+                        var data = _ref7.data;
+                        _this10.clean.register(data.destroy);
                         return data;
                     }).catch(function(err) {
                         throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + Object(belter_src.stringifyError)(err));
                     }), overrides = this.driver.delegateOverrides, _loop = function(_i6, _Object$keys4, _length6) {
                         var key = _Object$keys4[_i6];
-                        overrides[key] === DELEGATE.CALL_DELEGATE && (_this11[key] = function() {
-                            var _this12 = this, _arguments = arguments;
+                        overrides[key] === DELEGATE.CALL_DELEGATE && (_this10[key] = function() {
+                            var _this11 = this, _arguments = arguments;
                             return delegate.then(function(data) {
-                                return data.overrides[key].apply(_this12, _arguments);
+                                return data.overrides[key].apply(_this11, _arguments);
                             });
                         });
                     }, _i6 = 0, _Object$keys4 = Object.keys(overrides), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) _loop(_i6, _Object$keys4);
                 };
                 ParentComponent.prototype.watchForClose = function(win) {
-                    var _this13 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
-                        _this13.component.log("detect_close_child");
+                    var _this12 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
+                        _this12.component.log("detect_close_child");
                         return src.a.try(function() {
-                            return _this13.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+                            return _this12.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
                         }).finally(function() {
-                            return _this13.destroy();
+                            return _this12.destroy();
                         });
                     }, 3e3);
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 };
                 ParentComponent.prototype.watchForUnload = function() {
-                    var _this14 = this, onunload = Object(belter_src.once)(function() {
-                        _this14.component.log("navigate_away");
-                        _this14.destroyComponent();
+                    var _this13 = this, onunload = Object(belter_src.once)(function() {
+                        _this13.component.log("navigate_away");
+                        _this13.destroyComponent();
                     }), unloadWindowListener = Object(belter_src.addEventListener)(window, "unload", onunload);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 };
@@ -5282,75 +5319,75 @@
                     return proxyWin.setLocation(url);
                 };
                 ParentComponent.prototype.runTimeout = function() {
-                    var _this15 = this, timeout = this.props.timeout;
+                    var _this14 = this, timeout = this.props.timeout;
                     if (timeout) {
                         var _id = this.timeout = setTimeout(function() {
-                            _this15.component.log("timed_out", {
+                            _this14.component.log("timed_out", {
                                 timeout: timeout.toString()
                             });
-                            _this15.error(_this15.component.createError("Loading component timed out after " + timeout + " milliseconds"));
+                            _this14.error(_this14.component.createError("Loading component timed out after " + timeout + " milliseconds"));
                         }, timeout);
                         this.clean.register(function() {
                             clearTimeout(_id);
-                            delete _this15.timeout;
+                            delete _this14.timeout;
                         });
                     }
                 };
                 ParentComponent.prototype.initChild = function(childExports) {
-                    var _this16 = this;
+                    var _this15 = this;
                     return src.a.try(function() {
-                        _this16.childExports = childExports;
-                        _this16.onInit.resolve(_this16);
-                        _this16.timeout && clearTimeout(_this16.timeout);
+                        _this15.childExports = childExports;
+                        _this15.onInit.resolve(_this15);
+                        _this15.timeout && clearTimeout(_this15.timeout);
                     });
                 };
                 ParentComponent.prototype.buildParentExports = function(win) {
-                    var _this17 = this;
+                    var _this16 = this;
                     return {
                         init: function(childExports) {
-                            return _this17.initChild(childExports);
+                            return _this16.initChild(childExports);
                         },
                         close: function(reason) {
-                            return _this17.close(reason);
+                            return _this16.close(reason);
                         },
                         checkClose: function() {
-                            return _this17.checkClose(win);
+                            return _this16.checkClose(win);
                         },
                         resize: function(width, height) {
-                            return _this17.resize(width, height);
+                            return _this16.resize(width, height);
                         },
                         trigger: function(name) {
                             return src.a.try(function() {
-                                return _this17.event.trigger(name);
+                                return _this16.event.trigger(name);
                             });
                         },
                         hide: function() {
                             return src.a.try(function() {
-                                return _this17.hide();
+                                return _this16.hide();
                             });
                         },
                         show: function() {
                             return src.a.try(function() {
-                                return _this17.show();
+                                return _this16.show();
                             });
                         },
                         error: function(err) {
-                            return _this17.error(err);
+                            return _this16.error(err);
                         }
                     };
                 };
                 ParentComponent.prototype.resize = function(width, height) {
-                    var _this18 = this, _ref9$waitForTransiti = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref9$waitForTransiti || _ref9$waitForTransiti;
+                    var _this17 = this, _ref8$waitForTransiti = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref8$waitForTransiti || _ref8$waitForTransiti;
                     return src.a.try(function() {
-                        _this18.component.log("resize", {
+                        _this17.component.log("resize", {
                             height: Object(belter_src.stringify)(height),
                             width: Object(belter_src.stringify)(width)
                         });
-                        _this18.driver.resize.call(_this18, width, height);
-                        if (waitForTransition && _this18.element) {
+                        _this17.driver.resize.call(_this17, width, height);
+                        if (waitForTransition && _this17.element) {
                             var overflow = void 0;
-                            _this18.element && (overflow = Object(belter_src.setOverflow)(_this18.element, "hidden"));
-                            return Object(belter_src.elementStoppedMoving)(_this18.element).then(function() {
+                            _this17.element && (overflow = Object(belter_src.setOverflow)(_this17.element, "hidden"));
+                            return Object(belter_src.elementStoppedMoving)(_this17.element).then(function() {
                                 overflow && overflow.reset();
                             });
                         }
@@ -5365,12 +5402,12 @@
                     return this.driver.show.call(this);
                 };
                 ParentComponent.prototype.checkClose = function(win) {
-                    var _this19 = this;
+                    var _this18 = this;
                     return win.isClosed().then(function(closed) {
-                        return closed ? _this19.userClose() : src.a.delay(200).then(function() {
+                        return closed ? _this18.userClose() : src.a.delay(200).then(function() {
                             return win.isClosed();
                         }).then(function(secondClosed) {
-                            if (secondClosed) return _this19.userClose();
+                            if (secondClosed) return _this18.userClose();
                         });
                     });
                 };
@@ -5378,50 +5415,50 @@
                     return this.close(CLOSE_REASONS.USER_CLOSED);
                 };
                 ParentComponent.prototype.close = function() {
-                    var _this20 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this19 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
-                        _this20.component.log("close", {
+                        _this19.component.log("close", {
                             reason: reason
                         });
-                        _this20.event.triggerOnce(EVENTS.CLOSE);
-                        return _this20.props.onClose(reason);
+                        _this19.event.triggerOnce(EVENTS.CLOSE);
+                        return _this19.props.onClose(reason);
                     }).then(function() {
-                        return src.a.all([ _this20.closeComponent(), _this20.closeContainer() ]);
+                        return src.a.all([ _this19.closeComponent(), _this19.closeContainer() ]);
                     }).then(function() {
-                        return _this20.destroy();
+                        return _this19.destroy();
                     });
                 };
                 ParentComponent.prototype.closeContainer = function() {
-                    var _this21 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this20 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
-                        _this21.event.triggerOnce(EVENTS.CLOSE);
-                        return _this21.props.onClose(reason);
+                        _this20.event.triggerOnce(EVENTS.CLOSE);
+                        return _this20.props.onClose(reason);
                     }).then(function() {
-                        return src.a.all([ _this21.closeComponent(reason), _this21.hideContainer() ]);
+                        return src.a.all([ _this20.closeComponent(reason), _this20.hideContainer() ]);
                     }).then(function() {
-                        return _this21.destroyContainer();
+                        return _this20.destroyContainer();
                     });
                 };
                 ParentComponent.prototype.destroyContainer = function() {
-                    var _this22 = this;
+                    var _this21 = this;
                     return src.a.try(function() {
-                        _this22.clean.run("destroyContainerEvents");
-                        _this22.clean.run("destroyContainerTemplate");
+                        _this21.clean.run("destroyContainerEvents");
+                        _this21.clean.run("destroyContainerTemplate");
                     });
                 };
                 ParentComponent.prototype.closeComponent = function() {
-                    var _this23 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this22 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
-                        return _this23.cancelContainerEvents();
+                        return _this22.cancelContainerEvents();
                     }).then(function() {
-                        _this23.event.triggerOnce(EVENTS.CLOSE);
-                        return _this23.props.onClose(reason);
+                        _this22.event.triggerOnce(EVENTS.CLOSE);
+                        return _this22.props.onClose(reason);
                     }).then(function() {
-                        return _this23.hideComponent();
+                        return _this22.hideComponent();
                     }).then(function() {
-                        return _this23.destroyComponent();
+                        return _this22.destroyComponent();
                     }).then(function() {
-                        _this23.childExports && _this23.context === CONTEXT_TYPES.POPUP && _this23.childExports.close().catch(belter_src.noop);
+                        _this22.childExports && _this22.context === CONTEXT_TYPES.POPUP && _this22.childExports.close().catch(belter_src.noop);
                     });
                 };
                 ParentComponent.prototype.destroyComponent = function() {
@@ -5431,43 +5468,43 @@
                     this.clean.run("destroyWindow");
                 };
                 ParentComponent.prototype.showContainer = function() {
+                    var _this23 = this;
+                    return src.a.try(function() {
+                        if (_this23.props.onDisplay) return _this23.props.onDisplay();
+                    }).then(function() {
+                        if (_this23.container) return Object(belter_src.showAndAnimate)(_this23.container, ANIMATION_NAMES.SHOW_CONTAINER, _this23.clean.register);
+                    });
+                };
+                ParentComponent.prototype.showComponent = function() {
                     var _this24 = this;
                     return src.a.try(function() {
                         if (_this24.props.onDisplay) return _this24.props.onDisplay();
                     }).then(function() {
-                        if (_this24.container) return Object(belter_src.showAndAnimate)(_this24.container, ANIMATION_NAMES.SHOW_CONTAINER, _this24.clean.register);
-                    });
-                };
-                ParentComponent.prototype.showComponent = function() {
-                    var _this25 = this;
-                    return src.a.try(function() {
-                        if (_this25.props.onDisplay) return _this25.props.onDisplay();
-                    }).then(function() {
-                        if (_this25.element) return Object(belter_src.showAndAnimate)(_this25.element, ANIMATION_NAMES.SHOW_COMPONENT, _this25.clean.register);
+                        if (_this24.element) return Object(belter_src.showAndAnimate)(_this24.element, ANIMATION_NAMES.SHOW_COMPONENT, _this24.clean.register);
                     });
                 };
                 ParentComponent.prototype.hideContainer = function() {
-                    var _this26 = this;
+                    var _this25 = this;
                     return src.a.try(function() {
-                        if (_this26.container) return Object(belter_src.animateAndHide)(_this26.container, ANIMATION_NAMES.HIDE_CONTAINER, _this26.clean.register);
+                        if (_this25.container) return Object(belter_src.animateAndHide)(_this25.container, ANIMATION_NAMES.HIDE_CONTAINER, _this25.clean.register);
                     });
                 };
                 ParentComponent.prototype.hideComponent = function() {
-                    var _this27 = this;
+                    var _this26 = this;
                     return src.a.try(function() {
-                        if (_this27.element) return Object(belter_src.animateAndHide)(_this27.element, ANIMATION_NAMES.HIDE_COMPONENT, _this27.clean.register);
+                        if (_this26.element) return Object(belter_src.animateAndHide)(_this26.element, ANIMATION_NAMES.HIDE_COMPONENT, _this26.clean.register);
                     });
                 };
                 ParentComponent.prototype.prerender = function(proxyWin) {
-                    var _this28 = this;
+                    var _this27 = this;
                     return src.a.try(function() {
-                        if (_this28.component.prerenderTemplate) return src.a.try(function() {
+                        if (_this27.component.prerenderTemplate) return src.a.try(function() {
                             return proxyWin.awaitWindow();
                         }).then(function(win) {
-                            return _this28.driver.openPrerender.call(_this28, win);
+                            return _this27.driver.openPrerender.call(_this27, win);
                         }).then(function(prerenderWindow) {
                             if (prerenderWindow) {
-                                var doc = prerenderWindow.document, el = _this28.renderTemplate(_this28.component.prerenderTemplate, {
+                                var doc = prerenderWindow.document, el = _this27.renderTemplate(_this27.component.prerenderTemplate, {
                                     document: doc
                                 });
                                 el instanceof ElementNode && (el = el.render(dom_dom({
@@ -5480,8 +5517,8 @@
                         });
                     });
                 };
-                ParentComponent.prototype.renderTemplate = function(renderer, _ref10) {
-                    var _this29 = this, focus = _ref10.focus, container = _ref10.container, document = _ref10.document, _ref11 = this.component.dimensions || {}, _ref11$width = _ref11.width, width = void 0 === _ref11$width ? DEFAULT_DIMENSIONS.WIDTH + "px" : _ref11$width, _ref11$height = _ref11.height, height = void 0 === _ref11$height ? DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref11$height;
+                ParentComponent.prototype.renderTemplate = function(renderer, _ref9) {
+                    var _this28 = this, focus = _ref9.focus, container = _ref9.container, document = _ref9.document, _ref10 = this.component.dimensions || {}, _ref10$width = _ref10.width, width = void 0 === _ref10$width ? DEFAULT_DIMENSIONS.WIDTH + "px" : _ref10$width, _ref10$height = _ref10.height, height = void 0 === _ref10$height ? DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref10$height;
                     focus = focus || function() {
                         return src.a.resolve();
                     };
@@ -5498,11 +5535,11 @@
                         actions: {
                             focus: focus,
                             close: function() {
-                                return _this29.userClose();
+                                return _this28.userClose();
                             }
                         },
                         on: function(eventName, handler) {
-                            return _this29.on(eventName, handler);
+                            return _this28.on(eventName, handler);
                         },
                         jsxDom: node,
                         document: document,
@@ -5513,63 +5550,63 @@
                         container: container
                     });
                 };
-                ParentComponent.prototype.openContainer = function(element, _ref12) {
-                    var _this30 = this, focus = _ref12.focus;
+                ParentComponent.prototype.openContainer = function(element, _ref11) {
+                    var _this29 = this, focus = _ref11.focus;
                     return src.a.try(function() {
                         var el;
                         if (!(el = element ? Object(belter_src.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
-                        if (_this30.component.containerTemplate) {
-                            var container = _this30.renderTemplate(_this30.component.containerTemplate, {
+                        if (_this29.component.containerTemplate) {
+                            var container = _this29.renderTemplate(_this29.component.containerTemplate, {
                                 container: el,
                                 focus: focus
                             });
                             container instanceof ElementNode && (container = container.render(dom_dom({
                                 doc: document
                             })));
-                            _this30.container = container;
-                            Object(belter_src.hideElement)(_this30.container);
-                            Object(belter_src.appendChild)(el, _this30.container);
-                            if (_this30.driver.renderedIntoContainer) {
-                                _this30.element = _this30.getOutlet();
-                                Object(belter_src.hideElement)(_this30.element);
-                                if (!_this30.element) throw new Error("Could not find element to render component into");
-                                Object(belter_src.hideElement)(_this30.element);
+                            _this29.container = container;
+                            Object(belter_src.hideElement)(_this29.container);
+                            Object(belter_src.appendChild)(el, _this29.container);
+                            if (_this29.driver.renderedIntoContainer) {
+                                _this29.element = _this29.getOutlet();
+                                Object(belter_src.hideElement)(_this29.element);
+                                if (!_this29.element) throw new Error("Could not find element to render component into");
+                                Object(belter_src.hideElement)(_this29.element);
                             }
-                            _this30.clean.register("destroyContainerTemplate", function() {
-                                _this30.container && _this30.container.parentNode && _this30.container.parentNode.removeChild(_this30.container);
-                                delete _this30.container;
+                            _this29.clean.register("destroyContainerTemplate", function() {
+                                _this29.container && _this29.container.parentNode && _this29.container.parentNode.removeChild(_this29.container);
+                                delete _this29.container;
                             });
-                        } else if (_this30.driver.renderedIntoContainer) throw new Error("containerTemplate needed to render " + _this30.context);
+                        } else if (_this29.driver.renderedIntoContainer) throw new Error("containerTemplate needed to render " + _this29.context);
                     });
                 };
                 ParentComponent.prototype.cancelContainerEvents = function() {
                     this.clean.run("destroyContainerEvents");
                 };
                 ParentComponent.prototype.destroy = function() {
-                    var _this31 = this;
+                    var _this30 = this;
                     return src.a.try(function() {
-                        if (_this31.clean.hasTasks()) {
-                            _this31.component.log("destroy");
-                            return _this31.clean.all();
+                        if (_this30.clean.hasTasks()) {
+                            _this30.component.log("destroy");
+                            return _this30.clean.all();
                         }
                     });
                 };
                 ParentComponent.prototype.tryInit = function(method) {
-                    var _this32 = this;
+                    var _this31 = this;
                     return src.a.try(method).catch(function(err) {
-                        _this32.onInit.reject(err);
+                        _this31.onInit.reject(err);
                     }).then(function() {
-                        return _this32.onInit;
+                        return _this31.onInit;
                     });
                 };
                 ParentComponent.prototype.error = function(err) {
-                    var _this33 = this, props = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : this.props;
+                    var _this32 = this, props = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : this.props;
                     if (!this.errored) {
                         this.errored = !0;
                         return src.a.try(function() {
-                            _this33.onInit = _this33.onInit || new src.a();
-                            _this33.onInit.reject(err);
-                            return _this33.destroy();
+                            _this32.onInit = _this32.onInit || new src.a();
+                            _this32.onInit.reject(err);
+                            return _this32.destroy();
                         }).then(function() {
                             if (props.onError) return props.onError(err);
                         }).catch(function(errErr) {
@@ -5585,7 +5622,6 @@
                 };
                 return ParentComponent;
             }()).prototype, "getOutlet", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "buildUrl", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "buildUrl"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "close", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "closeContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "closeContainer"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "destroyContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "destroyContainer"), _class.prototype), 
@@ -5631,7 +5667,6 @@
                         this.component.getProp(propName).allowDelegate && (this.props[propName] = options.props[propName]);
                     }
                     this.userClose = options.overrides.userClose;
-                    this.getDomain = options.overrides.getDomain;
                     this.error = options.overrides.error;
                     this.on = options.overrides.on;
                     for (var delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides, _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
@@ -5760,13 +5795,13 @@
                             if (-1 === CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw new Error("Unsupported context type: " + (options.defaultContext || "unknown"));
                             if (options.contexts && options.defaultContext && !options.contexts[options.defaultContext]) throw new Error("Disallowed default context type: " + (options.defaultContext || "unknown"));
                         }
-                        if (options.url && options.buildUrl) throw new Error("Can not pass both options.url and options.buildUrl");
                         if (options.defaultEnv) {
                             if ("string" != typeof options.defaultEnv) throw new TypeError("Expected options.defaultEnv to be a string");
-                            if (!options.buildUrl && "object" !== validate__typeof(options.url)) throw new Error("Expected options.url to be an object mapping env->url");
+                            if ("object" !== validate__typeof(options.url)) throw new TypeError("Expected options.url to be an object mapping env->url");
                             if (options.url && "object" === validate__typeof(options.url) && !options.url[options.defaultEnv]) throw new Error("No url found for default env: " + options.defaultEnv);
                         }
-                        if (options.url && "object" === validate__typeof(options.url)) {
+                        if (!options.url) throw new Error("Must pass url");
+                        if ("object" === validate__typeof(options.url)) {
                             if (!options.defaultEnv) throw new Error("Must pass options.defaultEnv with env->url mapping");
                             for (var _i6 = 0, _Object$keys6 = Object.keys(options.url), _length6 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
                                 var env = _Object$keys6[_i6];
@@ -5871,11 +5906,9 @@
                     this.addProp(options, "scrolling");
                     this.addProp(options, "listenForResize");
                     this.addProp(options, "defaultEnv");
-                    this.addProp(options, "buildUrl");
-                    this.addProp(options, "url");
+                    this.addProp(options, "url", options.buildUrl);
                     this.addProp(options, "domain");
                     this.addProp(options, "bridgeUrl");
-                    this.addProp(options, "bridgeDomain");
                     this.addProp(options, "attributes", {});
                     this.addProp(options, "contexts", {
                         iframe: !0,
@@ -5931,10 +5964,7 @@
                         return !0;
                     });
                     _on(POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref) {
-                        var source = _ref.source, origin = _ref.origin, data = _ref.data, domain = _this2.getDomain(null, data.env || _this2.defaultEnv);
-                        if (!domain) throw new Error("Could not determine domain to allow remote render");
-                        if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Can not render from " + origin + " - expected " + domain.toString());
-                        var delegate = _this2.delegate(source, data.options);
+                        var source = _ref.source, data = _ref.data, delegate = _this2.delegate(source, data.options);
                         return {
                             overrides: delegate.getOverrides(data.context),
                             destroy: function() {
@@ -5950,45 +5980,24 @@
                         return !1;
                     });
                 };
-                Component.prototype.getValidDomain = function(url) {
-                    if (url) {
-                        var domain = Object(cross_domain_utils_src.getDomainFromUrl)(url);
-                        if ("string" == typeof this.domain && domain === this.domain) return domain;
-                        var domains = this.domain;
-                        if (domains && "object" === (void 0 === domains ? "undefined" : component__typeof(domains))) for (var _i6 = 0, _Object$keys6 = Object.keys(domains), _length6 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
-                            var env = _Object$keys6[_i6];
-                            if ("test" !== env && domain === domains[env]) return domain;
-                        }
+                Component.prototype.getUrl = function(props) {
+                    if ("function" == typeof this.url) return this.url(props);
+                    if ("string" == typeof this.url) return this.url;
+                    var env = props.env || this.defaultEnv;
+                    if (env && "object" === component__typeof(this.url) && this.url[env]) return this.url[env];
+                    throw new Error("Can not find url");
+                };
+                Component.prototype.getDomain = function(props) {
+                    if ("string" == typeof this.domain) return this.domain;
+                    var env = props.env || this.defaultEnv;
+                    return env && "object" === component__typeof(this.domain) && this.domain[env] ? this.domain[env] : Object(cross_domain_utils_src.getDomainFromUrl)(this.getUrl(props));
+                };
+                Component.prototype.getBridgeUrl = function(props) {
+                    if (this.bridgeUrl) {
+                        if ("string" == typeof this.bridgeUrl) return this.bridgeUrl;
+                        var env = props.env || this.defaultEnv;
+                        if (env && "object" === component__typeof(this.bridgeUrl) && this.bridgeUrl[env]) return this.bridgeUrl[env];
                     }
-                };
-                Component.prototype.getDomain = function(url, env) {
-                    var domain = this.getForEnv(this.domain, env);
-                    if (domain) return domain;
-                    if (domain = this.getValidDomain(url)) return domain;
-                    var envUrl = this.getForEnv(this.url, env);
-                    return envUrl ? Object(cross_domain_utils_src.getDomainFromUrl)(envUrl) : url ? Object(cross_domain_utils_src.getDomainFromUrl)(url) : void 0;
-                };
-                Component.prototype.getBridgeUrl = function(env) {
-                    return this.getForEnv(this.bridgeUrl, env);
-                };
-                Component.prototype.getForEnv = function(item, env) {
-                    if (item) {
-                        if ("string" == typeof item) return item;
-                        env || (env = this.defaultEnv);
-                        if (env) return env && "object" === (void 0 === item ? "undefined" : component__typeof(item)) && item[env] ? item[env] : void 0;
-                    }
-                };
-                Component.prototype.getBridgeDomain = function(env) {
-                    var bridgeDomain = this.getForEnv(this.bridgeDomain, env);
-                    if (bridgeDomain) return bridgeDomain;
-                    var bridgeUrl = this.getBridgeUrl(env);
-                    return bridgeUrl ? Object(cross_domain_utils_src.getDomainFromUrl)(bridgeUrl) : void 0;
-                };
-                Component.prototype.getUrl = function(env, props) {
-                    var url = this.getForEnv(this.url, env);
-                    if (url) return url;
-                    if (this.buildUrl) return this.buildUrl(props);
-                    throw new Error("Unable to get url");
                 };
                 Component.prototype.isZoidComponent = function() {
                     return isZoidComponentWindow();
