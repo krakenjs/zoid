@@ -162,12 +162,12 @@ export class ParentComponent<P> {
             tasks.showComponent = tasks.prerender.then(() => {
                 return this.showComponent();
             });
-
-            tasks.openBridge = tasks.awaitWindow.then(win => {
-                return this.openBridge(win, domain);
-            });
-
+            
             tasks.buildUrl = this.buildUrl();
+
+            tasks.openBridge = ZalgoPromise.all([ tasks.awaitWindow, tasks.buildUrl ]).then(([ win, url ]) => {
+                return this.openBridge(win, getDomainFromUrl(url));
+            });
 
             tasks.loadUrl = ZalgoPromise.all([
                 tasks.open,

@@ -36,11 +36,10 @@ export type ComponentOptionsType<P> = {
 
     tag : string,
 
-    url : EnvString | (props : BuiltInPropsType & P) => string,
-
-    domain? : EnvString,
+    url? : EnvString | (props : BuiltInPropsType & P) => string,
+    buildUrl? : (props : BuiltInPropsType & P) => string,
+    domain? : EnvString | RegExp,
     bridgeUrl? : EnvString,
-    bridgeDomain? : EnvString,
 
     props? : UserPropsDefinitionType<P>,
 
