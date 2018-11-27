@@ -39,8 +39,6 @@ export function getInternalProps() {
             required: false
         },
 
-        // A millisecond timeout before onTimeout is called
-
         timeout: {
             type: 'number',
             required: false,
@@ -100,22 +98,6 @@ export function getInternalProps() {
             },
             decorate: function decorate(onClose) {
                 return once(promisify(onClose));
-            }
-        },
-
-        // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
-
-        onTimeout: {
-            type: 'function',
-            required: false,
-            sendToChild: false,
-            def: function def() {
-                return function onTimeout(err) {
-                    return this.props.onError(err);
-                };
-            },
-            decorate: function decorate(onTimeout) {
-                return memoize(promisify(onTimeout));
             }
         },
 

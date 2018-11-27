@@ -1,9 +1,8 @@
-import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, getDomain } from 'cross-domain-utils/src';
-import { memoize, uniqueID, stringifyError, base64encode, base64decode } from 'belter/src';
+import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor } from 'cross-domain-utils/src';
+import { memoize, stringifyError, base64encode, base64decode } from 'belter/src';
 
 import { globalFor } from '../lib';
-import { WINDOW_REFERENCES } from '../constants';
-
+import { WINDOW_REFERENCES, ZOID, INITIAL_PROPS, CONTEXT_TYPES } from '../constants';
 
 function normalize(str) {
     return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
@@ -21,12 +20,7 @@ function normalize(str) {
     We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
 */
 
-export function buildChildWindowName(name) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-
-    options.id = uniqueID();
-    options.domain = getDomain(window);
+export function buildChildWindowName(name, options) {
 
     var encodedName = normalize(name);
     var encodedOptions = base64encode(JSON.stringify(options));
@@ -35,7 +29,7 @@ export function buildChildWindowName(name) {
         throw new Error('Invalid name: ' + name + ' - must contain alphanumeric characters');
     }
 
-    return ['xcomponent', encodedName, encodedOptions, ''].join('__');
+    return [ZOID, encodedName, encodedOptions, ''].join('__');
 }
 
 export var isZoidComponentWindow = memoize(function () {
@@ -46,7 +40,7 @@ export var isZoidComponentWindow = memoize(function () {
     var _window$name$split = window.name.split('__'),
         zoidcomp = _window$name$split[0];
 
-    if (zoidcomp !== 'xcomponent') {
+    if (zoidcomp !== ZOID) {
         return false;
     }
 
@@ -71,7 +65,7 @@ export var getComponentMeta = memoize(function () {
         name = _window$name$split2[1],
         encodedOptions = _window$name$split2[2];
 
-    if (zoidcomp !== 'xcomponent') {
+    if (zoidcomp !== ZOID) {
         throw new Error('Window not rendered by zoid - got ' + zoidcomp);
     }
 
@@ -89,7 +83,7 @@ export var getComponentMeta = memoize(function () {
 });
 
 export function getParentDomain() {
-    return getComponentMeta().domain; // How does this work for renderTo..?
+    return getComponentMeta().domain;
 }
 
 function getWindowByRef(_ref) {
@@ -152,53 +146,3 @@ export var getParentComponentWindow = memoize(function () {
 
     return getWindowByRef(componentMeta.componentParent);
 });
-
-export var getParentRenderWindow = memoize(function () {
-
-    var componentMeta = getComponentMeta();
-
-    if (!componentMeta) {
-        throw new Error('Can not get parent component window - window not rendered by zoid');
-    }
-
-    return getWindowByRef(componentMeta.renderParent);
-});
-
-/*  Get Position
-    ------------
-
-    Calculate the position for the popup
-
-    This is either
-    - Specified by the user
-    - The center of the screen
-
-    I'd love to do this with pure css, but alas... popup windows :(
-*/
-
-export function getPosition(_ref2) {
-    var width = _ref2.width,
-        height = _ref2.height;
-
-
-    var x = 0;
-    var y = 0;
-
-    if (width) {
-        if (window.outerWidth) {
-            x = Math.round((window.outerWidth - width) / 2) + window.screenX;
-        } else if (window.screen.width) {
-            x = Math.round((window.screen.width - width) / 2);
-        }
-    }
-
-    if (height) {
-        if (window.outerHeight) {
-            y = Math.round((window.outerHeight - height) / 2) + window.screenY;
-        } else if (window.screen.height) {
-            y = Math.round((window.screen.height - height) / 2);
-        }
-    }
-
-    return { x: x, y: y };
-}

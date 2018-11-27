@@ -4,10 +4,6 @@ var _desc, _value, _class;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
@@ -42,10 +38,9 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
-import { memoize } from 'belter/src';
+import { memoize, copyProp } from 'belter/src';
 import 'jsx-pragmatic/src';
 
-import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
@@ -71,99 +66,98 @@ var drivers = { angular: angular, angular2: angular2, glimmer: glimmer, react: r
     contains all of the configuration needed for them to set themselves up.
 */
 
-export var Component = (_class = function (_BaseComponent) {
-    _inherits(Component, _BaseComponent);
-
+export var Component = (_class = function () {
     function Component(options) {
         _classCallCheck(this, Component);
-
-        var _this = _possibleConstructorReturn(this, _BaseComponent.call(this));
 
         validate(options);
 
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
-        _this.addProp(options, 'tag');
+        this.addProp(options, 'tag');
 
-        _this.addProp(options, 'allowedParentDomains', WILDCARD);
+        this.addProp(options, 'allowedParentDomains', WILDCARD);
 
-        if (Component.components[_this.tag]) {
+        if (Component.components[this.tag]) {
             throw new Error('Can not register multiple components with the same tag');
         }
 
         // Name of the component, used for logging. Auto-generated from the tag name by default.
 
-        _this.addProp(options, 'name', _this.tag.replace(/-/g, '_'));
+        this.addProp(options, 'name', this.tag.replace(/-/g, '_'));
 
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
 
-        _this.builtinProps = getInternalProps();
-        _this.props = options.props || {};
+        this.builtinProps = getInternalProps();
+        this.props = options.props || {};
 
         if (!options.props) {
-            _this.looseProps = true;
+            this.looseProps = true;
         }
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        _this.addProp(options, 'dimensions');
-        _this.addProp(options, 'scrolling');
-        _this.addProp(options, 'listenForResize');
+        this.addProp(options, 'dimensions');
+        this.addProp(options, 'scrolling');
+        this.addProp(options, 'listenForResize');
 
         // The default environment we should render to if none is specified in the parent
 
-        _this.addProp(options, 'defaultEnv');
+        this.addProp(options, 'defaultEnv');
 
         // A mapping of env->url, used to determine which url to load for which env
 
-        _this.addProp(options, 'buildUrl');
+        this.addProp(options, 'buildUrl');
 
-        _this.addProp(options, 'url');
-        _this.addProp(options, 'domain');
+        this.addProp(options, 'url');
+        this.addProp(options, 'domain');
 
-        _this.addProp(options, 'bridgeUrl');
-        _this.addProp(options, 'bridgeDomain');
+        this.addProp(options, 'bridgeUrl');
+        this.addProp(options, 'bridgeDomain');
 
-        _this.addProp(options, 'attributes', {});
+        this.addProp(options, 'attributes', {});
 
         // A url to use by default to render the component, if not using envs
 
 
         // The allowed contexts. For example { iframe: true, popup: false }
 
-        _this.addProp(options, 'contexts', { iframe: true, popup: false });
+        this.addProp(options, 'contexts', { iframe: true, popup: false });
 
         // The default context to render to
 
-        _this.addProp(options, 'defaultContext');
+        this.addProp(options, 'defaultContext');
 
         // Auto Resize option
 
-        _this.addProp(options, 'autoResize', false);
+        this.addProp(options, 'autoResize', false);
 
         // Templates and styles for the parent page and the initial rendering of the component
 
-        _this.addProp(options, 'containerTemplate', defaultContainerTemplate);
-        _this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
+        this.addProp(options, 'containerTemplate', defaultContainerTemplate);
+        this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
 
         // Validation
 
-        _this.addProp(options, 'validate');
+        this.addProp(options, 'validate');
 
         // A mapping of tag->component so we can reference components by string tag name
 
-        Component.components[_this.tag] = _this;
+        Component.components[this.tag] = this;
 
         // Register all of the drivers for instantiating components. The model used is -- there's a standard javascript
         // way of rendering a component, then each other technology (e.g. react) needs to hook into that interface.
         // This makes us a little more pluggable and loosely coupled.
-        _this.registerDrivers();
-        _this.registerChild();
-        _this.listenDelegate();
-        return _this;
+        this.registerDrivers();
+        this.registerChild();
+        this.listenDelegate();
     }
+
+    Component.prototype.addProp = function addProp(options, name, def) {
+        copyProp(options, this, name, def);
+    };
 
     Component.prototype.getPropNames = function getPropNames() {
         var props = Object.keys(this.props);
@@ -216,17 +210,17 @@ export var Component = (_class = function (_BaseComponent) {
     };
 
     Component.prototype.registerChild = function registerChild() {
-        var _this2 = this;
+        var _this = this;
 
         return ZalgoPromise['try'](function () {
-            if (_this2.isChild()) {
-                return new ChildComponent(_this2);
+            if (_this.isChild()) {
+                return new ChildComponent(_this);
             }
         });
     };
 
     Component.prototype.listenDelegate = function listenDelegate() {
-        var _this3 = this;
+        var _this2 = this;
 
         on(POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name, function () {
             return true;
@@ -238,7 +232,7 @@ export var Component = (_class = function (_BaseComponent) {
                 data = _ref.data;
 
 
-            var domain = _this3.getDomain(null, data.env || _this3.defaultEnv);
+            var domain = _this2.getDomain(null, data.env || _this2.defaultEnv);
 
             if (!domain) {
                 throw new Error('Could not determine domain to allow remote render');
@@ -248,7 +242,7 @@ export var Component = (_class = function (_BaseComponent) {
                 throw new Error('Can not render from ' + origin + ' - expected ' + domain.toString());
             }
 
-            var delegate = _this3.delegate(source, data.options);
+            var delegate = _this2.delegate(source, data.options);
 
             return {
                 overrides: delegate.getOverrides(data.context),
@@ -446,50 +440,50 @@ export var Component = (_class = function (_BaseComponent) {
     */
 
     Component.prototype.render = function render(props, element) {
-        var _this4 = this;
+        var _this3 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this4, _this4.getRenderContext(null, element), { props: props }).render(element);
+            return new ParentComponent(_this3, _this3.getRenderContext(null, element), { props: props }).render(element);
         });
     };
 
     Component.prototype.renderIframe = function renderIframe(props, element) {
-        var _this5 = this;
+        var _this4 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this5, _this5.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).render(element);
+            return new ParentComponent(_this4, _this4.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).render(element);
         });
     };
 
     Component.prototype.renderPopup = function renderPopup(props) {
-        var _this6 = this;
+        var _this5 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this6, _this6.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).render();
+            return new ParentComponent(_this5, _this5.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).render();
         });
     };
 
     Component.prototype.renderTo = function renderTo(win, props, element) {
-        var _this7 = this;
+        var _this6 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this7, _this7.getRenderContext(null, element), { props: props }).renderTo(win, element);
+            return new ParentComponent(_this6, _this6.getRenderContext(null, element), { props: props }).renderTo(win, element);
         });
     };
 
     Component.prototype.renderIframeTo = function renderIframeTo(win, props, element) {
-        var _this8 = this;
+        var _this7 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this8, _this8.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).renderTo(win, element);
+            return new ParentComponent(_this7, _this7.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).renderTo(win, element);
         });
     };
 
     Component.prototype.renderPopupTo = function renderPopupTo(win, props) {
-        var _this9 = this;
+        var _this8 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this9, _this9.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
+            return new ParentComponent(_this8, _this8.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
         });
     };
 
@@ -527,5 +521,5 @@ export var Component = (_class = function (_BaseComponent) {
     };
 
     return Component;
-}(BaseComponent), (_applyDecoratedDescriptor(_class.prototype, 'getPropNames', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'getPropNames'), _class.prototype)), _class);
+}(), (_applyDecoratedDescriptor(_class.prototype, 'getPropNames', [memoize], Object.getOwnPropertyDescriptor(_class.prototype, 'getPropNames'), _class.prototype)), _class);
 Component.components = {};

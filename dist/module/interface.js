@@ -24,6 +24,4 @@ export function destroyAll() {
 }
 export var postRobot = _postRobot;
 
-export * from './error';
-
 export var CONSTANTS = _CONSTANTS;

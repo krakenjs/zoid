@@ -1,12 +1,11 @@
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { cleanUpWindow } from 'post-robot/src';
-import { findFrameByName, isSameDomain } from 'cross-domain-utils/src';
-import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, addClass, removeClass, noop, uniqueID } from 'belter/src';
+import { cleanUpWindow, ProxyWindow } from 'post-robot/src';
+import { assertSameDomain, isSameDomain } from 'cross-domain-utils/src';
+import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, addClass, removeClass, uniqueID } from 'belter/src';
 
 import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
-import { getPosition, getParentComponentWindow } from '../window';
 
 /*  Render Drivers
     --------------
@@ -31,31 +30,24 @@ export var RENDER_DRIVERS = {};
 
 RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
-    focusable: false,
-    renderedIntoContainerTemplate: true,
-    allowResize: true,
-    openOnClick: false,
-    needsBridge: false,
+    renderedIntoContainer: true,
 
-    open: function open(url) {
+    open: function open() {
         var _this = this;
 
         var attributes = this.component.attributes.iframe || {};
-        var name = '__zoid_frame__' + this.component.name + '_' + uniqueID() + '__';
 
-        this.iframe = iframe({
-            url: url,
+        var frame = iframe({
             attributes: _extends({
-                name: name,
                 title: this.component.name,
                 scrolling: this.component.scrolling ? 'yes' : 'no'
             }, attributes),
             'class': [CLASS_NAMES.COMPONENT_FRAME, CLASS_NAMES.INVISIBLE]
         }, this.element);
 
-        return awaitFrameWindow(this.iframe).then(function (frameWindow) {
+        this.clean.set('iframe', frame);
 
-            _this.window = frameWindow;
+        return awaitFrameWindow(frame).then(function (win) {
 
             var detectClose = function detectClose() {
                 return ZalgoPromise['try'](function () {
@@ -65,37 +57,25 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
                 });
             };
 
-            var iframeWatcher = watchElementForClose(_this.iframe, detectClose);
+            var iframeWatcher = watchElementForClose(frame, detectClose);
             var elementWatcher = watchElementForClose(_this.element, detectClose);
 
             _this.clean.register('destroyWindow', function () {
-
                 iframeWatcher.cancel();
                 elementWatcher.cancel();
-
-                cleanUpWindow(_this.window);
-
-                delete _this.window;
-
-                if (_this.iframe) {
-                    destroyElement(_this.iframe);
-                    delete _this.iframe;
-                }
+                cleanUpWindow(win);
+                destroyElement(frame);
             });
 
-            return name;
+            return ProxyWindow.toProxyWindow(win);
         });
-    },
-    setWindowName: function setWindowName(name) {
-        this.window.name = name;
-        this.iframe.setAttribute('name', name);
     },
     openPrerender: function openPrerender() {
         var _this2 = this;
 
         var attributes = this.component.attributes.iframe || {};
 
-        this.prerenderIframe = iframe({
+        var prerenderIframe = iframe({
             attributes: _extends({
                 name: '__zoid_prerender_frame__' + this.component.name + '_' + uniqueID() + '__',
                 scrolling: this.component.scrolling ? 'yes' : 'no'
@@ -103,17 +83,15 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
             'class': [CLASS_NAMES.PRERENDER_FRAME, CLASS_NAMES.VISIBLE]
         }, this.element);
 
-        return awaitFrameWindow(this.prerenderIframe).then(function (prerenderFrameWindow) {
+        this.clean.set('prerenderIframe', prerenderIframe);
 
-            _this2.prerenderWindow = prerenderFrameWindow;
+        return awaitFrameWindow(prerenderIframe).then(function (prerenderFrameWindow) {
 
             _this2.clean.register('destroyPrerender', function () {
-
-                if (_this2.prerenderIframe) {
-                    destroyElement(_this2.prerenderIframe);
-                    delete _this2.prerenderIframe;
-                }
+                destroyElement(prerenderIframe);
             });
+
+            return assertSameDomain(prerenderFrameWindow);
         });
     },
     switchPrerender: function switchPrerender() {
@@ -134,12 +112,11 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
 
     delegateOverrides: {
-
         openContainer: DELEGATE.CALL_DELEGATE,
         destroyComponent: DELEGATE.CALL_DELEGATE,
         destroyContainer: DELEGATE.CALL_DELEGATE,
         cancelContainerEvents: DELEGATE.CALL_DELEGATE,
-        createPrerenderTemplate: DELEGATE.CALL_DELEGATE,
+        prerender: DELEGATE.CALL_DELEGATE,
         elementReady: DELEGATE.CALL_DELEGATE,
         showContainer: DELEGATE.CALL_DELEGATE,
         showComponent: DELEGATE.CALL_DELEGATE,
@@ -149,32 +126,14 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         show: DELEGATE.CALL_DELEGATE,
         resize: DELEGATE.CALL_DELEGATE,
         loadUrl: DELEGATE.CALL_DELEGATE,
-        hijackSubmit: DELEGATE.CALL_DELEGATE,
         openPrerender: DELEGATE.CALL_DELEGATE,
         switchPrerender: DELEGATE.CALL_DELEGATE,
         setWindowName: DELEGATE.CALL_DELEGATE,
+        open: DELEGATE.CALL_DELEGATE,
 
         renderTemplate: DELEGATE.CALL_ORIGINAL,
         openContainerFrame: DELEGATE.CALL_ORIGINAL,
-        getOutlet: DELEGATE.CALL_ORIGINAL,
-
-        open: function open(original, override) {
-            return function overrideOpen() {
-                var _this4 = this;
-
-                return override.apply(this, arguments).then(function (name) {
-                    var remoteWindow = findFrameByName(getParentComponentWindow(), name);
-
-                    if (!remoteWindow) {
-                        throw new Error('Unable to find remote iframe window');
-                    }
-
-                    _this4.clean.set('window', remoteWindow);
-
-                    return name;
-                });
-            };
-        }
+        getOutlet: DELEGATE.CALL_ORIGINAL
     },
 
     resize: function resize(width, height) {
@@ -194,9 +153,6 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     },
     hide: function hide() {
         hideElement(this.element);
-    },
-    loadUrl: function loadUrl(url) {
-        this.iframe.setAttribute('src', url);
     }
 };
 
@@ -206,19 +162,13 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
     RENDER_DRIVERS[CONTEXT_TYPES.POPUP] = {
 
-        focusable: true,
-        renderedIntoContainerTemplate: false,
-        allowResize: false,
-        openOnClick: true,
-        needsBridge: true,
+        renderedIntoContainer: false,
 
         open: function open() {
-            var _this5 = this;
-
-            var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            var _this4 = this;
 
             return ZalgoPromise['try'](function () {
-                var _ref = _this5.component.dimensions || {},
+                var _ref = _this4.component.dimensions || {},
                     _ref$width = _ref.width,
                     width = _ref$width === undefined ? DEFAULT_DIMENSIONS.WIDTH : _ref$width,
                     _ref$height = _ref.height,
@@ -227,47 +177,23 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);
 
-                var _getPosition = getPosition({ width: width, height: height }),
-                    x = _getPosition.x,
-                    y = _getPosition.y;
+                var attributes = _this4.component.attributes.popup || {};
+                var win = popup('', _extends({ width: width, height: height }, attributes));
 
-                var attributes = _this5.component.attributes.popup || {};
-                var name = '__zoid_frame__' + _this5.component.name + '_' + uniqueID() + '__';
-
-                _this5.window = popup(url || '', _extends({
-                    name: name,
-                    width: width,
-                    height: height,
-                    top: y,
-                    left: x,
-                    status: 1,
-                    toolbar: 0,
-                    menubar: 0,
-                    resizable: 1,
-                    scrollbars: 1
-                }, attributes));
-
-                _this5.prerenderWindow = _this5.window;
-
-                _this5.clean.register('destroyWindow', function () {
-                    if (_this5.window) {
-                        _this5.window.close();
-                        cleanUpWindow(_this5.window);
-                        delete _this5.window;
-                        delete _this5.prerenderWindow;
-                    }
+                _this4.clean.register('destroyWindow', function () {
+                    win.close();
+                    cleanUpWindow(win);
                 });
 
-                _this5.resize(width, height);
-
-                return name;
+                return ProxyWindow.toProxyWindow(win);
             });
         },
-        setWindowName: function setWindowName(name) {
-            this.window.name = name;
-        },
-        openPrerender: function openPrerender() {
-            return ZalgoPromise['try'](noop);
+        openPrerender: function openPrerender(win) {
+            return ZalgoPromise['try'](function () {
+                if (isSameDomain(win)) {
+                    return assertSameDomain(win);
+                }
+            });
         },
         resize: function resize() {
             // pass
@@ -299,28 +225,12 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
             open: DELEGATE.CALL_ORIGINAL,
             loadUrl: DELEGATE.CALL_ORIGINAL,
-            createPrerenderTemplate: DELEGATE.CALL_ORIGINAL,
+            prerender: DELEGATE.CALL_ORIGINAL,
             destroyComponent: DELEGATE.CALL_ORIGINAL,
             resize: DELEGATE.CALL_ORIGINAL,
             renderTemplate: DELEGATE.CALL_ORIGINAL,
             openContainerFrame: DELEGATE.CALL_ORIGINAL,
             getOutlet: DELEGATE.CALL_ORIGINAL
-        },
-
-        loadUrl: function loadUrl(url) {
-
-            if (isSameDomain(this.window)) {
-                try {
-                    if (this.window.location && this.window.location.replace) {
-                        this.window.location.replace(url);
-                        return;
-                    }
-                } catch (err) {
-                    // pass
-                }
-            }
-
-            this.window.location = url;
         }
     };
 }
