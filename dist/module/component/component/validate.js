@@ -100,16 +100,12 @@ export function validate(options) {
             throw new TypeError('Expected options.defaultEnv to be a string');
         }
 
-        if (_typeof(options.url) !== 'object') {
-            throw new TypeError('Expected options.url to be an object mapping env->url');
-        }
-
-        if (options.url && _typeof(options.url) === 'object' && !options.url[options.defaultEnv]) {
+        if (_typeof(options.url) === 'object' && !options.url[options.defaultEnv]) {
             throw new Error('No url found for default env: ' + options.defaultEnv);
         }
     }
 
-    if (!options.url) {
+    if (!options.url && !options.buildUrl) {
         throw new Error('Must pass url');
     }
 

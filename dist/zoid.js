@@ -5797,10 +5797,9 @@
                         }
                         if (options.defaultEnv) {
                             if ("string" != typeof options.defaultEnv) throw new TypeError("Expected options.defaultEnv to be a string");
-                            if ("object" !== validate__typeof(options.url)) throw new TypeError("Expected options.url to be an object mapping env->url");
-                            if (options.url && "object" === validate__typeof(options.url) && !options.url[options.defaultEnv]) throw new Error("No url found for default env: " + options.defaultEnv);
+                            if ("object" === validate__typeof(options.url) && !options.url[options.defaultEnv]) throw new Error("No url found for default env: " + options.defaultEnv);
                         }
-                        if (!options.url) throw new Error("Must pass url");
+                        if (!options.url && !options.buildUrl) throw new Error("Must pass url");
                         if ("object" === validate__typeof(options.url)) {
                             if (!options.defaultEnv) throw new Error("Must pass options.defaultEnv with env->url mapping");
                             for (var _i6 = 0, _Object$keys6 = Object.keys(options.url), _length6 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i6 < _length6; _i6++) {
