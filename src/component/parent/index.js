@@ -407,7 +407,6 @@ export class ParentComponent<P> {
         this.component.log(`delegate_${ this.context }`);
 
         let props = {
-            dimensions: this.props.dimensions,
             onClose:    this.props.onClose,
             onDisplay:  this.props.onDisplay
         };

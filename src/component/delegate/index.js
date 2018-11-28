@@ -7,11 +7,10 @@ import { eventEmitter, type EventEmitterType } from 'belter/src';
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
 import type { Component } from '../component';
-import type { CancelableType, DimensionsType } from '../../types';
+import type { CancelableType } from '../../types';
 import { cleanup, type CleanupType } from '../../lib';
 
 export type DelegatePropsType = {
-    dimensions : DimensionsType,
     onClose : () => ?ZalgoPromise<void>,
     onDisplay : () => ?ZalgoPromise<void>
 };
@@ -48,7 +47,6 @@ export class DelegateComponent<P>  {
         this.event = eventEmitter();
 
         this.props = {
-            dimensions: options.props.dimensions,
             onClose:    options.props.onClose,
             onDisplay:  options.props.onDisplay
         };
