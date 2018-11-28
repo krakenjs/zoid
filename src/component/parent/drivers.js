@@ -58,8 +58,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         let frame = iframe({
             attributes: {
-                title:     this.component.name,
-                scrolling: this.component.scrolling ? 'yes' : 'no',
+                title: this.component.name,
                 ...attributes
             },
             class: [
@@ -100,8 +99,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         let prerenderIframe = iframe({
             attributes: {
-                name:      `__zoid_prerender_frame__${ this.component.name }_${ uniqueID() }__`,
-                scrolling: this.component.scrolling ? 'yes' : 'no',
+                name: `__zoid_prerender_frame__${ this.component.name }_${ uniqueID() }__`,
                 ...attributes
             },
             class: [

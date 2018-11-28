@@ -44,7 +44,6 @@ export type ComponentOptionsType<P> = {
     props? : UserPropsDefinitionType<P>,
 
     dimensions? : CssDimensionsType,
-    scrolling? : boolean,
     autoResize? : boolean | { width? : boolean, height? : boolean, element? : string },
     listenForResize? : boolean,
 
@@ -79,7 +78,6 @@ export class Component<P> {
     builtinProps : BuiltInPropsDefinitionType<P>
 
     dimensions : CssDimensionsType
-    scrolling : boolean
     autoResize : ?(boolean | { width? : boolean, height? : boolean, element? : string })
     listenForResize : ?boolean
 
@@ -127,7 +125,6 @@ export class Component<P> {
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
         this.addProp(options, 'dimensions');
-        this.addProp(options, 'scrolling');
         this.addProp(options, 'listenForResize');
 
         // The default environment we should render to if none is specified in the parent
