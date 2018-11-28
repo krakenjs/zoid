@@ -153,11 +153,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         openPrerender:           DELEGATE.CALL_DELEGATE,
         switchPrerender:         DELEGATE.CALL_DELEGATE,
         setWindowName:           DELEGATE.CALL_DELEGATE,
-        open:                    DELEGATE.CALL_DELEGATE,
-
-        renderTemplate:          DELEGATE.CALL_ORIGINAL,
-        openContainerFrame:      DELEGATE.CALL_ORIGINAL,
-        getOutlet:               DELEGATE.CALL_ORIGINAL
+        open:                    DELEGATE.CALL_DELEGATE
     },
 
     resize(width : ?(number | string), height : ?(number | string)) {
@@ -248,16 +244,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
             hide:                   DELEGATE.CALL_DELEGATE,
             show:                   DELEGATE.CALL_DELEGATE,
 
-            cancelContainerEvents:  DELEGATE.CALL_DELEGATE,
-
-            open:                    DELEGATE.CALL_ORIGINAL,
-            loadUrl:                 DELEGATE.CALL_ORIGINAL,
-            prerender:               DELEGATE.CALL_ORIGINAL,
-            destroyComponent:        DELEGATE.CALL_ORIGINAL,
-            resize:                  DELEGATE.CALL_ORIGINAL,
-            renderTemplate:          DELEGATE.CALL_ORIGINAL,
-            openContainerFrame:      DELEGATE.CALL_ORIGINAL,
-            getOutlet:               DELEGATE.CALL_ORIGINAL
+            cancelContainerEvents:  DELEGATE.CALL_DELEGATE
         }
     };
 }

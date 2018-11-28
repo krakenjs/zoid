@@ -219,13 +219,6 @@ export class ParentComponent<P> {
         return this.event.on(eventName, handler);
     }
 
-    @memoized
-    getOutlet() : HTMLElement {
-        let outlet = document.createElement('div');
-        addClass(outlet, CLASS_NAMES.OUTLET);
-        return outlet;
-    }
-
     checkAllowRemoteRender(target : CrossDomainWindowType) {
 
         if (!target) {
@@ -786,7 +779,7 @@ export class ParentComponent<P> {
         });
     }
 
-    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document } : { focus? : () => ZalgoPromise<void>, container? : HTMLElement, document? : Document }) : T {
+    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document, outlet } : { focus? : () => ZalgoPromise<void>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
             height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
@@ -800,7 +793,6 @@ export class ParentComponent<P> {
             props:     renderer.__xdomain__ ? null : this.props,
             tag:       this.component.tag,
             context:   this.context,
-            outlet:    this.getOutlet(),
             CLASS:     CLASS_NAMES,
             ANIMATION: ANIMATION_NAMES,
             CONTEXT:   CONTEXT_TYPES,
@@ -813,7 +805,8 @@ export class ParentComponent<P> {
             jsxDom:     node,
             document,
             dimensions: { width, height },
-            container
+            container,
+            outlet
         });
     }
 
@@ -839,7 +832,10 @@ export class ParentComponent<P> {
                 return;
             }
 
-            let container = this.renderTemplate(this.component.containerTemplate, { container: el, focus });
+            let outlet = document.createElement('div');
+            addClass(outlet, CLASS_NAMES.OUTLET);
+
+            let container = this.renderTemplate(this.component.containerTemplate, { container: el, focus, outlet });
 
             if (container instanceof ElementNode) {
                 container = container.render(dom({ doc: document }));
@@ -850,7 +846,7 @@ export class ParentComponent<P> {
             appendChild(el, this.container);
 
             if (this.driver.renderedIntoContainer) {
-                this.element = this.getOutlet();
+                this.element = outlet;
                 hideElement(this.element);
 
                 if (!this.element) {

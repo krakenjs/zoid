@@ -46,6 +46,15 @@ export class DelegateComponent<P>  {
         this.clean = cleanup(this);
         this.event = eventEmitter();
 
+        // $FlowFixMe
+        this.destroyComponent = ParentComponent.prototype.destroyComponent;
+        // $FlowFixMe
+        this.resize = ParentComponent.prototype.resize;
+        // $FlowFixMe
+        this.renderTemplate = ParentComponent.prototype.renderTemplate;
+        // $FlowFixMe
+        this.registerActiveComponent = ParentComponent.prototype.registerActiveComponent;
+
         this.props = {
             onClose:    options.props.onClose,
             onDisplay:  options.props.onDisplay
@@ -64,14 +73,8 @@ export class DelegateComponent<P>  {
         this.error     = options.overrides.error;
         this.on        = options.overrides.on;
 
-        let delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
-
-        for (let key of Object.keys(delegateOverrides)) {
-            // $FlowFixMe
-            this[key] = ParentComponent.prototype[key];
-        }
-
-        ParentComponent.prototype.registerActiveComponent.call(this);
+        // $FlowFixMe
+        this.registerActiveComponent();
 
         this.watchForClose(source);
     }
