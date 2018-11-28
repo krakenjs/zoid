@@ -34,12 +34,8 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
         let value = props[key];
 
         if (!propDef) {
-            if (component.looseProps) {
-                result[key] = value;
-                continue;
-            } else {
-                throw new Error(`Unrecognized prop: ${ key }`);
-            }
+            result[key] = value;
+            continue;
         }
 
         if (!isDefined(value) && propDef.alias) {

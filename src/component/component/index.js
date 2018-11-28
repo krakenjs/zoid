@@ -68,10 +68,8 @@ export type ComponentDriverType<P, T : mixed> = {
 
 export class Component<P> {
 
-    name : string
-    looseProps : boolean
-
     tag : string
+    name : string
     
     url : EnvString | (props : BuiltInPropsType & P) => string
     domain : EnvString | RegExp
@@ -125,10 +123,6 @@ export class Component<P> {
 
         this.builtinProps = getInternalProps();
         this.props = options.props || {};
-
-        if (!options.props) {
-            this.looseProps = true;
-        }
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 

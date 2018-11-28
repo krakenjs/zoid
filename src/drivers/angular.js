@@ -32,9 +32,7 @@ export let angular : ComponentDriverType<*, Angular> = {
                 scope[key] = '=';
             }
 
-            if (component.looseProps) {
-                scope.props = '=';
-            }
+            scope.props = '=';
 
             return {
                 scope,
@@ -42,11 +40,6 @@ export let angular : ComponentDriverType<*, Angular> = {
                 restrict: 'E',
 
                 controller: [ '$scope', '$element', ($scope, $element) => {
-
-                    if (component.looseProps && !$scope.props) {
-                        throw new Error(`For angular bindings to work, prop definitions must be passed to zoid.create`);
-                    }
-
                     component.log(`instantiate_angular_component`);
 
                     function safeApply() {

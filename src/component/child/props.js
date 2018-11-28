@@ -11,11 +11,7 @@ export function normalizeChildProp<T, P>(component : Component<P>, props : (Buil
     let prop : MixedPropDefinitionType<P> = component.getProp(key);
 
     if (!prop) {
-        if (component.looseProps) {
-            return value;
-        } else {
-            return;
-        }
+        return value;
     }
 
     if (typeof prop.childDecorate === 'function') {
