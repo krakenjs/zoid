@@ -4,7 +4,7 @@
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { memoize, copyProp } from 'belter/src';
+import { memoize, copyProp, isRegex } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
 import { ChildComponent } from '../child';
@@ -74,7 +74,7 @@ export class Component<P> {
     tag : string
     
     url : EnvString | (props : BuiltInPropsType & P) => string
-    domain : EnvString
+    domain : EnvString | RegExp
     bridgeUrl : EnvString
 
     props : UserPropsDefinitionType<P>
@@ -282,12 +282,14 @@ export class Component<P> {
         throw new Error(`Can not find url`);
     }
 
-    getDomain(props : BuiltInPropsType & P) : string {
-        if (typeof this.domain === 'string') {
+    getDomain(props : BuiltInPropsType & P) : string | RegExp {
+        if (typeof this.domain === 'string' || isRegex(this.domain)) {
+            // $FlowFixMe
             return this.domain;
         }
 
         let env = props.env || this.defaultEnv;
+        // $FlowFixMe
         if (env && typeof this.domain === 'object' && this.domain[env]) {
             return this.domain[env];
         }

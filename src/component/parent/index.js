@@ -276,7 +276,7 @@ export class ParentComponent<P> {
         return { ref: WINDOW_REFERENCES.GLOBAL, uid };
     }
 
-    buildChildWindowName({ proxyWin, domain, target = window } : { proxyWin : ProxyWindow, domain : string, target : CrossDomainWindowType } = {}) : string {
+    buildChildWindowName({ proxyWin, domain, target = window } : { proxyWin : ProxyWindow, domain : string | RegExp, target : CrossDomainWindowType } = {}) : string {
 
         let uid    = uniqueID();
         let tag    = this.component.tag;
@@ -325,7 +325,7 @@ export class ParentComponent<P> {
     }
 
 
-    getDomain() : string {
+    getDomain() : string | RegExp {
         return this.component.getDomain(this.props);
     }
 
