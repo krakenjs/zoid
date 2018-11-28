@@ -11,7 +11,6 @@ import type { CancelableType, DimensionsType } from '../../types';
 import { cleanup, type CleanupType } from '../../lib';
 
 export type DelegatePropsType = {
-    uid : string,
     dimensions : DimensionsType,
     onClose : () => ?ZalgoPromise<void>,
     onDisplay : () => ?ZalgoPromise<void>
@@ -49,7 +48,6 @@ export class DelegateComponent<P>  {
         this.event = eventEmitter();
 
         this.props = {
-            uid:        options.props.uid,
             dimensions: options.props.dimensions,
             onClose:    options.props.onClose,
             onDisplay:  options.props.onDisplay

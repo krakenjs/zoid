@@ -78,6 +78,7 @@ export class ParentComponent<P> {
     errored : boolean
     event : EventEmitterType
     clean : CleanupType
+    uid : string
 
     container : HTMLElement
     element : HTMLElement
@@ -92,6 +93,7 @@ export class ParentComponent<P> {
             this.onInit = new ZalgoPromise();
             this.clean = cleanup(this);
             this.event = eventEmitter();
+            this.uid = uniqueID();
 
             this.component = component;
             this.context = context;
@@ -405,7 +407,6 @@ export class ParentComponent<P> {
         this.component.log(`delegate_${ this.context }`);
 
         let props = {
-            uid:        this.props.uid,
             dimensions: this.props.dimensions,
             onClose:    this.props.onClose,
             onDisplay:  this.props.onDisplay
@@ -796,7 +797,7 @@ export class ParentComponent<P> {
 
         // $FlowFixMe
         return renderer.call(this, {
-            id:        `${ CLASS_NAMES.ZOID }-${ this.component.tag }-${ this.props.uid }`,
+            id:        `${ CLASS_NAMES.ZOID }-${ this.component.tag }-${ this.uid }`,
             props:     renderer.__xdomain__ ? null : this.props,
             tag:       this.component.tag,
             context:   this.context,

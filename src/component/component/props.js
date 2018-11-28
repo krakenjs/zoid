@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, once, memoize, noop, promisify } from 'belter/src';
+import { once, memoize, noop, promisify } from 'belter/src';
 
 import { type DimensionsType } from '../../types';
 import { PROP_SERIALIZATION } from '../../constants';
@@ -41,7 +41,6 @@ export type UserPropsDefinitionType<P> = {
 export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 
 type envPropType = string;
-type uidPropType = string;
 type timeoutPropType = number;
 type dimensionsPropType = DimensionsType;
 
@@ -53,7 +52,6 @@ type onErrorPropType = EventHandlerType<mixed>;
 
 export type BuiltInPropsType = {
     env : envPropType,
-    uid : uidPropType,
     timeout? : timeoutPropType,
     dimensions? : dimensionsPropType,
 
@@ -66,7 +64,6 @@ export type BuiltInPropsType = {
 
 export type PropsType = {
     env? : envPropType,
-    uid? : uidPropType,
     timeout? : timeoutPropType,
     dimensions? : dimensionsPropType,
 
@@ -79,7 +76,6 @@ export type PropsType = {
 
 export type BuiltInPropsDefinitionType<P> = {
     env : StringPropDefinitionType<envPropType, P>,
-    uid : StringPropDefinitionType<uidPropType, P>,
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
 
@@ -109,14 +105,6 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             def(props, component) : ?string {
                 return component.defaultEnv;
             }
-        },
-
-        uid: {
-            type: 'string',
-            def() : string {
-                return uniqueID();
-            },
-            queryParam: true
         },
 
         dimensions: {
