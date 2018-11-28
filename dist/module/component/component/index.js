@@ -38,7 +38,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl } from 'cross-domain-utils/src';
-import { memoize, copyProp } from 'belter/src';
+import { memoize, copyProp, isRegex } from 'belter/src';
 import 'jsx-pragmatic/src';
 
 import { ChildComponent } from '../child';
@@ -264,11 +264,13 @@ export var Component = (_class = function () {
     };
 
     Component.prototype.getDomain = function getDomain(props) {
-        if (typeof this.domain === 'string') {
+        if (typeof this.domain === 'string' || isRegex(this.domain)) {
+            // $FlowFixMe
             return this.domain;
         }
 
         var env = props.env || this.defaultEnv;
+        // $FlowFixMe
         if (env && _typeof(this.domain) === 'object' && this.domain[env]) {
             return this.domain[env];
         }

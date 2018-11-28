@@ -5987,7 +5987,7 @@
                     throw new Error("Can not find url");
                 };
                 Component.prototype.getDomain = function(props) {
-                    if ("string" == typeof this.domain) return this.domain;
+                    if ("string" == typeof this.domain || Object(belter_src.isRegex)(this.domain)) return this.domain;
                     var env = props.env || this.defaultEnv;
                     return env && "object" === component__typeof(this.domain) && this.domain[env] ? this.domain[env] : Object(cross_domain_utils_src.getDomainFromUrl)(this.getUrl(props));
                 };
