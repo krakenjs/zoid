@@ -1,9 +1,10 @@
 /* @flow */
 
-import { getDomain } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain } from 'cross-domain-utils/src';
 
 import type { Component } from '../component';
 import type { BuiltInPropsType, MixedPropDefinitionType } from '../component/props';
+import { getParentComponentWindow } from '../window';
 
 export function normalizeChildProp<T, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : ?T  {
 
@@ -28,14 +29,13 @@ export function normalizeChildProps<P>(component : Component<P>, props : (BuiltI
 
     // $FlowFixMe
     for (let key of Object.keys(props)) {
-
         let prop = component.getProp(key);
-        let value = props[key];
 
-        if (prop && prop.sameDomain && origin !== getDomain(window)) {
+        if (prop && prop.sameDomain && (origin !== getDomain(window) || !isSameDomain(getParentComponentWindow()))) {
             continue;
         }
 
+        let value = props[key];
         result[key] = normalizeChildProp(component, props, key, value);
 
         if (prop && prop.alias && !result[prop.alias]) {
