@@ -1359,11 +1359,14 @@
             __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.x;
             });
-            __webpack_require__.d(__webpack_exports__, "onCloseWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "normalizeMockUrl", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.y;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+            __webpack_require__.d(__webpack_exports__, "onCloseWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.z;
+            });
+            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.A;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
@@ -1475,13 +1478,11 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.z = function(pattern) {
+            __webpack_exports__.A = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
-            __webpack_exports__.h = function(url) {
-                return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
-            };
-            __webpack_exports__.y = function(win, callback) {
+            __webpack_exports__.h = getDomainFromUrl;
+            __webpack_exports__.z = function(win, callback) {
                 var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, maxtime = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1 / 0, timeout = void 0;
                 !function check() {
                     if (isWindowClosed(win)) {
@@ -1536,6 +1537,11 @@
                     return !0;
                 }
                 return !1;
+            };
+            __webpack_exports__.y = function(url) {
+                if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf(constants.a.MOCK))) return url;
+                var domain;
+                throw new Error("Mock urls not supported out of test mode");
             };
             var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
@@ -1740,6 +1746,9 @@
             function getDistanceFromTop() {
                 for (var distance = 0, parent = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window; parent; ) (parent = getParent(parent)) && (distance += 1);
                 return distance;
+            }
+            function getDomainFromUrl(url) {
+                return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
             }
         },
         "./node_modules/post-robot/src/bridge/index.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -2666,12 +2675,11 @@
                             var key = _component$getPropNam2[_i2];
                             scope[key] = "=";
                         }
-                        component.looseProps && (scope.props = "=");
+                        scope.props = "=";
                         return {
                             scope: scope,
                             restrict: "E",
                             controller: [ "$scope", "$element", function($scope, $element) {
-                                if (component.looseProps && !$scope.props) throw new Error("For angular bindings to work, prop definitions must be passed to zoid.create");
                                 component.log("instantiate_angular_component");
                                 var getProps = function() {
                                     var scopeProps = void 0;
@@ -4493,47 +4501,28 @@
                     }
                 };
             }
-            var isZoidComponentWindow = Object(belter_src.memoize)(function() {
-                return !!window.name && window.name.split("__")[0] === ZOID;
-            }), getComponentMeta = Object(belter_src.memoize)(function() {
-                if (!window.name) throw new Error("Can not get component meta without window name");
-                var _window$name$split2 = window.name.split("__"), zoidcomp = _window$name$split2[0], name = _window$name$split2[1], encodedOptions = _window$name$split2[2];
+            var parseChildWindowName = Object(belter_src.memoize)(function() {
+                if (!window.name) throw new Error("No window name");
+                var _window$name$split = window.name.split("__"), zoidcomp = _window$name$split[1], name = _window$name$split[2], encodedPayload = _window$name$split[3];
                 if (zoidcomp !== ZOID) throw new Error("Window not rendered by zoid - got " + zoidcomp);
-                var componentMeta = void 0;
+                if (!name) throw new Error("Expected component name");
+                if (!encodedPayload) throw new Error("Expected encoded payload");
                 try {
-                    componentMeta = JSON.parse(Object(belter_src.base64decode)(encodedOptions));
+                    return JSON.parse(Object(belter_src.base64decode)(encodedPayload));
                 } catch (err) {
-                    throw new Error("Can not decode component-meta: " + encodedOptions + " " + Object(belter_src.stringifyError)(err));
+                    throw new Error("Can not decode window name payload: " + encodedPayload + ": " + Object(belter_src.stringifyError)(err));
                 }
-                componentMeta.name = name;
-                return componentMeta;
-            });
-            function getParentDomain() {
-                return getComponentMeta().domain;
-            }
-            var window_getParentComponentWindow = Object(belter_src.memoize)(function() {
-                var componentMeta = getComponentMeta();
-                if (!componentMeta) throw new Error("Can not get parent component window - window not rendered by zoid");
-                return function(_ref) {
-                    var ref = _ref.ref, uid = _ref.uid, distance = _ref.distance, result = void 0;
-                    ref === WINDOW_REFERENCES.OPENER ? result = Object(cross_domain_utils_src.getOpener)(window) : ref === WINDOW_REFERENCES.TOP ? result = Object(cross_domain_utils_src.getTop)(window) : ref === WINDOW_REFERENCES.PARENT && (result = distance ? Object(cross_domain_utils_src.getNthParentFromTop)(window, distance) : Object(cross_domain_utils_src.getParent)(window));
-                    if (ref === WINDOW_REFERENCES.GLOBAL) {
-                        var ancestor = Object(cross_domain_utils_src.getAncestor)(window);
-                        if (ancestor) for (var _i2 = 0, _getAllFramesInWindow2 = Object(cross_domain_utils_src.getAllFramesInWindow)(ancestor), _length2 = null == _getAllFramesInWindow2 ? 0 : _getAllFramesInWindow2.length; _i2 < _length2; _i2++) {
-                            var global = globalFor(_getAllFramesInWindow2[_i2]);
-                            if (global && global.windows && global.windows[uid]) {
-                                result = global.windows[uid];
-                                break;
-                            }
-                        }
-                    }
-                    if (!result) throw new Error("Unable to find window by ref");
-                    return result;
-                }(componentMeta.componentParent);
+            }), isZoidComponentWindow = Object(belter_src.memoize)(function() {
+                try {
+                    parseChildWindowName();
+                } catch (err) {
+                    return !1;
+                }
+                return !0;
             });
             function normalizeChildProp(component, props, key, value) {
                 var prop = component.getProp(key);
-                return prop ? "function" == typeof prop.childDecorate ? prop.childDecorate(value) : value : component.looseProps ? value : void 0;
+                return prop && "function" == typeof prop.childDecorate ? prop.childDecorate(value) : value;
             }
             var child__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -4547,17 +4536,20 @@
                     }(this);
                     src.a.try(function() {
                         if (window.xchild || window.xprops) throw _this.component.createError("Can not attach multiple components to the same window");
-                        var parentDomain = getParentDomain(), parentComponentWindow = _this.getParentComponentWindow();
-                        _this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
                         _this.component = component;
                         _this.onPropHandlers = [];
+                        var _parseChildWindowName = parseChildWindowName(), parent = _parseChildWindowName.parent, domain = _parseChildWindowName.domain, exports = _parseChildWindowName.exports, context = _parseChildWindowName.context, props = _parseChildWindowName.props;
+                        _this.context = context;
+                        _this.parentComponentWindow = _this.getWindowByRef(parent);
+                        _this.parentExports = deserializeMessage(_this.parentComponentWindow, domain, exports);
+                        _this.checkParentDomain(domain);
                         window.xchild = _this.component.xchild = _this;
-                        _this.setProps(_this.getInitialProps(), getParentDomain());
-                        _this.checkParentDomain();
-                        Object(lib.e)(parentComponentWindow);
+                        var initialProps = _this.getPropsByRef(_this.parentComponentWindow, domain, props);
+                        _this.setProps(initialProps, domain);
+                        Object(lib.e)(_this.parentComponentWindow);
                         _this.watchForClose();
                         _this.listenForResize();
-                        _this.watchForResize();
+                        _this.watchForResize(context);
                         return _this.parentExports.init(_this.buildExports());
                     }).catch(function(err) {
                         _this.error(err);
@@ -4572,37 +4564,53 @@
                         });
                     }
                 };
-                ChildComponent.prototype.checkParentDomain = function() {
-                    if (!Object(cross_domain_utils_src.matchDomain)(this.component.allowedParentDomains, getParentDomain())) throw new Error("Can not be rendered by domain: " + getParentDomain());
+                ChildComponent.prototype.checkParentDomain = function(domain) {
+                    if (!Object(cross_domain_utils_src.matchDomain)(this.component.allowedParentDomains, domain)) throw new Error("Can not be rendered by domain: " + domain);
                 };
                 ChildComponent.prototype.onProps = function(handler) {
                     this.onPropHandlers.push(handler);
                 };
-                ChildComponent.prototype.getParentComponentWindow = function() {
-                    return window_getParentComponentWindow();
-                };
-                ChildComponent.prototype.getInitialProps = function() {
-                    var componentMeta = getComponentMeta(), props = componentMeta.props, parentComponentWindow = window_getParentComponentWindow();
-                    if (props.type === INITIAL_PROPS.RAW) props = props.value; else {
-                        if (props.type !== INITIAL_PROPS.UID) throw new Error("Unrecognized props type: " + props.type);
+                ChildComponent.prototype.getPropsByRef = function(parentComponentWindow, domain, _ref) {
+                    var type = _ref.type, value = _ref.value, uid = _ref.uid, props = void 0;
+                    if (type === INITIAL_PROPS.RAW) props = value; else if (type === INITIAL_PROPS.UID) {
                         if (!Object(cross_domain_utils_src.isSameDomain)(parentComponentWindow)) {
                             if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
                             throw new Error("Parent component window is on a different domain - expected " + Object(cross_domain_utils_src.getDomain)() + " - can not retrieve props");
                         }
                         var global = globalFor(parentComponentWindow);
                         if (!global) throw new Error("Can not find global for parent component - can not retrieve props");
-                        props = global.props[componentMeta.uid];
+                        props = global.props[uid];
                     }
                     if (!props) throw new Error("Initial props not found");
-                    return deserializeMessage(parentComponentWindow, getParentDomain(), props);
+                    return deserializeMessage(parentComponentWindow, domain, props);
+                };
+                ChildComponent.prototype.getWindowByRef = function(ref) {
+                    var type = ref.type, result = void 0;
+                    if (type === WINDOW_REFERENCES.OPENER) result = Object(cross_domain_utils_src.getOpener)(window); else if (type === WINDOW_REFERENCES.TOP) result = Object(cross_domain_utils_src.getTop)(window); else if (type === WINDOW_REFERENCES.PARENT) {
+                        var distance = ref.distance;
+                        result = distance ? Object(cross_domain_utils_src.getNthParentFromTop)(window, distance) : Object(cross_domain_utils_src.getParent)(window);
+                    }
+                    if (type === WINDOW_REFERENCES.GLOBAL) {
+                        var uid = ref.uid, ancestor = Object(cross_domain_utils_src.getAncestor)(window);
+                        if (ancestor) for (var _i2 = 0, _getAllFramesInWindow2 = Object(cross_domain_utils_src.getAllFramesInWindow)(ancestor), _length2 = null == _getAllFramesInWindow2 ? 0 : _getAllFramesInWindow2.length; _i2 < _length2; _i2++) {
+                            var global = globalFor(_getAllFramesInWindow2[_i2]);
+                            if (global && global.windows && global.windows[uid]) {
+                                result = global.windows[uid];
+                                break;
+                            }
+                        }
+                    }
+                    if (!result) throw new Error("Unable to find " + type + " window");
+                    return result;
                 };
                 ChildComponent.prototype.setProps = function(props, origin) {
                     var required = !(arguments.length > 2 && void 0 !== arguments[2]) || arguments[2];
                     this.props = this.props || {};
-                    var normalizedProps = function(component, props, origin) {
-                        for (var required = !(arguments.length > 3 && void 0 !== arguments[3]) || arguments[3], result = {}, _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
-                            var key = _Object$keys2[_i2], prop = component.getProp(key), value = props[key];
-                            if (!prop || !prop.sameDomain || origin === Object(cross_domain_utils_src.getDomain)(window)) {
+                    var normalizedProps = function(parentComponentWindow, component, props, origin) {
+                        for (var required = !(arguments.length > 4 && void 0 !== arguments[4]) || arguments[4], result = {}, _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+                            var key = _Object$keys2[_i2], prop = component.getProp(key);
+                            if (!prop || !prop.sameDomain || origin === Object(cross_domain_utils_src.getDomain)(window) && Object(cross_domain_utils_src.isSameDomain)(parentComponentWindow)) {
+                                var value = props[key];
                                 result[key] = normalizeChildProp(component, 0, key, value);
                                 prop && prop.alias && !result[prop.alias] && (result[prop.alias] = value);
                             }
@@ -4612,9 +4620,9 @@
                             props.hasOwnProperty(_key) || (result[_key] = normalizeChildProp(component, 0, _key, props[_key]));
                         }
                         return result;
-                    }(this.component, props, origin, required);
+                    }(this.parentComponentWindow, this.component, props, origin, required);
                     Object(belter_src.extend)(this.props, normalizedProps);
-                    for (var _i2 = 0, _onPropHandlers2 = this.onPropHandlers, _length2 = null == _onPropHandlers2 ? 0 : _onPropHandlers2.length; _i2 < _length2; _i2++) _onPropHandlers2[_i2].call(this, this.props);
+                    for (var _i4 = 0, _onPropHandlers2 = this.onPropHandlers, _length4 = null == _onPropHandlers2 ? 0 : _onPropHandlers2.length; _i4 < _length4; _i4++) _onPropHandlers2[_i4].call(this, this.props);
                     window.xprops = this.component.xprops = this.props;
                 };
                 ChildComponent.prototype.watchForClose = function() {
@@ -4624,12 +4632,12 @@
                     });
                 };
                 ChildComponent.prototype.enableAutoResize = function() {
-                    var _ref = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref$width = _ref.width, width = void 0 === _ref$width || _ref$width, _ref$height = _ref.height, height = void 0 === _ref$height || _ref$height;
+                    var _ref2 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref2$width = _ref2.width, width = void 0 === _ref2$width || _ref2$width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height;
                     this.autoResize = {
                         width: width,
                         height: height
                     };
-                    this.watchForResize();
+                    this.watchForResize(this.context);
                 };
                 ChildComponent.prototype.getAutoResize = function() {
                     var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
@@ -4646,9 +4654,9 @@
                         element: autoResize.element ? Object(belter_src.getElement)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement
                     };
                 };
-                ChildComponent.prototype.watchForResize = function() {
+                ChildComponent.prototype.watchForResize = function(context) {
                     var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                    if ((width || height) && getComponentMeta().context !== CONTEXT_TYPES.POPUP && !this.watchingForResize) {
+                    if ((width || height) && context !== CONTEXT_TYPES.POPUP && !this.watchingForResize) {
                         this.watchingForResize = !0;
                         return src.a.try(function() {
                             return Object(belter_src.waitForDocumentReady)();
@@ -4694,15 +4702,15 @@
                 ChildComponent.prototype.resize = function(width, height) {
                     return this.parentExports.resize(width, height);
                 };
-                ChildComponent.prototype.resizeToElement = function(el, _ref2) {
-                    var _this6 = this, width = _ref2.width, height = _ref2.height, history = [];
+                ChildComponent.prototype.resizeToElement = function(el, _ref3) {
+                    var _this6 = this, width = _ref3.width, height = _ref3.height, history = [];
                     return function resize() {
                         return src.a.try(function() {
                             for (var tracker = Object(belter_src.trackDimensions)(el, {
                                 width: width,
                                 height: height
-                            }), dimensions = tracker.check().dimensions, _i4 = 0, _length4 = null == history ? 0 : history.length; _i4 < _length4; _i4++) {
-                                var size = history[_i4], widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
+                            }), dimensions = tracker.check().dimensions, _i6 = 0, _length6 = null == history ? 0 : history.length; _i6 < _length6; _i6++) {
+                                var size = history[_i6], widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
                                 if (widthMatch && heightMatch) return;
                             }
                             history.push({
@@ -4757,8 +4765,7 @@
                 open: function() {
                     var _this = this, attributes = this.component.attributes.iframe || {}, frame = Object(belter_src.iframe)({
                         attributes: drivers__extends({
-                            title: this.component.name,
-                            scrolling: this.component.scrolling ? "yes" : "no"
+                            title: this.component.name
                         }, attributes),
                         class: [ CLASS_NAMES.COMPONENT_FRAME, CLASS_NAMES.INVISIBLE ]
                     }, this.element);
@@ -4783,8 +4790,7 @@
                 openPrerender: function() {
                     var _this2 = this, attributes = this.component.attributes.iframe || {}, prerenderIframe = Object(belter_src.iframe)({
                         attributes: drivers__extends({
-                            name: "__zoid_prerender_frame__" + this.component.name + "_" + Object(belter_src.uniqueID)() + "__",
-                            scrolling: this.component.scrolling ? "yes" : "no"
+                            name: "__zoid_prerender_frame__" + this.component.name + "_" + Object(belter_src.uniqueID)() + "__"
                         }, attributes),
                         class: [ CLASS_NAMES.PRERENDER_FRAME, CLASS_NAMES.VISIBLE ]
                     }, this.element);
@@ -4824,10 +4830,7 @@
                     openPrerender: DELEGATE.CALL_DELEGATE,
                     switchPrerender: DELEGATE.CALL_DELEGATE,
                     setWindowName: DELEGATE.CALL_DELEGATE,
-                    open: DELEGATE.CALL_DELEGATE,
-                    renderTemplate: DELEGATE.CALL_ORIGINAL,
-                    openContainerFrame: DELEGATE.CALL_ORIGINAL,
-                    getOutlet: DELEGATE.CALL_ORIGINAL
+                    open: DELEGATE.CALL_DELEGATE
                 },
                 resize: function(width, height) {
                     if (width) {
@@ -4887,15 +4890,7 @@
                     hideComponent: DELEGATE.CALL_DELEGATE,
                     hide: DELEGATE.CALL_DELEGATE,
                     show: DELEGATE.CALL_DELEGATE,
-                    cancelContainerEvents: DELEGATE.CALL_DELEGATE,
-                    open: DELEGATE.CALL_ORIGINAL,
-                    loadUrl: DELEGATE.CALL_ORIGINAL,
-                    prerender: DELEGATE.CALL_ORIGINAL,
-                    destroyComponent: DELEGATE.CALL_ORIGINAL,
-                    resize: DELEGATE.CALL_ORIGINAL,
-                    renderTemplate: DELEGATE.CALL_ORIGINAL,
-                    openContainerFrame: DELEGATE.CALL_ORIGINAL,
-                    getOutlet: DELEGATE.CALL_ORIGINAL
+                    cancelContainerEvents: DELEGATE.CALL_DELEGATE
                 }
             };
             var _class, props__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
@@ -4946,6 +4941,7 @@
                         _this.onInit = new src.a();
                         _this.clean = cleanup(_this);
                         _this.event = Object(belter_src.eventEmitter)();
+                        _this.uid = Object(belter_src.uniqueID)();
                         _this.component = component;
                         _this.context = context;
                         _this.driver = RENDER_DRIVERS[_this.context];
@@ -4960,13 +4956,13 @@
                 ParentComponent.prototype.render = function(element) {
                     var _this2 = this, target = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window;
                     return this.tryInit(function() {
-                        _this2.component.log("render_" + _this2.context, {
+                        _this2.component.log("render", {
                             context: _this2.context,
                             element: element
                         });
                         var tasks = {};
                         tasks.onRender = _this2.props.onRender();
-                        var domain = _this2.getDomain();
+                        var domain = _this2.getDomain(), initialDomain = _this2.getInitialDomain();
                         tasks.elementReady = src.a.try(function() {
                             if (element) return _this2.elementReady(element);
                         });
@@ -4989,31 +4985,36 @@
                         tasks.showContainer = tasks.openContainer.then(function() {
                             return _this2.showContainer();
                         });
-                        tasks.setWindowName = tasks.open.then(function(proxyWin) {
-                            return _this2.setWindowName(proxyWin, _this2.buildChildWindowName({
+                        tasks.buildWindowName = tasks.open.then(function(proxyWin) {
+                            return _this2.buildWindowName({
                                 proxyWin: proxyWin,
+                                initialDomain: initialDomain,
                                 domain: domain,
                                 target: target
-                            }));
+                            });
                         });
-                        tasks.watchForClose = src.a.all([ tasks.awaitWindow, tasks.setWindowName ]).then(function(_ref2) {
-                            var win = _ref2[0];
+                        tasks.setWindowName = src.a.all([ tasks.open, tasks.buildWindowName ]).then(function(_ref2) {
+                            var proxyWin = _ref2[0], windowName = _ref2[1];
+                            return _this2.setWindowName(proxyWin, windowName);
+                        });
+                        tasks.watchForClose = src.a.all([ tasks.awaitWindow, tasks.setWindowName ]).then(function(_ref3) {
+                            var win = _ref3[0];
                             return _this2.watchForClose(win);
                         });
-                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref3) {
-                            var proxyWin = _ref3[0];
+                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref4) {
+                            var proxyWin = _ref4[0];
                             return _this2.prerender(proxyWin);
                         });
                         tasks.showComponent = tasks.prerender.then(function() {
                             return _this2.showComponent();
                         });
                         tasks.buildUrl = _this2.buildUrl();
-                        tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.buildUrl ]).then(function(_ref4) {
-                            var win = _ref4[0], url = _ref4[1];
+                        tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.buildUrl ]).then(function(_ref5) {
+                            var win = _ref5[0], url = _ref5[1];
                             return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url));
                         });
-                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref5) {
-                            var proxyWin = _ref5[0], url = _ref5[1];
+                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
+                            var proxyWin = _ref6[0], url = _ref6[1];
                             return _this2.loadUrl(proxyWin, url);
                         });
                         tasks.switchPrerender = src.a.all([ tasks.prerender, _this2.onInit ]).then(function() {
@@ -5046,11 +5047,6 @@
                 ParentComponent.prototype.on = function(eventName, handler) {
                     return this.event.on(eventName, handler);
                 };
-                ParentComponent.prototype.getOutlet = function() {
-                    var outlet = document.createElement("div");
-                    Object(belter_src.addClass)(outlet, CLASS_NAMES.OUTLET);
-                    return outlet;
-                };
                 ParentComponent.prototype.checkAllowRemoteRender = function(target) {
                     if (!target) throw this.component.createError("Must pass window to renderTo");
                     if (!Object(cross_domain_utils_src.isSameTopWindow)(window, target)) throw new Error("Can only renderTo an adjacent frame");
@@ -5064,56 +5060,65 @@
                         ParentComponent.activeComponents.splice(ParentComponent.activeComponents.indexOf(_this4), 1);
                     });
                 };
-                ParentComponent.prototype.getComponentParentRef = function() {
-                    var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                    if (this.context === CONTEXT_TYPES.POPUP) return {
-                        ref: WINDOW_REFERENCES.OPENER
-                    };
-                    if (renderToWindow === window) return Object(cross_domain_utils_src.isTop)(window) ? {
-                        ref: WINDOW_REFERENCES.TOP
+                ParentComponent.prototype.getWindowRef = function(target, domain, uid) {
+                    if (domain === Object(cross_domain_utils_src.getDomain)(window)) {
+                        global_global.windows[uid] = window;
+                        this.clean.register(function() {
+                            delete global_global.windows[uid];
+                        });
+                        return {
+                            type: WINDOW_REFERENCES.GLOBAL,
+                            uid: uid
+                        };
+                    }
+                    if (target !== window) throw new Error("Can not currently create window reference for different target with a different domain");
+                    return this.context === CONTEXT_TYPES.POPUP ? {
+                        type: WINDOW_REFERENCES.OPENER
+                    } : Object(cross_domain_utils_src.isTop)(window) ? {
+                        type: WINDOW_REFERENCES.TOP
                     } : {
-                        ref: WINDOW_REFERENCES.PARENT,
+                        type: WINDOW_REFERENCES.PARENT,
                         distance: Object(cross_domain_utils_src.getDistanceFromTop)(window)
                     };
-                    var uid = Object(belter_src.uniqueID)();
-                    global_global.windows[uid] = window;
-                    this.clean.register(function() {
-                        delete global_global.windows[uid];
-                    });
-                    return {
-                        ref: WINDOW_REFERENCES.GLOBAL,
-                        uid: uid
-                    };
                 };
-                ParentComponent.prototype.buildChildWindowName = function() {
-                    var _ref6 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref6.proxyWin, domain = _ref6.domain, _ref6$target = _ref6.target, target = void 0 === _ref6$target ? window : _ref6$target, uid = Object(belter_src.uniqueID)(), tag = this.component.tag, sProps = serializeMessage(proxyWin, domain, this.getPropsForChild()), componentParent = this.getComponentParentRef(target), props = Object(cross_domain_utils_src.isSameDomain)(target) ? {
+                ParentComponent.prototype.buildWindowName = function(_ref7) {
+                    var name, childPayload, normalizedName, encodedPayload, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, target = _ref7.target;
+                    return name = this.component.name, childPayload = this.buildChildPayload({
+                        proxyWin: proxyWin,
+                        initialDomain: initialDomain,
+                        domain: domain,
+                        target: target
+                    }), normalizedName = name.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_"), 
+                    encodedPayload = Object(belter_src.base64encode)(JSON.stringify(childPayload)), 
+                    "__" + ZOID + "__" + normalizedName + "__" + encodedPayload + "__";
+                };
+                ParentComponent.prototype.getPropsRef = function(proxyWin, target, domain, uid) {
+                    var value = serializeMessage(proxyWin, domain, this.getPropsForChild(domain)), propRef = Object(cross_domain_utils_src.isSameDomain)(target) ? {
                         type: INITIAL_PROPS.RAW,
-                        value: sProps
+                        value: value
                     } : {
                         type: INITIAL_PROPS.UID,
                         uid: uid
                     };
-                    if (props.type === INITIAL_PROPS.UID) {
-                        global_global.props[uid] = sProps;
+                    if (propRef.type === INITIAL_PROPS.UID) {
+                        global_global.props[uid] = value;
                         this.clean.register(function() {
                             delete global_global.props[uid];
                         });
                     }
-                    var exports = serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin)), id = Object(belter_src.uniqueID)(), thisdomain = Object(cross_domain_utils_src.getDomain)(window), context = this.context;
-                    return function(name, options) {
-                        var encodedName = name.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_"), encodedOptions = Object(belter_src.base64encode)(JSON.stringify(options));
-                        if (!encodedName) throw new Error("Invalid name: " + name + " - must contain alphanumeric characters");
-                        return [ ZOID, encodedName, encodedOptions, "" ].join("__");
-                    }(this.component.name, {
-                        id: id,
-                        context: context,
-                        domain: thisdomain,
-                        uid: uid,
-                        tag: tag,
-                        componentParent: componentParent,
-                        props: props,
-                        exports: exports
-                    });
+                    return propRef;
+                };
+                ParentComponent.prototype.buildChildPayload = function() {
+                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref8.proxyWin, initialDomain = _ref8.initialDomain, domain = _ref8.domain, _ref8$target = _ref8.target, target = void 0 === _ref8$target ? window : _ref8$target;
+                    return {
+                        uid: this.uid,
+                        context: this.context,
+                        domain: Object(cross_domain_utils_src.getDomain)(window),
+                        tag: this.component.tag,
+                        parent: this.getWindowRef(target, initialDomain, this.uid),
+                        props: this.getPropsRef(proxyWin, target, domain, this.uid),
+                        exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
+                    };
                 };
                 ParentComponent.prototype.setProps = function(props) {
                     var isUpdate = arguments.length > 1 && void 0 !== arguments[1] && arguments[1];
@@ -5128,20 +5133,15 @@
                         }
                         for (var _i4 = 0, _length4 = null == propNames ? 0 : propNames.length; _i4 < _length4; _i4++) {
                             var _key = propNames[_i4], propDef = component.getProp(_key), value = props[_key];
-                            if (!propDef) {
-                                if (component.looseProps) {
-                                    result[_key] = value;
-                                    continue;
-                                }
-                                throw new Error("Unrecognized prop: " + _key);
-                            }
-                            !Object(belter_src.isDefined)(value) && propDef.alias && (value = props[propDef.alias]);
-                            propDef.value && (value = propDef.value());
-                            !Object(belter_src.isDefined)(value) && propDef.def && (value = propDef.def(props, component));
-                            if (Object(belter_src.isDefined)(value)) {
-                                if ("array" === propDef.type ? !Array.isArray(value) : (void 0 === value ? "undefined" : props__typeof(value)) !== propDef.type) throw new TypeError("Prop is not of type " + propDef.type + ": " + _key);
-                            } else if (!1 !== propDef.required) throw new Error("Expected prop " + _key + " to be passed");
-                            result[_key] = value;
+                            if (propDef) {
+                                !Object(belter_src.isDefined)(value) && propDef.alias && (value = props[propDef.alias]);
+                                propDef.value && (value = propDef.value());
+                                !Object(belter_src.isDefined)(value) && propDef.def && (value = propDef.def(props, component));
+                                if (Object(belter_src.isDefined)(value)) {
+                                    if ("array" === propDef.type ? !Array.isArray(value) : (void 0 === value ? "undefined" : props__typeof(value)) !== propDef.type) throw new TypeError("Prop is not of type " + propDef.type + ": " + _key);
+                                } else if (!1 !== propDef.required) throw new Error("Expected prop " + _key + " to be passed");
+                                result[_key] = value;
+                            } else result[_key] = value;
                         }
                         for (var _i6 = 0, _Object$keys4 = Object.keys(result), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
                             var _key2 = _Object$keys4[_i6], _propDef = component.getProp(_key2), _value = result[_key2];
@@ -5192,7 +5192,7 @@
                     })).then(function() {
                         return params;
                     })).then(function(query) {
-                        var url = _this5.component.getUrl(_this5.props);
+                        var url = Object(cross_domain_utils_src.normalizeMockUrl)(_this5.component.getUrl(_this5.props));
                         return Object(belter_src.extendUrl)(url, {
                             query: parent__extends({}, query)
                         });
@@ -5201,10 +5201,13 @@
                 ParentComponent.prototype.getDomain = function() {
                     return this.component.getDomain(this.props);
                 };
-                ParentComponent.prototype.getPropsForChild = function() {
+                ParentComponent.prototype.getInitialDomain = function() {
+                    return this.component.getInitialDomain(this.props);
+                };
+                ParentComponent.prototype.getPropsForChild = function(domain) {
                     for (var result = {}, _i2 = 0, _Object$keys2 = Object.keys(this.props), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
                         var key = _Object$keys2[_i2], prop = this.component.getProp(key);
-                        prop && !1 === prop.sendToChild || (result[key] = this.props[key]);
+                        prop && !1 === prop.sendToChild || prop && prop.sameDomain && !Object(cross_domain_utils_src.matchDomain)(domain, Object(cross_domain_utils_src.getDomain)(window)) || (result[key] = this.props[key]);
                     }
                     return result;
                 };
@@ -5212,7 +5215,7 @@
                     var _this6 = this;
                     this.setProps(props, !0);
                     return this.onInit.then(function() {
-                        if (_this6.childExports) return _this6.childExports.updateProps(_this6.getPropsForChild());
+                        if (_this6.childExports) return _this6.childExports.updateProps(_this6.getPropsForChild(_this6.getDomain()));
                         throw new Error("Child exports were not available");
                     });
                 };
@@ -5254,8 +5257,6 @@
                     var _this10 = this;
                     this.component.log("delegate_" + this.context);
                     for (var props = {
-                        uid: this.props.uid,
-                        dimensions: this.props.dimensions,
                         onClose: this.props.onClose,
                         onDisplay: this.props.onDisplay
                     }, _i4 = 0, _component$getPropNam2 = this.component.getPropNames(), _length4 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
@@ -5280,8 +5281,8 @@
                                 }
                             }
                         }
-                    }).then(function(_ref7) {
-                        var data = _ref7.data;
+                    }).then(function(_ref9) {
+                        var data = _ref9.data;
                         _this10.clean.register(data.destroy);
                         return data;
                     }).catch(function(err) {
@@ -5377,7 +5378,7 @@
                     };
                 };
                 ParentComponent.prototype.resize = function(width, height) {
-                    var _this17 = this, _ref8$waitForTransiti = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref8$waitForTransiti || _ref8$waitForTransiti;
+                    var _this17 = this, _ref10$waitForTransit = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref10$waitForTransit || _ref10$waitForTransit;
                     return src.a.try(function() {
                         _this17.component.log("resize", {
                             height: Object(belter_src.stringify)(height),
@@ -5517,17 +5518,16 @@
                         });
                     });
                 };
-                ParentComponent.prototype.renderTemplate = function(renderer, _ref9) {
-                    var _this28 = this, focus = _ref9.focus, container = _ref9.container, document = _ref9.document, _ref10 = this.component.dimensions || {}, _ref10$width = _ref10.width, width = void 0 === _ref10$width ? DEFAULT_DIMENSIONS.WIDTH + "px" : _ref10$width, _ref10$height = _ref10.height, height = void 0 === _ref10$height ? DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref10$height;
+                ParentComponent.prototype.renderTemplate = function(renderer, _ref11) {
+                    var _this28 = this, focus = _ref11.focus, container = _ref11.container, document = _ref11.document, outlet = _ref11.outlet, _ref12 = this.component.dimensions || {}, _ref12$width = _ref12.width, width = void 0 === _ref12$width ? DEFAULT_DIMENSIONS.WIDTH + "px" : _ref12$width, _ref12$height = _ref12.height, height = void 0 === _ref12$height ? DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref12$height;
                     focus = focus || function() {
                         return src.a.resolve();
                     };
                     return renderer.call(this, {
-                        id: CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.props.uid,
+                        id: CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.uid,
                         props: renderer.__xdomain__ ? null : this.props,
                         tag: this.component.tag,
                         context: this.context,
-                        outlet: this.getOutlet(),
                         CLASS: CLASS_NAMES,
                         ANIMATION: ANIMATION_NAMES,
                         CONTEXT: CONTEXT_TYPES,
@@ -5547,18 +5547,22 @@
                             width: width,
                             height: height
                         },
-                        container: container
+                        container: container,
+                        outlet: outlet
                     });
                 };
-                ParentComponent.prototype.openContainer = function(element, _ref11) {
-                    var _this29 = this, focus = _ref11.focus;
+                ParentComponent.prototype.openContainer = function(element, _ref13) {
+                    var _this29 = this, focus = _ref13.focus;
                     return src.a.try(function() {
                         var el;
                         if (!(el = element ? Object(belter_src.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
                         if (_this29.component.containerTemplate) {
+                            var outlet = document.createElement("div");
+                            Object(belter_src.addClass)(outlet, CLASS_NAMES.OUTLET);
                             var container = _this29.renderTemplate(_this29.component.containerTemplate, {
                                 container: el,
-                                focus: focus
+                                focus: focus,
+                                outlet: outlet
                             });
                             container instanceof ElementNode && (container = container.render(dom_dom({
                                 doc: document
@@ -5567,7 +5571,7 @@
                             Object(belter_src.hideElement)(_this29.container);
                             Object(belter_src.appendChild)(el, _this29.container);
                             if (_this29.driver.renderedIntoContainer) {
-                                _this29.element = _this29.getOutlet();
+                                _this29.element = outlet;
                                 Object(belter_src.hideElement)(_this29.element);
                                 if (!_this29.element) throw new Error("Could not find element to render component into");
                                 Object(belter_src.hideElement)(_this29.element);
@@ -5621,8 +5625,7 @@
                     return src.a.all(results).then(belter_src.noop);
                 };
                 return ParentComponent;
-            }()).prototype, "getOutlet", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "getOutlet"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "close", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
+            }()).prototype, "close", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "closeContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "closeContainer"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "destroyContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "destroyContainer"), _class.prototype), 
             _applyDecoratedDescriptor(_class.prototype, "closeComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "closeComponent"), _class.prototype), 
@@ -5656,9 +5659,11 @@
                     this.context = options.context;
                     this.clean = cleanup(this);
                     this.event = Object(belter_src.eventEmitter)();
+                    this.destroyComponent = parent_ParentComponent.prototype.destroyComponent;
+                    this.resize = parent_ParentComponent.prototype.resize;
+                    this.renderTemplate = parent_ParentComponent.prototype.renderTemplate;
+                    this.registerActiveComponent = parent_ParentComponent.prototype.registerActiveComponent;
                     this.props = {
-                        uid: options.props.uid,
-                        dimensions: options.props.dimensions,
                         onClose: options.props.onClose,
                         onDisplay: options.props.onDisplay
                     };
@@ -5669,11 +5674,7 @@
                     this.userClose = options.overrides.userClose;
                     this.error = options.overrides.error;
                     this.on = options.overrides.on;
-                    for (var delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides, _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
-                        var key = _Object$keys2[_i4];
-                        this[key] = parent_ParentComponent.prototype[key];
-                    }
-                    parent_ParentComponent.prototype.registerActiveComponent.call(this);
+                    this.registerActiveComponent();
                     this.watchForClose(source);
                 }
                 DelegateComponent.prototype.watchForClose = function(source) {
@@ -5683,12 +5684,12 @@
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 };
                 DelegateComponent.prototype.getOverrides = function(context) {
-                    for (var delegateOverrides = RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function(_i6, _Object$keys4, _length6) {
-                        var key = _Object$keys4[_i6];
+                    for (var delegateOverrides = RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function(_i4, _Object$keys2, _length4) {
+                        var key = _Object$keys2[_i4];
                         overrides[key] = function() {
                             return parent_ParentComponent.prototype[key].apply(self, arguments);
                         };
-                    }, _i6 = 0, _Object$keys4 = Object.keys(delegateOverrides), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) _loop(_i6, _Object$keys4);
+                    }, _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) _loop(_i4, _Object$keys2);
                     return overrides;
                 };
                 DelegateComponent.prototype.destroy = function() {
@@ -5823,13 +5824,6 @@
                                 return component.defaultEnv;
                             }
                         },
-                        uid: {
-                            type: "string",
-                            def: function() {
-                                return Object(belter_src.uniqueID)();
-                            },
-                            queryParam: !0
-                        },
                         dimensions: {
                             type: "object",
                             required: !1
@@ -5900,9 +5894,7 @@
                         }
                     };
                     this.props = options.props || {};
-                    options.props || (this.looseProps = !0);
                     this.addProp(options, "dimensions");
-                    this.addProp(options, "scrolling");
                     this.addProp(options, "listenForResize");
                     this.addProp(options, "defaultEnv");
                     this.addProp(options, "url", options.buildUrl);
@@ -5986,10 +5978,13 @@
                     if (env && "object" === component__typeof(this.url) && this.url[env]) return this.url[env];
                     throw new Error("Can not find url");
                 };
-                Component.prototype.getDomain = function(props) {
-                    if ("string" == typeof this.domain || Object(belter_src.isRegex)(this.domain)) return this.domain;
+                Component.prototype.getInitialDomain = function(props) {
+                    if ("string" == typeof this.domain) return this.domain;
                     var env = props.env || this.defaultEnv;
-                    return env && "object" === component__typeof(this.domain) && this.domain[env] ? this.domain[env] : Object(cross_domain_utils_src.getDomainFromUrl)(this.getUrl(props));
+                    return env && "object" === component__typeof(this.domain) && !Object(belter_src.isRegex)(this.domain) && this.domain[env] ? this.domain[env] : Object(cross_domain_utils_src.getDomainFromUrl)(this.getUrl(props));
+                };
+                Component.prototype.getDomain = function(props) {
+                    return Object(belter_src.isRegex)(this.domain) ? this.domain : this.getInitialDomain(props);
                 };
                 Component.prototype.getBridgeUrl = function(props) {
                     if (this.bridgeUrl) {
@@ -6002,7 +5997,7 @@
                     return isZoidComponentWindow();
                 };
                 Component.prototype.isChild = function() {
-                    return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+                    return isZoidComponentWindow() && parseChildWindowName().tag === this.tag;
                 };
                 Component.prototype.createError = function(message, tag) {
                     return new Error("[" + (tag || this.tag) + "] " + message);

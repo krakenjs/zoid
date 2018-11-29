@@ -20,9 +20,16 @@ export var DelegateComponent = function () {
         this.clean = cleanup(this);
         this.event = eventEmitter();
 
+        // $FlowFixMe
+        this.destroyComponent = ParentComponent.prototype.destroyComponent;
+        // $FlowFixMe
+        this.resize = ParentComponent.prototype.resize;
+        // $FlowFixMe
+        this.renderTemplate = ParentComponent.prototype.renderTemplate;
+        // $FlowFixMe
+        this.registerActiveComponent = ParentComponent.prototype.registerActiveComponent;
+
         this.props = {
-            uid: options.props.uid,
-            dimensions: options.props.dimensions,
             onClose: options.props.onClose,
             onDisplay: options.props.onDisplay
         };
@@ -41,15 +48,8 @@ export var DelegateComponent = function () {
         this.error = options.overrides.error;
         this.on = options.overrides.on;
 
-        var delegateOverrides = RENDER_DRIVERS[options.context].delegateOverrides;
-
-        for (var _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
-            var key = _Object$keys2[_i4];
-            // $FlowFixMe
-            this[key] = ParentComponent.prototype[key];
-        }
-
-        ParentComponent.prototype.registerActiveComponent.call(this);
+        // $FlowFixMe
+        this.registerActiveComponent();
 
         this.watchForClose(source);
     }
@@ -71,16 +71,16 @@ export var DelegateComponent = function () {
 
         var self = this;
 
-        var _loop = function _loop(_i6, _Object$keys4, _length6) {
-            var key = _Object$keys4[_i6];
+        var _loop = function _loop(_i4, _Object$keys2, _length4) {
+            var key = _Object$keys2[_i4];
             overrides[key] = function delegateOverride() {
                 // $FlowFixMe
                 return ParentComponent.prototype[key].apply(self, arguments);
             };
         };
 
-        for (var _i6 = 0, _Object$keys4 = Object.keys(delegateOverrides), _length6 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
-            _loop(_i6, _Object$keys4, _length6);
+        for (var _i4 = 0, _Object$keys2 = Object.keys(delegateOverrides), _length4 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
+            _loop(_i4, _Object$keys2, _length4);
         }
 
         return overrides;

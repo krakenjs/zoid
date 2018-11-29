@@ -39,8 +39,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         var frame = iframe({
             attributes: _extends({
-                title: this.component.name,
-                scrolling: this.component.scrolling ? 'yes' : 'no'
+                title: this.component.name
             }, attributes),
             'class': [CLASS_NAMES.COMPONENT_FRAME, CLASS_NAMES.INVISIBLE]
         }, this.element);
@@ -77,8 +76,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         var prerenderIframe = iframe({
             attributes: _extends({
-                name: '__zoid_prerender_frame__' + this.component.name + '_' + uniqueID() + '__',
-                scrolling: this.component.scrolling ? 'yes' : 'no'
+                name: '__zoid_prerender_frame__' + this.component.name + '_' + uniqueID() + '__'
             }, attributes),
             'class': [CLASS_NAMES.PRERENDER_FRAME, CLASS_NAMES.VISIBLE]
         }, this.element);
@@ -129,11 +127,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         openPrerender: DELEGATE.CALL_DELEGATE,
         switchPrerender: DELEGATE.CALL_DELEGATE,
         setWindowName: DELEGATE.CALL_DELEGATE,
-        open: DELEGATE.CALL_DELEGATE,
-
-        renderTemplate: DELEGATE.CALL_ORIGINAL,
-        openContainerFrame: DELEGATE.CALL_ORIGINAL,
-        getOutlet: DELEGATE.CALL_ORIGINAL
+        open: DELEGATE.CALL_DELEGATE
     },
 
     resize: function resize(width, height) {
@@ -221,16 +215,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
             hide: DELEGATE.CALL_DELEGATE,
             show: DELEGATE.CALL_DELEGATE,
 
-            cancelContainerEvents: DELEGATE.CALL_DELEGATE,
-
-            open: DELEGATE.CALL_ORIGINAL,
-            loadUrl: DELEGATE.CALL_ORIGINAL,
-            prerender: DELEGATE.CALL_ORIGINAL,
-            destroyComponent: DELEGATE.CALL_ORIGINAL,
-            resize: DELEGATE.CALL_ORIGINAL,
-            renderTemplate: DELEGATE.CALL_ORIGINAL,
-            openContainerFrame: DELEGATE.CALL_ORIGINAL,
-            getOutlet: DELEGATE.CALL_ORIGINAL
+            cancelContainerEvents: DELEGATE.CALL_DELEGATE
         }
     };
 }

@@ -35,12 +35,8 @@ export function normalizeProps(component, instance, props) {
         var value = props[_key];
 
         if (!propDef) {
-            if (component.looseProps) {
-                result[_key] = value;
-                continue;
-            } else {
-                throw new Error('Unrecognized prop: ' + _key);
-            }
+            result[_key] = value;
+            continue;
         }
 
         if (!isDefined(value) && propDef.alias) {

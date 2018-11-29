@@ -1,4 +1,4 @@
-import { getDomain } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain } from 'cross-domain-utils/src';
 
 export function normalizeChildProp(component, props, key, value) {
 
@@ -6,11 +6,7 @@ export function normalizeChildProp(component, props, key, value) {
     var prop = component.getProp(key);
 
     if (!prop) {
-        if (component.looseProps) {
-            return value;
-        } else {
-            return;
-        }
+        return value;
     }
 
     if (typeof prop.childDecorate === 'function') {
@@ -20,8 +16,8 @@ export function normalizeChildProp(component, props, key, value) {
     return value;
 }
 
-export function normalizeChildProps(component, props, origin) {
-    var required = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+export function normalizeChildProps(parentComponentWindow, component, props, origin) {
+    var required = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
 
     var result = {};
@@ -30,14 +26,13 @@ export function normalizeChildProps(component, props, origin) {
 
     for (var _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
         var key = _Object$keys2[_i2];
-
         var prop = component.getProp(key);
-        var value = props[key];
 
-        if (prop && prop.sameDomain && origin !== getDomain(window)) {
+        if (prop && prop.sameDomain && (origin !== getDomain(window) || !isSameDomain(parentComponentWindow))) {
             continue;
         }
 
+        var value = props[key];
         result[key] = normalizeChildProp(component, props, key, value);
 
         if (prop && prop.alias && !result[prop.alias]) {

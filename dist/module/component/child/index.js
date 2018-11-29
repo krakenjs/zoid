@@ -4,14 +4,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /* eslint max-lines: 0 */
 
-import { isSameDomain, matchDomain, getDomain } from 'cross-domain-utils/src';
+import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent, getNthParentFromTop, getAncestor, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
 
-import { getParentComponentWindow as _getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
+import { parseChildWindowName } from '../window';
 import { globalFor } from '../../lib';
-import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
+import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 
 
 import { normalizeChildProps } from './props';
@@ -37,24 +37,30 @@ export var ChildComponent = function () {
                 throw _this.component.createError('Can not attach multiple components to the same window');
             }
 
-            var parentDomain = getParentDomain();
-            var parentComponentWindow = _this.getParentComponentWindow();
-
-            _this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
-
             _this.component = component;
             _this.onPropHandlers = [];
 
+            var _parseChildWindowName = parseChildWindowName(),
+                parent = _parseChildWindowName.parent,
+                domain = _parseChildWindowName.domain,
+                exports = _parseChildWindowName.exports,
+                context = _parseChildWindowName.context,
+                props = _parseChildWindowName.props;
+
+            _this.context = context;
+            _this.parentComponentWindow = _this.getWindowByRef(parent);
+            _this.parentExports = deserializeMessage(_this.parentComponentWindow, domain, exports);
+
+            _this.checkParentDomain(domain);
+
             window.xchild = _this.component.xchild = _this;
-            _this.setProps(_this.getInitialProps(), getParentDomain());
-
-            _this.checkParentDomain();
-
-            markWindowKnown(parentComponentWindow);
+            var initialProps = _this.getPropsByRef(_this.parentComponentWindow, domain, props);
+            _this.setProps(initialProps, domain);
+            markWindowKnown(_this.parentComponentWindow);
 
             _this.watchForClose();
             _this.listenForResize();
-            _this.watchForResize();
+            _this.watchForResize(context);
 
             return _this.parentExports.init(_this.buildExports());
         })['catch'](function (err) {
@@ -73,9 +79,9 @@ export var ChildComponent = function () {
         }
     };
 
-    ChildComponent.prototype.checkParentDomain = function checkParentDomain() {
-        if (!matchDomain(this.component.allowedParentDomains, getParentDomain())) {
-            throw new Error('Can not be rendered by domain: ' + getParentDomain());
+    ChildComponent.prototype.checkParentDomain = function checkParentDomain(domain) {
+        if (!matchDomain(this.component.allowedParentDomains, domain)) {
+            throw new Error('Can not be rendered by domain: ' + domain);
         }
     };
 
@@ -83,22 +89,18 @@ export var ChildComponent = function () {
         this.onPropHandlers.push(handler);
     };
 
-    ChildComponent.prototype.getParentComponentWindow = function getParentComponentWindow() {
-        return _getParentComponentWindow();
-    };
+    ChildComponent.prototype.getPropsByRef = function getPropsByRef(parentComponentWindow, domain, _ref) {
+        var type = _ref.type,
+            value = _ref.value,
+            uid = _ref.uid;
 
-    ChildComponent.prototype.getInitialProps = function getInitialProps() {
-        var componentMeta = getComponentMeta();
+        var props = void 0;
 
-        var props = componentMeta.props;
-        var parentComponentWindow = _getParentComponentWindow();
-
-        if (props.type === INITIAL_PROPS.RAW) {
-            props = props.value;
-        } else if (props.type === INITIAL_PROPS.UID) {
+        if (type === INITIAL_PROPS.RAW) {
+            props = value;
+        } else if (type === INITIAL_PROPS.UID) {
 
             if (!isSameDomain(parentComponentWindow)) {
-
                 if (window.location.protocol === 'file:') {
                     throw new Error('Can not get props from file:// domain');
                 }
@@ -112,16 +114,61 @@ export var ChildComponent = function () {
                 throw new Error('Can not find global for parent component - can not retrieve props');
             }
 
-            props = global.props[componentMeta.uid];
-        } else {
-            throw new Error('Unrecognized props type: ' + props.type);
+            props = global.props[uid];
         }
 
         if (!props) {
             throw new Error('Initial props not found');
         }
 
-        return deserializeMessage(parentComponentWindow, getParentDomain(), props);
+        return deserializeMessage(parentComponentWindow, domain, props);
+    };
+
+    ChildComponent.prototype.getWindowByRef = function getWindowByRef(ref) {
+        var type = ref.type;
+
+        var result = void 0;
+
+        if (type === WINDOW_REFERENCES.OPENER) {
+            result = getOpener(window);
+        } else if (type === WINDOW_REFERENCES.TOP) {
+            result = getTop(window);
+        } else if (type === WINDOW_REFERENCES.PARENT) {
+            // $FlowFixMe
+            var distance = ref.distance;
+
+
+            if (distance) {
+                result = getNthParentFromTop(window, distance);
+            } else {
+                result = getParent(window);
+            }
+        }
+
+        if (type === WINDOW_REFERENCES.GLOBAL) {
+            // $FlowFixMe
+            var uid = ref.uid;
+
+            var ancestor = getAncestor(window);
+
+            if (ancestor) {
+                for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor), _length2 = _getAllFramesInWindow2 == null ? 0 : _getAllFramesInWindow2.length; _i2 < _length2; _i2++) {
+                    var frame = _getAllFramesInWindow2[_i2];
+                    var global = globalFor(frame);
+
+                    if (global && global.windows && global.windows[uid]) {
+                        result = global.windows[uid];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!result) {
+            throw new Error('Unable to find ' + type + ' window');
+        }
+
+        return result;
     };
 
     ChildComponent.prototype.setProps = function setProps(props, origin) {
@@ -129,11 +176,11 @@ export var ChildComponent = function () {
 
         // $FlowFixMe
         this.props = this.props || {};
-        var normalizedProps = normalizeChildProps(this.component, props, origin, required);
+        var normalizedProps = normalizeChildProps(this.parentComponentWindow, this.component, props, origin, required);
         extend(this.props, normalizedProps);
 
-        for (var _i2 = 0, _onPropHandlers2 = this.onPropHandlers, _length2 = _onPropHandlers2 == null ? 0 : _onPropHandlers2.length; _i2 < _length2; _i2++) {
-            var handler = _onPropHandlers2[_i2];
+        for (var _i4 = 0, _onPropHandlers2 = this.onPropHandlers, _length4 = _onPropHandlers2 == null ? 0 : _onPropHandlers2.length; _i4 < _length4; _i4++) {
+            var handler = _onPropHandlers2[_i4];
             handler.call(this, this.props);
         }
 
@@ -149,14 +196,14 @@ export var ChildComponent = function () {
     };
 
     ChildComponent.prototype.enableAutoResize = function enableAutoResize() {
-        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref$width = _ref.width,
-            width = _ref$width === undefined ? true : _ref$width,
-            _ref$height = _ref.height,
-            height = _ref$height === undefined ? true : _ref$height;
+        var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref2$width = _ref2.width,
+            width = _ref2$width === undefined ? true : _ref2$width,
+            _ref2$height = _ref2.height,
+            height = _ref2$height === undefined ? true : _ref2$height;
 
         this.autoResize = { width: width, height: height };
-        this.watchForResize();
+        this.watchForResize(this.context);
     };
 
     ChildComponent.prototype.getAutoResize = function getAutoResize() {
@@ -188,7 +235,7 @@ export var ChildComponent = function () {
         return { width: width, height: height, element: element };
     };
 
-    ChildComponent.prototype.watchForResize = function watchForResize() {
+    ChildComponent.prototype.watchForResize = function watchForResize(context) {
         var _this4 = this;
 
         var _getAutoResize = this.getAutoResize(),
@@ -200,7 +247,7 @@ export var ChildComponent = function () {
             return;
         }
 
-        if (getComponentMeta().context === CONTEXT_TYPES.POPUP) {
+        if (context === CONTEXT_TYPES.POPUP) {
             return;
         }
 
@@ -254,11 +301,11 @@ export var ChildComponent = function () {
         return this.parentExports.resize(width, height);
     };
 
-    ChildComponent.prototype.resizeToElement = function resizeToElement(el, _ref2) {
+    ChildComponent.prototype.resizeToElement = function resizeToElement(el, _ref3) {
         var _this6 = this;
 
-        var width = _ref2.width,
-            height = _ref2.height;
+        var width = _ref3.width,
+            height = _ref3.height;
 
 
         var history = [];
@@ -272,8 +319,8 @@ export var ChildComponent = function () {
                 var _tracker$check = tracker.check(),
                     dimensions = _tracker$check.dimensions;
 
-                for (var _i4 = 0, _length4 = history == null ? 0 : history.length; _i4 < _length4; _i4++) {
-                    var size = history[_i4];
+                for (var _i6 = 0, _length6 = history == null ? 0 : history.length; _i6 < _length6; _i6++) {
+                    var size = history[_i6];
 
                     var widthMatch = !width || size.width === dimensions.width;
                     var heightMatch = !height || size.height === dimensions.height;

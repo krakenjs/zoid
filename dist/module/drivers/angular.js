@@ -15,9 +15,7 @@ export var angular = {
                 scope[key] = '=';
             }
 
-            if (component.looseProps) {
-                scope.props = '=';
-            }
+            scope.props = '=';
 
             return {
                 scope: scope,
@@ -25,11 +23,6 @@ export var angular = {
                 restrict: 'E',
 
                 controller: ['$scope', '$element', function ($scope, $element) {
-
-                    if (component.looseProps && !$scope.props) {
-                        throw new Error('For angular bindings to work, prop definitions must be passed to zoid.create');
-                    }
-
                     component.log('instantiate_angular_component');
 
                     function safeApply() {

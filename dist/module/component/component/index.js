@@ -44,7 +44,7 @@ import 'jsx-pragmatic/src';
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
-import { isZoidComponentWindow, getComponentMeta } from '../window';
+import { isZoidComponentWindow, parseChildWindowName } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
@@ -93,14 +93,9 @@ export var Component = (_class = function () {
         this.builtinProps = getInternalProps();
         this.props = options.props || {};
 
-        if (!options.props) {
-            this.looseProps = true;
-        }
-
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
         this.addProp(options, 'dimensions');
-        this.addProp(options, 'scrolling');
         this.addProp(options, 'listenForResize');
 
         // The default environment we should render to if none is specified in the parent
@@ -263,19 +258,28 @@ export var Component = (_class = function () {
         throw new Error('Can not find url');
     };
 
-    Component.prototype.getDomain = function getDomain(props) {
-        if (typeof this.domain === 'string' || isRegex(this.domain)) {
+    Component.prototype.getInitialDomain = function getInitialDomain(props) {
+        if (typeof this.domain === 'string') {
             // $FlowFixMe
             return this.domain;
         }
 
         var env = props.env || this.defaultEnv;
         // $FlowFixMe
-        if (env && _typeof(this.domain) === 'object' && this.domain[env]) {
+        if (env && _typeof(this.domain) === 'object' && !isRegex(this.domain) && this.domain[env]) {
             return this.domain[env];
         }
 
         return getDomainFromUrl(this.getUrl(props));
+    };
+
+    Component.prototype.getDomain = function getDomain(props) {
+        if (isRegex(this.domain)) {
+            // $FlowFixMe
+            return this.domain;
+        }
+
+        return this.getInitialDomain(props);
     };
 
     Component.prototype.getBridgeUrl = function getBridgeUrl(props) {
@@ -296,7 +300,7 @@ export var Component = (_class = function () {
     };
 
     Component.prototype.isChild = function isChild() {
-        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+        return isZoidComponentWindow() && parseChildWindowName().tag === this.tag;
     };
 
     Component.prototype.createError = function createError(message, tag) {

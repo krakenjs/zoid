@@ -1,5 +1,5 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, once, memoize, noop, promisify } from 'belter/src';
+import { once, memoize, noop, promisify } from 'belter/src';
 
 import '../../types';
 import { PROP_SERIALIZATION } from '../../constants';
@@ -23,15 +23,6 @@ export function getInternalProps() {
             def: function def(props, component) {
                 return component.defaultEnv;
             }
-        },
-
-        uid: {
-            type: 'string',
-            def: function def() {
-                return uniqueID();
-            },
-
-            queryParam: true
         },
 
         dimensions: {
