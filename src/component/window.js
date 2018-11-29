@@ -1,173 +1,51 @@
 /* @flow */
 
-import { getOpener, getTop, getParent, getNthParentFromTop, getAllFramesInWindow, getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { memoize, stringifyError, base64encode, base64decode } from 'belter/src';
 
-import { globalFor } from '../lib';
-import { WINDOW_REFERENCES, ZOID, INITIAL_PROPS, CONTEXT_TYPES } from '../constants';
+import { normalizeString } from '../lib';
+import { ZOID } from '../constants';
 
-function normalize(str : string) : string {
-    return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, '').replace(/[^a-z0-9A-Z]+/g, '_');
+import type { ChildPayload } from './parent';
+
+export function buildChildWindowName(name : string, childPayload : ChildPayload) : string {
+    let normalizedName = normalizeString(name);
+    let encodedPayload = base64encode(JSON.stringify(childPayload));
+
+    return `__${ ZOID }__${ normalizedName }__${ encodedPayload }__`;
 }
 
-export type WindowRef = {
-    ref : string,
-    uid? : string,
-    distance? : number
-};
-
-/*  Build Child Window Name
-    -----------------------
-
-    Build a name for our child window. This should identify the following things to the child:
-
-    - That the window was created by, and is owned by zoid
-    - The name of the child's parent. This is so the child can identify which window created it, even when we do a
-      renderTo, in which case the true parent may actually be a sibling frame in the window hierarchy
-
-    We base64 encode the window name so IE doesn't die when it encounters any characters that it doesn't like.
-*/
-
-type PropsType = {
-    type : typeof INITIAL_PROPS.RAW,
-    value : string
-} | {
-    type : typeof INITIAL_PROPS.UID,
-    uid : string
-};
-
-type ChildWindowNameOptions = {
-    uid : string,
-    tag : string,
-    context : $Values<typeof CONTEXT_TYPES>,
-    componentParent : WindowRef,
-    props : PropsType,
-    exports : string,
-    id : string,
-    domain : string
-};
-
-export function buildChildWindowName(name : string, options : ChildWindowNameOptions) : string {
-
-    let encodedName = normalize(name);
-    let encodedOptions = base64encode(JSON.stringify(options));
-
-    if (!encodedName) {
-        throw new Error(`Invalid name: ${ name } - must contain alphanumeric characters`);
-    }
-
-    return [
-        ZOID,
-        encodedName,
-        encodedOptions,
-        ''
-    ].join('__');
-}
-
-export let isZoidComponentWindow = memoize(() => {
+export let parseChildWindowName = memoize(() : ChildPayload => {
     if (!window.name) {
-        return false;
+        throw new Error(`No window name`);
     }
 
-    let [ zoidcomp ] = window.name.split('__');
-
-    if (zoidcomp !== ZOID) {
-        return false;
-    }
-
-    return true;
-});
-
-/*  Parse Window Name
-    -----------------
-
-    The inverse of buildChildWindowName. Base64 decodes and json parses the window name to get the original props
-    passed down, including the parent name. Only accepts window names built by zoid
-*/
-
-export let getComponentMeta = memoize(() : ChildWindowNameOptions => {
-
-    if (!window.name) {
-        throw new Error(`Can not get component meta without window name`);
-    }
-
-    let [ zoidcomp, name, encodedOptions ] = window.name.split('__');
+    let [ , zoidcomp, name, encodedPayload ] = window.name.split('__');
 
     if (zoidcomp !== ZOID) {
         throw new Error(`Window not rendered by zoid - got ${ zoidcomp }`);
     }
 
-    let componentMeta;
+    if (!name) {
+        throw new Error(`Expected component name`);
+    }
+
+    if (!encodedPayload) {
+        throw new Error(`Expected encoded payload`);
+    }
 
     try {
-        componentMeta = JSON.parse(base64decode(encodedOptions));
+        return JSON.parse(base64decode(encodedPayload));
     } catch (err) {
-        throw new Error(`Can not decode component-meta: ${ encodedOptions } ${ stringifyError(err) }`);
+        throw new Error(`Can not decode window name payload: ${ encodedPayload }: ${ stringifyError(err) }`);
     }
-
-    componentMeta.name = name;
-
-    return componentMeta;
 });
 
-export function getParentDomain() : string {
-    return getComponentMeta().domain;
-}
-
-function getWindowByRef({ ref, uid, distance } : WindowRef) : CrossDomainWindowType {
-
-    let result;
-
-    if (ref === WINDOW_REFERENCES.OPENER) {
-        result = getOpener(window);
-
-    } else if (ref === WINDOW_REFERENCES.TOP) {
-        result = getTop(window);
-
-    } else if (ref === WINDOW_REFERENCES.PARENT) {
-
-        if (distance) {
-            result = getNthParentFromTop(window, distance);
-        } else {
-            result = getParent(window);
-        }
+export let isZoidComponentWindow = memoize(() => {
+    try {
+        parseChildWindowName();
+    } catch (err) {
+        return false;
     }
 
-    if (ref === WINDOW_REFERENCES.GLOBAL) {
-        let ancestor = getAncestor(window);
-
-        if (ancestor) {
-            for (let frame of getAllFramesInWindow(ancestor)) {
-                let global = globalFor(frame);
-
-                if (global && global.windows && global.windows[uid]) {
-                    result = global.windows[uid];
-                    break;
-                }
-            }
-        }
-    }
-
-    if (!result) {
-        throw new Error(`Unable to find window by ref`);
-    }
-
-    return result;
-}
-
-/*  Get Parent Component Window
-    ---------------------------
-
-    Get the parent component window, which may be different from the actual parent window
-*/
-
-export let getParentComponentWindow = memoize(() => {
-
-    let componentMeta = getComponentMeta();
-
-    if (!componentMeta) {
-        throw new Error(`Can not get parent component window - window not rendered by zoid`);
-    }
-
-    return getWindowByRef(componentMeta.componentParent);
+    return true;
 });

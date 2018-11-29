@@ -10,7 +10,7 @@ import { type ElementNode } from 'jsx-pragmatic/src';
 import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
-import { isZoidComponentWindow, getComponentMeta } from '../window';
+import { isZoidComponentWindow, parseChildWindowName } from '../window';
 import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
@@ -273,19 +273,28 @@ export class Component<P> {
         throw new Error(`Can not find url`);
     }
 
-    getDomain(props : BuiltInPropsType & P) : string | RegExp {
-        if (typeof this.domain === 'string' || isRegex(this.domain)) {
+    getInitialDomain(props : BuiltInPropsType & P) : string {
+        if (typeof this.domain === 'string') {
             // $FlowFixMe
             return this.domain;
         }
 
         let env = props.env || this.defaultEnv;
         // $FlowFixMe
-        if (env && typeof this.domain === 'object' && this.domain[env]) {
+        if (env && typeof this.domain === 'object' && !isRegex(this.domain) && this.domain[env]) {
             return this.domain[env];
         }
 
         return getDomainFromUrl(this.getUrl(props));
+    }
+
+    getDomain(props : BuiltInPropsType & P) : string | RegExp {
+        if (isRegex(this.domain)) {
+            // $FlowFixMe
+            return this.domain;
+        }
+
+        return this.getInitialDomain(props);
     }
 
     getBridgeUrl(props : BuiltInPropsType & P) : ?string {
@@ -306,7 +315,7 @@ export class Component<P> {
     }
 
     isChild() : boolean {
-        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+        return isZoidComponentWindow() && parseChildWindowName().tag === this.tag;
     }
 
 

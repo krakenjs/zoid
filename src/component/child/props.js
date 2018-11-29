@@ -1,10 +1,9 @@
 /* @flow */
 
-import { getDomain, isSameDomain } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import type { Component } from '../component';
 import type { BuiltInPropsType, MixedPropDefinitionType } from '../component/props';
-import { getParentComponentWindow } from '../window';
 
 export function normalizeChildProp<T, P>(component : Component<P>, props : (BuiltInPropsType & P), key : string, value : T) : ?T  {
 
@@ -23,7 +22,7 @@ export function normalizeChildProp<T, P>(component : Component<P>, props : (Buil
 }
 
 
-export function normalizeChildProps<P>(component : Component<P>, props : (BuiltInPropsType & P), origin : string, required : boolean = true) : (BuiltInPropsType & P) {
+export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindowType, component : Component<P>, props : (BuiltInPropsType & P), origin : string, required : boolean = true) : (BuiltInPropsType & P) {
 
     let result = {};
 
@@ -31,7 +30,7 @@ export function normalizeChildProps<P>(component : Component<P>, props : (BuiltI
     for (let key of Object.keys(props)) {
         let prop = component.getProp(key);
 
-        if (prop && prop.sameDomain && (origin !== getDomain(window) || !isSameDomain(getParentComponentWindow()))) {
+        if (prop && prop.sameDomain && (origin !== getDomain(window) || !isSameDomain(parentComponentWindow))) {
             continue;
         }
 

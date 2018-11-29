@@ -2,8 +2,8 @@
 /* eslint max-lines: 0 */
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
-import { isSameDomain, isTop, isSameTopWindow, matchDomain, getDomainFromUrl,
-    getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl,
+    onCloseWindow, getDomain, type CrossDomainWindowType, getDistanceFromTop, isTop, normalizeMockUrl } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
@@ -60,6 +60,25 @@ export type ParentExportsType<P> = {
     error : (mixed) => ZalgoPromise<void>
 };
 
+export type PropRef =
+    {| type : typeof INITIAL_PROPS.RAW, uid? : string, value? : string |};
+
+export type WindowRef =
+    {| type : typeof WINDOW_REFERENCES.OPENER |} |
+    {| type : typeof WINDOW_REFERENCES.TOP |} |
+    {| type : typeof WINDOW_REFERENCES.PARENT, distance : number |} |
+    {| type : typeof WINDOW_REFERENCES.GLOBAL, uid : string |};
+
+export type ChildPayload = {
+    uid : string,
+    tag : string,
+    context : $Values<typeof CONTEXT_TYPES>,
+    domain : string,
+    parent : WindowRef,
+    props : PropRef,
+    exports : string
+};
+
 /*  Parent Component
     ----------------
 
@@ -112,14 +131,14 @@ export class ParentComponent<P> {
 
     render(element : ElementRefType, target? : CrossDomainWindowType = window) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
-
-            this.component.log(`render_${ this.context }`, { context: this.context, element });
+            this.component.log(`render`, { context: this.context, element });
 
             let tasks = {};
             
             tasks.onRender = this.props.onRender();
 
             let domain = this.getDomain();
+            let initialDomain = this.getInitialDomain();
 
             tasks.elementReady = ZalgoPromise.try(() => {
                 if (element) {
@@ -149,8 +168,12 @@ export class ParentComponent<P> {
                 return this.showContainer();
             });
 
-            tasks.setWindowName = tasks.open.then(proxyWin => {
-                return this.setWindowName(proxyWin, this.buildChildWindowName({ proxyWin, domain, target }));
+            tasks.buildWindowName = tasks.open.then(proxyWin => {
+                return this.buildWindowName({ proxyWin, initialDomain, domain, target });
+            });
+
+            tasks.setWindowName =  ZalgoPromise.all([ tasks.open, tasks.buildWindowName ]).then(([ proxyWin, windowName ]) => {
+                return this.setWindowName(proxyWin, windowName);
             });
 
             tasks.watchForClose = ZalgoPromise.all([ tasks.awaitWindow, tasks.setWindowName ]).then(([ win ]) => {
@@ -245,58 +268,67 @@ export class ParentComponent<P> {
         });
     }
 
+    getWindowRef(target : CrossDomainWindowType, domain : string, uid : string) : WindowRef {
+        
+        if (domain === getDomain(window)) {
+            global.windows[uid] = window;
+            this.clean.register(() => {
+                delete global.windows[uid];
+            });
+    
+            return { type: WINDOW_REFERENCES.GLOBAL, uid };
+        }
 
-    getComponentParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
+        if (target !== window) {
+            throw new Error(`Can not currently create window reference for different target with a different domain`);
+        }
 
         if (this.context === CONTEXT_TYPES.POPUP) {
-            return { ref: WINDOW_REFERENCES.OPENER };
+            return { type: WINDOW_REFERENCES.OPENER };
         }
 
-        if (renderToWindow === window) {
-
-            if (isTop(window)) {
-                return { ref: WINDOW_REFERENCES.TOP };
-            }
-
-            return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
+        if (isTop(window)) {
+            return { type: WINDOW_REFERENCES.TOP };
         }
 
-        let uid = uniqueID();
-        global.windows[uid] = window;
-
-        this.clean.register(() => {
-            delete global.windows[uid];
-        });
-
-        return { ref: WINDOW_REFERENCES.GLOBAL, uid };
+        return { type: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
     }
 
-    buildChildWindowName({ proxyWin, domain, target = window } : { proxyWin : ProxyWindow, domain : string | RegExp, target : CrossDomainWindowType } = {}) : string {
+    buildWindowName({ proxyWin, initialDomain, domain, target } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType }) : string {
+        return buildChildWindowName(this.component.name, this.buildChildPayload({ proxyWin, initialDomain, domain, target }));
+    }
 
-        let uid    = uniqueID();
-        let tag    = this.component.tag;
-        let sProps = serializeMessage(proxyWin, domain, this.getPropsForChild());
+    getPropsRef(proxyWin : ProxyWindow, target : CrossDomainWindowType, domain : string | RegExp, uid : string) : PropRef {
+        let value = serializeMessage(proxyWin, domain, this.getPropsForChild(domain));
 
-        let componentParent = this.getComponentParentRef(target);
-
-        let props = isSameDomain(target)
-            ? { type: INITIAL_PROPS.RAW, value: sProps }
+        let propRef = isSameDomain(target)
+            ? { type: INITIAL_PROPS.RAW, value }
             : { type: INITIAL_PROPS.UID, uid };
 
-        if (props.type === INITIAL_PROPS.UID) {
-            global.props[uid] = sProps;
+        if (propRef.type === INITIAL_PROPS.UID) {
+            global.props[uid] = value;
 
             this.clean.register(() => {
                 delete global.props[uid];
             });
         }
-        
-        let exports = serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin));
-        let id = uniqueID();
-        let thisdomain = getDomain(window);
-        let context = this.context;
 
-        return buildChildWindowName(this.component.name, { id, context, domain: thisdomain, uid, tag, componentParent, props, exports });
+        return propRef;
+    }
+
+    buildChildPayload({ proxyWin, initialDomain, domain, target = window } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType } = {}) : ChildPayload {
+
+        let childPayload : ChildPayload = {
+            uid:     this.uid,
+            context: this.context,
+            domain:  getDomain(window),
+            tag:     this.component.tag,
+            parent:  this.getWindowRef(target, initialDomain, this.uid),
+            props:   this.getPropsRef(proxyWin, target, domain, this.uid),
+            exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
+        };
+
+        return childPayload;
     }
 
     setProps(props : (PropsType & P), isUpdate : boolean = false) {
@@ -314,27 +346,36 @@ export class ParentComponent<P> {
     buildUrl() : ZalgoPromise<string> {
         return propsToQuery({ ...this.component.props, ...this.component.builtinProps }, this.props)
             .then(query => {
-                let url = this.component.getUrl(this.props);
+                let url = normalizeMockUrl(this.component.getUrl(this.props));
                 return extendUrl(url, { query: { ...query } });
             });
     }
-
 
     getDomain() : string | RegExp {
         return this.component.getDomain(this.props);
     }
 
-    getPropsForChild() : (BuiltInPropsType & P) {
+    getInitialDomain() : string {
+        return this.component.getInitialDomain(this.props);
+    }
+
+    getPropsForChild(domain : string | RegExp) : (BuiltInPropsType & P) {
 
         let result = {};
 
         for (let key of Object.keys(this.props)) {
             let prop = this.component.getProp(key);
 
-            if (!prop || prop.sendToChild !== false) {
-                // $FlowFixMe
-                result[key] = this.props[key];
+            if (prop && prop.sendToChild === false) {
+                continue;
             }
+
+            if (prop && prop.sameDomain && !matchDomain(domain, getDomain(window))) {
+                continue;
+            }
+
+            // $FlowFixMe
+            result[key] = this.props[key];
         }
 
         // $FlowFixMe
@@ -346,13 +387,12 @@ export class ParentComponent<P> {
 
         return this.onInit.then(() => {
             if (this.childExports) {
-                return this.childExports.updateProps(this.getPropsForChild());
+                return this.childExports.updateProps(this.getPropsForChild(this.getDomain()));
             } else {
                 throw new Error(`Child exports were not available`);
             }
         });
     }
-
 
     openBridge(win : CrossDomainWindowType, domain : string) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {

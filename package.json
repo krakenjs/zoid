@@ -7,7 +7,7 @@
     "setup": "npm install && npm run flow-typed",
     "demo": "serve . --port 1337",
     "lint": "eslint src/ test/ *.js",
-    "flow-typed": "rm -rf flow-typed && flow-typed install",
+    "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",
     "flow:build": "flow gen-flow-files ./src/index.js --out-dir ./dist/module",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",

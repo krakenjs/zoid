@@ -1,19 +1,20 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent,
+    getNthParentFromTop, getAncestor, getAllFramesInWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
     cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
 
-import { getParentComponentWindow, getComponentMeta, getParentDomain } from '../window';
+import { parseChildWindowName } from '../window';
 import { globalFor } from '../../lib';
-import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
+import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
 import type { DimensionsType } from '../../types';
-import type { ParentExportsType } from '../parent';
+import type { WindowRef, PropRef, ParentExportsType } from '../parent';
 
 import { normalizeChildProps } from './props';
 
@@ -38,6 +39,7 @@ export class ChildComponent<P> {
     props : BuiltInPropsType & P
     context : string
     parentExports : ParentExportsType<P>
+    parentComponentWindow : CrossDomainWindowType
 
     onPropHandlers : Array<(BuiltInPropsType & P) => void>
     onInit : ZalgoPromise<ChildComponent<P>>
@@ -50,24 +52,25 @@ export class ChildComponent<P> {
                 throw this.component.createError(`Can not attach multiple components to the same window`);
             }
 
-            let parentDomain = getParentDomain();
-            let parentComponentWindow = this.getParentComponentWindow();
-
-            this.parentExports = deserializeMessage(parentComponentWindow, parentDomain, getComponentMeta().exports);
-
             this.component = component;
             this.onPropHandlers = [];
-    
+            
+            let { parent, domain, exports, context, props } = parseChildWindowName();
+
+            this.context = context;
+            this.parentComponentWindow = this.getWindowByRef(parent);
+            this.parentExports = deserializeMessage(this.parentComponentWindow, domain, exports);
+
+            this.checkParentDomain(domain);
+
             window.xchild = this.component.xchild = this;
-            this.setProps(this.getInitialProps(), getParentDomain());
-    
-            this.checkParentDomain();
-    
-            markWindowKnown(parentComponentWindow);
-    
+            let initialProps = this.getPropsByRef(this.parentComponentWindow, domain, props);
+            this.setProps(initialProps, domain);
+            markWindowKnown(this.parentComponentWindow);
+            
             this.watchForClose();
             this.listenForResize();
-            this.watchForResize();
+            this.watchForResize(context);
 
             return this.parentExports.init(this.buildExports());
 
@@ -85,9 +88,9 @@ export class ChildComponent<P> {
         }
     }
 
-    checkParentDomain() {
-        if (!matchDomain(this.component.allowedParentDomains, getParentDomain())) {
-            throw new Error(`Can not be rendered by domain: ${ getParentDomain() }`);
+    checkParentDomain(domain : string) {
+        if (!matchDomain(this.component.allowedParentDomains, domain)) {
+            throw new Error(`Can not be rendered by domain: ${ domain }`);
         }
     }
 
@@ -95,22 +98,14 @@ export class ChildComponent<P> {
         this.onPropHandlers.push(handler);
     }
 
-    getParentComponentWindow() : CrossDomainWindowType {
-        return getParentComponentWindow();
-    }
+    getPropsByRef(parentComponentWindow : CrossDomainWindowType, domain : string, { type, value, uid } : PropRef) : (BuiltInPropsType & P) {
+        let props;
 
-    getInitialProps() : (BuiltInPropsType & P) {
-        let componentMeta = getComponentMeta();
-
-        let props = componentMeta.props;
-        let parentComponentWindow = getParentComponentWindow();
-
-        if (props.type === INITIAL_PROPS.RAW) {
-            props = props.value;
-        } else if (props.type === INITIAL_PROPS.UID) {
+        if (type === INITIAL_PROPS.RAW) {
+            props = value;
+        } else if (type === INITIAL_PROPS.UID) {
 
             if (!isSameDomain(parentComponentWindow)) {
-
                 if (window.location.protocol === 'file:') {
                     throw new Error(`Can not get props from file:// domain`);
                 }
@@ -124,24 +119,66 @@ export class ChildComponent<P> {
                 throw new Error(`Can not find global for parent component - can not retrieve props`);
             }
 
-            props = global.props[componentMeta.uid];
-
-        } else {
-            throw new Error(`Unrecognized props type: ${ props.type }`);
+            props = global.props[uid];
         }
 
         if (!props) {
             throw new Error(`Initial props not found`);
         }
 
-        return deserializeMessage(parentComponentWindow, getParentDomain(), props);
+        return deserializeMessage(parentComponentWindow, domain, props);
+    }
+
+    getWindowByRef(ref : WindowRef) : CrossDomainWindowType {
+        let { type } = ref;
+        let result;
+    
+        if (type === WINDOW_REFERENCES.OPENER) {
+            result = getOpener(window);
+    
+        } else if (type === WINDOW_REFERENCES.TOP) {
+            result = getTop(window);
+    
+        } else if (type === WINDOW_REFERENCES.PARENT) {
+            // $FlowFixMe
+            let { distance } = ref;
+    
+            if (distance) {
+                result = getNthParentFromTop(window, distance);
+            } else {
+                result = getParent(window);
+            }
+        }
+    
+        if (type === WINDOW_REFERENCES.GLOBAL) {
+            // $FlowFixMe
+            let { uid } = ref;
+            let ancestor = getAncestor(window);
+    
+            if (ancestor) {
+                for (let frame of getAllFramesInWindow(ancestor)) {
+                    let global = globalFor(frame);
+    
+                    if (global && global.windows && global.windows[uid]) {
+                        result = global.windows[uid];
+                        break;
+                    }
+                }
+            }
+        }
+    
+        if (!result) {
+            throw new Error(`Unable to find ${ type } window`);
+        }
+    
+        return result;
     }
 
 
     setProps(props : (BuiltInPropsType & P), origin : string, required : boolean = true) {
         // $FlowFixMe
         this.props = this.props || {};
-        let normalizedProps = normalizeChildProps(this.component, props, origin, required);
+        let normalizedProps = normalizeChildProps(this.parentComponentWindow, this.component, props, origin, required);
         extend(this.props, normalizedProps);
         for (let handler of this.onPropHandlers) {
             handler.call(this, this.props);
@@ -157,7 +194,7 @@ export class ChildComponent<P> {
 
     enableAutoResize({ width = true, height = true } : { width : boolean, height : boolean } = {}) {
         this.autoResize = { width, height };
-        this.watchForResize();
+        this.watchForResize(this.context);
     }
 
     getAutoResize() : { width : boolean, height : boolean, element : HTMLElement } {
@@ -189,7 +226,7 @@ export class ChildComponent<P> {
         return { width, height, element };
     }
 
-    watchForResize() : ?ZalgoPromise<void> {
+    watchForResize(context : $Values<typeof CONTEXT_TYPES>) : ?ZalgoPromise<void> {
 
         let { width, height, element } = this.getAutoResize();
 
@@ -197,7 +234,7 @@ export class ChildComponent<P> {
             return;
         }
 
-        if (getComponentMeta().context === CONTEXT_TYPES.POPUP) {
+        if (context === CONTEXT_TYPES.POPUP) {
             return;
         }
 
