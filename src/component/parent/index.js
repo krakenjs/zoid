@@ -415,6 +415,11 @@ export class ParentComponent<P> {
     open() : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`);
+
+            if (this.props.window) {
+                return this.props.window;
+            }
+
             return this.driver.open.call(this);
         });
     }
@@ -440,6 +445,7 @@ export class ParentComponent<P> {
         this.component.log(`delegate_${ this.context }`);
 
         let props = {
+            window:     this.props.window,
             onClose:    this.props.onClose,
             onDisplay:  this.props.onDisplay
         };
@@ -454,6 +460,7 @@ export class ParentComponent<P> {
 
         let delegate = send(target, `${ POST_MESSAGE.DELEGATE }_${ this.component.name }`, {
 
+            uid:     this.uid,
             context: this.context,
             env:     this.props.env,
 

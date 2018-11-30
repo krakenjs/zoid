@@ -69,7 +69,7 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
             continue;
         }
 
-        if (propDef.validate) {
+        if (isDefined(value) && propDef.validate) {
             // $FlowFixMe
             propDef.validate(value, result);
         }

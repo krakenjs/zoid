@@ -2,6 +2,8 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, memoize, noop, promisify } from 'belter/src';
+import { isWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { ProxyWindow } from 'post-robot/src/serialize/window';
 
 import { type DimensionsType } from '../../types';
 import { PROP_SERIALIZATION } from '../../constants';
@@ -43,6 +45,7 @@ export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 type envPropType = string;
 type timeoutPropType = number;
 type dimensionsPropType = DimensionsType;
+type windowPropType = ProxyWindow;
 
 type onDisplayPropType = EventHandlerType<void>;
 type onEnterPropType = EventHandlerType<void>;
@@ -54,6 +57,7 @@ export type BuiltInPropsType = {
     env : envPropType,
     timeout? : timeoutPropType,
     dimensions? : dimensionsPropType,
+    window? : windowPropType,
 
     onDisplay : onDisplayPropType,
     onEnter : onEnterPropType,
@@ -66,6 +70,7 @@ export type PropsType = {
     env? : envPropType,
     timeout? : timeoutPropType,
     dimensions? : dimensionsPropType,
+    window? : windowPropType,
 
     onDisplay? : onDisplayPropType,
     onEnter? : onEnterPropType,
@@ -78,6 +83,7 @@ export type BuiltInPropsDefinitionType<P> = {
     env : StringPropDefinitionType<envPropType, P>,
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
+    window : ObjectPropDefinitionType<windowPropType, P>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P>,
     onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
@@ -104,6 +110,22 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             required:   false,
             def(props, component) : ?string {
                 return component.defaultEnv;
+            }
+        },
+
+        window: {
+            type:        'object',
+            sendToChild: false,
+            required:    false,
+            validate(val : CrossDomainWindowType | ProxyWindow) {
+                if (!isWindow(val) && !ProxyWindow.isProxyWindow(val)) {
+                    throw new Error(`Expected Window or ProxyWindow`);
+                }
+            },
+            decorate(val : CrossDomainWindowType | ProxyWindow | void) : ProxyWindow | void {
+                if (val) {
+                    return ProxyWindow.toProxyWindow(val);
+                }
             }
         },
 

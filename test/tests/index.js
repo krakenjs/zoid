@@ -11,4 +11,4 @@ import './validation';
 import './parentDomainCheck';
 import './angular2';
 import './vue';
-
+import './window';
