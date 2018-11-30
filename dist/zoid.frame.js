@@ -699,6 +699,7 @@
             __webpack_require__.d(__webpack_exports__, "toCSS", function() {
                 return __WEBPACK_IMPORTED_MODULE_9__css__.c;
             });
+            __webpack_require__("./node_modules/belter/src/test.js");
         },
         "./node_modules/belter/src/storage.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -762,6 +763,10 @@
                 } ]);
             };
             var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__("./node_modules/belter/src/util.js"), __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__("./node_modules/belter/src/dom.js");
+        },
+        "./node_modules/belter/src/test.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            __webpack_require__("./node_modules/zalgo-promise/src/index.js");
         },
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -5055,7 +5060,7 @@
                         for (var _i6 = 0, _Object$keys4 = Object.keys(result), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
                             var _key2 = _Object$keys4[_i6], _propDef = component.getProp(_key2), _value = result[_key2];
                             if (_propDef) {
-                                _propDef.validate && _propDef.validate(_value, result);
+                                Object(belter_src.isDefined)(_value) && _propDef.validate && _propDef.validate(_value, result);
                                 _propDef.decorate && (result[_key2] = _propDef.decorate(_value, result));
                                 result[_key2] && "function" === _propDef.type && (result[_key2] = result[_key2].bind(instance));
                             }
@@ -5147,7 +5152,7 @@
                     var _this8 = this;
                     return src.a.try(function() {
                         _this8.component.log("open_" + _this8.context);
-                        return _this8.driver.open.call(_this8);
+                        return _this8.props.window ? _this8.props.window : _this8.driver.open.call(_this8);
                     });
                 };
                 ParentComponent.prototype.setWindowName = function(proxyWin, name) {
@@ -5166,6 +5171,7 @@
                     var _this10 = this;
                     this.component.log("delegate_" + this.context);
                     for (var props = {
+                        window: this.props.window,
                         onClose: this.props.onClose,
                         onDisplay: this.props.onDisplay
                     }, _i4 = 0, _component$getPropNam2 = this.component.getPropNames(), _length4 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
@@ -5173,6 +5179,7 @@
                         this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
                     }
                     for (var delegate = _send(target, POST_MESSAGE.DELEGATE + "_" + this.component.name, {
+                        uid: this.uid,
                         context: this.context,
                         env: this.props.env,
                         options: {
@@ -5565,6 +5572,7 @@
                         if (!(instance instanceof DelegateComponent)) throw new TypeError("Cannot call a class as a function");
                     }(this);
                     this.component = component;
+                    this.uid = options.uid;
                     this.context = options.context;
                     this.clean = cleanup(this);
                     this.event = Object(belter_src.eventEmitter)();
@@ -5573,6 +5581,7 @@
                     this.renderTemplate = parent_ParentComponent.prototype.renderTemplate;
                     this.registerActiveComponent = parent_ParentComponent.prototype.registerActiveComponent;
                     this.props = {
+                        window: options.props.window,
                         onClose: options.props.onClose,
                         onDisplay: options.props.onDisplay
                     };
@@ -5731,6 +5740,17 @@
                             required: !1,
                             def: function(props, component) {
                                 return component.defaultEnv;
+                            }
+                        },
+                        window: {
+                            type: "object",
+                            sendToChild: !1,
+                            required: !1,
+                            validate: function(val) {
+                                if (!Object(cross_domain_utils_src.isWindow)(val) && !window_ProxyWindow.isProxyWindow(val)) throw new Error("Expected Window or ProxyWindow");
+                            },
+                            decorate: function(val) {
+                                if (val) return window_ProxyWindow.toProxyWindow(val);
                             }
                         },
                         dimensions: {

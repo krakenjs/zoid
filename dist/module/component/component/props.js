@@ -1,5 +1,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, memoize, noop, promisify } from 'belter/src';
+import { isWindow } from 'cross-domain-utils/src';
+import { ProxyWindow } from 'post-robot/src/serialize/window';
 
 import '../../types';
 import { PROP_SERIALIZATION } from '../../constants';
@@ -22,6 +24,22 @@ export function getInternalProps() {
             required: false,
             def: function def(props, component) {
                 return component.defaultEnv;
+            }
+        },
+
+        window: {
+            type: 'object',
+            sendToChild: false,
+            required: false,
+            validate: function validate(val) {
+                if (!isWindow(val) && !ProxyWindow.isProxyWindow(val)) {
+                    throw new Error('Expected Window or ProxyWindow');
+                }
+            },
+            decorate: function decorate(val) {
+                if (val) {
+                    return ProxyWindow.toProxyWindow(val);
+                }
             }
         },
 

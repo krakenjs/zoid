@@ -416,6 +416,11 @@ export var ParentComponent = (_class = function () {
 
         return ZalgoPromise['try'](function () {
             _this8.component.log('open_' + _this8.context);
+
+            if (_this8.props.window) {
+                return _this8.props.window;
+            }
+
             return _this8.driver.open.call(_this8);
         });
     };
@@ -444,6 +449,7 @@ export var ParentComponent = (_class = function () {
         this.component.log('delegate_' + this.context);
 
         var props = {
+            window: this.props.window,
             onClose: this.props.onClose,
             onDisplay: this.props.onDisplay
         };
@@ -459,6 +465,7 @@ export var ParentComponent = (_class = function () {
 
         var delegate = send(target, POST_MESSAGE.DELEGATE + '_' + this.component.name, {
 
+            uid: this.uid,
             context: this.context,
             env: this.props.env,
 

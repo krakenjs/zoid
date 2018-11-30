@@ -71,7 +71,7 @@ export function normalizeProps(component, instance, props) {
             continue;
         }
 
-        if (_propDef.validate) {
+        if (isDefined(_value) && _propDef.validate) {
             // $FlowFixMe
             _propDef.validate(_value, result);
         }

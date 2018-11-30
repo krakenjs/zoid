@@ -5,6 +5,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 import { onCloseWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { eventEmitter } from 'belter/src';
+import { ProxyWindow } from 'post-robot/src';
 
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS } from '../parent/drivers';
@@ -16,6 +17,7 @@ export var DelegateComponent = function () {
         _classCallCheck(this, DelegateComponent);
 
         this.component = component;
+        this.uid = options.uid;
         this.context = options.context;
         this.clean = cleanup(this);
         this.event = eventEmitter();
@@ -30,6 +32,7 @@ export var DelegateComponent = function () {
         this.registerActiveComponent = ParentComponent.prototype.registerActiveComponent;
 
         this.props = {
+            window: options.props.window,
             onClose: options.props.onClose,
             onDisplay: options.props.onDisplay
         };
