@@ -348,9 +348,11 @@ export class ChildComponent<P> {
 
     error(err : mixed) : ZalgoPromise<void> {
         // eslint-disable-next-line promise/no-promise-in-callback
-        return this.parentExports.error(err).then(noop).finally(() => {
-            return this.destroy();
-        }).then(() => {
+        return ZalgoPromise.try(() => {
+            if (this.parentExports.error) {
+                return this.parentExports.error(err);
+            }
+        }).catch(noop).then(() => {
             throw err;
         });
     }
