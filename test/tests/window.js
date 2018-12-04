@@ -24,7 +24,7 @@ describe('zoid window prop cases', () => {
             return testComponent.renderIframe({
                 window: win,
     
-                passUIDGetter: expect(getUID => {
+                passUIDGetter: expect(`passUIDGetter`, getUID => {
                     return send(win, 'eval', {
                         code: `
                             window.uid = ${ JSON.stringify(uid) };
@@ -54,7 +54,7 @@ describe('zoid window prop cases', () => {
             return testComponent.renderIframe({
                 window: win,
     
-                passUIDGetter: expect(getUID => {
+                passUIDGetter: expect(`passUIDGetter`, getUID => {
                     return send(win, 'eval', {
                         code: `
                             window.uid = ${ JSON.stringify(uid) };
@@ -91,7 +91,7 @@ describe('zoid window prop cases', () => {
             return testComponent.renderIframe({
                 myCustomWindow: win,
 
-                passUIDGetter: expect(getUID => {
+                passUIDGetter: expect(`passUIDGetter`, getUID => {
                     return send(win, 'eval', {
                         code: `
                             window.uid = ${ JSON.stringify(uid) };
@@ -129,7 +129,7 @@ describe('zoid window prop cases', () => {
             return testComponent.renderIframe({
                 myCustomWindow: win,
 
-                passUIDGetter: expect(getUID => {
+                passUIDGetter: expect(`passUIDGetter`, getUID => {
                     return send(win, 'eval', {
                         code: `
                             window.uid = ${ JSON.stringify(uid) };
