@@ -29,6 +29,8 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
         }
     }
 
+    const aliases = [];
+
     for (let key of propNames) {
         let propDef = component.getProp(key);
         let value = props[key];
@@ -38,8 +40,12 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
             continue;
         }
 
-        if (!isDefined(value) && propDef.alias) {
-            value = props[propDef.alias];
+        const alias = propDef.alias;
+        if (alias) {
+            if (!isDefined(value) && isDefined(props[alias])) {
+                value = props[alias];
+            }
+            aliases.push(alias);
         }
 
         if (propDef.value) {
@@ -59,6 +65,10 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
         }
 
         result[key] = value;
+    }
+
+    for (let alias of aliases) {
+        delete result[alias];
     }
 
     for (let key of Object.keys(result)) {
