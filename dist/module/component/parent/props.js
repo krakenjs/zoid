@@ -29,6 +29,8 @@ export function normalizeProps(component, instance, props) {
         }
     }
 
+    var aliases = [];
+
     for (var _i4 = 0, _length4 = propNames == null ? 0 : propNames.length; _i4 < _length4; _i4++) {
         var _key = propNames[_i4];
         var propDef = component.getProp(_key);
@@ -39,8 +41,12 @@ export function normalizeProps(component, instance, props) {
             continue;
         }
 
-        if (!isDefined(value) && propDef.alias) {
-            value = props[propDef.alias];
+        var alias = propDef.alias;
+        if (alias) {
+            if (!isDefined(value) && isDefined(props[alias])) {
+                value = props[alias];
+            }
+            aliases.push(alias);
         }
 
         if (propDef.value) {
@@ -62,8 +68,13 @@ export function normalizeProps(component, instance, props) {
         result[_key] = value;
     }
 
-    for (var _i6 = 0, _Object$keys4 = Object.keys(result), _length6 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
-        var _key2 = _Object$keys4[_i6];
+    for (var _i6 = 0, _length6 = aliases == null ? 0 : aliases.length; _i6 < _length6; _i6++) {
+        var _alias = aliases[_i6];
+        delete result[_alias];
+    }
+
+    for (var _i8 = 0, _Object$keys4 = Object.keys(result), _length8 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i8 < _length8; _i8++) {
+        var _key2 = _Object$keys4[_i8];
         var _propDef = component.getProp(_key2);
         var _value = result[_key2];
 
@@ -184,8 +195,8 @@ export function propsToQuery(propsDef, props) {
                     } else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                         result = dotify(queryValue, key);
 
-                        for (var _i8 = 0, _Object$keys6 = Object.keys(result), _length8 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i8 < _length8; _i8++) {
-                            var dotkey = _Object$keys6[_i8];
+                        for (var _i10 = 0, _Object$keys6 = Object.keys(result), _length10 = _Object$keys6 == null ? 0 : _Object$keys6.length; _i10 < _length10; _i10++) {
+                            var dotkey = _Object$keys6[_i10];
                             params[dotkey] = result[dotkey];
                         }
 

@@ -376,9 +376,11 @@ export var ChildComponent = function () {
         var _this7 = this;
 
         // eslint-disable-next-line promise/no-promise-in-callback
-        return this.parentExports.error(err).then(noop)['finally'](function () {
-            return _this7.destroy();
-        }).then(function () {
+        return ZalgoPromise['try'](function () {
+            if (_this7.parentExports.error) {
+                return _this7.parentExports.error(err);
+            }
+        })['catch'](noop).then(function () {
             throw err;
         });
     };

@@ -766,7 +766,7 @@
         },
         "./node_modules/belter/src/test.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_require__("./node_modules/zalgo-promise/src/index.js");
+            __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __webpack_require__("./node_modules/belter/src/util.js");
         },
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -4704,9 +4704,9 @@
                 };
                 ChildComponent.prototype.error = function(err) {
                     var _this7 = this;
-                    return this.parentExports.error(err).then(belter_src.noop).finally(function() {
-                        return _this7.destroy();
-                    }).then(function() {
+                    return src.a.try(function() {
+                        if (_this7.parentExports.error) return _this7.parentExports.error(err);
+                    }).catch(belter_src.noop).then(function() {
                         throw err;
                     });
                 };
@@ -5045,10 +5045,14 @@
                             var key = _Object$keys2[_i2];
                             -1 === propNames.indexOf(key) && propNames.push(key);
                         }
-                        for (var _i4 = 0, _length4 = null == propNames ? 0 : propNames.length; _i4 < _length4; _i4++) {
+                        for (var aliases = [], _i4 = 0, _length4 = null == propNames ? 0 : propNames.length; _i4 < _length4; _i4++) {
                             var _key = propNames[_i4], propDef = component.getProp(_key), value = props[_key];
                             if (propDef) {
-                                !Object(belter_src.isDefined)(value) && propDef.alias && (value = props[propDef.alias]);
+                                var alias = propDef.alias;
+                                if (alias) {
+                                    !Object(belter_src.isDefined)(value) && Object(belter_src.isDefined)(props[alias]) && (value = props[alias]);
+                                    aliases.push(alias);
+                                }
                                 propDef.value && (value = propDef.value());
                                 !Object(belter_src.isDefined)(value) && propDef.def && (value = propDef.def(props, component));
                                 if (Object(belter_src.isDefined)(value)) {
@@ -5057,8 +5061,9 @@
                                 result[_key] = value;
                             } else result[_key] = value;
                         }
-                        for (var _i6 = 0, _Object$keys4 = Object.keys(result), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) {
-                            var _key2 = _Object$keys4[_i6], _propDef = component.getProp(_key2), _value = result[_key2];
+                        for (var _i6 = 0, _length6 = null == aliases ? 0 : aliases.length; _i6 < _length6; _i6++) delete result[aliases[_i6]];
+                        for (var _i8 = 0, _Object$keys4 = Object.keys(result), _length8 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i8 < _length8; _i8++) {
+                            var _key2 = _Object$keys4[_i8], _propDef = component.getProp(_key2), _value = result[_key2];
                             if (_propDef) {
                                 Object(belter_src.isDefined)(_value) && _propDef.validate && _propDef.validate(_value, result);
                                 _propDef.decorate && (result[_key2] = _propDef.decorate(_value, result));
@@ -5092,8 +5097,8 @@
                                     if ("object" === (void 0 === queryValue ? "undefined" : props__typeof(queryValue)) && null !== queryValue) {
                                         if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = btoa(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                                             result = Object(belter_src.dotify)(queryValue, key);
-                                            for (var _i8 = 0, _Object$keys6 = Object.keys(result), _length8 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i8 < _length8; _i8++) {
-                                                var dotkey = _Object$keys6[_i8];
+                                            for (var _i10 = 0, _Object$keys6 = Object.keys(result), _length10 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i10 < _length10; _i10++) {
+                                                var dotkey = _Object$keys6[_i10];
                                                 params[dotkey] = result[dotkey];
                                             }
                                             return;
