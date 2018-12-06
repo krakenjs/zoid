@@ -5024,7 +5024,7 @@
                             var win = _ref5[0], url = _ref5[1];
                             return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url));
                         });
-                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
+                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.prerender, tasks.setWindowName ]).then(function(_ref6) {
                             var proxyWin = _ref6[0], url = _ref6[1];
                             return _this2.loadUrl(proxyWin, url);
                         });

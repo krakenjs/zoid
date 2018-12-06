@@ -172,7 +172,7 @@ export var ParentComponent = (_class = function () {
                 return _this2.openBridge(win, getDomainFromUrl(url));
             });
 
-            tasks.loadUrl = ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName]).then(function (_ref6) {
+            tasks.loadUrl = ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.prerender, tasks.setWindowName]).then(function (_ref6) {
                 var proxyWin = _ref6[0],
                     url = _ref6[1];
 
