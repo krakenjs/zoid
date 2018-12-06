@@ -194,6 +194,7 @@ export class ParentComponent<P> {
 
             tasks.loadUrl = ZalgoPromise.all([
                 tasks.open,
+                tasks.prerender,
                 tasks.buildUrl,
                 tasks.setWindowName
             ]).then(([ proxyWin, url ]) => {
