@@ -115,8 +115,8 @@ export var ParentComponent = (_class = function () {
             });
 
             var focus = function focus() {
-                return tasks.awaitWindow.then(function (win) {
-                    return win.focus();
+                return tasks.open.then(function (proxyWin) {
+                    return proxyWin.focus();
                 });
             };
 

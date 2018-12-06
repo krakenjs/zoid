@@ -150,8 +150,8 @@
                     return loadedFrame.contentWindow;
                 });
             };
-            __webpack_exports__.n = function() {
-                var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, el = getElement(arguments[1]), attributes = options.attributes || {}, style = options.style || {}, frame = function() {
+            __webpack_exports__.n = function iframe() {
+                var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, container = arguments[1], attempts = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 3, el = getElement(container), attributes = options.attributes || {}, style = options.style || {}, frame = function() {
                     var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, container = arguments[2];
                     tag = tag.toLowerCase();
                     var element = document.createElement(tag);
@@ -194,6 +194,14 @@
                 });
                 awaitFrameLoad(frame);
                 el.appendChild(frame);
+                var win = frame.contentWindow;
+                if (win) try {
+                    Object(util.r)(win.name);
+                } catch (err) {
+                    el.removeChild(frame);
+                    if (!attempts) throw new Error("Frame is cross-domain: " + err.stack);
+                    return iframe(options, container, attempts - 1);
+                }
                 (options.url || window.navigator.userAgent.match(/MSIE|Edge/i)) && frame.setAttribute("src", options.url || "about:blank");
                 return frame;
             };
@@ -773,7 +781,9 @@
             "use strict";
             __webpack_exports__.b = base64encode;
             __webpack_exports__.a = function(str) {
-                return window.atob(str);
+                if ("undefined" != typeof window && "function" == typeof window.atob) return window.atob(str);
+                if ("undefined" != typeof Buffer) return Buffer.from(str, "base64").toString("utf8");
+                throw new Error("Can not find window.atob or Buffer");
             };
             __webpack_exports__.y = uniqueID;
             __webpack_exports__.k = function() {
@@ -1005,7 +1015,9 @@
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
             function base64encode(str) {
-                return window.btoa(str);
+                if ("undefined" != typeof window && "function" == typeof window.btoa) return window.btoa(str);
+                if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
+                throw new Error("Can not find window.btoa or Buffer");
             }
             function uniqueID() {
                 var chars = "0123456789abcdef";
@@ -1205,7 +1217,7 @@
                     if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
-                        return weakmap.has(key);
+                        if (weakmap.has(key)) return !0;
                     } catch (err) {
                         delete this.weakmap;
                     }
@@ -3372,7 +3384,7 @@
                     }, function(_ref) {
                         var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
                         return src.a.try(function() {
-                            var meth = methodStore.get(source, function() {
+                            var meth = methodStore.getOrSet(source, function() {
                                 return {};
                             })[data.id] || proxyWindowMethods.get(id);
                             if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(cross_domain_utils_src.getDomain)(window));
@@ -4875,8 +4887,8 @@
                             if (element) return _this2.elementReady(element);
                         });
                         var focus = function() {
-                            return tasks.awaitWindow.then(function(win) {
-                                return win.focus();
+                            return tasks.open.then(function(proxyWin) {
+                                return proxyWin.focus();
                             });
                         };
                         tasks.openContainer = tasks.elementReady.then(function() {
