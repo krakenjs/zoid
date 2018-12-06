@@ -39,7 +39,7 @@ export type RenderOptionsType<P> = {
     EVENT : typeof EVENTS,
     actions : {
         close : (?string) => ZalgoPromise<void>,
-        focus : () => ZalgoPromise<void>
+        focus : () => ZalgoPromise<ProxyWindow>
     },
     on : (string, () => void) => CancelableType,
     jsxDom : typeof node,
@@ -147,9 +147,7 @@ export class ParentComponent<P> {
             });
 
             let focus = () => {
-                return tasks.awaitWindow.then(win => {
-                    return win.focus();
-                });
+                return tasks.open.then(proxyWin => proxyWin.focus());
             };
 
             tasks.openContainer = tasks.elementReady.then(() => {
@@ -826,7 +824,7 @@ export class ParentComponent<P> {
         });
     }
 
-    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document, outlet } : { focus? : () => ZalgoPromise<void>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
+    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document, outlet } : { focus? : () => ZalgoPromise<ProxyWindow>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
             height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
@@ -857,7 +855,7 @@ export class ParentComponent<P> {
         });
     }
 
-    openContainer(element : ?HTMLElement, { focus } : { focus? : () => ZalgoPromise<void> }) : ZalgoPromise<void> {
+    openContainer(element : ?HTMLElement, { focus } : { focus : () => ZalgoPromise<ProxyWindow> }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             let el;
 
