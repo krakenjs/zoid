@@ -854,7 +854,7 @@ export var ParentComponent = (_class = function () {
             }).then(function (win) {
                 return _this27.driver.openPrerender.call(_this27, win);
             }).then(function (prerenderWindow) {
-                if (!prerenderWindow) {
+                if (!prerenderWindow || !isSameDomain(prerenderWindow)) {
                     return;
                 }
 
