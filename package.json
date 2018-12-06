@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "setup": "npm install && npm run flow-typed",
-    "demo": "serve . --port 1337",
+    "demo": "serve . -l 1337",
     "lint": "eslint src/ test/ *.js",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",

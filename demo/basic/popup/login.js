@@ -7,7 +7,7 @@ window.MyLoginZoidComponent = zoid.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: zoid.getCurrentScriptDir() + '/login.htm',
+    url: `${ zoid.getCurrentScriptDir()  }/login.htm`,
 
     // Allow the component to be rendered as a popup
 
@@ -16,7 +16,7 @@ window.MyLoginZoidComponent = zoid.create({
     },
 
     dimensions: {
-        width: '300px',
+        width:  '300px',
         height: '150px'
     },
 
@@ -36,16 +36,16 @@ window.MyLoginZoidComponent = zoid.create({
             return actions.focus();
         }
 
-        return jsxDom('div', { id, onClick: focus, 'class': `${CLASS.ZOID} ${CLASS.ZOID}-tag-${tag} ${CLASS.ZOID}-context-${context} ${CLASS.ZOID}-focus` },
+        return jsxDom('div', { id, 'onClick': focus, 'class': `${ CLASS.ZOID } ${ CLASS.ZOID }-tag-${ tag } ${ CLASS.ZOID }-context-${ context } ${ CLASS.ZOID }-focus` },
 
-            jsxDom('a', { href: '#', onClick: close, 'class': `${CLASS.ZOID}-close` }),
+            jsxDom('a', { 'href': '#', 'onClick': close, 'class': `${ CLASS.ZOID }-close` }),
 
-            outlet,
+            jsxDom('node', { el: outlet }),
 
             jsxDom('style', null,
 
                 `
-                    #${id} {
+                    #${ id } {
                         position: fixed;
                         top: 0;
                         left: 0;
@@ -54,11 +54,11 @@ window.MyLoginZoidComponent = zoid.create({
                         background-color: rgba(0, 0, 0, 0.8);
                     }
 
-                    #${id}.${CLASS.ZOID}-context-${CONTEXT.POPUP} {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.POPUP } {
                         cursor: pointer;
                     }
 
-                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} .${CLASS.OUTLET} {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.IFRAME } .${ CLASS.OUTLET } {
                         box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);
                         position: fixed;
                         top: 50%;
@@ -70,17 +70,17 @@ window.MyLoginZoidComponent = zoid.create({
                         -ms-transform: translate3d(-50%, -50%, 0);
                     }
 
-                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.IFRAME } ${ CLASS.OUTLET } {
                         height: 150px;
                         width: 300px;
                     }
 
-                    #${id}.${CLASS.ZOID}-context-${CONTEXT.IFRAME} ${CLASS.OUTLET} iframe {
+                    #${ id }.${ CLASS.ZOID }-context-${ CONTEXT.IFRAME } ${ CLASS.OUTLET } iframe {
                         height: 100%;
                         width: 100%;
                     }
 
-                    #${id} .${CLASS.ZOID}-close {
+                    #${ id } .${ CLASS.ZOID }-close {
                         position: absolute;
                         right: 16px;
                         top: 16px;
@@ -89,12 +89,12 @@ window.MyLoginZoidComponent = zoid.create({
                         opacity: 0.6;
                     }
 
-                    #${id} .${CLASS.ZOID}-close:hover {
+                    #${ id } .${ CLASS.ZOID }-close:hover {
                         opacity: 1;
                     }
 
-                    #${id} .${CLASS.ZOID}-close:before,
-                    #${id} .${CLASS.ZOID}-close:after {
+                    #${ id } .${ CLASS.ZOID }-close:before,
+                    #${ id } .${ CLASS.ZOID }-close:after {
                         position: absolute;
                         left: 8px;
                         content: ' ';
@@ -103,11 +103,11 @@ window.MyLoginZoidComponent = zoid.create({
                         background-color: white;
                     }
 
-                    #${id} .${CLASS.ZOID}-close:before {
+                    #${ id } .${ CLASS.ZOID }-close:before {
                         transform: rotate(45deg);
                     }
 
-                    #${id} .${CLASS.ZOID}-close:after {
+                    #${ id } .${ CLASS.ZOID }-close:after {
                         transform: rotate(-45deg);
                     }
                 `
