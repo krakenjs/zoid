@@ -806,7 +806,7 @@ export class ParentComponent<P> {
                 return this.driver.openPrerender.call(this, win);
                 
             }).then(prerenderWindow => {
-                if (!prerenderWindow) {
+                if (!prerenderWindow || !isSameDomain(prerenderWindow)) {
                     return;
                 }
         
