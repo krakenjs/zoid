@@ -246,7 +246,7 @@ var MyLoginZoidComponent = zoid.create({
                     `}
                 </style>
 
-                { opts.outlet }
+                <node el={ opts.outlet } />
             </div>
         );
     }
@@ -267,7 +267,7 @@ var MyLoginZoidComponent = zoid.create({
                     border: 5px solid red;
                 }
             `),
-            opts.outlet
+            jsxDom('node', { el: opts.outlet })
         );
     }
 });
