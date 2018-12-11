@@ -1,6 +1,7 @@
 /* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
+import { once } from 'belter/src';
 
 import { testComponent } from '../component';
 import { onWindowOpen } from '../common';
@@ -209,6 +210,7 @@ describe('zoid render to parent', () => {
     });
 
     it('should focus a zoid renderToParent popup on click of the overlay', done => {
+        done = once(done);
 
         testComponent.renderIframe({
 
