@@ -1,6 +1,7 @@
 /* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
+import { once } from 'belter/src';
 
 import { testComponent } from '../component';
 import { onWindowOpen } from '../common';
@@ -56,6 +57,7 @@ describe('zoid actions', () => {
     });
 
     it('should focus a zoid popup', done => {
+        done = once(done);
 
         let win;
         let focus;

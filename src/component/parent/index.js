@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
-import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl,
+import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl, isBlankDomain,
     onCloseWindow, getDomain, type CrossDomainWindowType, getDistanceFromTop, isTop, normalizeMockUrl } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
@@ -178,8 +178,8 @@ export class ParentComponent<P> {
                 return this.watchForClose(win);
             });
 
-            tasks.prerender = ZalgoPromise.all([ tasks.open, tasks.openContainer ]).then(([ proxyWin ]) => {
-                return this.prerender(proxyWin);
+            tasks.prerender = ZalgoPromise.all([ tasks.awaitWindow, tasks.openContainer ]).then(([ win ]) => {
+                return this.prerender(win);
             });
 
             tasks.showComponent = tasks.prerender.then(() => {
@@ -195,7 +195,6 @@ export class ParentComponent<P> {
             tasks.loadUrl = ZalgoPromise.all([
                 tasks.open,
                 tasks.buildUrl,
-                tasks.prerender,
                 tasks.setWindowName
             ]).then(([ proxyWin, url ]) => {
                 return this.loadUrl(proxyWin, url);
@@ -792,20 +791,17 @@ export class ParentComponent<P> {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    prerender(proxyWin : ProxyWindow) : ZalgoPromise<void> {
+    prerender(win : CrossDomainWindowType) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (!this.component.prerenderTemplate) {
                 return;
             }
 
             return ZalgoPromise.try(() => {
-                return proxyWin.awaitWindow();
-
-            }).then(win => {
                 return this.driver.openPrerender.call(this, win);
                 
             }).then(prerenderWindow => {
-                if (!prerenderWindow || !isSameDomain(prerenderWindow)) {
+                if (!prerenderWindow || !isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
                     return;
                 }
         
