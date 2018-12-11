@@ -1302,38 +1302,41 @@
             __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.o;
             });
-            __webpack_require__.d(__webpack_exports__, "isOpener", function() {
+            __webpack_require__.d(__webpack_exports__, "isBlankDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.p;
             });
-            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "isOpener", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.q;
             });
-            __webpack_require__.d(__webpack_exports__, "isSameTopWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.r;
             });
-            __webpack_require__.d(__webpack_exports__, "isTop", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameTopWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.s;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isTop", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.t;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.u;
             });
-            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.v;
             });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.w;
             });
-            __webpack_require__.d(__webpack_exports__, "normalizeMockUrl", function() {
+            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.x;
             });
-            __webpack_require__.d(__webpack_exports__, "onCloseWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "normalizeMockUrl", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.y;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+            __webpack_require__.d(__webpack_exports__, "onCloseWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.z;
+            });
+            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.A;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
@@ -1349,19 +1352,26 @@
             __webpack_exports__.j = getOpener;
             __webpack_exports__.b = getActualDomain;
             __webpack_exports__.f = getDomain;
+            __webpack_exports__.p = function(win) {
+                try {
+                    if (!win.location.href) return !0;
+                    if ("about:blank" === win.location.href) return !0;
+                } catch (err) {}
+                return !1;
+            };
             __webpack_exports__.n = isActuallySameDomain;
-            __webpack_exports__.q = isSameDomain;
+            __webpack_exports__.r = isSameDomain;
             __webpack_exports__.a = function(win) {
                 if (!isSameDomain(win)) throw new Error("Expected window to be same domain");
                 return win;
             };
             __webpack_exports__.l = getTop;
             __webpack_exports__.c = getAllFramesInWindow;
-            __webpack_exports__.s = function(win) {
+            __webpack_exports__.t = function(win) {
                 return win === getTop(win);
             };
-            __webpack_exports__.u = isWindowClosed;
-            __webpack_exports__.v = function(frame) {
+            __webpack_exports__.v = isWindowClosed;
+            __webpack_exports__.w = function(frame) {
                 !function() {
                     for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
                         iframeFrames.splice(i, 1);
@@ -1394,7 +1404,7 @@
                     if (-1 !== winFrames.indexOf(win[name])) return win[name];
                 } catch (err) {}
             };
-            __webpack_exports__.p = function(parent, child) {
+            __webpack_exports__.q = function(parent, child) {
                 return parent === getOpener(child);
             };
             __webpack_exports__.d = getAncestor;
@@ -1417,7 +1427,7 @@
                     return parent;
                 }(win, getDistanceFromTop(win) - n);
             };
-            __webpack_exports__.r = function(win1, win2) {
+            __webpack_exports__.s = function(win1, win2) {
                 var top1 = getTop(win1) || win1, top2 = getTop(win2) || win2;
                 try {
                     if (top1 && top2) return top1 === top2;
@@ -1428,7 +1438,7 @@
                 return !(opener1 && anyMatch(getAllFramesInWindow(opener1), allFrames2) || (opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1), 
                 1));
             };
-            __webpack_exports__.w = function matchDomain(pattern, origin) {
+            __webpack_exports__.x = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
                     if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
@@ -1438,11 +1448,11 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.z = function(pattern) {
+            __webpack_exports__.A = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
             __webpack_exports__.g = getDomainFromUrl;
-            __webpack_exports__.y = function(win, callback) {
+            __webpack_exports__.z = function(win, callback) {
                 var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, maxtime = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1 / 0, timeout = void 0;
                 !function check() {
                     if (isWindowClosed(win)) {
@@ -1460,7 +1470,7 @@
                     }
                 };
             };
-            __webpack_exports__.t = function(obj) {
+            __webpack_exports__.u = function(obj) {
                 try {
                     if (obj === window) return !0;
                 } catch (err) {
@@ -1498,7 +1508,7 @@
                 }
                 return !1;
             };
-            __webpack_exports__.x = function(url) {
+            __webpack_exports__.y = function(url) {
                 if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf(constants.a.MOCK))) return url;
                 var domain;
                 throw new Error("Mock urls not supported out of test mode");
@@ -4921,9 +4931,9 @@
                             var win = _ref3[0];
                             return _this2.watchForClose(win);
                         });
-                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref4) {
-                            var proxyWin = _ref4[0];
-                            return _this2.prerender(proxyWin);
+                        tasks.prerender = src.a.all([ tasks.awaitWindow, tasks.openContainer ]).then(function(_ref4) {
+                            var win = _ref4[0];
+                            return _this2.prerender(win);
                         });
                         tasks.showComponent = tasks.prerender.then(function() {
                             return _this2.showComponent();
@@ -4933,7 +4943,7 @@
                             var win = _ref5[0], url = _ref5[1];
                             return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url));
                         });
-                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.prerender, tasks.setWindowName ]).then(function(_ref6) {
+                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
                             var proxyWin = _ref6[0], url = _ref6[1];
                             return _this2.loadUrl(proxyWin, url);
                         });
@@ -5423,15 +5433,13 @@
                         if (_this26.element) return Object(belter_src.animateAndHide)(_this26.element, ANIMATION_NAMES.HIDE_COMPONENT, _this26.clean.register);
                     });
                 };
-                ParentComponent.prototype.prerender = function(proxyWin) {
+                ParentComponent.prototype.prerender = function(win) {
                     var _this27 = this;
                     return src.a.try(function() {
                         if (_this27.component.prerenderTemplate) return src.a.try(function() {
-                            return proxyWin.awaitWindow();
-                        }).then(function(win) {
                             return _this27.driver.openPrerender.call(_this27, win);
                         }).then(function(prerenderWindow) {
-                            if (prerenderWindow && Object(cross_domain_utils_src.isSameDomain)(prerenderWindow)) {
+                            if (prerenderWindow && Object(cross_domain_utils_src.isSameDomain)(prerenderWindow) && Object(cross_domain_utils_src.isBlankDomain)(prerenderWindow)) {
                                 var doc = prerenderWindow.document, el = _this27.renderTemplate(_this27.component.prerenderTemplate, {
                                     document: doc
                                 });

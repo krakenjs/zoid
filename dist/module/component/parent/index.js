@@ -38,7 +38,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 /* eslint max-lines: 0 */
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
-import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl, onCloseWindow, getDomain, getDistanceFromTop, isTop, normalizeMockUrl } from 'cross-domain-utils/src';
+import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl, isBlankDomain, onCloseWindow, getDomain, getDistanceFromTop, isTop, normalizeMockUrl } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, extendUrl, setOverflow, elementStoppedMoving, getElement, memoized, appendChild, once, stringify, stringifyError, eventEmitter } from 'belter/src';
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
@@ -153,10 +153,10 @@ export var ParentComponent = (_class = function () {
                 return _this2.watchForClose(win);
             });
 
-            tasks.prerender = ZalgoPromise.all([tasks.open, tasks.openContainer]).then(function (_ref4) {
-                var proxyWin = _ref4[0];
+            tasks.prerender = ZalgoPromise.all([tasks.awaitWindow, tasks.openContainer]).then(function (_ref4) {
+                var win = _ref4[0];
 
-                return _this2.prerender(proxyWin);
+                return _this2.prerender(win);
             });
 
             tasks.showComponent = tasks.prerender.then(function () {
@@ -172,7 +172,7 @@ export var ParentComponent = (_class = function () {
                 return _this2.openBridge(win, getDomainFromUrl(url));
             });
 
-            tasks.loadUrl = ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.prerender, tasks.setWindowName]).then(function (_ref6) {
+            tasks.loadUrl = ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName]).then(function (_ref6) {
                 var proxyWin = _ref6[0],
                     url = _ref6[1];
 
@@ -841,7 +841,7 @@ export var ParentComponent = (_class = function () {
          Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    ParentComponent.prototype.prerender = function prerender(proxyWin) {
+    ParentComponent.prototype.prerender = function prerender(win) {
         var _this27 = this;
 
         return ZalgoPromise['try'](function () {
@@ -850,11 +850,9 @@ export var ParentComponent = (_class = function () {
             }
 
             return ZalgoPromise['try'](function () {
-                return proxyWin.awaitWindow();
-            }).then(function (win) {
                 return _this27.driver.openPrerender.call(_this27, win);
             }).then(function (prerenderWindow) {
-                if (!prerenderWindow || !isSameDomain(prerenderWindow)) {
+                if (!prerenderWindow || !isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
                     return;
                 }
 
