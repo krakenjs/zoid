@@ -10,7 +10,7 @@ import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
 
 import { parseChildWindowName } from '../window';
 import { globalFor } from '../../lib';
-import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+import { CONTEXT, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
 import type { DimensionsType } from '../../types';
@@ -226,7 +226,7 @@ export class ChildComponent<P> {
         return { width, height, element };
     }
 
-    watchForResize(context : $Values<typeof CONTEXT_TYPES>) : ?ZalgoPromise<void> {
+    watchForResize(context : $Values<typeof CONTEXT>) : ?ZalgoPromise<void> {
 
         let { width, height, element } = this.getAutoResize();
 
@@ -234,7 +234,7 @@ export class ChildComponent<P> {
             return;
         }
 
-        if (context === CONTEXT_TYPES.POPUP) {
+        if (context === CONTEXT.POPUP) {
             return;
         }
 

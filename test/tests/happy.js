@@ -3,6 +3,7 @@
 import { assert } from 'chai';
 
 import { testComponent } from '../component';
+import { onWindowOpen } from '../common';
 
 describe('zoid happy cases', () => {
 
@@ -186,7 +187,7 @@ describe('zoid happy cases', () => {
         }, document.body);
     });
 
-    it('should try to render to iframe, when both iframe and popup are supported contexts', done => {
+    it('should try to render to iframe, when both iframe and popup are supported contexts', () => {
         
         let originalDefaultContext = testComponent.defaultContext;
         let originalContexts = testComponent.contexts;
@@ -197,18 +198,20 @@ describe('zoid happy cases', () => {
             iframe: true
         };
 
+        let promise = onWindowOpen().then(openedWindow => {
+            if (openedWindow.parent === openedWindow) {
+                throw new Error(`Expected opened window to be iframe`);
+            }
+        });
+
         testComponent.render({
             onEnter() {
-                try {
-                    assert.equal(this.context, 'iframe');
-                    testComponent.defaultContext = originalDefaultContext;
-                    testComponent.contexts = originalContexts;
-                    done();
-                } catch (err) {
-                    done(err);
-                }
+                testComponent.defaultContext = originalDefaultContext;
+                testComponent.contexts = originalContexts;
             }
         }, document.body);
+
+        return promise;
     });
 
     it('should enter a component and call back with a string prop', done => {

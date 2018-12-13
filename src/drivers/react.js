@@ -3,6 +3,7 @@
 import { extend } from 'belter/src';
 
 import type { Component, ComponentDriverType } from '../component/component';
+import { CONTEXT } from '../constants';
 
 declare class ReactClassType {
 
@@ -54,7 +55,7 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
 
                     this.setState({ parent });
 
-                    parent.render(el);
+                    parent.render(CONTEXT.IFRAME, el);
                 },
 
                 componentDidUpdate() {
@@ -80,7 +81,7 @@ export let react : ComponentDriverType<*, ReactLibraryType> = {
 
                     this.setState({ parent });
 
-                    parent.render(el);
+                    parent.render(CONTEXT.IFRAME, el);
                 }
 
                 componentDidUpdate() {

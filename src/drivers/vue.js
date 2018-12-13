@@ -3,6 +3,7 @@
 import { extend } from 'belter/src';
 
 import type { Component, ComponentDriverType } from '../component/component';
+import { CONTEXT } from '../constants';
 
 type VueComponent = {
     render : (Function) => Element,
@@ -32,7 +33,7 @@ export let vue : ComponentDriverType<*, void> = {
                 // $FlowFixMe
                 this.parent = component.init(extend({}, this.$attrs), null, el);
 
-                this.parent.render(el);
+                this.parent.render(CONTEXT.IFRAME, el);
             },
 
             beforeUpdate() {

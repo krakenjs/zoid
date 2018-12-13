@@ -11,7 +11,7 @@ import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
 import { isZoidComponentWindow, parseChildWindowName } from '../window';
-import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
+import { CONTEXT, POST_MESSAGE, WILDCARD } from '../../constants';
 import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
 import type { CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
@@ -238,13 +238,8 @@ export class Component<P> {
             return true;
         });
 
-        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, data }) => {
-            let delegate = this.delegate(source, data.options);
-
-            return {
-                overrides: delegate.getOverrides(data.context),
-                destroy:   () => delegate.destroy()
-            };
+        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, data: { context, props, overrides } }) => {
+            return this.delegate(source, { context, props, overrides }).getDelegate();
         });
     }
 
@@ -344,18 +339,18 @@ export class Component<P> {
             throw new Error(`[${ this.tag }] Can not render to ${ context }`);
         }
 
-        if (!element && context === CONTEXT_TYPES.IFRAME) {
-            throw new Error(`[${ this.tag }] Context type ${ CONTEXT_TYPES.IFRAME } requires an element selector`);
+        if (!element && context === CONTEXT.IFRAME) {
+            throw new Error(`[${ this.tag }] Context type ${ CONTEXT.IFRAME } requires an element selector`);
         }
     }
 
     getDefaultContext() : string {
         if (this.defaultContext) {
             return this.defaultContext;
-        } else if (this.contexts[CONTEXT_TYPES.IFRAME]) {
-            return CONTEXT_TYPES.IFRAME;
-        } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
-            return CONTEXT_TYPES.POPUP;
+        } else if (this.contexts[CONTEXT.IFRAME]) {
+            return CONTEXT.IFRAME;
+        } else if (this.contexts[CONTEXT.POPUP]) {
+            return CONTEXT.POPUP;
         }
 
         throw new Error(`Can not determine default context`);
@@ -376,37 +371,43 @@ export class Component<P> {
 
     render(props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(null, element), { props }).render(element);
+            let context = this.getRenderContext(null, element);
+            return new ParentComponent(this, context, { props }).render(context, element);
         });
     }
 
     renderIframe(props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props }).render(element);
+            let context = this.getRenderContext(CONTEXT.IFRAME, element);
+            return new ParentComponent(this, context, { props }).render(context, element);
         });
     }
 
     renderPopup(props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.POPUP), { props }).render();
+            let context = this.getRenderContext(CONTEXT.POPUP);
+            return new ParentComponent(this, context, { props }).render(context);
         });
     }
 
     renderTo(win : CrossDomainWindowType, props : (PropsType & P), element : ?ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(null, element), { props }).renderTo(win, element);
+            let context = this.getRenderContext(null, element);
+            return new ParentComponent(this, context, { props }).renderTo(context, win, element);
         });
     }
 
     renderIframeTo(win : CrossDomainWindowType, props : (PropsType & P), element : ElementRefType) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props }).renderTo(win, element);
+            let context = this.getRenderContext(CONTEXT.IFRAME, element);
+            return new ParentComponent(this, context, { props }).renderTo(context, win, element);
         });
     }
 
     renderPopupTo(win : CrossDomainWindowType, props : (PropsType & P)) : ZalgoPromise<ParentComponent<P>> {
         return ZalgoPromise.try(() => {
-            return new ParentComponent(this, this.getRenderContext(CONTEXT_TYPES.POPUP), { props }).renderTo(win);
+            let context = this.getRenderContext(CONTEXT.POPUP);
+            return new ParentComponent(this, context, { props }).renderTo(context, win);
         });
     }
 

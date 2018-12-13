@@ -13,7 +13,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow,
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { buildChildWindowName } from '../window';
-import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES,
+import { POST_MESSAGE, CONTEXT, CLASS_NAMES, ANIMATION_NAMES,
     CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import type { Component } from '../component';
 import { global, cleanup, type CleanupType } from '../../lib';
@@ -35,7 +35,7 @@ export type RenderOptionsType<P> = {
     outlet : HTMLElement,
     CLASS : typeof CLASS_NAMES,
     ANIMATION : typeof ANIMATION_NAMES,
-    CONTEXT : typeof CONTEXT_TYPES,
+    CONTEXT : typeof CONTEXT,
     EVENT : typeof EVENTS,
     actions : {
         close : (?string) => ZalgoPromise<void>,
@@ -72,7 +72,7 @@ export type WindowRef =
 export type ChildPayload = {
     uid : string,
     tag : string,
-    context : $Values<typeof CONTEXT_TYPES>,
+    context : $Values<typeof CONTEXT>,
     domain : string,
     parent : WindowRef,
     props : PropRef,
@@ -90,14 +90,12 @@ export type ChildPayload = {
 export class ParentComponent<P> {
 
     component : Component<P>
-    context : string
     driver : ContextDriverType
     props : BuiltInPropsType & P
     onInit : ZalgoPromise<ParentComponent<P>>
     errored : boolean
     event : EventEmitterType
     clean : CleanupType
-    uid : string
 
     container : HTMLElement
     element : HTMLElement
@@ -112,11 +110,9 @@ export class ParentComponent<P> {
             this.onInit = new ZalgoPromise();
             this.clean = cleanup(this);
             this.event = eventEmitter();
-            this.uid = uniqueID();
 
             this.component = component;
-            this.context = context;
-            this.driver = RENDER_DRIVERS[this.context];
+            this.driver = RENDER_DRIVERS[context];
     
             this.setProps(props);
             this.registerActiveComponent();
@@ -129,10 +125,11 @@ export class ParentComponent<P> {
         });
     }
 
-    render(element : ElementRefType, target? : CrossDomainWindowType = window) : ZalgoPromise<ParentComponent<P>> {
+    render(context : $Values<typeof CONTEXT>, element : ElementRefType, target? : CrossDomainWindowType = window) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
-            this.component.log(`render`, { context: this.context, element });
+            this.component.log(`render`);
 
+            let uid = uniqueID();
             let tasks = {};
             
             tasks.onRender = this.props.onRender();
@@ -151,7 +148,7 @@ export class ParentComponent<P> {
             };
 
             tasks.openContainer = tasks.elementReady.then(() => {
-                return this.openContainer(element, { focus });
+                return this.openContainer(element, { context, uid, focus });
             });
 
             tasks.open = this.driver.renderedIntoContainer
@@ -167,7 +164,7 @@ export class ParentComponent<P> {
             });
 
             tasks.buildWindowName = tasks.open.then(proxyWin => {
-                return this.buildWindowName({ proxyWin, initialDomain, domain, target });
+                return this.buildWindowName({ proxyWin, initialDomain, domain, target, context, uid });
             });
 
             tasks.setWindowName =  ZalgoPromise.all([ tasks.open, tasks.buildWindowName ]).then(([ proxyWin, windowName ]) => {
@@ -179,7 +176,7 @@ export class ParentComponent<P> {
             });
 
             tasks.prerender = ZalgoPromise.all([ tasks.awaitWindow, tasks.openContainer ]).then(([ win ]) => {
-                return this.prerender(win);
+                return this.prerender(win, { context, uid });
             });
 
             tasks.showComponent = tasks.prerender.then(() => {
@@ -189,7 +186,7 @@ export class ParentComponent<P> {
             tasks.buildUrl = this.buildUrl();
 
             tasks.openBridge = ZalgoPromise.all([ tasks.awaitWindow, tasks.buildUrl ]).then(([ win, url ]) => {
-                return this.openBridge(win, getDomainFromUrl(url));
+                return this.openBridge(win, getDomainFromUrl(url), context);
             });
 
             tasks.loadUrl = ZalgoPromise.all([
@@ -217,10 +214,10 @@ export class ParentComponent<P> {
         });
     }
 
-    renderTo(target : CrossDomainWindowType, element : ?string) : ZalgoPromise<ParentComponent<P>> {
+    renderTo(context : $Values<typeof CONTEXT>, target : CrossDomainWindowType,  element : ?string) : ZalgoPromise<ParentComponent<P>> {
         return this.tryInit(() => {
             if (target === window) {
-                return this.render(element);
+                return this.render(context, element);
             }
 
             if (element && typeof element !== 'string') {
@@ -229,10 +226,10 @@ export class ParentComponent<P> {
 
             this.checkAllowRemoteRender(target);
 
-            this.component.log(`render_${ this.context }_to_win`, { element: stringify(element), context: this.context });
+            this.component.log(`render_${ context }_to_win`, { element: stringify(element), context });
 
-            this.delegate(target);
-            return this.render(element, target);
+            this.delegate(context, target);
+            return this.render(context, element, target);
         });
     }
 
@@ -266,7 +263,7 @@ export class ParentComponent<P> {
         });
     }
 
-    getWindowRef(target : CrossDomainWindowType, domain : string, uid : string) : WindowRef {
+    getWindowRef(target : CrossDomainWindowType, domain : string, uid : string, context : $Values<typeof CONTEXT>) : WindowRef {
         
         if (domain === getDomain(window)) {
             global.windows[uid] = window;
@@ -281,7 +278,7 @@ export class ParentComponent<P> {
             throw new Error(`Can not currently create window reference for different target with a different domain`);
         }
 
-        if (this.context === CONTEXT_TYPES.POPUP) {
+        if (context === CONTEXT.POPUP) {
             return { type: WINDOW_REFERENCES.OPENER };
         }
 
@@ -292,8 +289,8 @@ export class ParentComponent<P> {
         return { type: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
     }
 
-    buildWindowName({ proxyWin, initialDomain, domain, target } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType }) : string {
-        return buildChildWindowName(this.component.name, this.buildChildPayload({ proxyWin, initialDomain, domain, target }));
+    buildWindowName({ proxyWin, initialDomain, domain, target, uid, context } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string }) : string {
+        return buildChildWindowName(this.component.name, this.buildChildPayload({ proxyWin, initialDomain, domain, target, context, uid }));
     }
 
     getPropsRef(proxyWin : ProxyWindow, target : CrossDomainWindowType, domain : string | RegExp, uid : string) : PropRef {
@@ -314,15 +311,15 @@ export class ParentComponent<P> {
         return propRef;
     }
 
-    buildChildPayload({ proxyWin, initialDomain, domain, target = window } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType } = {}) : ChildPayload {
+    buildChildPayload({ proxyWin, initialDomain, domain, target = window, context, uid } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string } = {}) : ChildPayload {
 
         let childPayload : ChildPayload = {
-            uid:     this.uid,
-            context: this.context,
+            uid,
+            context,
             domain:  getDomain(window),
             tag:     this.component.tag,
-            parent:  this.getWindowRef(target, initialDomain, this.uid),
-            props:   this.getPropsRef(proxyWin, target, domain, this.uid),
+            parent:  this.getWindowRef(target, initialDomain, uid, context),
+            props:   this.getPropsRef(proxyWin, target, domain, uid),
             exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
         };
 
@@ -392,7 +389,7 @@ export class ParentComponent<P> {
         });
     }
 
-    openBridge(win : CrossDomainWindowType, domain : string) : ZalgoPromise<?CrossDomainWindowType> {
+    openBridge(win : CrossDomainWindowType, domain : string, context : $Values<typeof CONTEXT>) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
             if (!bridge || !bridge.needsBridge({ win, domain }) || bridge.hasBridge(domain, domain)) {
                 return;
@@ -401,7 +398,7 @@ export class ParentComponent<P> {
             let bridgeUrl = this.component.getBridgeUrl(this.props);
 
             if (!bridgeUrl) {
-                throw new Error(`Bridge url and domain needed to render ${ this.context }`);
+                throw new Error(`Bridge url and domain needed to render ${ context }`);
             }
 
             let bridgeDomain = getDomainFromUrl(bridgeUrl);
@@ -412,7 +409,7 @@ export class ParentComponent<P> {
     
     open() : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
-            this.component.log(`open_${ this.context }`);
+            this.component.log(`open`);
 
             if (this.props.window) {
                 return this.props.window;
@@ -439,8 +436,8 @@ export class ParentComponent<P> {
     }
 
 
-    delegate(target : CrossDomainWindowType) {
-        this.component.log(`delegate_${ this.context }`);
+    delegate(context : $Values<typeof CONTEXT>, target : CrossDomainWindowType) {
+        this.component.log(`delegate`);
 
         let props = {
             window:     this.props.window,
@@ -457,20 +454,12 @@ export class ParentComponent<P> {
         }
 
         let delegate = send(target, `${ POST_MESSAGE.DELEGATE }_${ this.component.name }`, {
-
-            uid:     this.uid,
-            context: this.context,
-            env:     this.props.env,
-
-            options: {
-                context: this.context,
-                props,
-
-                overrides: {
-                    userClose: () => this.userClose(),
-                    error:     (err) => this.error(err),
-                    on:        (eventName, handler) => this.on(eventName, handler)
-                }
+            context,
+            props,
+            overrides: {
+                userClose: () => this.userClose(),
+                error:     (err) => this.error(err),
+                on:        (eventName, handler) => this.on(eventName, handler)
             }
 
         }).then(({ data }) => {
@@ -727,7 +716,7 @@ export class ParentComponent<P> {
 
         }).then(() => {
             // IE in metro mode -- child window needs to close itself, or close will hang
-            if (this.childExports && this.context === CONTEXT_TYPES.POPUP) {
+            if (this.childExports && this.driver.callChildToClose) {
                 this.childExports.close().catch(noop);
             }
         });
@@ -791,7 +780,7 @@ export class ParentComponent<P> {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    prerender(win : CrossDomainWindowType) : ZalgoPromise<void> {
+    prerender(win : CrossDomainWindowType, { context, uid } : { context : $Values<typeof CONTEXT>, uid : string }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (!this.component.prerenderTemplate) {
                 return;
@@ -806,7 +795,7 @@ export class ParentComponent<P> {
                 }
         
                 let doc = prerenderWindow.document;
-                let el = this.renderTemplate(this.component.prerenderTemplate, { document: doc });
+                let el = this.renderTemplate(this.component.prerenderTemplate, { context, uid, document: doc });
     
                 if (el instanceof ElementNode) {
                     el = el.render(dom({ doc }));
@@ -821,7 +810,7 @@ export class ParentComponent<P> {
         });
     }
 
-    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { focus, container, document, outlet } : { focus? : () => ZalgoPromise<ProxyWindow>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
+    renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { context, uid, focus, container, document, outlet } : { context : $Values<typeof CONTEXT>, uid : string, focus? : () => ZalgoPromise<ProxyWindow>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
         let {
             width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
             height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
@@ -831,13 +820,14 @@ export class ParentComponent<P> {
 
         // $FlowFixMe
         return renderer.call(this, {
-            id:        `${ CLASS_NAMES.ZOID }-${ this.component.tag }-${ this.uid }`,
+            context,
+            uid,
+            id:        `${ CLASS_NAMES.ZOID }-${ this.component.tag }-${ uid }`,
             props:     renderer.__xdomain__ ? null : this.props,
             tag:       this.component.tag,
-            context:   this.context,
             CLASS:     CLASS_NAMES,
             ANIMATION: ANIMATION_NAMES,
-            CONTEXT:   CONTEXT_TYPES,
+            CONTEXT,
             EVENT:     EVENTS,
             actions:   {
                 focus,
@@ -852,7 +842,7 @@ export class ParentComponent<P> {
         });
     }
 
-    openContainer(element : ?HTMLElement, { focus } : { focus : () => ZalgoPromise<ProxyWindow> }) : ZalgoPromise<void> {
+    openContainer(element : ?HTMLElement, { context, uid, focus } : { context : $Values<typeof CONTEXT>, uid : string, focus : () => ZalgoPromise<ProxyWindow> }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             let el;
 
@@ -868,7 +858,7 @@ export class ParentComponent<P> {
 
             if (!this.component.containerTemplate) {
                 if (this.driver.renderedIntoContainer) {
-                    throw new Error(`containerTemplate needed to render ${ this.context }`);
+                    throw new Error(`containerTemplate needed to render ${ context }`);
                 }
 
                 return;
@@ -877,7 +867,7 @@ export class ParentComponent<P> {
             let outlet = document.createElement('div');
             addClass(outlet, CLASS_NAMES.OUTLET);
 
-            let container = this.renderTemplate(this.component.containerTemplate, { container: el, focus, outlet });
+            let container = this.renderTemplate(this.component.containerTemplate, { context, uid, container: el, focus, outlet });
 
             if (container instanceof ElementNode) {
                 container = container.render(dom({ doc: document }));

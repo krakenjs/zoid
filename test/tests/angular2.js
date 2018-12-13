@@ -154,7 +154,7 @@ describe('angular 2 driver', () => {
             });
 
             it('render zoid into target element', () => {
-                sinon.assert.calledWith(initializedZoid.render, 'nativeElement value');
+                sinon.assert.calledWith(initializedZoid.render, 'iframe', 'nativeElement value');
             });
 
             it('saves a reference to parent zoid', () => {

@@ -2,7 +2,7 @@
 
 import { isPerc, isPx } from 'belter/src';
 
-import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
+import { PROP_TYPES_LIST, CONTEXT_LIST } from '../../constants';
 
 import type { ComponentOptionsType } from './index';
 
@@ -70,7 +70,7 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
 
         for (let context of Object.keys(options.contexts)) {
 
-            if (CONTEXT_TYPES_LIST.indexOf(context) === -1) {
+            if (CONTEXT_LIST.indexOf(context) === -1) {
                 throw new Error(`Unsupported context type: ${ context }`);
             }
 
@@ -85,7 +85,7 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
     }
 
     if (options.defaultContext) {
-        if (CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) {
+        if (CONTEXT_LIST.indexOf(options.defaultContext) === -1) {
             throw new Error(`Unsupported context type: ${ options.defaultContext || 'unknown' }`);
         }
 

@@ -3,6 +3,7 @@
 import { dasherizeToCamel, replaceObject } from 'belter/src';
 
 import type { Component, ComponentDriverType } from '../component/component';
+import { CONTEXT } from '../constants';
 
 type AngularModule = {
     directive : (string, () => {
@@ -82,7 +83,7 @@ export let angular : ComponentDriverType<*, Angular> = {
                     };
 
                     let parent = component.init(getProps(), null, $element[0]);
-                    parent.render($element[0]);
+                    parent.render(CONTEXT.IFRAME, $element[0]);
 
                     $scope.$watch(() => {
                         parent.updateProps(getProps());

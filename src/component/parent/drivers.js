@@ -7,12 +7,13 @@ import { iframe, popup, toCSS, showElement, hideElement,
     destroyElement, normalizeDimension, watchElementForClose,
     awaitFrameWindow, addClass, removeClass, uniqueID } from 'belter/src';
 
-import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
+import { CONTEXT, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
 
 
 export type ContextDriverType = {
 
     renderedIntoContainer : boolean,
+    callChildToClose : boolean,
 
     open : () => ZalgoPromise<ProxyWindow>,
     resize : (?(number | string), ?(number | string)) => void,
@@ -48,9 +49,10 @@ export let RENDER_DRIVERS : { [string] : ContextDriverType } = {};
 // Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
 // to feel like a native element on the page.
 
-RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
+RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
     renderedIntoContainer: true,
+    callChildToClose:      false,
 
     open() : ZalgoPromise<ProxyWindow> {
 
@@ -182,9 +184,10 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
     // Popup context opens up a centered popup window on the page.
 
-    RENDER_DRIVERS[CONTEXT_TYPES.POPUP] = {
+    RENDER_DRIVERS[CONTEXT.POPUP] = {
         
         renderedIntoContainer: false,
+        callChildToClose:      true,
 
         open() : ZalgoPromise<ProxyWindow> {
             return ZalgoPromise.try(() => {

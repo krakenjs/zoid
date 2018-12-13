@@ -38,7 +38,7 @@ export const PROP_SERIALIZATION = {
 
 export const PROP_TYPES_LIST : Array<string> = Object.keys(PROP_TYPES).map(key => PROP_TYPES[key]);
 
-export const CONTEXT_TYPES = {
+export const CONTEXT = {
     IFRAME: `iframe`,
     POPUP:  `popup`
 };
@@ -79,7 +79,7 @@ export const CLOSE_REASONS = {
     PARENT_CLOSE_DETECTED: ('parent_close_detected' : 'parent_close_detected')
 };
 
-export const CONTEXT_TYPES_LIST : Array<string> = Object.keys(CONTEXT_TYPES).map(key => CONTEXT_TYPES[key]);
+export const CONTEXT_LIST : Array<string> = Object.keys(CONTEXT).map(key => CONTEXT[key]);
 
 export const DELEGATE = {
     CALL_ORIGINAL: 'call_original',

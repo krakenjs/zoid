@@ -20,12 +20,16 @@ export type DelegatePropsType = {
 export type DelegateOptionsType = {
     context : string,
     props : DelegatePropsType,
-    uid : string,
     overrides : {
         userClose : (string) => ZalgoPromise<void>,
         error : (mixed) => ZalgoPromise<void>,
         on : (string, () => void) => CancelableType
     }
+};
+
+export type DelegateReturnType = {
+    overrides : Object,
+    destroy : () => ZalgoPromise<void>
 };
 
 export class DelegateComponent<P>  {
@@ -45,7 +49,6 @@ export class DelegateComponent<P>  {
 
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         this.component = component;
-        this.uid = options.uid;
         this.context = options.context;
         this.clean = cleanup(this);
         this.event = eventEmitter();
@@ -84,12 +87,14 @@ export class DelegateComponent<P>  {
         this.watchForClose(source);
     }
 
+    getDelegate() : DelegateReturnType {
+        return {
+            overrides: this.getOverrides(),
+            destroy:   () => this.destroy()
+        };
+    }
+
     get driver() : ContextDriverType {
-
-        if (!this.context) {
-            throw new Error('Context not set');
-        }
-
         return RENDER_DRIVERS[this.context];
     }
 
@@ -98,8 +103,8 @@ export class DelegateComponent<P>  {
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     }
 
-    getOverrides(context : string) : { [string] : mixed } {
-
+    getOverrides() : { [string] : mixed } {
+        let context = this.context;
         let delegateOverrides = RENDER_DRIVERS[context].delegateOverrides;
 
         let overrides = {};

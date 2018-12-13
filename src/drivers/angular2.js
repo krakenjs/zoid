@@ -4,6 +4,7 @@
 import { replaceObject } from 'belter/src';
 
 import type { Component, ComponentDriverType } from '../component/component';
+import { CONTEXT } from '../constants';
 
 type Angular2Injection = {};
 
@@ -57,7 +58,7 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
                 ngOnInit () {
                     const targetElement = this.elementRef.nativeElement;
                     const parent = zoid.init(getProps(this), null, targetElement);
-                    parent.render(targetElement);
+                    parent.render(CONTEXT.IFRAME, targetElement);
                     this.parent = parent;
                 },
                 ngOnChanges() {
