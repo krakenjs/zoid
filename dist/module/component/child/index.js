@@ -1,17 +1,46 @@
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _desc, _value, _class;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+        desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+        desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+        return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+        desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+        Object['define' + 'Property'](target, property, desc);
+        desc = null;
+    }
+
+    return desc;
+}
 
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent, getNthParentFromTop, getAncestor, getAllFramesInWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport, cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
+import { extend, getElement, noop, memoized, waitForDocumentBody, onResize } from 'belter/src';
 
 import { parseChildWindowName } from '../window';
 import { globalFor } from '../../lib';
-import { CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
+import { CONTEXT, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 
 
 import { normalizeChildProps } from './props';
@@ -26,7 +55,7 @@ import { normalizeChildProps } from './props';
     utilize.
 */
 
-export var ChildComponent = function () {
+export var ChildComponent = (_class = function () {
     function ChildComponent(component) {
         var _this = this;
 
@@ -59,25 +88,14 @@ export var ChildComponent = function () {
             markWindowKnown(_this.parentComponentWindow);
 
             _this.watchForClose();
-            _this.listenForResize();
-            _this.watchForResize(context);
 
             return _this.parentExports.init(_this.buildExports());
+        }).then(function () {
+            return _this.watchForResize();
         })['catch'](function (err) {
             _this.error(err);
         });
     }
-
-    ChildComponent.prototype.listenForResize = function listenForResize() {
-        var _this2 = this;
-
-        if (this.component.listenForResize) {
-            this.parentExports.trigger.fireAndForget('resize');
-            window.addEventListener('resize', function () {
-                _this2.parentExports.trigger.fireAndForget('resize');
-            });
-        }
-    };
 
     ChildComponent.prototype.checkParentDomain = function checkParentDomain(domain) {
         if (!matchDomain(this.component.allowedParentDomains, domain)) {
@@ -188,92 +206,65 @@ export var ChildComponent = function () {
     };
 
     ChildComponent.prototype.watchForClose = function watchForClose() {
-        var _this3 = this;
+        var _this2 = this;
 
         window.addEventListener('unload', function () {
-            return _this3.parentExports.checkClose.fireAndForget();
+            return _this2.parentExports.checkClose.fireAndForget();
         });
     };
 
     ChildComponent.prototype.enableAutoResize = function enableAutoResize() {
         var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
             _ref2$width = _ref2.width,
-            width = _ref2$width === undefined ? true : _ref2$width,
+            width = _ref2$width === undefined ? false : _ref2$width,
             _ref2$height = _ref2.height,
-            height = _ref2$height === undefined ? true : _ref2$height;
+            height = _ref2$height === undefined ? true : _ref2$height,
+            _ref2$element = _ref2.element,
+            element = _ref2$element === undefined ? 'body' : _ref2$element;
 
-        this.autoResize = { width: width, height: height };
-        this.watchForResize(this.context);
+        this.autoResize = { width: width, height: height, element: element };
+        this.watchForResize();
     };
 
     ChildComponent.prototype.getAutoResize = function getAutoResize() {
+        var _ref3 = this.autoResize || this.component.autoResize || {},
+            _ref3$width = _ref3.width,
+            width = _ref3$width === undefined ? false : _ref3$width,
+            _ref3$height = _ref3.height,
+            height = _ref3$height === undefined ? false : _ref3$height,
+            _ref3$element = _ref3.element,
+            element = _ref3$element === undefined ? 'body' : _ref3$element;
 
-        var width = false;
-        var height = false;
-
-        var autoResize = this.autoResize || this.component.autoResize;
-
-        if ((typeof autoResize === 'undefined' ? 'undefined' : _typeof(autoResize)) === 'object') {
-            width = Boolean(autoResize.width);
-            height = Boolean(autoResize.height);
-        } else if (autoResize) {
-            width = true;
-            height = true;
-        }
-
-        var element = void 0;
-
-        if (autoResize.element) {
-            element = getElement(autoResize.element);
-        } else if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-            element = document.body;
-        } else {
-            element = document.documentElement;
-        }
-
-        // $FlowFixMe
+        element = getElement(element);
         return { width: width, height: height, element: element };
     };
 
-    ChildComponent.prototype.watchForResize = function watchForResize(context) {
-        var _this4 = this;
+    ChildComponent.prototype.watchForResize = function watchForResize() {
+        var _this3 = this;
 
-        var _getAutoResize = this.getAutoResize(),
-            width = _getAutoResize.width,
-            height = _getAutoResize.height,
-            element = _getAutoResize.element;
+        return waitForDocumentBody().then(function () {
+            var _getAutoResize = _this3.getAutoResize(),
+                width = _getAutoResize.width,
+                height = _getAutoResize.height,
+                element = _getAutoResize.element;
 
-        if (!width && !height) {
-            return;
-        }
-
-        if (context === CONTEXT_TYPES.POPUP) {
-            return;
-        }
-
-        if (this.watchingForResize) {
-            return;
-        }
-
-        this.watchingForResize = true;
-
-        return ZalgoPromise['try'](function () {
-            return waitForDocumentReady();
-        }).then(function () {
-
-            // $FlowFixMe
-            if (!dimensionsMatchViewport(element, { width: width, height: height })) {
-                // $FlowFixMe
-                return _this4.resizeToElement(element, { width: width, height: height });
+            if (!width && !height) {
+                return;
             }
-        }).then(function () {
 
-            return cycle(function () {
-                return onDimensionsChange(element, { width: width, height: height }).then(function () {
-                    // $FlowFixMe
-                    return _this4.resizeToElement(element, { width: width, height: height });
+            if (_this3.context === CONTEXT.POPUP) {
+                return;
+            }
+
+            onResize(element, function (_ref4) {
+                var newWidth = _ref4.width,
+                    newHeight = _ref4.height;
+
+                _this3.resize({
+                    width: width ? newWidth : undefined,
+                    height: height ? newHeight : undefined
                 });
-            });
+            }, { width: width, height: height });
         });
     };
 
@@ -283,10 +274,10 @@ export var ChildComponent = function () {
 
         return {
             updateProps: function updateProps(props) {
-                var _this5 = this;
+                var _this4 = this;
 
                 return ZalgoPromise['try'](function () {
-                    return self.setProps(props, _this5.origin, false);
+                    return self.setProps(props, _this4.origin, false);
                 });
             },
             close: function close() {
@@ -297,51 +288,11 @@ export var ChildComponent = function () {
         };
     };
 
-    ChildComponent.prototype.resize = function resize(width, height) {
-        return this.parentExports.resize(width, height);
-    };
+    ChildComponent.prototype.resize = function resize(_ref5) {
+        var width = _ref5.width,
+            height = _ref5.height;
 
-    ChildComponent.prototype.resizeToElement = function resizeToElement(el, _ref3) {
-        var _this6 = this;
-
-        var width = _ref3.width,
-            height = _ref3.height;
-
-
-        var history = [];
-
-        var resize = function resize() {
-            return ZalgoPromise['try'](function () {
-
-                // $FlowFixMe
-                var tracker = trackDimensions(el, { width: width, height: height });
-
-                var _tracker$check = tracker.check(),
-                    dimensions = _tracker$check.dimensions;
-
-                for (var _i6 = 0, _length6 = history == null ? 0 : history.length; _i6 < _length6; _i6++) {
-                    var size = history[_i6];
-
-                    var widthMatch = !width || size.width === dimensions.width;
-                    var heightMatch = !height || size.height === dimensions.height;
-
-                    if (widthMatch && heightMatch) {
-                        return;
-                    }
-                }
-
-                history.push({ width: dimensions.width, height: dimensions.height });
-
-                return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function () {
-
-                    if (tracker.check().changed) {
-                        return resize();
-                    }
-                });
-            });
-        };
-
-        return resize();
+        return this.parentExports.resize.fireAndForget({ width: width, height: height });
     };
 
     ChildComponent.prototype.hide = function hide() {
@@ -373,12 +324,12 @@ export var ChildComponent = function () {
     };
 
     ChildComponent.prototype.error = function error(err) {
-        var _this7 = this;
+        var _this5 = this;
 
         // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise['try'](function () {
-            if (_this7.parentExports.error) {
-                return _this7.parentExports.error(err);
+            if (_this5.parentExports.error) {
+                return _this5.parentExports.error(err);
             }
         })['catch'](noop).then(function () {
             throw err;
@@ -386,4 +337,4 @@ export var ChildComponent = function () {
     };
 
     return ChildComponent;
-}();
+}(), (_applyDecoratedDescriptor(_class.prototype, 'watchForResize', [memoized], Object.getOwnPropertyDescriptor(_class.prototype, 'watchForResize'), _class.prototype)), _class);

@@ -38,15 +38,15 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl } from 'cross-domain-utils/src';
-import { memoize, copyProp, isRegex } from 'belter/src';
+import { memoize, isRegex, toCSS } from 'belter/src';
 import 'jsx-pragmatic/src';
 
 import { ChildComponent } from '../child';
 import { ParentComponent } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { isZoidComponentWindow, parseChildWindowName } from '../window';
-import { CONTEXT_TYPES, POST_MESSAGE, WILDCARD } from '../../constants';
-import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
+import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../../constants';
+import { angular, angular2, glimmer, react, vue } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
 
 
@@ -54,7 +54,7 @@ import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 import { getInternalProps } from './props';
 
-var drivers = { angular: angular, angular2: angular2, glimmer: glimmer, react: react, vue: vue, script: script };
+var drivers = { angular: angular, angular2: angular2, glimmer: glimmer, react: react, vue: vue };
 
 /*  Component
     ---------
@@ -75,17 +75,14 @@ export var Component = (_class = function () {
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
-        this.addProp(options, 'tag');
+        this.tag = options.tag;
+        this.name = this.tag.replace(/-/g, '_');
 
-        this.addProp(options, 'allowedParentDomains', WILDCARD);
+        this.allowedParentDomains = options.allowedParentDomains || WILDCARD;
 
         if (Component.components[this.tag]) {
             throw new Error('Can not register multiple components with the same tag');
         }
-
-        // Name of the component, used for logging. Auto-generated from the tag name by default.
-
-        this.addProp(options, 'name', this.tag.replace(/-/g, '_'));
 
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
@@ -95,45 +92,29 @@ export var Component = (_class = function () {
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions');
-        this.addProp(options, 'listenForResize');
+        var _ref = options.dimensions || {},
+            _ref$width = _ref.width,
+            width = _ref$width === undefined ? DEFAULT_DIMENSIONS.WIDTH : _ref$width,
+            _ref$height = _ref.height,
+            height = _ref$height === undefined ? DEFAULT_DIMENSIONS.HEIGHT : _ref$height;
 
-        // The default environment we should render to if none is specified in the parent
+        this.dimensions = { width: toCSS(width), height: toCSS(height) };
 
-        this.addProp(options, 'defaultEnv');
+        this.defaultEnv = options.defaultEnv;
+        this.url = options.url || options.buildUrl;
+        this.domain = options.domain;
+        this.bridgeUrl = options.bridgeUrl;
 
-        // $FlowFixMe
-        this.addProp(options, 'url', options.buildUrl);
-        this.addProp(options, 'domain');
-        this.addProp(options, 'bridgeUrl');
+        this.attributes = options.attributes || {};
+        this.contexts = options.contexts || { iframe: true, popup: false };
+        this.defaultContext = options.defaultContext || CONTEXT.IFRAME;
 
-        this.addProp(options, 'attributes', {});
+        this.autoResize = _typeof(options.autoResize) === 'object' ? options.autoResize : { width: Boolean(options.autoResize), height: Boolean(options.autoResize), element: 'body' };
 
-        // A url to use by default to render the component, if not using envs
+        this.containerTemplate = options.containerTemplate || defaultContainerTemplate;
+        this.prerenderTemplate = options.prerenderTemplate || defaultPrerenderTemplate;
 
-
-        // The allowed contexts. For example { iframe: true, popup: false }
-
-        this.addProp(options, 'contexts', { iframe: true, popup: false });
-
-        // The default context to render to
-
-        this.addProp(options, 'defaultContext');
-
-        // Auto Resize option
-
-        this.addProp(options, 'autoResize', false);
-
-        // Templates and styles for the parent page and the initial rendering of the component
-
-        this.addProp(options, 'containerTemplate', defaultContainerTemplate);
-        this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
-
-        // Validation
-
-        this.addProp(options, 'validate');
-
-        // A mapping of tag->component so we can reference components by string tag name
+        this.validate = options.validate;
 
         Component.components[this.tag] = this;
 
@@ -144,10 +125,6 @@ export var Component = (_class = function () {
         this.registerChild();
         this.listenDelegate();
     }
-
-    Component.prototype.addProp = function addProp(options, name, def) {
-        copyProp(options, this, name, def);
-    };
 
     Component.prototype.getPropNames = function getPropNames() {
         var props = Object.keys(this.props);
@@ -216,24 +193,20 @@ export var Component = (_class = function () {
             return true;
         });
 
-        on(POST_MESSAGE.DELEGATE + '_' + this.name, function (_ref) {
-            var source = _ref.source,
-                data = _ref.data;
+        on(POST_MESSAGE.DELEGATE + '_' + this.name, function (_ref2) {
+            var source = _ref2.source,
+                _ref2$data = _ref2.data,
+                context = _ref2$data.context,
+                props = _ref2$data.props,
+                overrides = _ref2$data.overrides;
 
-            var delegate = _this2.delegate(source, data.options);
-
-            return {
-                overrides: delegate.getOverrides(data.context),
-                destroy: function destroy() {
-                    return delegate.destroy();
-                }
-            };
+            return _this2.delegate(source, { context: context, props: props, overrides: overrides }).getDelegate();
         });
     };
 
     Component.prototype.canRenderTo = function canRenderTo(win) {
-        return send(win, POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name).then(function (_ref2) {
-            var data = _ref2.data;
+        return send(win, POST_MESSAGE.ALLOW_DELEGATE + '_' + this.name).then(function (_ref3) {
+            var data = _ref3.data;
 
             return data;
         })['catch'](function () {
@@ -325,18 +298,18 @@ export var Component = (_class = function () {
             throw new Error('[' + this.tag + '] Can not render to ' + context);
         }
 
-        if (!element && context === CONTEXT_TYPES.IFRAME) {
-            throw new Error('[' + this.tag + '] Context type ' + CONTEXT_TYPES.IFRAME + ' requires an element selector');
+        if (!element && context === CONTEXT.IFRAME) {
+            throw new Error('[' + this.tag + '] Context type ' + CONTEXT.IFRAME + ' requires an element selector');
         }
     };
 
     Component.prototype.getDefaultContext = function getDefaultContext() {
-        if (this.defaultContext) {
+        if (this.defaultContext && this.contexts[this.defaultContext]) {
             return this.defaultContext;
-        } else if (this.contexts[CONTEXT_TYPES.IFRAME]) {
-            return CONTEXT_TYPES.IFRAME;
-        } else if (this.contexts[CONTEXT_TYPES.POPUP]) {
-            return CONTEXT_TYPES.POPUP;
+        } else if (this.contexts[CONTEXT.IFRAME]) {
+            return CONTEXT.IFRAME;
+        } else if (this.contexts[CONTEXT.POPUP]) {
+            return CONTEXT.POPUP;
         }
 
         throw new Error('Can not determine default context');
@@ -357,7 +330,8 @@ export var Component = (_class = function () {
         var _this3 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this3, _this3.getRenderContext(null, element), { props: props }).render(element);
+            var context = _this3.getRenderContext(null, element);
+            return new ParentComponent(_this3, context, { props: props }).render(context, element);
         });
     };
 
@@ -365,7 +339,8 @@ export var Component = (_class = function () {
         var _this4 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this4, _this4.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).render(element);
+            var context = _this4.getRenderContext(CONTEXT.IFRAME, element);
+            return new ParentComponent(_this4, context, { props: props }).render(context, element);
         });
     };
 
@@ -373,7 +348,8 @@ export var Component = (_class = function () {
         var _this5 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this5, _this5.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).render();
+            var context = _this5.getRenderContext(CONTEXT.POPUP);
+            return new ParentComponent(_this5, context, { props: props }).render(context);
         });
     };
 
@@ -381,7 +357,8 @@ export var Component = (_class = function () {
         var _this6 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this6, _this6.getRenderContext(null, element), { props: props }).renderTo(win, element);
+            var context = _this6.getRenderContext(null, element);
+            return new ParentComponent(_this6, context, { props: props }).renderTo(context, win, element);
         });
     };
 
@@ -389,7 +366,8 @@ export var Component = (_class = function () {
         var _this7 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this7, _this7.getRenderContext(CONTEXT_TYPES.IFRAME, element), { props: props }).renderTo(win, element);
+            var context = _this7.getRenderContext(CONTEXT.IFRAME, element);
+            return new ParentComponent(_this7, context, { props: props }).renderTo(context, win, element);
         });
     };
 
@@ -397,7 +375,8 @@ export var Component = (_class = function () {
         var _this8 = this;
 
         return ZalgoPromise['try'](function () {
-            return new ParentComponent(_this8, _this8.getRenderContext(CONTEXT_TYPES.POPUP), { props: props }).renderTo(win);
+            var context = _this8.getRenderContext(CONTEXT.POPUP);
+            return new ParentComponent(_this8, context, { props: props }).renderTo(context, win);
         });
     };
 

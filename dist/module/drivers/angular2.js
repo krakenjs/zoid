@@ -4,6 +4,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 import { replaceObject } from 'belter/src';
 
+import { CONTEXT } from '../constants';
+
 export var angular2 = {
     global: function global() {
         // pass
@@ -45,7 +47,7 @@ export var angular2 = {
             ngOnInit: function ngOnInit() {
                 var targetElement = this.elementRef.nativeElement;
                 var parent = zoid.init(getProps(this), null, targetElement);
-                parent.render(targetElement);
+                parent.render(CONTEXT.IFRAME, targetElement);
                 this.parent = parent;
             },
             ngOnChanges: function ngOnChanges() {

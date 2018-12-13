@@ -1,5 +1,7 @@
 import { extend } from 'belter/src';
 
+import { CONTEXT } from '../constants';
+
 export var vue = {
     global: function global() {
         // pass
@@ -20,7 +22,7 @@ export var vue = {
                 // $FlowFixMe
                 this.parent = component.init(extend({}, this.$attrs), null, el);
 
-                this.parent.render(el);
+                this.parent.render(CONTEXT.IFRAME, el);
             },
             beforeUpdate: function beforeUpdate() {
 

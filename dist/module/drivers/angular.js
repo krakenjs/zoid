@@ -1,5 +1,7 @@
 import { dasherizeToCamel, replaceObject } from 'belter/src';
 
+import { CONTEXT } from '../constants';
+
 export var angular = {
     global: function global() {
         return window.angular;
@@ -67,7 +69,7 @@ export var angular = {
                     };
 
                     var parent = component.init(getProps(), null, $element[0]);
-                    parent.render($element[0]);
+                    parent.render(CONTEXT.IFRAME, $element[0]);
 
                     $scope.$watch(function () {
                         parent.updateProps(getProps());

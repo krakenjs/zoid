@@ -2,7 +2,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 import { isPerc, isPx } from 'belter/src';
 
-import { PROP_TYPES_LIST, CONTEXT_TYPES_LIST } from '../../constants';
+import { PROP_TYPES_LIST, CONTEXT_LIST } from '../../constants';
 
 function validatePropDefinitions(options) {
 
@@ -71,7 +71,7 @@ export function validate(options) {
         for (var _i4 = 0, _Object$keys4 = Object.keys(options.contexts), _length4 = _Object$keys4 == null ? 0 : _Object$keys4.length; _i4 < _length4; _i4++) {
             var context = _Object$keys4[_i4];
 
-            if (CONTEXT_TYPES_LIST.indexOf(context) === -1) {
+            if (CONTEXT_LIST.indexOf(context) === -1) {
                 throw new Error('Unsupported context type: ' + context);
             }
 
@@ -86,7 +86,7 @@ export function validate(options) {
     }
 
     if (options.defaultContext) {
-        if (CONTEXT_TYPES_LIST.indexOf(options.defaultContext) === -1) {
+        if (CONTEXT_LIST.indexOf(options.defaultContext) === -1) {
             throw new Error('Unsupported context type: ' + (options.defaultContext || 'unknown'));
         }
 

@@ -32,9 +32,9 @@ export function normalizeChildProps(parentComponentWindow, component, props, ori
             continue;
         }
 
-        var value = props[key];
-        result[key] = normalizeChildProp(component, props, key, value);
+        var value = normalizeChildProp(component, props, key, props[key]);
 
+        result[key] = value;
         if (prop && prop.alias && !result[prop.alias]) {
             result[prop.alias] = value;
         }

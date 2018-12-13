@@ -38,7 +38,7 @@ export var PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function (key) {
     return PROP_TYPES[key];
 });
 
-export var CONTEXT_TYPES = {
+export var CONTEXT = {
     IFRAME: 'iframe',
     POPUP: 'popup'
 };
@@ -79,8 +79,8 @@ export var CLOSE_REASONS = {
     PARENT_CLOSE_DETECTED: 'parent_close_detected'
 };
 
-export var CONTEXT_TYPES_LIST = Object.keys(CONTEXT_TYPES).map(function (key) {
-    return CONTEXT_TYPES[key];
+export var CONTEXT_LIST = Object.keys(CONTEXT).map(function (key) {
+    return CONTEXT[key];
 });
 
 export var DELEGATE = {
@@ -91,6 +91,6 @@ export var DELEGATE = {
 export var WILDCARD = '*';
 
 export var DEFAULT_DIMENSIONS = {
-    WIDTH: 300,
-    HEIGHT: 150
+    WIDTH: '300px',
+    HEIGHT: '150px'
 };

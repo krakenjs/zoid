@@ -62,7 +62,7 @@
         "./node_modules/belter/src/decorators.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             __webpack_exports__.a = function(target, name, descriptor) {
-                descriptor.value = Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)(descriptor.value, {
+                descriptor.value = Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)(descriptor.value, {
                     name: name,
                     thisNamespace: !0
                 });
@@ -79,20 +79,13 @@
             "use strict";
             var src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), util = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__("./node_modules/belter/src/device.js");
-            __webpack_exports__.v = function waitForDocumentReady() {
-                return Object(util.m)(waitForDocumentReady, function() {
-                    return new src.a(function(resolve) {
-                        if (isDocumentReady()) return resolve();
-                        var interval = setInterval(function() {
-                            if (isDocumentReady()) {
-                                clearInterval(interval);
-                                return resolve();
-                            }
-                        }, 10);
-                    });
+            __webpack_exports__.s = function() {
+                return waitForDocumentReady().then(function() {
+                    if (document.body) return document.body;
+                    throw new Error("Document ready but document.body not present");
                 });
             };
-            __webpack_exports__.k = function(url) {
+            __webpack_exports__.j = function(url) {
                 var originalHash, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, query = options.query || {}, hash = options.hash || {}, originalUrl = void 0, _url$split = url.split("#");
                 originalUrl = _url$split[0];
                 originalHash = _url$split[1];
@@ -103,8 +96,8 @@
                 hashString && (originalUrl = originalUrl + "#" + hashString);
                 return originalUrl;
             };
-            __webpack_exports__.o = function isLocalStorageEnabled() {
-                return Object(util.m)(isLocalStorageEnabled, function() {
+            __webpack_exports__.n = function isLocalStorageEnabled() {
+                return Object(util.k)(isLocalStorageEnabled, function() {
                     try {
                         if ("undefined" == typeof window) return !1;
                         if (window.localStorage) {
@@ -119,10 +112,10 @@
                 });
             };
             __webpack_exports__.e = appendChild;
-            __webpack_exports__.l = getElement;
+            __webpack_exports__.k = getElement;
             __webpack_exports__.i = function(id) {
                 return new src.a(function(resolve, reject) {
-                    var name = Object(util.w)(id), el = getElementSafe(id);
+                    var name = Object(util.u)(id), el = getElementSafe(id);
                     if (el) return resolve(el);
                     if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
                     var interval = setInterval(function() {
@@ -138,24 +131,25 @@
                 });
             };
             __webpack_exports__.a = PopupOpenError;
-            __webpack_exports__.x = function(win, el) {
+            __webpack_exports__.u = function(win, el) {
                 var tag = el.tagName.toLowerCase();
                 if ("html" !== tag) throw new Error("Expected element to be html, got " + tag);
                 for (var documentElement = win.document.documentElement; documentElement.children && documentElement.children.length; ) documentElement.removeChild(documentElement.children[0]);
                 for (;el.children.length; ) documentElement.appendChild(el.children[0]);
             };
-            __webpack_exports__.f = function(frame) {
+            __webpack_exports__.f = awaitFrameLoad;
+            __webpack_exports__.g = function(frame) {
                 return frame.contentWindow ? src.a.resolve(frame.contentWindow) : awaitFrameLoad(frame).then(function(loadedFrame) {
                     if (!loadedFrame.contentWindow) throw new Error("Could not find window in iframe");
                     return loadedFrame.contentWindow;
                 });
             };
-            __webpack_exports__.n = function iframe() {
+            __webpack_exports__.m = function iframe() {
                 var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, container = arguments[1], attempts = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 3, el = getElement(container), attributes = options.attributes || {}, style = options.style || {}, frame = function() {
                     var tag = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "div", options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, container = arguments[2];
                     tag = tag.toLowerCase();
                     var element = document.createElement(tag);
-                    options.style && Object(util.j)(element.style, options.style);
+                    options.style && Object(util.h)(element.style, options.style);
                     options.class && (element.className = options.class.join(" "));
                     if (options.attributes) for (var _i6 = 0, _Object$keys2 = Object.keys(options.attributes), _length6 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i6 < _length6; _i6++) {
                         var key = _Object$keys2[_i6];
@@ -196,7 +190,7 @@
                 el.appendChild(frame);
                 var win = frame.contentWindow;
                 if (win) try {
-                    Object(util.r)(win.name);
+                    Object(util.p)(win.name);
                 } catch (err) {
                     el.removeChild(frame);
                     if (!attempts) throw new Error("Frame is cross-domain: " + err.stack);
@@ -213,75 +207,12 @@
                     }
                 };
             };
-            __webpack_exports__.j = function(element) {
-                var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3;
-                return new src.a(function(resolve, reject) {
-                    var el = getElement(element), start = el.getBoundingClientRect(), interval = void 0, timer = void 0;
-                    interval = setInterval(function() {
-                        var end = el.getBoundingClientRect();
-                        if (start.top === end.top && start.bottom === end.bottom && start.left === end.left && start.right === end.right && start.width === end.width && start.height === end.height) {
-                            clearTimeout(timer);
-                            clearInterval(interval);
-                            return resolve();
-                        }
-                        start = end;
-                    }, 50);
-                    timer = setTimeout(function() {
-                        clearInterval(interval);
-                        reject(new Error("Timed out waiting for element to stop animating after " + timeout + "ms"));
-                    }, timeout);
-                });
-            };
-            __webpack_exports__.r = function(el) {
-                var value = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "auto", _el$style = el.style, overflow = _el$style.overflow, overflowX = _el$style.overflowX, overflowY = _el$style.overflowY;
-                el.style.overflow = el.style.overflowX = el.style.overflowY = value;
-                return {
-                    reset: function() {
-                        el.style.overflow = overflow;
-                        el.style.overflowX = overflowX;
-                        el.style.overflowY = overflowY;
-                    }
-                };
-            };
-            __webpack_exports__.u = trackDimensions;
-            __webpack_exports__.p = function(el, _ref4) {
-                var _ref4$width = _ref4.width, width = void 0 === _ref4$width || _ref4$width, _ref4$height = _ref4.height, height = void 0 === _ref4$height || _ref4$height, _ref4$delay = _ref4.delay, delay = void 0 === _ref4$delay ? 50 : _ref4$delay, _ref4$threshold = _ref4.threshold, threshold = void 0 === _ref4$threshold ? 0 : _ref4$threshold;
-                return new src.a(function(resolve) {
-                    var tracker = trackDimensions(el, {
-                        width: width,
-                        height: height,
-                        threshold: threshold
-                    }), interval = void 0, resolver = Object(util.g)(function(dimensions) {
-                        clearInterval(interval);
-                        return resolve(dimensions);
-                    }, 4 * delay);
-                    interval = setInterval(function() {
-                        var _tracker$check = tracker.check(), changed = _tracker$check.changed, dimensions = _tracker$check.dimensions;
-                        if (changed) {
-                            tracker.reset();
-                            return resolver(dimensions);
-                        }
-                    }, delay);
-                    window.addEventListener("resize", function onWindowResize() {
-                        var _tracker$check2 = tracker.check(), changed = _tracker$check2.changed, dimensions = _tracker$check2.dimensions;
-                        if (changed) {
-                            tracker.reset();
-                            window.removeEventListener("resize", onWindowResize);
-                            resolver(dimensions);
-                        }
-                    });
-                });
-            };
-            __webpack_exports__.h = function(el, _ref5) {
-                var width = _ref5.width, height = _ref5.height, dimensions = getCurrentDimensions(el);
-                return !(width && dimensions.width !== window.innerWidth || height && dimensions.height !== window.innerHeight);
-            };
-            __webpack_exports__.t = showElement;
-            __webpack_exports__.m = hideElement;
-            __webpack_exports__.g = function(element) {
+            __webpack_exports__.r = showElement;
+            __webpack_exports__.l = hideElement;
+            __webpack_exports__.h = function(element) {
                 element.parentNode && element.parentNode.removeChild(element);
             };
-            __webpack_exports__.s = function(element, name, clean) {
+            __webpack_exports__.q = function(element, name, clean) {
                 var animation = animate(element, name, clean);
                 showElement(element);
                 return animation;
@@ -294,13 +225,13 @@
             __webpack_exports__.b = function(element, name) {
                 element.classList ? element.classList.add(name) : -1 === element.className.split(/\s+/).indexOf(name) && (element.className += " " + name);
             };
-            __webpack_exports__.q = function(element, name) {
+            __webpack_exports__.p = function(element, name) {
                 element.classList ? element.classList.remove(name) : -1 !== element.className.split(/\s+/).indexOf(name) && (element.className = element.className.replace(name, ""));
             };
-            __webpack_exports__.w = function(element, handler) {
-                handler = Object(util.s)(handler);
+            __webpack_exports__.t = function(element, handler) {
+                handler = Object(util.q)(handler);
                 var interval = void 0;
-                isElementClosed(element) ? handler() : interval = Object(util.v)(function() {
+                isElementClosed(element) ? handler() : interval = Object(util.t)(function() {
                     if (isElementClosed(element)) {
                         interval.cancel();
                         handler();
@@ -309,6 +240,41 @@
                 return {
                     cancel: function() {
                         interval && interval.cancel();
+                    }
+                };
+            };
+            __webpack_exports__.o = function(el, handler) {
+                var _ref6 = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, _ref6$width = _ref6.width, width = void 0 === _ref6$width || _ref6$width, _ref6$height = _ref6.height, height = void 0 === _ref6$height || _ref6$height, _ref6$interval = _ref6.interval, interval = void 0 === _ref6$interval ? 100 : _ref6$interval, _ref6$win = _ref6.win, win = void 0 === _ref6$win ? window : _ref6$win, currentWidth = el.offsetWidth, currentHeight = el.offsetHeight;
+                handler({
+                    width: currentWidth,
+                    height: currentHeight
+                });
+                var check = function() {
+                    var newWidth = el.offsetWidth, newHeight = el.offsetHeight;
+                    (width && newWidth !== currentWidth || height && newHeight !== currentHeight) && handler({
+                        width: newWidth,
+                        height: newHeight
+                    });
+                    currentWidth = newWidth;
+                    currentHeight = newHeight;
+                }, observer = void 0, timeout = void 0;
+                if (void 0 !== win.ResizeObserver) (observer = new win.ResizeObserver(check)).observe(el); else if (void 0 !== win.MutationObserver) {
+                    (observer = new win.MutationObserver(check)).observe(el, {
+                        attributes: !0,
+                        childList: !0,
+                        subtree: !0,
+                        characterData: !1
+                    });
+                    win.addEventListener("resize", check);
+                } else !function loop() {
+                    check();
+                    timeout = setTimeout(loop, interval);
+                }();
+                return {
+                    cancel: function() {
+                        observer.disconnect();
+                        window.removeEventListener("resize", check);
+                        clearTimeout(timeout);
                     }
                 };
             };
@@ -329,8 +295,21 @@
             function urlEncode(str) {
                 return str.replace(/\?/g, "%3F").replace(/&/g, "%26").replace(/#/g, "%23").replace(/\+/g, "%2B");
             }
+            function waitForDocumentReady() {
+                return Object(util.k)(waitForDocumentReady, function() {
+                    return new src.a(function(resolve) {
+                        if (isDocumentReady()) return resolve();
+                        var interval = setInterval(function() {
+                            if (isDocumentReady()) {
+                                clearInterval(interval);
+                                return resolve();
+                            }
+                        }, 10);
+                    });
+                });
+            }
             function parseQuery(queryString) {
-                return Object(util.m)(parseQuery, function() {
+                return Object(util.k)(parseQuery, function() {
                     var params = {};
                     if (!queryString) return params;
                     if (-1 === queryString.indexOf("=")) return params;
@@ -356,20 +335,13 @@
                 container.appendChild(child);
             }
             function getElementSafe(id) {
-                if (function(element) {
-                    return element instanceof window.Element || null !== element && "object" === (void 0 === element ? "undefined" : _typeof(element)) && 1 === element.nodeType && "object" === _typeof(element.style) && "object" === _typeof(element.ownerDocument);
-                }(id)) return id;
-                if ("string" == typeof id) {
-                    var element = document.getElementById(id);
-                    if (element) return element;
-                    document.querySelector && (element = document.querySelector(id));
-                    if (element) return element;
-                }
+                var element, doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : document;
+                return (element = id) instanceof window.Element || null !== element && "object" === (void 0 === element ? "undefined" : _typeof(element)) && 1 === element.nodeType && "object" === _typeof(element.style) && "object" === _typeof(element.ownerDocument) ? id : "string" == typeof id ? doc.querySelector(id) : void 0;
             }
             function getElement(id) {
-                var element = getElementSafe(id);
+                var element = getElementSafe(id, arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : document);
                 if (element) return element;
-                throw new Error("Can not find element: " + Object(util.w)(id));
+                throw new Error("Can not find element: " + Object(util.u)(id));
             }
             function PopupOpenError(message) {
                 this.message = message;
@@ -393,42 +365,14 @@
                 awaitFrameLoadPromises.set(frame, promise);
                 return promise;
             }
-            function getCurrentDimensions(el) {
-                return {
-                    width: el.offsetWidth,
-                    height: el.offsetHeight
-                };
-            }
-            function trackDimensions(el, _ref3) {
-                var _ref3$width = _ref3.width, width = void 0 === _ref3$width || _ref3$width, _ref3$height = _ref3.height, height = void 0 === _ref3$height || _ref3$height, _ref3$threshold = _ref3.threshold, threshold = void 0 === _ref3$threshold ? 0 : _ref3$threshold, currentDimensions = getCurrentDimensions(el);
-                return {
-                    check: function() {
-                        var newDimensions = getCurrentDimensions(el);
-                        return {
-                            changed: function(one, two, _ref2) {
-                                var _ref2$width = _ref2.width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height, _ref2$threshold = _ref2.threshold, threshold = void 0 === _ref2$threshold ? 0 : _ref2$threshold;
-                                return !(void 0 !== _ref2$width && !_ref2$width || !(Math.abs(one.width - two.width) > threshold)) || !!(height && Math.abs(one.height - two.height) > threshold);
-                            }(currentDimensions, newDimensions, {
-                                width: width,
-                                height: height,
-                                threshold: threshold
-                            }),
-                            dimensions: newDimensions
-                        };
-                    },
-                    reset: function() {
-                        currentDimensions = getCurrentDimensions(el);
-                    }
-                };
-            }
             function bindEvents(element, eventNames, handler) {
-                handler = Object(util.s)(handler);
+                handler = Object(util.q)(handler);
                 for (var _i8 = 0, _length8 = null == eventNames ? 0 : eventNames.length; _i8 < _length8; _i8++) {
                     var eventName = eventNames[_i8];
                     element.addEventListener(eventName, handler);
                 }
                 return {
-                    cancel: Object(util.s)(function() {
+                    cancel: Object(util.q)(function() {
                         for (var _i10 = 0, _length10 = null == eventNames ? 0 : eventNames.length; _i10 < _length10; _i10++) {
                             var _eventName = eventNames[_i10];
                             element.removeEventListener(_eventName, handler);
@@ -552,59 +496,50 @@
             __webpack_require__.d(__webpack_exports__, "appendChild", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.e;
             });
-            __webpack_require__.d(__webpack_exports__, "awaitFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "awaitFrameLoad", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.f;
             });
-            __webpack_require__.d(__webpack_exports__, "destroyElement", function() {
+            __webpack_require__.d(__webpack_exports__, "awaitFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "dimensionsMatchViewport", function() {
+            __webpack_require__.d(__webpack_exports__, "destroyElement", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.h;
             });
             __webpack_require__.d(__webpack_exports__, "elementReady", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "elementStoppedMoving", function() {
+            __webpack_require__.d(__webpack_exports__, "extendUrl", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.j;
             });
-            __webpack_require__.d(__webpack_exports__, "extendUrl", function() {
+            __webpack_require__.d(__webpack_exports__, "getElement", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "getElement", function() {
+            __webpack_require__.d(__webpack_exports__, "hideElement", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.l;
             });
-            __webpack_require__.d(__webpack_exports__, "hideElement", function() {
+            __webpack_require__.d(__webpack_exports__, "iframe", function() {
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.m;
             });
-            __webpack_require__.d(__webpack_exports__, "iframe", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.n;
-            });
-            __webpack_require__.d(__webpack_exports__, "onDimensionsChange", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.p;
+            __webpack_require__.d(__webpack_exports__, "onResize", function() {
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.o;
             });
             __webpack_require__.d(__webpack_exports__, "removeClass", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.q;
-            });
-            __webpack_require__.d(__webpack_exports__, "setOverflow", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.r;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.p;
             });
             __webpack_require__.d(__webpack_exports__, "showAndAnimate", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.s;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.q;
             });
             __webpack_require__.d(__webpack_exports__, "showElement", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.t;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.r;
             });
-            __webpack_require__.d(__webpack_exports__, "trackDimensions", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.u;
-            });
-            __webpack_require__.d(__webpack_exports__, "waitForDocumentReady", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.v;
+            __webpack_require__.d(__webpack_exports__, "waitForDocumentBody", function() {
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.s;
             });
             __webpack_require__.d(__webpack_exports__, "watchElementForClose", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.w;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.t;
             });
             __webpack_require__.d(__webpack_exports__, "writeElementToWindow", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__dom__.x;
+                return __WEBPACK_IMPORTED_MODULE_1__dom__.u;
             });
             __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js"), 
             __webpack_require__("./node_modules/belter/src/storage.js");
@@ -615,68 +550,62 @@
             __webpack_require__.d(__webpack_exports__, "base64encode", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.b;
             });
-            __webpack_require__.d(__webpack_exports__, "copyProp", function() {
+            __webpack_require__.d(__webpack_exports__, "dasherizeToCamel", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.d;
             });
-            __webpack_require__.d(__webpack_exports__, "cycle", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.e;
-            });
-            __webpack_require__.d(__webpack_exports__, "dasherizeToCamel", function() {
+            __webpack_require__.d(__webpack_exports__, "dotify", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.f;
             });
-            __webpack_require__.d(__webpack_exports__, "dotify", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
-            });
             __webpack_require__.d(__webpack_exports__, "eventEmitter", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.i;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.g;
             });
             __webpack_require__.d(__webpack_exports__, "extend", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.j;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
             });
             __webpack_require__.d(__webpack_exports__, "getOrSet", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.j;
             });
             __webpack_require__.d(__webpack_exports__, "isDefined", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
             });
             __webpack_require__.d(__webpack_exports__, "isRegex", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.m;
             });
             __webpack_require__.d(__webpack_exports__, "memoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "memoizePromise", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.q;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__.d(__webpack_exports__, "noop", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.r;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
             });
             __webpack_require__.d(__webpack_exports__, "once", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.s;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.q;
             });
             __webpack_require__.d(__webpack_exports__, "promisify", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.t;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.r;
             });
             __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.u;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.s;
             });
             __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.v;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.t;
             });
             __webpack_require__.d(__webpack_exports__, "stringify", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.w;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.u;
             });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.x;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.v;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.y;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.w;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.z;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.x;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.A;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.y;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -713,23 +642,23 @@
             "use strict";
             __webpack_exports__.a = function getStorage(_ref) {
                 var name = _ref.name, _ref$version = _ref.version, version = void 0 === _ref$version ? "latest" : _ref$version, _ref$lifetime = _ref.lifetime, lifetime = void 0 === _ref$lifetime ? 3e5 : _ref$lifetime;
-                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.m)(getStorage, function() {
+                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.k)(getStorage, function() {
                     var STORAGE_KEY = "__" + name + "_" + version + "_storage__", accessedStorage = void 0;
                     function getState(handler) {
-                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.o)(), storage = void 0;
+                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.n)(), storage = void 0;
                         accessedStorage && (storage = accessedStorage);
                         if (!storage && localStorageEnabled) {
                             var rawStorage = window.localStorage.getItem(STORAGE_KEY);
                             rawStorage && (storage = JSON.parse(rawStorage));
                         }
-                        storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.k)()[STORAGE_KEY]);
+                        storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.i)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.w)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.w)());
                         accessedStorage = storage;
                         var result = handler(storage);
-                        localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.k)()[STORAGE_KEY] = storage;
+                        localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.i)()[STORAGE_KEY] = storage;
                         accessedStorage = null;
                         return result;
                     }
@@ -738,7 +667,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.y)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.w)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -785,14 +714,14 @@
                 if ("undefined" != typeof Buffer) return Buffer.from(str, "base64").toString("utf8");
                 throw new Error("Can not find window.atob or Buffer");
             };
-            __webpack_exports__.y = uniqueID;
-            __webpack_exports__.k = function() {
+            __webpack_exports__.w = uniqueID;
+            __webpack_exports__.i = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof global) return global;
                 throw new Error("No global found");
             };
-            __webpack_exports__.p = function(method) {
+            __webpack_exports__.n = function(method) {
                 var _this = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, cacheMap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
                 function memoizedFunction() {
                     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
@@ -814,7 +743,7 @@
                 options.name && (memoizedFunction.displayName = options.name + ":memoized");
                 return memoizedFunction;
             };
-            __webpack_exports__.q = function(method) {
+            __webpack_exports__.o = function(method) {
                 var cache = {};
                 function memoizedPromiseFunction() {
                     for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
@@ -830,7 +759,7 @@
                 };
                 return memoizedPromiseFunction;
             };
-            __webpack_exports__.t = function(method) {
+            __webpack_exports__.r = function(method) {
                 var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                 function promisifiedFunction() {
                     return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(method, this, arguments);
@@ -838,12 +767,12 @@
                 options.name && (promisifiedFunction.displayName = options.name + ":promisified");
                 return promisifiedFunction;
             };
-            __webpack_exports__.m = function(method, logic) {
+            __webpack_exports__.k = function(method, logic) {
                 var args = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : [], cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {}, key = serializeArgs(args);
                 return cache.hasOwnProperty(key) ? cache[key] : cache[key] = logic.apply(void 0, args);
             };
-            __webpack_exports__.r = function() {};
-            __webpack_exports__.s = function(method) {
+            __webpack_exports__.p = function() {};
+            __webpack_exports__.q = function(method) {
                 var called = !1;
                 return function() {
                     if (!called) {
@@ -852,7 +781,7 @@
                     }
                 };
             };
-            __webpack_exports__.x = function stringifyError(err) {
+            __webpack_exports__.v = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -869,16 +798,16 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.w = function(item) {
+            __webpack_exports__.u = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
-            __webpack_exports__.j = function(obj, source) {
+            __webpack_exports__.h = function(obj, source) {
                 if (!source) return obj;
                 if (Object.assign) return Object.assign(obj, source);
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.v = function(method, time) {
+            __webpack_exports__.t = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -892,7 +821,7 @@
                     }
                 };
             };
-            __webpack_exports__.h = function dotify(obj) {
+            __webpack_exports__.f = function dotify(obj) {
                 var prefix = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "", newobj = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                 prefix = prefix ? prefix + "." : prefix;
                 for (var key in obj) obj.hasOwnProperty(key) && void 0 !== obj[key] && null !== obj[key] && "function" != typeof obj[key] && (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every(function(val) {
@@ -900,7 +829,7 @@
                 }) ? newobj["" + prefix + key + "[]"] = obj[key].join(",") : obj[key] && "object" === _typeof(obj[key]) ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
                 return newobj;
             };
-            __webpack_exports__.i = function() {
+            __webpack_exports__.g = function() {
                 var triggered = {}, handlers = {};
                 return {
                     on: function(eventName, handler) {
@@ -936,7 +865,7 @@
                     }
                 };
             };
-            __webpack_exports__.f = function(string) {
+            __webpack_exports__.d = function(string) {
                 return string.replace(/-([a-z])/g, function(g) {
                     return g[1].toUpperCase();
                 });
@@ -944,7 +873,7 @@
             __webpack_exports__.c = function(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
             };
-            __webpack_exports__.u = function replaceObject(item, replacer) {
+            __webpack_exports__.s = function replaceObject(item, replacer) {
                 var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
                 if (Array.isArray(item)) {
                     for (var _length3 = item.length, result = [], _loop = function(i) {
@@ -970,21 +899,10 @@
                 }
                 throw new Error("Pass an object or array");
             };
-            __webpack_exports__.d = function(source, target, name, def) {
-                if (source.hasOwnProperty(name)) {
-                    var descriptor = Object.getOwnPropertyDescriptor(source, name);
-                    Object.defineProperty(target, name, descriptor);
-                } else target[name] = def;
-            };
-            __webpack_exports__.n = function(value) {
+            __webpack_exports__.l = function(value) {
                 return null !== value && void 0 !== value;
             };
-            __webpack_exports__.e = function cycle(method) {
-                return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(method).then(function() {
-                    return cycle(method);
-                });
-            };
-            __webpack_exports__.g = function(method) {
+            __webpack_exports__.e = function(method) {
                 var time = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 100, timeout = void 0;
                 return function() {
                     var _this3 = this, _arguments2 = arguments;
@@ -994,16 +912,16 @@
                     }, time);
                 };
             };
-            __webpack_exports__.o = function(item) {
+            __webpack_exports__.m = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "z", function() {
+            __webpack_require__.d(__webpack_exports__, "x", function() {
                 return weakMapMemoize;
             });
-            __webpack_require__.d(__webpack_exports__, "A", function() {
+            __webpack_require__.d(__webpack_exports__, "y", function() {
                 return weakMapMemoizePromise;
             });
-            __webpack_exports__.l = function(obj, key, getter) {
+            __webpack_exports__.j = function(obj, key, getter) {
                 if (obj.hasOwnProperty(key)) return obj[key];
                 var val = getter();
                 obj[key] = val;
@@ -1373,13 +1291,9 @@
             __webpack_exports__.v = isWindowClosed;
             __webpack_exports__.w = function(frame) {
                 !function() {
-                    for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
+                    for (var i = 0; i < iframeWindows.length; i++) if (isWindowClosed(iframeWindows[i])) {
                         iframeFrames.splice(i, 1);
                         iframeWindows.splice(i, 1);
-                    }
-                    for (var _i8 = 0; _i8 < iframeWindows.length; _i8++) if (isWindowClosed(iframeWindows[_i8])) {
-                        iframeFrames.splice(_i8, 1);
-                        iframeWindows.splice(_i8, 1);
                     }
                 }();
                 if (frame && frame.contentWindow) try {
@@ -1391,8 +1305,8 @@
                 return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
             };
             __webpack_exports__.h = function(win, name) {
-                for (var winFrames = getFrames(win), _i10 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i10 < _length8; _i10++) {
-                    var childFrame = winFrames[_i10];
+                for (var winFrames = getFrames(win), _i9 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i9 < _length8; _i9++) {
+                    var childFrame = winFrames[_i9];
                     try {
                         if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                     } catch (err) {}
@@ -1413,7 +1327,7 @@
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
                 if (getTop(child) === child) return !1;
-                for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
+                for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
                 return !1;
             };
             __webpack_exports__.e = getDistanceFromTop;
@@ -1664,12 +1578,6 @@
                 if (!top) throw new Error("Can not determine top window");
                 return [].concat(getAllChildFrames(top), [ top ]);
             }
-            function isFrameWindowClosed(frame) {
-                if (!frame.contentWindow) return !0;
-                if (!frame.parentNode) return !0;
-                var doc = frame.ownerDocument;
-                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
-            }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
                 var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
@@ -1702,7 +1610,12 @@
                 }(iframeWindows, win);
                 if (-1 !== iframeIndex) {
                     var frame = iframeFrames[iframeIndex];
-                    if (frame && isFrameWindowClosed(frame)) return !0;
+                    if (frame && function(frame) {
+                        if (!frame.contentWindow) return !0;
+                        if (!frame.parentNode) return !0;
+                        var doc = frame.ownerDocument;
+                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                    }(frame)) return !0;
                 }
                 return !1;
             }
@@ -1710,7 +1623,7 @@
                 return getOpener(win = win || window) || getParent(win) || void 0;
             }
             function anyMatch(collection1, collection2) {
-                for (var _i18 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i18 < _length16; _i18++) for (var item1 = collection1[_i18], _i20 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i20 < _length18; _i20++) if (item1 === collection2[_i20]) return !0;
+                for (var _i17 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i17 < _length16; _i17++) for (var item1 = collection1[_i17], _i19 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i19 < _length18; _i19++) if (item1 === collection2[_i19]) return !0;
                 return !1;
             }
             function getDistanceFromTop() {
@@ -2628,12 +2541,135 @@
                 return promise_ZalgoPromise;
             });
         },
+        "./src/constants.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            Object.defineProperty(__webpack_exports__, "__esModule", {
+                value: !0
+            });
+            __webpack_require__.d(__webpack_exports__, "ZOID", function() {
+                return ZOID;
+            });
+            __webpack_require__.d(__webpack_exports__, "__ZOID__", function() {
+                return __ZOID__;
+            });
+            __webpack_require__.d(__webpack_exports__, "POST_MESSAGE", function() {
+                return POST_MESSAGE;
+            });
+            __webpack_require__.d(__webpack_exports__, "PROP_TYPES", function() {
+                return PROP_TYPES;
+            });
+            __webpack_require__.d(__webpack_exports__, "INITIAL_PROPS", function() {
+                return INITIAL_PROPS;
+            });
+            __webpack_require__.d(__webpack_exports__, "WINDOW_REFERENCES", function() {
+                return WINDOW_REFERENCES;
+            });
+            __webpack_require__.d(__webpack_exports__, "PROP_SERIALIZATION", function() {
+                return PROP_SERIALIZATION;
+            });
+            __webpack_require__.d(__webpack_exports__, "PROP_TYPES_LIST", function() {
+                return PROP_TYPES_LIST;
+            });
+            __webpack_require__.d(__webpack_exports__, "CONTEXT", function() {
+                return CONTEXT;
+            });
+            __webpack_require__.d(__webpack_exports__, "CLASS_NAMES", function() {
+                return CLASS_NAMES;
+            });
+            __webpack_require__.d(__webpack_exports__, "EVENTS", function() {
+                return EVENTS;
+            });
+            __webpack_require__.d(__webpack_exports__, "ATTRIBUTES", function() {
+                return ATTRIBUTES;
+            });
+            __webpack_require__.d(__webpack_exports__, "ANIMATION_NAMES", function() {
+                return ANIMATION_NAMES;
+            });
+            __webpack_require__.d(__webpack_exports__, "EVENT_NAMES", function() {
+                return EVENT_NAMES;
+            });
+            __webpack_require__.d(__webpack_exports__, "CLOSE_REASONS", function() {
+                return CLOSE_REASONS;
+            });
+            __webpack_require__.d(__webpack_exports__, "CONTEXT_LIST", function() {
+                return CONTEXT_LIST;
+            });
+            __webpack_require__.d(__webpack_exports__, "DELEGATE", function() {
+                return DELEGATE;
+            });
+            __webpack_require__.d(__webpack_exports__, "WILDCARD", function() {
+                return WILDCARD;
+            });
+            __webpack_require__.d(__webpack_exports__, "DEFAULT_DIMENSIONS", function() {
+                return DEFAULT_DIMENSIONS;
+            });
+            var ZOID = "zoid", __ZOID__ = "__" + ZOID + "__", POST_MESSAGE = {
+                DELEGATE: ZOID + "_delegate",
+                ALLOW_DELEGATE: ZOID + "_allow_delegate"
+            }, PROP_TYPES = {
+                STRING: "string",
+                OBJECT: "object",
+                FUNCTION: "function",
+                BOOLEAN: "boolean",
+                NUMBER: "number",
+                ARRAY: "array"
+            }, INITIAL_PROPS = {
+                RAW: "raw",
+                UID: "uid"
+            }, WINDOW_REFERENCES = {
+                OPENER: "opener",
+                TOP: "top",
+                PARENT: "parent",
+                GLOBAL: "global"
+            }, PROP_SERIALIZATION = {
+                JSON: "json",
+                DOTIFY: "dotify",
+                BASE64: "base64"
+            }, PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function(key) {
+                return PROP_TYPES[key];
+            }), CONTEXT = {
+                IFRAME: "iframe",
+                POPUP: "popup"
+            }, CLASS_NAMES = {
+                ZOID: "" + ZOID,
+                OUTLET: ZOID + "-outlet",
+                COMPONENT_FRAME: ZOID + "-component-frame",
+                PRERENDER_FRAME: ZOID + "-prerender-frame",
+                VISIBLE: ZOID + "-visible",
+                INVISIBLE: ZOID + "-invisible"
+            }, EVENTS = {
+                CLOSE: ZOID + "-close"
+            }, ATTRIBUTES = {
+                IFRAME_PLACEHOLDER: "data-zoid-" + ZOID + "-placeholder"
+            }, ANIMATION_NAMES = {
+                SHOW_CONTAINER: ZOID + "-show-container",
+                SHOW_COMPONENT: ZOID + "-show-component",
+                HIDE_CONTAINER: ZOID + "-hide-container",
+                HIDE_COMPONENT: ZOID + "-hide-component"
+            }, EVENT_NAMES = {
+                CLICK: "click"
+            }, CLOSE_REASONS = {
+                PARENT_CALL: "parent_call",
+                CHILD_CALL: "child_call",
+                CLOSE_DETECTED: "close_detected",
+                USER_CLOSED: "user_closed",
+                PARENT_CLOSE_DETECTED: "parent_close_detected"
+            }, CONTEXT_LIST = Object.keys(CONTEXT).map(function(key) {
+                return CONTEXT[key];
+            }), DELEGATE = {
+                CALL_ORIGINAL: "call_original",
+                CALL_DELEGATE: "call_delegate"
+            }, WILDCARD = "*", DEFAULT_DIMENSIONS = {
+                WIDTH: "300px",
+                HEIGHT: "150px"
+            };
+        },
         "./src/drivers/angular.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return angular;
             });
-            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), angular = {
+            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__("./src/constants.js"), angular = {
                 global: function() {
                     return window.angular;
                 },
@@ -2670,7 +2706,7 @@
                                         } : item;
                                     });
                                 }, parent = component.init(getProps(), null, $element[0]);
-                                parent.render($element[0]);
+                                parent.render(__WEBPACK_IMPORTED_MODULE_1__constants__.CONTEXT.IFRAME, $element[0]);
                                 $scope.$watch(function() {
                                     parent.updateProps(getProps());
                                 });
@@ -2685,7 +2721,7 @@
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return angular2;
             });
-            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), _extends = Object.assign || function(target) {
+            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__("./src/constants.js"), _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -2716,7 +2752,7 @@
                         } ],
                         ngOnInit: function() {
                             var targetElement = this.elementRef.nativeElement, parent = zoid.init(getProps(this), null, targetElement);
-                            parent.render(targetElement);
+                            parent.render(__WEBPACK_IMPORTED_MODULE_1__constants__.CONTEXT.IFRAME, targetElement);
                             this.parent = parent;
                         },
                         ngOnChanges: function() {
@@ -2779,37 +2815,33 @@
         },
         "./src/drivers/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            var __WEBPACK_IMPORTED_MODULE_0__script__ = __webpack_require__("./src/drivers/script.js");
-            __webpack_require__.d(__webpack_exports__, "script", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__script__.a;
-            });
-            var __WEBPACK_IMPORTED_MODULE_1__react__ = __webpack_require__("./src/drivers/react.js");
+            var __WEBPACK_IMPORTED_MODULE_0__react__ = __webpack_require__("./src/drivers/react.js");
             __webpack_require__.d(__webpack_exports__, "react", function() {
-                return __WEBPACK_IMPORTED_MODULE_1__react__.a;
+                return __WEBPACK_IMPORTED_MODULE_0__react__.a;
             });
-            var __WEBPACK_IMPORTED_MODULE_2__vue__ = __webpack_require__("./src/drivers/vue.js");
+            var __WEBPACK_IMPORTED_MODULE_1__vue__ = __webpack_require__("./src/drivers/vue.js");
             __webpack_require__.d(__webpack_exports__, "vue", function() {
-                return __WEBPACK_IMPORTED_MODULE_2__vue__.a;
+                return __WEBPACK_IMPORTED_MODULE_1__vue__.a;
             });
-            var __WEBPACK_IMPORTED_MODULE_3__angular__ = __webpack_require__("./src/drivers/angular.js");
+            var __WEBPACK_IMPORTED_MODULE_2__angular__ = __webpack_require__("./src/drivers/angular.js");
             __webpack_require__.d(__webpack_exports__, "angular", function() {
-                return __WEBPACK_IMPORTED_MODULE_3__angular__.a;
+                return __WEBPACK_IMPORTED_MODULE_2__angular__.a;
             });
-            var __WEBPACK_IMPORTED_MODULE_4__ember__ = __webpack_require__("./src/drivers/ember.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__ember__);
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__ember__, "angular2") && __webpack_require__.d(__webpack_exports__, "angular2", function() {
-                return __WEBPACK_IMPORTED_MODULE_4__ember__.angular2;
+            var __WEBPACK_IMPORTED_MODULE_3__ember__ = __webpack_require__("./src/drivers/ember.js");
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__ember__);
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__ember__, "angular2") && __webpack_require__.d(__webpack_exports__, "angular2", function() {
+                return __WEBPACK_IMPORTED_MODULE_3__ember__.angular2;
             });
-            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_4__ember__, "glimmer") && __webpack_require__.d(__webpack_exports__, "glimmer", function() {
-                return __WEBPACK_IMPORTED_MODULE_4__ember__.glimmer;
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_3__ember__, "glimmer") && __webpack_require__.d(__webpack_exports__, "glimmer", function() {
+                return __WEBPACK_IMPORTED_MODULE_3__ember__.glimmer;
             });
-            var __WEBPACK_IMPORTED_MODULE_5__glimmer__ = __webpack_require__("./src/drivers/glimmer.js");
+            var __WEBPACK_IMPORTED_MODULE_4__glimmer__ = __webpack_require__("./src/drivers/glimmer.js");
             __webpack_require__.d(__webpack_exports__, "glimmer", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__glimmer__.a;
+                return __WEBPACK_IMPORTED_MODULE_4__glimmer__.a;
             });
-            var __WEBPACK_IMPORTED_MODULE_6__angular2__ = __webpack_require__("./src/drivers/angular2.js");
+            var __WEBPACK_IMPORTED_MODULE_5__angular2__ = __webpack_require__("./src/drivers/angular2.js");
             __webpack_require__.d(__webpack_exports__, "angular2", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__angular2__.a;
+                return __WEBPACK_IMPORTED_MODULE_5__angular2__.a;
             });
         },
         "./src/drivers/react.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -2817,7 +2849,7 @@
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return react;
             });
-            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), react = {
+            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__("./src/constants.js"), react = {
                 global: function() {
                     if (window.React && window.ReactDOM) return {
                         React: window.React,
@@ -2836,7 +2868,7 @@
                             this.setState({
                                 parent: parent
                             });
-                            parent.render(el);
+                            parent.render(__WEBPACK_IMPORTED_MODULE_1__constants__.CONTEXT.IFRAME, el);
                         },
                         componentDidUpdate: function() {
                             this.state && this.state.parent && this.state.parent.updateProps(Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.extend)({}, this.props));
@@ -2872,7 +2904,7 @@
                             this.setState({
                                 parent: parent
                             });
-                            parent.render(el);
+                            parent.render(__WEBPACK_IMPORTED_MODULE_1__constants__.CONTEXT.IFRAME, el);
                         };
                         _class.prototype.componentDidUpdate = function() {
                             this.state && this.state.parent && this.state.parent.updateProps(Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.extend)({}, this.props));
@@ -2883,46 +2915,12 @@
                 }
             };
         },
-        "./src/drivers/script.js": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            __webpack_require__.d(__webpack_exports__, "a", function() {
-                return script;
-            });
-            var script = {
-                global: function() {
-                    return window.document;
-                },
-                register: function register(component, document) {
-                    function render(element) {
-                        if (element && element.tagName && "script" === element.tagName.toLowerCase() && element.attributes.type && "application/x-component" === element.attributes.type.value && element.parentNode) {
-                            var tag = element.getAttribute("data-component");
-                            if (tag && tag === component.tag) {
-                                component.log("instantiate_script_component");
-                                var props = element.innerText ? eval("(" + element.innerText + ")") : {}, container = document.createElement("div");
-                                if (!element.parentNode) throw new Error("Element has no parent");
-                                element.parentNode.replaceChild(container, element);
-                                component.render(props, container);
-                            }
-                        }
-                    }
-                    function scan() {
-                        for (var scriptTags = Array.prototype.slice.call(document.getElementsByTagName("script")), _i2 = 0, _length2 = null == scriptTags ? 0 : scriptTags.length; _i2 < _length2; _i2++) render(scriptTags[_i2]);
-                    }
-                    scan();
-                    document.addEventListener("DOMContentLoaded", scan);
-                    window.addEventListener("load", scan);
-                    document.addEventListener("DOMNodeInserted", function(event) {
-                        render(event.target);
-                    });
-                }
-            };
-        },
         "./src/drivers/vue.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return vue;
             });
-            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), vue = {
+            var __WEBPACK_IMPORTED_MODULE_0_belter_src__ = __webpack_require__("./node_modules/belter/src/index.js"), __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__("./src/constants.js"), vue = {
                 global: function() {},
                 register: function(component) {
                     return {
@@ -2933,7 +2931,7 @@
                         mounted: function() {
                             var el = this.$el;
                             this.parent = component.init(Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.extend)({}, this.$attrs), null, el);
-                            this.parent.render(el);
+                            this.parent.render(__WEBPACK_IMPORTED_MODULE_1__constants__.CONTEXT.IFRAME, el);
                         },
                         beforeUpdate: function() {
                             this.parent && this.$attrs && this.parent.updateProps(Object(__WEBPACK_IMPORTED_MODULE_0_belter_src__.extend)({}, this.$attrs));
@@ -3065,64 +3063,6 @@
             });
             __webpack_require__.d(post_robot_src_namespaceObject, "disable", function() {
                 return disable;
-            });
-            var src_constants_namespaceObject = {};
-            __webpack_require__.d(src_constants_namespaceObject, "ZOID", function() {
-                return ZOID;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "__ZOID__", function() {
-                return __ZOID__;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "POST_MESSAGE", function() {
-                return POST_MESSAGE;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "PROP_TYPES", function() {
-                return PROP_TYPES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "INITIAL_PROPS", function() {
-                return INITIAL_PROPS;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "WINDOW_REFERENCES", function() {
-                return WINDOW_REFERENCES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "PROP_SERIALIZATION", function() {
-                return PROP_SERIALIZATION;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "PROP_TYPES_LIST", function() {
-                return PROP_TYPES_LIST;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "CONTEXT_TYPES", function() {
-                return constants_CONTEXT_TYPES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "CLASS_NAMES", function() {
-                return CLASS_NAMES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "EVENTS", function() {
-                return EVENTS;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "ATTRIBUTES", function() {
-                return ATTRIBUTES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "ANIMATION_NAMES", function() {
-                return ANIMATION_NAMES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "EVENT_NAMES", function() {
-                return EVENT_NAMES;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "CLOSE_REASONS", function() {
-                return CLOSE_REASONS;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "CONTEXT_TYPES_LIST", function() {
-                return CONTEXT_TYPES_LIST;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "DELEGATE", function() {
-                return constants_DELEGATE;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "WILDCARD", function() {
-                return constants_WILDCARD;
-            });
-            __webpack_require__.d(src_constants_namespaceObject, "DEFAULT_DIMENSIONS", function() {
-                return constants_DEFAULT_DIMENSIONS;
             });
             var src_interface_namespaceObject = {};
             __webpack_require__.d(src_interface_namespaceObject, "PopupOpenError", function() {
@@ -4298,7 +4238,7 @@
                         for (var el = _ref4.el, props = _ref4.props, _i4 = 0, _Object$keys2 = Object.keys(props), _length4 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i4 < _length4; _i4++) {
                             var prop = _Object$keys2[_i4], val = props[prop];
                             if (null !== val && void 0 !== val && prop !== ELEMENT_PROP_EL && prop !== ELEMENT_PROP_INNER_HTML) if (DOM_EVENT.hasOwnProperty(prop)) {
-                                if ("function" != typeof val) throw new TypeError("Prop " + prop + " must be function");
+                                if (void 0 !== val && "function" != typeof val) throw new TypeError("Prop " + prop + " must be function");
                                 el.addEventListener(DOM_EVENT[prop], val);
                             } else if ("string" == typeof val || "number" == typeof val) el.setAttribute(prop, val.toString()); else {
                                 if ("boolean" != typeof val) throw new TypeError("Can not render prop " + prop + " of type " + (void 0 === val ? "undefined" : dom__typeof(val)));
@@ -4356,70 +4296,11 @@
             function useLogger(newLogger) {
                 logger = newLogger;
             }
-            var ZOID = "zoid", __ZOID__ = "__" + ZOID + "__", POST_MESSAGE = {
-                DELEGATE: ZOID + "_delegate",
-                ALLOW_DELEGATE: ZOID + "_allow_delegate"
-            }, PROP_TYPES = {
-                STRING: "string",
-                OBJECT: "object",
-                FUNCTION: "function",
-                BOOLEAN: "boolean",
-                NUMBER: "number",
-                ARRAY: "array"
-            }, INITIAL_PROPS = {
-                RAW: "raw",
-                UID: "uid"
-            }, WINDOW_REFERENCES = {
-                OPENER: "opener",
-                TOP: "top",
-                PARENT: "parent",
-                GLOBAL: "global"
-            }, PROP_SERIALIZATION = {
-                JSON: "json",
-                DOTIFY: "dotify",
-                BASE64: "base64"
-            }, PROP_TYPES_LIST = Object.keys(PROP_TYPES).map(function(key) {
-                return PROP_TYPES[key];
-            }), constants_CONTEXT_TYPES = {
-                IFRAME: "iframe",
-                POPUP: "popup"
-            }, CLASS_NAMES = {
-                ZOID: "" + ZOID,
-                OUTLET: ZOID + "-outlet",
-                COMPONENT_FRAME: ZOID + "-component-frame",
-                PRERENDER_FRAME: ZOID + "-prerender-frame",
-                VISIBLE: ZOID + "-visible",
-                INVISIBLE: ZOID + "-invisible"
-            }, EVENTS = {
-                CLOSE: ZOID + "-close"
-            }, ATTRIBUTES = {
-                IFRAME_PLACEHOLDER: "data-zoid-" + ZOID + "-placeholder"
-            }, ANIMATION_NAMES = {
-                SHOW_CONTAINER: ZOID + "-show-container",
-                SHOW_COMPONENT: ZOID + "-show-component",
-                HIDE_CONTAINER: ZOID + "-hide-container",
-                HIDE_COMPONENT: ZOID + "-hide-component"
-            }, EVENT_NAMES = {
-                CLICK: "click"
-            }, CLOSE_REASONS = {
-                PARENT_CALL: "parent_call",
-                CHILD_CALL: "child_call",
-                CLOSE_DETECTED: "close_detected",
-                USER_CLOSED: "user_closed",
-                PARENT_CLOSE_DETECTED: "parent_close_detected"
-            }, CONTEXT_TYPES_LIST = Object.keys(constants_CONTEXT_TYPES).map(function(key) {
-                return constants_CONTEXT_TYPES[key];
-            }), constants_DELEGATE = {
-                CALL_ORIGINAL: "call_original",
-                CALL_DELEGATE: "call_delegate"
-            }, constants_WILDCARD = "*", constants_DEFAULT_DIMENSIONS = {
-                WIDTH: 300,
-                HEIGHT: 150
-            };
+            var constants = __webpack_require__("./src/constants.js");
             function globalFor(win) {
                 if (Object(cross_domain_utils_src.isSameDomain)(win)) {
-                    win[__ZOID__] || (win[__ZOID__] = {});
-                    return win[__ZOID__];
+                    win[constants.__ZOID__] || (win[constants.__ZOID__] = {});
+                    return win[constants.__ZOID__];
                 }
             }
             var global_global = function() {
@@ -4475,10 +4356,10 @@
                     }
                 };
             }
-            var parseChildWindowName = Object(belter_src.memoize)(function() {
+            var _class, parseChildWindowName = Object(belter_src.memoize)(function() {
                 if (!window.name) throw new Error("No window name");
                 var _window$name$split = window.name.split("__"), zoidcomp = _window$name$split[1], name = _window$name$split[2], encodedPayload = _window$name$split[3];
-                if (zoidcomp !== ZOID) throw new Error("Window not rendered by zoid - got " + zoidcomp);
+                if (zoidcomp !== constants.ZOID) throw new Error("Window not rendered by zoid - got " + zoidcomp);
                 if (!name) throw new Error("Expected component name");
                 if (!encodedPayload) throw new Error("Expected encoded payload");
                 try {
@@ -4498,11 +4379,26 @@
                 var prop = component.getProp(key);
                 return prop && "function" == typeof prop.childDecorate ? prop.childDecorate(value) : value;
             }
-            var child__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-                return typeof obj;
-            } : function(obj) {
-                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-            }, child_ChildComponent = function() {
+            var child_ChildComponent = (function(target, property, decorators, descriptor, context) {
+                var desc = {};
+                Object.keys(descriptor).forEach(function(key) {
+                    desc[key] = descriptor[key];
+                });
+                desc.enumerable = !!desc.enumerable;
+                desc.configurable = !!desc.configurable;
+                ("value" in desc || desc.initializer) && (desc.writable = !0);
+                desc = decorators.slice().reverse().reduce(function(desc, decorator) {
+                    return decorator(target, "watchForResize", desc) || desc;
+                }, desc);
+                if (context && void 0 !== desc.initializer) {
+                    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+                    desc.initializer = void 0;
+                }
+                if (void 0 === desc.initializer) {
+                    Object.defineProperty(target, "watchForResize", desc);
+                    desc = null;
+                }
+            }((_class = function() {
                 function ChildComponent(component) {
                     var _this = this;
                     !function(instance, Constructor) {
@@ -4522,22 +4418,13 @@
                         _this.setProps(initialProps, domain);
                         Object(lib.e)(_this.parentComponentWindow);
                         _this.watchForClose();
-                        _this.listenForResize();
-                        _this.watchForResize(context);
                         return _this.parentExports.init(_this.buildExports());
+                    }).then(function() {
+                        return _this.watchForResize();
                     }).catch(function(err) {
                         _this.error(err);
                     });
                 }
-                ChildComponent.prototype.listenForResize = function() {
-                    var _this2 = this;
-                    if (this.component.listenForResize) {
-                        this.parentExports.trigger.fireAndForget("resize");
-                        window.addEventListener("resize", function() {
-                            _this2.parentExports.trigger.fireAndForget("resize");
-                        });
-                    }
-                };
                 ChildComponent.prototype.checkParentDomain = function(domain) {
                     if (!Object(cross_domain_utils_src.matchDomain)(this.component.allowedParentDomains, domain)) throw new Error("Can not be rendered by domain: " + domain);
                 };
@@ -4546,7 +4433,7 @@
                 };
                 ChildComponent.prototype.getPropsByRef = function(parentComponentWindow, domain, _ref) {
                     var type = _ref.type, value = _ref.value, uid = _ref.uid, props = void 0;
-                    if (type === INITIAL_PROPS.RAW) props = value; else if (type === INITIAL_PROPS.UID) {
+                    if (type === constants.INITIAL_PROPS.RAW) props = value; else if (type === constants.INITIAL_PROPS.UID) {
                         if (!Object(cross_domain_utils_src.isSameDomain)(parentComponentWindow)) {
                             if ("file:" === window.location.protocol) throw new Error("Can not get props from file:// domain");
                             throw new Error("Parent component window is on a different domain - expected " + Object(cross_domain_utils_src.getDomain)() + " - can not retrieve props");
@@ -4560,11 +4447,11 @@
                 };
                 ChildComponent.prototype.getWindowByRef = function(ref) {
                     var type = ref.type, result = void 0;
-                    if (type === WINDOW_REFERENCES.OPENER) result = Object(cross_domain_utils_src.getOpener)(window); else if (type === WINDOW_REFERENCES.TOP) result = Object(cross_domain_utils_src.getTop)(window); else if (type === WINDOW_REFERENCES.PARENT) {
+                    if (type === constants.WINDOW_REFERENCES.OPENER) result = Object(cross_domain_utils_src.getOpener)(window); else if (type === constants.WINDOW_REFERENCES.TOP) result = Object(cross_domain_utils_src.getTop)(window); else if (type === constants.WINDOW_REFERENCES.PARENT) {
                         var distance = ref.distance;
                         result = distance ? Object(cross_domain_utils_src.getNthParentFromTop)(window, distance) : Object(cross_domain_utils_src.getParent)(window);
                     }
-                    if (type === WINDOW_REFERENCES.GLOBAL) {
+                    if (type === constants.WINDOW_REFERENCES.GLOBAL) {
                         var uid = ref.uid, ancestor = Object(cross_domain_utils_src.getAncestor)(window);
                         if (ancestor) for (var _i2 = 0, _getAllFramesInWindow2 = Object(cross_domain_utils_src.getAllFramesInWindow)(ancestor), _length2 = null == _getAllFramesInWindow2 ? 0 : _getAllFramesInWindow2.length; _i2 < _length2; _i2++) {
                             var global = globalFor(_getAllFramesInWindow2[_i2]);
@@ -4584,8 +4471,8 @@
                         for (var required = !(arguments.length > 4 && void 0 !== arguments[4]) || arguments[4], result = {}, _i2 = 0, _Object$keys2 = Object.keys(props), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
                             var key = _Object$keys2[_i2], prop = component.getProp(key);
                             if (!prop || !prop.sameDomain || origin === Object(cross_domain_utils_src.getDomain)(window) && Object(cross_domain_utils_src.isSameDomain)(parentComponentWindow)) {
-                                var value = props[key];
-                                result[key] = normalizeChildProp(component, 0, key, value);
+                                var value = normalizeChildProp(component, 0, key, props[key]);
+                                result[key] = value;
                                 prop && prop.alias && !result[prop.alias] && (result[prop.alias] = value);
                             }
                         }
@@ -4600,70 +4487,51 @@
                     window.xprops = this.component.xprops = this.props;
                 };
                 ChildComponent.prototype.watchForClose = function() {
-                    var _this3 = this;
+                    var _this2 = this;
                     window.addEventListener("unload", function() {
-                        return _this3.parentExports.checkClose.fireAndForget();
+                        return _this2.parentExports.checkClose.fireAndForget();
                     });
                 };
                 ChildComponent.prototype.enableAutoResize = function() {
-                    var _ref2 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref2$width = _ref2.width, width = void 0 === _ref2$width || _ref2$width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height;
+                    var _ref2 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, _ref2$width = _ref2.width, width = void 0 !== _ref2$width && _ref2$width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height, _ref2$element = _ref2.element, element = void 0 === _ref2$element ? "body" : _ref2$element;
                     this.autoResize = {
                         width: width,
-                        height: height
+                        height: height,
+                        element: element
                     };
-                    this.watchForResize(this.context);
+                    this.watchForResize();
                 };
                 ChildComponent.prototype.getAutoResize = function() {
-                    var width = !1, height = !1, autoResize = this.autoResize || this.component.autoResize;
-                    if ("object" === (void 0 === autoResize ? "undefined" : child__typeof(autoResize))) {
-                        width = Boolean(autoResize.width);
-                        height = Boolean(autoResize.height);
-                    } else if (autoResize) {
-                        width = !0;
-                        height = !0;
-                    }
+                    var _ref3 = this.autoResize || this.component.autoResize || {}, _ref3$width = _ref3.width, width = void 0 !== _ref3$width && _ref3$width, _ref3$height = _ref3.height, height = void 0 !== _ref3$height && _ref3$height, _ref3$element = _ref3.element, element = void 0 === _ref3$element ? "body" : _ref3$element;
                     return {
                         width: width,
                         height: height,
-                        element: autoResize.element ? Object(belter_src.getElement)(autoResize.element) : window.navigator.userAgent.match(/MSIE (9|10)\./) ? document.body : document.documentElement
+                        element: element = Object(belter_src.getElement)(element)
                     };
                 };
-                ChildComponent.prototype.watchForResize = function(context) {
-                    var _this4 = this, _getAutoResize = this.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                    if ((width || height) && context !== constants_CONTEXT_TYPES.POPUP && !this.watchingForResize) {
-                        this.watchingForResize = !0;
-                        return src.a.try(function() {
-                            return Object(belter_src.waitForDocumentReady)();
-                        }).then(function() {
-                            if (!Object(belter_src.dimensionsMatchViewport)(element, {
-                                width: width,
-                                height: height
-                            })) return _this4.resizeToElement(element, {
-                                width: width,
-                                height: height
+                ChildComponent.prototype.watchForResize = function() {
+                    var _this3 = this;
+                    return Object(belter_src.waitForDocumentBody)().then(function() {
+                        var _getAutoResize = _this3.getAutoResize(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
+                        (width || height) && _this3.context !== constants.CONTEXT.POPUP && Object(belter_src.onResize)(element, function(_ref4) {
+                            var newWidth = _ref4.width, newHeight = _ref4.height;
+                            _this3.resize({
+                                width: width ? newWidth : void 0,
+                                height: height ? newHeight : void 0
                             });
-                        }).then(function() {
-                            return Object(belter_src.cycle)(function() {
-                                return Object(belter_src.onDimensionsChange)(element, {
-                                    width: width,
-                                    height: height
-                                }).then(function() {
-                                    return _this4.resizeToElement(element, {
-                                        width: width,
-                                        height: height
-                                    });
-                                });
-                            });
+                        }, {
+                            width: width,
+                            height: height
                         });
-                    }
+                    });
                 };
                 ChildComponent.prototype.buildExports = function() {
                     var self = this;
                     return {
                         updateProps: function(props) {
-                            var _this5 = this;
+                            var _this4 = this;
                             return src.a.try(function() {
-                                return self.setProps(props, _this5.origin, !1);
+                                return self.setProps(props, _this4.origin, !1);
                             });
                         },
                         close: function() {
@@ -4673,29 +4541,12 @@
                         }
                     };
                 };
-                ChildComponent.prototype.resize = function(width, height) {
-                    return this.parentExports.resize(width, height);
-                };
-                ChildComponent.prototype.resizeToElement = function(el, _ref3) {
-                    var _this6 = this, width = _ref3.width, height = _ref3.height, history = [];
-                    return function resize() {
-                        return src.a.try(function() {
-                            for (var tracker = Object(belter_src.trackDimensions)(el, {
-                                width: width,
-                                height: height
-                            }), dimensions = tracker.check().dimensions, _i6 = 0, _length6 = null == history ? 0 : history.length; _i6 < _length6; _i6++) {
-                                var size = history[_i6], widthMatch = !width || size.width === dimensions.width, heightMatch = !height || size.height === dimensions.height;
-                                if (widthMatch && heightMatch) return;
-                            }
-                            history.push({
-                                width: dimensions.width,
-                                height: dimensions.height
-                            });
-                            return _this6.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(function() {
-                                if (tracker.check().changed) return resize();
-                            });
-                        });
-                    }();
+                ChildComponent.prototype.resize = function(_ref5) {
+                    var width = _ref5.width, height = _ref5.height;
+                    return this.parentExports.resize.fireAndForget({
+                        width: width,
+                        height: height
+                    });
                 };
                 ChildComponent.prototype.hide = function() {
                     return this.parentExports.hide();
@@ -4704,10 +4555,10 @@
                     return this.parentExports.show();
                 };
                 ChildComponent.prototype.userClose = function() {
-                    return this.close(CLOSE_REASONS.USER_CLOSED);
+                    return this.close(constants.CLOSE_REASONS.USER_CLOSED);
                 };
                 ChildComponent.prototype.close = function() {
-                    var reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.CHILD_CALL;
+                    var reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : constants.CLOSE_REASONS.CHILD_CALL;
                     return this.parentExports.close(reason);
                 };
                 ChildComponent.prototype.destroy = function() {
@@ -4719,35 +4570,37 @@
                     window.focus();
                 };
                 ChildComponent.prototype.error = function(err) {
-                    var _this7 = this;
+                    var _this5 = this;
                     return src.a.try(function() {
-                        if (_this7.parentExports.error) return _this7.parentExports.error(err);
+                        if (_this5.parentExports.error) return _this5.parentExports.error(err);
                     }).catch(belter_src.noop).then(function() {
                         throw err;
                     });
                 };
                 return ChildComponent;
-            }(), drivers__extends = Object.assign || function(target) {
+            }()).prototype, 0, [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "watchForResize"), _class.prototype), 
+            _class), drivers__extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
                 }
                 return target;
             }, RENDER_DRIVERS = {};
-            RENDER_DRIVERS[constants_CONTEXT_TYPES.IFRAME] = {
+            RENDER_DRIVERS[constants.CONTEXT.IFRAME] = {
                 renderedIntoContainer: !0,
+                callChildToClose: !1,
                 open: function() {
                     var _this = this, attributes = this.component.attributes.iframe || {}, frame = Object(belter_src.iframe)({
                         attributes: drivers__extends({
                             title: this.component.name
                         }, attributes),
-                        class: [ CLASS_NAMES.COMPONENT_FRAME, CLASS_NAMES.INVISIBLE ]
+                        class: [ constants.CLASS_NAMES.COMPONENT_FRAME, constants.CLASS_NAMES.INVISIBLE ]
                     }, this.element);
                     this.clean.set("iframe", frame);
                     return Object(belter_src.awaitFrameWindow)(frame).then(function(win) {
                         var detectClose = function() {
                             return src.a.try(function() {
-                                return _this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+                                return _this.props.onClose(constants.CLOSE_REASONS.CLOSE_DETECTED);
                             }).finally(function() {
                                 return _this.destroy();
                             });
@@ -4766,10 +4619,11 @@
                         attributes: drivers__extends({
                             name: "__zoid_prerender_frame__" + this.component.name + "_" + Object(belter_src.uniqueID)() + "__"
                         }, attributes),
-                        class: [ CLASS_NAMES.PRERENDER_FRAME, CLASS_NAMES.VISIBLE ]
+                        class: [ constants.CLASS_NAMES.PRERENDER_FRAME, constants.CLASS_NAMES.VISIBLE ]
                     }, this.element);
                     this.clean.set("prerenderIframe", prerenderIframe);
-                    return Object(belter_src.awaitFrameWindow)(prerenderIframe).then(function(prerenderFrameWindow) {
+                    return Object(belter_src.awaitFrameLoad)(prerenderIframe).then(function() {
+                        var prerenderFrameWindow = prerenderIframe.contentWindow;
                         _this2.clean.register("destroyPrerender", function() {
                             Object(belter_src.destroyElement)(prerenderIframe);
                         });
@@ -4778,35 +4632,36 @@
                 },
                 switchPrerender: function() {
                     var _this3 = this;
-                    Object(belter_src.addClass)(this.prerenderIframe, CLASS_NAMES.INVISIBLE);
-                    Object(belter_src.removeClass)(this.prerenderIframe, CLASS_NAMES.VISIBLE);
-                    Object(belter_src.addClass)(this.iframe, CLASS_NAMES.VISIBLE);
-                    Object(belter_src.removeClass)(this.iframe, CLASS_NAMES.INVISIBLE);
+                    Object(belter_src.addClass)(this.prerenderIframe, constants.CLASS_NAMES.INVISIBLE);
+                    Object(belter_src.removeClass)(this.prerenderIframe, constants.CLASS_NAMES.VISIBLE);
+                    Object(belter_src.addClass)(this.iframe, constants.CLASS_NAMES.VISIBLE);
+                    Object(belter_src.removeClass)(this.iframe, constants.CLASS_NAMES.INVISIBLE);
                     setTimeout(function() {
                         _this3.prerenderIframe && Object(belter_src.destroyElement)(_this3.prerenderIframe);
                     }, 1e3);
                 },
                 delegateOverrides: {
-                    openContainer: constants_DELEGATE.CALL_DELEGATE,
-                    destroyComponent: constants_DELEGATE.CALL_DELEGATE,
-                    destroyContainer: constants_DELEGATE.CALL_DELEGATE,
-                    cancelContainerEvents: constants_DELEGATE.CALL_DELEGATE,
-                    prerender: constants_DELEGATE.CALL_DELEGATE,
-                    elementReady: constants_DELEGATE.CALL_DELEGATE,
-                    showContainer: constants_DELEGATE.CALL_DELEGATE,
-                    showComponent: constants_DELEGATE.CALL_DELEGATE,
-                    hideContainer: constants_DELEGATE.CALL_DELEGATE,
-                    hideComponent: constants_DELEGATE.CALL_DELEGATE,
-                    hide: constants_DELEGATE.CALL_DELEGATE,
-                    show: constants_DELEGATE.CALL_DELEGATE,
-                    resize: constants_DELEGATE.CALL_DELEGATE,
-                    loadUrl: constants_DELEGATE.CALL_DELEGATE,
-                    openPrerender: constants_DELEGATE.CALL_DELEGATE,
-                    switchPrerender: constants_DELEGATE.CALL_DELEGATE,
-                    setWindowName: constants_DELEGATE.CALL_DELEGATE,
-                    open: constants_DELEGATE.CALL_DELEGATE
+                    openContainer: constants.DELEGATE.CALL_DELEGATE,
+                    destroyComponent: constants.DELEGATE.CALL_DELEGATE,
+                    destroyContainer: constants.DELEGATE.CALL_DELEGATE,
+                    cancelContainerEvents: constants.DELEGATE.CALL_DELEGATE,
+                    prerender: constants.DELEGATE.CALL_DELEGATE,
+                    elementReady: constants.DELEGATE.CALL_DELEGATE,
+                    showContainer: constants.DELEGATE.CALL_DELEGATE,
+                    showComponent: constants.DELEGATE.CALL_DELEGATE,
+                    hideContainer: constants.DELEGATE.CALL_DELEGATE,
+                    hideComponent: constants.DELEGATE.CALL_DELEGATE,
+                    hide: constants.DELEGATE.CALL_DELEGATE,
+                    show: constants.DELEGATE.CALL_DELEGATE,
+                    resize: constants.DELEGATE.CALL_DELEGATE,
+                    loadUrl: constants.DELEGATE.CALL_DELEGATE,
+                    openPrerender: constants.DELEGATE.CALL_DELEGATE,
+                    switchPrerender: constants.DELEGATE.CALL_DELEGATE,
+                    setWindowName: constants.DELEGATE.CALL_DELEGATE,
+                    open: constants.DELEGATE.CALL_DELEGATE
                 },
-                resize: function(width, height) {
+                resize: function(_ref) {
+                    var width = _ref.width, height = _ref.height;
                     if (width) {
                         this.container.style.width = Object(belter_src.toCSS)(width);
                         this.element.style.width = Object(belter_src.toCSS)(width);
@@ -4823,7 +4678,7 @@
                     Object(belter_src.hideElement)(this.element);
                 }
             };
-            var _class, props__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            var parent__class, props__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -4838,7 +4693,7 @@
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
-            function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+            function parent__applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
                 var desc = {};
                 Object.keys(descriptor).forEach(function(key) {
                     desc[key] = descriptor[key];
@@ -4861,7 +4716,7 @@
             }
             global_global.props = global_global.props || {};
             global_global.windows = global_global.windows || {};
-            var parent_ParentComponent = (_applyDecoratedDescriptor((_class = function() {
+            var parent_ParentComponent = (parent__applyDecoratedDescriptor((parent__class = function() {
                 function ParentComponent(component, context, _ref) {
                     var _this = this, props = _ref.props;
                     !function(instance, Constructor) {
@@ -4871,10 +4726,8 @@
                         _this.onInit = new src.a();
                         _this.clean = cleanup(_this);
                         _this.event = Object(belter_src.eventEmitter)();
-                        _this.uid = Object(belter_src.uniqueID)();
                         _this.component = component;
-                        _this.context = context;
-                        _this.driver = RENDER_DRIVERS[_this.context];
+                        _this.driver = RENDER_DRIVERS[context];
                         _this.setProps(props);
                         _this.registerActiveComponent();
                         _this.watchForUnload();
@@ -4883,14 +4736,11 @@
                         return _this.error(err, props);
                     });
                 }
-                ParentComponent.prototype.render = function(element) {
-                    var _this2 = this, target = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window;
+                ParentComponent.prototype.render = function(context, element) {
+                    var _this2 = this, target = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : window;
                     return this.tryInit(function() {
-                        _this2.component.log("render", {
-                            context: _this2.context,
-                            element: element
-                        });
-                        var tasks = {};
+                        _this2.component.log("render");
+                        var uid = Object(belter_src.uniqueID)(), tasks = {};
                         tasks.onRender = _this2.props.onRender();
                         var domain = _this2.getDomain(), initialDomain = _this2.getInitialDomain();
                         tasks.elementReady = src.a.try(function() {
@@ -4903,6 +4753,8 @@
                         };
                         tasks.openContainer = tasks.elementReady.then(function() {
                             return _this2.openContainer(element, {
+                                context: context,
+                                uid: uid,
                                 focus: focus
                             });
                         });
@@ -4920,7 +4772,9 @@
                                 proxyWin: proxyWin,
                                 initialDomain: initialDomain,
                                 domain: domain,
-                                target: target
+                                target: target,
+                                context: context,
+                                uid: uid
                             });
                         });
                         tasks.setWindowName = src.a.all([ tasks.open, tasks.buildWindowName ]).then(function(_ref2) {
@@ -4933,7 +4787,10 @@
                         });
                         tasks.prerender = src.a.all([ tasks.awaitWindow, tasks.openContainer ]).then(function(_ref4) {
                             var win = _ref4[0];
-                            return _this2.prerender(win);
+                            return _this2.prerender(win, {
+                                context: context,
+                                uid: uid
+                            });
                         });
                         tasks.showComponent = tasks.prerender.then(function() {
                             return _this2.showComponent();
@@ -4941,7 +4798,7 @@
                         tasks.buildUrl = _this2.buildUrl();
                         tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.buildUrl ]).then(function(_ref5) {
                             var win = _ref5[0], url = _ref5[1];
-                            return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url));
+                            return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url), context);
                         });
                         tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
                             var proxyWin = _ref6[0], url = _ref6[1];
@@ -4960,18 +4817,18 @@
                         return _this2;
                     });
                 };
-                ParentComponent.prototype.renderTo = function(target, element) {
+                ParentComponent.prototype.renderTo = function(context, target, element) {
                     var _this3 = this;
                     return this.tryInit(function() {
-                        if (target === window) return _this3.render(element);
+                        if (target === window) return _this3.render(context, element);
                         if (element && "string" != typeof element) throw new Error("Element passed to renderTo must be a string selector, got " + (void 0 === element ? "undefined" : parent__typeof(element)) + " " + element);
                         _this3.checkAllowRemoteRender(target);
-                        _this3.component.log("render_" + _this3.context + "_to_win", {
+                        _this3.component.log("render_" + context + "_to_win", {
                             element: Object(belter_src.stringify)(element),
-                            context: _this3.context
+                            context: context
                         });
-                        _this3.delegate(target);
-                        return _this3.render(element, target);
+                        _this3.delegate(context, target);
+                        return _this3.render(context, element, target);
                     });
                 };
                 ParentComponent.prototype.on = function(eventName, handler) {
@@ -4990,47 +4847,49 @@
                         ParentComponent.activeComponents.splice(ParentComponent.activeComponents.indexOf(_this4), 1);
                     });
                 };
-                ParentComponent.prototype.getWindowRef = function(target, domain, uid) {
+                ParentComponent.prototype.getWindowRef = function(target, domain, uid, context) {
                     if (domain === Object(cross_domain_utils_src.getDomain)(window)) {
                         global_global.windows[uid] = window;
                         this.clean.register(function() {
                             delete global_global.windows[uid];
                         });
                         return {
-                            type: WINDOW_REFERENCES.GLOBAL,
+                            type: constants.WINDOW_REFERENCES.GLOBAL,
                             uid: uid
                         };
                     }
                     if (target !== window) throw new Error("Can not currently create window reference for different target with a different domain");
-                    return this.context === constants_CONTEXT_TYPES.POPUP ? {
-                        type: WINDOW_REFERENCES.OPENER
+                    return context === constants.CONTEXT.POPUP ? {
+                        type: constants.WINDOW_REFERENCES.OPENER
                     } : Object(cross_domain_utils_src.isTop)(window) ? {
-                        type: WINDOW_REFERENCES.TOP
+                        type: constants.WINDOW_REFERENCES.TOP
                     } : {
-                        type: WINDOW_REFERENCES.PARENT,
+                        type: constants.WINDOW_REFERENCES.PARENT,
                         distance: Object(cross_domain_utils_src.getDistanceFromTop)(window)
                     };
                 };
                 ParentComponent.prototype.buildWindowName = function(_ref7) {
-                    var name, childPayload, normalizedName, encodedPayload, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, target = _ref7.target;
+                    var name, childPayload, normalizedName, encodedPayload, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, target = _ref7.target, uid = _ref7.uid, context = _ref7.context;
                     return name = this.component.name, childPayload = this.buildChildPayload({
                         proxyWin: proxyWin,
                         initialDomain: initialDomain,
                         domain: domain,
-                        target: target
+                        target: target,
+                        context: context,
+                        uid: uid
                     }), normalizedName = name.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_"), 
                     encodedPayload = Object(belter_src.base64encode)(JSON.stringify(childPayload)), 
-                    "__" + ZOID + "__" + normalizedName + "__" + encodedPayload + "__";
+                    "__" + constants.ZOID + "__" + normalizedName + "__" + encodedPayload + "__";
                 };
                 ParentComponent.prototype.getPropsRef = function(proxyWin, target, domain, uid) {
                     var value = serializeMessage(proxyWin, domain, this.getPropsForChild(domain)), propRef = Object(cross_domain_utils_src.isSameDomain)(target) ? {
-                        type: INITIAL_PROPS.RAW,
+                        type: constants.INITIAL_PROPS.RAW,
                         value: value
                     } : {
-                        type: INITIAL_PROPS.UID,
+                        type: constants.INITIAL_PROPS.UID,
                         uid: uid
                     };
-                    if (propRef.type === INITIAL_PROPS.UID) {
+                    if (propRef.type === constants.INITIAL_PROPS.UID) {
                         global_global.props[uid] = value;
                         this.clean.register(function() {
                             delete global_global.props[uid];
@@ -5039,14 +4898,14 @@
                     return propRef;
                 };
                 ParentComponent.prototype.buildChildPayload = function() {
-                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref8.proxyWin, initialDomain = _ref8.initialDomain, domain = _ref8.domain, _ref8$target = _ref8.target, target = void 0 === _ref8$target ? window : _ref8$target;
+                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref8.proxyWin, initialDomain = _ref8.initialDomain, domain = _ref8.domain, _ref8$target = _ref8.target, target = void 0 === _ref8$target ? window : _ref8$target, context = _ref8.context, uid = _ref8.uid;
                     return {
-                        uid: this.uid,
-                        context: this.context,
+                        uid: uid,
+                        context: context,
                         domain: Object(cross_domain_utils_src.getDomain)(window),
                         tag: this.component.tag,
-                        parent: this.getWindowRef(target, initialDomain, this.uid),
-                        props: this.getPropsRef(proxyWin, target, domain, this.uid),
+                        parent: this.getWindowRef(target, initialDomain, uid, context),
+                        props: this.getPropsRef(proxyWin, target, domain, uid),
                         exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
                     };
                 };
@@ -5111,7 +4970,7 @@
                                 if ("boolean" == typeof queryValue) result = queryValue.toString(); else if ("string" == typeof queryValue) result = queryValue.toString(); else {
                                     if ("function" == typeof queryValue) return;
                                     if ("object" === (void 0 === queryValue ? "undefined" : props__typeof(queryValue)) && null !== queryValue) {
-                                        if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = btoa(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
+                                        if (prop.serialization === constants.PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === constants.PROP_SERIALIZATION.BASE64) result = btoa(JSON.stringify(queryValue)); else if (prop.serialization === constants.PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                                             result = Object(belter_src.dotify)(queryValue, key);
                                             for (var _i10 = 0, _Object$keys6 = Object.keys(result), _length10 = null == _Object$keys6 ? 0 : _Object$keys6.length; _i10 < _length10; _i10++) {
                                                 var dotkey = _Object$keys6[_i10];
@@ -5154,7 +5013,7 @@
                         throw new Error("Child exports were not available");
                     });
                 };
-                ParentComponent.prototype.openBridge = function(win, domain) {
+                ParentComponent.prototype.openBridge = function(win, domain, context) {
                     var _this7 = this;
                     return src.a.try(function() {
                         if (bridge && bridge.needsBridge({
@@ -5162,7 +5021,7 @@
                             domain: domain
                         }) && !bridge.hasBridge(domain, domain)) {
                             var bridgeUrl = _this7.component.getBridgeUrl(_this7.props);
-                            if (!bridgeUrl) throw new Error("Bridge url and domain needed to render " + _this7.context);
+                            if (!bridgeUrl) throw new Error("Bridge url and domain needed to render " + context);
                             var bridgeDomain = Object(cross_domain_utils_src.getDomainFromUrl)(bridgeUrl);
                             bridge.linkUrl(win, domain);
                             return bridge.openBridge(bridgeUrl, bridgeDomain);
@@ -5172,8 +5031,15 @@
                 ParentComponent.prototype.open = function() {
                     var _this8 = this;
                     return src.a.try(function() {
-                        _this8.component.log("open_" + _this8.context);
-                        return _this8.props.window ? _this8.props.window : _this8.driver.open.call(_this8);
+                        _this8.component.log("open");
+                        var windowProp = _this8.props.window;
+                        if (windowProp) {
+                            _this8.clean.register("destroyProxyWindow", function() {
+                                return windowProp.close();
+                            });
+                            return windowProp;
+                        }
+                        return _this8.driver.open.call(_this8);
                     });
                 };
                 ParentComponent.prototype.setWindowName = function(proxyWin, name) {
@@ -5188,9 +5054,9 @@
                 ParentComponent.prototype.elementReady = function(element) {
                     return Object(belter_src.elementReady)(element).then(belter_src.noop);
                 };
-                ParentComponent.prototype.delegate = function(target) {
+                ParentComponent.prototype.delegate = function(context, target) {
                     var _this10 = this;
-                    this.component.log("delegate_" + this.context);
+                    this.component.log("delegate");
                     for (var props = {
                         window: this.props.window,
                         onClose: this.props.onClose,
@@ -5199,23 +5065,18 @@
                         var propName = _component$getPropNam2[_i4];
                         this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
                     }
-                    for (var delegate = _send(target, POST_MESSAGE.DELEGATE + "_" + this.component.name, {
-                        uid: this.uid,
-                        context: this.context,
-                        env: this.props.env,
-                        options: {
-                            context: this.context,
-                            props: props,
-                            overrides: {
-                                userClose: function() {
-                                    return _this10.userClose();
-                                },
-                                error: function(err) {
-                                    return _this10.error(err);
-                                },
-                                on: function(eventName, handler) {
-                                    return _this10.on(eventName, handler);
-                                }
+                    for (var delegate = _send(target, constants.POST_MESSAGE.DELEGATE + "_" + this.component.name, {
+                        context: context,
+                        props: props,
+                        overrides: {
+                            userClose: function() {
+                                return _this10.userClose();
+                            },
+                            error: function(err) {
+                                return _this10.error(err);
+                            },
+                            on: function(eventName, handler) {
+                                return _this10.on(eventName, handler);
                             }
                         }
                     }).then(function(_ref9) {
@@ -5226,7 +5087,7 @@
                         throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + Object(belter_src.stringifyError)(err));
                     }), overrides = this.driver.delegateOverrides, _loop = function(_i6, _Object$keys4, _length6) {
                         var key = _Object$keys4[_i6];
-                        overrides[key] === constants_DELEGATE.CALL_DELEGATE && (_this10[key] = function() {
+                        overrides[key] === constants.DELEGATE.CALL_DELEGATE && (_this10[key] = function() {
                             var _this11 = this, _arguments = arguments;
                             return delegate.then(function(data) {
                                 return data.overrides[key].apply(_this11, _arguments);
@@ -5238,7 +5099,7 @@
                     var _this12 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
                         _this12.component.log("detect_close_child");
                         return src.a.try(function() {
-                            return _this12.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+                            return _this12.props.onClose(constants.CLOSE_REASONS.CLOSE_DETECTED);
                         }).finally(function() {
                             return _this12.destroy();
                         });
@@ -5291,8 +5152,12 @@
                         checkClose: function() {
                             return _this16.checkClose(win);
                         },
-                        resize: function(width, height) {
-                            return _this16.resize(width, height);
+                        resize: function(_ref10) {
+                            var width = _ref10.width, height = _ref10.height;
+                            return _this16.resize({
+                                width: width,
+                                height: height
+                            });
                         },
                         trigger: function(name) {
                             return src.a.try(function() {
@@ -5314,21 +5179,13 @@
                         }
                     };
                 };
-                ParentComponent.prototype.resize = function(width, height) {
-                    var _this17 = this, _ref10$waitForTransit = (arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}).waitForTransition, waitForTransition = void 0 === _ref10$waitForTransit || _ref10$waitForTransit;
+                ParentComponent.prototype.resize = function(_ref11) {
+                    var _this17 = this, width = _ref11.width, height = _ref11.height;
                     return src.a.try(function() {
-                        _this17.component.log("resize", {
-                            height: Object(belter_src.stringify)(height),
-                            width: Object(belter_src.stringify)(width)
+                        _this17.driver.resize.call(_this17, {
+                            width: width,
+                            height: height
                         });
-                        _this17.driver.resize.call(_this17, width, height);
-                        if (waitForTransition && _this17.element) {
-                            var overflow = void 0;
-                            _this17.element && (overflow = Object(belter_src.setOverflow)(_this17.element, "hidden"));
-                            return Object(belter_src.elementStoppedMoving)(_this17.element).then(function() {
-                                overflow && overflow.reset();
-                            });
-                        }
                     });
                 };
                 ParentComponent.prototype.hide = function() {
@@ -5350,15 +5207,15 @@
                     });
                 };
                 ParentComponent.prototype.userClose = function() {
-                    return this.close(CLOSE_REASONS.USER_CLOSED);
+                    return this.close(constants.CLOSE_REASONS.USER_CLOSED);
                 };
                 ParentComponent.prototype.close = function() {
-                    var _this19 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this19 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : constants.CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
                         _this19.component.log("close", {
                             reason: reason
                         });
-                        _this19.event.triggerOnce(EVENTS.CLOSE);
+                        _this19.event.triggerOnce(constants.EVENTS.CLOSE);
                         return _this19.props.onClose(reason);
                     }).then(function() {
                         return src.a.all([ _this19.closeComponent(), _this19.closeContainer() ]);
@@ -5367,9 +5224,9 @@
                     });
                 };
                 ParentComponent.prototype.closeContainer = function() {
-                    var _this20 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this20 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : constants.CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
-                        _this20.event.triggerOnce(EVENTS.CLOSE);
+                        _this20.event.triggerOnce(constants.EVENTS.CLOSE);
                         return _this20.props.onClose(reason);
                     }).then(function() {
                         return src.a.all([ _this20.closeComponent(reason), _this20.hideContainer() ]);
@@ -5385,18 +5242,18 @@
                     });
                 };
                 ParentComponent.prototype.closeComponent = function() {
-                    var _this22 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : CLOSE_REASONS.PARENT_CALL;
+                    var _this22 = this, reason = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : constants.CLOSE_REASONS.PARENT_CALL;
                     return src.a.try(function() {
                         return _this22.cancelContainerEvents();
                     }).then(function() {
-                        _this22.event.triggerOnce(EVENTS.CLOSE);
+                        _this22.event.triggerOnce(constants.EVENTS.CLOSE);
                         return _this22.props.onClose(reason);
                     }).then(function() {
                         return _this22.hideComponent();
                     }).then(function() {
                         return _this22.destroyComponent();
                     }).then(function() {
-                        _this22.childExports && _this22.context === constants_CONTEXT_TYPES.POPUP && _this22.childExports.close().catch(belter_src.noop);
+                        _this22.childExports && _this22.driver.callChildToClose && _this22.childExports.close().catch(belter_src.noop);
                     });
                 };
                 ParentComponent.prototype.destroyComponent = function() {
@@ -5410,7 +5267,7 @@
                     return src.a.try(function() {
                         if (_this23.props.onDisplay) return _this23.props.onDisplay();
                     }).then(function() {
-                        if (_this23.container) return Object(belter_src.showAndAnimate)(_this23.container, ANIMATION_NAMES.SHOW_CONTAINER, _this23.clean.register);
+                        if (_this23.container) return Object(belter_src.showAndAnimate)(_this23.container, constants.ANIMATION_NAMES.SHOW_CONTAINER, _this23.clean.register);
                     });
                 };
                 ParentComponent.prototype.showComponent = function() {
@@ -5418,29 +5275,31 @@
                     return src.a.try(function() {
                         if (_this24.props.onDisplay) return _this24.props.onDisplay();
                     }).then(function() {
-                        if (_this24.element) return Object(belter_src.showAndAnimate)(_this24.element, ANIMATION_NAMES.SHOW_COMPONENT, _this24.clean.register);
+                        if (_this24.element) return Object(belter_src.showAndAnimate)(_this24.element, constants.ANIMATION_NAMES.SHOW_COMPONENT, _this24.clean.register);
                     });
                 };
                 ParentComponent.prototype.hideContainer = function() {
                     var _this25 = this;
                     return src.a.try(function() {
-                        if (_this25.container) return Object(belter_src.animateAndHide)(_this25.container, ANIMATION_NAMES.HIDE_CONTAINER, _this25.clean.register);
+                        if (_this25.container) return Object(belter_src.animateAndHide)(_this25.container, constants.ANIMATION_NAMES.HIDE_CONTAINER, _this25.clean.register);
                     });
                 };
                 ParentComponent.prototype.hideComponent = function() {
                     var _this26 = this;
                     return src.a.try(function() {
-                        if (_this26.element) return Object(belter_src.animateAndHide)(_this26.element, ANIMATION_NAMES.HIDE_COMPONENT, _this26.clean.register);
+                        if (_this26.element) return Object(belter_src.animateAndHide)(_this26.element, constants.ANIMATION_NAMES.HIDE_COMPONENT, _this26.clean.register);
                     });
                 };
-                ParentComponent.prototype.prerender = function(win) {
-                    var _this27 = this;
+                ParentComponent.prototype.prerender = function(win, _ref12) {
+                    var _this27 = this, context = _ref12.context, uid = _ref12.uid;
                     return src.a.try(function() {
                         if (_this27.component.prerenderTemplate) return src.a.try(function() {
                             return _this27.driver.openPrerender.call(_this27, win);
                         }).then(function(prerenderWindow) {
                             if (prerenderWindow && Object(cross_domain_utils_src.isSameDomain)(prerenderWindow) && Object(cross_domain_utils_src.isBlankDomain)(prerenderWindow)) {
                                 var doc = prerenderWindow.document, el = _this27.renderTemplate(_this27.component.prerenderTemplate, {
+                                    context: context,
+                                    uid: uid,
                                     document: doc
                                 });
                                 el instanceof ElementNode && (el = el.render(dom_dom({
@@ -5448,25 +5307,40 @@
                                 })));
                                 try {
                                     Object(belter_src.writeElementToWindow)(prerenderWindow, el);
-                                } catch (err) {}
+                                } catch (err) {
+                                    return;
+                                }
+                                var _ref13 = _this27.component.autoResize || {}, _ref13$width = _ref13.width, width = void 0 !== _ref13$width && _ref13$width, _ref13$height = _ref13.height, height = void 0 !== _ref13$height && _ref13$height, _ref13$element = _ref13.element, element = void 0 === _ref13$element ? "body" : _ref13$element;
+                                (width || height) && Object(belter_src.onResize)(Object(belter_src.getElement)(element, prerenderWindow.document), function(_ref14) {
+                                    var newWidth = _ref14.width, newHeight = _ref14.height;
+                                    _this27.resize({
+                                        width: width ? newWidth : void 0,
+                                        height: height ? newHeight : void 0
+                                    });
+                                }, {
+                                    width: width,
+                                    height: height,
+                                    win: prerenderWindow
+                                });
                             }
                         });
                     });
                 };
-                ParentComponent.prototype.renderTemplate = function(renderer, _ref11) {
-                    var _this28 = this, focus = _ref11.focus, container = _ref11.container, document = _ref11.document, outlet = _ref11.outlet, _ref12 = this.component.dimensions || {}, _ref12$width = _ref12.width, width = void 0 === _ref12$width ? constants_DEFAULT_DIMENSIONS.WIDTH + "px" : _ref12$width, _ref12$height = _ref12.height, height = void 0 === _ref12$height ? constants_DEFAULT_DIMENSIONS.HEIGHT + "px" : _ref12$height;
+                ParentComponent.prototype.renderTemplate = function(renderer, _ref15) {
+                    var _this28 = this, context = _ref15.context, uid = _ref15.uid, focus = _ref15.focus, container = _ref15.container, document = _ref15.document, outlet = _ref15.outlet;
                     focus = focus || function() {
                         return src.a.resolve();
                     };
                     return renderer.call(this, {
-                        id: CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + this.uid,
+                        context: context,
+                        uid: uid,
+                        id: constants.CLASS_NAMES.ZOID + "-" + this.component.tag + "-" + uid,
                         props: renderer.__xdomain__ ? null : this.props,
                         tag: this.component.tag,
-                        context: this.context,
-                        CLASS: CLASS_NAMES,
-                        ANIMATION: ANIMATION_NAMES,
-                        CONTEXT: constants_CONTEXT_TYPES,
-                        EVENT: EVENTS,
+                        CLASS: constants.CLASS_NAMES,
+                        ANIMATION: constants.ANIMATION_NAMES,
+                        CONTEXT: constants.CONTEXT,
+                        EVENT: constants.EVENTS,
                         actions: {
                             focus: focus,
                             close: function() {
@@ -5478,23 +5352,22 @@
                         },
                         jsxDom: node,
                         document: document,
-                        dimensions: {
-                            width: width,
-                            height: height
-                        },
+                        dimensions: this.component.dimensions,
                         container: container,
                         outlet: outlet
                     });
                 };
-                ParentComponent.prototype.openContainer = function(element, _ref13) {
-                    var _this29 = this, focus = _ref13.focus;
+                ParentComponent.prototype.openContainer = function(element, _ref16) {
+                    var _this29 = this, context = _ref16.context, uid = _ref16.uid, focus = _ref16.focus;
                     return src.a.try(function() {
                         var el;
                         if (!(el = element ? Object(belter_src.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
                         if (_this29.component.containerTemplate) {
                             var outlet = document.createElement("div");
-                            Object(belter_src.addClass)(outlet, CLASS_NAMES.OUTLET);
+                            Object(belter_src.addClass)(outlet, constants.CLASS_NAMES.OUTLET);
                             var container = _this29.renderTemplate(_this29.component.containerTemplate, {
+                                context: context,
+                                uid: uid,
                                 container: el,
                                 focus: focus,
                                 outlet: outlet
@@ -5515,7 +5388,7 @@
                                 _this29.container && _this29.container.parentNode && _this29.container.parentNode.removeChild(_this29.container);
                                 delete _this29.container;
                             });
-                        } else if (_this29.driver.renderedIntoContainer) throw new Error("containerTemplate needed to render " + _this29.context);
+                        } else if (_this29.driver.renderedIntoContainer) throw new Error("containerTemplate needed to render " + context);
                     });
                 };
                 ParentComponent.prototype.cancelContainerEvents = function() {
@@ -5560,15 +5433,15 @@
                     return src.a.all(results).then(belter_src.noop);
                 };
                 return ParentComponent;
-            }()).prototype, "close", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "closeContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "closeContainer"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "destroyContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "destroyContainer"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "closeComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "closeComponent"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "showContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "showContainer"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "showComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "showComponent"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "hideContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "hideContainer"), _class.prototype), 
-            _applyDecoratedDescriptor(_class.prototype, "hideComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(_class.prototype, "hideComponent"), _class.prototype), 
-            _class);
+            }()).prototype, "close", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "close"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "closeContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "closeContainer"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "destroyContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "destroyContainer"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "closeComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "closeComponent"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "showContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "showContainer"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "showComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "showComponent"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "hideContainer", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "hideContainer"), parent__class.prototype), 
+            parent__applyDecoratedDescriptor(parent__class.prototype, "hideComponent", [ belter_src.memoized ], Object.getOwnPropertyDescriptor(parent__class.prototype, "hideComponent"), parent__class.prototype), 
+            parent__class);
             parent_ParentComponent.activeComponents = [];
             var _createClass = function() {
                 function defineProperties(target, props) {
@@ -5591,7 +5464,6 @@
                         if (!(instance instanceof DelegateComponent)) throw new TypeError("Cannot call a class as a function");
                     }(this);
                     this.component = component;
-                    this.uid = options.uid;
                     this.context = options.context;
                     this.clean = cleanup(this);
                     this.event = Object(belter_src.eventEmitter)();
@@ -5614,14 +5486,23 @@
                     this.registerActiveComponent();
                     this.watchForClose(source);
                 }
+                DelegateComponent.prototype.getDelegate = function() {
+                    var _this = this;
+                    return {
+                        overrides: this.getOverrides(),
+                        destroy: function() {
+                            return _this.destroy();
+                        }
+                    };
+                };
                 DelegateComponent.prototype.watchForClose = function(source) {
-                    var _this = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(source, function() {
-                        return _this.destroy();
+                    var _this2 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(source, function() {
+                        return _this2.destroy();
                     }, 3e3);
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 };
-                DelegateComponent.prototype.getOverrides = function(context) {
-                    for (var delegateOverrides = RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function(_i4, _Object$keys2, _length4) {
+                DelegateComponent.prototype.getOverrides = function() {
+                    for (var context = this.context, delegateOverrides = RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function(_i4, _Object$keys2, _length4) {
                         var key = _Object$keys2[_i4];
                         overrides[key] = function() {
                             return parent_ParentComponent.prototype[key].apply(self, arguments);
@@ -5635,7 +5516,6 @@
                 _createClass(DelegateComponent, [ {
                     key: "driver",
                     get: function() {
-                        if (!this.context) throw new Error("Context not set");
                         return RENDER_DRIVERS[this.context];
                     }
                 } ]);
@@ -5677,8 +5557,7 @@
                 angular2: drivers.angular2,
                 glimmer: drivers.glimmer,
                 react: drivers.react,
-                vue: drivers.vue,
-                script: drivers.script
+                vue: drivers.vue
             }, component_Component = (function(target, property, decorators, descriptor, context) {
                 var desc = {};
                 Object.keys(descriptor).forEach(function(key) {
@@ -5712,7 +5591,7 @@
                                 var key = _Object$keys2[_i2], prop = options.props[key];
                                 if (!prop || "object" !== (void 0 === prop ? "undefined" : validate__typeof(prop))) throw new Error("Expected options.props." + key + " to be an object");
                                 if (!prop.type) throw new Error("Expected prop.type");
-                                if (-1 === PROP_TYPES_LIST.indexOf(prop.type)) throw new Error("Expected prop.type to be one of " + PROP_TYPES_LIST.join(", "));
+                                if (-1 === constants.PROP_TYPES_LIST.indexOf(prop.type)) throw new Error("Expected prop.type to be one of " + constants.PROP_TYPES_LIST.join(", "));
                                 if (prop.required && prop.def) throw new Error("Required prop can not have a default value");
                             }
                         }(options);
@@ -5724,13 +5603,13 @@
                             if (options.contexts.popup) throw new Error("Popups not supported in this build -- please use the full zoid.js build");
                             for (var anyEnabled = !1, _i4 = 0, _Object$keys4 = Object.keys(options.contexts), _length4 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i4 < _length4; _i4++) {
                                 var context = _Object$keys4[_i4];
-                                if (-1 === CONTEXT_TYPES_LIST.indexOf(context)) throw new Error("Unsupported context type: " + context);
+                                if (-1 === constants.CONTEXT_LIST.indexOf(context)) throw new Error("Unsupported context type: " + context);
                                 (options.contexts && options.contexts[context] || options.contexts && void 0 === options.contexts[context]) && (anyEnabled = !0);
                             }
                             if (!anyEnabled) throw new Error("No context type is enabled");
                         }
                         if (options.defaultContext) {
-                            if (-1 === CONTEXT_TYPES_LIST.indexOf(options.defaultContext)) throw new Error("Unsupported context type: " + (options.defaultContext || "unknown"));
+                            if (-1 === constants.CONTEXT_LIST.indexOf(options.defaultContext)) throw new Error("Unsupported context type: " + (options.defaultContext || "unknown"));
                             if (options.contexts && options.defaultContext && !options.contexts[options.defaultContext]) throw new Error("Disallowed default context type: " + (options.defaultContext || "unknown"));
                         }
                         if (options.defaultEnv) {
@@ -5748,10 +5627,10 @@
                         if (options.prerenderTemplate && "function" != typeof options.prerenderTemplate) throw new Error("Expected options.prerenderTemplate to be a function");
                         if (options.containerTemplate && "function" != typeof options.containerTemplate) throw new Error("Expected options.containerTemplate to be a function");
                     }(options);
-                    this.addProp(options, "tag");
-                    this.addProp(options, "allowedParentDomains", constants_WILDCARD);
+                    this.tag = options.tag;
+                    this.name = this.tag.replace(/-/g, "_");
+                    this.allowedParentDomains = options.allowedParentDomains || constants.WILDCARD;
                     if (Component.components[this.tag]) throw new Error("Can not register multiple components with the same tag");
-                    this.addProp(options, "name", this.tag.replace(/-/g, "_"));
                     this.builtinProps = {
                         env: {
                             type: "string",
@@ -5842,30 +5721,34 @@
                         }
                     };
                     this.props = options.props || {};
-                    this.addProp(options, "dimensions");
-                    this.addProp(options, "listenForResize");
-                    this.addProp(options, "defaultEnv");
-                    this.addProp(options, "url", options.buildUrl);
-                    this.addProp(options, "domain");
-                    this.addProp(options, "bridgeUrl");
-                    this.addProp(options, "attributes", {});
-                    this.addProp(options, "contexts", {
+                    var _ref = options.dimensions || {}, _ref$width = _ref.width, width = void 0 === _ref$width ? constants.DEFAULT_DIMENSIONS.WIDTH : _ref$width, _ref$height = _ref.height, height = void 0 === _ref$height ? constants.DEFAULT_DIMENSIONS.HEIGHT : _ref$height;
+                    this.dimensions = {
+                        width: Object(belter_src.toCSS)(width),
+                        height: Object(belter_src.toCSS)(height)
+                    };
+                    this.defaultEnv = options.defaultEnv;
+                    this.url = options.url || options.buildUrl;
+                    this.domain = options.domain;
+                    this.bridgeUrl = options.bridgeUrl;
+                    this.attributes = options.attributes || {};
+                    this.contexts = options.contexts || {
                         iframe: !0,
                         popup: !1
-                    });
-                    this.addProp(options, "defaultContext");
-                    this.addProp(options, "autoResize", !1);
-                    this.addProp(options, "containerTemplate", defaultContainerTemplate);
-                    this.addProp(options, "prerenderTemplate", defaultPrerenderTemplate);
-                    this.addProp(options, "validate");
+                    };
+                    this.defaultContext = options.defaultContext || constants.CONTEXT.IFRAME;
+                    this.autoResize = "object" === component__typeof(options.autoResize) ? options.autoResize : {
+                        width: Boolean(options.autoResize),
+                        height: Boolean(options.autoResize),
+                        element: "body"
+                    };
+                    this.containerTemplate = options.containerTemplate || defaultContainerTemplate;
+                    this.prerenderTemplate = options.prerenderTemplate || defaultPrerenderTemplate;
+                    this.validate = options.validate;
                     Component.components[this.tag] = this;
                     this.registerDrivers();
                     this.registerChild();
                     this.listenDelegate();
                 }
-                Component.prototype.addProp = function(options, name, def) {
-                    Object(belter_src.copyProp)(options, this, name, def);
-                };
                 Component.prototype.getPropNames = function() {
                     for (var props = Object.keys(this.props), _i2 = 0, _Object$keys2 = Object.keys(this.builtinProps), _length2 = null == _Object$keys2 ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
                         var key = _Object$keys2[_i2];
@@ -5899,22 +5782,21 @@
                 };
                 Component.prototype.listenDelegate = function() {
                     var _this2 = this;
-                    _on(POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name, function() {
+                    _on(constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name, function() {
                         return !0;
                     });
-                    _on(POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref) {
-                        var source = _ref.source, data = _ref.data, delegate = _this2.delegate(source, data.options);
-                        return {
-                            overrides: delegate.getOverrides(data.context),
-                            destroy: function() {
-                                return delegate.destroy();
-                            }
-                        };
+                    _on(constants.POST_MESSAGE.DELEGATE + "_" + this.name, function(_ref2) {
+                        var source = _ref2.source, _ref2$data = _ref2.data, context = _ref2$data.context, props = _ref2$data.props, overrides = _ref2$data.overrides;
+                        return _this2.delegate(source, {
+                            context: context,
+                            props: props,
+                            overrides: overrides
+                        }).getDelegate();
                     });
                 };
                 Component.prototype.canRenderTo = function(win) {
-                    return _send(win, POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name).then(function(_ref2) {
-                        return _ref2.data;
+                    return _send(win, constants.POST_MESSAGE.ALLOW_DELEGATE + "_" + this.name).then(function(_ref3) {
+                        return _ref3.data;
                     }).catch(function() {
                         return !1;
                     });
@@ -5960,12 +5842,12 @@
                 };
                 Component.prototype.validateRenderContext = function(context, element) {
                     if (context && !this.contexts[context]) throw new Error("[" + this.tag + "] Can not render to " + context);
-                    if (!element && context === constants_CONTEXT_TYPES.IFRAME) throw new Error("[" + this.tag + "] Context type " + constants_CONTEXT_TYPES.IFRAME + " requires an element selector");
+                    if (!element && context === constants.CONTEXT.IFRAME) throw new Error("[" + this.tag + "] Context type " + constants.CONTEXT.IFRAME + " requires an element selector");
                 };
                 Component.prototype.getDefaultContext = function() {
-                    if (this.defaultContext) return this.defaultContext;
-                    if (this.contexts[constants_CONTEXT_TYPES.IFRAME]) return constants_CONTEXT_TYPES.IFRAME;
-                    if (this.contexts[constants_CONTEXT_TYPES.POPUP]) return constants_CONTEXT_TYPES.POPUP;
+                    if (this.defaultContext && this.contexts[this.defaultContext]) return this.defaultContext;
+                    if (this.contexts[constants.CONTEXT.IFRAME]) return constants.CONTEXT.IFRAME;
+                    if (this.contexts[constants.CONTEXT.POPUP]) return constants.CONTEXT.POPUP;
                     throw new Error("Can not determine default context");
                 };
                 Component.prototype.getRenderContext = function(context, element) {
@@ -5976,49 +5858,55 @@
                 Component.prototype.render = function(props, element) {
                     var _this3 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this3, _this3.getRenderContext(null, element), {
+                        var context = _this3.getRenderContext(null, element);
+                        return new parent_ParentComponent(_this3, context, {
                             props: props
-                        }).render(element);
+                        }).render(context, element);
                     });
                 };
                 Component.prototype.renderIframe = function(props, element) {
                     var _this4 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this4, _this4.getRenderContext(constants_CONTEXT_TYPES.IFRAME, element), {
+                        var context = _this4.getRenderContext(constants.CONTEXT.IFRAME, element);
+                        return new parent_ParentComponent(_this4, context, {
                             props: props
-                        }).render(element);
+                        }).render(context, element);
                     });
                 };
                 Component.prototype.renderPopup = function(props) {
                     var _this5 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this5, _this5.getRenderContext(constants_CONTEXT_TYPES.POPUP), {
+                        var context = _this5.getRenderContext(constants.CONTEXT.POPUP);
+                        return new parent_ParentComponent(_this5, context, {
                             props: props
-                        }).render();
+                        }).render(context);
                     });
                 };
                 Component.prototype.renderTo = function(win, props, element) {
                     var _this6 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this6, _this6.getRenderContext(null, element), {
+                        var context = _this6.getRenderContext(null, element);
+                        return new parent_ParentComponent(_this6, context, {
                             props: props
-                        }).renderTo(win, element);
+                        }).renderTo(context, win, element);
                     });
                 };
                 Component.prototype.renderIframeTo = function(win, props, element) {
                     var _this7 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this7, _this7.getRenderContext(constants_CONTEXT_TYPES.IFRAME, element), {
+                        var context = _this7.getRenderContext(constants.CONTEXT.IFRAME, element);
+                        return new parent_ParentComponent(_this7, context, {
                             props: props
-                        }).renderTo(win, element);
+                        }).renderTo(context, win, element);
                     });
                 };
                 Component.prototype.renderPopupTo = function(win, props) {
                     var _this8 = this;
                     return src.a.try(function() {
-                        return new parent_ParentComponent(_this8, _this8.getRenderContext(constants_CONTEXT_TYPES.POPUP), {
+                        var context = _this8.getRenderContext(constants.CONTEXT.POPUP);
+                        return new parent_ParentComponent(_this8, context, {
                             props: props
-                        }).renderTo(win);
+                        }).renderTo(context, win);
                     });
                 };
                 Component.prototype.log = function(event) {
@@ -6056,7 +5944,7 @@
             function interface_destroyAll() {
                 return parent_ParentComponent.destroyAll();
             }
-            var postRobot = post_robot_src_namespaceObject, CONSTANTS = src_constants_namespaceObject;
+            var postRobot = post_robot_src_namespaceObject, CONSTANTS = constants;
             __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
                 return belter_src.PopupOpenError;
             });

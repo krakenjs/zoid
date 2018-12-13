@@ -17,7 +17,6 @@ export var DelegateComponent = function () {
         _classCallCheck(this, DelegateComponent);
 
         this.component = component;
-        this.uid = options.uid;
         this.context = options.context;
         this.clean = cleanup(this);
         this.event = eventEmitter();
@@ -57,17 +56,28 @@ export var DelegateComponent = function () {
         this.watchForClose(source);
     }
 
-    DelegateComponent.prototype.watchForClose = function watchForClose(source) {
+    DelegateComponent.prototype.getDelegate = function getDelegate() {
         var _this = this;
 
+        return {
+            overrides: this.getOverrides(),
+            destroy: function destroy() {
+                return _this.destroy();
+            }
+        };
+    };
+
+    DelegateComponent.prototype.watchForClose = function watchForClose(source) {
+        var _this2 = this;
+
         var closeWindowListener = onCloseWindow(source, function () {
-            return _this.destroy();
+            return _this2.destroy();
         }, 3000);
         this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
     };
 
-    DelegateComponent.prototype.getOverrides = function getOverrides(context) {
-
+    DelegateComponent.prototype.getOverrides = function getOverrides() {
+        var context = this.context;
         var delegateOverrides = RENDER_DRIVERS[context].delegateOverrides;
 
         var overrides = {};
@@ -96,11 +106,6 @@ export var DelegateComponent = function () {
     _createClass(DelegateComponent, [{
         key: 'driver',
         get: function get() {
-
-            if (!this.context) {
-                throw new Error('Context not set');
-            }
-
             return RENDER_DRIVERS[this.context];
         }
     }]);

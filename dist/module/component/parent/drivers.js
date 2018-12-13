@@ -3,9 +3,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow, ProxyWindow } from 'post-robot/src';
 import { assertSameDomain, isSameDomain } from 'cross-domain-utils/src';
-import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, addClass, removeClass, uniqueID } from 'belter/src';
+import { iframe, popup, toCSS, showElement, hideElement, destroyElement, normalizeDimension, watchElementForClose, awaitFrameWindow, awaitFrameLoad, addClass, removeClass, uniqueID } from 'belter/src';
 
-import { CONTEXT_TYPES, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
+import { CONTEXT, DELEGATE, CLOSE_REASONS, CLASS_NAMES } from '../../constants';
 
 /*  Render Drivers
     --------------
@@ -28,9 +28,10 @@ export var RENDER_DRIVERS = {};
 // Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
 // to feel like a native element on the page.
 
-RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
+RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
     renderedIntoContainer: true,
+    callChildToClose: false,
 
     open: function open() {
         var _this = this;
@@ -83,7 +84,8 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
 
         this.clean.set('prerenderIframe', prerenderIframe);
 
-        return awaitFrameWindow(prerenderIframe).then(function (prerenderFrameWindow) {
+        return awaitFrameLoad(prerenderIframe).then(function () {
+            var prerenderFrameWindow = prerenderIframe.contentWindow;
 
             _this2.clean.register('destroyPrerender', function () {
                 destroyElement(prerenderIframe);
@@ -130,7 +132,10 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         open: DELEGATE.CALL_DELEGATE
     },
 
-    resize: function resize(width, height) {
+    resize: function resize(_ref) {
+        var width = _ref.width,
+            height = _ref.height;
+
 
         if (width) {
             this.container.style.width = toCSS(width);
@@ -154,19 +159,19 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
     // Popup context opens up a centered popup window on the page.
 
-    RENDER_DRIVERS[CONTEXT_TYPES.POPUP] = {
+    RENDER_DRIVERS[CONTEXT.POPUP] = {
 
         renderedIntoContainer: false,
+        callChildToClose: true,
 
         open: function open() {
             var _this4 = this;
 
             return ZalgoPromise['try'](function () {
-                var _ref = _this4.component.dimensions || {},
-                    _ref$width = _ref.width,
-                    width = _ref$width === undefined ? DEFAULT_DIMENSIONS.WIDTH : _ref$width,
-                    _ref$height = _ref.height,
-                    height = _ref$height === undefined ? DEFAULT_DIMENSIONS.HEIGHT : _ref$height;
+                var _component$dimensions = _this4.component.dimensions,
+                    width = _component$dimensions.width,
+                    height = _component$dimensions.height;
+
 
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);

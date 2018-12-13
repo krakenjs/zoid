@@ -6,6 +6,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { extend } from 'belter/src';
 
+import { CONTEXT } from '../constants';
+
 export var react = {
     global: function global() {
         if (window.React && window.ReactDOM) {
@@ -36,7 +38,7 @@ export var react = {
 
                     this.setState({ parent: parent });
 
-                    parent.render(el);
+                    parent.render(CONTEXT.IFRAME, el);
                 },
                 componentDidUpdate: function componentDidUpdate() {
 
@@ -69,7 +71,7 @@ export var react = {
 
                     this.setState({ parent: parent });
 
-                    parent.render(el);
+                    parent.render(CONTEXT.IFRAME, el);
                 };
 
                 _class.prototype.componentDidUpdate = function componentDidUpdate() {
