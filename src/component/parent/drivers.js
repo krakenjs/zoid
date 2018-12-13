@@ -5,9 +5,9 @@ import { cleanUpWindow, ProxyWindow } from 'post-robot/src';
 import { type CrossDomainWindowType, type SameDomainWindowType, assertSameDomain, isSameDomain } from 'cross-domain-utils/src';
 import { iframe, popup, toCSS, showElement, hideElement,
     destroyElement, normalizeDimension, watchElementForClose,
-    awaitFrameWindow, addClass, removeClass, uniqueID } from 'belter/src';
+    awaitFrameWindow, awaitFrameLoad, addClass, removeClass, uniqueID } from 'belter/src';
 
-import { CONTEXT, DELEGATE, CLOSE_REASONS, CLASS_NAMES, DEFAULT_DIMENSIONS } from '../../constants';
+import { CONTEXT, DELEGATE, CLOSE_REASONS, CLASS_NAMES } from '../../constants';
 
 
 export type ContextDriverType = {
@@ -16,7 +16,7 @@ export type ContextDriverType = {
     callChildToClose : boolean,
 
     open : () => ZalgoPromise<ProxyWindow>,
-    resize : (?(number | string), ?(number | string)) => void,
+    resize : ({ width? : ?number, height? : ?number }) => void,
     show : () => void,
     hide : () => void,
 
@@ -112,7 +112,8 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
         this.clean.set('prerenderIframe', prerenderIframe);
 
-        return awaitFrameWindow(prerenderIframe).then(prerenderFrameWindow => {
+        return awaitFrameLoad(prerenderIframe).then(() => {
+            let prerenderFrameWindow = prerenderIframe.contentWindow;
 
             this.clean.register('destroyPrerender', () => {
                 destroyElement(prerenderIframe);
@@ -158,7 +159,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         open:                    DELEGATE.CALL_DELEGATE
     },
 
-    resize(width : ?(number | string), height : ?(number | string)) {
+    resize({ width, height } : { width? : ?number, height? : ?number }) {
 
         if (width) {
             this.container.style.width = toCSS(width);
@@ -191,11 +192,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
         open() : ZalgoPromise<ProxyWindow> {
             return ZalgoPromise.try(() => {
-
-                let {
-                    width = DEFAULT_DIMENSIONS.WIDTH,
-                    height = DEFAULT_DIMENSIONS.HEIGHT
-                } = this.component.dimensions || {};
+                let { width, height } = this.component.dimensions;
 
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);

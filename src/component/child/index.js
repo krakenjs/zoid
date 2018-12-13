@@ -5,15 +5,13 @@ import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent,
     getNthParentFromTop, getAncestor, getAllFramesInWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, onDimensionsChange, trackDimensions, dimensionsMatchViewport,
-    cycle, getElement, noop, waitForDocumentReady } from 'belter/src';
+import { extend, getElement, noop, memoized, waitForDocumentBody, onResize } from 'belter/src';
 
 import { parseChildWindowName } from '../window';
 import { globalFor } from '../../lib';
 import { CONTEXT, CLOSE_REASONS, INITIAL_PROPS, WINDOW_REFERENCES } from '../../constants';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
-import type { DimensionsType } from '../../types';
 import type { WindowRef, PropRef, ParentExportsType } from '../parent';
 
 import { normalizeChildProps } from './props';
@@ -69,23 +67,15 @@ export class ChildComponent<P> {
             markWindowKnown(this.parentComponentWindow);
             
             this.watchForClose();
-            this.listenForResize();
-            this.watchForResize(context);
 
             return this.parentExports.init(this.buildExports());
+
+        }).then(() => {
+            return this.watchForResize();
 
         }).catch(err => {
             this.error(err);
         });
-    }
-
-    listenForResize() {
-        if (this.component.listenForResize) {
-            this.parentExports.trigger.fireAndForget('resize');
-            window.addEventListener('resize', () => {
-                this.parentExports.trigger.fireAndForget('resize');
-            });
-        }
     }
 
     checkParentDomain(domain : string) {
@@ -192,77 +182,36 @@ export class ChildComponent<P> {
         });
     }
 
-    enableAutoResize({ width = true, height = true } : { width : boolean, height : boolean } = {}) {
-        this.autoResize = { width, height };
-        this.watchForResize(this.context);
+    enableAutoResize({ width = false, height = true, element = 'body' } : { width : boolean, height : boolean, element : string } = {}) {
+        this.autoResize = { width, height, element };
+        this.watchForResize();
     }
 
     getAutoResize() : { width : boolean, height : boolean, element : HTMLElement } {
-
-        let width = false;
-        let height = false;
-
-        let autoResize = this.autoResize || this.component.autoResize;
-
-        if (typeof autoResize === 'object') {
-            width = Boolean(autoResize.width);
-            height = Boolean(autoResize.height);
-        } else if (autoResize) {
-            width = true;
-            height = true;
-        }
-
-        let element;
-
-        if (autoResize.element) {
-            element = getElement(autoResize.element);
-        } else if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-            element = document.body;
-        } else {
-            element = document.documentElement;
-        }
-
-        // $FlowFixMe
+        let { width = false, height = false, element = 'body' } = this.autoResize || this.component.autoResize || {};
+        element = getElement(element);
         return { width, height, element };
     }
 
-    watchForResize(context : $Values<typeof CONTEXT>) : ?ZalgoPromise<void> {
+    @memoized
+    watchForResize() : ?ZalgoPromise<void> {
+        return waitForDocumentBody().then(() => {
+            let { width, height, element } = this.getAutoResize();
 
-        let { width, height, element } = this.getAutoResize();
-
-        if (!width && !height) {
-            return;
-        }
-
-        if (context === CONTEXT.POPUP) {
-            return;
-        }
-
-        if (this.watchingForResize) {
-            return;
-        }
-
-        this.watchingForResize = true;
-
-        return ZalgoPromise.try(() => {
-            return waitForDocumentReady();
-
-        }).then(() => {
-
-            // $FlowFixMe
-            if (!dimensionsMatchViewport(element, { width, height })) {
-                // $FlowFixMe
-                return this.resizeToElement(element, { width, height });
+            if (!width && !height) {
+                return;
+            }
+    
+            if (this.context === CONTEXT.POPUP) {
+                return;
             }
 
-        }).then(() => {
-
-            return cycle(() => {
-                return onDimensionsChange(element, { width, height }).then(() => {
-                    // $FlowFixMe
-                    return this.resizeToElement(element, { width, height });
+            onResize(element, ({ width: newWidth, height: newHeight }) => {
+                this.resize({
+                    width:  width ? newWidth : undefined,
+                    height: height ? newHeight : undefined
                 });
-            });
+            }, { width, height });
         });
     }
 
@@ -281,43 +230,8 @@ export class ChildComponent<P> {
         };
     }
 
-    resize(width : ?number, height : ?number) : ZalgoPromise<void> {
-        return this.parentExports.resize(width, height);
-    }
-
-    resizeToElement(el : HTMLElement, { width, height } : DimensionsType) : ZalgoPromise<void> {
-
-        let history = [];
-
-        let resize = () => {
-            return ZalgoPromise.try(() => {
-
-                // $FlowFixMe
-                let tracker = trackDimensions(el, { width, height });
-                let { dimensions } = tracker.check();
-
-                for (let size of history) {
-
-                    let widthMatch = !width || size.width === dimensions.width;
-                    let heightMatch = !height || size.height === dimensions.height;
-
-                    if (widthMatch && heightMatch) {
-                        return;
-                    }
-                }
-
-                history.push({ width: dimensions.width, height: dimensions.height });
-
-                return this.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(() => {
-
-                    if (tracker.check().changed) {
-                        return resize();
-                    }
-                });
-            });
-        };
-
-        return resize();
+    resize({ width, height } : { width? : number, height? : number }) : ZalgoPromise<void> {
+        return this.parentExports.resize.fireAndForget({ width, height });
     }
 
     hide() : ZalgoPromise<void> {

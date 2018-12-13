@@ -4,15 +4,15 @@
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { memoize, copyProp, isRegex } from 'belter/src';
+import { memoize, copyProp, isRegex, toCSS } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
 import { ChildComponent } from '../child';
 import { ParentComponent, type RenderOptionsType } from '../parent';
 import { DelegateComponent, type DelegateOptionsType } from '../delegate';
 import { isZoidComponentWindow, parseChildWindowName } from '../window';
-import { CONTEXT, POST_MESSAGE, WILDCARD } from '../../constants';
-import { angular, angular2, glimmer, react, vue, script } from '../../drivers/index';
+import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../../constants';
+import { angular, angular2, glimmer, react, vue } from '../../drivers/index';
 import { info, error, warn } from '../../lib';
 import type { CssDimensionsType, StringMatcherType, ElementRefType, EnvString } from '../../types';
 
@@ -20,7 +20,7 @@ import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsType, type BuiltInPropsType, type MixedPropDefinitionType } from './props';
 
-const drivers = { angular, angular2, glimmer, react, vue, script };
+const drivers = { angular, angular2, glimmer, react, vue };
 
 /*  Component
     ---------
@@ -44,7 +44,7 @@ export type ComponentOptionsType<P> = {
     props? : UserPropsDefinitionType<P>,
 
     dimensions? : CssDimensionsType,
-    autoResize? : boolean | { width? : boolean, height? : boolean, element? : string },
+    autoResize? : { width? : boolean, height? : boolean, element? : string },
     listenForResize? : boolean,
 
     allowedParentDomains? : StringMatcherType,
@@ -78,7 +78,7 @@ export class Component<P> {
     builtinProps : BuiltInPropsDefinitionType<P>
 
     dimensions : CssDimensionsType
-    autoResize : ?(boolean | { width? : boolean, height? : boolean, element? : string })
+    autoResize : { width? : boolean, height? : boolean, element? : string }
     listenForResize : ?boolean
 
     allowedParentDomains : StringMatcherType
@@ -124,7 +124,9 @@ export class Component<P> {
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
-        this.addProp(options, 'dimensions');
+        let { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = options.dimensions || {};
+        this.dimensions = { width: toCSS(width), height: toCSS(height) };
+
         this.addProp(options, 'listenForResize');
 
         // The default environment we should render to if none is specified in the parent
@@ -151,7 +153,7 @@ export class Component<P> {
 
         // Auto Resize option
 
-        this.addProp(options, 'autoResize', false);
+        this.addProp(options, 'autoResize');
 
         // Templates and styles for the parent page and the initial rendering of the component
 

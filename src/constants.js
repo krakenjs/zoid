@@ -89,6 +89,6 @@ export const DELEGATE = {
 export const WILDCARD = '*';
 
 export const DEFAULT_DIMENSIONS = {
-    WIDTH:  300,
-    HEIGHT: 150
+    WIDTH:  '300px',
+    HEIGHT: '150px'
 };

@@ -34,9 +34,9 @@ export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindow
             continue;
         }
 
-        let value = props[key];
-        result[key] = normalizeChildProp(component, props, key, value);
+        let value = normalizeChildProp(component, props, key, props[key]);
 
+        result[key] = value;
         if (prop && prop.alias && !result[prop.alias]) {
             result[prop.alias] = value;
         }

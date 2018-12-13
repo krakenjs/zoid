@@ -1,6 +1,5 @@
 /* @flow */
 
-export * from './script';
 export * from './react';
 export * from './vue';
 export * from './angular';

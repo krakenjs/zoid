@@ -6,15 +6,14 @@ import { isSameDomain, isSameTopWindow, matchDomain, getDomainFromUrl, isBlankDo
     onCloseWindow, getDomain, type CrossDomainWindowType, getDistanceFromTop, isTop, normalizeMockUrl } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
-    noop, showAndAnimate, animateAndHide, showElement, hideElement,
-    addClass, extend, extendUrl,
-    setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
+    noop, showAndAnimate, animateAndHide, showElement, hideElement, onResize,
+    addClass, extend, extendUrl, getElement, memoized, appendChild,
     once, stringify, stringifyError, eventEmitter, type EventEmitterType } from 'belter/src';
 import { node, dom, ElementNode } from 'jsx-pragmatic/src';
 
 import { buildChildWindowName } from '../window';
 import { POST_MESSAGE, CONTEXT, CLASS_NAMES, ANIMATION_NAMES,
-    CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
+    CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS } from '../../constants';
 import type { Component } from '../component';
 import { global, cleanup, type CleanupType } from '../../lib';
 import type { PropsType, BuiltInPropsType } from '../component/props';
@@ -53,7 +52,7 @@ export type ParentExportsType<P> = {
     init : (ChildExportsType<P>) => ZalgoPromise<void>,
     close : (string) => ZalgoPromise<void>,
     checkClose : () => ZalgoPromise<void>,
-    resize : (?number, ?number) => ZalgoPromise<void>,
+    resize : ({ width? : ?number, height? : ?number }) => ZalgoPromise<void>,
     trigger : (string) => ZalgoPromise<void>,
     hide : () => ZalgoPromise<void>,
     show : () => ZalgoPromise<void>,
@@ -411,8 +410,14 @@ export class ParentComponent<P> {
         return ZalgoPromise.try(() => {
             this.component.log(`open`);
 
-            if (this.props.window) {
-                return this.props.window;
+            let windowProp = this.props.window;
+
+            if (windowProp) {
+                this.clean.register('destroyProxyWindow', () => {
+                    return windowProp.close();
+                });
+
+                return windowProp;
             }
 
             return this.driver.open.call(this);
@@ -551,7 +556,7 @@ export class ParentComponent<P> {
             init:       (childExports) => this.initChild(childExports),
             close:      (reason) => this.close(reason),
             checkClose: () => this.checkClose(win),
-            resize:     (width, height) => this.resize(width, height),
+            resize:     ({ width, height }) => this.resize({ width, height }),
             trigger:    (name) => ZalgoPromise.try(() => this.event.trigger(name)),
             hide:       () => ZalgoPromise.try(() => this.hide()),
             show:       () => ZalgoPromise.try(() => this.show()),
@@ -559,45 +564,11 @@ export class ParentComponent<P> {
         };
     }
 
-    /*  Resize
-        ------
-
-        Resize the child component window
-    */
-
-    resize(width : ?(number | string), height : ?(number | string), { waitForTransition = true } : { waitForTransition : boolean } = {}) : ZalgoPromise<void> {
+    resize({ width, height } : { width? : ?number, height? : ?number }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-            this.component.log(`resize`, { height: stringify(height), width: stringify(width) });
-            this.driver.resize.call(this, width, height);
-
-            if (!waitForTransition) {
-                return;
-            }
-
-            if (this.element) {
-
-                let overflow;
-
-                if (this.element) {
-                    overflow = setOverflow(this.element, 'hidden');
-                }
-
-                return elementStoppedMoving(this.element).then(() => {
-
-                    if (overflow) {
-                        overflow.reset();
-                    }
-                });
-            }
+            this.driver.resize.call(this, { width, height });
         });
     }
-
-
-    /*  Hide
-        ----
-
-        Hide the component and any parent template
-    */
 
     hide() : void {
 
@@ -804,18 +775,24 @@ export class ParentComponent<P> {
                 try {
                     writeElementToWindow(prerenderWindow, el);
                 } catch (err) {
-                    // pass
+                    return;
+                }
+
+                let { width = false, height = false, element = 'body' } = this.component.autoResize || {};
+                
+                if (width || height) {
+                    onResize(getElement(element, prerenderWindow.document), ({ width: newWidth, height: newHeight }) => {
+                        this.resize({
+                            width:  width ? newWidth : undefined,
+                            height: height ? newHeight : undefined
+                        });
+                    }, { width, height, win: prerenderWindow });
                 }
             });
         });
     }
 
     renderTemplate<T : HTMLElement | ElementNode>(renderer : (RenderOptionsType<P>) => T, { context, uid, focus, container, document, outlet } : { context : $Values<typeof CONTEXT>, uid : string, focus? : () => ZalgoPromise<ProxyWindow>, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : T {
-        let {
-            width  = `${ DEFAULT_DIMENSIONS.WIDTH }px`,
-            height = `${ DEFAULT_DIMENSIONS.HEIGHT }px`
-        } = (this.component.dimensions || {});
-
         focus = focus || (() => ZalgoPromise.resolve());
 
         // $FlowFixMe
@@ -836,7 +813,7 @@ export class ParentComponent<P> {
             on:         (eventName, handler) => this.on(eventName, handler),
             jsxDom:     node,
             document,
-            dimensions: { width, height },
+            dimensions: this.component.dimensions,
             container,
             outlet
         });
