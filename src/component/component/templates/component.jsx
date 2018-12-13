@@ -5,7 +5,7 @@ import { node, dom } from 'jsx-pragmatic/src';
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultPrerenderTemplate({ document } : RenderOptionsType<{}>) : HTMLElement {
+export function defaultPrerenderTemplate<P>({ document } : RenderOptionsType<P>) : HTMLElement {
     return (
         <html>
             <head>

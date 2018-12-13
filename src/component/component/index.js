@@ -4,7 +4,7 @@
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { memoize, copyProp, isRegex, toCSS } from 'belter/src';
+import { memoize, isRegex, toCSS } from 'belter/src';
 import { type ElementNode } from 'jsx-pragmatic/src';
 
 import { ChildComponent } from '../child';
@@ -36,7 +36,7 @@ export type ComponentOptionsType<P> = {
 
     tag : string,
 
-    url? : EnvString | (props : BuiltInPropsType & P) => string,
+    url : EnvString | (props : BuiltInPropsType & P) => string,
     buildUrl? : (props : BuiltInPropsType & P) => string,
     domain? : EnvString | RegExp,
     bridgeUrl? : EnvString,
@@ -45,11 +45,15 @@ export type ComponentOptionsType<P> = {
 
     dimensions? : CssDimensionsType,
     autoResize? : { width? : boolean, height? : boolean, element? : string },
-    listenForResize? : boolean,
 
     allowedParentDomains? : StringMatcherType,
 
     defaultEnv? : string,
+
+    attributes? : {
+        iframe? : { [string] : string },
+        popup? : { [string] : string }
+    },
 
     contexts? : { iframe? : boolean, popup? : boolean },
     defaultContext? : string,
@@ -57,7 +61,7 @@ export type ComponentOptionsType<P> = {
     containerTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
     prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement | ElementNode,
 
-    validate? : (Component<P>, UserPropsDefinitionType<P>) => void
+    validate? : (Component<P>, (PropsType & P)) => void
 };
 
 export type ComponentDriverType<P, T : mixed> = {
@@ -70,28 +74,32 @@ export class Component<P> {
     tag : string
     name : string
     
-    url : EnvString | (props : BuiltInPropsType & P) => string
-    domain : EnvString | RegExp
-    bridgeUrl : EnvString
+    url : void | EnvString | (props : BuiltInPropsType & P) => string
+    domain : void | EnvString | RegExp
+    bridgeUrl : void | EnvString
 
     props : UserPropsDefinitionType<P>
     builtinProps : BuiltInPropsDefinitionType<P>
 
-    dimensions : CssDimensionsType
-    autoResize : { width? : boolean, height? : boolean, element? : string }
-    listenForResize : ?boolean
+    dimensions : void | CssDimensionsType
+    autoResize : void | { width? : boolean, height? : boolean, element? : string }
 
     allowedParentDomains : StringMatcherType
 
-    defaultEnv : ?string
+    defaultEnv : void | string
 
     contexts : { iframe? : boolean, popup? : boolean }
     defaultContext : string
+    
+    attributes : {
+        iframe? : { [string] : string },
+        popup? : { [string] : string }
+    }
 
     containerTemplate : (RenderOptionsType<P>) => HTMLElement | ElementNode
     prerenderTemplate : (RenderOptionsType<P>) => HTMLElement | ElementNode
 
-    validate : (Component<P>, (PropsType & P)) => void
+    validate : void | (Component<P>, (PropsType & P)) => void
 
     driverCache : { [string] : mixed }
 
@@ -104,17 +112,14 @@ export class Component<P> {
         // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
         // e.g. <my-component>
 
-        this.addProp(options, 'tag');
+        this.tag = options.tag;
+        this.name = this.tag.replace(/-/g, '_');
 
-        this.addProp(options, 'allowedParentDomains', WILDCARD);
+        this.allowedParentDomains = options.allowedParentDomains || WILDCARD;
 
         if (Component.components[this.tag]) {
             throw new Error(`Can not register multiple components with the same tag`);
         }
-
-        // Name of the component, used for logging. Auto-generated from the tag name by default.
-
-        this.addProp(options, 'name', this.tag.replace(/-/g, '_'));
 
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
@@ -127,44 +132,23 @@ export class Component<P> {
         let { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = options.dimensions || {};
         this.dimensions = { width: toCSS(width), height: toCSS(height) };
 
-        this.addProp(options, 'listenForResize');
+        this.defaultEnv = options.defaultEnv;
+        this.url = options.url || options.buildUrl;
+        this.domain = options.domain;
+        this.bridgeUrl = options.bridgeUrl;
 
-        // The default environment we should render to if none is specified in the parent
+        this.attributes = options.attributes || {};
+        this.contexts = options.contexts || { iframe: true, popup: false };
+        this.defaultContext = options.defaultContext || CONTEXT.IFRAME;
 
-        this.addProp(options, 'defaultEnv');
+        this.autoResize = (typeof options.autoResize === 'object')
+            ? options.autoResize
+            : { width: Boolean(options.autoResize), height: Boolean(options.autoResize), element: 'body' };
 
-        // $FlowFixMe
-        this.addProp(options, 'url', options.buildUrl);
-        this.addProp(options, 'domain');
-        this.addProp(options, 'bridgeUrl');
-        
-        this.addProp(options, 'attributes', {});
+        this.containerTemplate = options.containerTemplate || defaultContainerTemplate;
+        this.prerenderTemplate = options.prerenderTemplate || defaultPrerenderTemplate;
 
-        // A url to use by default to render the component, if not using envs
-
-
-        // The allowed contexts. For example { iframe: true, popup: false }
-
-        this.addProp(options, 'contexts', { iframe: true, popup: false });
-
-        // The default context to render to
-
-        this.addProp(options, 'defaultContext');
-
-        // Auto Resize option
-
-        this.addProp(options, 'autoResize');
-
-        // Templates and styles for the parent page and the initial rendering of the component
-
-        this.addProp(options, 'containerTemplate', defaultContainerTemplate);
-        this.addProp(options, 'prerenderTemplate', defaultPrerenderTemplate);
-
-        // Validation
-
-        this.addProp(options, 'validate');
-
-        // A mapping of tag->component so we can reference components by string tag name
+        this.validate = options.validate;
 
         Component.components[this.tag] = this;
 
@@ -174,10 +158,6 @@ export class Component<P> {
         this.registerDrivers();
         this.registerChild();
         this.listenDelegate();
-    }
-
-    addProp(options : Object, name : string, def : mixed) {
-        copyProp(options, this, name, def);
     }
 
     @memoize
@@ -347,7 +327,7 @@ export class Component<P> {
     }
 
     getDefaultContext() : string {
-        if (this.defaultContext) {
+        if (this.defaultContext && this.contexts[this.defaultContext]) {
             return this.defaultContext;
         } else if (this.contexts[CONTEXT.IFRAME]) {
             return CONTEXT.IFRAME;

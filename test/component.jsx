@@ -112,6 +112,7 @@ export let testComponent = zoid.create({
 
     containerTemplate,
 
+    // $FlowFixMe
     validate(component, { invalidate }) {
         if (invalidate === true) {
             throw new Error('Invalidated prop is defined as true');

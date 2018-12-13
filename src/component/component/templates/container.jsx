@@ -5,7 +5,7 @@ import { node, dom } from 'jsx-pragmatic/src';
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultContainerTemplate({ id, tag, context, CLASS, outlet, document, dimensions : { width, height } } : RenderOptionsType<{}>) : HTMLElement {
+export function defaultContainerTemplate<P>({ id, tag, context, CLASS, outlet, document, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
 
     return (
         <div id={ id } class={ `${ CLASS.ZOID } ${ CLASS.ZOID }-tag-${ tag } ${ CLASS.ZOID }-context-${ context }` }>
