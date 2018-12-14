@@ -62,17 +62,10 @@ export class DelegateComponent<P>  {
         // $FlowFixMe
         this.registerActiveComponent = ParentComponent.prototype.registerActiveComponent;
 
-        this.props = {
-            window:     options.props.window,
-            onClose:    options.props.onClose,
-            onDisplay:  options.props.onDisplay
-        };
-
-        for (let propName of component.getPropNames()) {
-            // $FlowFixMe
-            let prop = this.component.getProp(propName);
-
-            if (prop.allowDelegate) {
+        // $FlowFixMe
+        this.props = {};
+        for (let propName of this.component.getPropNames()) {
+            if (options.props[propName] && this.component.getProp(propName).allowDelegate) {
                 this.props[propName] = options.props[propName];
             }
         }
@@ -84,7 +77,7 @@ export class DelegateComponent<P>  {
         // $FlowFixMe
         this.registerActiveComponent();
 
-        this.watchForClose(source);
+        this.watchForSourceClose(source);
     }
 
     getDelegate() : DelegateReturnType {
@@ -98,9 +91,9 @@ export class DelegateComponent<P>  {
         return RENDER_DRIVERS[this.context];
     }
 
-    watchForClose(source : CrossDomainWindowType) {
-        let closeWindowListener = onCloseWindow(source, () => this.destroy(), 3000);
-        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+    watchForSourceClose(source : CrossDomainWindowType) {
+        let closeSourceWindowListener = onCloseWindow(source, () => this.destroy(), 3000);
+        this.clean.register('destroyCloseSourceWindowListener', closeSourceWindowListener.cancel);
     }
 
     getOverrides() : { [string] : mixed } {

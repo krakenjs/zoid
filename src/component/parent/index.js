@@ -154,10 +154,6 @@ export class ParentComponent<P> {
                 ? tasks.openContainer.then(() => this.open())
                 : this.open();
 
-            tasks.awaitWindow = tasks.open.then(proxyWin => {
-                return proxyWin.awaitWindow();
-            });
-
             tasks.showContainer = tasks.openContainer.then(() => {
                 return this.showContainer();
             });
@@ -170,12 +166,12 @@ export class ParentComponent<P> {
                 return this.setWindowName(proxyWin, windowName);
             });
 
-            tasks.watchForClose = ZalgoPromise.all([ tasks.awaitWindow, tasks.setWindowName ]).then(([ win ]) => {
-                return this.watchForClose(win);
+            tasks.watchForClose = tasks.open.then(proxyWin => {
+                return this.watchForClose(proxyWin);
             });
 
-            tasks.prerender = ZalgoPromise.all([ tasks.awaitWindow, tasks.openContainer ]).then(([ win ]) => {
-                return this.prerender(win, { context, uid });
+            tasks.prerender = ZalgoPromise.all([ tasks.open, tasks.openContainer ]).then(([ proxyWin ]) => {
+                return this.prerender(proxyWin, { context, uid });
             });
 
             tasks.showComponent = tasks.prerender.then(() => {
@@ -184,8 +180,8 @@ export class ParentComponent<P> {
             
             tasks.buildUrl = this.buildUrl();
 
-            tasks.openBridge = ZalgoPromise.all([ tasks.awaitWindow, tasks.buildUrl ]).then(([ win, url ]) => {
-                return this.openBridge(win, getDomainFromUrl(url), context);
+            tasks.openBridge = ZalgoPromise.all([ tasks.open, tasks.buildUrl ]).then(([ proxyWin, url ]) => {
+                return this.openBridge(proxyWin, getDomainFromUrl(url), context);
             });
 
             tasks.loadUrl = ZalgoPromise.all([
@@ -388,8 +384,11 @@ export class ParentComponent<P> {
         });
     }
 
-    openBridge(win : CrossDomainWindowType, domain : string, context : $Values<typeof CONTEXT>) : ZalgoPromise<?CrossDomainWindowType> {
+    openBridge(proxyWin : ProxyWindow, domain : string, context : $Values<typeof CONTEXT>) : ZalgoPromise<?CrossDomainWindowType> {
         return ZalgoPromise.try(() => {
+            return proxyWin.awaitWindow();
+            
+        }).then(win => {
             if (!bridge || !bridge.needsBridge({ win, domain }) || bridge.hasBridge(domain, domain)) {
                 return;
             }
@@ -444,16 +443,9 @@ export class ParentComponent<P> {
     delegate(context : $Values<typeof CONTEXT>, target : CrossDomainWindowType) {
         this.component.log(`delegate`);
 
-        let props = {
-            window:     this.props.window,
-            onClose:    this.props.onClose,
-            onDisplay:  this.props.onDisplay
-        };
-
+        let props = {};
         for (let propName of this.component.getPropNames()) {
-            let prop = this.component.getProp(propName);
-
-            if (prop.allowDelegate) {
+            if (this.component.getProp(propName).allowDelegate) {
                 props[propName] = this.props[propName];
             }
         }
@@ -490,31 +482,27 @@ export class ParentComponent<P> {
         }
     }
 
-    watchForClose(win : CrossDomainWindowType) {
-        let closeWindowListener = onCloseWindow(win, () => {
-            this.component.log(`detect_close_child`);
+    watchForClose(proxyWin : ProxyWindow) : ZalgoPromise<void> {
+        return proxyWin.awaitWindow().then(win => {
+            let closeWindowListener = onCloseWindow(win, () => {
+                this.component.log(`detect_close_child`);
 
-            return ZalgoPromise.try(() => {
-                return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
-            }).finally(() => {
-                return this.destroy();
-            });
-        }, 3000);
+                return ZalgoPromise.try(() => {
+                    return this.props.onClose(CLOSE_REASONS.CLOSE_DETECTED);
+                }).finally(() => {
+                    return this.destroy();
+                });
+            }, 3000);
 
-        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+            this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+        });
     }
 
     watchForUnload() {
-
-        // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
-        // and close the child manually if that happens.
-
-        let onunload = once(() => {
+        let unloadWindowListener = addEventListener(window, 'unload', once(() => {
             this.component.log(`navigate_away`);
-            this.destroyComponent();
-        });
-
-        let unloadWindowListener = addEventListener(window, 'unload', onunload);
+            this.destroy();
+        }));
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
@@ -698,6 +686,7 @@ export class ParentComponent<P> {
         this.clean.run('destroyCloseWindowListener');
         this.clean.run('destroyContainerEvents');
         this.clean.run('destroyWindow');
+        this.clean.run('destroyProxyWindow');
     }
 
     @memoized
@@ -751,13 +740,16 @@ export class ParentComponent<P> {
         Creates an initial template and stylesheet which are loaded into the child window, to be displayed before the url is loaded
     */
 
-    prerender(win : CrossDomainWindowType, { context, uid } : { context : $Values<typeof CONTEXT>, uid : string }) : ZalgoPromise<void> {
+    prerender(proxyWin : ProxyWindow, { context, uid } : { context : $Values<typeof CONTEXT>, uid : string }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (!this.component.prerenderTemplate) {
                 return;
             }
 
             return ZalgoPromise.try(() => {
+                return proxyWin.awaitWindow();
+
+            }).then(win => {
                 return this.driver.openPrerender.call(this, win);
                 
             }).then(prerenderWindow => {

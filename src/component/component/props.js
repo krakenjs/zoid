@@ -114,9 +114,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         },
 
         window: {
-            type:        'object',
-            sendToChild: false,
-            required:    false,
+            type:          'object',
+            sendToChild:   false,
+            required:      false,
+            allowDelegate: true,
             validate(val : CrossDomainWindowType | ProxyWindow) {
                 if (!isWindow(val) && !ProxyWindow.isProxyWindow(val)) {
                     throw new Error(`Expected Window or ProxyWindow`);
@@ -141,9 +142,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         },
 
         onDisplay: {
-            type:        'function',
-            required:    false,
-            sendToChild: false,
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            allowDelegate: true,
 
             def() : Function {
                 return noop;
@@ -187,9 +189,10 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // When the user closes the component.
 
         onClose: {
-            type:        'function',
-            required:    false,
-            sendToChild: false,
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            allowDelegate: true,
 
             def() : Function {
                 return noop;
