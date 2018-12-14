@@ -4853,9 +4853,6 @@
                         tasks.open = _this2.driver.renderedIntoContainer ? tasks.openContainer.then(function() {
                             return _this2.open();
                         }) : _this2.open();
-                        tasks.awaitWindow = tasks.open.then(function(proxyWin) {
-                            return proxyWin.awaitWindow();
-                        });
                         tasks.showContainer = tasks.openContainer.then(function() {
                             return _this2.showContainer();
                         });
@@ -4873,13 +4870,12 @@
                             var proxyWin = _ref2[0], windowName = _ref2[1];
                             return _this2.setWindowName(proxyWin, windowName);
                         });
-                        tasks.watchForClose = src.a.all([ tasks.awaitWindow, tasks.setWindowName ]).then(function(_ref3) {
-                            var win = _ref3[0];
-                            return _this2.watchForClose(win);
+                        tasks.watchForClose = tasks.open.then(function(proxyWin) {
+                            return _this2.watchForClose(proxyWin);
                         });
-                        tasks.prerender = src.a.all([ tasks.awaitWindow, tasks.openContainer ]).then(function(_ref4) {
-                            var win = _ref4[0];
-                            return _this2.prerender(win, {
+                        tasks.prerender = src.a.all([ tasks.open, tasks.openContainer ]).then(function(_ref3) {
+                            var proxyWin = _ref3[0];
+                            return _this2.prerender(proxyWin, {
                                 context: context,
                                 uid: uid
                             });
@@ -4888,12 +4884,12 @@
                             return _this2.showComponent();
                         });
                         tasks.buildUrl = _this2.buildUrl();
-                        tasks.openBridge = src.a.all([ tasks.awaitWindow, tasks.buildUrl ]).then(function(_ref5) {
-                            var win = _ref5[0], url = _ref5[1];
-                            return _this2.openBridge(win, Object(cross_domain_utils_src.getDomainFromUrl)(url), context);
+                        tasks.openBridge = src.a.all([ tasks.open, tasks.buildUrl ]).then(function(_ref4) {
+                            var proxyWin = _ref4[0], url = _ref4[1];
+                            return _this2.openBridge(proxyWin, Object(cross_domain_utils_src.getDomainFromUrl)(url), context);
                         });
-                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref6) {
-                            var proxyWin = _ref6[0], url = _ref6[1];
+                        tasks.loadUrl = src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref5) {
+                            var proxyWin = _ref5[0], url = _ref5[1];
                             return _this2.loadUrl(proxyWin, url);
                         });
                         tasks.switchPrerender = src.a.all([ tasks.prerender, _this2.onInit ]).then(function() {
@@ -4960,8 +4956,8 @@
                         distance: Object(cross_domain_utils_src.getDistanceFromTop)(window)
                     };
                 };
-                ParentComponent.prototype.buildWindowName = function(_ref7) {
-                    var name, childPayload, normalizedName, encodedPayload, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, target = _ref7.target, uid = _ref7.uid, context = _ref7.context;
+                ParentComponent.prototype.buildWindowName = function(_ref6) {
+                    var name, childPayload, normalizedName, encodedPayload, proxyWin = _ref6.proxyWin, initialDomain = _ref6.initialDomain, domain = _ref6.domain, target = _ref6.target, uid = _ref6.uid, context = _ref6.context;
                     return name = this.component.name, childPayload = this.buildChildPayload({
                         proxyWin: proxyWin,
                         initialDomain: initialDomain,
@@ -4990,7 +4986,7 @@
                     return propRef;
                 };
                 ParentComponent.prototype.buildChildPayload = function() {
-                    var _ref8 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref8.proxyWin, initialDomain = _ref8.initialDomain, domain = _ref8.domain, _ref8$target = _ref8.target, target = void 0 === _ref8$target ? window : _ref8$target, context = _ref8.context, uid = _ref8.uid;
+                    var _ref7 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, _ref7$target = _ref7.target, target = void 0 === _ref7$target ? window : _ref7$target, context = _ref7.context, uid = _ref7.uid;
                     return {
                         uid: uid,
                         context: context,
@@ -5105,9 +5101,11 @@
                         throw new Error("Child exports were not available");
                     });
                 };
-                ParentComponent.prototype.openBridge = function(win, domain, context) {
+                ParentComponent.prototype.openBridge = function(proxyWin, domain, context) {
                     var _this7 = this;
                     return src.a.try(function() {
+                        return proxyWin.awaitWindow();
+                    }).then(function(win) {
                         if (bridge && bridge.needsBridge({
                             win: win,
                             domain: domain
@@ -5149,11 +5147,7 @@
                 ParentComponent.prototype.delegate = function(context, target) {
                     var _this10 = this;
                     this.component.log("delegate");
-                    for (var props = {
-                        window: this.props.window,
-                        onClose: this.props.onClose,
-                        onDisplay: this.props.onDisplay
-                    }, _i4 = 0, _component$getPropNam2 = this.component.getPropNames(), _length4 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
+                    for (var props = {}, _i4 = 0, _component$getPropNam2 = this.component.getPropNames(), _length4 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i4 < _length4; _i4++) {
                         var propName = _component$getPropNam2[_i4];
                         this.component.getProp(propName).allowDelegate && (props[propName] = this.props[propName]);
                     }
@@ -5171,8 +5165,8 @@
                                 return _this10.on(eventName, handler);
                             }
                         }
-                    }).then(function(_ref9) {
-                        var data = _ref9.data;
+                    }).then(function(_ref8) {
+                        var data = _ref8.data;
                         _this10.clean.register(data.destroy);
                         return data;
                     }).catch(function(err) {
@@ -5187,22 +5181,25 @@
                         });
                     }, _i6 = 0, _Object$keys4 = Object.keys(overrides), _length6 = null == _Object$keys4 ? 0 : _Object$keys4.length; _i6 < _length6; _i6++) _loop(_i6, _Object$keys4);
                 };
-                ParentComponent.prototype.watchForClose = function(win) {
-                    var _this12 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
-                        _this12.component.log("detect_close_child");
-                        return src.a.try(function() {
-                            return _this12.props.onClose(constants.CLOSE_REASONS.CLOSE_DETECTED);
-                        }).finally(function() {
-                            return _this12.destroy();
-                        });
-                    }, 3e3);
-                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                ParentComponent.prototype.watchForClose = function(proxyWin) {
+                    var _this12 = this;
+                    return proxyWin.awaitWindow().then(function(win) {
+                        var closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
+                            _this12.component.log("detect_close_child");
+                            return src.a.try(function() {
+                                return _this12.props.onClose(constants.CLOSE_REASONS.CLOSE_DETECTED);
+                            }).finally(function() {
+                                return _this12.destroy();
+                            });
+                        }, 3e3);
+                        _this12.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                    });
                 };
                 ParentComponent.prototype.watchForUnload = function() {
-                    var _this13 = this, onunload = Object(belter_src.once)(function() {
+                    var _this13 = this, unloadWindowListener = Object(belter_src.addEventListener)(window, "unload", Object(belter_src.once)(function() {
                         _this13.component.log("navigate_away");
-                        _this13.destroyComponent();
-                    }), unloadWindowListener = Object(belter_src.addEventListener)(window, "unload", onunload);
+                        _this13.destroy();
+                    }));
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 };
                 ParentComponent.prototype.loadUrl = function(proxyWin, url) {
@@ -5244,8 +5241,8 @@
                         checkClose: function() {
                             return _this16.checkClose(win);
                         },
-                        resize: function(_ref10) {
-                            var width = _ref10.width, height = _ref10.height;
+                        resize: function(_ref9) {
+                            var width = _ref9.width, height = _ref9.height;
                             return _this16.resize({
                                 width: width,
                                 height: height
@@ -5271,8 +5268,8 @@
                         }
                     };
                 };
-                ParentComponent.prototype.resize = function(_ref11) {
-                    var _this17 = this, width = _ref11.width, height = _ref11.height;
+                ParentComponent.prototype.resize = function(_ref10) {
+                    var _this17 = this, width = _ref10.width, height = _ref10.height;
                     return src.a.try(function() {
                         _this17.driver.resize.call(_this17, {
                             width: width,
@@ -5353,6 +5350,7 @@
                     this.clean.run("destroyCloseWindowListener");
                     this.clean.run("destroyContainerEvents");
                     this.clean.run("destroyWindow");
+                    this.clean.run("destroyProxyWindow");
                 };
                 ParentComponent.prototype.showContainer = function() {
                     var _this23 = this;
@@ -5382,10 +5380,12 @@
                         if (_this26.element) return Object(belter_src.animateAndHide)(_this26.element, constants.ANIMATION_NAMES.HIDE_COMPONENT, _this26.clean.register);
                     });
                 };
-                ParentComponent.prototype.prerender = function(win, _ref12) {
-                    var _this27 = this, context = _ref12.context, uid = _ref12.uid;
+                ParentComponent.prototype.prerender = function(proxyWin, _ref11) {
+                    var _this27 = this, context = _ref11.context, uid = _ref11.uid;
                     return src.a.try(function() {
                         if (_this27.component.prerenderTemplate) return src.a.try(function() {
+                            return proxyWin.awaitWindow();
+                        }).then(function(win) {
                             return _this27.driver.openPrerender.call(_this27, win);
                         }).then(function(prerenderWindow) {
                             if (prerenderWindow && Object(cross_domain_utils_src.isSameDomain)(prerenderWindow) && Object(cross_domain_utils_src.isBlankDomain)(prerenderWindow)) {
@@ -5402,9 +5402,9 @@
                                 } catch (err) {
                                     return;
                                 }
-                                var _ref13 = _this27.component.autoResize || {}, _ref13$width = _ref13.width, width = void 0 !== _ref13$width && _ref13$width, _ref13$height = _ref13.height, height = void 0 !== _ref13$height && _ref13$height, _ref13$element = _ref13.element, element = void 0 === _ref13$element ? "body" : _ref13$element;
-                                (width || height) && Object(belter_src.onResize)(Object(belter_src.getElement)(element, prerenderWindow.document), function(_ref14) {
-                                    var newWidth = _ref14.width, newHeight = _ref14.height;
+                                var _ref12 = _this27.component.autoResize || {}, _ref12$width = _ref12.width, width = void 0 !== _ref12$width && _ref12$width, _ref12$height = _ref12.height, height = void 0 !== _ref12$height && _ref12$height, _ref12$element = _ref12.element, element = void 0 === _ref12$element ? "body" : _ref12$element;
+                                (width || height) && Object(belter_src.onResize)(Object(belter_src.getElement)(element, prerenderWindow.document), function(_ref13) {
+                                    var newWidth = _ref13.width, newHeight = _ref13.height;
                                     _this27.resize({
                                         width: width ? newWidth : void 0,
                                         height: height ? newHeight : void 0
@@ -5418,8 +5418,8 @@
                         });
                     });
                 };
-                ParentComponent.prototype.renderTemplate = function(renderer, _ref15) {
-                    var _this28 = this, context = _ref15.context, uid = _ref15.uid, focus = _ref15.focus, container = _ref15.container, document = _ref15.document, outlet = _ref15.outlet;
+                ParentComponent.prototype.renderTemplate = function(renderer, _ref14) {
+                    var _this28 = this, context = _ref14.context, uid = _ref14.uid, focus = _ref14.focus, container = _ref14.container, document = _ref14.document, outlet = _ref14.outlet;
                     focus = focus || function() {
                         return src.a.resolve();
                     };
@@ -5449,8 +5449,8 @@
                         outlet: outlet
                     });
                 };
-                ParentComponent.prototype.openContainer = function(element, _ref16) {
-                    var _this29 = this, context = _ref16.context, uid = _ref16.uid, focus = _ref16.focus;
+                ParentComponent.prototype.openContainer = function(element, _ref15) {
+                    var _this29 = this, context = _ref15.context, uid = _ref15.uid, focus = _ref15.focus;
                     return src.a.try(function() {
                         var el;
                         if (!(el = element ? Object(belter_src.getElement)(element) : document.body)) throw new Error("Could not find element to open container into");
@@ -5563,20 +5563,16 @@
                     this.resize = parent_ParentComponent.prototype.resize;
                     this.renderTemplate = parent_ParentComponent.prototype.renderTemplate;
                     this.registerActiveComponent = parent_ParentComponent.prototype.registerActiveComponent;
-                    this.props = {
-                        window: options.props.window,
-                        onClose: options.props.onClose,
-                        onDisplay: options.props.onDisplay
-                    };
-                    for (var _i2 = 0, _component$getPropNam2 = component.getPropNames(), _length2 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
+                    this.props = {};
+                    for (var _i2 = 0, _component$getPropNam2 = this.component.getPropNames(), _length2 = null == _component$getPropNam2 ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
                         var propName = _component$getPropNam2[_i2];
-                        this.component.getProp(propName).allowDelegate && (this.props[propName] = options.props[propName]);
+                        options.props[propName] && this.component.getProp(propName).allowDelegate && (this.props[propName] = options.props[propName]);
                     }
                     this.userClose = options.overrides.userClose;
                     this.error = options.overrides.error;
                     this.on = options.overrides.on;
                     this.registerActiveComponent();
-                    this.watchForClose(source);
+                    this.watchForSourceClose(source);
                 }
                 DelegateComponent.prototype.getDelegate = function() {
                     var _this = this;
@@ -5587,11 +5583,11 @@
                         }
                     };
                 };
-                DelegateComponent.prototype.watchForClose = function(source) {
-                    var _this2 = this, closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(source, function() {
+                DelegateComponent.prototype.watchForSourceClose = function(source) {
+                    var _this2 = this, closeSourceWindowListener = Object(cross_domain_utils_src.onCloseWindow)(source, function() {
                         return _this2.destroy();
                     }, 3e3);
-                    this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
+                    this.clean.register("destroyCloseSourceWindowListener", closeSourceWindowListener.cancel);
                 };
                 DelegateComponent.prototype.getOverrides = function() {
                     for (var context = this.context, delegateOverrides = RENDER_DRIVERS[context].delegateOverrides, overrides = {}, self = this, _loop = function(_i4, _Object$keys2, _length4) {
@@ -5736,6 +5732,7 @@
                             type: "object",
                             sendToChild: !1,
                             required: !1,
+                            allowDelegate: !0,
                             validate: function(val) {
                                 if (!Object(cross_domain_utils_src.isWindow)(val) && !window_ProxyWindow.isProxyWindow(val)) throw new Error("Expected Window or ProxyWindow");
                             },
@@ -5756,6 +5753,7 @@
                             type: "function",
                             required: !1,
                             sendToChild: !1,
+                            allowDelegate: !0,
                             def: function() {
                                 return belter_src.noop;
                             },
@@ -5789,6 +5787,7 @@
                             type: "function",
                             required: !1,
                             sendToChild: !1,
+                            allowDelegate: !0,
                             def: function() {
                                 return belter_src.noop;
                             },

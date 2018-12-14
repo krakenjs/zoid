@@ -31,6 +31,7 @@ export function getInternalProps() {
             type: 'object',
             sendToChild: false,
             required: false,
+            allowDelegate: true,
             validate: function validate(val) {
                 if (!isWindow(val) && !ProxyWindow.isProxyWindow(val)) {
                     throw new Error('Expected Window or ProxyWindow');
@@ -58,6 +59,7 @@ export function getInternalProps() {
             type: 'function',
             required: false,
             sendToChild: false,
+            allowDelegate: true,
 
             def: function def() {
                 return noop;
@@ -101,6 +103,7 @@ export function getInternalProps() {
             type: 'function',
             required: false,
             sendToChild: false,
+            allowDelegate: true,
 
             def: function def() {
                 return noop;

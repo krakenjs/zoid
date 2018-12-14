@@ -30,18 +30,12 @@ export var DelegateComponent = function () {
         // $FlowFixMe
         this.registerActiveComponent = ParentComponent.prototype.registerActiveComponent;
 
-        this.props = {
-            window: options.props.window,
-            onClose: options.props.onClose,
-            onDisplay: options.props.onDisplay
-        };
+        // $FlowFixMe
+        this.props = {};
 
-        for (var _i2 = 0, _component$getPropNam2 = component.getPropNames(), _length2 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
+        for (var _i2 = 0, _component$getPropNam2 = this.component.getPropNames(), _length2 = _component$getPropNam2 == null ? 0 : _component$getPropNam2.length; _i2 < _length2; _i2++) {
             var propName = _component$getPropNam2[_i2];
-            // $FlowFixMe
-            var prop = this.component.getProp(propName);
-
-            if (prop.allowDelegate) {
+            if (options.props[propName] && this.component.getProp(propName).allowDelegate) {
                 this.props[propName] = options.props[propName];
             }
         }
@@ -53,7 +47,7 @@ export var DelegateComponent = function () {
         // $FlowFixMe
         this.registerActiveComponent();
 
-        this.watchForClose(source);
+        this.watchForSourceClose(source);
     }
 
     DelegateComponent.prototype.getDelegate = function getDelegate() {
@@ -67,13 +61,13 @@ export var DelegateComponent = function () {
         };
     };
 
-    DelegateComponent.prototype.watchForClose = function watchForClose(source) {
+    DelegateComponent.prototype.watchForSourceClose = function watchForSourceClose(source) {
         var _this2 = this;
 
-        var closeWindowListener = onCloseWindow(source, function () {
+        var closeSourceWindowListener = onCloseWindow(source, function () {
             return _this2.destroy();
         }, 3000);
-        this.clean.register('destroyCloseWindowListener', closeWindowListener.cancel);
+        this.clean.register('destroyCloseSourceWindowListener', closeSourceWindowListener.cancel);
     };
 
     DelegateComponent.prototype.getOverrides = function getOverrides() {
