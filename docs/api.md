@@ -8,34 +8,28 @@ Create a component definition, which will be loaded in both the parent and child
 
 A tag-name for the component, used for:
 
+- Loading the correct component in the child window or frame
+- Generating framework drivers
 - Logging
-- Auto-generating an angular directive
 
 ```javascript
 tag: 'my-component-tag'
 ```
 
-#### url `string | { env : string }` [required]
+#### url `string | ({ props }) => string` [required]
 
-The full url that will be loaded when your component is rendered, or an object mapping different urls for different
-environments.
+The full url that will be loaded when your component is rendered, or a function returning the url
 
 ```javascript
 url: 'https://www.my-site.com/mycomponent'
 ```
 
 ```javascript
-url: {
-    local: 'http://localhost:8000/mycomponent',
-    dev: 'http://my-dev-site.com:8000/mycomponent',
-    live: 'https://my-live-site.com/mycomponent'
+url: ({ props }) => {
+    return (props.env === 'development')
+        ? 'http://dev.my-site.com/mycomponent'
+        : 'https://www.my-site.com/mycomponent';
 }
-```
-Note: If the map-syntax is used for `url`, the rendered component can override the `defaultEnv` at runtime like so:
-```javascript
-MyComponent.render({
-env: 'local'
-}, '#container')
 ```
 
 #### dimensions `{ width : string, height : string }`
@@ -63,14 +57,13 @@ A mapping of prop name to prop settings. Used to do run-time validation and prop
 ```javascript
 props: {
 
+    onLogin: {
+        type: 'function'
+    },
+
     prefilledEmail: {
         type: 'string',
         required: false
-    },
-
-    onLogin: {
-        type: 'function',
-        required: true
     }
 }
 ```
@@ -86,19 +79,20 @@ props: {
   - `'boolean'`
   - `'object'`
   - `'function'`
+  - `'array'`
 
 - **required** `boolean`
 
-  Whether or not the prop is mandatory
+  Whether or not the prop is mandatory. Defaults to `true`.
 
   ```javascript
   onLogin: {
       type: 'function',
-      required: true
+      required: false
   }
   ```
 
-- **def** `(props) => value`
+- **default** `({ props }) => value`
 
   A function returning the default value for the prop, if none is passed
 
@@ -106,22 +100,22 @@ props: {
   email: {
       type: 'string',
       required: false,
-      def: function() {
+      default: function() {
           return 'a@b.com';
       }
   }
   ```
 
-- **validate** `(value, props) => void`
+- **validate** `({ value, props }) => void`
 
   A function to validate the passed value. Should throw an appropriate error if invalid.
 
   ```javascript
   email: {
       type: 'string',
-      validate: function(value, props) {
+      validate: function({ value, props }) {
           if (!value.match(/^.+@.+\..+$/)) {
-              throw new Error(`Expected email to be valid format`);
+              throw new TypeError(`Expected email to be valid format`);
           }
       }
   }
@@ -152,7 +146,7 @@ props: {
   ```javascript
   email: {
       type: 'string',
-      queryParam: function(value) {
+      queryParam: function({ value }) {
           if (value.indexOf('@foo.com') !== -1) {
               return 'foo-email'; // ?foo-email=person@foo.com
           } else {
@@ -162,7 +156,7 @@ props: {
   }
   ```
 
-- **value** `any`
+- **value** `({ props }) => value`
 
   The value for the prop, if it should be statically defined at component creation time
 
@@ -175,7 +169,7 @@ props: {
   }
   ```
 
-- **decorate** `(value, props) => value`
+- **decorate** `({ value, props }) => value`
 
   A function used to decorate the prop at render-time. Called with the value of the prop, should return the new value.
 
@@ -193,7 +187,7 @@ props: {
 
 - **serialization** `string`
 
-  If `'json'`, the prop will be JSON stringified before being inserted into the url, otherwise the prop will be converted to dot-notation.
+  If `json`, the prop will be JSON stringified before being inserted into the url
 
   ```javascript
   user: {
@@ -202,10 +196,21 @@ props: {
   }
   ```
 
+  If `dotify` the prop will be converted to dot-notation.
+
   ```javascript
   user: {
       type: 'object',
       serialization: 'dotify' // ?user.name=Zippy&user.age=34
+  }
+  ```
+
+  If `base64`, the prop will be JSON stringified then base64 encoded before being inserted into the url
+
+  ```javascript
+  user: {
+      type: 'object',
+      serialization: 'base64' // ?user=eyJuYW1lIjoiWmlwcHkiLCJhZ2UiOjM0fQ==
   }
   ```
 
@@ -226,56 +231,74 @@ A function which should return a DOM element, rendered on the parent page and co
 
 zoid will pass `opts.outlet` to this function, which is a pre-generated element your component will be rendered into. This must be inserted somewhere into the DOM element you return. For popup components, you don't need to use `opts.outlet`
 
-Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javascript.
+Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) with a `/* @jsx node */` comment, to transpile the jsx down to regular javascript.
 
 ```javascript
-/* @jsx jsxDom */
+/* @jsx node */
+
+import { node, dom } from 'jsx-pragmatic';
 
 var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function(opts) {
+    containerTemplate: function({ uid, doc, outlet }) {
         return (
-            <div id={ opts.id }>
+            <div id={ uid } class="container">
                 <style>
                     {`
-                        #${ opts.id } {
+                        #${ uid }.container {
                             border: 5px solid red;
                         }
                     `}
                 </style>
 
-                <node el={ opts.outlet } />
+                <node el={ outlet } />
             </div>
-        );
+        ).render(dom({ doc }));
     }
 });
 ```
 
-As with React, you are also free to skip using JSX and just use `jsxDom` directly:
+As with React, you are also free to skip using JSX and just use `node` from `jsx-pragmatic` directly:
 
 ```javascript
+import { node, dom } from 'jsx-pragmatic';
+
 var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function containerTemplate(opts) {
-        return jsxDom('div', { id: opts.id },
-            jsxDom('style', null, `
-                #${ opts.id } {
+    containerTemplate: function containerTemplate({ uid, doc, outlet ) {
+        return node('div', { id: uid, class: 'container' },
+            node('style', null, `
+                #${ uid }.container {
                     border: 5px solid red;
                 }
             `),
-            jsxDom('node', { el: opts.outlet })
-        );
+            node('node', { el: outlet })
+        ).render(dom({ doc }));
     }
 });
 ```
 
-Since `containerTemplate` only requires a DOM element, you're also free to manually create the element hierarchy using built-in browser methods like `opts.document.createElement`, `innerHTML` and so on.
+Since `containerTemplate` requires a DOM element to be returned, you're also free to manually create the element hierarchy using built-in browser methods like `doc.createElement`:
 
-**Note:** if using `document.createElement`, you must use `opts.document`, so the element is created using the target document of the new iframe or popup window, not the document of the parent page.
+```javascript
+import { node, dom } from 'jsx-pragmatic';
+
+var MyLoginZoidComponent = zoid.create({
+    tag: 'my-login',
+    url: 'https://www.mysite.com/login',
+
+    containerTemplate: function containerTemplate(({ doc, uid, outlet })) {
+        let container = doc.createElement('div');
+        container.id = uid;
+        container.appendChild(outlet);
+        return container;
+    }
+});
+```
 
 #### prerenderTemplate `(opts) => HTMLElement`
 
@@ -283,116 +306,101 @@ A function which should return a DOM element, rendered in place of the iframe el
 
 Useful if you want to display a loading spinner or pre-render some content as the component loads.
 
-Best used with [jsx](https://facebook.github.io/jsx/) and the built-in `jsxDom` jsx pragma. You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) to transpile the jsx down to regular javascript.
+Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) with a `/* @jsx node */` comment, to transpile the jsx down to regular javascript.
 
 ```javascript
-/* @jsx jsxDom */
+/* @jsx node */
+
+import { node, dom } from 'jsx-pragmatic';
 
 var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    prerenderTemplate: function(opts) {
+    prerenderTemplate: function({ doc ) {
         return (
             <p>
                 Please wait while the component loads...
             </p>
-        );
+        ).render(dom({ doc }));
     }
 });
 ```
 
-As with React, you are also free to skip using JSX and just use `jsxDom` directly:
+As with React, you are also free to skip using JSX and just use `node` directly:
 
 ```javascript
+import { node, dom } from 'jsx-pragmatic';
+
 var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    prerenderTemplate: function containerTemplate(opts) {
-        return jsxDom('p', null, `
+    prerenderTemplate: function containerTemplate({ doc }) {
+        return node('p', null, `
             Please wait while the component loads...
-        `);
+        `).render(dom({ doc }));
     }
 });
 ```
 
-Since `prerenderTemplate` only requires a DOM element, you're also free to manually create the element hierarchy using built-in browser methods like `opts.document.createElement`, `innerHTML` and so on.
+Since `prerenderTemplate` only requires a DOM element, you're also free to manually create the element hierarchy using built-in browser methods like `doc.createElement`.
 
-**Note:** if using `document.createElement`, you must use `opts.document`, so the element is created using the target document of the new iframe or popup window, not the document of the parent page.
+**Note:** if you're using `document` method, you must use the `doc` passed to `prerenderTemplate`, so the element is created using the target document of the new iframe or popup window, **not** the document of the parent page. This is essential for browser compatibility.
+
+```javascript
+import { node, dom } from 'jsx-pragmatic';
+
+var MyLoginZoidComponent = zoid.create({
+    tag: 'my-login',
+    url: 'https://www.mysite.com/login',
+
+    prerenderTemplate: function containerTemplate({ doc }) {
+        const p = doc.createElement('p');
+        p.innerText = 'Please wait while the component loads...';
+        return p;
+    }
+});
+```
 
 ##### opts
 
 Data automatically passed to `containerTemplate` and `prerenderTemplate`, used to help render and customize the template.
 
-- `id`: Unique id automatically generated by zoid on render
+- `uid`: Unique id automatically generated by zoid on render, unique to the instantiation of the given component
 - `props`: Props passed to the component in `render()`
-- `jsxDOM`: Helper for turning JSX into a DOM element
-- `document`: The document into which the generated element will be inserted.
+- `doc`: The appropriate document used to render dom elements
 - `container`: The element into which the generated element will be inserted
 - `dimensions`: The dimensions for the component
 - `tag`: Tag name of the component
 - `context`: Context type of the component (`iframe` or `popup`)
 - `outlet`: DOM Element into which the iframe will be inserted on render. Only applies to `containerTemplate` when rendering an iframe
-- `actions`: Set of functions which can be attached to events on the generated DOM element
-  - `close`: Close the component. Useful if you want to render a close button outside the component
-  - `focus`: Focus the component. Valid for popup components only. Useful if you want a clickable background overlay to re-focus the popup window.
-- `on`: Listen for events from the component
-  - `resize`: The component window resized. Useful if you want to dynamically resize the container based on the size of the iframe.
-- `CLASS`: Enum of class names which are internally used by zoid
-  - `ZOID`: Class given to the container for the component
-  - `OUTLET`: Class given to the outlet element
-  - `COMPONENT_FRAME`: Class given to the component's iframe
-  - `PRERENDER_FRAME`: Class given to the component's prerender iframe, only if `prerenderTemplate` is specified
-  - `VISIBLE`: Class given to the iframe when it becomes invisible, if pre-rendering using `prerenderTemplate`
-  - `INVISIBLE`: Class given to the iframe while it is invisible, if pre-rendering using `prerenderTemplate`
-- `ANIMATION`: Enum of animation names that will be applied to the component as it renders and unrenders. Useful if you want to define custom css animations to display the component.
-  - `SHOW_CONTAINER`: The component's container element, include it's `containerTemplate`, if provided, is displayed during a render.
-  - `HIDE_CONTAINER`: The component's container element, include it's `containerTemplate`, if provided, is hidden during close.
-  - `SHOW_COMPONENT`: The component element is displayed during render
-  - `HIDE_COMPONENT`: The component element is hidden during render
+- `close`: Close the component. Useful if you want to render a close button outside the component
+- `focus`: Focus the component. Valid for popup components only. Useful if you want a clickable background overlay to re-focus the popup window.
 
-#### defaultLogLevel `string | Object<string>`
+#### autoResize `{ height: boolean, width: boolean, element: string }`
 
-The default logging level required for this component. Options are: 
+Makes the iframe resize automatically when the child window size changes.
 
-  - `'debug'`
-  - `'info'`
-  - `'warn'`
-  - `'error'`
-  
-```javascript
-defaultLogLevel: 'error'
-```
-
-Note that this value can be overriden by passing 'logLevel' as a prop when rendering the component.
-
-
-#### autoResize `boolean | { height: boolean, width: boolean, element: string }`
-
-When set to `true`, makes the zoid parent iframe resize automatically when the child component size changes.
-You can also decide whether you want autoresizing for `width` or `height`
-
-```javascript
-autoResize: true
-```
 ```javascript
 autoResize: {
-    width: true,
-    height: false,
+    width: false,
+    height: true,
 }
 ```
 
-Note that by default it matches the `html` element of your content. (`body` if you are using IE9 or IE10).
+Note that by default it matches the `body` element of your content.
 You can override this setting by specifying a custom selector as an `element` property.
 
 ```javascript
 autoResize: {
-    width: true,
+    width: false,
     height: true,
     element: '.my-selector',
 }
 ```
+
+Recommended to only use autoResize for height. Width has some strange effects, especially when scroll bars are present.
 
 #### allowedParentDomains `string | Array<string | RegEx>`
 
@@ -405,33 +413,7 @@ allowedParentDomains: [
   ]
 ```
 
-#### buildUrl `(props) => url`
-
-Function which can be specified instead of `url` if you need to dynamically generate the url with the user-provided props.
-
-```javascript
-buildUrl(props) {
-    return `https://${ props.locale }.foo.com`;
-}
-```
-
-### defaultEnv `string`
-
-Default env to use when specifying `url` as a mapping of env to url.
-
-```javascript
-url: {
-    local: 'http://localhost:8000/mycomponent',
-    dev: 'http://my-dev-site.com:8000/mycomponent',
-    live: 'https://my-live-site.com/mycomponent'
-},
-
-defaultEnv: 'live'
-```
-
-Note: See `url` definition for note on overriding defaultEnv.
-
-#### domain `string | { env : string }`
+#### domain `string`
 
 A string, or map of env to strings, for the domain which will be loaded in the iframe or popup.
 
@@ -443,68 +425,27 @@ url: 'https://foo.com/login',
 domain: 'https://subdomain.foo.com'
 ```
 
-```javascript
-url: {
-    local: 'https://localhost.foo.com/login',
-    production: 'https://foo.com/login'
-},
-
-domain: {
-    local: 'https://subdomain.localhost.foo.com',
-    production: 'https://subdomain.foo.com'
-}
-```
-
-#### contexts `{ context : boolean }`
-
-Contexts to allow, between `iframe` and `popup`.
-
-```javascript
-contexts: {
-    iframe: true,
-    popup: false
-}
-```
-
-```javascript
-contexts: {
-    iframe: false,
-    popup: true
-}
-```
-
-```javascript
-contexts: {
-    iframe: true,
-    popup: true
-}
-```
-
 ### defaultContext `string`
 
-If both `iframe` and `popup` are set to `true` in the `contexts` setting, determines which should be picked by default.
+Determines which should be picked by default when `render()` is called. Defaults to `iframe`.
 
 ```javascript
 defaultContext: 'popup'
 ```
 
-### validate `(component, props) => void`
+### validate `({ props }) => void`
 
 Function which is passed all of the props at once and may validate them. Useful for validating inter-dependant props.
 
 ```javascript
-validate: function(component, props) {
+validate: function({ props }) {
     if (props.name === 'Batman' && props.strength < 10) {
         throw new Error(`Batman must have at least 10 strength`);
     }
 }
 ```
 
-#### scrolling `boolean`
-
-Whether to allow scrolling for iframe components. Defaults to `false`.
-
-#### bridgeUrl `string | { env : string }`
+#### bridgeUrl `string `
 
 The url for a [post-robot bridge](https://github.com/krakenjs/post-robot#parent-to-popup-messaging). Will be automatically loaded in a hidden iframe when a popup component is rendered, to allow communication between the parent window and the popup in IE/Edge.
 
@@ -514,38 +455,9 @@ This is only necessary if you are creating a popup component which needs to run 
 bridgeUrl: 'https://foo.com/bridge'
 ```
 
-```javascript
-bridgeUrl: {
-    local: 'https://localhost.foo.com/bridge',
-    production: 'https://foo.com/bridge'
-}
-```
-
-#### bridgeDomain `string | { env : string }`
-
-Required if the final domain of the bridge is different to that of the initial `bridgeUrl` provided - for example, if the original url does a 302 redirect to a different domain or subdomain.
-
-```javascript
-bridgeUrl: 'https://foo.com/bridge',
-
-bridgeDomain: 'https://subdomain.foo.com'
-```
-
-```javascript
-bridgeUrl: {
-    local: 'https://localhost.foo.com/bridge',
-    production: 'https://foo.com/bridge'
-},
-
-bridgeDomain: {
-    local: 'https://subdomain.localhost.foo.com',
-    production: 'https://subdomain.foo.com'
-}
-```
-
 # `Component`
 
-### `Component.render(props, container)`
+### `Component(props).render(container, ?context)`
 
 Render the component to the given container element.
 
@@ -559,9 +471,13 @@ Element selector, or element, into which the component should be rendered.
 
 Defaults to `document.body`.
 
-### `Component.renderTo(win, props, container)`
+#### context `iframe | popup`
 
-Equivalent to `Component.render()` but allows rendering to a remote window. For example, a child component may render a new component to the parent page.
+The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`.
+
+### `Component(props).renderTo(win, container, ?context)`
+
+Equivalent to `Component().render()` but allows rendering to a remote window. For example, a child component may render a new component to the parent page.
 
 - The component must have been registered on the target window
 - The component must be rendered from within the iframe of an existing component
@@ -571,23 +487,19 @@ Equivalent to `Component.render()` but allows rendering to a remote window. For 
 
 The target window to which the component should be rendered. Ordinarily this will be `window.parent`.
 
-### `Component.init(props, context, container)`
-
-Shortcut to instantiate a component on a parent page, with props. Returns instance of `ParentComponent`. Does not render the component. Render the instance using `ParentComponent.render(container)`. Useful for obtaining the parent instance for inter-component operations.
-
 #### props `Object`
 
 Object containing all of the props required by the given component
-
-#### context `string` (optional)
-
-Context type of the component (`iframe`, `popup`)
 
 #### container `string | HTMLElement`
 
 Element selector, or element, into which the component should be rendered.
 
 Defaults to `document.body`.
+
+#### context `iframe | popup`
+
+The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`.
 
 ### `Component.driver(name, dependencies)`
 
@@ -597,7 +509,7 @@ Register a component with your framework of choice, so it can be rendered native
 
 ```javascript
 let MyReactZoidComponent = MyZoidComponent.driver('react', {
-    React: React, 
+    React:    React, 
     ReactDOM: ReactDOM
 });
 ```

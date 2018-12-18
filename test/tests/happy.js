@@ -1,304 +1,294 @@
 /* @flow */
 
-import { assert } from 'chai';
+import { wrapPromise } from 'belter/src';
+import { getParent, getOpener } from 'cross-domain-utils/src';
 
-import { testComponent } from '../component';
 import { onWindowOpen } from '../common';
 
 describe('zoid happy cases', () => {
 
-    it('should enter a component rendered as an iframe', done => {
+    it('should render a component where the url is a function', () => {
+        return wrapPromise(({ expect }) => {
 
-        testComponent.renderIframe({
-            onEnter: done
-        }, document.body);
-    });
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-url-function',
+                    url:    () => '/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-    it('should enter a component rendered as an iframe and call a prop', done => {
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
 
-        testComponent.renderIframe({
-
-            foo(bar) {
-                assert.equal(bar, 'bar');
-                done();
-            },
-
-            run: `
-                window.xprops.foo('bar');
-            `
-        }, document.body);
-    });
-
-    it('should enter a component rendered as an iframe', done => {
-
-        testComponent.renderIframe({
-            onEnter: done
-        }, document.body);
-    });
-
-    it('should enter a component rendered as an iframe and call a prop', done => {
-
-        testComponent.renderIframe({
-
-            foo(bar) {
-                assert.equal(bar, 'bar');
-                done();
-            },
-
-            run: `
-                window.xprops.foo('bar');
-            `
-        }, document.body);
-    });
-
-    it('should enter a component rendered as a popup', done => {
-
-        testComponent.renderPopup({
-            onEnter: done
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body);
         });
     });
 
-    it('should enter a component rendered as a popup and call a prop', done => {
+    it('should render a component with default context', () => {
+        return wrapPromise(({ expect }) => {
 
-        testComponent.renderPopup({
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-default',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-            foo(bar) {
-                assert.equal(bar, 'bar');
-                done();
-            },
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
 
-            run: `
-                window.xprops.foo('bar');
-            `
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body);
         });
     });
 
-    it('should enter a component, update a prop, and call a prop', done => {
+    it('should render a component with iframe context', () => {
+        return wrapPromise(({ expect }) => {
 
-        let isDone = false;
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-iframe',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        testComponent.renderIframe({
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
 
-            foo() {
-                this.updateProps({
-                    foo(bar) {
-                        if (!isDone) {
-                            isDone = true;
-                            assert.equal(bar, 'bar');
-                            done();
-                        }
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+        });
+    });
+
+    it('should render a component with popup context', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-popup',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getOpener(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body, window.zoid.CONTEXT.POPUP);
+        });
+    });
+
+    it('should render a component with popup context and no element', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:            'test-render-popup-no-element',
+                    url:            'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain:         'mock://www.child.com',
+                    defaultContext: 'popup'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getOpener(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render();
+        });
+    });
+
+    it('should render a component to a string element selector', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-string-selector',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render('body');
+        });
+    });
+
+    it('should enter a component rendered as an iframe and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+            const expectedValue = 'bar';
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-iframe-with-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+
+                foo: expect('foo', bar => {
+                    if (bar !== expectedValue) {
+                        throw new Error(`Expected bar to be ${ JSON.stringify(expectedValue) }, got ${ JSON.stringify(bar) }`);
                     }
+                }),
+
+                run: `
+                    window.xprops.foo(${ JSON.stringify(expectedValue) });
+                `
+            }).render(document.body);
+        });
+    });
+
+    it('should enter a component rendered as an iframe and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+            const expectedValue = 'bar';
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-popup-with-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
                 });
-            },
+            };
 
-            run: `
-                window.xprops.foo();
+            const component = window.__component__();
+            return component({
 
-                window.xchild.onProps(function() {
-                    window.xprops.foo('bar');
+                foo: expect('foo', bar => {
+                    if (bar !== expectedValue) {
+                        throw new Error(`Expected bar to be ${ JSON.stringify(expectedValue) }, got ${ JSON.stringify(bar) }`);
+                    }
+                }),
+
+                run: `
+                    window.xprops.foo(${ JSON.stringify(expectedValue) });
+                `
+            }).render(document.body, window.zoid.CONTEXT.POPUP);
+        });
+    });
+
+    it('should render a component where the domain is a regex', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-domain-regex',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: /^mock:\/\/www\.child\.com$/
                 });
-            `
-        }, document.body);
-    });
+            };
 
-    it('should try to render by passing in an element', done => {
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
 
-        testComponent.render({
-            onEnter: done
-        }, document.body);
-    });
-
-    it('should try to render to defaultContext iframe', done => {
-
-        let originalDefaultContext = testComponent.defaultContext;
-        testComponent.defaultContext = 'iframe';
-
-        testComponent.render({
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                done();
-            }
-        }, document.body);
-    });
-
-    it('should try to render to defaultContext iframe using renderTo', done => {
-        
-        let originalDefaultContext = testComponent.defaultContext;
-        testComponent.defaultContext = 'iframe';
-
-        testComponent.renderTo(window, {
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                done();
-            }
-        }, 'body');
-    });
-
-    it('should try to render to defaultContext popup', done => {
-
-        let originalDefaultContext = testComponent.defaultContext;
-        testComponent.defaultContext = 'popup';
-
-        testComponent.render({
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                done();
-            }
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body);
         });
     });
 
-    it('should try to render to when popup is the only available option', done => {
+    it('should correctly identify the component as being the child', () => {
+        return wrapPromise(({ expect }) => {
 
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-ischild',
+                    url:    () => '/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  true,
-            iframe: false
-        };
-
-        testComponent.render({
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                testComponent.contexts = originalContexts;
-                done();
-            }
+            const component = window.__component__();
+            return component({
+                isChildResult: expect('isChildResult', result => {
+                    if (result !== true) {
+                        throw new Error(`Expected result to be true`);
+                    }
+                }),
+                run: () => {
+                    return `
+                        window.xprops.isChildResult(window.__component__().isChild());
+                    `;
+                }
+            }).render(document.body);
         });
     });
 
-    it('should try to render to when iframe is the only available option', done => {
+    it('should correctly identify the component as not being the child', () => {
+        return wrapPromise(({ expect }) => {
 
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-ischild-negative',
+                    url:    () => '/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  false,
-            iframe: true
-        };
+            const component = window.__component__();
+            return component({
+                isChildResult: expect('isChildResult', result => {
+                    if (result !== false) {
+                        throw new Error(`Expected result to be false`);
+                    }
+                }),
+                run: () => {
+                    return `
+                        const component = window.zoid.create({
+                            tag:    'test-render-ischild-negative-second',
+                            url:    () => '/base/test/windows/child/index.htm',
+                            domain: 'mock://www.child.com'
+                        });
 
-        testComponent.render({
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                testComponent.contexts = originalContexts;
-                done();
-            }
-        }, document.body);
-    });
-
-    it('should try to render to iframe, when both iframe and popup are supported contexts', () => {
-        
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
-
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  true,
-            iframe: true
-        };
-
-        let promise = onWindowOpen().then(openedWindow => {
-            if (openedWindow.parent === openedWindow) {
-                throw new Error(`Expected opened window to be iframe`);
-            }
+                        window.xprops.isChildResult(component.isChild());
+                    `;
+                }
+            }).render(document.body);
         });
-
-        testComponent.render({
-            onEnter() {
-                testComponent.defaultContext = originalDefaultContext;
-                testComponent.contexts = originalContexts;
-            }
-        }, document.body);
-
-        return promise;
-    });
-
-    it('should enter a component and call back with a string prop', done => {
-
-        testComponent.renderIframe({
-
-            stringProp: 'bar',
-
-            foo(result) {
-                assert.equal(result, 'bar');
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.stringProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with a number prop', done => {
-
-        testComponent.renderIframe({
-
-            numberProp: 123,
-
-            foo(result) {
-                assert.equal(result, 123);
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.numberProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with a boolean prop', done => {
-
-        testComponent.renderIframe({
-
-            booleanProp: true,
-
-            foo(result) {
-                assert.equal(result, true);
-                done();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.booleanProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with an object prop', done => {
-
-        testComponent.renderIframe({
-
-            objectProp: { foo: 'bar', x: 12345, fn() { done(); }, obj: { bar: 'baz' } },
-
-            foo(result) {
-                assert.equal(result.foo, 'bar');
-                assert.equal(result.obj.bar, 'baz');
-                assert.equal(result.x, 12345);
-                assert.isTrue(result.fn instanceof Function);
-                result.fn();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.objectProp);
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and call back with a function prop', done => {
-
-        testComponent.renderIframe({
-
-            functionProp: done,
-
-            foo(result) {
-                assert.isTrue(result instanceof Function);
-                result();
-            },
-
-            run: `
-                window.xprops.foo(window.xprops.functionProp);
-            `
-        }, document.body);
     });
 });

@@ -24,7 +24,7 @@
 
             // document.querySelector('#openLoginButton').style.display = 'none';
 
-            MyLoginZoidComponent.renderTo(window.parent, {
+            MyLoginZoidComponent({
 
                 prefilledEmail: 'foo@bar.com',
 
@@ -34,7 +34,8 @@
                 }
 
             }, window.xprops.loginContainer);
-        });
+            
+        }).renderTo(window.parent);
 
     </script>
 

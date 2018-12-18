@@ -6,7 +6,7 @@
   "scripts": {
     "setup": "npm install && npm run flow-typed",
     "demo": "serve . -l 1337",
-    "lint": "eslint src/ test/ *.js",
+    "lint": "eslint --ext .js --ext .jsx src/ test/ *.js",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",
     "flow:build": "flow gen-flow-files ./src/index.js --out-dir ./dist/module",
@@ -48,8 +48,8 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "flow-bin": "^0.76",
-    "grumbler-scripts": "^2.0.19",
+    "flow-bin": "^0.81",
+    "grumbler-scripts": "^3",
     "mocha": "^4",
     "serve": "^10.0.0"
   },

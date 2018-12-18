@@ -50,7 +50,7 @@ Render the component on the parent page:
 
 <script src="script-where-my-login-component-is-defined.js"></script>
 <script>
-    MyLoginComponent.render({
+    MyLoginComponent({
 
         prefilledEmail: 'foo@bar.com',
 
@@ -58,7 +58,7 @@ Render the component on the parent page:
             console.log('User logged in with email:', email);
         }
 
-    }, '#container');
+    }).render('#container');
 </script>
 ```
 

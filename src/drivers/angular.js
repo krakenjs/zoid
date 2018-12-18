@@ -1,35 +1,31 @@
 /* @flow */
 
-import { dasherizeToCamel, replaceObject } from 'belter/src';
+import { dasherizeToCamel, replaceObject, noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
-type AngularModule = {
+type AngularModule = {|
     directive : (string, () => {
         scope : { [string] : '=' | '@' },
         restrict : string,
-        controller : Array<string | Function>
+        controller : $ReadOnlyArray<string | Function>
     }) => AngularModule
-};
+|};
 
-type Angular = {
-    module : (string, Array<string>) => AngularModule
-};
+type Angular = {|
+    module : (string, $ReadOnlyArray<string>) => AngularModule
+|};
 
-export let angular : ComponentDriverType<*, Angular> = {
-
-    global() : ?Angular {
-        return window.angular;
-    },
+export const angular : ComponentDriverType<*, Angular> = {
 
     register(component : Component<*>, ng : Angular) : AngularModule {
 
-        let module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
+        const module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
 
-            let scope = {};
+            const scope = {};
 
-            for (let key of component.getPropNames()) {
+            for (const key of component.getPropNames()) {
                 scope[key] = '=';
             }
 
@@ -53,40 +49,24 @@ export let angular : ComponentDriverType<*, Angular> = {
                         }
                     }
 
-                    let getProps = () => {
-
-                        let scopeProps;
-
-                        if ($scope.props) {
-                            scopeProps = $scope.props;
-                        } else {
-                            scopeProps = {};
-                            for (let key of Object.keys(scope)) {
-                                if ($scope[key] !== undefined) {
-                                    scopeProps[key] = $scope[key];
-                                }
-                            }
-                        }
-
-                        scopeProps = replaceObject(scopeProps, item => {
+                    const getProps = () => {
+                        return replaceObject($scope.props, item => {
                             if (typeof item === 'function') {
                                 return function angularWrapped() : mixed {
-                                    let result = item.apply(this, arguments);
+                                    const result = item.apply(this, arguments);
                                     safeApply();
                                     return result;
                                 };
                             }
                             return item;
                         });
-
-                        return scopeProps;
                     };
 
-                    let parent = component.init(getProps(), null, $element[0]);
-                    parent.render(CONTEXT.IFRAME, $element[0]);
+                    const instance = component.init(getProps());
+                    instance.render($element[0], CONTEXT.IFRAME);
 
                     $scope.$watch(() => {
-                        parent.updateProps(getProps());
+                        instance.updateProps(getProps()).catch(noop);
                     });
                 } ]
             };

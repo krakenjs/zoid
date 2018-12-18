@@ -1,26 +1,35 @@
 /* @flow */
 
-import { extend } from 'belter/src';
+import { extend, noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
-type VueComponent = {
+type VueComponent = {|
     render : (Function) => Element,
     inheritAttrs : boolean,
     mounted : () => void,
-    beforeUpdate : () => void
-};
+    watch : {|
+        $attrs : {|
+            deep : boolean,
+            handler : () => void
+        |}
+    |}
+|};
 
-export let vue : ComponentDriverType<*, void> = {
+type RegisteredVueComponent = {|
+    
+|};
 
-    global() {
-        // pass
-    },
+type VueType = {|
+    component : (string, VueComponent) => RegisteredVueComponent
+|};
 
-    register<P>(component : Component<P>) : VueComponent {
+export const vue : ComponentDriverType<*, VueType> = {
 
-        return {
+    register<P>(component : Component<P>, Vue : VueType) : RegisteredVueComponent {
+
+        return Vue.component(component.tag, {
             render(createElement) : Element {
                 return createElement('div');
             },
@@ -28,20 +37,23 @@ export let vue : ComponentDriverType<*, void> = {
             inheritAttrs: false,
 
             mounted() {
-                let el = this.$el;
+                const el = this.$el;
 
                 // $FlowFixMe
-                this.parent = component.init(extend({}, this.$attrs), null, el);
-
-                this.parent.render(CONTEXT.IFRAME, el);
+                this.parent = component.init(extend({}, this.$attrs));
+                this.parent.render(el, CONTEXT.IFRAME);
             },
 
-            beforeUpdate() {
-                
-                if (this.parent && this.$attrs) {
-                    this.parent.updateProps(extend({}, this.$attrs));
+            watch: {
+                $attrs: {
+                    handler: function onChange() {
+                        if (this.parent && this.$attrs) {
+                            this.parent.updateProps(extend({}, this.$attrs)).catch(noop);
+                        }
+                    },
+                    deep: true
                 }
             }
-        };
+        });
     }
 };

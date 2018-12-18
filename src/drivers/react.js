@@ -1,98 +1,65 @@
 /* @flow */
+/* eslint react/no-deprecated: off, react/no-find-dom-node: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
 
-import { extend } from 'belter/src';
+import { extend, noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 declare class ReactClassType {
 
 }
 
-type ReactElementType = {
+type ReactElementType = {|
 
-};
+|};
 
-type ReactType = {
-    createClass : ({ render : ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void }) => (typeof ReactClassType),
-    createElement : (string, ?{ [string] : mixed }, ...children : Array<ReactElementType>) => ReactElementType
-};
+declare class __ReactComponent {
 
-type ReactDomType = {
-    findDOMNode : (ReactElementType) => HTMLElement
-};
+}
 
-type ReactLibraryType = { React : ReactType, ReactDOM : ReactDomType };
+type ReactType = {|
+    Component : __ReactComponent,
+    createClass : ({ render : () => ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void }) => (typeof ReactClassType),
+    createElement : (string, ?{ [string] : mixed }, ...children : $ReadOnlyArray<ReactElementType>) => ReactElementType
+|};
 
-export let react : ComponentDriverType<*, ReactLibraryType> = {
+type ReactDomType = {|
+    findDOMNode : (typeof ReactClassType) => HTMLElement
+|};
 
-    global() : ?ReactLibraryType {
-        if (window.React && window.ReactDOM) {
-            return {
-                React:    window.React,
-                ReactDOM: window.ReactDOM
-            };
-        }
-    },
+type ReactLibraryType = {|
+    React : ReactType,
+    ReactDOM : ReactDomType
+|};
+
+export const react : ComponentDriverType<*, ReactLibraryType> = {
 
     register(component : Component<*>, { React, ReactDOM } : ReactLibraryType) : (typeof ReactClassType) {
 
-        if (React.createClass) {
+        // $FlowFixMe
+        return class extends React.Component {
+            render() : ReactElementType {
+                return React.createElement('div', null);
+            }
 
-            // $FlowFixMe
-            component.react = React.createClass({
+            componentDidMount() {
+                component.log(`instantiate_react_component`);
 
-                render() : ReactElementType {
-                    return React.createElement('div', null);
-                },
+                // $FlowFixMe
+                const el = ReactDOM.findDOMNode(this);
 
-                componentDidMount() {
-                    component.log(`instantiate_react_component`);
+                const parent = component.init(extend({}, this.props));
+                parent.render(el, CONTEXT.IFRAME);
+                this.setState({ parent });
+            }
 
-                    let el = ReactDOM.findDOMNode(this);
+            componentDidUpdate() {
 
-                    let parent = component.init(extend({}, this.props), null, el);
-
-                    this.setState({ parent });
-
-                    parent.render(CONTEXT.IFRAME, el);
-                },
-
-                componentDidUpdate() {
-
-                    if (this.state && this.state.parent) {
-                        this.state.parent.updateProps(extend({}, this.props));
-                    }
+                if (this.state && this.state.parent) {
+                    this.state.parent.updateProps(extend({}, this.props)).catch(noop);
                 }
-            });
-        } else {
-            // $FlowFixMe
-            component.react = class extends React.Component {
-                render() : ReactElementType {
-                    return React.createElement('div', null);
-                }
-
-                componentDidMount() {
-                    component.log(`instantiate_react_component`);
-
-                    let el = ReactDOM.findDOMNode(this);
-
-                    let parent = component.init(extend({}, this.props), null, el);
-
-                    this.setState({ parent });
-
-                    parent.render(CONTEXT.IFRAME, el);
-                }
-
-                componentDidUpdate() {
-
-                    if (this.state && this.state.parent) {
-                        this.state.parent.updateProps(extend({}, this.props));
-                    }
-                }
-            };
-        }
-
-        return component.react;
+            }
+        };
     }
 };

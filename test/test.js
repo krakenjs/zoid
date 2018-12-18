@@ -1,15 +1,11 @@
 /* @flow */
 
-import { CONFIG } from 'post-robot/src';
-
-import zoid from '../src';
-
 import './tests';
 
-CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+window.mockDomain = 'mock://www.parent.com';
 
 window.console.karma = (...args) => {
-    let karma = window.karma || (window.top && window.top.karma) || (window.parent && window.parent.karma) || (window.opener && window.opener.karma);
+    const karma = window.karma || (window.top && window.top.karma) || (window.parent && window.parent.karma) || (window.opener && window.opener.karma);
     if (karma) {
         karma.log('debug', args);
     }
@@ -18,14 +14,14 @@ window.console.karma = (...args) => {
 };
 
 beforeEach(() => {
-    window.onerror = () => {
+    window.addEventListener('error', () => {
         // pass
-    };
+    });
 });
 
 window.name = '__zoid_test_parent_window__';
 
-let body = document.body;
+const body = document.body;
 
 if (!body) {
     throw new Error(`Expected document.body to be present`);
@@ -35,5 +31,7 @@ body.style.width = '1000px';
 body.style.height = '1000px';
 
 afterEach((done) => {
-    return zoid.destroyAll().then(() => done());
+    delete window.__component__;
+    delete window.navigator.mockUserAgent;
+    return window.zoid.destroyAll().then(() => done());
 });

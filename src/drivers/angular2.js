@@ -3,38 +3,55 @@
 
 import { replaceObject } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component/component';
+import type { Component, ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
-type Angular2Injection = {};
+type Angular2Injection = {||};
 
-type Angular2Component = {};
+type Angular2Component = {||};
 
-type Angular2Module = {};
+type Angular2Module = {||};
 
-type Angular2 = {
-    Component : ({ selector : string, template : string, inputs : Array<string> }) => {
-        Class : ({ constructor : Array<Angular2Injection | Function>, ngOnInit : () => void, ngOnChanges : () => void }) => Angular2Component
+type Angular2 = {|
+    Component : ({ selector : string, template : string, inputs : $ReadOnlyArray<string> }) => {
+        Class : ({ constructor : $ReadOnlyArray<Angular2Injection | Function>, ngOnInit : () => void, ngDoCheck : () => void }) => Angular2Component
     },
-    NgModule : ({ declarations : Array<Angular2Component>, exports : Array<Angular2Component> }) => {
+    NgModule : ({ declarations : $ReadOnlyArray<Angular2Component>, exports : $ReadOnlyArray<Angular2Component> }) => {
         Class : ({ constructor : () => void }) => Angular2Module
     },
     ElementRef : Angular2Injection,
     NgZone : Angular2Injection
+|};
+
+const equals = (obj1, obj2) => {
+    const checked = {};
+
+    for (const key in obj1) {
+        if (obj1.hasOwnProperty(key)) {
+            checked[key] = true;
+
+            if (obj1[key] !== obj2[key]) {
+                return false;
+            }
+        }
+    }
+
+    for (const key in obj2) {
+        if (!checked[key]) {
+            return false;
+        }
+    }
+
+    return true;
 };
 
-
-export let angular2 : ComponentDriverType<*, Angular2> = {
-
-    global() {
-        // pass
-    },
+export const angular2 : ComponentDriverType<*, Angular2> = {
 
     register(zoid : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
 
         zoid.log('initializing angular2 component');
 
-        let getProps = (component) => {
+        const getProps = (component) => {
             return replaceObject({ ...component.internalProps, ...component.props }, item => {
                 if (typeof item === 'function') {
                     return function angular2Wrapped() : void {
@@ -52,17 +69,19 @@ export let angular2 : ComponentDriverType<*, Angular2> = {
                 inputs:   [ 'props' ]
             }).Class({
                 constructor: [ ElementRef, NgZone, function angularConstructor(elementRef, zone) {
+                    this._props = {};
                     this.elementRef = elementRef;
                     this.zone = zone;
                 } ],
                 ngOnInit () {
                     const targetElement = this.elementRef.nativeElement;
-                    const parent = zoid.init(getProps(this), null, targetElement);
-                    parent.render(CONTEXT.IFRAME, targetElement);
-                    this.parent = parent;
+                    
+                    this.parent = zoid.init(getProps(this));
+                    this.parent.render(targetElement, CONTEXT.IFRAME);
                 },
-                ngOnChanges() {
-                    if (this.parent) {
+                ngDoCheck() {
+                    if (this.parent && !equals(this._props, this.props)) {
+                        this._props = { ...this.props };
                         this.parent.updateProps(getProps(this));
                     }
                 }

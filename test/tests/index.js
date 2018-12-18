@@ -1,14 +1,14 @@
 /* @flow */
 
 import './happy';
+import './props';
 import './actions';
 import './drivers';
 import './error';
-import './templates';
-import './options';
-import './parent';
+import './renderto';
 import './validation';
-import './parentDomainCheck';
-import './angular2';
-import './vue';
+import './domain';
 import './window';
+import './dimensions';
+import './child';
+import './bridge';

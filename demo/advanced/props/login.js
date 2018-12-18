@@ -7,7 +7,7 @@ window.MyLoginZoidComponent = zoid.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: zoid.getCurrentScriptDir() + '/login.htm',
+    url: './login.htm',
 
     // The properties they can (or must) pass down to my component
 

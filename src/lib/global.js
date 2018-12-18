@@ -18,7 +18,7 @@ export function globalFor(win : CrossDomainWindowType) : ?Object {
 }
 
 export function localGlobal() : Object {
-    let global = globalFor(window);
+    const global = globalFor(window);
 
     if (!global) {
         throw new Error(`Could not get local global`);
@@ -27,4 +27,4 @@ export function localGlobal() : Object {
     return global;
 }
 
-export let global = localGlobal();
+export const global = localGlobal();

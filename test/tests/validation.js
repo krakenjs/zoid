@@ -1,111 +1,156 @@
 /* @flow */
 
-import { assert } from 'chai';
-
-import zoid from '../../src';
-import { testComponent, testComponent5 } from '../component';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 describe('zoid validation errors', () => {
 
-    function expectError(description, method) {
-        try {
-            method();
-        } catch (err) {
-            assert.isTrue(err instanceof Error, `Expected Error for use case: ${ description }, got ${ typeof err }`);
-            return;
-        }
+    function expectError(description, method) : ZalgoPromise<void> {
+        let error;
 
-        throw new Error(`Expected Error for use case: ${ description }`);
+        return ZalgoPromise.try(method).catch(err => {
+            error = err;
+        }).then(() => {
+            if (!(error instanceof Error)) {
+                throw new TypeError(`Expected Error for use case: ${ description }`);
+            }
+        });
     }
 
-    it('should throw validation errors when a component is created without the correct options', () => {
-
-        expectError('Empty options', () => {
+    it('should throw validation errors when a component is created with no options', () => {
+        return expectError('Empty options', () => {
             // $FlowFixMe
-            zoid.create({});
+            window.zoid.create();
         });
+    });
 
-        expectError('Special chars in tag name', () => {
+    it('should throw validation errors when a component is created with Empty options', () => {
+        return expectError('Empty options', () => {
             // $FlowFixMe
-            zoid.create({
+            window.zoid.create({});
+        });
+    });
+
+    it('should throw validation errors when a component is created with no tag', () => {
+        return expectError('Empty options', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                url: 'http://foo.com/bar'
+            });
+        });
+    });
+
+    it('should throw validation errors when a component is created with no url', () => {
+        return expectError('Empty options', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                tag: 'my-component-no-url'
+            });
+        });
+    });
+
+    it('should throw validation errors when a component is created with Special chars in tag name', () => {
+        return expectError('Special chars in tag name', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                url: 'http://foo.com/bar',
                 tag: 'special$%&-chars'
             });
         });
+    });
 
-        expectError('String passed for dimensions', () => {
+    it('should throw validation errors when a component is created with String passed for dimensions', () => {
+        return expectError('String passed for dimensions', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
+            window.zoid.create({
+                url:        'http://foo.com/bar',
+                tag:        'my-component-string-dimensions',
                 dimensions: 'moo'
             });
         });
+    });
 
-        expectError('Empty options passed for dimensions', () => {
+    it('should throw validation errors when a component is created with Empty options passed for dimensions', () => {
+        return expectError('Empty options passed for dimensions', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
+            window.zoid.create({
+                url:        'http://foo.com/bar',
+                tag:        'my-component-empty-dimensions',
                 dimensions: {}
             });
         });
+    });
 
-        expectError('Strings passed for dimensions', () => {
+    it('should throw validation errors when a component is created with Strings passed for dimensions', () => {
+        return expectError('Strings passed for dimensions', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
+            window.zoid.create({
+                url:        'http://foo.com/bar',
+                tag:        'my-component-string-dimensions-object',
                 dimensions: {
                     height: 'foo',
                     width:  'bar'
                 }
             });
         });
+    });
 
-        expectError('String passed for height', () => {
+    it('should throw validation errors when a component is created with String passed for height', () => {
+        return expectError('String passed for height', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
+            window.zoid.create({
+                url:        'http://foo.com/bar',
+                tag:        'my-component-string-height',
                 dimensions: {
                     height: 'foo',
-                    width:  50
+                    width:  '50px'
                 }
             });
         });
+    });
 
-        expectError('Props passed as string', () => {
+    it('should throw validation errors when a component is created with String passed for width', () => {
+        return expectError('String passed for height', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
+            window.zoid.create({
+                url:        'http://foo.com/bar',
+                tag:        'my-component-string-width',
                 dimensions: {
                     height: '50px',
-                    width:  '200px'
-                },
-                url:   'http://zombo.com',
+                    width:  'foo'
+                }
+            });
+        });
+    });
+
+    it('should throw validation errors when a component is created with Props passed as string', () => {
+        return expectError('Props passed as string', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                url:   'http://foo.com/bar',
+                tag:   'my-component-props-string',
                 props: 'foo'
             });
         });
+    });
 
-        expectError('Prop passed as string', () => {
+    it('should throw validation errors when a component is created with Prop passed as string', () => {
+        return expectError('Prop passed as string', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
+            window.zoid.create({
+                tag:   'my-component-prop-string',
                 url:   'http://zombo.com',
                 props: {
                     moo: 'wat'
                 }
             });
         });
+    });
 
-        expectError('Invalid prop type passed', () => {
+    it('should throw validation errors when a component is created with Invalid prop type passed', () => {
+        return expectError('Invalid prop type passed', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
+            window.zoid.create({
+                tag:   'my-component-invalid-prop-type',
                 url:   'http://zombo.com',
                 props: {
                     moo: {
@@ -114,15 +159,13 @@ describe('zoid validation errors', () => {
                 }
             });
         });
+    });
 
-        expectError('Empty prop definition', () => {
+    it('should throw validation errors when a component is created with Empty prop definition', () => {
+        return expectError('Empty prop definition', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
+            window.zoid.create({
+                tag:   'my-component-no-prop-type',
                 url:   'http://zombo.com',
                 props: {
                     onSomething: {
@@ -131,225 +174,216 @@ describe('zoid validation errors', () => {
                 }
             });
         });
+    });
 
-        expectError('Required and default passed', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
+    it('should throw validation errors when a component is created with Required and default passed', () => {
+        return expectError('Required and default passed', () => {
+            window.zoid.create({
+                tag:   'my-component-required-and-default',
                 url:   'http://zombo.com',
                 props: {
                     onSomething: {
                         type:     'function',
                         required: true,
-                        def() { /* pass */ }
+                        default:  () => {
+                            return () => {
+                                // pass
+                            };
+                        }
                     }
                 }
             });
         });
+    });
 
-        expectError('Invalid context passed', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url:      'http://zombo.com',
-                contexts: {
-                    invalid: true,
-                    popup:   false
-                }
+    it('should throw validation errors when a component is created with non-function passed for prerenderTemplate', () => {
+        return expectError('String passed for height', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                url:               'http://foo.com/bar',
+                tag:               'my-component-prerender-non-function',
+                prerenderTemplate: 'foo'
             });
         });
+    });
 
-        expectError('No contexts enabled', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url:      'http://zombo.com',
-                contexts: {
-                    iframe: false,
-                    popup:  false
-                }
+    it('should throw validation errors when a component is created with non-function passed for containerTemplate', () => {
+        return expectError('String passed for height', () => {
+            // $FlowFixMe
+            window.zoid.create({
+                url:               'http://foo.com/bar',
+                tag:               'my-component-container-non-function',
+                containerTemplate: 'foo'
             });
         });
+    });
 
-        zoid.create({
-            tag:        'my-component-working-2',
-            dimensions: {
-                height: '50px',
-                width:  '200px'
-            },
-            url:      'http://zombo.com',
-            contexts: {
-                iframe: true,
-                popup:  false
-            }
-        });
-
-        expectError('Invalid default context', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                contexts: {
-                    iframe: true,
-                    popup:  false
-                },
+    it('should throw validation errors when a component is created with Invalid default context', () => {
+        return expectError('Invalid default context', () => {
+            window.zoid.create({
+                tag:            'my-component-invalid-default-context',
                 url:            'http://zombo.com',
                 defaultContext: 'moo'
             });
         });
+    });
 
-        expectError('Default context disabled', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url:      'http://zombo.com',
-                contexts: {
-                    iframe: true,
-                    popup:  false
-                },
-                defaultContext: 'popup'
-            });
-        });
-
-        zoid.create({
-            tag:        'my-component',
-            dimensions: {
-                height: '50px',
-                width:  '200px'
-            },
-            url:      'http://zombo.com',
-            contexts: {
-                iframe: true,
-                popup:  false
-            },
-            defaultContext: 'iframe'
-        });
-
-        expectError('Undefined url', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url: {
-                    // $FlowFixMe
-                    foo: undefined
-                }
-            });
-        });
-
-        expectError('No default env passed', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url: {
-                    foo: 'http://www.zombo.com'
-                }
-            });
-        });
-
-        expectError('Invalid default env passed', () => {
+    it('should throw validation errors when a component is created with Invalid url passed', () => {
+        return expectError('Invalid url passed', () => {
             // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                envUrls: {
-                    foo: 'http://www.zombo.com'
-                },
-                defaultEnv: 1234
-            });
-        });
-
-        expectError('Default env passed with empty urls', () => {
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
-                url: {
-
-                },
-                defaultEnv: 'moo'
-            });
-        });
-
-        expectError('Invalid url passed', () => {
-            // $FlowFixMe
-            zoid.create({
-                tag:        'my-component',
-                dimensions: {
-                    height: '50px',
-                    width:  '200px'
-                },
+            window.zoid.create({
+                tag: 'my-component-invalid-url',
                 url: 12345
             });
         });
     });
 
-    it('should throw validation errors when a component is inited without the correct options', () => {
+    it('should throw validation errors when a component is rendered with String passed for function prop', () => {
+        return expectError('String passed for function prop', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-string-passed-as-function-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        functionProp: {
+                            type: 'function'
+                        }
+                    }
+                });
+            };
 
-        expectError('String passed for function prop', () => {
-            testComponent.init({
+            const component = window.__component__();
+            return component({
                 functionProp: 'foobar'
             });
         });
+    });
 
-        expectError('Object passed for string prop', () => {
-            testComponent.init({
+    it('should throw validation errors when a component is rendered with Object passed for string prop', () => {
+        return expectError('Object passed for string prop', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-object-passed-as-string-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        stringProp: {
+                            type: 'string'
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            return component({
                 stringProp() { /* pass */ }
             });
         });
+    });
 
-        expectError('Object passed fro number prop', () => {
-            testComponent.init({
+    it('should throw validation errors when a component is rendered with Object passed as number prop', () => {
+        return expectError('Object passed as number prop', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-object-passed-as-number-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        numberProp: {
+                            type: 'number'
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            return component({
                 numberProp() { /* pass */ }
             });
         });
+    });
 
-        expectError('Unserializable object passed for object prop', () => {
-            let obj = {};
+    it('should throw validation errors when a component is rendered with Unserializable object passed for object prop', () => {
+        return expectError('Unserializable object passed for object prop', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-unserializable-object',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        objectProp: {
+                            type: 'object'
+                        }
+                    }
+                });
+            };
+
+            const obj = {};
             obj.obj = obj;
 
-            testComponent.init({
+            const component = window.__component__();
+            return component({
                 objectProp: obj
+            }).render(document.body);
+        });
+    });
+
+    it('should throw validation errors when a component is rendered with object passed for array prop', () => {
+        return expectError('Object passed for array', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-object-passed-for-array',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        arrayProp: {
+                            type: 'array'
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                arrayProp: {}
             });
         });
+    });
 
-        /*
+    it('should throw validation errors when a component is rendered with no props passed', () => {
+        return expectError('No props passed', () => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-no-props-passed-when-required',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        functionProp: {
+                            type: 'function'
+                        }
+                    }
+                });
+            };
 
-        expectError('Invalid prop passed', () => {
-            testComponent.init({
-                invalidProp: 'foobar'
-            });
-        });
-
-        */
-
-        expectError('No props passed', () => {
             // $FlowFixMe
-            testComponent5.init();
+            return window.__component__().render();
+        });
+    });
+
+    it('should throw validation errors when a component is created with a function prop with queryParam true', () => {
+        return expectError('Function queryParam true', () => {
+            return window.zoid.create({
+                tag:    'test-render-function-queryparam-true',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com',
+                props:  {
+                    functionProp: {
+                        type:       'function',
+                        queryParam: true
+                    }
+                }
+            });
         });
     });
 });

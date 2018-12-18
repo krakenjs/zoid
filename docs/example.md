@@ -107,7 +107,7 @@ My life is even easier. I just need to drop in your component onto my page:
 <script>
     // Render the component
 
-    MyLoginComponent.render({
+    MyLoginComponent({
 
         prefilledEmail: 'foo@bar.com',
 
@@ -115,7 +115,7 @@ My life is even easier. I just need to drop in your component onto my page:
             console.log('User logged in with email:', email);
         }
 
-    }, '#container');
+    }).render('#container');
 </script>
 ```
 

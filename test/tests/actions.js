@@ -1,81 +1,96 @@
 /* @flow */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
-import { once } from 'belter/src';
+import { wrapPromise } from 'belter/src';
 
-import { testComponent } from '../component';
 import { onWindowOpen } from '../common';
 
 describe('zoid actions', () => {
 
-    it('should close a zoid iframe', done => {
+    it('should close a zoid iframe', () => {
+        return wrapPromise(({ expect }) => {
+            let win;
+            let closeComponent;
 
-        let win;
-        let close;
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:               'test-container-close-iframe',
+                    url:               '/base/test/windows/child/index.htm',
+                    domain:            'mock://www.child.com',
+                    containerTemplate: ({ close, outlet }) => {
+                        closeComponent = close;
+                        return outlet;
+                    }
+                });
+            };
 
-        let originalContainerTemplate = testComponent.containerTemplate;
-        testComponent.containerTemplate = ({ outlet, actions }) => {
-            close = actions.close;
-            testComponent.containerTemplate = originalContainerTemplate;
-            return outlet;
-        };
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                win = openedWindow;
+            }));
 
-        onWindowOpen().then(openedWindow => {
-            win = openedWindow;
-        });
-
-        testComponent.renderIframe({}, document.body).then(() => {
-            onCloseWindow(win, () => {
-                done();
-            }, 50);
-            close();
-        });
-    });
-
-    it('should close a zoid popup', done => {
-
-        let win;
-        let close;
-
-        let originalContainerTemplate = testComponent.containerTemplate;
-        testComponent.containerTemplate = ({ outlet, actions }) => {
-            close = actions.close;
-            testComponent.containerTemplate = originalContainerTemplate;
-            return outlet;
-        };
-
-        onWindowOpen().then(openedWindow => {
-            win = openedWindow;
-        });
-
-        testComponent.renderPopup({}).then(() => {
-            onCloseWindow(win, () => {
-                done();
-            }, 50);
-            close();
+            const component = window.__component__();
+            return component().render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
+                onCloseWindow(win, expect('onCloseWindow'), 50);
+                return closeComponent();
+            });
         });
     });
 
-    it('should focus a zoid popup', done => {
-        done = once(done);
+    it('should close a zoid popup', () => {
+        return wrapPromise(({ expect }) => {
+            let win;
+            let closeComponent;
 
-        let win;
-        let focus;
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:               'test-container-close-popup',
+                    url:               '/base/test/windows/child/index.htm',
+                    domain:            'mock://www.child.com',
+                    containerTemplate: ({ close, outlet }) => {
+                        closeComponent = close;
+                        return outlet;
+                    }
+                });
+            };
 
-        let originalContainerTemplate = testComponent.containerTemplate;
-        testComponent.containerTemplate = ({ outlet, actions }) => {
-            focus = actions.focus;
-            testComponent.containerTemplate = originalContainerTemplate;
-            return outlet;
-        };
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                win = openedWindow;
+            }));
 
-        onWindowOpen().then(openedWindow => {
-            win = openedWindow;
+            const component = window.__component__();
+            return component().render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+                onCloseWindow(win, expect('onCloseWindow'), 50);
+                return closeComponent();
+            });
         });
+    });
 
-        testComponent.renderPopup({}).then(() => {
-            win.focus = done;
-            focus();
+    it('should focus a zoid popup', () => {
+        return wrapPromise(({ expect }) => {
+            let win;
+            let focusComponent;
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:               'test-container-focus-popup',
+                    url:               '/base/test/windows/child/index.htm',
+                    domain:            'mock://www.child.com',
+                    containerTemplate: ({ focus, outlet }) => {
+                        focusComponent = focus;
+                        return outlet;
+                    }
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                win = openedWindow;
+            }));
+
+            const component = window.__component__();
+            return component().render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+                win.focus = expect('windowFocus');
+                return focusComponent();
+            });
         });
     });
 });

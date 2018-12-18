@@ -1,236 +1,524 @@
 /* @flow */
+/* eslint max-lines: off */
 
-import { assert } from 'chai';
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { wrapPromise, noop } from 'belter/src';
 
-import zoid from '../../src';
-import { testComponent, testComponent3 } from '../component';
 import { onWindowOpen } from '../common';
 
 describe('zoid error cases', () => {
 
-    it('should error out when window.open returns a closed window', done => {
-
-        let windowOpen = window.open;
-
-        window.open = () => {
-            return {
-                closed: true,
-                close() { /* pass */ }
+    it('should error out when window.open returns a closed window', () => {
+        return wrapPromise(({ expect, error }) => {
+            const windowOpen = window.open;
+            window.open = () => {
+                return {
+                    closed: true,
+                    close:  error('close')
+                };
             };
-        };
 
-        testComponent.renderPopup({
-            onEnter: done
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-popup-closed',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        }).catch(err => {
-            assert.isTrue(err instanceof zoid.PopupOpenError, 'Expected PopupOpenError when popup is not opened');
-            window.open = windowOpen;
-            done();
+            const component = window.__component__();
+            return component().render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch', err => {
+                if (!(err instanceof window.zoid.PopupOpenError)) {
+                    throw new TypeError(`Expected PopupOpenError when popup is not opened`);
+                }
+
+                window.open = windowOpen;
+            }));
         });
     });
 
-    it('should enter a component, throw an integration error, and return the error to the parent with the original stack', done => {
+    it('should enter a component, throw an integration error, and return the error to the parent with the original stack', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-from-child',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        testComponent.renderIframe({
+            const component = window.__component__();
+            return component({
 
-            onError(err) {
-                // $FlowFixMe
-                assert.isTrue(err && err.message.indexOf('xxxxx') !== -1, 'Expected error to contain original error');
-                done();
-            },
+                onError: expect('onError', err => {
+                    // $FlowFixMe
+                    if (!err || err.message.indexOf('xxxxx') === -1) {
+                        throw new Error(`Expected error to contain original error from child window`);
+                    }
+                }),
 
-            run: `
-                window.xchild.error(new Error('xxxxx'));
-            `
-        }, document.body);
-    });
-
-    it('should enter a component and timeout, then call onError', done => {
-
-        testComponent.renderIframe({
-            timeout: 1,
-            onError() {
-                done();
-            }
-        }, document.body);
-    });
-
-    it('should try to render a component to an unsupported context and error out', done => {
-
-        // $FlowFixMe
-        testComponent3.render(null, 'moo').catch(() => {
-            done();
+                run: `
+                    window.xprops.onError(new Error('xxxxx'));
+                `
+            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(noop);
         });
     });
 
-    it('should try to render to when iframe is the only available option but no element is passed', done => {
+    it('should enter a component and timeout, then call onError', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-from-child-onerror',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
-
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  false,
-            iframe: true
-        };
-
-        // $FlowFixMe
-        testComponent.render().catch(() => {
-            testComponent.defaultContext = originalDefaultContext;
-            testComponent.contexts = originalContexts;
-            done();
+            const component = window.__component__();
+            return component({
+                timeout: 1,
+                onError: expect('onError')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
         });
     });
 
-    it('should try to render a popup when an element selector is specified', done => {
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+    it('should run validate function on props, and pass up error when thrown', () => {
+        return wrapPromise(({ expect, expectError }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-prop-validate',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        validateProp: {
+                            type:     'string',
+                            validate: expectError('validate', () => {
+                                throw new Error(`Invalid prop`);
+                            })
+                        }
+                    }
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  true,
-            iframe: false
-        };
+            const component = window.__component__();
 
-        // $FlowFixMe
-        testComponent.render(null, 'moo').then(() => {
-            done('Expected an error to be thrown');
-        }).catch(() => {
-            testComponent.defaultContext = originalDefaultContext;
-            testComponent.contexts = originalContexts;
-
-            done();
+            return ZalgoPromise.try(() => {
+                component({
+                    validateProp: 'foo'
+                });
+            }).catch(expect('catch'));
         });
     });
 
-    it('should try to render a popup when an element selector is specified using renderTo', done => {
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+    it('should run validate function on props, and call onError when error is thrown', () => {
+        return wrapPromise(({ expect, expectError }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-prop-validate-onerror',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        validateProp: {
+                            type:     'string',
+                            validate: expectError('validate', () => {
+                                throw new Error(`Invalid prop`);
+                            })
+                        }
+                    }
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  true,
-            iframe: false
-        };
+            const component = window.__component__();
 
-        // $FlowFixMe
-        testComponent.renderTo(window, null, 'moo').then(() => {
-            done('Expected an error to be thrown');
-        }).catch(() => {
-            testComponent.defaultContext = originalDefaultContext;
-            testComponent.contexts = originalContexts;
-
-            done();
+            return ZalgoPromise.try(() => {
+                component({
+                    validateProp: 'foo',
+                    onError:      expect('onError')
+                });
+            }).catch(expect('catch'));
         });
     });
 
-    it('should throw an error if the component does not have a suitable context configured', done => {
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+    it('should run validate function on component, and pass up error when thrown', () => {
+        return wrapPromise(({ expect, expectError }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:      'test-error-validate',
+                    url:      '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    validate: expectError('validate', () => {
+                        throw new Error(`Invalid component`);
+                    })
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  false,
-            iframe: false
-        };
+            const component = window.__component__();
 
-        // $FlowFixMe
-        testComponent.render(null).then(() => {
-            done('Expected an error to be thrown');
-        }).catch(() => {
-            testComponent.defaultContext = originalDefaultContext;
-            testComponent.contexts = originalContexts;
 
-            done();
+            return ZalgoPromise.try(() => {
+                component();
+            }).catch(expect('catch'));
         });
     });
 
-    it('should throw an error if the context specified is not accepted by the component config', done => {
-        let originalDefaultContext = testComponent.defaultContext;
-        let originalContexts = testComponent.contexts;
+    it('should run validate function on component, and call onError when error is thrown', () => {
+        return wrapPromise(({ expect, expectError }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:      'test-error-validate-onerror',
+                    url:      '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    validate: expectError('validate', () => {
+                        throw new Error(`Invalid component`);
+                    })
+                });
+            };
 
-        delete testComponent.defaultContext;
-        testComponent.contexts = {
-            popup:  false,
-            iframe: true
-        };
+            const component = window.__component__();
 
-        try {
-            // $FlowFixMe
-            testComponent.init(null, 'popup', 'moo');
-            done('expected error to be thrown');
-        } catch (err) {
-            testComponent.defaultContext = originalDefaultContext;
-            testComponent.contexts = originalContexts;
-
-            done();
-        }
-    });
-
-    it('should run validate function on props, and pass up error when thrown', done => {
-        testComponent.renderPopup({
-            validateProp: 'foo'
-        }).catch(() => {
-            done();
+            return ZalgoPromise.try(() => {
+                component({
+                    onError: expect('onError')
+                });
+            }).catch(expect('catch'));
         });
     });
 
-    it('should run validate function on props, and call onError when error is thrown', done => {
-        testComponent.renderPopup({
-            validateProp: 'foo',
+    it('should call onclose when a popup is closed by someone other than zoid', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-popup-closed',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
 
-            onError() {
-                done();
-            }
-        });
-    });
-
-    it('should run validate function on component, and pass up error when thrown', done => {
-        testComponent.renderPopup({
-            invalidate: true
-        }).catch(() => {
-            done();
-        });
-    });
-
-    it('should run validate function on props, and call onError when error is thrown', done => {
-        testComponent.renderPopup({
-            invalidate: true,
-
-            onError() {
-                done();
-            }
-        });
-    });
-
-    it('should call onclose when a popup is closed by someone other tha zoid', done => {
-
-        onWindowOpen().then(openedWindow => {
-            setTimeout(() => {
-                openedWindow.close();
-            }, 50);
-        });
-
-        testComponent.renderPopup({
-            onClose() {
-                done();
-            }
-        });
-    });
-
-    it('should call onclose when an iframe is closed by someone other tha zoid', done => {
-
-        testComponent.renderIframe({
-
-            onEnter() {
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
                 setTimeout(() => {
-                    this.iframe.parentNode.removeChild(this.iframe);
-                }, 10);
-            },
+                    openedWindow.close();
+                }, 200);
+            }));
 
-            onClose() {
-                done();
-            }
-        }, document.body);
+            const component = window.__component__();
+            return component({
+                onClose: expect('onClose')
+            }).render('body', window.zoid.CONTEXT.POPUP);
+        }, { timeout: 5000 });
+    });
+
+    it('should call onclose when a popup is closed by someone other than zoid during render', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-popup-closed-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                setTimeout(() => openedWindow.close(), 1);
+            }));
+
+            const component = window.__component__();
+            return component({
+                onClose: expect('onClose')
+            }).render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
+        }, { timeout: 5000 });
+    });
+
+    it('should call onclose when an iframe is closed by someone other than zoid', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-iframe-closed',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                setTimeout(() => {
+                    // $FlowFixMe
+                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                }, 200);
+            }));
+            
+            const component = window.__component__();
+            return component({
+                onClose: expect('onClose')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+        }, { timeout: 5000 });
+    });
+
+    it('should call onclose when an iframe is closed by someone other than zoid during render', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-iframe-closed-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+                setTimeout(() => {
+                    // $FlowFixMe
+                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                }, 1);
+            }));
+
+            const component = window.__component__();
+            return component({
+                onClose: expect('onClose')
+            }).render('body', window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
+        }, { timeout: 5000 });
+    });
+
+    it('should error out when a prerender template is created with the incorrect document', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-prerender-incorrect-document',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+    
+                    prerenderTemplate: () => {
+                        const body = document.createElement('body');
+                        const html = document.createElement('html');
+                        html.appendChild(body);
+                        return html;
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            return component().render(document.body).catch(expect('catch'));
+        });
+    });
+
+    it('should call onclose when an iframe is closed immediately after changing location', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-iframe-redirected-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
+            }));
+
+            const component = window.__component__();
+            return component({
+                run: () => {
+                    return `
+                        window.xprops.onLoad();
+                    `;
+                },
+                onLoad: expect('onLoad', () => {
+                    // $FlowFixMe
+                    openedWindow.location.reload();
+                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                }),
+                onClose: expect('onClose')
+            }).render('body', window.zoid.CONTEXT.IFRAME);
+        }, { timeout: 9000 });
+    });
+
+    it('should call onclose when an iframe is closed after changing location', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-iframe-immediately-redirected-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
+            }));
+
+            const component = window.__component__();
+            return component({
+                run: () => {
+                    return `
+                        window.xprops.onLoad();
+                    `;
+                },
+                onLoad: expect('onLoad', () => {
+                    // $FlowFixMe
+                    openedWindow.location.reload();
+                    setTimeout(() => {
+                        openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                    }, 1);
+                }),
+                onClose: expect('onClose')
+            }).render('body', window.zoid.CONTEXT.IFRAME);
+        }, { timeout: 5000 });
+    });
+
+    it('should error out when a component is created with a duplicate tag', () => {
+        return wrapPromise(({ expect }) => {
+            window.zoid.create({
+                tag:    'test-error-duplicate-tag',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com'
+            });
+
+            return ZalgoPromise.try(() => {
+                window.zoid.create({
+                    tag:    'test-error-duplicate-tag',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            }).catch(expect('catch'));
+        });
+    });
+
+    it('should error out when an unknown driver is requested', () => {
+        return wrapPromise(({ expect }) => {
+            const component = window.zoid.create({
+                tag:    'test-error-unknown-driver',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com'
+            });
+
+            return ZalgoPromise.try(() => {
+                component.driver('meep', {});
+            }).catch(expect('catch'));
+        });
+    });
+
+    it('should error out where the domain is an invalid regex', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-domain-invalid-regex',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: /^mock:\/\/www\.meep\.com$/
+                });
+            };
+
+            const component = window.__component__();
+            return component().render(document.body).catch(expect('catch'));
+        });
+    });
+
+    it('should error out where an invalid element is passed', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-invalid-element',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component().render({}).catch(expect('catch'));
+        });
+    });
+
+    it('should error out where an invalid window is passed', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-invalid-window',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component().renderTo({}, 'body').catch(expect('catch'));
+        });
+    });
+
+    it('should error out where no element is passed', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-no-element',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component().render().catch(expect('catch'));
+        });
+    });
+
+    it('should error out where an invalid context is passed', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-invalid-context',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component().render('body', 'meep').catch(expect('catch'));
+        });
+    });
+
+    it('should error out when trying to register a child when one is already active', () => {
+        return wrapPromise(({ expect }) => {
+
+            const component = window.zoid.create({
+                tag:    'test-xprops-present',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com'
+            });
+
+            window.__component__ = () => {
+                window.xprops = {};
+                let error;
+
+                try {
+                    window.zoid.create({
+                        tag:    'test-xprops-present',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    });
+                } catch (err) {
+                    error = err;
+                }
+
+                delete window.xprops;
+                window.zoid.create({
+                    tag:    'test-xprops-present',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+
+                window.xprops.onLoad(error);
+            };
+
+            return component({
+                onLoad: expect('onLoad', (err) => {
+                    if (!err) {
+                        throw new Error(`Expected error to be thrown in child`);
+                    }
+                })
+            }).render(document.body);
+        });
     });
 });

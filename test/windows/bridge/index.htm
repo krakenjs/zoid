@@ -1,0 +1,16 @@
+<body>
+    <script>
+        window.mockDomain = 'mock://www.child.com';
+
+        var parentWindow = window;
+        while ((parentWindow.opener && parentWindow.opener.zoid && parentWindow !== parentWindow.opener) || (parentWindow.parent && parentWindow.parent.zoid && parentWindow !== parentWindow.parent)) {
+            parentWindow = parentWindow.opener || parentWindow.parent;
+        }
+
+        window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
+
+        window.__coverage__ = parentWindow.__coverage__;
+    </script>
+
+    <script src="/base/test/zoid.js"></script>
+</body>

@@ -2,6 +2,7 @@
 .*/node_modules/babel-plugin-flow-runtime
 .*/node_modules/flow-runtime
 .*/node_modules/npm
+.*/node_modules/jsonlint
 .*/dist/module
 [include]
 [libs]

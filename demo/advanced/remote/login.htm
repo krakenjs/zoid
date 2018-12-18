@@ -60,7 +60,7 @@
                 // Since we had a successful login, call-back the parent page to let them know which user logged in:
 
                 window.xprops.onLogin(email);
-                window.xchild.close();
+                window.xprops.close();
 
             }, 2000);
         });

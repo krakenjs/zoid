@@ -110,8 +110,6 @@ window.MyLoginZoidComponent = zoid.create({
                     #${ id } .${ CLASS.ZOID }-close:after {
                         transform: rotate(-45deg);
                     }
-                `
-            )
-        );
+                `));
     }
 });

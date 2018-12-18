@@ -1,7 +1,6 @@
 /* @flow */
 
-// eslint-disable-next-line import/no-namespace
-import * as INTERFACE from './interface';
-
-export * from './interface';
-export default INTERFACE;
+export { PopupOpenError } from 'belter/src';
+export { create, destroyAll, Component } from './component';
+export type { ZoidComponent } from './component';
+export { PROP_TYPE, PROP_SERIALIZATION, CONTEXT, CLASS } from './constants';

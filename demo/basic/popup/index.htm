@@ -28,7 +28,7 @@
 
             // Render the component
 
-            MyLoginZoidComponent.render({
+            MyLoginZoidComponent({
 
                 prefilledEmail: 'foo@bar.com',
 
@@ -36,7 +36,7 @@
                     console.log('User logged in with email:', email);
                     document.querySelector('#result').innerText = email + ' logged in!';
                 }
-            });
+            }).render('body');
         });
 
     </script>

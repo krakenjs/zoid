@@ -1,37 +1,37 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 
-export function onWindowOpen({ time = 500 } : { time? : number } = {}) : ZalgoPromise<CrossDomainWindowType> {
+export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<CrossDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
 
-        let winOpen = window.open;
-        let documentCreateElement = document.createElement;
+        const winOpen = window.open;
+        const documentCreateElement = win.document.createElement;
 
-        let reset = () => {
-            window.open = winOpen;
+        const reset = () => {
+            win.open = winOpen;
             // $FlowFixMe
-            document.createElement = documentCreateElement;
+            win.document.createElement = documentCreateElement;
         };
 
-        window.open = function patchedWindowOpen() : CrossDomainWindowType {
-            let win = winOpen.apply(this, arguments);
+        win.open = function patchedWindowOpen() : CrossDomainWindowType {
+            const popup = winOpen.apply(this, arguments);
             reset();
-            resolve(win);
-            return win;
+            resolve(popup);
+            return popup;
         };
 
         // $FlowFixMe
         document.createElement = function docCreateElement(tagName) : HTMLElement {
-            let el = documentCreateElement.apply(this, arguments);
+            const el = documentCreateElement.apply(this, arguments);
 
             if (tagName && tagName.toLowerCase() === 'iframe') {
 
-                let interval;
+                // eslint-disable-next-line prefer-const
                 let timeout;
 
-                interval = setInterval(() => {
+                const interval = setInterval(() => {
                     // $FlowFixMe
                     if (el.contentWindow) {
                         reset();
@@ -50,12 +50,12 @@ export function onWindowOpen({ time = 500 } : { time? : number } = {}) : ZalgoPr
 
             return el;
         };
-    }).then(win => {
+    }).then(openedWindow => {
 
-        if (!win || isWindowClosed(win)) {
+        if (!openedWindow || isWindowClosed(openedWindow)) {
             throw new Error(`Expected win to be open`);
         }
 
-        return win;
+        return openedWindow;
     });
 }
