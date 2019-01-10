@@ -36,7 +36,7 @@ function validatePropDefinitions<P>(options : ComponentOptionsType<P>) {
                 throw new Error(`Required prop can not have a default value`);
             }
 
-            if (prop.type === PROP_TYPE.FUNCTION && prop.queryParam) {
+            if (prop.type === PROP_TYPE.FUNCTION && prop.queryParam && !prop.queryValue) {
                 throw new Error(`Do not pass queryParam for function prop`);
             }
         }
