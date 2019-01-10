@@ -4959,7 +4959,7 @@
                             if (!prop.type) throw new Error("Expected prop.type");
                             if (-1 === PROP_TYPE_LIST.indexOf(prop.type)) throw new Error("Expected prop.type to be one of " + PROP_TYPE_LIST.join(", "));
                             if (prop.required && prop.default) throw new Error("Required prop can not have a default value");
-                            if (prop.type === PROP_TYPE.FUNCTION && prop.queryParam) throw new Error("Do not pass queryParam for function prop");
+                            if (prop.type === PROP_TYPE.FUNCTION && prop.queryParam && !prop.queryValue) throw new Error("Do not pass queryParam for function prop");
                         }
                     }(options);
                     if (options.dimensions) {
