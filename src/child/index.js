@@ -5,7 +5,7 @@ import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent,
     getNthParentFromTop, getAncestor, getAllFramesInWindow, type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, noop, memoized, waitForDocumentBody, onResize, getElementSafe } from 'belter/src';
+import { extend, memoized, waitForDocumentBody, onResize, getElementSafe } from 'belter/src';
 
 import { parseChildWindowName, globalFor } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -280,13 +280,12 @@ export class ChildComponent<P> {
     }
 
     onError(err : mixed) : ZalgoPromise<void> {
-        // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise.try(() => {
             if (this.parent && this.parent.onError) {
                 return this.parent.onError(err);
+            } else {
+                throw err;
             }
-        }).catch(noop).then(() => {
-            throw err;
         });
     }
 }
