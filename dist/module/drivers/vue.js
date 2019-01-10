@@ -1,35 +1,40 @@
-import { extend } from 'belter/src';
+"use strict";
 
-import { CONTEXT } from '../constants';
+exports.__esModule = true;
+exports.vue = void 0;
 
-export var vue = {
-    global: function global() {
-        // pass
-    },
-    register: function register(component) {
+var _src = require("belter/src");
 
-        return {
-            render: function render(createElement) {
-                return createElement('div');
-            },
+var _constants = require("../constants");
 
+const vue = {
+  register(component, Vue) {
+    return Vue.component(component.tag, {
+      render(createElement) {
+        return createElement('div');
+      },
 
-            inheritAttrs: false,
+      inheritAttrs: false,
 
-            mounted: function mounted() {
-                var el = this.$el;
+      mounted() {
+        const el = this.$el; // $FlowFixMe
 
-                // $FlowFixMe
-                this.parent = component.init(extend({}, this.$attrs), null, el);
+        this.parent = component.init((0, _src.extend)({}, this.$attrs));
+        this.parent.render(el, _constants.CONTEXT.IFRAME);
+      },
 
-                this.parent.render(CONTEXT.IFRAME, el);
-            },
-            beforeUpdate: function beforeUpdate() {
-
-                if (this.parent && this.$attrs) {
-                    this.parent.updateProps(extend({}, this.$attrs));
-                }
+      watch: {
+        $attrs: {
+          handler: function onChange() {
+            if (this.parent && this.$attrs) {
+              this.parent.updateProps((0, _src.extend)({}, this.$attrs)).catch(_src.noop);
             }
-        };
-    }
+          },
+          deep: true
+        }
+      }
+    });
+  }
+
 };
+exports.vue = vue;

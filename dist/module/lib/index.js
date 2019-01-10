@@ -1,5 +1,17 @@
-export * from './fn';
-export * from './logger';
-export * from './global';
-export * from './clean';
-export * from './util';
+"use strict";
+
+exports.__esModule = true;
+
+var _global = require("./global");
+
+Object.keys(_global).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  exports[key] = _global[key];
+});
+
+var _window = require("./window");
+
+Object.keys(_window).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  exports[key] = _window[key];
+});

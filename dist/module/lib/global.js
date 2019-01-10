@@ -1,28 +1,35 @@
-import { isSameDomain } from 'cross-domain-utils/src';
+"use strict";
 
-import { __ZOID__ } from '../constants';
+exports.__esModule = true;
+exports.globalFor = globalFor;
+exports.localGlobal = localGlobal;
+exports.global = void 0;
 
-export function globalFor(win) {
+var _src = require("cross-domain-utils/src");
 
-    if (!isSameDomain(win)) {
-        return;
-    }
+var _constants = require("../constants");
 
-    if (!win[__ZOID__]) {
-        win[__ZOID__] = {};
-    }
+function globalFor(win) {
+  if (!(0, _src.isSameDomain)(win)) {
+    return;
+  }
 
-    return win[__ZOID__];
+  if (!win[_constants.__ZOID__]) {
+    win[_constants.__ZOID__] = {};
+  }
+
+  return win[_constants.__ZOID__];
 }
 
-export function localGlobal() {
-    var global = globalFor(window);
+function localGlobal() {
+  const global = globalFor(window);
 
-    if (!global) {
-        throw new Error('Could not get local global');
-    }
+  if (!global) {
+    throw new Error(`Could not get local global`);
+  }
 
-    return global;
+  return global;
 }
 
-export var global = localGlobal();
+const global = localGlobal();
+exports.global = global;
