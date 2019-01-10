@@ -2933,7 +2933,7 @@
                 });
             };
             ProxyWindow.isProxyWindow = function(obj) {
-                return Boolean(obj && obj.isProxyWindow);
+                return Boolean(obj && !Object(cross_domain_utils_src.isWindow)(obj) && obj.isProxyWindow);
             };
             ProxyWindow.toProxyWindow = function(win) {
                 cleanupProxyWindows();
@@ -3873,7 +3873,6 @@
                 var _this6 = this;
                 return zalgo_promise_src.a.try(function() {
                     if (_this6.parent && _this6.parent.onError) return _this6.parent.onError(err);
-                }).catch(src.noop).then(function() {
                     throw err;
                 });
             };

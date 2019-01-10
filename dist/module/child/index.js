@@ -308,13 +308,12 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
   }
 
   onError(err) {
-    // eslint-disable-next-line promise/no-promise-in-callback
     return _src3.ZalgoPromise.try(() => {
       if (this.parent && this.parent.onError) {
         return this.parent.onError(err);
+      } else {
+        throw err;
       }
-    }).catch(_src4.noop).then(() => {
-      throw err;
     });
   }
 
