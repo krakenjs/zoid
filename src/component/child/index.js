@@ -5,16 +5,16 @@ import { flush } from 'beaver-logger/client';
 import { isSameDomain, matchDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { onResize } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { getParentComponentWindow, getComponentMeta, getParentDomain, getParentRenderWindow } from '../window';
-import { extend, deserializeFunctions, get, onDimensionsChange, trackDimensions, dimensionsMatchViewport, stringify,
-    cycle, globalFor, setLogLevel, getElement, documentReady, noop, stringifyError } from '../../lib';
+import { extend, deserializeFunctions, get, stringify,
+    globalFor, setLogLevel, getElement, noop, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLOSE_REASONS, INITIAL_PROPS } from '../../constants';
 import { RenderError } from '../../error';
 import type { Component } from '../component';
 import type { BuiltInPropsType } from '../component/props';
-import type { DimensionsType } from '../../types';
 
 import { normalizeChildProps } from './props';
 
@@ -85,8 +85,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         this.setWindows();
 
-        this.listenForResize();
-
         // Send an init message to our parent. This gives us an initial set of data to use that we can use to function.
         //
         // For example:
@@ -112,15 +110,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
             this.error(err);
             throw err;
         });
-    }
-
-    listenForResize() {
-        if (this.component.listenForResize) {
-            this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-            window.addEventListener('resize', () => {
-                this.sendToParent(POST_MESSAGE.ONRESIZE, {}, { fireAndForget: true });
-            });
-        }
     }
 
     hasValidParentDomain() : boolean {
@@ -305,10 +294,8 @@ export class ChildComponent<P> extends BaseComponent<P> {
 
         if (autoResize.element) {
             element = getElement(autoResize.element);
-        } else if (window.navigator.userAgent.match(/MSIE (9|10)\./)) {
-            element = document.body;
         } else {
-            element = document.documentElement;
+            element = document.body;
         }
 
         // $FlowFixMe
@@ -332,28 +319,10 @@ export class ChildComponent<P> extends BaseComponent<P> {
         }
 
         this.watchingForResize = true;
-
-        return ZalgoPromise.try(() => {
-
-            return documentReady;
-
-        }).then(() => {
-
-            // $FlowFixMe
-            if (!dimensionsMatchViewport(element, { width, height })) {
-                // $FlowFixMe
-                return this.resizeToElement(element, { width, height });
-            }
-
-        }).then(() => {
-
-            return cycle(() => {
-                return onDimensionsChange(element, { width, height }).then(() => {
-                    // $FlowFixMe
-                    return this.resizeToElement(element, { width, height });
-                });
-            });
-        });
+    
+        onResize(element, ({ width: newWidth, height: newHeight }) => {
+            this.resize(width ? newWidth : undefined, height ? newHeight : undefined);
+        }, { width, height });
     }
 
 
@@ -391,43 +360,6 @@ export class ChildComponent<P> extends BaseComponent<P> {
             return this.sendToParent(POST_MESSAGE.RESIZE, { width, height }).then(noop);
         });
     }
-
-
-    resizeToElement(el : HTMLElement, { width, height } : DimensionsType) : ZalgoPromise<void> {
-
-        let history = [];
-
-        let resize = () => {
-            return ZalgoPromise.try(() => {
-
-                // $FlowFixMe
-                let tracker = trackDimensions(el, { width, height });
-                let { dimensions } = tracker.check();
-
-                for (let size of history) {
-
-                    let widthMatch = !width || size.width === dimensions.width;
-                    let heightMatch = !height || size.height === dimensions.height;
-
-                    if (widthMatch && heightMatch) {
-                        return;
-                    }
-                }
-
-                history.push({ width: dimensions.width, height: dimensions.height });
-
-                return this.resize(width ? dimensions.width : null, height ? dimensions.height : null).then(() => {
-
-                    if (tracker.check().changed) {
-                        return resize();
-                    }
-                });
-            });
-        };
-
-        return resize();
-    }
-
 
     /*  Hide
         ----

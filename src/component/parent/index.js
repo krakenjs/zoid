@@ -5,13 +5,14 @@ import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { getElementSafe, onResize } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, showAndAnimate, animateAndHide, showElement, hideElement,
     addClass, extend, serializeFunctions, extendUrl, jsxDom,
-    setOverflow, elementStoppedMoving, getElement, memoized, appendChild,
+    getElement, memoized, appendChild,
     global, writeToWindow, setLogLevel, once,
     prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
@@ -862,11 +863,6 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 });
             },
 
-            [ POST_MESSAGE.ONRESIZE ]() {
-                this.event.trigger('resize');
-            },
-
-
             [ POST_MESSAGE.HIDE ]() {
                 this.hide();
             },
@@ -891,30 +887,10 @@ export class ParentComponent<P> extends BaseComponent<P> {
         Resize the child component window
     */
 
-    resize(width : number | string, height : number | string, { waitForTransition = true } : { waitForTransition : boolean } = {}) : ZalgoPromise<void> {
+    resize(width : ?(number | string), height : ?(number | string)) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.component.log(`resize`, { height: stringify(height), width: stringify(width) });
             this.driver.resize.call(this, width, height);
-
-            if (!waitForTransition) {
-                return;
-            }
-
-            if (this.element || this.iframe) {
-
-                let overflow;
-
-                if (this.element) {
-                    overflow = setOverflow(this.element, 'hidden');
-                }
-
-                return elementStoppedMoving(this.element || this.iframe).then(() => {
-
-                    if (overflow) {
-                        overflow.reset();
-                    }
-                });
-            }
         });
     }
 
@@ -1173,6 +1149,18 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 } catch (err) {
                     this.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
                     console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
+                }
+
+                let { width = false, height = false, element = 'body' } = (typeof this.component.autoResize === 'object' && this.component.autoResize !== null)
+                    ? this.component.autoResize
+                    : {};
+
+                element = getElementSafe(element, doc);
+
+                if (element && (width || height)) {
+                    onResize(element, ({ width: newWidth, height: newHeight }) => {
+                        this.resize(width ? newWidth : undefined, height ? newHeight : undefined);
+                    }, { width, height, win });
                 }
             });
         });

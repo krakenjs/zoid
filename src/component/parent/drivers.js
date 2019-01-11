@@ -20,7 +20,7 @@ export type ContextDriverType = {
     needsBridge : boolean,
 
     open : (?string) => ZalgoPromise<void>,
-    resize : (number | string, number | string) => void,
+    resize : (?(number | string), ?(number | string)) => void,
     show : () => void,
     hide : () => void,
     loadUrl : (string) => void,
@@ -194,7 +194,7 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
         }
     },
 
-    resize(width : number | string, height : number | string) {
+    resize(width : ?(number | string), height : ?(number | string)) {
 
         if (width) {
             this.container.style.width = toCSS(width);
