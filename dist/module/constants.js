@@ -10,7 +10,6 @@ export var POST_MESSAGE = {
     CHECK_CLOSE: ZOID + '_check_close',
     REDIRECT: ZOID + '_redirect',
     RESIZE: ZOID + '_resize',
-    ONRESIZE: ZOID + '_onresize',
     DELEGATE: ZOID + '_delegate',
     ALLOW_DELEGATE: ZOID + '_allow_delegate',
     ERROR: ZOID + '_error',

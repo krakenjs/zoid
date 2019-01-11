@@ -47,10 +47,11 @@ import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { getElementSafe, onResize } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName as _buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
-import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, serializeFunctions, extendUrl, jsxDom, setOverflow, elementStoppedMoving, getElement, memoized, appendChild, global, writeToWindow, setLogLevel, once, prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
+import { addEventListener, uniqueID, elementReady as _elementReady, writeElementToWindow, noop, showAndAnimate, animateAndHide, showElement, hideElement, addClass, extend, serializeFunctions, extendUrl, jsxDom, getElement, memoized, appendChild, global, writeToWindow, setLogLevel, once, prefetchPage, awaitFrameLoad, stringify, stringifyError } from '../../lib';
 import { POST_MESSAGE, CONTEXT_TYPES, CLASS_NAMES, ANIMATION_NAMES, CLOSE_REASONS, DELEGATE, INITIAL_PROPS, WINDOW_REFERENCES, EVENTS, DEFAULT_DIMENSIONS } from '../../constants';
 import { RenderError } from '../../error';
 
@@ -860,8 +861,6 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                     return _this20.resize(data.width, data.height);
                 }
             });
-        }, _ref9[POST_MESSAGE.ONRESIZE] = function () {
-            this.event.trigger('resize');
         }, _ref9[POST_MESSAGE.HIDE] = function () {
             this.hide();
         }, _ref9[POST_MESSAGE.SHOW] = function () {
@@ -879,33 +878,9 @@ export var ParentComponent = (_class = function (_BaseComponent) {
     ParentComponent.prototype.resize = function resize(width, height) {
         var _this21 = this;
 
-        var _ref10 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-            _ref10$waitForTransit = _ref10.waitForTransition,
-            waitForTransition = _ref10$waitForTransit === undefined ? true : _ref10$waitForTransit;
-
         return ZalgoPromise['try'](function () {
             _this21.component.log('resize', { height: stringify(height), width: stringify(width) });
             _this21.driver.resize.call(_this21, width, height);
-
-            if (!waitForTransition) {
-                return;
-            }
-
-            if (_this21.element || _this21.iframe) {
-
-                var overflow = void 0;
-
-                if (_this21.element) {
-                    overflow = setOverflow(_this21.element, 'hidden');
-                }
-
-                return elementStoppedMoving(_this21.element || _this21.iframe).then(function () {
-
-                    if (overflow) {
-                        overflow.reset();
-                    }
-                });
-            }
         });
     };
 
@@ -1155,6 +1130,25 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                     _this31.component.logError('preprender_error', { err: err.stack ? err.stack : err.toString() });
                     console.error(err.stack ? err.stack : err); // eslint-disable-line no-console
                 }
+
+                var _ref10 = _typeof(_this31.component.autoResize) === 'object' && _this31.component.autoResize !== null ? _this31.component.autoResize : {},
+                    _ref10$width = _ref10.width,
+                    width = _ref10$width === undefined ? false : _ref10$width,
+                    _ref10$height = _ref10.height,
+                    height = _ref10$height === undefined ? false : _ref10$height,
+                    _ref10$element = _ref10.element,
+                    element = _ref10$element === undefined ? 'body' : _ref10$element;
+
+                element = getElementSafe(element, doc);
+
+                if (element && (width || height)) {
+                    onResize(element, function (_ref11) {
+                        var newWidth = _ref11.width,
+                            newHeight = _ref11.height;
+
+                        _this31.resize(width ? newWidth : undefined, height ? newHeight : undefined);
+                    }, { width: width, height: height, win: win });
+                }
             });
         });
     };
@@ -1169,11 +1163,11 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var _ref11 = this.component.dimensions || {},
-            _ref11$width = _ref11.width,
-            width = _ref11$width === undefined ? DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref11$width,
-            _ref11$height = _ref11.height,
-            height = _ref11$height === undefined ? DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref11$height;
+        var _ref12 = this.component.dimensions || {},
+            _ref12$width = _ref12.width,
+            width = _ref12$width === undefined ? DEFAULT_DIMENSIONS.WIDTH + 'px' : _ref12$width,
+            _ref12$height = _ref12.height,
+            height = _ref12$height === undefined ? DEFAULT_DIMENSIONS.HEIGHT + 'px' : _ref12$height;
 
         return renderer.call(this, _extends({
             id: CLASS_NAMES.ZOID + '-' + this.component.tag + '-' + this.props.uid,
