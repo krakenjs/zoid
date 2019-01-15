@@ -195,11 +195,11 @@ export class ChildComponent<P> {
 
     watchForClose() {
         window.addEventListener('beforeunload', () => {
-            return this.parent.checkClose.fireAndForget();
+            this.parent.checkClose.fireAndForget();
         });
 
         window.addEventListener('unload', () => {
-            return this.parent.checkClose.fireAndForget();
+            this.parent.checkClose.fireAndForget();
         });
 
         onCloseWindow(this.parentComponentWindow, () => {
