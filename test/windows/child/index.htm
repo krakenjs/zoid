@@ -9,6 +9,7 @@
             parentWindow = parentWindow.opener || parentWindow.parent;
         }
 
+        window.console.karma = parentWindow.console.karma;
         window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
 
         window.__coverage__ = parentWindow.__coverage__;
