@@ -11,7 +11,7 @@ import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../
 import { DelegateComponent } from '../delegate';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
 import { isZoidComponentWindow, parseChildWindowName } from '../lib';
-import type { CssDimensionsType, StringMatcherType, ElementRefType } from '../types';
+import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
@@ -72,8 +72,8 @@ export type ComponentOptionsType<P> = {|
 |};
 
 type ZoidRenderer = {|
-    render : (element? : ElementRefType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
-    renderTo : (target : CrossDomainWindowType, element? : ElementRefType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
+    render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
+    renderTo : (target : CrossDomainWindowType, container? : string, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
 
 export type ZoidComponentInstance<P> = {| ...ParentHelpers<P>, ...ZoidRenderer |};
@@ -275,16 +275,17 @@ export class Component<P> {
         return isZoidComponentWindow() && parseChildWindowName().tag === this.tag;
     }
 
-    getDefaultElement(context : $Values<typeof CONTEXT>, element : ?ElementRefType) : ElementRefType {
-        if (element) {
-            if (!isElement(element) && typeof element !== 'string') {
-                throw new Error(`Expected element to be passed`);
+    getDefaultContainer<T : (string | HTMLElement)>(context : $Values<typeof CONTEXT>, container? : T) : T {
+        if (container) {
+            if (typeof container !== 'string' && !isElement(container)) {
+                throw new TypeError(`Expected string or element selector to be passed`);
             }
 
-            return element;
+            return container;
         }
 
         if (context === CONTEXT.POPUP) {
+            // $FlowFixMe
             return 'body';
         }
 
@@ -314,24 +315,24 @@ export class Component<P> {
         
         const parent = new ParentComponent(this, props);
 
-        const render = (target, element, context) => ZalgoPromise.try(() => {
+        const render = (target, container, context) => ZalgoPromise.try(() => {
             if (!isWindow(target)) {
                 throw new Error(`Must pass window to renderTo`);
             }
 
             context = this.getDefaultContext(context, props);
-            element = this.getDefaultElement(context, element);
-            return parent.render(target, element, context);
+            container = this.getDefaultContainer(context, container);
+            return parent.render(target, container, context);
         });
 
         return {
             ...parent.getHelpers(),
-            render:   (element, context) => render(window, element, context),
-            renderTo: (target, element, context) => render(target, element, context)
+            render:   (container, context) => render(window, container, context),
+            renderTo: (target, container, context) => render(target, container, context)
         };
     }
 
-    checkAllowRender(target : CrossDomainWindowType, domain : string | RegExp, element : ElementRefType) {
+    checkAllowRender(target : CrossDomainWindowType, domain : string | RegExp, container : string | HTMLElement) {
         if (target === window) {
             return;
         }
@@ -346,8 +347,8 @@ export class Component<P> {
             throw new Error(`Can not render remotely to ${ domain.toString() } - can only render to ${ origin }`);
         }
 
-        if (element && typeof element !== 'string') {
-            throw new Error(`Element passed to renderTo must be a string selector, got ${ typeof element } ${ element }`);
+        if (container && typeof container !== 'string') {
+            throw new Error(`Container passed to renderTo must be a string selector, got ${ typeof container } }`);
         }
     }
 

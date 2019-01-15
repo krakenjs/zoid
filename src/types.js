@@ -1,7 +1,5 @@
 /* @flow */
 
-export type ElementRefType = ElementRefType;
-
 export type DimensionsType = {|
     width : number,
     height : number

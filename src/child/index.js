@@ -250,7 +250,7 @@ export class ChildComponent<P> {
 
         return {
             updateProps(props : (PropsType<P>)) : ZalgoPromise<void> {
-                return ZalgoPromise.try(() => self.setProps(props, this.origin, true));
+                return ZalgoPromise.try(() => self.setProps(props, this.__origin__, true));
             },
 
             close() : ZalgoPromise<void> {
