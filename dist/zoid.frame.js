@@ -3198,10 +3198,10 @@
             _proto.watchForClose = function() {
                 var _this3 = this;
                 window.addEventListener("beforeunload", function() {
-                    return _this3.parent.checkClose.fireAndForget();
+                    _this3.parent.checkClose.fireAndForget();
                 });
                 window.addEventListener("unload", function() {
-                    return _this3.parent.checkClose.fireAndForget();
+                    _this3.parent.checkClose.fireAndForget();
                 });
                 Object(cross_domain_utils_src.onCloseWindow)(this.parentComponentWindow, function() {
                     _this3.destroy();

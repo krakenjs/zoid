@@ -195,10 +195,10 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
 
   watchForClose() {
     window.addEventListener('beforeunload', () => {
-      return this.parent.checkClose.fireAndForget();
+      this.parent.checkClose.fireAndForget();
     });
     window.addEventListener('unload', () => {
-      return this.parent.checkClose.fireAndForget();
+      this.parent.checkClose.fireAndForget();
     });
     (0, _src.onCloseWindow)(this.parentComponentWindow, () => {
       this.destroy();
