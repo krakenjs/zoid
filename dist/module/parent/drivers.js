@@ -13,6 +13,8 @@ var _src4 = require("belter/src");
 
 var _constants = require("../constants");
 
+var _lib = require("../lib");
+
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 /*  Render Drivers
@@ -38,70 +40,78 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
   renderedIntoContainer: true,
   callChildToClose: false,
 
-  open() {
-    const frame = (0, _src4.iframe)({
-      attributes: _extends({
-        title: this.component.name
-      }, this.component.attributes.iframe),
-      class: [_constants.CLASS.COMPONENT_FRAME, _constants.CLASS.INVISIBLE]
-    }, this.element);
-    this.clean.set('iframe', frame);
-    return (0, _src4.awaitFrameWindow)(frame).then(win => {
-      const detectClose = () => {
-        return this.close();
-      };
-
-      const iframeWatcher = (0, _src4.watchElementForClose)(frame, detectClose);
-      const elementWatcher = (0, _src4.watchElementForClose)(this.element, detectClose);
-      this.clean.register(() => {
-        iframeWatcher.cancel();
-        elementWatcher.cancel();
-        (0, _src2.cleanUpWindow)(win);
-        (0, _src4.destroyElement)(frame);
-      });
-      return _src2.ProxyWindow.toProxyWindow(win);
-    });
-  },
-
-  openPrerender() {
-    const prerenderIframe = (0, _src4.iframe)({
-      attributes: _extends({
-        name: `__zoid_prerender_frame__${this.component.name}_${(0, _src4.uniqueID)()}__`
-      }, this.component.attributes.iframe),
-      class: [_constants.CLASS.PRERENDER_FRAME, _constants.CLASS.VISIBLE]
-    }, this.element);
-    this.clean.set('prerenderIframe', prerenderIframe);
-    return (0, _src4.awaitFrameWindow)(prerenderIframe).then(prerenderFrameWindow => {
-      this.clean.register(() => (0, _src4.destroyElement)(prerenderIframe));
-      return (0, _src3.assertSameDomain)(prerenderFrameWindow);
-    });
-  },
-
-  switchPrerender() {
-    (0, _src4.addClass)(this.prerenderIframe, _constants.CLASS.INVISIBLE);
-    (0, _src4.removeClass)(this.prerenderIframe, _constants.CLASS.VISIBLE);
-
-    if (this.iframe) {
-      (0, _src4.addClass)(this.iframe, _constants.CLASS.VISIBLE);
-      (0, _src4.removeClass)(this.iframe, _constants.CLASS.INVISIBLE);
+  open(proxyElement) {
+    if (!proxyElement) {
+      throw new Error(`Expected container element to be passed`);
     }
 
-    setTimeout(() => (0, _src4.destroyElement)(this.prerenderIframe), 1);
+    return proxyElement.getElement().then(element => {
+      const frame = (0, _src4.iframe)({
+        attributes: _extends({
+          title: this.component.name
+        }, this.component.attributes.iframe),
+        class: [_constants.CLASS.COMPONENT_FRAME, _constants.CLASS.INVISIBLE]
+      }, element);
+      return (0, _src4.awaitFrameWindow)(frame).then(win => {
+        const iframeWatcher = (0, _src4.watchElementForClose)(frame, () => this.close());
+        const elementWatcher = (0, _src4.watchElementForClose)(element, () => this.close());
+        this.clean.register(() => {
+          iframeWatcher.cancel();
+          elementWatcher.cancel();
+          (0, _src2.cleanUpWindow)(win);
+          (0, _src4.destroyElement)(frame);
+        });
+        return {
+          proxyWin: _src2.ProxyWindow.toProxyWindow(win),
+          proxyFrame: (0, _lib.getProxyElement)(frame)
+        };
+      });
+    });
   },
 
-  delegate: ['renderContainer', 'prerender', 'resize', 'openPrerender', 'switchPrerender', 'open'],
+  openPrerender(proxyWin, proxyElement) {
+    return proxyElement.getElement().then(element => {
+      const prerenderIframe = (0, _src4.iframe)({
+        attributes: _extends({
+          name: `__zoid_prerender_frame__${this.component.name}_${(0, _src4.uniqueID)()}__`
+        }, this.component.attributes.iframe),
+        class: [_constants.CLASS.PRERENDER_FRAME, _constants.CLASS.VISIBLE]
+      }, element);
+      return (0, _src4.awaitFrameWindow)(prerenderIframe).then(prerenderFrameWindow => {
+        this.clean.register(() => (0, _src4.destroyElement)(prerenderIframe));
+        return (0, _src3.assertSameDomain)(prerenderFrameWindow);
+      }).then(win => {
+        return {
+          proxyPrerenderWin: _src2.ProxyWindow.toProxyWindow(win),
+          proxyPrerenderFrame: (0, _lib.getProxyElement)(prerenderIframe)
+        };
+      });
+    });
+  },
+
+  switchPrerender({
+    proxyFrame,
+    proxyPrerenderFrame
+  }) {
+    return _src.ZalgoPromise.all([proxyFrame.getElement(), proxyPrerenderFrame.getElement()]).then(([frame, prerenderFrame]) => {
+      (0, _src4.addClass)(prerenderFrame, _constants.CLASS.INVISIBLE);
+      (0, _src4.removeClass)(prerenderFrame, _constants.CLASS.VISIBLE);
+      (0, _src4.addClass)(frame, _constants.CLASS.VISIBLE);
+      (0, _src4.removeClass)(frame, _constants.CLASS.INVISIBLE);
+      setTimeout(() => (0, _src4.destroyElement)(prerenderFrame), 1);
+    });
+  },
+
+  delegate: ['getProxyContainer', 'renderContainer', 'prerender', 'switchPrerender', 'open'],
 
   resize({
     width,
     height
   }) {
-    if (typeof width === 'number') {
-      this.element.style.width = (0, _src4.toCSS)(width);
-    }
-
-    if (typeof height === 'number') {
-      this.element.style.height = (0, _src4.toCSS)(height);
-    }
+    this.proxyOutlet.resize({
+      width,
+      height
+    });
   }
 
 };
@@ -127,18 +137,20 @@ if (__ZOID__.__POPUP_SUPPORT__) {
           win.close();
           (0, _src2.cleanUpWindow)(win);
         });
-        return _src2.ProxyWindow.toProxyWindow(win);
+        return {
+          proxyWin: _src2.ProxyWindow.toProxyWindow(win)
+        };
       });
     },
 
-    openPrerender(win) {
+    openPrerender(proxyWin) {
       return _src.ZalgoPromise.try(() => {
-        if ((0, _src3.isSameDomain)(win)) {
-          return (0, _src3.assertSameDomain)(win);
-        }
+        return {
+          proxyPrerenderWin: proxyWin
+        };
       });
     },
 
-    delegate: ['renderContainer']
+    delegate: ['getProxyContainer', 'renderContainer']
   };
 }

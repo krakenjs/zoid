@@ -15,3 +15,10 @@ Object.keys(_window).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
   exports[key] = _window[key];
 });
+
+var _serialize = require("./serialize");
+
+Object.keys(_serialize).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  exports[key] = _serialize[key];
+});

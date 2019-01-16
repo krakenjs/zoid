@@ -213,16 +213,17 @@ let Component = (_class = (_temp = _class2 = class Component {
     return (0, _lib.isZoidComponentWindow)() && (0, _lib.parseChildWindowName)().tag === this.tag;
   }
 
-  getDefaultElement(context, element) {
-    if (element) {
-      if (!(0, _src4.isElement)(element) && typeof element !== 'string') {
-        throw new Error(`Expected element to be passed`);
+  getDefaultContainer(context, container) {
+    if (container) {
+      if (typeof container !== 'string' && !(0, _src4.isElement)(container)) {
+        throw new TypeError(`Expected string or element selector to be passed`);
       }
 
-      return element;
+      return container;
     }
 
     if (context === _constants.CONTEXT.POPUP) {
+      // $FlowFixMe
       return 'body';
     }
 
@@ -250,23 +251,23 @@ let Component = (_class = (_temp = _class2 = class Component {
     props = props || {};
     const parent = new _parent.ParentComponent(this, props);
 
-    const render = (target, element, context) => _src2.ZalgoPromise.try(() => {
+    const render = (target, container, context) => _src2.ZalgoPromise.try(() => {
       if (!(0, _src3.isWindow)(target)) {
         throw new Error(`Must pass window to renderTo`);
       }
 
       context = this.getDefaultContext(context, props);
-      element = this.getDefaultElement(context, element);
-      return parent.render(target, element, context);
+      container = this.getDefaultContainer(context, container);
+      return parent.render(target, container, context);
     });
 
     return _extends({}, parent.getHelpers(), {
-      render: (element, context) => render(window, element, context),
-      renderTo: (target, element, context) => render(target, element, context)
+      render: (container, context) => render(window, container, context),
+      renderTo: (target, container, context) => render(target, container, context)
     });
   }
 
-  checkAllowRender(target, domain, element) {
+  checkAllowRender(target, domain, container) {
     if (target === window) {
       return;
     }
@@ -281,8 +282,8 @@ let Component = (_class = (_temp = _class2 = class Component {
       throw new Error(`Can not render remotely to ${domain.toString()} - can only render to ${origin}`);
     }
 
-    if (element && typeof element !== 'string') {
-      throw new Error(`Element passed to renderTo must be a string selector, got ${typeof element} ${element}`);
+    if (container && typeof container !== 'string') {
+      throw new Error(`Container passed to renderTo must be a string selector, got ${typeof container} }`);
     }
   }
 

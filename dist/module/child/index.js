@@ -271,7 +271,7 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
     const self = this;
     return {
       updateProps(props) {
-        return _src3.ZalgoPromise.try(() => self.setProps(props, this.origin, true));
+        return _src3.ZalgoPromise.try(() => self.setProps(props, this.__origin__, true));
       },
 
       close() {
