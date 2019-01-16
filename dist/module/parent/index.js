@@ -364,7 +364,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       context,
       props,
       overrides: {
-        focus: () => this.focus(),
         close: () => this.close(),
         onError: err => this.onError(err)
       }
@@ -421,7 +420,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     return proxyWin.awaitWindow().then(win => {
       const closeWindowListener = (0, _src2.onCloseWindow)(win, () => {
         this.component.log(`detect_close_child`);
-        return _src3.ZalgoPromise.all([this.props.onClose(), this.destroy(new Error(`Window close detected`))]);
+        return this.close();
       }, 2000);
       this.clean.register(closeWindowListener.cancel);
     });
@@ -440,7 +439,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       const timeout = this.props.timeout;
 
       if (timeout) {
-        return this.initPromise.timeout(timeout, new Error(`Loading component timed out after ${timeout} milliseconds`)).then(_src4.noop);
+        return this.initPromise.timeout(timeout, new Error(`Loading component timed out after ${timeout} milliseconds`));
       }
     });
   }
@@ -448,7 +447,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
   initChild(child) {
     return _src3.ZalgoPromise.try(() => {
       this.clean.set('child', child);
-      this.initPromise.resolve(this);
+      this.initPromise.resolve();
     });
   }
 

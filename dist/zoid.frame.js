@@ -3741,9 +3741,6 @@
                     context: context,
                     props: props,
                     overrides: {
-                        focus: function() {
-                            return _this9.focus();
-                        },
                         close: function() {
                             return _this9.close();
                         },
@@ -3790,7 +3787,7 @@
                 return proxyWin.awaitWindow().then(function(win) {
                     var closeWindowListener = Object(cross_domain_utils_src.onCloseWindow)(win, function() {
                         _this11.component.log("detect_close_child");
-                        return zalgo_promise_src.a.all([ _this11.props.onClose(), _this11.destroy(new Error("Window close detected")) ]);
+                        return _this11.close();
                     }, 2e3);
                     _this11.clean.register(closeWindowListener.cancel);
                 });
@@ -3806,14 +3803,14 @@
                 var _this13 = this;
                 return zalgo_promise_src.a.try(function() {
                     var timeout = _this13.props.timeout;
-                    if (timeout) return _this13.initPromise.timeout(timeout, new Error("Loading component timed out after " + timeout + " milliseconds")).then(src.noop);
+                    if (timeout) return _this13.initPromise.timeout(timeout, new Error("Loading component timed out after " + timeout + " milliseconds"));
                 });
             };
             _proto.initChild = function(child) {
                 var _this14 = this;
                 return zalgo_promise_src.a.try(function() {
                     _this14.clean.set("child", child);
-                    _this14.initPromise.resolve(_this14);
+                    _this14.initPromise.resolve();
                 });
             };
             _proto.buildParentExports = function(win) {
@@ -3993,7 +3990,7 @@
                 this.context = options.context;
                 this.driver = RENDER_DRIVERS[options.context];
                 this.clean = Object(src.cleanup)(this);
-                this.close = parent_ParentComponent.prototype.close;
+                this.focus = parent_ParentComponent.prototype.close;
                 this.resize = parent_ParentComponent.prototype.resize;
                 this.renderTemplate = parent_ParentComponent.prototype.renderTemplate;
                 this.props = {};
@@ -4003,7 +4000,6 @@
                 }
                 this.close = options.overrides.close;
                 this.onError = options.overrides.onError;
-                this.focus = options.overrides.focus;
                 this.component.registerActiveComponent(this);
                 this.clean.register(function() {
                     return _this.component.destroyActiveComponent(_this);
