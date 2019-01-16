@@ -4698,8 +4698,14 @@
                     }
                 },
                 resize: function(width, height) {
-                    width && (this.element.style.width = Object(lib.Q)(width));
-                    height && (this.element.style.height = Object(lib.Q)(height));
+                    if (width) {
+                        this.container.style.width = Object(lib.Q)(width);
+                        this.element.style.width = Object(lib.Q)(width);
+                    }
+                    if (height) {
+                        this.container.style.height = Object(lib.Q)(height);
+                        this.element.style.height = Object(lib.Q)(height);
+                    }
                 },
                 show: function() {
                     Object(lib.N)(this.element);
