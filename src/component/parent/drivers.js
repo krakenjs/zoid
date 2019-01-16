@@ -197,10 +197,12 @@ RENDER_DRIVERS[CONTEXT_TYPES.IFRAME] = {
     resize(width : ?(number | string), height : ?(number | string)) {
 
         if (width) {
+            this.container.style.width = toCSS(width);
             this.element.style.width   = toCSS(width);
         }
 
         if (height) {
+            this.container.style.height = toCSS(height);
             this.element.style.height = toCSS(height);
         }
     },
