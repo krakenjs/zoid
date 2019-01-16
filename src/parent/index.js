@@ -369,9 +369,8 @@ export class ParentComponent<P> {
             context,
             props,
             overrides: {
-                focus:     () => this.focus(),
-                close:     () => this.close(),
-                onError:   (err) => this.onError(err)
+                close:   () => this.close(),
+                onError: (err) => this.onError(err)
             }
 
         }).then(({ data }) => {
@@ -418,11 +417,7 @@ export class ParentComponent<P> {
         return proxyWin.awaitWindow().then(win => {
             const closeWindowListener = onCloseWindow(win, () => {
                 this.component.log(`detect_close_child`);
-
-                return ZalgoPromise.all([
-                    this.props.onClose(),
-                    this.destroy(new Error(`Window close detected`))
-                ]);
+                return this.close();
             }, 2000);
 
             this.clean.register(closeWindowListener.cancel);
@@ -585,7 +580,7 @@ export class ParentComponent<P> {
         });
     }
 
-    destroy(err? : mixed = new Error(`Component destroyed before render complete`)) : ZalgoPromise<void> {
+    destroy(err : mixed = new Error(`Component destroyed before render complete`)) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.component.log(`destroy`);
             this.initPromise.asyncReject(err);

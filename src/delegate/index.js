@@ -48,9 +48,9 @@ export class DelegateComponent<P>  {
         this.context = options.context;
         this.driver = RENDER_DRIVERS[options.context];
         this.clean = cleanup(this);
-
+        
         // $FlowFixMe
-        this.close = ParentComponent.prototype.close;
+        this.focus = ParentComponent.prototype.close;
         // $FlowFixMe
         this.resize = ParentComponent.prototype.resize;
         // $FlowFixMe
@@ -66,8 +66,7 @@ export class DelegateComponent<P>  {
 
         this.close     = options.overrides.close;
         this.onError   = options.overrides.onError;
-        this.focus     = options.overrides.focus;
-        
+
         this.component.registerActiveComponent(this);
         this.clean.register(() => this.component.destroyActiveComponent(this));
 
