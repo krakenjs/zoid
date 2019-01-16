@@ -81,7 +81,7 @@ export class ParentComponent<P> {
     driver : ContextDriverType
     clean : CleanupType
 
-    initPromise : ZalgoPromise<ParentComponent<P>>
+    initPromise : ZalgoPromise<void>
     
     props : PropsType<P>
     state : StateType
@@ -443,7 +443,7 @@ export class ParentComponent<P> {
             const timeout = this.props.timeout;
 
             if (timeout) {
-                return this.initPromise.timeout(timeout, new Error(`Loading component timed out after ${ timeout } milliseconds`)).then(noop);
+                return this.initPromise.timeout(timeout, new Error(`Loading component timed out after ${ timeout } milliseconds`));
             }
         });
     }
@@ -451,7 +451,7 @@ export class ParentComponent<P> {
     initChild(child : ChildExportsType<P>) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.clean.set('child', child);
-            this.initPromise.resolve(this);
+            this.initPromise.resolve();
         });
     }
 
