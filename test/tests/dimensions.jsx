@@ -35,16 +35,16 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
             }).render(document.body).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
 
                 if (componentWindow.innerWidth !== expectedWidth) {
                     throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
@@ -82,16 +82,16 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
             }).render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
 
                 if (componentWindow.innerWidth !== expectedWidth) {
                     throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
@@ -125,10 +125,8 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
@@ -139,6 +137,9 @@ describe('zoid dimensions cases', () => {
                 return instance.resize({ width, height });
 
             }).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
+                
                 if (componentWindow.innerWidth !== expectedWidth) {
                     throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
                 }
@@ -171,22 +172,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 }),
 
                 run: () => {
@@ -225,22 +226,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 }),
 
                 run: () => {
@@ -284,22 +285,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 }),
 
                 run: () => {
@@ -343,22 +344,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 }),
 
                 run: () => {
@@ -399,22 +400,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 }),
 
                 run: () => {
@@ -472,22 +473,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 })
             }).render(document.body);
         });
@@ -539,22 +540,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 })
             }).render(document.body);
         });
@@ -606,22 +607,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 })
             }).render(document.body);
         });
@@ -672,22 +673,22 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            let componentWindow;
-
-            onWindowOpen().then(expect('onWindowOpen', win => {
-                componentWindow = assertSameDomain(win);
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
             }));
 
             const component = window.__component__();
             return component({
                 onResized: expect('onResized', () => {
-                    if (componentWindow.innerWidth !== expectedWidth) {
-                        throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
-                    }
-
-                    if (componentWindow.innerHeight !== expectedHeight) {
-                        throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
-                    }
+                    return componentWindowPromise.then(componentWindow => {
+                        if (componentWindow.innerWidth !== expectedWidth) {
+                            throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                        }
+    
+                        if (componentWindow.innerHeight !== expectedHeight) {
+                            throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                        }
+                    });
                 })
             }).render(document.body);
         });

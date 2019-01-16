@@ -12,7 +12,6 @@ import { getProxyElement, type ProxyElement } from '../lib';
 
 export type ContextDriverType = {|
     renderedIntoContainer : boolean,
-    callChildToClose : boolean,
 
     open : (?ProxyElement) => ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }>,
     openPrerender : (ProxyWindow, ProxyElement) => ZalgoPromise<{ proxyPrerenderWin : ProxyWindow, proxyPrerenderFrame? : ProxyElement }>,
@@ -23,38 +22,17 @@ export type ContextDriverType = {|
     delegate : $ReadOnlyArray<string>
 |};
 
-/*  Render Drivers
-    --------------
-
-    There are various differences in how we treat:
-
-    - Opening frames and windows
-    - Rendering up to the parent
-    - Resizing
-    - etc.
-
-    based on the context we're rendering to.
-
-    These render drivers split this functionality out in a driver pattern, so our component code doesn't bunch up into a
-    series of if-popup-then-else-if-iframe code.
-*/
-
 export const RENDER_DRIVERS : { [string] : ContextDriverType } = {};
 
-// Iframe context is rendered inline on the page, without any kind of parent template. It's the one context that is designed
-// to feel like a native element on the page.
-
 RENDER_DRIVERS[CONTEXT.IFRAME] = {
-
     renderedIntoContainer: true,
-    callChildToClose:      false,
 
-    open(proxyElement) : ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }> {
-        if (!proxyElement) {
+    open(proxyOutlet) : ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }> {
+        if (!proxyOutlet) {
             throw new Error(`Expected container element to be passed`);
         }
 
-        return proxyElement.getElement().then(element => {
+        return proxyOutlet.getElement().then(outlet => {
             const frame = iframe({
                 attributes: {
                     title: this.component.name,
@@ -64,19 +42,15 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                     CLASS.COMPONENT_FRAME,
                     CLASS.INVISIBLE
                 ]
-            }, element);
+            }, outlet);
+
+            const frameWatcher = watchElementForClose(frame, () => this.close());
+            this.clean.register(() => frameWatcher.cancel());
+            this.clean.register(() => destroyElement(frame));
     
             return awaitFrameWindow(frame).then(win => {
-                const iframeWatcher = watchElementForClose(frame, () => this.close());
-                const elementWatcher = watchElementForClose(element, () => this.close());
-    
-                this.clean.register(() => {
-                    iframeWatcher.cancel();
-                    elementWatcher.cancel();
-                    cleanUpWindow(win);
-                    destroyElement(frame);
-                });
-    
+                this.clean.register(() => cleanUpWindow(win));
+
                 return {
                     proxyWin:   ProxyWindow.toProxyWindow(win),
                     proxyFrame: getProxyElement(frame)
@@ -87,7 +61,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
     openPrerender(proxyWin : ProxyWindow, proxyElement : ProxyElement) : ZalgoPromise<{ proxyPrerenderWin : ProxyWindow, proxyPrerenderFrame? : ProxyElement }> {
         return proxyElement.getElement().then(element => {
-            const prerenderIframe = iframe({
+            const prerenderFrame = iframe({
                 attributes: {
                     name: `__zoid_prerender_frame__${ this.component.name }_${ uniqueID() }__`,
                     ...this.component.attributes.iframe
@@ -98,13 +72,14 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                 ]
             }, element);
 
-            return awaitFrameWindow(prerenderIframe).then(prerenderFrameWindow => {
-                this.clean.register(() => destroyElement(prerenderIframe));
+            this.clean.register(() => destroyElement(prerenderFrame));
+
+            return awaitFrameWindow(prerenderFrame).then(prerenderFrameWindow => {
                 return assertSameDomain(prerenderFrameWindow);
             }).then(win => {
                 return {
                     proxyPrerenderWin:   ProxyWindow.toProxyWindow(win),
-                    proxyPrerenderFrame: getProxyElement(prerenderIframe)
+                    proxyPrerenderFrame: getProxyElement(prerenderFrame)
                 };
             });
         });
@@ -138,9 +113,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
 if (__ZOID__.__POPUP_SUPPORT__) {
     RENDER_DRIVERS[CONTEXT.POPUP] = {
-        
         renderedIntoContainer: false,
-        callChildToClose:      true,
 
         open() : ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }> {
             return ZalgoPromise.try(() => {

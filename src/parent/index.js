@@ -7,7 +7,7 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, onResize, extend, extendUrl, memoized, appendChild, cleanup, type CleanupType,
-    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe } from 'belter/src';
+    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe, watchElementForClose } from 'belter/src';
 
 import { POST_MESSAGE, CONTEXT, CLASS,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -101,6 +101,7 @@ export class ParentComponent<P> {
             this.setProps(props);
             this.component.registerActiveComponent(this);
             this.clean.register(() => this.component.destroyActiveComponent(this));
+            this.watchForUnload();
 
         } catch (err) {
             this.onError(err, props.onError).catch(noop);
@@ -128,7 +129,6 @@ export class ParentComponent<P> {
             tasks.init = this.initPromise;
             tasks.buildUrl = this.buildUrl();
             tasks.onRender = this.props.onRender();
-            this.watchForUnload();
 
             tasks.getProxyContainer = this.getProxyContainer(container);
 
@@ -308,7 +308,7 @@ export class ParentComponent<P> {
         });
     }
     
-    open(proxyElement? : ProxyElement) : ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }> {
+    open(proxyOutlet? : ProxyElement) : ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }> {
         return ZalgoPromise.try(() => {
             this.component.log(`open`);
 
@@ -322,7 +322,7 @@ export class ParentComponent<P> {
                 };
             }
 
-            return this.driver.open.call(this, proxyElement);
+            return this.driver.open.call(this, proxyOutlet);
 
         }).then(({ proxyWin, proxyFrame }) => {
             this.proxyWin = proxyWin;
@@ -493,7 +493,7 @@ export class ParentComponent<P> {
             return this.props.onClose();
 
         }).then(() => {
-            if (this.child && this.driver.callChildToClose) {
+            if (this.child) {
                 this.child.close.fireAndForget().catch(noop);
             }
 
@@ -572,6 +572,8 @@ export class ParentComponent<P> {
             const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, outlet });
             appendChild(container, innerContainer);
 
+            const outletWatcher = watchElementForClose(outlet, () => this.close());
+            this.clean.register(() => outletWatcher.cancel());
             this.clean.register(() => destroyElement(outlet));
             this.clean.register(() => destroyElement(innerContainer));
 
