@@ -13,12 +13,9 @@ export function defaultContainerTemplate<P>({ uid, outlet, doc, dimensions : { w
         <div id={ uid }>
             <style>
                 {`
-                    #${ uid }, #${ uid } > .${ CLASS.OUTLET } {
+                    #${ uid } > .${ CLASS.OUTLET } {
                         width: ${ width };
                         height: ${ height };
-                    }
-
-                    #${ uid } > .${ CLASS.OUTLET } {
                         display: inline-block;
                         position: relative;
                     }
