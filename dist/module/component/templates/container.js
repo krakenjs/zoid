@@ -22,12 +22,9 @@ function defaultContainerTemplate({
   return (0, _src.node)("div", {
     id: uid
   }, (0, _src.node)("style", null, `
-                    #${uid}, #${uid} > .${_constants.CLASS.OUTLET} {
+                    #${uid} > .${_constants.CLASS.OUTLET} {
                         width: ${width};
                         height: ${height};
-                    }
-
-                    #${uid} > .${_constants.CLASS.OUTLET} {
                         display: inline-block;
                         position: relative;
                     }

@@ -3900,28 +3900,27 @@
         _class), RENDER_DRIVERS = {};
         RENDER_DRIVERS[CONTEXT.IFRAME] = {
             renderedIntoContainer: !0,
-            callChildToClose: !1,
-            open: function(proxyElement) {
+            open: function(proxyOutlet) {
                 var _this = this;
-                if (!proxyElement) throw new Error("Expected container element to be passed");
-                return proxyElement.getElement().then(function(element) {
+                if (!proxyOutlet) throw new Error("Expected container element to be passed");
+                return proxyOutlet.getElement().then(function(outlet) {
                     var frame = Object(src.iframe)({
                         attributes: Object(esm_extends.a)({
                             title: _this.component.name
                         }, _this.component.attributes.iframe),
                         class: [ CLASS.COMPONENT_FRAME, CLASS.INVISIBLE ]
-                    }, element);
+                    }, outlet), frameWatcher = Object(src.watchElementForClose)(frame, function() {
+                        return _this.close();
+                    });
+                    _this.clean.register(function() {
+                        return frameWatcher.cancel();
+                    });
+                    _this.clean.register(function() {
+                        return Object(src.destroyElement)(frame);
+                    });
                     return Object(src.awaitFrameWindow)(frame).then(function(win) {
-                        var iframeWatcher = Object(src.watchElementForClose)(frame, function() {
-                            return _this.close();
-                        }), elementWatcher = Object(src.watchElementForClose)(element, function() {
-                            return _this.close();
-                        });
                         _this.clean.register(function() {
-                            iframeWatcher.cancel();
-                            elementWatcher.cancel();
-                            cleanUpWindow(win);
-                            Object(src.destroyElement)(frame);
+                            return cleanUpWindow(win);
                         });
                         return {
                             proxyWin: window_ProxyWindow.toProxyWindow(win),
@@ -3933,21 +3932,21 @@
             openPrerender: function(proxyWin, proxyElement) {
                 var _this2 = this;
                 return proxyElement.getElement().then(function(element) {
-                    var prerenderIframe = Object(src.iframe)({
+                    var prerenderFrame = Object(src.iframe)({
                         attributes: Object(esm_extends.a)({
                             name: "__zoid_prerender_frame__" + _this2.component.name + "_" + Object(src.uniqueID)() + "__"
                         }, _this2.component.attributes.iframe),
                         class: [ CLASS.PRERENDER_FRAME, CLASS.VISIBLE ]
                     }, element);
-                    return Object(src.awaitFrameWindow)(prerenderIframe).then(function(prerenderFrameWindow) {
-                        _this2.clean.register(function() {
-                            return Object(src.destroyElement)(prerenderIframe);
-                        });
+                    _this2.clean.register(function() {
+                        return Object(src.destroyElement)(prerenderFrame);
+                    });
+                    return Object(src.awaitFrameWindow)(prerenderFrame).then(function(prerenderFrameWindow) {
                         return Object(cross_domain_utils_src.assertSameDomain)(prerenderFrameWindow);
                     }).then(function(win) {
                         return {
                             proxyPrerenderWin: window_ProxyWindow.toProxyWindow(win),
-                            proxyPrerenderFrame: getProxyElement(prerenderIframe)
+                            proxyPrerenderFrame: getProxyElement(prerenderFrame)
                         };
                     });
                 });
@@ -3976,7 +3975,6 @@
         };
         RENDER_DRIVERS[CONTEXT.POPUP] = {
             renderedIntoContainer: !1,
-            callChildToClose: !0,
             open: function() {
                 var _this3 = this;
                 return zalgo_promise_src.a.try(function() {
@@ -4029,6 +4027,7 @@
                     this.clean.register(function() {
                         return _this.component.destroyActiveComponent(_this);
                     });
+                    this.watchForUnload();
                 } catch (err) {
                     this.onError(err, props.onError).catch(src.noop);
                     throw err;
@@ -4047,7 +4046,6 @@
                     tasks.init = _this2.initPromise;
                     tasks.buildUrl = _this2.buildUrl();
                     tasks.onRender = _this2.props.onRender();
-                    _this2.watchForUnload();
                     tasks.getProxyContainer = _this2.getProxyContainer(container);
                     tasks.renderContainer = tasks.getProxyContainer.then(function(proxyContainer) {
                         return _this2.renderContainer(proxyContainer, {
@@ -4313,7 +4311,7 @@
                     if (_this5.child) return _this5.child.updateProps(_this5.getPropsForChild(_this5.getDomain()));
                 });
             };
-            _proto.open = function(proxyElement) {
+            _proto.open = function(proxyOutlet) {
                 var _this6 = this;
                 return zalgo_promise_src.a.try(function() {
                     _this6.component.log("open");
@@ -4326,7 +4324,7 @@
                             proxyWin: window_ProxyWindow.toProxyWindow(windowProp)
                         };
                     }
-                    return _this6.driver.open.call(_this6, proxyElement);
+                    return _this6.driver.open.call(_this6, proxyOutlet);
                 }).then(function(_ref11) {
                     var proxyWin = _ref11.proxyWin, proxyFrame = _ref11.proxyFrame;
                     return {
@@ -4487,7 +4485,7 @@
                     _this18.component.log("close");
                     return _this18.props.onClose();
                 }).then(function() {
-                    _this18.child && _this18.driver.callChildToClose && _this18.child.close.fireAndForget().catch(src.noop);
+                    _this18.child && _this18.child.close.fireAndForget().catch(src.noop);
                     return _this18.destroy(new Error("Window closed"));
                 });
             };
@@ -4564,6 +4562,12 @@
                         outlet: outlet
                     });
                     Object(src.appendChild)(container, innerContainer);
+                    var outletWatcher = Object(src.watchElementForClose)(outlet, function() {
+                        return _this21.close();
+                    });
+                    _this21.clean.register(function() {
+                        return outletWatcher.cancel();
+                    });
                     _this21.clean.register(function() {
                         return Object(src.destroyElement)(outlet);
                     });
@@ -4978,7 +4982,7 @@
             var uid = _ref.uid, outlet = _ref.outlet, doc = _ref.doc, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
             return node("div", {
                 id: uid
-            }, node("style", null, "\n                    #" + uid + ", #" + uid + " > ." + CLASS.OUTLET + " {\n                        width: " + width + ";\n                        height: " + height + ";\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " {\n                        display: inline-block;\n                        position: relative;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), node("node", {
+            }, node("style", null, "\n                    #" + uid + " > ." + CLASS.OUTLET + " {\n                        width: " + width + ";\n                        height: " + height + ";\n                        display: inline-block;\n                        position: relative;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe {\n                        height: 100%;\n                        width: 100%;\n                        position: absolute;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n\n                    #" + uid + " > ." + CLASS.OUTLET + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n                "), node("node", {
                 el: outlet
             })).render(dom_dom({
                 doc: doc

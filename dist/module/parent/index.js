@@ -47,6 +47,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       this.setProps(props);
       this.component.registerActiveComponent(this);
       this.clean.register(() => this.component.destroyActiveComponent(this));
+      this.watchForUnload();
     } catch (err) {
       this.onError(err, props.onError).catch(_src4.noop);
       throw err;
@@ -70,7 +71,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       tasks.init = this.initPromise;
       tasks.buildUrl = this.buildUrl();
       tasks.onRender = this.props.onRender();
-      this.watchForUnload();
       tasks.getProxyContainer = this.getProxyContainer(container);
       tasks.renderContainer = tasks.getProxyContainer.then(proxyContainer => {
         return this.renderContainer(proxyContainer, {
@@ -294,7 +294,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     });
   }
 
-  open(proxyElement) {
+  open(proxyOutlet) {
     return _src3.ZalgoPromise.try(() => {
       this.component.log(`open`);
       const windowProp = this.props.window;
@@ -307,7 +307,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
         };
       }
 
-      return this.driver.open.call(this, proxyElement);
+      return this.driver.open.call(this, proxyOutlet);
     }).then(({
       proxyWin,
       proxyFrame
@@ -511,7 +511,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       this.component.log(`close`);
       return this.props.onClose();
     }).then(() => {
-      if (this.child && this.driver.callChildToClose) {
+      if (this.child) {
         this.child.close.fireAndForget().catch(_src4.noop);
       }
 
@@ -623,6 +623,8 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
         outlet
       });
       (0, _src4.appendChild)(container, innerContainer);
+      const outletWatcher = (0, _src4.watchElementForClose)(outlet, () => this.close());
+      this.clean.register(() => outletWatcher.cancel());
       this.clean.register(() => (0, _src4.destroyElement)(outlet));
       this.clean.register(() => (0, _src4.destroyElement)(innerContainer));
       this.proxyOutlet = (0, _lib.getProxyElement)(outlet);
