@@ -50,7 +50,7 @@ export class DelegateComponent<P>  {
         this.clean = cleanup(this);
         
         // $FlowFixMe
-        this.focus = ParentComponent.prototype.close;
+        this.focus = ParentComponent.prototype.focus;
         // $FlowFixMe
         this.resize = ParentComponent.prototype.resize;
         // $FlowFixMe
