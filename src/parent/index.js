@@ -140,6 +140,10 @@ export class ParentComponent<P> {
                 ? tasks.renderContainer.then(proxyOutlet => this.open(proxyOutlet))
                 : this.open();
 
+            tasks.saveProxyWin = tasks.open.then(({ proxyWin }) => {
+                return this.saveProxyWin(proxyWin);
+            });
+
             tasks.buildWindowName = tasks.open.then(({ proxyWin }) => {
                 return this.buildWindowName({ proxyWin, initialDomain, domain, target, context, uid });
             });
@@ -324,10 +328,12 @@ export class ParentComponent<P> {
 
             return this.driver.open.call(this, proxyOutlet);
 
-        }).then(({ proxyWin, proxyFrame }) => {
-            this.proxyWin = proxyWin;
+        });
+    }
 
-            return { proxyWin, proxyFrame };
+    saveProxyWin(proxyWin : ProxyWindow) : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.proxyWin = proxyWin;
         });
     }
 

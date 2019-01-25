@@ -103,7 +103,8 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         'renderContainer',
         'prerender',
         'switchPrerender',
-        'open'
+        'open',
+        'saveProxyWin'
     ],
 
     resize({ width, height } : { width : ?number, height : ?number }) {
@@ -149,7 +150,8 @@ if (__ZOID__.__POPUP_SUPPORT__) {
 
         delegate: [
             'getProxyContainer',
-            'renderContainer'
+            'renderContainer',
+            'saveProxyWin'
         ]
     };
 }
