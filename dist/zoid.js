@@ -1971,6 +1971,7 @@
             var element = document.createElement(tag);
             options.style && Object(util.f)(element.style, options.style);
             options.class && (element.className = options.class.join(" "));
+            options.id && element.setAttribute("id", options.id);
             if (options.attributes) for (var _i6 = 0, _Object$keys2 = Object.keys(options.attributes); _i6 < _Object$keys2.length; _i6++) {
                 var key = _Object$keys2[_i6];
                 element.setAttribute(key, options.attributes[key]);
@@ -4562,12 +4563,6 @@
                         outlet: outlet
                     });
                     Object(src.appendChild)(container, innerContainer);
-                    var outletWatcher = Object(src.watchElementForClose)(outlet, function() {
-                        return _this21.close();
-                    });
-                    _this21.clean.register(function() {
-                        return outletWatcher.cancel();
-                    });
                     _this21.clean.register(function() {
                         return Object(src.destroyElement)(outlet);
                     });
@@ -4634,7 +4629,7 @@
                 this.context = options.context;
                 this.driver = RENDER_DRIVERS[options.context];
                 this.clean = Object(src.cleanup)(this);
-                this.focus = parent_ParentComponent.prototype.close;
+                this.focus = parent_ParentComponent.prototype.focus;
                 this.resize = parent_ParentComponent.prototype.resize;
                 this.renderTemplate = parent_ParentComponent.prototype.renderTemplate;
                 this.props = {};

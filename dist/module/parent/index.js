@@ -623,8 +623,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
         outlet
       });
       (0, _src4.appendChild)(container, innerContainer);
-      const outletWatcher = (0, _src4.watchElementForClose)(outlet, () => this.close());
-      this.clean.register(() => outletWatcher.cancel());
       this.clean.register(() => (0, _src4.destroyElement)(outlet));
       this.clean.register(() => (0, _src4.destroyElement)(innerContainer));
       this.proxyOutlet = (0, _lib.getProxyElement)(outlet);

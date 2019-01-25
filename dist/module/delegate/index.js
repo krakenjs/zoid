@@ -31,7 +31,7 @@ class DelegateComponent {
     this.driver = _drivers.RENDER_DRIVERS[options.context];
     this.clean = (0, _src4.cleanup)(this); // $FlowFixMe
 
-    this.focus = _parent.ParentComponent.prototype.close; // $FlowFixMe
+    this.focus = _parent.ParentComponent.prototype.focus; // $FlowFixMe
 
     this.resize = _parent.ParentComponent.prototype.resize; // $FlowFixMe
 
