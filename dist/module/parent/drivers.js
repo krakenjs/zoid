@@ -80,7 +80,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
     });
   },
 
-  delegate: ['getProxyContainer', 'renderContainer', 'prerender', 'switchPrerender', 'open'],
+  delegate: ['getProxyContainer', 'renderContainer', 'prerender', 'switchPrerender', 'open', 'saveProxyWin'],
 
   resize({
     width,
@@ -128,6 +128,6 @@ if (__ZOID__.__POPUP_SUPPORT__) {
       });
     },
 
-    delegate: ['getProxyContainer', 'renderContainer']
+    delegate: ['getProxyContainer', 'renderContainer', 'saveProxyWin']
   };
 }
