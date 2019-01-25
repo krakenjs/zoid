@@ -6,5 +6,10 @@ module.exports = {
     'globals': {
         __ZOID__: true,
         __POST_ROBOT__: true
+    },
+
+    'rules': {
+        'react/display-name': 'off',
+        'react/prop-types': 'off'
     }
 };

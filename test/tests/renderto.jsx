@@ -1,8 +1,10 @@
 /* @flow */
 /* eslint max-lines: off */
+/** @jsx node */
 
 import { onCloseWindow, getParent, getOpener, isWindowClosed } from 'cross-domain-utils/src';
 import { wrapPromise } from 'belter/src';
+import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen } from '../common';
 
@@ -576,6 +578,118 @@ describe('zoid renderto cases', () => {
 
                         component.canRenderTo(window.parent)
                             .then(window.xprops.canRenderToResult)
+                    `;
+                }
+            }).render(document.body);
+        });
+    });
+
+    it('should render a component to the parent as an iframe inside an iframe and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-in-iframe-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:               'test-renderto-iframe-in-iframe-remote',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain:            'mock://www.child.com',
+                        containerTemplate: ({ doc, outlet }) => {
+                            return (
+                                <div>
+                                    <iframe>
+                                        <html>
+                                            <body>
+                                                <node el={ outlet } />
+                                            </body>
+                                        </html>
+                                    </iframe>
+                                </div>
+                            ).render(dom({ doc }));
+                        }
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                foo: expect('foo'),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        window.__component__().remote({
+                            foo: window.xprops.foo,
+
+                            run: \`
+                                window.xprops.foo();
+                            \`
+                        }).renderTo(window.parent, 'body');
+                    `;
+                }
+            }).render(document.body);
+        });
+    });
+
+    it('should render a component to the parent as an popup inside an iframe and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-popup-in-iframe-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:               'test-renderto-popup-in-iframe-remote',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain:            'mock://www.child.com',
+                        containerTemplate: ({ doc, outlet }) => {
+                            return (
+                                <div>
+                                    <iframe>
+                                        <html>
+                                            <body>
+                                                <node el={ outlet } />
+                                            </body>
+                                        </html>
+                                    </iframe>
+                                </div>
+                            ).render(dom({ doc }));
+                        }
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                foo: expect('foo'),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        window.__component__().remote({
+                            foo: window.xprops.foo,
+
+                            run: \`
+                                window.xprops.foo();
+                            \`
+                        }).renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
                     `;
                 }
             }).render(document.body);

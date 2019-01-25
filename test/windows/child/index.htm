@@ -4,9 +4,29 @@
     <script>
         window.mockDomain = 'mock://www.child.com';
 
+        function getAncestor(win) {
+            if (win.opener) {
+                return win.opener;
+            }
+
+            if (win.parent !== win) {
+                return win.parent;
+            }
+        }
+
         var parentWindow = window;
-        while ((parentWindow.opener && parentWindow.opener.zoid && parentWindow !== parentWindow.opener) || (parentWindow.parent && parentWindow.parent.zoid && parentWindow !== parentWindow.parent)) {
-            parentWindow = parentWindow.opener || parentWindow.parent;
+        while (true) {
+            const ancestor = getAncestor(parentWindow);
+
+            if (!ancestor) {
+                break;
+            }
+
+            if (ancestor.zoid || getAncestor(ancestor)) {
+                parentWindow = ancestor;
+            } else {
+                break;
+            }
         }
 
         window.console.karma = parentWindow.console.karma;
