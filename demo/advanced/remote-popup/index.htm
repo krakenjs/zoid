@@ -4,33 +4,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
     <link rel="stylesheet" href="../../common/index.css" />
 
+    <script src="../../../node_modules/jsx-pragmatic/dist/jsx-pragmatic.js"></script>
     <script src="../../../dist/zoid.js"></script>
+
+    <script src="./login-button.js"></script>
     <script src="./login.js"></script>
 </head>
 
 <body>
-
     <h3>Log in on xyz.com</h3>
 
     <div id="container"></div>
 
-    <div id="result"></div>
+    <hr>
+
+    <div id="loginContainer"></div>
 
     <script>
+        MyLoginButtonComponent({
 
-        // Render the component
-
-        MyLoginZoidComponent({
-
-            prefilledEmail: 'foo@bar.com',
-
-            onLogin: function(email) {
-                console.log('User logged in with email:', email);
-                document.querySelector('#result').innerText = email + ' logged in!';
-            }
+            loginContainer: '#loginContainer'
 
         }).render('#container');
-
     </script>
 
 </body>

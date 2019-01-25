@@ -8,13 +8,6 @@ window.MyLoginZoidComponent = zoid.create({
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
     url: './login.htm',
-    
-    dimensions: {
-        width:  '300px',
-        height: '150px'
-    },
-
-    // The background overlay
 
     containerTemplate: ({ uid, tag, context, focus, close, doc, outlet }) => {
 
