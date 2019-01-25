@@ -7,7 +7,7 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow,
     noop, onResize, extend, extendUrl, memoized, appendChild, cleanup, type CleanupType,
-    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe, watchElementForClose } from 'belter/src';
+    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe } from 'belter/src';
 
 import { POST_MESSAGE, CONTEXT, CLASS,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -571,9 +571,7 @@ export class ParentComponent<P> {
 
             const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, outlet });
             appendChild(container, innerContainer);
-
-            const outletWatcher = watchElementForClose(outlet, () => this.close());
-            this.clean.register(() => outletWatcher.cancel());
+        
             this.clean.register(() => destroyElement(outlet));
             this.clean.register(() => destroyElement(innerContainer));
 
