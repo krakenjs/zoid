@@ -1,7 +1,7 @@
 /* @flow */
 
 import { on } from 'post-robot/src';
-import { memoize } from 'belter/src';
+import { memoize, destroyElement } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 if (window.__component__) {
@@ -13,7 +13,7 @@ if (!window.xprops) {
     setTimeout(() => {
         window.close();
         if (window.frameElement) {
-            window.frameElement.parentNode.removeChild(window.frameElement);
+            destroyElement(window.frameElement);
         }
     }, 1);
     throw new Error(`No xprops found`);

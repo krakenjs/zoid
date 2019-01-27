@@ -303,13 +303,14 @@ describe('zoid happy cases', () => {
                     tag:               'test-render-iframe-in-iframe-with-prop',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ doc, outlet }) => {
+                    containerTemplate: ({ doc, frame, prerenderFrame }) => {
                         return (
                             <div>
                                 <iframe>
                                     <html>
                                         <body>
-                                            <node el={ outlet } />
+                                            <node el={ frame } />
+                                            <node el={ prerenderFrame } />
                                         </body>
                                     </html>
                                 </iframe>
@@ -335,50 +336,6 @@ describe('zoid happy cases', () => {
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
             }).render(document.body);
-        });
-    });
-
-    it('should enter a component rendered as a popup inside another iframe and call a prop', () => {
-        return wrapPromise(({ expect, avoid }) => {
-            const expectedValue = 'bar';
-
-            window.__component__ = () => {
-                return window.zoid.create({
-                    tag:               'test-render-popup-in-iframe-with-prop',
-                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain:            'mock://www.child.com',
-                    containerTemplate: ({ doc, outlet }) => {
-                        return (
-                            <div>
-                                <iframe>
-                                    <html>
-                                        <body>
-                                            <node el={ outlet } />
-                                        </body>
-                                    </html>
-                                </iframe>
-                            </div>
-                        ).render(dom({ doc }));
-                    }
-                });
-            };
-
-            const component = window.__component__();
-
-            return component({
-
-                foo: expect('foo', bar => {
-                    if (bar !== expectedValue) {
-                        throw new Error(`Expected bar to be ${ JSON.stringify(expectedValue) }, got ${ JSON.stringify(bar) }`);
-                    }
-                }),
-
-                onClose: avoid('onClose'),
-
-                run: `
-                    window.xprops.foo(${ JSON.stringify(expectedValue) });
-                `
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
         });
     });
 

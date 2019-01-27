@@ -1,7 +1,9 @@
 /* @flow */
+/** @jsx node */
 
 import { onCloseWindow } from 'cross-domain-utils/src';
 import { wrapPromise } from 'belter/src';
+import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen } from '../common';
 
@@ -17,9 +19,15 @@ describe('zoid actions', () => {
                     tag:               'test-container-close-iframe',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ close, outlet }) => {
+                    containerTemplate: ({ doc, close, frame, prerenderFrame }) => {
                         closeComponent = close;
-                        return outlet;
+
+                        return (
+                            <div>
+                                <node el={ frame } />
+                                <node el={ prerenderFrame } />
+                            </div>
+                        ).render(dom({ doc }));
                     }
                 });
             };
@@ -46,9 +54,12 @@ describe('zoid actions', () => {
                     tag:               'test-container-close-popup',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ close, outlet }) => {
+                    containerTemplate: ({ doc, close }) => {
                         closeComponent = close;
-                        return outlet;
+
+                        return (
+                            <div />
+                        ).render(dom({ doc }));
                     }
                 });
             };
@@ -75,9 +86,12 @@ describe('zoid actions', () => {
                     tag:               'test-container-close-popup-from-child',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ close, outlet }) => {
+                    containerTemplate: ({ doc, close }) => {
                         closeComponent = close;
-                        return outlet;
+
+                        return (
+                            <div />
+                        ).render(dom({ doc }));
                     }
                 });
             };
@@ -108,9 +122,12 @@ describe('zoid actions', () => {
                     tag:               'test-container-focus-popup',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ focus, outlet }) => {
+                    containerTemplate: ({ doc, focus }) => {
                         focusComponent = focus;
-                        return outlet;
+
+                        return (
+                            <div />
+                        ).render(dom({ doc }));
                     }
                 });
             };

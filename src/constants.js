@@ -40,12 +40,6 @@ export const PROP_SERIALIZATION = {
 
 export const CONTEXT = WINDOW_TYPE;
 
-export const CLASS = {
-    OUTLET:            `${ ZOID }-outlet`,
-    COMPONENT_FRAME:   `${ ZOID }-component-frame`,
-    PRERENDER_FRAME:   `${ ZOID }-prerender-frame`
-};
-
 export const WILDCARD = '*';
 
 export const DEFAULT_DIMENSIONS = {
@@ -54,10 +48,10 @@ export const DEFAULT_DIMENSIONS = {
 };
 
 export const EVENT = {
-    RENDER:   'render',
-    RENDERED: 'rendered',
-    DISPLAY:  'display',
-    ERROR:    'error',
-    CLOSE:    'close',
-    PROPS:    'props'
+    RENDER:   'zoid-render',
+    RENDERED: 'zoid-rendered',
+    DISPLAY:  'zoid-display',
+    ERROR:    'zoid-error',
+    CLOSE:    'zoid-close',
+    PROPS:    'zoid-props'
 };

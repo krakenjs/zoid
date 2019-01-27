@@ -3,7 +3,7 @@
 /** @jsx node */
 
 import { onCloseWindow, getParent, getOpener, isWindowClosed } from 'cross-domain-utils/src';
-import { wrapPromise } from 'belter/src';
+import { wrapPromise, destroyElement } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen } from '../common';
@@ -216,13 +216,13 @@ describe('zoid renderto cases', () => {
                         window.__component__().remote({
                             onClose: function() {
                                 setTimeout(() => {
-                                    window.frameElement.parentNode.removeChild(window.frameElement);
+                                    window.frameElement.parentNode.removeChild(window.frameElement)
                                 }, 100);
                             },
 
                             run: \`
                                 setTimeout(() => {
-                                    window.frameElement.parentNode.removeChild(window.frameElement);
+                                    window.frameElement.parentNode.removeChild(window.frameElement)
                                 }, 100);
                             \`
                         }).renderTo(window.parent, 'body');
@@ -381,11 +381,12 @@ describe('zoid renderto cases', () => {
                         tag:               'test-renderto-container-focus-popup-remote',
                         url:               '/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
-                        containerTemplate: ({ doc, outlet, focus }) => {
-                            const div = doc.createElement('div');
-                            div.appendChild(outlet);
+                        containerTemplate: ({ doc, focus }) => {
                             doFocus = focus;
-                            return div;
+
+                            return (
+                                <div />
+                            ).render(dom({ doc }));
                         }
                     })
                 };
@@ -636,7 +637,7 @@ describe('zoid renderto cases', () => {
                     }
 
                     // $FlowFixMe
-                    simpleWindow.frameElement.parentNode.removeChild(simpleWindow.frameElement);
+                    destroyElement(simpleWindow.frameElement);
                     return onCloseWindow(remoteWindow, expect('onCloseWindow'));
                 }),
 
@@ -740,13 +741,14 @@ describe('zoid renderto cases', () => {
                         tag:               'test-renderto-iframe-in-iframe-remote',
                         url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
-                        containerTemplate: ({ doc, outlet }) => {
+                        containerTemplate: ({ doc, frame, prerenderFrame }) => {
                             return (
                                 <div>
                                     <iframe>
                                         <html>
                                             <body>
-                                                <node el={ outlet } />
+                                                <node el={ frame } />
+                                                <node el={ prerenderFrame } />
                                             </body>
                                         </html>
                                     </iframe>
@@ -761,12 +763,6 @@ describe('zoid renderto cases', () => {
                 foo: expect('foo'),
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
-                        if (getParent(win) !== window) {
-                            throw new Error(`Expected window parent to be current window`);
-                        }
-                    }));
-
                     return `
                         window.__component__().remote({
                             foo: window.xprops.foo,
@@ -775,62 +771,6 @@ describe('zoid renderto cases', () => {
                                 window.xprops.foo();
                             \`
                         }).renderTo(window.parent, 'body');
-                    `;
-                }
-            }).render(document.body);
-        });
-    });
-
-    it('should render a component to the parent as an popup inside an iframe and call a prop', () => {
-        return wrapPromise(({ expect }) => {
-
-            window.__component__ = () => {
-                return {
-                    simple: window.zoid.create({
-                        tag:    'test-renderto-popup-in-iframe-simple',
-                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
-                    }),
-
-                    remote: window.zoid.create({
-                        tag:               'test-renderto-popup-in-iframe-remote',
-                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain:            'mock://www.child.com',
-                        containerTemplate: ({ doc, outlet }) => {
-                            return (
-                                <div>
-                                    <iframe>
-                                        <html>
-                                            <body>
-                                                <node el={ outlet } />
-                                            </body>
-                                        </html>
-                                    </iframe>
-                                </div>
-                            ).render(dom({ doc }));
-                        }
-                    })
-                };
-            };
-
-            return window.__component__().simple({
-                foo: expect('foo'),
-
-                run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
-                        if (getParent(win) !== window) {
-                            throw new Error(`Expected window parent to be current window`);
-                        }
-                    }));
-
-                    return `
-                        window.__component__().remote({
-                            foo: window.xprops.foo,
-
-                            run: \`
-                                window.xprops.foo();
-                            \`
-                        }).renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
                     `;
                 }
             }).render(document.body);

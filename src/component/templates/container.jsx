@@ -3,62 +3,69 @@
 /* eslint react/react-in-jsx-scope: off */
 
 import { node, dom } from 'jsx-pragmatic/src';
+import { destroyElement } from 'belter/src';
 
 import { type RenderOptionsType } from '../../parent';
-import { CLASS, EVENT } from '../../constants';
+import { EVENT } from '../../constants';
 
-const STAGE = {
-    PRERENDERED: 'prerender',
-    RENDERED:    'rendered'
+const CLASS = {
+    VISIBLE:   'visible',
+    INVISIBLE: 'invisible'
 };
 
-export function defaultContainerTemplate<P>({ uid, outlet, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
+export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
 
-    outlet.classList.add(STAGE.PRERENDERED);
+    if (!frame || !prerenderFrame) {
+        return (
+            <div id={ uid } />
+        ).render(dom({ doc }));
+    }
+
+    prerenderFrame.classList.add(CLASS.VISIBLE);
+    frame.classList.add(CLASS.INVISIBLE);
+
     event.on(EVENT.RENDERED, () => {
-        outlet.classList.add(STAGE.RENDERED);
-        outlet.classList.remove(STAGE.PRERENDERED);
+        prerenderFrame.classList.remove(CLASS.VISIBLE);
+        prerenderFrame.classList.add(CLASS.INVISIBLE);
+
+        frame.classList.remove(CLASS.INVISIBLE);
+        frame.classList.add(CLASS.VISIBLE);
+
+        setTimeout(() => {
+            destroyElement(prerenderFrame);
+        }, 1);
     });
 
     return (
         <div id={ uid }>
             <style>
                 {`
-                    #${ uid } > .${ CLASS.OUTLET } {
-                        width: ${ width };
-                        height: ${ height };
-                        display: inline-block;
+                    #${ uid } {
                         position: relative;
                     }
 
-                    #${ uid } > .${ CLASS.OUTLET } > iframe {
-                        height: 100%;
-                        width: 100%;
+                    #${ uid } > iframe {
+                        width: ${ width };
+                        height: ${ height };
+                        display: inline-block;
                         position: absolute;
                         top: 0;
                         left: 0;
                         transition: opacity .2s ease-in-out;
                     }
 
-                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.PRERENDERED } > iframe.${ CLASS.COMPONENT_FRAME } {
+                    #${ uid } > iframe.${ CLASS.INVISIBLE } {
                         opacity: 0;
                     }
 
-                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.PRERENDERED } > iframe.${ CLASS.PRERENDER_FRAME } {
+                    #${ uid } > iframe.${ CLASS.VISIBLE } {
                         opacity: 1;
-                    }
-
-                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.RENDERED } > iframe.${ CLASS.COMPONENT_FRAME } {
-                        opacity: 1;
-                    }
-
-                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.RENDERED } > iframe.${ CLASS.PRERENDER_FRAME } {
-                        opacity: 0;
                     }
                 `}
             </style>
 
-            <node el={ outlet } />
+            <node el={ frame } />
+            <node el={ prerenderFrame } />
         </div>
     ).render(dom({ doc }));
 }

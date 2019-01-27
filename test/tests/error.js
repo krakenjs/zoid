@@ -2,7 +2,7 @@
 /* eslint max-lines: off */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { wrapPromise, noop } from 'belter/src';
+import { wrapPromise, noop, destroyElement } from 'belter/src';
 
 import { onWindowOpen } from '../common';
 
@@ -241,7 +241,7 @@ describe('zoid error cases', () => {
             onWindowOpen().then(expect('onWindowOpen', openedWindow => {
                 setTimeout(() => {
                     // $FlowFixMe
-                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                    destroyElement(openedWindow.frameElement);
                 }, 200);
             }));
             
@@ -265,7 +265,7 @@ describe('zoid error cases', () => {
             onWindowOpen().then(expect('onWindowOpen', openedWindow => {
                 setTimeout(() => {
                     // $FlowFixMe
-                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                    destroyElement(openedWindow.frameElement);
                 }, 1);
             }));
 
@@ -325,7 +325,7 @@ describe('zoid error cases', () => {
                 onLoad: expect('onLoad', () => {
                     // $FlowFixMe
                     openedWindow.location.reload();
-                    openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                    destroyElement(openedWindow.frameElement);
                 }),
                 onClose: expect('onClose')
             }).render('body', window.zoid.CONTEXT.IFRAME);
@@ -359,7 +359,7 @@ describe('zoid error cases', () => {
                     // $FlowFixMe
                     openedWindow.location.reload();
                     setTimeout(() => {
-                        openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
+                        destroyElement(openedWindow.frameElement);
                     }, 50);
                 }),
                 onClose: expect('onClose')
