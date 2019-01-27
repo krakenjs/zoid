@@ -1,20 +1,16 @@
 /* @flow */
 
-import { memoize, stringifyError, base64encode, base64decode } from 'belter/src';
+import { memoize, stringifyError, base64decode } from 'belter/src';
 
 import { ZOID } from '../constants';
 import type { ChildPayload } from '../parent';
 
-export function buildChildWindowName(name : string, childPayload : ChildPayload) : string {
-    return `__${ ZOID }__${ name }__${ base64encode(JSON.stringify(childPayload)) }__`;
-}
-
-export const parseChildWindowName = memoize(() : ChildPayload => {
-    if (!window.name) {
+const parseChildWindowName = memoize((windowName : string) : ChildPayload => {
+    if (!windowName) {
         throw new Error(`No window name`);
     }
 
-    const [ , zoidcomp, name, encodedPayload ] = window.name.split('__');
+    const [ , zoidcomp, name, encodedPayload ] = windowName.split('__');
 
     if (zoidcomp !== ZOID) {
         throw new Error(`Window not rendered by zoid - got ${ zoidcomp }`);
@@ -35,12 +31,10 @@ export const parseChildWindowName = memoize(() : ChildPayload => {
     }
 });
 
-export const isZoidComponentWindow = memoize(() => {
+export function getChildPayload() : ?ChildPayload {
     try {
-        parseChildWindowName();
+        return parseChildWindowName(window.name);
     } catch (err) {
-        return false;
+        // pass
     }
-
-    return true;
-});
+}

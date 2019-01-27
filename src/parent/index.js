@@ -3,16 +3,17 @@
 
 import { send, bridge, serializeMessage, ProxyWindow } from 'post-robot/src';
 import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
-    onCloseWindow, getDomain, type CrossDomainWindowType, getDistanceFromTop, isTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
+    onCloseWindow, getDomain, type CrossDomainWindowType,
+    getDistanceFromTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { addEventListener, uniqueID, elementReady, writeElementToWindow,
+import { addEventListener, uniqueID, elementReady, writeElementToWindow, base64encode,
     noop, onResize, extend, extendUrl, memoized, appendChild, cleanup, type CleanupType,
-    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe } from 'belter/src';
+    once, stringifyError, destroyElement, isDefined, createElement, getElementSafe, assertExists } from 'belter/src';
 
-import { POST_MESSAGE, CONTEXT, CLASS,
+import { ZOID, POST_MESSAGE, CONTEXT, CLASS,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { Component, onErrorPropType } from '../component';
-import { global, buildChildWindowName, getProxyElement, type ProxyElement } from '../lib';
+import { globalFor, getProxyElement, type ProxyElement } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { DimensionsType } from '../types';
@@ -20,6 +21,7 @@ import type { DimensionsType } from '../types';
 import { RENDER_DRIVERS, type ContextDriverType } from './drivers';
 import { propsToQuery, normalizeProps } from './props';
 
+const global = assertExists('global', globalFor(window));
 global.props = global.props || {};
 global.windows = global.windows || {};
 
@@ -50,7 +52,6 @@ export type PropRef =
 
 export type WindowRef =
     {| type : typeof WINDOW_REFERENCES.OPENER |} |
-    {| type : typeof WINDOW_REFERENCES.TOP |} |
     {| type : typeof WINDOW_REFERENCES.PARENT, distance : number |} |
     {| type : typeof WINDOW_REFERENCES.GLOBAL, uid : string |};
 
@@ -204,7 +205,8 @@ export class ParentComponent<P> {
     }
 
     buildWindowName({ proxyWin, initialDomain, domain, target, uid, context } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string }) : string {
-        return buildChildWindowName(this.component.name, this.buildChildPayload({ proxyWin, initialDomain, domain, target, context, uid }));
+        const childPayload = this.buildChildPayload({ proxyWin, initialDomain, domain, target, context, uid });
+        return `__${ ZOID }__${ this.component.name }__${ base64encode(JSON.stringify(childPayload)) }__`;
     }
 
     getPropsRef(proxyWin : ProxyWindow, target : CrossDomainWindowType, domain : string | RegExp, uid : string) : PropRef {
@@ -411,10 +413,6 @@ export class ParentComponent<P> {
 
         if (context === CONTEXT.POPUP) {
             return { type: WINDOW_REFERENCES.OPENER };
-        }
-
-        if (isTop(window)) {
-            return { type: WINDOW_REFERENCES.TOP };
         }
 
         return { type: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };

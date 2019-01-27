@@ -332,7 +332,7 @@ describe('zoid error cases', () => {
         }, { timeout: 9000 });
     });
 
-    it('should call onclose when an iframe is closed after changing location', () => {
+    it('should call onclose when an iframe is closed after changing location after a small delay', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
                 return window.zoid.create({
@@ -360,12 +360,83 @@ describe('zoid error cases', () => {
                     openedWindow.location.reload();
                     setTimeout(() => {
                         openedWindow.frameElement.parentNode.removeChild(openedWindow.frameElement);
-                    }, 1);
+                    }, 50);
                 }),
                 onClose: expect('onClose')
             }).render('body', window.zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
+
+    it('should call onclose when an popup is closed immediately after changing location', () => {
+        return wrapPromise(({ expect, avoid }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-popup-redirected-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
+            }));
+
+            const component = window.__component__();
+            return component({
+                run: () => {
+                    return `
+                        window.xprops.onLoad();
+                    `;
+                },
+                onLoad: expect('onLoad', () => {
+                    // $FlowFixMe
+                    openedWindow.location.reload();
+                    openedWindow.close();
+                }),
+                onClose: expect('onClose'),
+                onError: avoid('onError')
+            }).render('body', window.zoid.CONTEXT.POPUP);
+        }, { timeout: 9000 });
+    });
+
+    it('should call onclose when an popup is closed after changing location after a small delay', () => {
+        return wrapPromise(({ expect, avoid }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-onclose-popup-immediately-redirected-during-render',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
+            }));
+
+            const component = window.__component__();
+            return component({
+                run: () => {
+                    return `
+                        window.xprops.onLoad();
+                    `;
+                },
+                onLoad: expect('onLoad', () => {
+                    // $FlowFixMe
+                    openedWindow.location.reload();
+                    setTimeout(() => {
+                        openedWindow.close();
+                    }, 50);
+                }),
+                onClose: expect('onClose'),
+                onError: avoid
+            }).render('body', window.zoid.CONTEXT.POPUP);
+        }, { timeout: 5000 });
+    });
+
 
     it('should error out when a component is created with a duplicate tag', () => {
         return wrapPromise(({ expect }) => {
@@ -520,5 +591,75 @@ describe('zoid error cases', () => {
                 })
             }).render(document.body);
         });
+    });
+
+    it('should not set xprops when window name does not contain zoid', () => {
+        window.name = `__transformer__test_create_window_name_no_zoid__abc123__`;
+
+        window.zoid.create({
+            tag:    'test-create-window-name-no-zoid',
+            url:    'mock://www.child.com/base/test/windows/child/index.htm',
+            domain: 'mock://www.child.com'
+        });
+
+        if (window.xprops) {
+            throw new Error(`Expected xprops to not be set`);
+        }
+    });
+
+    it('should not set xprops when window name does contain component name', () => {
+        window.name = `__zoid__`;
+
+        window.zoid.create({
+            tag:    'test-create-window-name-no-component-name-passed',
+            url:    'mock://www.child.com/base/test/windows/child/index.htm',
+            domain: 'mock://www.child.com'
+        });
+
+        if (window.xprops) {
+            throw new Error(`Expected xprops to not be set`);
+        }
+    });
+
+    it('should not set xprops when window name does not match component name', () => {
+        window.name = `__zoid__some_other_component__abc123__`;
+
+        window.zoid.create({
+            tag:    'test-create-window-name-non-matching-component',
+            url:    'mock://www.child.com/base/test/windows/child/index.htm',
+            domain: 'mock://www.child.com'
+        });
+
+        if (window.xprops) {
+            throw new Error(`Expected xprops to not be set`);
+        }
+    });
+
+    it('should not set xprops when payload is not sent', () => {
+        window.name = `__zoid__test_create_window_name_no_payload__`;
+
+        window.zoid.create({
+            tag:    'test-create-window-name-no-payload',
+            url:    'mock://www.child.com/base/test/windows/child/index.htm',
+            domain: 'mock://www.child.com'
+        });
+
+        if (window.xprops) {
+            throw new Error(`Expected xprops to not be set`);
+        }
+    });
+
+    it('should not set xprops when payload is not correctly formatted', () => {
+        window.name = `__zoid__test_create_window_name_bad_payload__abc123__`;
+
+        window.zoid.create({
+            tag:    'test-create-window-name-bad-payload',
+            url:    'mock://www.child.com/base/test/windows/child/index.htm',
+            domain: 'mock://www.child.com'
+        });
+
+        if (window.xprops) {
+            throw new Error(`Expected xprops to not be set`);
+        }
     });
 });

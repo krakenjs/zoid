@@ -1,19 +1,23 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { isSameDomain, matchDomain, getDomain, getOpener, getTop, getParent,
-    getNthParentFromTop, getAncestor, getAllFramesInWindow, type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
+import { isSameDomain, matchDomain, getDomain, getOpener,
+    getNthParentFromTop, getAncestor, getAllFramesInWindow,
+    type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, memoized, waitForDocumentBody, onResize, getElementSafe } from 'belter/src';
+import { extend, memoized, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
 
-import { parseChildWindowName, globalFor } from '../lib';
+import { globalFor } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { Component } from '../component';
 import type { PropsType } from '../component/props';
 import type { WindowRef, PropRef, ParentExportsType } from '../parent';
 
 import { normalizeChildProps } from './props';
+import { getChildPayload } from './window';
+
+export * from './window';
 
 export type ChildExportsType<P> = {|
     updateProps : (props : (PropsType<P>)) => ZalgoPromise<void>,
@@ -54,10 +58,16 @@ export class ChildComponent<P> {
             this.component = component;
             this.onPropHandlers = [];
             
-            const { parent, domain, exports, context, props } = parseChildWindowName();
+            const childPayload = getChildPayload();
+
+            if (!childPayload) {
+                throw new Error(`No child payload found`);
+            }
+
+            const { parent, domain, exports, context, props } = childPayload;
 
             this.context = context;
-            this.parentComponentWindow = this.getWindowByRef(parent);
+            this.parentComponentWindow = this.getParentComponentWindow(parent);
             this.parent = deserializeMessage(this.parentComponentWindow, domain, exports);
 
             this.checkParentDomain(domain);
@@ -104,74 +114,51 @@ export class ChildComponent<P> {
         if (type === INITIAL_PROPS.RAW) {
             props = value;
         } else if (type === INITIAL_PROPS.UID) {
-
             if (!isSameDomain(parentComponentWindow)) {
-                if (window.location.protocol === 'file:') {
-                    throw new Error(`Can not get props from file:// domain`);
-                }
-
                 throw new Error(`Parent component window is on a different domain - expected ${ getDomain() } - can not retrieve props`);
             }
 
             const global = globalFor(parentComponentWindow);
-
-            if (!global) {
-                throw new Error(`Can not find global for parent component - can not retrieve props`);
-            }
-
-            props = global.props[uid];
+            props = assertExists('props', global && global.props[uid]);
         }
 
         if (!props) {
-            throw new Error(`Initial props not found`);
+            throw new Error(`Could not find props`);
         }
 
         return deserializeMessage(parentComponentWindow, domain, props);
     }
 
-    getWindowByRef(ref : WindowRef) : CrossDomainWindowType {
+    getParentComponentWindow(ref : WindowRef) : CrossDomainWindowType {
         const { type } = ref;
-        let result;
     
         if (type === WINDOW_REFERENCES.OPENER) {
-            result = getOpener(window);
-    
-        } else if (type === WINDOW_REFERENCES.TOP) {
-            result = getTop(window);
+            return assertExists('opener', getOpener(window));
     
         } else if (type === WINDOW_REFERENCES.PARENT) {
             // $FlowFixMe
-            const { distance } = ref;
-    
-            if (distance) {
-                result = getNthParentFromTop(window, distance);
-            } else {
-                result = getParent(window);
-            }
-        }
-    
-        if (type === WINDOW_REFERENCES.GLOBAL) {
+            const distance = ref.distance;
+            return assertExists('parent', getNthParentFromTop(window, distance));
+
+        } else if (type === WINDOW_REFERENCES.GLOBAL) {
             // $FlowFixMe
             const { uid } = ref;
             const ancestor = getAncestor(window);
-    
-            if (ancestor) {
-                for (const frame of getAllFramesInWindow(ancestor)) {
-                    const global = globalFor(frame);
-    
-                    if (global && global.windows && global.windows[uid]) {
-                        result = global.windows[uid];
-                        break;
-                    }
+
+            if (!ancestor) {
+                throw new Error(`Can not find ancestor window`);
+            }
+
+            for (const frame of getAllFramesInWindow(ancestor)) {
+                const global = globalFor(frame);
+
+                if (global && global.windows && global.windows[uid]) {
+                    return global.windows[uid];
                 }
             }
         }
     
-        if (!result) {
-            throw new Error(`Unable to find ${ type } window`);
-        }
-    
-        return result;
+        throw new Error(`Unable to find ${ type } parent component window`);
     }
 
     getProps() : PropsType<P> {
@@ -207,11 +194,6 @@ export class ChildComponent<P> {
         });
     }
 
-    enableAutoResize({ width = false, height = true, element = 'body' } : { width : boolean, height : boolean, element : string } = {}) {
-        this.autoResize = { width, height, element };
-        this.watchForResize();
-    }
-
     getAutoResize() : { width : boolean, height : boolean, element : ?HTMLElement } {
         let { width = false, height = false, element = 'body' } = this.autoResize || this.component.autoResize || {};
         element = getElementSafe(element);
@@ -223,15 +205,7 @@ export class ChildComponent<P> {
         return waitForDocumentBody().then(() => {
             const { width, height, element } = this.getAutoResize();
 
-            if (!element) {
-                return;
-            }
-
-            if (!width && !height) {
-                return;
-            }
-    
-            if (this.context === CONTEXT.POPUP) {
+            if (!element || (!width && !height) || this.context === CONTEXT.POPUP) {
                 return;
             }
 

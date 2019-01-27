@@ -363,7 +363,7 @@ describe('zoid props cases', () => {
         });
     });
 
-    it('should pass a sameDomain prop and not have it populate on the child', () => {
+    it('should not pass a sameDomain prop to the child', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
@@ -381,6 +381,40 @@ describe('zoid props cases', () => {
             };
 
             const component = window.__component__();
+            const instance = component({
+                foo:      'bar',
+                passProp: expect('passProp', (val) => {
+                    if (val) {
+                        throw new Error(`Expected val to not be passed`);
+                    }
+                }),
+                run: `
+                    window.xprops.passProp(window.xprops.foo);
+                `
+            });
+            
+            return instance.render(document.body);
+        });
+    });
+
+    it('should pass a sameDomain prop and not have it populate on the child', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = (sameDomain = true) => {
+                return window.zoid.create({
+                    tag:    'test-samedomain-prop-passed',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:       'string',
+                            sameDomain
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__(false);
             const instance = component({
                 foo:      'bar',
                 passProp: expect('passProp', (val) => {

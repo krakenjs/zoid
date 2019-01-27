@@ -31,6 +31,7 @@ body.style.width = '1000px';
 body.style.height = '1000px';
 
 afterEach((done) => {
+    window.name = '';
     delete window.__component__;
     delete window.navigator.mockUserAgent;
     return window.zoid.destroyAll().then(() => done());

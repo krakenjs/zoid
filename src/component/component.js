@@ -6,11 +6,10 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
 import { memoize, isRegex, noop, isElement } from 'belter/src';
 
-import { ChildComponent } from '../child';
+import { ChildComponent, getChildPayload } from '../child';
 import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
-import { isZoidComponentWindow, parseChildWindowName } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validate } from './validate';
@@ -272,7 +271,8 @@ export class Component<P> {
     }
 
     isChild() : boolean {
-        return isZoidComponentWindow() && parseChildWindowName().tag === this.tag;
+        const payload = getChildPayload();
+        return Boolean(payload && payload.tag === this.tag);
     }
 
     getDefaultContainer<T : (string | HTMLElement)>(context : $Values<typeof CONTEXT>, container? : T) : T {

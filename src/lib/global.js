@@ -16,15 +16,3 @@ export function globalFor(win : CrossDomainWindowType) : ?Object {
 
     return win[__ZOID__];
 }
-
-export function localGlobal() : Object {
-    const global = globalFor(window);
-
-    if (!global) {
-        throw new Error(`Could not get local global`);
-    }
-
-    return global;
-}
-
-export const global = localGlobal();

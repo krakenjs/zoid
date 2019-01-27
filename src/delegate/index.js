@@ -39,9 +39,13 @@ export class DelegateComponent<P>  {
     props : DelegatePropsType
     clean : CleanupType
 
+    focus : () => ZalgoPromise<void>
+    resize : ({ width? : ?number, height? : ?number }) => ZalgoPromise<void>
+    renderTemplate : Function
+
     close : () => ZalgoPromise<void>
     onError : (mixed) => ZalgoPromise<void>
-    focus : () => ZalgoPromise<void>
+    
 
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         this.component = component;
@@ -49,17 +53,16 @@ export class DelegateComponent<P>  {
         this.driver = RENDER_DRIVERS[options.context];
         this.clean = cleanup(this);
         
-        // $FlowFixMe
         this.focus = ParentComponent.prototype.focus;
-        // $FlowFixMe
         this.resize = ParentComponent.prototype.resize;
-        // $FlowFixMe
         this.renderTemplate = ParentComponent.prototype.renderTemplate;
 
         // $FlowFixMe
         this.props = {};
         for (const propName of Object.keys(options.props)) {
-            if (options.props[propName] && this.component.getPropDefinition(propName) && this.component.getPropDefinition(propName).allowDelegate) {
+            const propDef = this.component.getPropDefinition(propName);
+            if (propDef && propDef.allowDelegate && options.props[propName]) {
+                // $FlowFixMe
                 this.props[propName] = options.props[propName];
             }
         }
