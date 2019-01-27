@@ -275,7 +275,7 @@ describe('zoid drivers', () => {
                             run: expect('run', ({ run }) => {
                                 return run(`
                                     return window.xprops.onLoad().then(() => {
-                                        window.xprops.onChange(() => {
+                                        window.xprops.onProps(() => {
                                             window.xprops.foo('bar');
                                         });
                                     });

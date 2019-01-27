@@ -43,9 +43,7 @@ export const CONTEXT = WINDOW_TYPE;
 export const CLASS = {
     OUTLET:            `${ ZOID }-outlet`,
     COMPONENT_FRAME:   `${ ZOID }-component-frame`,
-    PRERENDER_FRAME:   `${ ZOID }-prerender-frame`,
-    VISIBLE:           `${ ZOID }-visible`,
-    INVISIBLE:         `${ ZOID }-invisible`
+    PRERENDER_FRAME:   `${ ZOID }-prerender-frame`
 };
 
 export const WILDCARD = '*';
@@ -53,4 +51,13 @@ export const WILDCARD = '*';
 export const DEFAULT_DIMENSIONS = {
     WIDTH:  '300px',
     HEIGHT: '150px'
+};
+
+export const EVENT = {
+    RENDER:   'render',
+    RENDERED: 'rendered',
+    DISPLAY:  'display',
+    ERROR:    'error',
+    CLOSE:    'close',
+    PROPS:    'props'
 };

@@ -20,7 +20,7 @@ export type onRenderedPropType = EventHandlerType<void>;
 export type onRenderPropType = EventHandlerType<void>;
 export type onClosePropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
-export type onChangePropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
+export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
 
 export type PropsInputType<P> = {
     timeout? : timeoutPropType,
@@ -30,7 +30,8 @@ export type PropsInputType<P> = {
     onRendered? : onRenderedPropType,
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
-    onError? : onErrorPropType
+    onError? : onErrorPropType,
+    onProps? : onPropsPropType<P>
 } & P;
 
 export type PropsType<P> = {|
@@ -45,7 +46,7 @@ export type PropsType<P> = {|
     onRender : onRenderPropType,
     onClose : onClosePropType,
     onError : onErrorPropType,
-    onChange : onChangePropType<P>
+    onProps : onPropsPropType<P>
 |} & P;
 
 type PropDefinitionType<T, P, S : string> = {|
@@ -62,7 +63,7 @@ type PropDefinitionType<T, P, S : string> = {|
     default? : ({ props : P, state : Object }) => ?T,
     sameDomain? : boolean,
     serialization? : $Values<typeof PROP_SERIALIZATION>,
-    childDecorate? : ({ value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onPropsChange : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void> }) => ?T
+    childDecorate? : ({ value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void> }) => ?T
 |};
 
 export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;
@@ -91,10 +92,13 @@ export type BuiltInPropsDefinitionType<P> = {
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>,
-    onChange : FunctionPropDefinitionType<onChangePropType<P>, P>
+    onProps : FunctionPropDefinitionType<onPropsPropType<P>, P>
 };
 
-export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
+const defaultNoop = () => noop;
+const decorateOnce = ({ value }) => once(value);
+
+export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
     return {
         window: {
             type:          'object',
@@ -121,27 +125,21 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            childDecorate: ({ close }) => {
-                return close;
-            }
+            childDecorate: ({ close }) => close
         },
 
         focus: {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            childDecorate: ({ focus }) => {
-                return focus;
-            }
+            childDecorate: ({ focus }) => focus
         },
 
         resize: {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            childDecorate: ({ resize }) => {
-                return resize;
-            }
+            childDecorate: ({ resize }) => resize
         },
 
         onDisplay: {
@@ -149,24 +147,24 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
-            default:       () => noop,
-            decorate:      ({ value }) => once(value)
+            default:       defaultNoop,
+            decorate:      decorateOnce
         },
 
         onRendered: {
             type:        'function',
             required:    false,
             sendToChild: false,
-            default:     () => noop,
-            decorate:    ({ value }) => once(value)
+            default:     defaultNoop,
+            decorate:    decorateOnce
         },
 
         onRender: {
             type:        'function',
             required:    false,
             sendToChild: false,
-            default:     () => noop,
-            decorate:    ({ value }) => once(value)
+            default:     defaultNoop,
+            decorate:    decorateOnce
         },
 
         onClose: {
@@ -174,28 +172,23 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
-            default:       () => noop,
-            decorate:      ({ value }) => once(value)
+            default:       defaultNoop,
+            decorate:      decorateOnce
         },
 
         onError: {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            childDecorate: ({ onError }) => {
-                return function childOnError(err : mixed) : ZalgoPromise<void> {
-                    return onError(err);
-                };
-            }
+            childDecorate: ({ onError }) => onError
         },
 
-        onChange: {
+        onProps: {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            childDecorate: ({ onPropsChange }) => {
-                return onPropsChange;
-            }
+            default:       defaultNoop,
+            childDecorate: ({ onProps }) => onProps
         }
     };
 }

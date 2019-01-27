@@ -14,7 +14,7 @@ import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
-import { getInternalProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsInputType, type PropsType, type MixedPropDefinitionType } from './props';
+import { getBuiltInProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsInputType, type PropsType, type MixedPropDefinitionType } from './props';
 
 const drivers = __ZOID__.__FRAMEWORK_SUPPORT__
     ? require('../drivers')
@@ -138,7 +138,7 @@ export class Component<P> {
         // A json based spec describing what kind of props the component accepts. This is used to validate any props before
         // they are passed down to the child.
 
-        this.builtinProps = getInternalProps();
+        this.builtinProps = getBuiltInProps();
         this.props = options.props || {};
 
         // The dimensions of the component, e.g. { width: '300px', height: '150px' }

@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow, ProxyWindow } from 'post-robot/src';
 import { assertSameDomain } from 'cross-domain-utils/src';
 import { iframe, popup, destroyElement, normalizeDimension, watchElementForClose,
-    awaitFrameWindow, addClass, removeClass, uniqueID } from 'belter/src';
+    awaitFrameWindow, uniqueID } from 'belter/src';
 
 import { CONTEXT, CLASS } from '../constants';
 import { getProxyElement, type ProxyElement } from '../lib';
@@ -12,13 +12,9 @@ import { getProxyElement, type ProxyElement } from '../lib';
 
 export type ContextDriverType = {|
     renderedIntoContainer : boolean,
-
     open : (?ProxyElement) => ZalgoPromise<{ proxyWin : ProxyWindow, proxyFrame? : ProxyElement }>,
     openPrerender : (ProxyWindow, ProxyElement) => ZalgoPromise<{ proxyPrerenderWin : ProxyWindow, proxyPrerenderFrame? : ProxyElement }>,
-
     resize? : ({ width : ?number, height : ?number }) => void,
-    switchPrerender? : ({ proxyFrame : ProxyElement, proxyPrerenderFrame : ProxyElement }) => ZalgoPromise<void>,
-
     delegate : $ReadOnlyArray<string>
 |};
 
@@ -39,8 +35,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                     ...this.component.attributes.iframe
                 },
                 class: [
-                    CLASS.COMPONENT_FRAME,
-                    CLASS.INVISIBLE
+                    CLASS.COMPONENT_FRAME
                 ]
             }, outlet);
 
@@ -67,8 +62,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                     ...this.component.attributes.iframe
                 },
                 class: [
-                    CLASS.PRERENDER_FRAME,
-                    CLASS.VISIBLE
+                    CLASS.PRERENDER_FRAME
                 ]
             }, element);
 
@@ -85,24 +79,10 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         });
     },
 
-    switchPrerender({ proxyFrame, proxyPrerenderFrame } : { proxyFrame : ProxyElement, proxyPrerenderFrame : ProxyElement }) : ZalgoPromise<void> {
-        return ZalgoPromise.all([
-            proxyFrame.getElement(),
-            proxyPrerenderFrame.getElement()
-        ]).then(([ frame, prerenderFrame ]) => {
-            addClass(prerenderFrame, CLASS.INVISIBLE);
-            removeClass(prerenderFrame, CLASS.VISIBLE);
-            addClass(frame, CLASS.VISIBLE);
-            removeClass(frame, CLASS.INVISIBLE);
-            setTimeout(() => destroyElement(prerenderFrame), 1);
-        });
-    },
-
     delegate: [
         'getProxyContainer',
         'renderContainer',
         'prerender',
-        'switchPrerender',
         'open',
         'saveProxyWin'
     ],

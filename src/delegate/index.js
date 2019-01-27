@@ -3,7 +3,7 @@
 import { onCloseWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { ProxyWindow } from 'post-robot/src';
-import { cleanup, type CleanupType } from 'belter/src';
+import { cleanup, type CleanupType, type EventEmitterType } from 'belter/src';
 
 import { ParentComponent } from '../parent';
 import { RENDER_DRIVERS, type ContextDriverType } from '../parent/drivers';
@@ -21,7 +21,7 @@ export type DelegateOptionsType = {|
     overrides : {
         close : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
-        focus : () => ZalgoPromise<void>
+        event : EventEmitterType
     }
 |};
 
@@ -45,7 +45,7 @@ export class DelegateComponent<P>  {
 
     close : () => ZalgoPromise<void>
     onError : (mixed) => ZalgoPromise<void>
-    
+    event : EventEmitterType
 
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         this.component = component;
@@ -67,8 +67,9 @@ export class DelegateComponent<P>  {
             }
         }
 
-        this.close     = options.overrides.close;
-        this.onError   = options.overrides.onError;
+        this.close   = options.overrides.close;
+        this.onError = options.overrides.onError;
+        this.event   = options.overrides.event;
 
         this.component.registerActiveComponent(this);
         this.clean.register(() => this.component.destroyActiveComponent(this));

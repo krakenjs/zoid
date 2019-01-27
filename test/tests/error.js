@@ -29,7 +29,7 @@ describe('zoid error cases', () => {
             const component = window.__component__();
             return component().render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch', err => {
                 if (!(err instanceof window.zoid.PopupOpenError)) {
-                    throw new TypeError(`Expected PopupOpenError when popup is not opened`);
+                    throw err;
                 }
 
                 window.open = windowOpen;

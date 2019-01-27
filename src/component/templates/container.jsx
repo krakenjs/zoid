@@ -5,9 +5,20 @@
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { type RenderOptionsType } from '../../parent';
-import { CLASS } from '../../constants';
+import { CLASS, EVENT } from '../../constants';
 
-export function defaultContainerTemplate<P>({ uid, outlet, doc, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
+const STAGE = {
+    PRERENDERED: 'prerender',
+    RENDERED:    'rendered'
+};
+
+export function defaultContainerTemplate<P>({ uid, outlet, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
+
+    outlet.classList.add(STAGE.PRERENDERED);
+    event.on(EVENT.RENDERED, () => {
+        outlet.classList.add(STAGE.RENDERED);
+        outlet.classList.remove(STAGE.PRERENDERED);
+    });
 
     return (
         <div id={ uid }>
@@ -29,11 +40,19 @@ export function defaultContainerTemplate<P>({ uid, outlet, doc, dimensions : { w
                         transition: opacity .2s ease-in-out;
                     }
 
-                    #${ uid } > .${ CLASS.OUTLET } > iframe.${ CLASS.VISIBLE } {
+                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.PRERENDERED } > iframe.${ CLASS.COMPONENT_FRAME } {
+                        opacity: 0;
+                    }
+
+                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.PRERENDERED } > iframe.${ CLASS.PRERENDER_FRAME } {
                         opacity: 1;
                     }
 
-                    #${ uid } > .${ CLASS.OUTLET } > iframe.${ CLASS.INVISIBLE } {
+                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.RENDERED } > iframe.${ CLASS.COMPONENT_FRAME } {
+                        opacity: 1;
+                    }
+
+                    #${ uid } > .${ CLASS.OUTLET }.${ STAGE.RENDERED } > iframe.${ CLASS.PRERENDER_FRAME } {
                         opacity: 0;
                     }
                 `}

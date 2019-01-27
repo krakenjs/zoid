@@ -46,7 +46,7 @@ export const vue : ComponentDriverType<*, VueType> = {
 
             watch: {
                 $attrs: {
-                    handler: function onChange() {
+                    handler: function handler() {
                         if (this.parent && this.$attrs) {
                             this.parent.updateProps(extend({}, this.$attrs)).catch(noop);
                         }

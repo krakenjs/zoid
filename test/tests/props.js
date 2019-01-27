@@ -20,7 +20,7 @@ describe('zoid props cases', () => {
             const component = window.__component__();
             const instance = component({
                 run: `
-                    window.xprops.onChange(function() {
+                    window.xprops.onProps(function() {
                         window.xprops.foo('bar');
                     });
                 `
@@ -61,7 +61,7 @@ describe('zoid props cases', () => {
             const component = window.__component__();
             const instance = component({
                 run: `
-                    window.xprops.onChange(function() {
+                    window.xprops.onProps(function() {
                         window.xprops.meep();
                     });
                 `
@@ -99,7 +99,7 @@ describe('zoid props cases', () => {
             const component = window.__component__();
             const instance = component({
                 run: `
-                    window.xprops.onChange(function() {
+                    window.xprops.onProps(function() {
                         window.xprops.meep();
                     });
                 `

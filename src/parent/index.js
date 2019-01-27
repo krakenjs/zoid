@@ -6,12 +6,12 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
     onCloseWindow, getDomain, type CrossDomainWindowType,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { addEventListener, uniqueID, elementReady, writeElementToWindow, base64encode,
-    noop, onResize, extend, extendUrl, memoized, appendChild, cleanup, type CleanupType,
+import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
+    noop, onResize, extend, extendUrl, memoized, appendChild, cleanup, type CleanupType, base64encode,
     once, stringifyError, destroyElement, isDefined, createElement, getElementSafe, assertExists } from 'belter/src';
 
-import { ZOID, POST_MESSAGE, CONTEXT, CLASS,
-    INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
+import { POST_MESSAGE, CONTEXT, CLASS, EVENT,
+    INITIAL_PROPS, WINDOW_REFERENCES, ZOID } from '../constants';
 import type { Component, onErrorPropType } from '../component';
 import { globalFor, getProxyElement, type ProxyElement } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
@@ -36,7 +36,8 @@ export type RenderOptionsType<P> = {|
     doc : Document,
     container? : HTMLElement,
     dimensions : DimensionsType,
-    state : Object
+    state : Object,
+    event : EventEmitterType
 |};
 
 export type ParentExportsType<P> = {|
@@ -73,7 +74,8 @@ export type ParentHelpers<P> = {|
     focus : () => ZalgoPromise<void>,
     resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
-    updateProps : PropsInputType<P> => ZalgoPromise<void>
+    updateProps : PropsInputType<P> => ZalgoPromise<void>,
+    event : EventEmitterType
 |};
 
 export class ParentComponent<P> {
@@ -81,6 +83,7 @@ export class ParentComponent<P> {
     component : Component<P>
     driver : ContextDriverType
     clean : CleanupType
+    event : EventEmitterType
 
     initPromise : ZalgoPromise<void>
     
@@ -94,20 +97,42 @@ export class ParentComponent<P> {
     constructor(component : Component<P>, props : PropsInputType<P>) {
         try {
             this.initPromise = new ZalgoPromise();
+
             this.clean = cleanup(this);
             this.state = {};
 
             this.component = component;
     
+            this.setupEvents(props.onError);
             this.setProps(props);
             this.component.registerActiveComponent(this);
             this.clean.register(() => this.component.destroyActiveComponent(this));
             this.watchForUnload();
 
         } catch (err) {
-            this.onError(err, props.onError).catch(noop);
+            this.onError(err).catch(noop);
             throw err;
         }
+    }
+
+    setupEvents(onError : ?onErrorPropType) {
+        this.event = eventEmitter();
+        
+        this.event.on(EVENT.RENDER,   () => this.props.onRender());
+        this.event.on(EVENT.DISPLAY,  () => this.props.onDisplay());
+        this.event.on(EVENT.RENDERED, () => this.props.onRendered());
+        this.event.on(EVENT.CLOSE,    () => this.props.onClose());
+        this.event.on(EVENT.PROPS,    (props) => this.props.onProps(props));
+
+        this.event.on(EVENT.ERROR, err => {
+            if (this.props && this.props.onError) {
+                return this.props.onError(err);
+            } else if (onError) {
+                return onError(err);
+            } else {
+                throw err;
+            }
+        });
     }
 
     render(target : CrossDomainWindowType, container : string | HTMLElement, context : $Values<typeof CONTEXT>) : ZalgoPromise<void> {
@@ -129,7 +154,7 @@ export class ParentComponent<P> {
 
             tasks.init = this.initPromise;
             tasks.buildUrl = this.buildUrl();
-            tasks.onRender = this.props.onRender();
+            tasks.onRender = this.event.trigger(EVENT.RENDER);
 
             tasks.getProxyContainer = this.getProxyContainer(container);
 
@@ -167,15 +192,11 @@ export class ParentComponent<P> {
             });
 
             tasks.onDisplay = tasks.prerender.then(() => {
-                return this.props.onDisplay();
+                return this.event.trigger(EVENT.DISPLAY);
             });
 
             tasks.openBridge = tasks.open.then(({ proxyWin }) => {
                 return this.openBridge(proxyWin, initialDomain, context);
-            });
-
-            tasks.switchPrerender = ZalgoPromise.all([ tasks.open, tasks.prerender, tasks.init ]).then(([ { proxyFrame }, { proxyPrerenderFrame } ]) => {
-                return this.switchPrerender({ proxyFrame, proxyPrerenderFrame });
             });
 
             tasks.runTimeout = tasks.loadUrl.then(() => {
@@ -183,7 +204,7 @@ export class ParentComponent<P> {
             });
 
             tasks.onRender = tasks.init.then(() => {
-                return this.props.onRendered();
+                return this.event.trigger(EVENT.RENDERED);
             });
 
             return ZalgoPromise.hash(tasks);
@@ -242,6 +263,7 @@ export class ParentComponent<P> {
     getHelpers() : ParentHelpers<P> {
         return {
             state:       this.state,
+            event:       this.event,
             close:       () => this.close(),
             focus:       () => this.focus(),
             resize:      ({ width, height }) => this.resize({ width, height }),
@@ -348,22 +370,6 @@ export class ParentComponent<P> {
         });
     }
 
-    switchPrerender({ proxyFrame, proxyPrerenderFrame } : { proxyFrame : ?ProxyElement, proxyPrerenderFrame : ?ProxyElement }) : ZalgoPromise<void> {
-        return ZalgoPromise.try(() => {
-            if (this.driver.switchPrerender) {
-                if (this.props.window) {
-                    return;
-                }
-
-                if (!proxyFrame || !proxyPrerenderFrame) {
-                    throw new Error(`Expected to have both proxy frame and proxy prerender frame to switch`);
-                }
-
-                return this.driver.switchPrerender.call(this, { proxyFrame, proxyPrerenderFrame });
-            }
-        });
-    }
-
     delegate(context : $Values<typeof CONTEXT>, target : CrossDomainWindowType) {
         this.component.log(`delegate`);
 
@@ -378,6 +384,7 @@ export class ParentComponent<P> {
             context,
             props,
             overrides: {
+                event:   this.event,
                 close:   () => this.close(),
                 onError: (err) => this.onError(err)
             }
@@ -495,7 +502,7 @@ export class ParentComponent<P> {
     close() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.component.log(`close`);
-            return this.props.onClose();
+            return this.event.trigger(EVENT.CLOSE);
 
         }).then(() => {
             if (this.child) {
@@ -557,7 +564,8 @@ export class ParentComponent<P> {
             state:      this.state,
             props:      this.props,
             tag:        this.component.tag,
-            dimensions: this.component.dimensions
+            dimensions: this.component.dimensions,
+            event:      this.event
         });
     }
 
@@ -592,18 +600,11 @@ export class ParentComponent<P> {
         });
     }
 
-    onError(err : mixed, onError? : onErrorPropType) : ZalgoPromise<void> {
+    onError(err : mixed) : ZalgoPromise<void> {
         // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise.try(() => {
             this.initPromise.asyncReject(err);
-
-            if (!onError && this.props && this.props.onError) {
-                onError = this.props.onError;
-            }
-    
-            if (onError) {
-                return onError(err);
-            }
+            return this.event.trigger(EVENT.ERROR, err);
 
         }).then(() => {
             return this.initPromise;

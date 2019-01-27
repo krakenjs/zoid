@@ -16,10 +16,8 @@ export function normalizeChildProp<T, P>(component : Component<P>, props : (Prop
         return value;
     }
 
-    const { focus, close, resize, onError, onPropsChange } = helpers;
-
     if (typeof prop.childDecorate === 'function') {
-        return prop.childDecorate({ value, focus, close, resize, onError, onPropsChange });
+        return prop.childDecorate({ value, ...helpers });
     }
 
     return value;

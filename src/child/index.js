@@ -29,7 +29,7 @@ export type ChildHelpers<P> = {|
     focus : () => ZalgoPromise<void>,
     resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
-    onPropsChange : ((PropsType<P>) => void) => void
+    onProps : ((PropsType<P>) => void) => void
 |};
 
 /*  Child Component
@@ -94,7 +94,7 @@ export class ChildComponent<P> {
             close:         () => this.close(),
             resize:        ({ width, height }) => this.resize({ width, height }),
             onError:       (err) => this.onError(err),
-            onPropsChange: (handler) => this.onPropsChange(handler)
+            onProps: (handler) => this.onProps(handler)
         };
     }
 
@@ -104,7 +104,7 @@ export class ChildComponent<P> {
         }
     }
 
-    onPropsChange(handler : Function) {
+    onProps(handler : Function) {
         this.onPropHandlers.push(handler);
     }
 
