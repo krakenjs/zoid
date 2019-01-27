@@ -2438,9 +2438,15 @@
                     return _this5.actualWindow ? Object(cross_domain_utils_src.isWindowClosed)(_this5.actualWindow) : _this5.serializedWindow.isClosed();
                 });
             };
+            _proto.getWindow = function() {
+                return this.actualWindow;
+            };
             _proto.setWindow = function(win) {
                 this.actualWindow = win;
                 this.actualWindowPromise.resolve(win);
+            };
+            _proto.awaitWindow = function() {
+                return this.actualWindowPromise;
             };
             _proto.matchWindow = function(win) {
                 var _this6 = this;
@@ -2454,9 +2460,6 @@
             };
             _proto.unwrap = function() {
                 return this.actualWindow || this;
-            };
-            _proto.awaitWindow = function() {
-                return this.actualWindowPromise;
             };
             _proto.getInstanceID = function() {
                 return this.actualWindow ? getWindowInstanceID(this.actualWindow) : this.serializedWindow.getInstanceID();
@@ -3567,6 +3570,7 @@
                     }) : _this2.open();
                     tasks.saveProxyWin = tasks.open.then(function(_ref) {
                         var proxyWin = _ref.proxyWin;
+                        _this2.proxyWin = proxyWin;
                         return _this2.saveProxyWin(proxyWin);
                     });
                     tasks.buildWindowName = tasks.open.then(function(_ref2) {
@@ -3584,27 +3588,27 @@
                         var proxyWin = _ref3[0].proxyWin, windowName = _ref3[1];
                         return proxyWin.setName(windowName);
                     });
-                    tasks.watchForClose = tasks.open.then(function(_ref4) {
-                        var proxyWin = _ref4.proxyWin;
-                        return _this2.watchForClose(proxyWin);
-                    });
-                    tasks.prerender = zalgo_promise_src.a.all([ tasks.open, tasks.renderContainer ]).then(function(_ref5) {
-                        var proxyWin = _ref5[0].proxyWin, proxyOutlet = _ref5[1];
+                    tasks.prerender = zalgo_promise_src.a.all([ tasks.open, tasks.renderContainer ]).then(function(_ref4) {
+                        var proxyWin = _ref4[0].proxyWin, proxyOutlet = _ref4[1];
                         return _this2.prerender(proxyWin, proxyOutlet, {
                             context: context,
                             uid: uid
                         });
                     });
+                    tasks.loadUrl = zalgo_promise_src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender ]).then(function(_ref5) {
+                        var proxyWin = _ref5[0].proxyWin, url = _ref5[1];
+                        return proxyWin.setLocation(url);
+                    });
+                    tasks.watchForClose = tasks.open.then(function(_ref6) {
+                        var proxyWin = _ref6.proxyWin;
+                        return _this2.watchForClose(proxyWin);
+                    });
                     tasks.onDisplay = tasks.prerender.then(function() {
                         return _this2.props.onDisplay();
                     });
-                    tasks.openBridge = tasks.open.then(function(_ref6) {
-                        var proxyWin = _ref6.proxyWin;
+                    tasks.openBridge = tasks.open.then(function(_ref7) {
+                        var proxyWin = _ref7.proxyWin;
                         return _this2.openBridge(proxyWin, initialDomain, context);
-                    });
-                    tasks.loadUrl = zalgo_promise_src.a.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(function(_ref7) {
-                        var proxyWin = _ref7[0].proxyWin, url = _ref7[1];
-                        return proxyWin.setLocation(url);
                     });
                     tasks.switchPrerender = zalgo_promise_src.a.all([ tasks.open, tasks.prerender, tasks.init ]).then(function(_ref8) {
                         var proxyFrame = _ref8[0].proxyFrame, proxyPrerenderFrame = _ref8[1].proxyPrerenderFrame;
@@ -4007,45 +4011,44 @@
                 return zalgo_promise_src.a.try(function() {
                     return _this20.driver.openPrerender.call(_this20, proxyWin, proxyElement);
                 }).then(function(_ref17) {
-                    var proxyPrerenderWin = _ref17.proxyPrerenderWin, proxyPrerenderFrame = _ref17.proxyPrerenderFrame;
-                    return proxyPrerenderWin.awaitWindow().then(function(prerenderWindow) {
-                        if (!Object(cross_domain_utils_src.isSameDomain)(prerenderWindow) || !Object(cross_domain_utils_src.isBlankDomain)(prerenderWindow)) return {
-                            proxyPrerenderWin: proxyPrerenderWin,
-                            proxyPrerenderFrame: proxyPrerenderFrame
-                        };
-                        var doc = (prerenderWindow = Object(cross_domain_utils_src.assertSameDomain)(prerenderWindow)).document, el = _this20.renderTemplate(_this20.component.prerenderTemplate, {
-                            context: context,
-                            uid: uid,
-                            document: doc
-                        });
-                        if (el.ownerDocument !== doc) throw new Error("Expected prerender template to have been created with document from child window");
-                        Object(src.writeElementToWindow)(prerenderWindow, el);
-                        var _ref18 = _this20.component.autoResize || {}, _ref18$width = _ref18.width, width = void 0 !== _ref18$width && _ref18$width, _ref18$height = _ref18.height, height = void 0 !== _ref18$height && _ref18$height, _ref18$element = _ref18.element, element = void 0 === _ref18$element ? "body" : _ref18$element;
-                        (element = Object(src.getElementSafe)(element, doc)) && (width || height) && Object(src.onResize)(element, function(_ref19) {
-                            var newWidth = _ref19.width, newHeight = _ref19.height;
-                            _this20.resize({
-                                width: width ? newWidth : void 0,
-                                height: height ? newHeight : void 0
-                            });
-                        }, {
-                            width: width,
-                            height: height,
-                            win: prerenderWindow
-                        });
-                        return {
-                            proxyPrerenderWin: proxyPrerenderWin,
-                            proxyPrerenderFrame: proxyPrerenderFrame
-                        };
+                    var proxyPrerenderWin = _ref17.proxyPrerenderWin, proxyPrerenderFrame = _ref17.proxyPrerenderFrame, prerenderWindow = proxyPrerenderWin.getWindow();
+                    if (!prerenderWindow || !Object(cross_domain_utils_src.isSameDomain)(prerenderWindow) || !Object(cross_domain_utils_src.isBlankDomain)(prerenderWindow)) return {
+                        proxyPrerenderWin: proxyPrerenderWin,
+                        proxyPrerenderFrame: proxyPrerenderFrame
+                    };
+                    var doc = (prerenderWindow = Object(cross_domain_utils_src.assertSameDomain)(prerenderWindow)).document, el = _this20.renderTemplate(_this20.component.prerenderTemplate, {
+                        context: context,
+                        uid: uid,
+                        doc: doc
                     });
+                    if (el.ownerDocument !== doc) throw new Error("Expected prerender template to have been created with document from child window");
+                    Object(src.writeElementToWindow)(prerenderWindow, el);
+                    var _ref18 = _this20.component.autoResize || {}, _ref18$width = _ref18.width, width = void 0 !== _ref18$width && _ref18$width, _ref18$height = _ref18.height, height = void 0 !== _ref18$height && _ref18$height, _ref18$element = _ref18.element, element = void 0 === _ref18$element ? "body" : _ref18$element;
+                    (element = Object(src.getElementSafe)(element, doc)) && (width || height) && Object(src.onResize)(element, function(_ref19) {
+                        var newWidth = _ref19.width, newHeight = _ref19.height;
+                        _this20.resize({
+                            width: width ? newWidth : void 0,
+                            height: height ? newHeight : void 0
+                        });
+                    }, {
+                        width: width,
+                        height: height,
+                        win: prerenderWindow
+                    });
+                    return {
+                        proxyPrerenderWin: proxyPrerenderWin,
+                        proxyPrerenderFrame: proxyPrerenderFrame
+                    };
                 });
             };
             _proto.renderTemplate = function(renderer, _ref20) {
-                var _this21 = this, context = _ref20.context, uid = _ref20.uid, container = _ref20.container, document = _ref20.document, outlet = _ref20.outlet;
+                var _this21 = this, context = _ref20.context, uid = _ref20.uid, container = _ref20.container, doc = _ref20.doc, outlet = _ref20.outlet;
                 return renderer.call(this, {
                     container: container,
                     outlet: outlet,
                     context: context,
                     uid: uid,
+                    doc: doc,
                     focus: function() {
                         return _this21.focus();
                     },
@@ -4055,7 +4058,6 @@
                     state: this.state,
                     props: this.props,
                     tag: this.component.tag,
-                    doc: document,
                     dimensions: this.component.dimensions
                 });
             };
@@ -4072,7 +4074,8 @@
                         context: context,
                         uid: uid,
                         container: container,
-                        outlet: outlet
+                        outlet: outlet,
+                        doc: document
                     });
                     Object(src.appendChild)(container, innerContainer);
                     _this22.clean.register(function() {

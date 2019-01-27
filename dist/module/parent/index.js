@@ -82,6 +82,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       tasks.saveProxyWin = tasks.open.then(({
         proxyWin
       }) => {
+        this.proxyWin = proxyWin;
         return this.saveProxyWin(proxyWin);
       });
       tasks.buildWindowName = tasks.open.then(({
@@ -101,11 +102,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       }, windowName]) => {
         return proxyWin.setName(windowName);
       });
-      tasks.watchForClose = tasks.open.then(({
-        proxyWin
-      }) => {
-        return this.watchForClose(proxyWin);
-      });
       tasks.prerender = _src3.ZalgoPromise.all([tasks.open, tasks.renderContainer]).then(([{
         proxyWin
       }, proxyOutlet]) => {
@@ -114,6 +110,16 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
           uid
         });
       });
+      tasks.loadUrl = _src3.ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender]).then(([{
+        proxyWin
+      }, url]) => {
+        return proxyWin.setLocation(url);
+      });
+      tasks.watchForClose = tasks.open.then(({
+        proxyWin
+      }) => {
+        return this.watchForClose(proxyWin);
+      });
       tasks.onDisplay = tasks.prerender.then(() => {
         return this.props.onDisplay();
       });
@@ -121,11 +127,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
         proxyWin
       }) => {
         return this.openBridge(proxyWin, initialDomain, context);
-      });
-      tasks.loadUrl = _src3.ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName]).then(([{
-        proxyWin
-      }, url]) => {
-        return proxyWin.setLocation(url);
       });
       tasks.switchPrerender = _src3.ZalgoPromise.all([tasks.open, tasks.prerender, tasks.init]).then(([{
         proxyFrame
@@ -531,55 +532,55 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       proxyPrerenderWin,
       proxyPrerenderFrame
     }) => {
-      return proxyPrerenderWin.awaitWindow().then(prerenderWindow => {
-        if (!(0, _src2.isSameDomain)(prerenderWindow) || !(0, _src2.isBlankDomain)(prerenderWindow)) {
-          return {
-            proxyPrerenderWin,
-            proxyPrerenderFrame
-          };
-        }
+      let prerenderWindow = proxyPrerenderWin.getWindow();
 
-        prerenderWindow = (0, _src2.assertSameDomain)(prerenderWindow);
-        const doc = prerenderWindow.document;
-        const el = this.renderTemplate(this.component.prerenderTemplate, {
-          context,
-          uid,
-          document: doc
-        });
-
-        if (el.ownerDocument !== doc) {
-          throw new Error(`Expected prerender template to have been created with document from child window`);
-        }
-
-        (0, _src4.writeElementToWindow)(prerenderWindow, el);
-        let {
-          width = false,
-          height = false,
-          element = 'body'
-        } = this.component.autoResize || {};
-        element = (0, _src4.getElementSafe)(element, doc);
-
-        if (element && (width || height)) {
-          (0, _src4.onResize)(element, ({
-            width: newWidth,
-            height: newHeight
-          }) => {
-            this.resize({
-              width: width ? newWidth : undefined,
-              height: height ? newHeight : undefined
-            });
-          }, {
-            width,
-            height,
-            win: prerenderWindow
-          });
-        }
-
+      if (!prerenderWindow || !(0, _src2.isSameDomain)(prerenderWindow) || !(0, _src2.isBlankDomain)(prerenderWindow)) {
         return {
           proxyPrerenderWin,
           proxyPrerenderFrame
         };
+      }
+
+      prerenderWindow = (0, _src2.assertSameDomain)(prerenderWindow);
+      const doc = prerenderWindow.document;
+      const el = this.renderTemplate(this.component.prerenderTemplate, {
+        context,
+        uid,
+        doc
       });
+
+      if (el.ownerDocument !== doc) {
+        throw new Error(`Expected prerender template to have been created with document from child window`);
+      }
+
+      (0, _src4.writeElementToWindow)(prerenderWindow, el);
+      let {
+        width = false,
+        height = false,
+        element = 'body'
+      } = this.component.autoResize || {};
+      element = (0, _src4.getElementSafe)(element, doc);
+
+      if (element && (width || height)) {
+        (0, _src4.onResize)(element, ({
+          width: newWidth,
+          height: newHeight
+        }) => {
+          this.resize({
+            width: width ? newWidth : undefined,
+            height: height ? newHeight : undefined
+          });
+        }, {
+          width,
+          height,
+          win: prerenderWindow
+        });
+      }
+
+      return {
+        proxyPrerenderWin,
+        proxyPrerenderFrame
+      };
     });
   }
 
@@ -587,7 +588,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     context,
     uid,
     container,
-    document,
+    doc,
     outlet
   }) {
     // $FlowFixMe
@@ -596,12 +597,12 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       outlet,
       context,
       uid,
+      doc,
       focus: () => this.focus(),
       close: () => this.close(),
       state: this.state,
       props: this.props,
       tag: this.component.tag,
-      doc: document,
       dimensions: this.component.dimensions
     });
   }
@@ -622,7 +623,8 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
         context,
         uid,
         container,
-        outlet
+        outlet,
+        doc: document
       });
       (0, _src4.appendChild)(container, innerContainer);
       this.clean.register(() => (0, _src4.destroyElement)(outlet));
