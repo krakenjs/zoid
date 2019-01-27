@@ -381,4 +381,60 @@ describe('zoid happy cases', () => {
             }).render(document.body, window.zoid.CONTEXT.POPUP);
         });
     });
+
+    it('should prerender to an iframe', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:               'test-render-prerender-iframe',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain:            'mock://www.child.com',
+                    prerenderTemplate: ({ doc }) => {
+                        const html = doc.createElement('html');
+                        const body = doc.createElement('body');
+                        const script = doc.createElement('script');
+                        script.text = `
+                            window.parent.prerenderScriptLoaded();
+                        `;
+                        html.appendChild(body);
+                        body.appendChild(script);
+                        return html;
+                    }
+                });
+            };
+
+            window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
+
+            const component = window.__component__();
+            return component().render(document.body);
+        });
+    });
+
+    it('should prerender to an iframe', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:               'test-render-prerender-popup',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain:            'mock://www.child.com',
+                    prerenderTemplate: ({ doc }) => {
+                        const html = doc.createElement('html');
+                        const body = doc.createElement('body');
+                        const script = doc.createElement('script');
+                        script.text = `
+                            window.opener.prerenderScriptLoaded();
+                        `;
+                        html.appendChild(body);
+                        body.appendChild(script);
+                        return html;
+                    }
+                });
+            };
+
+            window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
+
+            const component = window.__component__();
+            return component().render(document.body, window.zoid.CONTEXT.POPUP);
+        });
+    });
 });

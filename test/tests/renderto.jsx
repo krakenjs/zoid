@@ -96,6 +96,89 @@ describe('zoid renderto cases', () => {
         });
     });
 
+    it('should prerender to a remotely rendered popup', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-prerender-popup-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:               'test-renderto-prerender-popup-remote',
+                        url:               '/base/test/windows/child/index.htm',
+                        domain:            'mock://www.child.com',
+                        prerenderTemplate: ({ doc }) => {
+                            const html = doc.createElement('html');
+                            const body = doc.createElement('body');
+                            const script = doc.createElement('script');
+                            script.text = `
+                                window.opener.prerenderScriptLoaded();
+                            `;
+                            html.appendChild(body);
+                            body.appendChild(script);
+                            return html;
+                        }
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                prerenderScriptLoaded: expect('prerenderScriptLoaded'),
+
+                run: expect('run', () => {
+                    return `
+                        window.prerenderScriptLoaded = window.xprops.prerenderScriptLoaded;
+                        window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
+                    `;
+                })
+            }).render(document.body);
+        }, { timeout: 5000 });
+    });
+
+    it('should prerender to a remotely rendered iframe', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-prerender-iframe-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:               'test-renderto-prerender-iframe-remote',
+                        url:               '/base/test/windows/child/index.htm',
+                        domain:            'mock://www.child.com',
+                        prerenderTemplate: ({ doc }) => {
+                            const html = doc.createElement('html');
+                            const body = doc.createElement('body');
+                            const script = doc.createElement('script');
+                            script.text = `
+                                window.parent.prerenderScriptLoaded();
+                            `;
+                            html.appendChild(body);
+                            body.appendChild(script);
+                            return html;
+                        }
+                    })
+                };
+            };
+
+            window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
+
+            return window.__component__().simple({
+                run: expect('run', () => {
+                    return `
+                        window.__component__().remote().renderTo(window.parent, 'body');
+                    `;
+                })
+            }).render(document.body);
+        }, { timeout: 5000 });
+    });
+
     it('should render a component to the parent as an iframe and close after a delay', () => {
         return wrapPromise(({ expect }) => {
 
@@ -282,9 +365,58 @@ describe('zoid renderto cases', () => {
         }, { timeout: 5000 });
     });
 
-    it('should close a zoid renderToParent popup on call of close from prerender template', () => {
+    it('should focus a zoid renderToParent popup on call of focus from container template', () => {
         return wrapPromise(({ expect }) => {
+            let doFocus;
 
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-container-focus-popup-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:               'test-renderto-container-focus-popup-remote',
+                        url:               '/base/test/windows/child/index.htm',
+                        domain:            'mock://www.child.com',
+                        containerTemplate: ({ doc, outlet, focus }) => {
+                            const div = doc.createElement('div');
+                            div.appendChild(outlet);
+                            doFocus = focus;
+                            return div;
+                        }
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                doFocus: expect('doFocus', () => doFocus()),
+                onFocus: expect('onFocus'),
+
+                run: expect('run', () => {
+                    return `
+                        let win;
+
+                        let winOpen = window.open;
+                        window.open = function windowOpen() {
+                            win = winOpen.apply(this, arguments);
+                            return win;
+                        }
+
+                        window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP).then(() => {
+                            win.focus = window.xprops.onFocus;
+                            return window.xprops.doFocus();
+                        });
+                    `;
+                })
+            }).render(document.body);
+        }, { timeout: 5000 });
+    });
+
+    it('should focus a zoid renderToParent popup on call of focus from prerender template', () => {
+        return wrapPromise(({ expect }) => {
             window.__component__ = () => {
                 return {
                     simple: window.zoid.create({
@@ -297,11 +429,11 @@ describe('zoid renderto cases', () => {
                         tag:               'test-renderto-prerender-focus-popup-remote',
                         url:               '/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
-                        prerenderTemplate: ({ focus }) => {
-                            const html = document.createElement('html');
-                            const body = document.createElement('body');
+                        prerenderTemplate: ({ doc, focus }) => {
+                            const html = doc.createElement('html');
+                            const body = doc.createElement('body');
                             html.appendChild(body);
-                            setTimeout(focus, 300);
+                            window.doFocus = focus;
                             return html;
                         }
                     })
@@ -309,15 +441,24 @@ describe('zoid renderto cases', () => {
             };
 
             return window.__component__().simple({
-                run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
-                        win.focus = expect('windowFocus');
-                    }));
+                onFocus: expect('onFocus'),
 
+                run: expect('run', () => {
                     return `
-                        window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
+                        let win;
+
+                        let winOpen = window.open;
+                        window.open = function windowOpen() {
+                            win = winOpen.apply(this, arguments);
+                            return win;
+                        }
+
+                        window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP).then(() => {
+                            win.focus = window.xprops.onFocus;
+                            window.doFocus();
+                        });
                     `;
-                }
+                })
             }).render(document.body);
         }, { timeout: 5000 });
     });

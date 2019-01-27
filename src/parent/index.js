@@ -141,6 +141,7 @@ export class ParentComponent<P> {
                 : this.open();
 
             tasks.saveProxyWin = tasks.open.then(({ proxyWin }) => {
+                this.proxyWin = proxyWin;
                 return this.saveProxyWin(proxyWin);
             });
 
@@ -152,12 +153,16 @@ export class ParentComponent<P> {
                 return proxyWin.setName(windowName);
             });
 
-            tasks.watchForClose = tasks.open.then(({ proxyWin }) => {
-                return this.watchForClose(proxyWin);
-            });
-
             tasks.prerender = ZalgoPromise.all([ tasks.open, tasks.renderContainer ]).then(([ { proxyWin }, proxyOutlet ]) => {
                 return this.prerender(proxyWin, proxyOutlet, { context, uid });
+            });
+
+            tasks.loadUrl = ZalgoPromise.all([ tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender ]).then(([ { proxyWin }, url ]) => {
+                return proxyWin.setLocation(url);
+            });
+
+            tasks.watchForClose = tasks.open.then(({ proxyWin }) => {
+                return this.watchForClose(proxyWin);
             });
 
             tasks.onDisplay = tasks.prerender.then(() => {
@@ -166,10 +171,6 @@ export class ParentComponent<P> {
 
             tasks.openBridge = tasks.open.then(({ proxyWin }) => {
                 return this.openBridge(proxyWin, initialDomain, context);
-            });
-
-            tasks.loadUrl = ZalgoPromise.all([ tasks.open, tasks.buildUrl, tasks.setWindowName ]).then(([ { proxyWin }, url ]) => {
-                return proxyWin.setLocation(url);
             });
 
             tasks.switchPrerender = ZalgoPromise.all([ tasks.open, tasks.prerender, tasks.init ]).then(([ { proxyFrame }, { proxyPrerenderFrame } ]) => {
@@ -512,53 +513,52 @@ export class ParentComponent<P> {
             return this.driver.openPrerender.call(this, proxyWin, proxyElement);
             
         }).then(({ proxyPrerenderWin, proxyPrerenderFrame }) => {
-            return proxyPrerenderWin.awaitWindow().then(prerenderWindow => {
+            let prerenderWindow = proxyPrerenderWin.getWindow();
 
-                if (!isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
-                    return { proxyPrerenderWin, proxyPrerenderFrame };
-                }
-
-                prerenderWindow = assertSameDomain(prerenderWindow);
-        
-                const doc = prerenderWindow.document;
-                const el = this.renderTemplate(this.component.prerenderTemplate, { context, uid, document: doc });
-    
-                if (el.ownerDocument !== doc) {
-                    throw new Error(`Expected prerender template to have been created with document from child window`);
-                }
-    
-                writeElementToWindow(prerenderWindow, el);
-    
-                let { width = false, height = false, element = 'body' } = this.component.autoResize || {};
-                element = getElementSafe(element, doc);
-                
-                if (element && (width || height)) {
-                    onResize(element, ({ width: newWidth, height: newHeight }) => {
-                        this.resize({
-                            width:  width ? newWidth : undefined,
-                            height: height ? newHeight : undefined
-                        });
-                    }, { width, height, win: prerenderWindow });
-                }
-    
+            if (!prerenderWindow || !isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
                 return { proxyPrerenderWin, proxyPrerenderFrame };
-            });
+            }
+
+            prerenderWindow = assertSameDomain(prerenderWindow);
+    
+            const doc = prerenderWindow.document;
+            const el = this.renderTemplate(this.component.prerenderTemplate, { context, uid, doc });
+
+            if (el.ownerDocument !== doc) {
+                throw new Error(`Expected prerender template to have been created with document from child window`);
+            }
+
+            writeElementToWindow(prerenderWindow, el);
+
+            let { width = false, height = false, element = 'body' } = this.component.autoResize || {};
+            element = getElementSafe(element, doc);
+            
+            if (element && (width || height)) {
+                onResize(element, ({ width: newWidth, height: newHeight }) => {
+                    this.resize({
+                        width:  width ? newWidth : undefined,
+                        height: height ? newHeight : undefined
+                    });
+                }, { width, height, win: prerenderWindow });
+            }
+
+            return { proxyPrerenderWin, proxyPrerenderFrame };
         });
     }
 
-    renderTemplate(renderer : (RenderOptionsType<P>) => HTMLElement, { context, uid, container, document, outlet } : { context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, document? : Document, outlet? : HTMLElement }) : HTMLElement {
+    renderTemplate(renderer : (RenderOptionsType<P>) => HTMLElement, { context, uid, container, doc, outlet } : { context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, outlet? : HTMLElement }) : HTMLElement {
         // $FlowFixMe
         return renderer.call(this, {
             container,
             outlet,
             context,
             uid,
+            doc,
             focus:      () => this.focus(),
             close:      () => this.close(),
             state:      this.state,
             props:      this.props,
             tag:        this.component.tag,
-            doc:        document,
             dimensions: this.component.dimensions
         });
     }
@@ -575,7 +575,7 @@ export class ParentComponent<P> {
                 class: [ CLASS.OUTLET ]
             });
 
-            const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, outlet });
+            const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, outlet, doc: document });
             appendChild(container, innerContainer);
         
             this.clean.register(() => destroyElement(outlet));
