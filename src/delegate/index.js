@@ -98,6 +98,7 @@ export class DelegateComponent<P>  {
                 // $FlowFixMe
                 return ParentComponent.prototype[key].apply(self, arguments);
             };
+            overrides[key].__name__ = key;
         }
 
         return overrides;
