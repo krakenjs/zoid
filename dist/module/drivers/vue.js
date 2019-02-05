@@ -25,7 +25,7 @@ const vue = {
 
       watch: {
         $attrs: {
-          handler: function onChange() {
+          handler: function handler() {
             if (this.parent && this.$attrs) {
               this.parent.updateProps((0, _src.extend)({}, this.$attrs)).catch(_src.noop);
             }

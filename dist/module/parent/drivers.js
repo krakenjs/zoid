@@ -20,83 +20,75 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 const RENDER_DRIVERS = {};
 exports.RENDER_DRIVERS = RENDER_DRIVERS;
 RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
-  renderedIntoContainer: true,
+  openOnClick: false,
 
-  open(proxyOutlet) {
-    if (!proxyOutlet) {
-      throw new Error(`Expected container element to be passed`);
+  openFrame() {
+    return (0, _lib.getProxyElement)((0, _src4.iframe)({
+      attributes: _extends({
+        title: this.component.name
+      }, this.component.attributes.iframe)
+    }));
+  },
+
+  open(proxyFrame) {
+    if (!proxyFrame) {
+      throw new Error(`Expected proxy frame to be passed`);
     }
 
-    return proxyOutlet.getElement().then(outlet => {
-      const frame = (0, _src4.iframe)({
-        attributes: _extends({
-          title: this.component.name
-        }, this.component.attributes.iframe),
-        class: [_constants.CLASS.COMPONENT_FRAME, _constants.CLASS.INVISIBLE]
-      }, outlet);
-      const frameWatcher = (0, _src4.watchElementForClose)(frame, () => this.close());
-      this.clean.register(() => frameWatcher.cancel());
-      this.clean.register(() => (0, _src4.destroyElement)(frame));
+    return proxyFrame.getElement().then(frame => {
       return (0, _src4.awaitFrameWindow)(frame).then(win => {
+        const frameWatcher = (0, _src4.watchElementForClose)(frame, () => this.close());
+        this.clean.register(() => frameWatcher.cancel());
+        this.clean.register(() => (0, _src4.destroyElement)(frame));
         this.clean.register(() => (0, _src2.cleanUpWindow)(win));
-        return {
-          proxyWin: _src2.ProxyWindow.toProxyWindow(win),
-          proxyFrame: (0, _lib.getProxyElement)(frame)
-        };
+        return (0, _src2.toProxyWindow)(win);
       });
     });
   },
 
-  openPrerender(proxyWin, proxyElement) {
-    return proxyElement.getElement().then(element => {
-      const prerenderFrame = (0, _src4.iframe)({
-        attributes: _extends({
-          name: `__zoid_prerender_frame__${this.component.name}_${(0, _src4.uniqueID)()}__`
-        }, this.component.attributes.iframe),
-        class: [_constants.CLASS.PRERENDER_FRAME, _constants.CLASS.VISIBLE]
-      }, element);
+  openPrerenderFrame() {
+    return (0, _lib.getProxyElement)((0, _src4.iframe)({
+      attributes: _extends({
+        name: `__zoid_prerender_frame__${this.component.name}_${(0, _src4.uniqueID)()}__`,
+        title: `prerender__${this.component.name}`
+      }, this.component.attributes.iframe)
+    }));
+  },
+
+  openPrerender(proxyWin, proxyPrerenderFrame) {
+    if (!proxyPrerenderFrame) {
+      throw new Error(`Expected proxy frame to be passed`);
+    }
+
+    return proxyPrerenderFrame.getElement().then(prerenderFrame => {
       this.clean.register(() => (0, _src4.destroyElement)(prerenderFrame));
       return (0, _src4.awaitFrameWindow)(prerenderFrame).then(prerenderFrameWindow => {
         return (0, _src3.assertSameDomain)(prerenderFrameWindow);
       }).then(win => {
-        return {
-          proxyPrerenderWin: _src2.ProxyWindow.toProxyWindow(win),
-          proxyPrerenderFrame: (0, _lib.getProxyElement)(prerenderFrame)
-        };
+        return (0, _src2.toProxyWindow)(win);
       });
     });
   },
 
-  switchPrerender({
-    proxyFrame,
-    proxyPrerenderFrame
-  }) {
-    return _src.ZalgoPromise.all([proxyFrame.getElement(), proxyPrerenderFrame.getElement()]).then(([frame, prerenderFrame]) => {
-      (0, _src4.addClass)(prerenderFrame, _constants.CLASS.INVISIBLE);
-      (0, _src4.removeClass)(prerenderFrame, _constants.CLASS.VISIBLE);
-      (0, _src4.addClass)(frame, _constants.CLASS.VISIBLE);
-      (0, _src4.removeClass)(frame, _constants.CLASS.INVISIBLE);
-      setTimeout(() => (0, _src4.destroyElement)(prerenderFrame), 1);
-    });
-  },
-
-  delegate: ['getProxyContainer', 'renderContainer', 'prerender', 'switchPrerender', 'open', 'saveProxyWin'],
+  delegate: ['getProxyContainer', 'renderContainer', 'openFrame', 'openPrerenderFrame', 'prerender', 'open', 'openPrerender'],
 
   resize({
     width,
     height
   }) {
-    this.proxyOutlet.resize({
-      width,
-      height
-    });
+    if (this.proxyContainer) {
+      this.proxyContainer.resize({
+        width,
+        height
+      });
+    }
   }
 
 };
 
 if (__ZOID__.__POPUP_SUPPORT__) {
   RENDER_DRIVERS[_constants.CONTEXT.POPUP] = {
-    renderedIntoContainer: false,
+    openOnClick: true,
 
     open() {
       return _src.ZalgoPromise.try(() => {
@@ -114,20 +106,16 @@ if (__ZOID__.__POPUP_SUPPORT__) {
           win.close();
           (0, _src2.cleanUpWindow)(win);
         });
-        return {
-          proxyWin: _src2.ProxyWindow.toProxyWindow(win)
-        };
+        return (0, _src2.toProxyWindow)(win);
       });
     },
 
     openPrerender(proxyWin) {
       return _src.ZalgoPromise.try(() => {
-        return {
-          proxyPrerenderWin: proxyWin
-        };
+        return proxyWin;
       });
     },
 
-    delegate: ['getProxyContainer', 'renderContainer', 'saveProxyWin']
+    delegate: ['getProxyContainer', 'renderContainer', 'setProxyWin']
   };
 }

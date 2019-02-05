@@ -23,30 +23,34 @@ class DelegateComponent {
     this.driver = void 0;
     this.props = void 0;
     this.clean = void 0;
+    this.focus = void 0;
+    this.resize = void 0;
+    this.renderTemplate = void 0;
     this.close = void 0;
     this.onError = void 0;
-    this.focus = void 0;
+    this.event = void 0;
     this.component = component;
     this.context = options.context;
     this.driver = _drivers.RENDER_DRIVERS[options.context];
-    this.clean = (0, _src4.cleanup)(this); // $FlowFixMe
-
-    this.focus = _parent.ParentComponent.prototype.focus; // $FlowFixMe
-
-    this.resize = _parent.ParentComponent.prototype.resize; // $FlowFixMe
-
+    this.clean = (0, _src4.cleanup)(this);
+    this.focus = _parent.ParentComponent.prototype.focus;
+    this.resize = _parent.ParentComponent.prototype.resize;
     this.renderTemplate = _parent.ParentComponent.prototype.renderTemplate; // $FlowFixMe
 
     this.props = {};
 
     for (const propName of Object.keys(options.props)) {
-      if (options.props[propName] && this.component.getPropDefinition(propName) && this.component.getPropDefinition(propName).allowDelegate) {
+      const propDef = this.component.getPropDefinition(propName);
+
+      if (propDef && propDef.allowDelegate && options.props[propName]) {
+        // $FlowFixMe
         this.props[propName] = options.props[propName];
       }
     }
 
     this.close = options.overrides.close;
     this.onError = options.overrides.onError;
+    this.event = options.overrides.event;
     this.component.registerActiveComponent(this);
     this.clean.register(() => this.component.destroyActiveComponent(this));
     this.watchForSourceClose(source);
@@ -73,6 +77,8 @@ class DelegateComponent {
         // $FlowFixMe
         return _parent.ParentComponent.prototype[key].apply(self, arguments);
       };
+
+      overrides[key].__name__ = key;
     }
 
     return overrides;

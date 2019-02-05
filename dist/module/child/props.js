@@ -6,6 +6,8 @@ exports.normalizeChildProps = normalizeChildProps;
 
 var _src = require("cross-domain-utils/src");
 
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 function normalizeChildProp(component, props, key, value, helpers) {
   // $FlowFixMe
   const prop = component.getPropDefinition(key);
@@ -14,23 +16,10 @@ function normalizeChildProp(component, props, key, value, helpers) {
     return value;
   }
 
-  const {
-    focus,
-    close,
-    resize,
-    onError,
-    onPropsChange
-  } = helpers;
-
   if (typeof prop.childDecorate === 'function') {
-    return prop.childDecorate({
-      value,
-      focus,
-      close,
-      resize,
-      onError,
-      onPropsChange
-    });
+    return prop.childDecorate(_extends({
+      value
+    }, helpers));
   }
 
   return value;

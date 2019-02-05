@@ -2,34 +2,17 @@
 
 exports.__esModule = true;
 exports.globalFor = globalFor;
-exports.localGlobal = localGlobal;
-exports.global = void 0;
 
 var _src = require("cross-domain-utils/src");
 
-var _constants = require("../constants");
-
 function globalFor(win) {
   if (!(0, _src.isSameDomain)(win)) {
-    return;
+    throw new Error(`Can not get global for window on different domain`);
   }
 
-  if (!win[_constants.__ZOID__]) {
-    win[_constants.__ZOID__] = {};
+  if (!win[__ZOID__.__GLOBAL_KEY__]) {
+    win[__ZOID__.__GLOBAL_KEY__] = {};
   }
 
-  return win[_constants.__ZOID__];
+  return win[__ZOID__.__GLOBAL_KEY__];
 }
-
-function localGlobal() {
-  const global = globalFor(window);
-
-  if (!global) {
-    throw new Error(`Could not get local global`);
-  }
-
-  return global;
-}
-
-const global = localGlobal();
-exports.global = global;

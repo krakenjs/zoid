@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.getInternalProps = getInternalProps;
+exports.getBuiltInProps = getBuiltInProps;
 
 var _src = require("zalgo-promise/src");
 
@@ -9,11 +9,17 @@ var _src2 = require("belter/src");
 
 var _src3 = require("cross-domain-utils/src");
 
-var _window = require("post-robot/src/serialize/window");
+var _src4 = require("post-robot/src");
 
 var _constants = require("../constants");
 
-function getInternalProps() {
+const defaultNoop = () => _src2.noop;
+
+const decorateOnce = ({
+  value
+}) => (0, _src2.once)(value);
+
+function getBuiltInProps() {
   return {
     window: {
       type: 'object',
@@ -24,7 +30,7 @@ function getInternalProps() {
       validate({
         value
       }) {
-        if (!(0, _src3.isWindow)(value) && !_window.ProxyWindow.isProxyWindow(value)) {
+        if (!(0, _src3.isWindow)(value) && !_src4.ProxyWindow.isProxyWindow(value)) {
           throw new Error(`Expected Window or ProxyWindow`);
         }
       },
@@ -32,7 +38,7 @@ function getInternalProps() {
       decorate({
         value
       }) {
-        return _window.ProxyWindow.toProxyWindow(value);
+        return (0, _src4.toProxyWindow)(value);
       }
 
     },
@@ -47,9 +53,7 @@ function getInternalProps() {
       sendToChild: false,
       childDecorate: ({
         close
-      }) => {
-        return close;
-      }
+      }) => close
     },
     focus: {
       type: 'function',
@@ -57,9 +61,7 @@ function getInternalProps() {
       sendToChild: false,
       childDecorate: ({
         focus
-      }) => {
-        return focus;
-      }
+      }) => focus
     },
     resize: {
       type: 'function',
@@ -67,47 +69,37 @@ function getInternalProps() {
       sendToChild: false,
       childDecorate: ({
         resize
-      }) => {
-        return resize;
-      }
+      }) => resize
     },
     onDisplay: {
       type: 'function',
       required: false,
       sendToChild: false,
       allowDelegate: true,
-      default: () => _src2.noop,
-      decorate: ({
-        value
-      }) => (0, _src2.once)(value)
+      default: defaultNoop,
+      decorate: decorateOnce
     },
     onRendered: {
       type: 'function',
       required: false,
       sendToChild: false,
-      default: () => _src2.noop,
-      decorate: ({
-        value
-      }) => (0, _src2.once)(value)
+      default: defaultNoop,
+      decorate: decorateOnce
     },
     onRender: {
       type: 'function',
       required: false,
       sendToChild: false,
-      default: () => _src2.noop,
-      decorate: ({
-        value
-      }) => (0, _src2.once)(value)
+      default: defaultNoop,
+      decorate: decorateOnce
     },
     onClose: {
       type: 'function',
       required: false,
       sendToChild: false,
       allowDelegate: true,
-      default: () => _src2.noop,
-      decorate: ({
-        value
-      }) => (0, _src2.once)(value)
+      default: defaultNoop,
+      decorate: decorateOnce
     },
     onError: {
       type: 'function',
@@ -115,21 +107,16 @@ function getInternalProps() {
       sendToChild: false,
       childDecorate: ({
         onError
-      }) => {
-        return function childOnError(err) {
-          return onError(err);
-        };
-      }
+      }) => onError
     },
-    onChange: {
+    onProps: {
       type: 'function',
       required: false,
       sendToChild: false,
+      default: defaultNoop,
       childDecorate: ({
-        onPropsChange
-      }) => {
-        return onPropsChange;
-      }
+        onProps
+      }) => onProps
     }
   };
 }

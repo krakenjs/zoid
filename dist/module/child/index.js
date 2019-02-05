@@ -1,6 +1,9 @@
 "use strict";
 
 exports.__esModule = true;
+var _exportNames = {
+  ChildComponent: true
+};
 exports.ChildComponent = void 0;
 
 var _src = require("cross-domain-utils/src");
@@ -17,9 +20,15 @@ var _constants = require("../constants");
 
 var _props = require("./props");
 
-var _class, _temp;
+var _window = require("./window");
 
-function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) { var desc = {}; Object['ke' + 'ys'](descriptor).forEach(function (key) { desc[key] = descriptor[key]; }); desc.enumerable = !!desc.enumerable; desc.configurable = !!desc.configurable; if ('value' in desc || desc.initializer) { desc.writable = true; } desc = decorators.slice().reverse().reduce(function (desc, decorator) { return decorator(target, property, desc) || desc; }, desc); if (context && desc.initializer !== void 0) { desc.value = desc.initializer ? desc.initializer.call(context) : void 0; desc.initializer = undefined; } if (desc.initializer === void 0) { Object['define' + 'Property'](target, property, desc); desc = null; } return desc; }
+Object.keys(_window).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  exports[key] = _window[key];
+});
+
+/* eslint max-lines: 0 */
 
 /*  Child Component
     ---------------
@@ -30,7 +39,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
     responsible for managing the state and messaging back up to the parent, and providing props for the component to
     utilize.
 */
-let ChildComponent = (_class = (_temp = class ChildComponent {
+class ChildComponent {
   // eslint-disable-line flowtype/no-mutable-array
   constructor(component) {
     this.component = void 0;
@@ -44,15 +53,21 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
     _src3.ZalgoPromise.try(() => {
       this.component = component;
       this.onPropHandlers = [];
+      const childPayload = (0, _window.getChildPayload)();
+
+      if (!childPayload) {
+        throw new Error(`No child payload found`);
+      }
+
       const {
         parent,
         domain,
         exports,
         context,
         props
-      } = (0, _lib.parseChildWindowName)();
+      } = childPayload;
       this.context = context;
-      this.parentComponentWindow = this.getWindowByRef(parent);
+      this.parentComponentWindow = this.getParentComponentWindow(parent);
       this.parent = (0, _src2.deserializeMessage)(this.parentComponentWindow, domain, exports);
       this.checkParentDomain(domain);
       const initialProps = this.getPropsByRef(this.parentComponentWindow, domain, props);
@@ -79,7 +94,7 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
         height
       }),
       onError: err => this.onError(err),
-      onPropsChange: handler => this.onPropsChange(handler)
+      onProps: handler => this.onProps(handler)
     };
   }
 
@@ -89,7 +104,7 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
     }
   }
 
-  onPropsChange(handler) {
+  onProps(handler) {
     this.onPropHandlers.push(handler);
   }
 
@@ -104,76 +119,54 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
       props = value;
     } else if (type === _constants.INITIAL_PROPS.UID) {
       if (!(0, _src.isSameDomain)(parentComponentWindow)) {
-        if (window.location.protocol === 'file:') {
-          throw new Error(`Can not get props from file:// domain`);
-        }
-
         throw new Error(`Parent component window is on a different domain - expected ${(0, _src.getDomain)()} - can not retrieve props`);
       }
 
       const global = (0, _lib.globalFor)(parentComponentWindow);
-
-      if (!global) {
-        throw new Error(`Can not find global for parent component - can not retrieve props`);
-      }
-
-      props = global.props[uid];
+      props = (0, _src4.assertExists)('props', global && global.props[uid]);
     }
 
     if (!props) {
-      throw new Error(`Initial props not found`);
+      throw new Error(`Could not find props`);
     }
 
     return (0, _src2.deserializeMessage)(parentComponentWindow, domain, props);
   }
 
-  getWindowByRef(ref) {
+  getParentComponentWindow(ref) {
     const {
       type
     } = ref;
-    let result;
 
     if (type === _constants.WINDOW_REFERENCES.OPENER) {
-      result = (0, _src.getOpener)(window);
-    } else if (type === _constants.WINDOW_REFERENCES.TOP) {
-      result = (0, _src.getTop)(window);
+      return (0, _src4.assertExists)('opener', (0, _src.getOpener)(window));
     } else if (type === _constants.WINDOW_REFERENCES.PARENT) {
       // $FlowFixMe
-      const {
-        distance
-      } = ref;
-
-      if (distance) {
-        result = (0, _src.getNthParentFromTop)(window, distance);
-      } else {
-        result = (0, _src.getParent)(window);
-      }
-    }
-
-    if (type === _constants.WINDOW_REFERENCES.GLOBAL) {
+      const distance = ref.distance;
+      return (0, _src4.assertExists)('parent', (0, _src.getNthParentFromTop)(window, distance));
+    } else if (type === _constants.WINDOW_REFERENCES.GLOBAL) {
       // $FlowFixMe
       const {
         uid
       } = ref;
       const ancestor = (0, _src.getAncestor)(window);
 
-      if (ancestor) {
-        for (const frame of (0, _src.getAllFramesInWindow)(ancestor)) {
+      if (!ancestor) {
+        throw new Error(`Can not find ancestor window`);
+      }
+
+      for (const frame of (0, _src.getAllFramesInWindow)(ancestor)) {
+        if ((0, _src.isSameDomain)(frame)) {
           const global = (0, _lib.globalFor)(frame);
 
           if (global && global.windows && global.windows[uid]) {
-            result = global.windows[uid];
-            break;
+            return global.windows[uid];
           }
         }
       }
     }
 
-    if (!result) {
-      throw new Error(`Unable to find ${type} window`);
-    }
-
-    return result;
+    throw new Error(`Unable to find ${type} parent component window`);
   }
 
   getProps() {
@@ -205,19 +198,6 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
     });
   }
 
-  enableAutoResize({
-    width = false,
-    height = true,
-    element = 'body'
-  } = {}) {
-    this.autoResize = {
-      width,
-      height,
-      element
-    };
-    this.watchForResize();
-  }
-
   getAutoResize() {
     let {
       width = false,
@@ -240,15 +220,7 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
         element
       } = this.getAutoResize();
 
-      if (!element) {
-        return;
-      }
-
-      if (!width && !height) {
-        return;
-      }
-
-      if (this.context === _constants.CONTEXT.POPUP) {
+      if (!element || !width && !height || this.context === _constants.CONTEXT.POPUP) {
         return;
       }
 
@@ -317,5 +289,6 @@ let ChildComponent = (_class = (_temp = class ChildComponent {
     });
   }
 
-}, _temp), (_applyDecoratedDescriptor(_class.prototype, "watchForResize", [_src4.memoized], Object.getOwnPropertyDescriptor(_class.prototype, "watchForResize"), _class.prototype)), _class);
+}
+
 exports.ChildComponent = ChildComponent;

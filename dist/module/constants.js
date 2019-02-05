@@ -1,14 +1,12 @@
 "use strict";
 
 exports.__esModule = true;
-exports.DEFAULT_DIMENSIONS = exports.WILDCARD = exports.CLASS = exports.CONTEXT = exports.PROP_SERIALIZATION = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPE = exports.POST_MESSAGE = exports.__ZOID__ = exports.ZOID = void 0;
+exports.EVENT = exports.DEFAULT_DIMENSIONS = exports.WILDCARD = exports.CONTEXT = exports.PROP_SERIALIZATION = exports.WINDOW_REFERENCES = exports.INITIAL_PROPS = exports.PROP_TYPE = exports.POST_MESSAGE = exports.ZOID = void 0;
 
 var _src = require("cross-domain-utils/src");
 
 const ZOID = `zoid`;
 exports.ZOID = ZOID;
-const __ZOID__ = `__${ZOID}__`;
-exports.__ZOID__ = __ZOID__;
 const POST_MESSAGE = {
   DELEGATE: `${ZOID}_delegate`,
   ALLOW_DELEGATE: `${ZOID}_allow_delegate`
@@ -43,14 +41,6 @@ const PROP_SERIALIZATION = {
 exports.PROP_SERIALIZATION = PROP_SERIALIZATION;
 const CONTEXT = _src.WINDOW_TYPE;
 exports.CONTEXT = CONTEXT;
-const CLASS = {
-  OUTLET: `${ZOID}-outlet`,
-  COMPONENT_FRAME: `${ZOID}-component-frame`,
-  PRERENDER_FRAME: `${ZOID}-prerender-frame`,
-  VISIBLE: `${ZOID}-visible`,
-  INVISIBLE: `${ZOID}-invisible`
-};
-exports.CLASS = CLASS;
 const WILDCARD = '*';
 exports.WILDCARD = WILDCARD;
 const DEFAULT_DIMENSIONS = {
@@ -58,3 +48,12 @@ const DEFAULT_DIMENSIONS = {
   HEIGHT: '150px'
 };
 exports.DEFAULT_DIMENSIONS = DEFAULT_DIMENSIONS;
+const EVENT = {
+  RENDER: 'zoid-render',
+  RENDERED: 'zoid-rendered',
+  DISPLAY: 'zoid-display',
+  ERROR: 'zoid-error',
+  CLOSE: 'zoid-close',
+  PROPS: 'zoid-props'
+};
+exports.EVENT = EVENT;

@@ -21,7 +21,7 @@ var _delegate = require("../delegate");
 
 var _constants = require("../constants");
 
-var _lib = require("../lib");
+var _drivers = require("../drivers");
 
 var _validate = require("./validate");
 
@@ -29,14 +29,9 @@ var _templates = require("./templates");
 
 var _props = require("./props");
 
-var _class, _class2, _temp;
-
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) { var desc = {}; Object['ke' + 'ys'](descriptor).forEach(function (key) { desc[key] = descriptor[key]; }); desc.enumerable = !!desc.enumerable; desc.configurable = !!desc.configurable; if ('value' in desc || desc.initializer) { desc.writable = true; } desc = decorators.slice().reverse().reduce(function (desc, decorator) { return decorator(target, property, desc) || desc; }, desc); if (context && desc.initializer !== void 0) { desc.value = desc.initializer ? desc.initializer.call(context) : void 0; desc.initializer = undefined; } if (desc.initializer === void 0) { Object['define' + 'Property'](target, property, desc); desc = null; } return desc; }
-
-const drivers = __ZOID__.__FRAMEWORK_SUPPORT__ ? require('../drivers') : {};
-let Component = (_class = (_temp = _class2 = class Component {
+class Component {
   constructor(options) {
     this.tag = void 0;
     this.name = void 0;
@@ -56,6 +51,7 @@ let Component = (_class = (_temp = _class2 = class Component {
     this.driverCache = void 0;
     this.xprops = void 0;
     this.logger = void 0;
+    this.propNames = void 0;
     (0, _validate.validate)(options); // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
     // e.g. <my-component>
 
@@ -69,7 +65,7 @@ let Component = (_class = (_temp = _class2 = class Component {
     // they are passed down to the child.
 
 
-    this.builtinProps = (0, _props.getInternalProps)();
+    this.builtinProps = (0, _props.getBuiltInProps)();
     this.props = options.props || {}; // The dimensions of the component, e.g. { width: '300px', height: '150px' }
 
     const {
@@ -87,9 +83,10 @@ let Component = (_class = (_temp = _class2 = class Component {
     this.attributes.iframe = this.attributes.iframe || {};
     this.attributes.popup = this.attributes.popup || {};
     this.defaultContext = options.defaultContext || _constants.CONTEXT.IFRAME;
-    this.autoResize = options.autoResize;
-    this.containerTemplate = options.containerTemplate || _templates.defaultContainerTemplate;
-    this.prerenderTemplate = options.prerenderTemplate || _templates.defaultPrerenderTemplate;
+    this.autoResize = options.autoResize; // $FlowFixMe
+
+    this.containerTemplate = options.containerTemplate || (__ZOID__.__DEFAULT_CONTAINER__ ? _templates.defaultContainerTemplate : null);
+    this.prerenderTemplate = options.prerenderTemplate || (__ZOID__.__DEFAULT_PRERENDER__ ? _templates.defaultPrerenderTemplate : null);
     this.validate = options.validate;
     this.logger = options.logger || {
       debug: _src4.noop,
@@ -103,15 +100,20 @@ let Component = (_class = (_temp = _class2 = class Component {
   }
 
   getPropNames() {
-    const props = Object.keys(this.props);
+    if (this.propNames) {
+      return this.propNames;
+    }
+
+    const propNames = Object.keys(this.props);
 
     for (const key of Object.keys(this.builtinProps)) {
-      if (props.indexOf(key) === -1) {
-        props.push(key);
+      if (propNames.indexOf(key) === -1) {
+        propNames.push(key);
       }
     }
 
-    return props;
+    this.propNames = propNames;
+    return propNames;
   } // $FlowFixMe
 
 
@@ -121,17 +123,28 @@ let Component = (_class = (_temp = _class2 = class Component {
   }
 
   driver(name, dep) {
-    if (!drivers[name]) {
-      throw new Error(`Could not find driver for framework: ${name}`);
+    if (__ZOID__.__FRAMEWORK_SUPPORT__) {
+      const drivers = {
+        react: _drivers.react,
+        angular: _drivers.angular,
+        vue: _drivers.vue,
+        angular2: _drivers.angular2
+      };
+
+      if (!drivers[name]) {
+        throw new Error(`Could not find driver for framework: ${name}`);
+      }
+
+      this.driverCache = this.driverCache || {};
+
+      if (!this.driverCache[name]) {
+        this.driverCache[name] = drivers[name].register(this, dep);
+      }
+
+      return this.driverCache[name];
+    } else {
+      throw new Error(`Driver support not enabled`);
     }
-
-    this.driverCache = this.driverCache || {};
-
-    if (!this.driverCache[name]) {
-      this.driverCache[name] = drivers[name].register(this, dep);
-    }
-
-    return this.driverCache[name];
   }
 
   registerChild() {
@@ -210,7 +223,8 @@ let Component = (_class = (_temp = _class2 = class Component {
   }
 
   isChild() {
-    return (0, _lib.isZoidComponentWindow)() && (0, _lib.parseChildWindowName)().tag === this.tag;
+    const payload = (0, _child.getChildPayload)();
+    return Boolean(payload && payload.tag === this.tag);
   }
 
   getDefaultContainer(context, container) {
@@ -232,7 +246,7 @@ let Component = (_class = (_temp = _class2 = class Component {
 
   getDefaultContext(context, props) {
     if (props.window) {
-      return _src.ProxyWindow.toProxyWindow(props.window).getType();
+      return (0, _src.toProxyWindow)(props.window).getType();
     }
 
     if (context) {
@@ -314,8 +328,11 @@ let Component = (_class = (_temp = _class2 = class Component {
     return _src2.ZalgoPromise.all(results).then(_src4.noop);
   }
 
-}, _class2.components = {}, _class2.activeComponents = [], _temp), (_applyDecoratedDescriptor(_class.prototype, "getPropNames", [_src4.memoize], Object.getOwnPropertyDescriptor(_class.prototype, "getPropNames"), _class.prototype)), _class);
+}
+
 exports.Component = Component;
+Component.components = {};
+Component.activeComponents = [];
 
 function create(options) {
   const component = new Component(options);

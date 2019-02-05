@@ -9,13 +9,6 @@ Object.keys(_global).forEach(function (key) {
   exports[key] = _global[key];
 });
 
-var _window = require("./window");
-
-Object.keys(_window).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  exports[key] = _window[key];
-});
-
 var _serialize = require("./serialize");
 
 Object.keys(_serialize).forEach(function (key) {

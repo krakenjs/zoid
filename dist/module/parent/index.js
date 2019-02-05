@@ -19,46 +19,60 @@ var _drivers = require("./drivers");
 
 var _props = require("./props");
 
-var _class, _temp;
-
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) { var desc = {}; Object['ke' + 'ys'](descriptor).forEach(function (key) { desc[key] = descriptor[key]; }); desc.enumerable = !!desc.enumerable; desc.configurable = !!desc.configurable; if ('value' in desc || desc.initializer) { desc.writable = true; } desc = decorators.slice().reverse().reduce(function (desc, decorator) { return decorator(target, property, desc) || desc; }, desc); if (context && desc.initializer !== void 0) { desc.value = desc.initializer ? desc.initializer.call(context) : void 0; desc.initializer = undefined; } if (desc.initializer === void 0) { Object['define' + 'Property'](target, property, desc); desc = null; } return desc; }
-
-_lib.global.props = _lib.global.props || {};
-_lib.global.windows = _lib.global.windows || {};
-let ParentComponent = (_class = (_temp = class ParentComponent {
+class ParentComponent {
   constructor(component, props) {
     this.component = void 0;
     this.driver = void 0;
     this.clean = void 0;
+    this.event = void 0;
     this.initPromise = void 0;
     this.props = void 0;
     this.state = void 0;
     this.child = void 0;
     this.proxyWin = void 0;
-    this.proxyOutlet = void 0;
+    this.proxyContainer = void 0;
 
     try {
       this.initPromise = new _src3.ZalgoPromise();
       this.clean = (0, _src4.cleanup)(this);
       this.state = {};
       this.component = component;
+      this.setupEvents(props.onError);
       this.setProps(props);
       this.component.registerActiveComponent(this);
       this.clean.register(() => this.component.destroyActiveComponent(this));
       this.watchForUnload();
     } catch (err) {
-      this.onError(err, props.onError).catch(_src4.noop);
+      this.onError(err).catch(_src4.noop);
       throw err;
     }
+  }
+
+  setupEvents(onError) {
+    this.event = (0, _src4.eventEmitter)();
+    this.event.on(_constants.EVENT.RENDER, () => this.props.onRender());
+    this.event.on(_constants.EVENT.DISPLAY, () => this.props.onDisplay());
+    this.event.on(_constants.EVENT.RENDERED, () => this.props.onRendered());
+    this.event.on(_constants.EVENT.CLOSE, () => this.props.onClose());
+    this.event.on(_constants.EVENT.PROPS, props => this.props.onProps(props));
+    this.event.on(_constants.EVENT.ERROR, err => {
+      if (this.props && this.props.onError) {
+        return this.props.onError(err);
+      } else if (onError) {
+        return onError(err);
+      } else {
+        throw err;
+      }
+    });
   }
 
   render(target, container, context) {
     return _src3.ZalgoPromise.try(() => {
       this.component.log(`render`);
       this.driver = _drivers.RENDER_DRIVERS[context];
-      const uid = `${this.component.tag}-${(0, _src4.uniqueID)()}`;
+      const uid = `${_constants.ZOID}-${this.component.tag}-${(0, _src4.uniqueID)()}`;
       const domain = this.getDomain();
       const initialDomain = this.getInitialDomain();
       this.component.checkAllowRender(target, domain, container);
@@ -70,24 +84,38 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       const tasks = {};
       tasks.init = this.initPromise;
       tasks.buildUrl = this.buildUrl();
-      tasks.onRender = this.props.onRender();
+      tasks.onRender = this.event.trigger(_constants.EVENT.RENDER);
       tasks.getProxyContainer = this.getProxyContainer(container);
-      tasks.renderContainer = tasks.getProxyContainer.then(proxyContainer => {
+      tasks.openFrame = this.openFrame();
+      tasks.openPrerenderFrame = this.openPrerenderFrame();
+      tasks.renderContainer = _src3.ZalgoPromise.all([tasks.getProxyContainer, tasks.openFrame, tasks.openPrerenderFrame]).then(([proxyContainer, proxyFrame, proxyPrerenderFrame]) => {
         return this.renderContainer(proxyContainer, {
+          context,
+          uid,
+          proxyFrame,
+          proxyPrerenderFrame
+        });
+      });
+      tasks.open = this.driver.openOnClick ? this.open() : tasks.openFrame.then(proxyFrame => this.open(proxyFrame));
+      tasks.openPrerender = _src3.ZalgoPromise.all([tasks.open, tasks.openPrerenderFrame]).then(([proxyWin, proxyPrerenderFrame]) => {
+        return this.openPrerender(proxyWin, proxyPrerenderFrame);
+      });
+      tasks.setState = _src3.ZalgoPromise.all([tasks.open.then(proxyWin => {
+        this.proxyWin = proxyWin;
+        return this.setProxyWin(proxyWin);
+      }), tasks.renderContainer.then(proxyContainer => {
+        this.proxyContainer = proxyContainer;
+      })]);
+      tasks.prerender = _src3.ZalgoPromise.all([tasks.openPrerender, tasks.setState]).then(([proxyPrerenderWin]) => {
+        return this.prerender(proxyPrerenderWin, {
           context,
           uid
         });
       });
-      tasks.open = this.driver.renderedIntoContainer ? tasks.renderContainer.then(proxyOutlet => this.open(proxyOutlet)) : this.open();
-      tasks.saveProxyWin = tasks.open.then(({
-        proxyWin
-      }) => {
-        this.proxyWin = proxyWin;
-        return this.saveProxyWin(proxyWin);
+      tasks.loadUrl = _src3.ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender]).then(([proxyWin, url]) => {
+        return proxyWin.setLocation(url);
       });
-      tasks.buildWindowName = tasks.open.then(({
-        proxyWin
-      }) => {
+      tasks.buildWindowName = tasks.open.then(proxyWin => {
         return this.buildWindowName({
           proxyWin,
           initialDomain,
@@ -97,52 +125,23 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
           uid
         });
       });
-      tasks.setWindowName = _src3.ZalgoPromise.all([tasks.open, tasks.buildWindowName]).then(([{
-        proxyWin
-      }, windowName]) => {
+      tasks.setWindowName = _src3.ZalgoPromise.all([tasks.open, tasks.buildWindowName]).then(([proxyWin, windowName]) => {
         return proxyWin.setName(windowName);
       });
-      tasks.prerender = _src3.ZalgoPromise.all([tasks.open, tasks.renderContainer]).then(([{
-        proxyWin
-      }, proxyOutlet]) => {
-        return this.prerender(proxyWin, proxyOutlet, {
-          context,
-          uid
-        });
-      });
-      tasks.loadUrl = _src3.ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender]).then(([{
-        proxyWin
-      }, url]) => {
-        return proxyWin.setLocation(url);
-      });
-      tasks.watchForClose = tasks.open.then(({
-        proxyWin
-      }) => {
+      tasks.watchForClose = tasks.open.then(proxyWin => {
         return this.watchForClose(proxyWin);
       });
       tasks.onDisplay = tasks.prerender.then(() => {
-        return this.props.onDisplay();
+        return this.event.trigger(_constants.EVENT.DISPLAY);
       });
-      tasks.openBridge = tasks.open.then(({
-        proxyWin
-      }) => {
+      tasks.openBridge = tasks.open.then(proxyWin => {
         return this.openBridge(proxyWin, initialDomain, context);
-      });
-      tasks.switchPrerender = _src3.ZalgoPromise.all([tasks.open, tasks.prerender, tasks.init]).then(([{
-        proxyFrame
-      }, {
-        proxyPrerenderFrame
-      }]) => {
-        return this.switchPrerender({
-          proxyFrame,
-          proxyPrerenderFrame
-        });
       });
       tasks.runTimeout = tasks.loadUrl.then(() => {
         return this.runTimeout();
       });
       tasks.onRender = tasks.init.then(() => {
-        return this.props.onRendered();
+        return this.event.trigger(_constants.EVENT.RENDERED);
       });
       return _src3.ZalgoPromise.hash(tasks);
     }).catch(err => {
@@ -166,14 +165,15 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     uid,
     context
   }) {
-    return (0, _lib.buildChildWindowName)(this.component.name, this.buildChildPayload({
+    const childPayload = this.buildChildPayload({
       proxyWin,
       initialDomain,
       domain,
       target,
       context,
       uid
-    }));
+    });
+    return `__${_constants.ZOID}__${this.component.name}__${(0, _src4.base64encode)(JSON.stringify(childPayload))}__`;
   }
 
   getPropsRef(proxyWin, target, domain, uid) {
@@ -187,9 +187,11 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     };
 
     if (propRef.type === _constants.INITIAL_PROPS.UID) {
-      _lib.global.props[uid] = value;
+      const global = (0, _lib.globalFor)(window);
+      global.props = global.props || {};
+      global.props[uid] = value;
       this.clean.register(() => {
-        delete _lib.global.props[uid];
+        delete global.props[uid];
       });
     }
 
@@ -215,9 +217,16 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     };
   }
 
+  setProxyWin(proxyWin) {
+    return _src3.ZalgoPromise.try(() => {
+      this.proxyWin = proxyWin;
+    });
+  }
+
   getHelpers() {
     return {
       state: this.state,
+      event: this.event,
       close: () => this.close(),
       focus: () => this.focus(),
       resize: ({
@@ -300,26 +309,42 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     });
   }
 
-  open(proxyOutlet) {
+  openFrame() {
+    return _src3.ZalgoPromise.try(() => {
+      if (this.driver.openFrame) {
+        return this.driver.openFrame.call(this);
+      }
+    });
+  }
+
+  openPrerenderFrame() {
+    return _src3.ZalgoPromise.try(() => {
+      if (this.driver.openPrerenderFrame) {
+        return this.driver.openPrerenderFrame.call(this);
+      }
+    });
+  }
+
+  open(proxyFrame) {
     return _src3.ZalgoPromise.try(() => {
       this.component.log(`open`);
       const windowProp = this.props.window;
 
       if (windowProp) {
-        this.clean.register(() => windowProp.close()); // $FlowFixMe
-
-        return {
-          proxyWin: _src.ProxyWindow.toProxyWindow(windowProp)
-        };
+        this.clean.register(() => windowProp.close());
+        return (0, _src.toProxyWindow)(windowProp);
       }
 
-      return this.driver.open.call(this, proxyOutlet);
+      return this.driver.open.call(this, proxyFrame);
+    }).then(proxyWin => {
+      this.proxyWin = proxyWin;
+      return proxyWin;
     });
   }
 
-  saveProxyWin(proxyWin) {
+  openPrerender(proxyWin, proxyPrerenderFrame) {
     return _src3.ZalgoPromise.try(() => {
-      this.proxyWin = proxyWin;
+      return this.driver.openPrerender.call(this, proxyWin, proxyPrerenderFrame);
     });
   }
 
@@ -327,28 +352,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     return _src3.ZalgoPromise.try(() => {
       if (this.proxyWin) {
         return this.proxyWin.focus().then(_src4.noop);
-      }
-    });
-  }
-
-  switchPrerender({
-    proxyFrame,
-    proxyPrerenderFrame
-  }) {
-    return _src3.ZalgoPromise.try(() => {
-      if (this.driver.switchPrerender) {
-        if (this.props.window) {
-          return;
-        }
-
-        if (!proxyFrame || !proxyPrerenderFrame) {
-          throw new Error(`Expected to have both proxy frame and proxy prerender frame to switch`);
-        }
-
-        return this.driver.switchPrerender.call(this, {
-          proxyFrame,
-          proxyPrerenderFrame
-        });
       }
     });
   }
@@ -367,6 +370,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
       context,
       props,
       overrides: {
+        event: this.event,
         close: () => this.close(),
         onError: err => this.onError(err)
       }
@@ -391,9 +395,11 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
 
   getWindowRef(target, domain, uid, context) {
     if (domain === (0, _src2.getDomain)(window)) {
-      _lib.global.windows[uid] = window;
+      const global = (0, _lib.globalFor)(window);
+      global.windows = global.windows || {};
+      global.windows[uid] = window;
       this.clean.register(() => {
-        delete _lib.global.windows[uid];
+        delete global.windows[uid];
       });
       return {
         type: _constants.WINDOW_REFERENCES.GLOBAL,
@@ -404,12 +410,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     if (context === _constants.CONTEXT.POPUP) {
       return {
         type: _constants.WINDOW_REFERENCES.OPENER
-      };
-    }
-
-    if ((0, _src2.isTop)(window)) {
-      return {
-        type: _constants.WINDOW_REFERENCES.TOP
       };
     }
 
@@ -512,7 +512,7 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
   close() {
     return _src3.ZalgoPromise.try(() => {
       this.component.log(`close`);
-      return this.props.onClose();
+      return this.event.trigger(_constants.EVENT.CLOSE);
     }).then(() => {
       if (this.child) {
         this.child.close.fireAndForget().catch(_src4.noop);
@@ -522,32 +522,34 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     });
   }
 
-  prerender(proxyWin, proxyElement, {
+  prerender(proxyPrerenderWin, {
     context,
     uid
   }) {
     return _src3.ZalgoPromise.try(() => {
-      return this.driver.openPrerender.call(this, proxyWin, proxyElement);
-    }).then(({
-      proxyPrerenderWin,
-      proxyPrerenderFrame
-    }) => {
+      const prerenderTemplate = this.component.prerenderTemplate;
+
+      if (!prerenderTemplate) {
+        return;
+      }
+
       let prerenderWindow = proxyPrerenderWin.getWindow();
 
       if (!prerenderWindow || !(0, _src2.isSameDomain)(prerenderWindow) || !(0, _src2.isBlankDomain)(prerenderWindow)) {
-        return {
-          proxyPrerenderWin,
-          proxyPrerenderFrame
-        };
+        return;
       }
 
       prerenderWindow = (0, _src2.assertSameDomain)(prerenderWindow);
       const doc = prerenderWindow.document;
-      const el = this.renderTemplate(this.component.prerenderTemplate, {
+      const el = this.renderTemplate(prerenderTemplate, {
         context,
         uid,
         doc
       });
+
+      if (!el) {
+        return;
+      }
 
       if (el.ownerDocument !== doc) {
         throw new Error(`Expected prerender template to have been created with document from child window`);
@@ -576,11 +578,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
           win: prerenderWindow
         });
       }
-
-      return {
-        proxyPrerenderWin,
-        proxyPrerenderFrame
-      };
     });
   }
 
@@ -589,48 +586,51 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     uid,
     container,
     doc,
-    outlet
+    frame,
+    prerenderFrame
   }) {
     // $FlowFixMe
     return renderer.call(this, {
       container,
-      outlet,
       context,
       uid,
       doc,
+      frame,
+      prerenderFrame,
       focus: () => this.focus(),
       close: () => this.close(),
       state: this.state,
       props: this.props,
       tag: this.component.tag,
-      dimensions: this.component.dimensions
+      dimensions: this.component.dimensions,
+      event: this.event
     });
   }
 
   renderContainer(proxyContainer, {
+    proxyFrame,
+    proxyPrerenderFrame,
     context,
     uid
   }) {
-    return _src3.ZalgoPromise.try(() => {
-      return proxyContainer.getElement();
-    }).then(element => {
-      return (0, _src4.elementReady)(element);
-    }).then(container => {
-      const outlet = (0, _src4.createElement)('div', {
-        class: [_constants.CLASS.OUTLET]
-      });
+    return _src3.ZalgoPromise.all([proxyContainer.getElement().then(_src4.elementReady), // $FlowFixMe
+    proxyFrame ? proxyFrame.getElement() : null, // $FlowFixMe
+    proxyPrerenderFrame ? proxyPrerenderFrame.getElement() : null]).then(([container, frame, prerenderFrame]) => {
       const innerContainer = this.renderTemplate(this.component.containerTemplate, {
         context,
         uid,
         container,
-        outlet,
+        frame,
+        prerenderFrame,
         doc: document
       });
-      (0, _src4.appendChild)(container, innerContainer);
-      this.clean.register(() => (0, _src4.destroyElement)(outlet));
-      this.clean.register(() => (0, _src4.destroyElement)(innerContainer));
-      this.proxyOutlet = (0, _lib.getProxyElement)(outlet);
-      return this.proxyOutlet;
+
+      if (innerContainer) {
+        (0, _src4.appendChild)(container, innerContainer);
+        this.clean.register(() => (0, _src4.destroyElement)(innerContainer));
+        this.proxyContainer = (0, _lib.getProxyElement)(innerContainer);
+        return this.proxyContainer;
+      }
     });
   }
 
@@ -642,18 +642,11 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     });
   }
 
-  onError(err, onError) {
+  onError(err) {
     // eslint-disable-next-line promise/no-promise-in-callback
     return _src3.ZalgoPromise.try(() => {
       this.initPromise.asyncReject(err);
-
-      if (!onError && this.props && this.props.onError) {
-        onError = this.props.onError;
-      }
-
-      if (onError) {
-        return onError(err);
-      }
+      return this.event.trigger(_constants.EVENT.ERROR, err);
     }).then(() => {
       return this.initPromise;
     }).then(() => {
@@ -688,5 +681,6 @@ let ParentComponent = (_class = (_temp = class ParentComponent {
     }
   }
 
-}, _temp), (_applyDecoratedDescriptor(_class.prototype, "close", [_src4.memoized], Object.getOwnPropertyDescriptor(_class.prototype, "close"), _class.prototype)), _class);
+}
+
 exports.ParentComponent = ParentComponent;
