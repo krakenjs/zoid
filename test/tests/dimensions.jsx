@@ -693,4 +693,118 @@ describe('zoid dimensions cases', () => {
             }).render(document.body);
         });
     });
+
+    it('should render a component to an iframe with 100% percentage dimensions', () => {
+        return wrapPromise(({ expect }) => {
+            const width = 178;
+            const height = 253;
+
+            const expectedWidth = width;
+            const expectedHeight = height;
+
+            const el = document.createElement('div');
+            el.style.width = `${ width }px`;
+            el.style.height = `${ height }px`;
+
+            if (!document.body) {
+                throw new Error(`Could not find document.body`);
+            }
+
+            document.body.appendChild(el);
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:        'test-render-iframe-100-percent-dimensions',
+                    url:        '/base/test/windows/child/index.htm',
+                    domain:     'mock://www.child.com',
+                    dimensions: {
+                        width:  '100%',
+                        height: '100%'
+                    },
+                    attributes: {
+                        iframe: {
+                            scrolling: 'no'
+                        }
+                    }
+                });
+            };
+
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(el).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
+
+                if (componentWindow.innerWidth !== expectedWidth) {
+                    throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                }
+
+                if (componentWindow.innerHeight !== expectedHeight) {
+                    throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                }
+            });
+        });
+    });
+
+    it('should render a component to an iframe with 50% percentage dimensions', () => {
+        return wrapPromise(({ expect }) => {
+            const width = 161;
+            const height = 257;
+
+            const expectedWidth = width;
+            const expectedHeight = height;
+
+            const el = document.createElement('div');
+            el.style.width = `${ width * 2 }px`;
+            el.style.height = `${ height * 2 }px`;
+
+            if (!document.body) {
+                throw new Error(`Could not find document.body`);
+            }
+            
+            document.body.appendChild(el);
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:        'test-render-iframe-50-percent-dimensions',
+                    url:        '/base/test/windows/child/index.htm',
+                    domain:     'mock://www.child.com',
+                    dimensions: {
+                        width:  '50%',
+                        height: '50%'
+                    },
+                    attributes: {
+                        iframe: {
+                            scrolling: 'no'
+                        }
+                    }
+                });
+            };
+
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
+                return assertSameDomain(win);
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(el).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
+
+                if (componentWindow.innerWidth !== expectedWidth) {
+                    throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                }
+
+                if (componentWindow.innerHeight !== expectedHeight) {
+                    throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                }
+            });
+        });
+    });
 });
