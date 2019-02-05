@@ -2577,8 +2577,8 @@
         }();
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_8_0_9__ || (win.__zoid_8_0_9__ = {});
-            return win.__zoid_8_0_9__;
+            win.__zoid_9_0_0__ || (win.__zoid_9_0_0__ = {});
+            return win.__zoid_9_0_0__;
         }
         function getProxyElement(element) {
             return {
