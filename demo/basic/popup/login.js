@@ -16,7 +16,7 @@ window.MyLoginZoidComponent = zoid.create({
 
     // The background overlay
 
-    containerTemplate: ({ uid, tag, context, focus, close, doc, outlet }) => {
+    containerTemplate: ({ uid, tag, context, focus, close, doc }) => {
 
         function closeComponent(event) {
             event.preventDefault();
@@ -34,8 +34,6 @@ window.MyLoginZoidComponent = zoid.create({
 
             pragmatic.node('a', { 'href': '#', 'onClick': closeComponent, 'class': `${ tag }-close` }),
 
-            pragmatic.node('node', { el: outlet }),
-
             pragmatic.node('style', null, `
                 #${ uid } {
                     position: fixed;
@@ -48,28 +46,6 @@ window.MyLoginZoidComponent = zoid.create({
 
                 #${ uid }.${ tag }-context-${ zoid.CONTEXT.POPUP } {
                     cursor: pointer;
-                }
-
-                #${ uid }.${ tag }-context-${ zoid.CONTEXT.IFRAME } .${ zoid.CLASS.OUTLET } {
-                    box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.4);
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate3d(-50%, -50%, 0);
-                    -webkit-transform: translate3d(-50%, -50%, 0);
-                    -moz-transform: translate3d(-50%, -50%, 0);
-                    -o-transform: translate3d(-50%, -50%, 0);
-                    -ms-transform: translate3d(-50%, -50%, 0);
-                }
-
-                #${ uid }.${ tag }-context-${ zoid.CONTEXT.IFRAME } ${ zoid.CLASS.OUTLET } {
-                    height: 150px;
-                    width: 300px;
-                }
-
-                #${ uid }.${ tag }-context-${ zoid.CONTEXT.IFRAME } ${ zoid.CLASS.OUTLET } iframe {
-                    height: 100%;
-                    width: 100%;
                 }
 
                 #${ uid } .${ tag }-close {

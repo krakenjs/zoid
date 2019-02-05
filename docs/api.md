@@ -229,7 +229,7 @@ props: {
 
 A function which should return a DOM element, rendered on the parent page and containing the iframe element (or rendered behind the popup window).
 
-zoid will pass `opts.outlet` to this function, which is a pre-generated element your component will be rendered into. This must be inserted somewhere into the DOM element you return. For popup components, you don't need to use `opts.outlet`
+zoid will pass `opts.frame` and `opts.prerenderFrame` to this function, which is a pre-generated element your component will be rendered into. These must be inserted somewhere into the DOM element you return, for frame-based components
 
 Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) with a `/* @jsx node */` comment, to transpile the jsx down to regular javascript.
 
@@ -242,7 +242,7 @@ var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function({ uid, doc, outlet }) {
+    containerTemplate: function({ uid, doc, frame, prerenderFrame }) {
         return (
             <div id={ uid } class="container">
                 <style>
@@ -253,7 +253,8 @@ var MyLoginZoidComponent = zoid.create({
                     `}
                 </style>
 
-                <node el={ outlet } />
+                <frame el={ frame } />
+                <frame el={ prerenderFrame } />
             </div>
         ).render(dom({ doc }));
     }
@@ -269,14 +270,15 @@ var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function containerTemplate({ uid, doc, outlet ) {
+    containerTemplate: function containerTemplate({ uid, doc, frame, prerenderFrame }) {
         return node('div', { id: uid, class: 'container' },
             node('style', null, `
                 #${ uid }.container {
                     border: 5px solid red;
                 }
             `),
-            node('node', { el: outlet })
+            node('node', { el: frame }),
+            node('node', { el: prerenderFrame })
         ).render(dom({ doc }));
     }
 });
@@ -291,10 +293,11 @@ var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function containerTemplate(({ doc, uid, outlet })) {
+    containerTemplate: function containerTemplate(({ doc, uid, frame, prerenderFrame })) {
         let container = doc.createElement('div');
         container.id = uid;
-        container.appendChild(outlet);
+        container.appendChild(frame);
+        container.appendChild(prerenderFrame);
         return container;
     }
 });
@@ -374,7 +377,8 @@ Data automatically passed to `containerTemplate` and `prerenderTemplate`, used t
 - `dimensions`: The dimensions for the component
 - `tag`: Tag name of the component
 - `context`: Context type of the component (`iframe` or `popup`)
-- `outlet`: DOM Element into which the iframe will be inserted on render. Only applies to `containerTemplate` when rendering an iframe
+- `frame`: Frame element that will be rendered into. Only applies to `containerTemplate` when rendering an iframe
+- `prerenderFrame`: Frame element that will be pre-rendered into. Only applies to `containerTemplate` when rendering an iframe using `prerenderTemplate`
 - `close`: Close the component. Useful if you want to render a close button outside the component
 - `focus`: Focus the component. Valid for popup components only. Useful if you want a clickable background overlay to re-focus the popup window.
 
