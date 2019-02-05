@@ -2261,8 +2261,8 @@
         }();
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_1__ || (win.__zoid_9_0_1__ = {});
-            return win.__zoid_9_0_1__;
+            win.__zoid_9_0_2__ || (win.__zoid_9_0_2__ = {});
+            return win.__zoid_9_0_2__;
         }
         function getProxyElement(element) {
             return {
@@ -4129,6 +4129,9 @@
         });
         __webpack_require__.d(__webpack_exports__, "CONTEXT", function() {
             return CONTEXT;
+        });
+        __webpack_require__.d(__webpack_exports__, "EVENT", function() {
+            return EVENT;
         });
     } ]);
 });
