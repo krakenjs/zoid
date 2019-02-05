@@ -549,6 +549,12 @@ export class ParentComponent<P> {
 
     prerender(proxyPrerenderWin : ProxyWindow, { context, uid } : { context : $Values<typeof CONTEXT>, uid : string }) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
+            const prerenderTemplate = this.component.prerenderTemplate;
+
+            if (!prerenderTemplate) {
+                return;
+            }
+
             let prerenderWindow = proxyPrerenderWin.getWindow();
 
             if (!prerenderWindow || !isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
@@ -558,7 +564,7 @@ export class ParentComponent<P> {
             prerenderWindow = assertSameDomain(prerenderWindow);
     
             const doc = prerenderWindow.document;
-            const el = this.renderTemplate(this.component.prerenderTemplate, { context, uid, doc });
+            const el = this.renderTemplate(prerenderTemplate, { context, uid, doc });
 
             if (!el) {
                 return;

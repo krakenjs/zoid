@@ -107,7 +107,7 @@ export class Component<P> {
     }
 
     containerTemplate : (RenderOptionsType<P>) => ?HTMLElement
-    prerenderTemplate : (RenderOptionsType<P>) => ?HTMLElement
+    prerenderTemplate : ?(RenderOptionsType<P>) => ?HTMLElement
 
     validate : void | ({ props : PropsInputType<P> }) => void
 
@@ -157,8 +157,9 @@ export class Component<P> {
 
         this.autoResize = options.autoResize;
 
-        this.containerTemplate = options.containerTemplate || defaultContainerTemplate;
-        this.prerenderTemplate = options.prerenderTemplate || defaultPrerenderTemplate;
+        // $FlowFixMe
+        this.containerTemplate = options.containerTemplate || (__ZOID__.__DEFAULT_CONTAINER__ ? defaultContainerTemplate : null);
+        this.prerenderTemplate = options.prerenderTemplate || (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null);
 
         this.validate = options.validate;
 

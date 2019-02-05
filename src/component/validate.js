@@ -85,7 +85,7 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
         throw new Error(`Expected options.prerenderTemplate to be a function`);
     }
 
-    if (options.containerTemplate && typeof options.containerTemplate !== 'function') {
+    if ((options.containerTemplate || !__ZOID__.__DEFAULT_CONTAINER__) && typeof options.containerTemplate !== 'function') {
         throw new Error(`Expected options.containerTemplate to be a function`);
     }
 }

@@ -13,6 +13,8 @@ module.exports = {
     __ZOID__: {
         __GLOBAL_KEY__:        `__zoid_${ getCurrentVersion(pkg) }__`,
         __POPUP_SUPPORT__:     true,
-        __FRAMEWORK_SUPPORT__: false
+        __FRAMEWORK_SUPPORT__: false,
+        __DEFAULT_CONTAINER__: true,
+        __DEFAULT_PRERENDER__: true
     }
 };
