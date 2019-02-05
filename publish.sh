@@ -17,7 +17,7 @@ npm install post-robot zalgo-promise beaver-logger cross-domain-safe-weakmap cro
 
 git checkout dist;
 rm -rf dist/*;
-npm run build;
+npm run build -- --level=${1-patch};
 
 git add dist;
 git commit -m "Dist" || echo "Nothing to distribute";

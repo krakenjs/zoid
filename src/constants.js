@@ -4,8 +4,6 @@ import { WINDOW_TYPE } from 'cross-domain-utils/src';
 
 export const ZOID = `zoid`;
 
-export const __ZOID__ = `__${ ZOID }__`;
-
 export const POST_MESSAGE = {
     DELEGATE:       `${ ZOID }_delegate`,
     ALLOW_DELEGATE: `${ ZOID }_allow_delegate`

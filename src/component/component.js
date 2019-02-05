@@ -1,24 +1,21 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { on, send, ProxyWindow, bridge } from 'post-robot/src';
+import { on, send, bridge, toProxyWindow } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
-import { memoize, isRegex, noop, isElement } from 'belter/src';
+import { isRegex, noop, isElement } from 'belter/src';
 
 import { ChildComponent, getChildPayload } from '../child';
 import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
+import { react, angular, vue, angular2 } from '../drivers';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validate } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 import { getBuiltInProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsInputType, type PropsType, type MixedPropDefinitionType } from './props';
-
-const drivers = __ZOID__.__FRAMEWORK_SUPPORT__
-    ? require('../drivers')
-    : {};
 
 type LoggerPayload = { [string] : ?string };
 
@@ -62,8 +59,8 @@ export type ComponentOptionsType<P> = {|
 
     defaultContext? : $Values<typeof CONTEXT>,
 
-    containerTemplate? : (RenderOptionsType<P>) => HTMLElement,
-    prerenderTemplate? : (RenderOptionsType<P>) => HTMLElement,
+    containerTemplate? : (RenderOptionsType<P>) => ?HTMLElement,
+    prerenderTemplate? : (RenderOptionsType<P>) => ?HTMLElement,
 
     validate? : ({ props : PropsInputType<P> }) => void,
 
@@ -109,8 +106,8 @@ export class Component<P> {
         popup? : { [string] : string }
     }
 
-    containerTemplate : (RenderOptionsType<P>) => HTMLElement
-    prerenderTemplate : (RenderOptionsType<P>) => HTMLElement
+    containerTemplate : (RenderOptionsType<P>) => ?HTMLElement
+    prerenderTemplate : (RenderOptionsType<P>) => ?HTMLElement
 
     validate : void | ({ props : PropsInputType<P> }) => void
 
@@ -119,6 +116,8 @@ export class Component<P> {
     xprops : ?PropsType<P>
 
     logger : Logger
+
+    propNames : $ReadOnlyArray<string>
 
     constructor(options : ComponentOptionsType<P>) {
         validate(options);
@@ -176,17 +175,20 @@ export class Component<P> {
         Component.components[this.tag] = this;
     }
 
-    @memoize
     getPropNames() : $ReadOnlyArray<string> {
-        const props = Object.keys(this.props);
+        if (this.propNames) {
+            return this.propNames;
+        }
 
+        const propNames = Object.keys(this.props);
         for (const key of Object.keys(this.builtinProps)) {
-            if (props.indexOf(key) === -1) {
-                props.push(key);
+            if (propNames.indexOf(key) === -1) {
+                propNames.push(key);
             }
         }
 
-        return props;
+        this.propNames = propNames;
+        return propNames;
     }
 
     // $FlowFixMe
@@ -196,17 +198,23 @@ export class Component<P> {
     }
 
     driver(name : string, dep : mixed) : mixed {
-        if (!drivers[name]) {
-            throw new Error(`Could not find driver for framework: ${ name }`);
+        if (__ZOID__.__FRAMEWORK_SUPPORT__) {
+            const drivers = { react, angular, vue, angular2 };
+
+            if (!drivers[name]) {
+                throw new Error(`Could not find driver for framework: ${ name }`);
+            }
+    
+            this.driverCache = this.driverCache || {};
+    
+            if (!this.driverCache[name]) {
+                this.driverCache[name] = drivers[name].register(this, dep);
+            }
+    
+            return this.driverCache[name];
+        } else {
+            throw new Error(`Driver support not enabled`);
         }
-
-        this.driverCache = this.driverCache || {};
-
-        if (!this.driverCache[name]) {
-            this.driverCache[name] = drivers[name].register(this, dep);
-        }
-
-        return this.driverCache[name];
     }
 
     registerChild() {
@@ -294,7 +302,7 @@ export class Component<P> {
 
     getDefaultContext(context : ?$Values<typeof CONTEXT>, props : PropsInputType<P>) : $Values<typeof CONTEXT> {
         if (props.window) {
-            return ProxyWindow.toProxyWindow(props.window).getType();
+            return toProxyWindow(props.window).getType();
         }
 
         if (context) {

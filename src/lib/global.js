@@ -2,17 +2,15 @@
 
 import { isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import { __ZOID__ } from '../constants';
-
-export function globalFor(win : CrossDomainWindowType) : ?Object {
+export function globalFor(win : CrossDomainWindowType) : Object {
 
     if (!isSameDomain(win)) {
-        return;
+        throw new Error(`Can not get global for window on different domain`);
     }
 
-    if (!win[__ZOID__]) {
-        win[__ZOID__] = {};
+    if (!win[__ZOID__.__GLOBAL_KEY__]) {
+        win[__ZOID__.__GLOBAL_KEY__] = {};
     }
 
-    return win[__ZOID__];
+    return win[__ZOID__.__GLOBAL_KEY__];
 }

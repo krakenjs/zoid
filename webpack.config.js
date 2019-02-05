@@ -1,9 +1,17 @@
 /* @flow */
 /* eslint import/no-nodejs-modules: off, import/no-default-export: off */
 
-import { getWebpackConfig } from 'grumbler-scripts/config/webpack.config';
+import { getWebpackConfig, getNextVersion } from 'grumbler-scripts/config/webpack.config';
+import { argv } from 'yargs';
 
+import pkg from './package.json';
 import globals from './globals';
+
+const zoidGlobals = {
+    ...globals.__ZOID__,
+    __GLOBAL_KEY__:  `__zoid_${ getNextVersion(pkg, argv.level) }__`
+};
+
 
 export const FILE_NAME = 'zoid';
 export const MODULE_NAME = 'zoid';
@@ -35,7 +43,7 @@ export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
         },
 
         __ZOID__: {
-            ...globals.__ZOID__,
+            ...zoidGlobals,
             __POPUP_SUPPORT__: false
         }
     }
@@ -54,7 +62,7 @@ export const WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
         },
 
         __ZOID__: {
-            ...globals.__ZOID__,
+            ...zoidGlobals,
             __POPUP_SUPPORT__: false
         }
     }
@@ -73,7 +81,7 @@ export const WEBPACK_CONFIG_FRAMEWORK = getWebpackConfig({
         },
 
         __ZOID__: {
-            ...globals.__ZOID__,
+            ...zoidGlobals,
             __POPUP_SUPPORT__:     false,
             __FRAMEWORK_SUPPORT__: true
         }
@@ -93,7 +101,7 @@ export const WEBPACK_CONFIG_FRAMEWORK_MIN = getWebpackConfig({
         },
 
         __ZOID__: {
-            ...globals.__ZOID__,
+            ...zoidGlobals,
             __POPUP_SUPPORT__:     false,
             __FRAMEWORK_SUPPORT__: true
         }
@@ -108,7 +116,7 @@ export const WEBPACK_CONFIG_TEST = getWebpackConfig({
         ...globals,
 
         __ZOID__: {
-            ...globals.__ZOID__,
+            ...zoidGlobals,
             __POPUP_SUPPORT__:     true,
             __FRAMEWORK_SUPPORT__: true
         }

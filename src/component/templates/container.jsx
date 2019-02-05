@@ -13,12 +13,10 @@ const CLASS = {
     INVISIBLE: 'invisible'
 };
 
-export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : HTMLElement {
+export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
 
     if (!frame || !prerenderFrame) {
-        return (
-            <div id={ uid } />
-        ).render(dom({ doc }));
+        return;
     }
 
     prerenderFrame.classList.add(CLASS.VISIBLE);
@@ -41,14 +39,17 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, e
             <style>
                 {`
                     #${ uid } {
+                        display: inline-block;
                         position: relative;
+                        width: ${ width };
+                        height: ${ height };
                     }
 
                     #${ uid } > iframe {
-                        width: ${ width };
-                        height: ${ height };
                         display: inline-block;
                         position: absolute;
+                        width: 100%;
+                        height: 100%;
                         top: 0;
                         left: 0;
                         transition: opacity .2s ease-in-out;

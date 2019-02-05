@@ -6,7 +6,7 @@ import { isSameDomain, matchDomain, getDomain, getOpener,
     type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, memoized, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
+import { extend, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
 
 import { globalFor } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -150,10 +150,12 @@ export class ChildComponent<P> {
             }
 
             for (const frame of getAllFramesInWindow(ancestor)) {
-                const global = globalFor(frame);
+                if (isSameDomain(frame)) {
+                    const global = globalFor(frame);
 
-                if (global && global.windows && global.windows[uid]) {
-                    return global.windows[uid];
+                    if (global && global.windows && global.windows[uid]) {
+                        return global.windows[uid];
+                    }
                 }
             }
         }
@@ -200,7 +202,6 @@ export class ChildComponent<P> {
         return { width, height, element };
     }
 
-    @memoized
     watchForResize() : ?ZalgoPromise<void> {
         return waitForDocumentBody().then(() => {
             const { width, height, element } = this.getAutoResize();

@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { cleanUpWindow, ProxyWindow } from 'post-robot/src';
+import { cleanUpWindow, ProxyWindow, toProxyWindow } from 'post-robot/src';
 import { assertSameDomain } from 'cross-domain-utils/src';
 import { iframe, popup, destroyElement, normalizeDimension, watchElementForClose,
     awaitFrameWindow, uniqueID } from 'belter/src';
@@ -47,7 +47,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                 this.clean.register(() => destroyElement(frame));
                 this.clean.register(() => cleanUpWindow(win));
 
-                return ProxyWindow.toProxyWindow(win);
+                return toProxyWindow(win);
             });
         });
     },
@@ -73,7 +73,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
             return awaitFrameWindow(prerenderFrame).then(prerenderFrameWindow => {
                 return assertSameDomain(prerenderFrameWindow);
             }).then(win => {
-                return ProxyWindow.toProxyWindow(win);
+                return toProxyWindow(win);
             });
         });
     },
@@ -89,8 +89,9 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
     ],
 
     resize({ width, height } : { width : ?number, height : ?number }) {
-        this.proxyFrame.resize({ width, height });
-        this.proxyPrerenderFrame.resize({ width, height });
+        if (this.proxyContainer) {
+            this.proxyContainer.resize({ width, height });
+        }
     }
 };
 
@@ -116,7 +117,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                     cleanUpWindow(win);
                 });
 
-                return ProxyWindow.toProxyWindow(win);
+                return toProxyWindow(win);
             });
         },
 

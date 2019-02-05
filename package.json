@@ -14,7 +14,7 @@
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --progress",
     "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
-    "build": "npm run test && npm run babel && npm run webpack",
+    "build": "npm run test && npm run babel && npm run webpack -- $@",
     "release": "./publish.sh",
     "release:patch": "./publish.sh patch",
     "release:minor": "./publish.sh minor",
@@ -57,7 +57,7 @@
     "cross-domain-safe-weakmap": "^1.0.19",
     "cross-domain-utils": "^2.0.3",
     "jsx-pragmatic": "^1.0.7",
-    "post-robot": "^9",
+    "post-robot": "^10",
     "zalgo-promise": "^1.0.22"
   }
 }
