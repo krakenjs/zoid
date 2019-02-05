@@ -157,9 +157,17 @@ export class Component<P> {
 
         this.autoResize = options.autoResize;
 
-        // $FlowFixMe
-        this.containerTemplate = options.containerTemplate || (__ZOID__.__DEFAULT_CONTAINER__ ? defaultContainerTemplate : null);
-        this.prerenderTemplate = options.prerenderTemplate || (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null);
+        if (options.containerTemplate) {
+            this.containerTemplate = options.containerTemplate;
+        } else if (__ZOID__.__DEFAULT_CONTAINER__) {
+            this.containerTemplate = defaultContainerTemplate;
+        }
+
+        if (options.prerenderTemplate) {
+            this.prerenderTemplate = options.prerenderTemplate;
+        } else if (__ZOID__.__DEFAULT_PRERENDER__) {
+            this.prerenderTemplate = defaultPrerenderTemplate;
+        }
 
         this.validate = options.validate;
 
