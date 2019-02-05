@@ -4,6 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, noop } from 'belter/src';
 import { isWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ProxyWindow } from 'post-robot/src/serialize/window';
+import { send } from 'post-robot/src';
 
 import { PROP_SERIALIZATION } from '../constants';
 
@@ -111,7 +112,7 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
                 }
             },
             decorate({ value } : { value : CrossDomainWindowType | ProxyWindow }) : ProxyWindow {
-                return ProxyWindow.toProxyWindow(value);
+                return ProxyWindow.toProxyWindow(value, { send });
             }
         },
 

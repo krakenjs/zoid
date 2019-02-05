@@ -57,7 +57,7 @@
     "cross-domain-safe-weakmap": "^1.0.19",
     "cross-domain-utils": "^2.0.3",
     "jsx-pragmatic": "^1.0.7",
-    "post-robot": "^9",
+    "post-robot": "^10",
     "zalgo-promise": "^1.0.22"
   }
 }

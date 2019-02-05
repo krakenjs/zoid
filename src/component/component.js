@@ -294,7 +294,7 @@ export class Component<P> {
 
     getDefaultContext(context : ?$Values<typeof CONTEXT>, props : PropsInputType<P>) : $Values<typeof CONTEXT> {
         if (props.window) {
-            return ProxyWindow.toProxyWindow(props.window).getType();
+            return ProxyWindow.toProxyWindow(props.window, { send }).getType();
         }
 
         if (context) {

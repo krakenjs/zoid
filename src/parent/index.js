@@ -402,7 +402,7 @@ export class ParentComponent<P> {
 
             if (windowProp) {
                 this.clean.register(() => windowProp.close());
-                return ProxyWindow.toProxyWindow(windowProp);
+                return ProxyWindow.toProxyWindow(windowProp, { send });
             }
 
             return this.driver.open.call(this, proxyFrame);
