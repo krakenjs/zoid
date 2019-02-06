@@ -50,13 +50,12 @@
   "devDependencies": {
     "flow-bin": "^0.81",
     "grumbler-scripts": "^3",
+    "jsx-pragmatic": "^1.0.13",
     "mocha": "^4",
     "serve": "^10.0.0"
   },
   "dependencies": {
-    "cross-domain-safe-weakmap": "^1.0.19",
     "cross-domain-utils": "^2.0.3",
-    "jsx-pragmatic": "^1.0.7",
     "post-robot": "^10",
     "zalgo-promise": "^1.0.22"
   }
