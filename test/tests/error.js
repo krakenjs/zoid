@@ -110,8 +110,8 @@ describe('zoid error cases', () => {
         });
     });
 
-    it('should run validate function on props, and call onError when error is thrown', () => {
-        return wrapPromise(({ expect, expectError }) => {
+    it('should run validate function on props, and not call onError when error is thrown', () => {
+        return wrapPromise(({ expect, avoid, expectError }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-error-prop-validate-onerror',
@@ -133,7 +133,7 @@ describe('zoid error cases', () => {
             return ZalgoPromise.try(() => {
                 component({
                     validateProp: 'foo',
-                    onError:      expect('onError')
+                    onError:      avoid('onError')
                 });
             }).catch(expect('catch'));
         });
@@ -161,8 +161,8 @@ describe('zoid error cases', () => {
         });
     });
 
-    it('should run validate function on component, and call onError when error is thrown', () => {
-        return wrapPromise(({ expect, expectError }) => {
+    it('should run validate function on component, and not call onError when error is thrown', () => {
+        return wrapPromise(({ expect, avoid, expectError }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:      'test-error-validate-onerror',
@@ -178,14 +178,14 @@ describe('zoid error cases', () => {
 
             return ZalgoPromise.try(() => {
                 component({
-                    onError: expect('onError')
+                    onError: avoid('onError')
                 });
             }).catch(expect('catch'));
         });
     });
 
     it('should call onclose when a popup is closed by someone other than zoid', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-popup-closed',
@@ -194,21 +194,27 @@ describe('zoid error cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
-                setTimeout(() => {
-                    openedWindow.close();
-                }, 200);
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
             }));
 
             const component = window.__component__();
             return component({
-                onClose: expect('onClose')
-            }).render('body', window.zoid.CONTEXT.POPUP);
+                onClose: expect('onClose'),
+                onError: avoid('onError')
+            }).render('body', window.zoid.CONTEXT.POPUP).then(() => {
+                if (!openedWindow) {
+                    throw new Error(`Expected window to have been opened`);
+                }
+                openedWindow.close();
+            });
         }, { timeout: 5000 });
     });
 
     it('should call onclose when a popup is closed by someone other than zoid during render', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-popup-closed-during-render',
@@ -223,13 +229,14 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                onClose: expect('onClose')
+                onClose: expect('onClose'),
+                onError: avoid('onError')
             }).render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
         }, { timeout: 5000 });
     });
 
     it('should call onclose when an iframe is closed by someone other than zoid', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-iframe-closed',
@@ -247,13 +254,14 @@ describe('zoid error cases', () => {
             
             const component = window.__component__();
             return component({
-                onClose: expect('onClose')
+                onClose: expect('onClose'),
+                onError: avoid('onError')
             }).render(document.body, window.zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
 
     it('should call onclose when an iframe is closed by someone other than zoid during render', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-iframe-closed-during-render',
@@ -271,7 +279,8 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                onClose: expect('onClose')
+                onClose: expect('onClose'),
+                onError: avoid('onError')
             }).render('body', window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
         }, { timeout: 5000 });
     });
@@ -300,7 +309,7 @@ describe('zoid error cases', () => {
     });
 
     it('should call onclose when an iframe is closed immediately after changing location', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-iframe-redirected-during-render',
@@ -327,13 +336,14 @@ describe('zoid error cases', () => {
                     openedWindow.location.reload();
                     destroyElement(openedWindow.frameElement);
                 }),
-                onClose: expect('onClose')
+                onClose: expect('onClose'),
+                onError: avoid('onError')
             }).render('body', window.zoid.CONTEXT.IFRAME);
         }, { timeout: 9000 });
     });
 
     it('should call onclose when an iframe is closed after changing location after a small delay', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-onclose-iframe-immediately-redirected-during-render',
@@ -362,7 +372,8 @@ describe('zoid error cases', () => {
                         destroyElement(openedWindow.frameElement);
                     }, 50);
                 }),
-                onClose: expect('onClose')
+                onClose: expect('onClose'),
+                onError: avoid('onError')
             }).render('body', window.zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
@@ -432,7 +443,7 @@ describe('zoid error cases', () => {
                     }, 50);
                 }),
                 onClose: expect('onClose'),
-                onError: avoid
+                onError: avoid('onError')
             }).render('body', window.zoid.CONTEXT.POPUP);
         }, { timeout: 5000 });
     });
