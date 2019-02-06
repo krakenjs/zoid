@@ -1160,7 +1160,7 @@
         };
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_0__ : win.__post_robot_10_0_0__ = win.__post_robot_10_0_0__ || {};
+            return win !== window ? win.__post_robot_10_0_1__ : win.__post_robot_10_0_1__ = win.__post_robot_10_0_1__ || {};
         }
         var getObj = function() {
             return {};
@@ -1782,7 +1782,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_0__ = _extends({
+            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_1__ = _extends({
                 id: uniqueID()
             }, message), _serializeMessage), {
                 on: on,
@@ -1915,7 +1915,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_0__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_1__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2205,8 +2205,8 @@
         }();
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_3__ || (win.__zoid_9_0_3__ = {});
-            return win.__zoid_9_0_3__;
+            win.__zoid_9_0_4__ || (win.__zoid_9_0_4__ = {});
+            return win.__zoid_9_0_4__;
         }
         function getProxyElement(element) {
             return {
@@ -2328,6 +2328,9 @@
                     },
                     onProps: function(handler) {
                         return _this2.onProps(handler);
+                    },
+                    getParent: function() {
+                        return _this2.parentComponentWindow;
                     }
                 };
             };
@@ -3698,6 +3701,14 @@
                             return _ref6.resize;
                         }
                     },
+                    getParent: {
+                        type: "function",
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref7) {
+                            return _ref7.getParent;
+                        }
+                    },
                     onDisplay: {
                         type: "function",
                         required: !1,
@@ -3732,8 +3743,8 @@
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref7) {
-                            return _ref7.onError;
+                        childDecorate: function(_ref8) {
+                            return _ref8.onError;
                         }
                     },
                     onProps: {
@@ -3741,8 +3752,8 @@
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
-                        childDecorate: function(_ref8) {
-                            return _ref8.onProps;
+                        childDecorate: function(_ref9) {
+                            return _ref9.onProps;
                         }
                     }
                 };

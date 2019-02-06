@@ -94,7 +94,8 @@ class ChildComponent {
         height
       }),
       onError: err => this.onError(err),
-      onProps: handler => this.onProps(handler)
+      onProps: handler => this.onProps(handler),
+      getParent: () => this.parentComponentWindow
     };
   }
 
