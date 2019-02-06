@@ -22,32 +22,29 @@ var _props = require("./props");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 class ParentComponent {
+  // eslint-disable-line flowtype/no-mutable-array
   constructor(component, props) {
     this.component = void 0;
     this.driver = void 0;
     this.clean = void 0;
     this.event = void 0;
     this.initPromise = void 0;
+    this.handledErrors = void 0;
     this.props = void 0;
     this.state = void 0;
     this.child = void 0;
     this.proxyWin = void 0;
     this.proxyContainer = void 0;
-
-    try {
-      this.initPromise = new _src3.ZalgoPromise();
-      this.clean = (0, _src4.cleanup)(this);
-      this.state = {};
-      this.component = component;
-      this.setupEvents(props.onError);
-      this.setProps(props);
-      this.component.registerActiveComponent(this);
-      this.clean.register(() => this.component.destroyActiveComponent(this));
-      this.watchForUnload();
-    } catch (err) {
-      this.onError(err).catch(_src4.noop);
-      throw err;
-    }
+    this.initPromise = new _src3.ZalgoPromise();
+    this.handledErrors = [];
+    this.clean = (0, _src4.cleanup)(this);
+    this.state = {};
+    this.component = component;
+    this.setupEvents(props.onError);
+    this.setProps(props);
+    this.component.registerActiveComponent(this);
+    this.clean.register(() => this.component.destroyActiveComponent(this));
+    this.watchForUnload();
   }
 
   setupEvents(onError) {
@@ -63,7 +60,11 @@ class ParentComponent {
       } else if (onError) {
         return onError(err);
       } else {
-        throw err;
+        return this.initPromise.reject(err).then(() => {
+          setTimeout(() => {
+            throw err;
+          }, 1);
+        });
       }
     });
   }
@@ -145,7 +146,9 @@ class ParentComponent {
       });
       return _src3.ZalgoPromise.hash(tasks);
     }).catch(err => {
-      return _src3.ZalgoPromise.all([this.onError(err), this.destroy(err)]);
+      return _src3.ZalgoPromise.all([this.onError(err), this.destroy(err)]).then(() => {
+        throw err;
+      });
     }).then(_src4.noop);
   }
 
@@ -518,7 +521,7 @@ class ParentComponent {
         this.child.close.fireAndForget().catch(_src4.noop);
       }
 
-      return this.destroy(new Error(`Window closed`));
+      return this.destroy(new Error(`Window closed`), false);
     });
   }
 
@@ -634,23 +637,32 @@ class ParentComponent {
     });
   }
 
-  destroy(err = new Error(`Component destroyed before render complete`)) {
+  destroy(err, trigger = true) {
     return _src3.ZalgoPromise.try(() => {
+      if (!err) {
+        trigger = false;
+        err = new Error('Component destroyed');
+      }
+
       this.component.log(`destroy`);
-      this.initPromise.asyncReject(err);
+      return this.onError(err, trigger);
+    }).then(() => {
       return this.clean.all();
     });
   }
 
-  onError(err) {
-    // eslint-disable-next-line promise/no-promise-in-callback
+  onError(err, trigger = true) {
     return _src3.ZalgoPromise.try(() => {
+      if (this.handledErrors.indexOf(err) !== -1) {
+        return;
+      }
+
+      this.handledErrors.push(err);
       this.initPromise.asyncReject(err);
-      return this.event.trigger(_constants.EVENT.ERROR, err);
-    }).then(() => {
-      return this.initPromise;
-    }).then(() => {
-      throw err;
+
+      if (trigger) {
+        return this.event.trigger(_constants.EVENT.ERROR, err);
+      }
     });
   }
 

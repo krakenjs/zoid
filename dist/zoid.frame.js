@@ -2205,8 +2205,8 @@
         }();
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_4__ || (win.__zoid_9_0_4__ = {});
-            return win.__zoid_9_0_4__;
+            win.__zoid_9_0_5__ || (win.__zoid_9_0_5__ = {});
+            return win.__zoid_9_0_5__;
         }
         function getProxyElement(element) {
             return {
@@ -2601,27 +2601,24 @@
                 this.clean = void 0;
                 this.event = void 0;
                 this.initPromise = void 0;
+                this.handledErrors = void 0;
                 this.props = void 0;
                 this.state = void 0;
                 this.child = void 0;
                 this.proxyWin = void 0;
                 this.proxyContainer = void 0;
-                try {
-                    this.initPromise = new promise_ZalgoPromise();
-                    this.clean = cleanup(this);
-                    this.state = {};
-                    this.component = component;
-                    this.setupEvents(props.onError);
-                    this.setProps(props);
-                    this.component.registerActiveComponent(this);
-                    this.clean.register(function() {
-                        return _this.component.destroyActiveComponent(_this);
-                    });
-                    this.watchForUnload();
-                } catch (err) {
-                    this.onError(err).catch(src_util_noop);
-                    throw err;
-                }
+                this.initPromise = new promise_ZalgoPromise();
+                this.handledErrors = [];
+                this.clean = cleanup(this);
+                this.state = {};
+                this.component = component;
+                this.setupEvents(props.onError);
+                this.setProps(props);
+                this.component.registerActiveComponent(this);
+                this.clean.register(function() {
+                    return _this.component.destroyActiveComponent(_this);
+                });
+                this.watchForUnload();
             }
             var _proto = ParentComponent.prototype;
             _proto.setupEvents = function(onError) {
@@ -2681,9 +2678,11 @@
                     return _this2.props.onProps(props);
                 });
                 this.event.on(EVENT.ERROR, function(err) {
-                    if (_this2.props && _this2.props.onError) return _this2.props.onError(err);
-                    if (onError) return onError(err);
-                    throw err;
+                    return _this2.props && _this2.props.onError ? _this2.props.onError(err) : onError ? onError(err) : _this2.initPromise.reject(err).then(function() {
+                        setTimeout(function() {
+                            throw err;
+                        }, 1);
+                    });
                 });
             };
             _proto.render = function(target, container, context) {
@@ -2765,7 +2764,9 @@
                     });
                     return promise_ZalgoPromise.hash(tasks);
                 }).catch(function(err) {
-                    return promise_ZalgoPromise.all([ _this3.onError(err), _this3.destroy(err) ]);
+                    return promise_ZalgoPromise.all([ _this3.onError(err), _this3.destroy(err) ]).then(function() {
+                        throw err;
+                    });
                 }).then(src_util_noop);
             };
             _proto.getProxyContainer = function(container) {
@@ -3165,7 +3166,7 @@
                     return _this22.event.trigger(EVENT.CLOSE);
                 }).then(function() {
                     _this22.child && _this22.child.close.fireAndForget().catch(src_util_noop);
-                    return _this22.destroy(new Error("Window closed"));
+                    return _this22.destroy(new Error("Window closed"), !1);
                 });
             };
             _proto.prerender = function(proxyPrerenderWin, _ref12) {
@@ -3254,24 +3255,29 @@
                     }
                 });
             };
-            _proto.destroy = function(err) {
+            _proto.destroy = function(err, trigger) {
                 var _this26 = this;
-                void 0 === err && (err = new Error("Component destroyed before render complete"));
+                void 0 === trigger && (trigger = !0);
                 return promise_ZalgoPromise.try(function() {
+                    if (!err) {
+                        trigger = !1;
+                        err = new Error("Component destroyed");
+                    }
                     _this26.component.log("destroy");
-                    _this26.initPromise.asyncReject(err);
+                    return _this26.onError(err, trigger);
+                }).then(function() {
                     return _this26.clean.all();
                 });
             };
-            _proto.onError = function(err) {
+            _proto.onError = function(err, trigger) {
                 var _this27 = this;
+                void 0 === trigger && (trigger = !0);
                 return promise_ZalgoPromise.try(function() {
-                    _this27.initPromise.asyncReject(err);
-                    return _this27.event.trigger(EVENT.ERROR, err);
-                }).then(function() {
-                    return _this27.initPromise;
-                }).then(function() {
-                    throw err;
+                    if (-1 === _this27.handledErrors.indexOf(err)) {
+                        _this27.handledErrors.push(err);
+                        _this27.initPromise.asyncReject(err);
+                        return trigger ? _this27.event.trigger(EVENT.ERROR, err) : void 0;
+                    }
                 });
             };
             _proto.openBridge = function(proxyWin, domain, context) {};
