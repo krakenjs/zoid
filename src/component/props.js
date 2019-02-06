@@ -142,6 +142,13 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             childDecorate: ({ resize }) => resize
         },
 
+        getParent: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ getParent }) => getParent
+        },
+
         onDisplay: {
             type:          'function',
             required:      false,
