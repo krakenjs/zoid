@@ -3,13 +3,9 @@
 exports.__esModule = true;
 exports.defaultContainerTemplate = defaultContainerTemplate;
 
-var _src = require("jsx-pragmatic/src");
-
-var _src2 = require("belter/src");
+var _src = require("belter/src");
 
 var _constants = require("../../constants");
-
-/* @jsx node */
 
 /* eslint react/react-in-jsx-scope: off */
 const CLASS = {
@@ -41,42 +37,41 @@ function defaultContainerTemplate({
       frame.classList.remove(CLASS.INVISIBLE);
       frame.classList.add(CLASS.VISIBLE);
       setTimeout(() => {
-        (0, _src2.destroyElement)(prerenderFrame);
+        (0, _src.destroyElement)(prerenderFrame);
       }, 1);
     });
-    return (0, _src.node)("div", {
-      id: uid
-    }, (0, _src.node)("style", null, `
-                        #${uid} {
-                            display: inline-block;
-                            position: relative;
-                            width: ${width};
-                            height: ${height};
-                        }
-    
-                        #${uid} > iframe {
-                            display: inline-block;
-                            position: absolute;
-                            width: 100%;
-                            height: 100%;
-                            top: 0;
-                            left: 0;
-                            transition: opacity .2s ease-in-out;
-                        }
-    
-                        #${uid} > iframe.${CLASS.INVISIBLE} {
-                            opacity: 0;
-                        }
-    
-                        #${uid} > iframe.${CLASS.VISIBLE} {
-                            opacity: 1;
-                        }
-                    `), (0, _src.node)("node", {
-      el: frame
-    }), (0, _src.node)("node", {
-      el: prerenderFrame
-    })).render((0, _src.dom)({
-      doc
-    }));
+    const div = doc.createElement('div');
+    div.setAttribute('id', uid);
+    const style = doc.createElement('style');
+    style.appendChild(doc.createTextNode(`
+            #${uid} {
+                display: inline-block;
+                position: relative;
+                width: ${width};
+                height: ${height};
+            }
+
+            #${uid} > iframe {
+                display: inline-block;
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                transition: opacity .2s ease-in-out;
+            }
+
+            #${uid} > iframe.${CLASS.INVISIBLE} {
+                opacity: 0;
+            }
+
+            #${uid} > iframe.${CLASS.VISIBLE} {
+                opacity: 1;
+        }
+        `));
+    div.appendChild(frame);
+    div.appendChild(prerenderFrame);
+    div.appendChild(style);
+    return div;
   }
 }
