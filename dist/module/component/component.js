@@ -83,10 +83,20 @@ class Component {
     this.attributes.iframe = this.attributes.iframe || {};
     this.attributes.popup = this.attributes.popup || {};
     this.defaultContext = options.defaultContext || _constants.CONTEXT.IFRAME;
-    this.autoResize = options.autoResize; // $FlowFixMe
+    this.autoResize = options.autoResize;
 
-    this.containerTemplate = options.containerTemplate || (__ZOID__.__DEFAULT_CONTAINER__ ? _templates.defaultContainerTemplate : null);
-    this.prerenderTemplate = options.prerenderTemplate || (__ZOID__.__DEFAULT_PRERENDER__ ? _templates.defaultPrerenderTemplate : null);
+    if (options.containerTemplate) {
+      this.containerTemplate = options.containerTemplate;
+    } else if (__ZOID__.__DEFAULT_CONTAINER__) {
+      this.containerTemplate = _templates.defaultContainerTemplate;
+    }
+
+    if (options.prerenderTemplate) {
+      this.prerenderTemplate = options.prerenderTemplate;
+    } else if (__ZOID__.__DEFAULT_PRERENDER__) {
+      this.prerenderTemplate = _templates.defaultPrerenderTemplate;
+    }
+
     this.validate = options.validate;
     this.logger = options.logger || {
       debug: _src4.noop,

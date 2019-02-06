@@ -2577,8 +2577,8 @@
         }();
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_1__ || (win.__zoid_9_0_1__ = {});
-            return win.__zoid_9_0_1__;
+            win.__zoid_9_0_2__ || (win.__zoid_9_0_2__ = {});
+            return win.__zoid_9_0_2__;
         }
         function getProxyElement(element) {
             return {
@@ -4017,7 +4017,7 @@
                 });
                 return node("div", {
                     id: uid
-                }, node("style", null, "\n                    #" + uid + " {\n                        display: inline-block;\n                        position: relative;\n                        width: " + width + ";\n                        height: " + height + ";\n                    }\n\n                    #" + uid + " > iframe {\n                        display: inline-block;\n                        position: absolute;\n                        width: 100%;\n                        height: 100%;\n                        top: 0;\n                        left: 0;\n                        transition: opacity .2s ease-in-out;\n                    }\n\n                    #" + uid + " > iframe." + CLASS.INVISIBLE + " {\n                        opacity: 0;\n                    }\n\n                    #" + uid + " > iframe." + CLASS.VISIBLE + " {\n                        opacity: 1;\n                    }\n                "), node("node", {
+                }, node("style", null, "\n                        #" + uid + " {\n                            display: inline-block;\n                            position: relative;\n                            width: " + width + ";\n                            height: " + height + ";\n                        }\n    \n                        #" + uid + " > iframe {\n                            display: inline-block;\n                            position: absolute;\n                            width: 100%;\n                            height: 100%;\n                            top: 0;\n                            left: 0;\n                            transition: opacity .2s ease-in-out;\n                        }\n    \n                        #" + uid + " > iframe." + CLASS.INVISIBLE + " {\n                            opacity: 0;\n                        }\n    \n                        #" + uid + " > iframe." + CLASS.VISIBLE + " {\n                            opacity: 1;\n                        }\n                    "), node("node", {
                     el: frame
                 }), node("node", {
                     el: prerenderFrame
@@ -4028,7 +4028,7 @@
         }
         function defaultPrerenderTemplate(_ref) {
             var doc = _ref.doc;
-            return node("html", null, node("body", null, node("style", null, "\n                        .spinner {\n                            position: fixed;\n                            max-height: 60vmin;\n                            max-width: 60vmin;\n                            height: 40px;\n                            width: 40px;\n                            top: 50%;\n                            left: 50%;\n                            box-sizing: border-box;\n                            border: 3px solid rgba(0, 0, 0, .2);\n                            border-top-color: rgba(33, 128, 192, 0.8);\n                            border-radius: 100%;\n                            animation: rotation .7s infinite linear;\n                        }\n\n                        @keyframes rotation {\n                            from {\n                                transform: translateX(-50%) translateY(-50%) rotate(0deg);\n                            }\n                            to {\n                                transform: translateX(-50%) translateY(-50%) rotate(359deg);\n                            }\n                        }\n                    "), node("div", {
+            return node("html", null, node("body", null, node("style", null, "\n                            .spinner {\n                                position: fixed;\n                                max-height: 60vmin;\n                                max-width: 60vmin;\n                                height: 40px;\n                                width: 40px;\n                                top: 50%;\n                                left: 50%;\n                                box-sizing: border-box;\n                                border: 3px solid rgba(0, 0, 0, .2);\n                                border-top-color: rgba(33, 128, 192, 0.8);\n                                border-radius: 100%;\n                                animation: rotation .7s infinite linear;\n                            }\n    \n                            @keyframes rotation {\n                                from {\n                                    transform: translateX(-50%) translateY(-50%) rotate(0deg);\n                                }\n                                to {\n                                    transform: translateX(-50%) translateY(-50%) rotate(359deg);\n                                }\n                            }\n                        "), node("div", {
                 class: "spinner"
             }))).render(dom_dom({
                 doc: doc
@@ -4197,8 +4197,8 @@
                 this.attributes.popup = this.attributes.popup || {};
                 this.defaultContext = options.defaultContext || CONTEXT.IFRAME;
                 this.autoResize = options.autoResize;
-                this.containerTemplate = options.containerTemplate || defaultContainerTemplate;
-                this.prerenderTemplate = options.prerenderTemplate || defaultPrerenderTemplate;
+                options.containerTemplate ? this.containerTemplate = options.containerTemplate : this.containerTemplate = defaultContainerTemplate;
+                options.prerenderTemplate ? this.prerenderTemplate = options.prerenderTemplate : this.prerenderTemplate = defaultPrerenderTemplate;
                 this.validate = options.validate;
                 this.logger = options.logger || {
                     debug: src_util_noop,
