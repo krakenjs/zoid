@@ -1,13 +1,13 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { dotify, isDefined } from 'belter/src';
+import { dotify, isDefined, extend } from 'belter/src';
 
 import type { Component } from '../component';
 import type { BuiltInPropsDefinitionType, PropsInputType, PropsType, MixedPropDefinitionType } from '../component/props';
 import { PROP_SERIALIZATION } from '../constants';
 
-import type { ParentComponent, ParentHelpers } from './index';
+import type { ParentHelpers } from './index';
 
 /*  Normalize Props
     ---------------
@@ -15,18 +15,16 @@ import type { ParentComponent, ParentHelpers } from './index';
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function normalizeProps<P>(component : Component<P>, instance : ParentComponent<P>, props : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) : (PropsType<P>) { // eslint-disable-line complexity
+export function extendProps<P>(component : Component<P>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) { // eslint-disable-line complexity
 
     // $FlowFixMe
-    props = props || {};
-    const result : $Shape<P> = { ...props }; // eslint-disable-line no-undef
+    inputProps = inputProps || {};
+    extend(props, inputProps);
 
-    const propNames = isUpdate
-        ? []
-        : [ ...component.getPropNames() ];
+    const propNames = isUpdate ? [] : [ ...component.getPropNames() ];
 
     // $FlowFixMe
-    for (const key of Object.keys(props)) {
+    for (const key of Object.keys(inputProps)) {
         if (propNames.indexOf(key) === -1) {
             propNames.push(key);
         }
@@ -39,7 +37,7 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
     for (const key of propNames) {
         const propDef = component.getPropDefinition(key);
         // $FlowFixMe
-        let value = props[key];
+        let value = inputProps[key];
 
         if (!propDef) {
             continue;
@@ -47,18 +45,18 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
 
         const alias = propDef.alias;
         if (alias) {
-            if (!isDefined(value) && isDefined(props[alias])) {
-                value = props[alias];
+            if (!isDefined(value) && isDefined(inputProps[alias])) {
+                value = inputProps[alias];
             }
             aliases.push(alias);
         }
 
         if (propDef.value) {
-            value = propDef.value({ props: result, state, close, focus, onError });
+            value = propDef.value({ props, state, close, focus, onError });
         }
 
         if (!isDefined(value) && propDef.default) {
-            value = propDef.default({ props: result, state, close, focus, onError });
+            value = propDef.default({ props, state, close, focus, onError });
         }
 
         if (isDefined(value)) {
@@ -68,19 +66,19 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
         }
         
         // $FlowFixMe
-        result[key] = value;
+        props[key] = value;
     }
 
     for (const alias of aliases) {
         // $FlowFixMe
-        delete result[alias];
+        delete props[alias];
     }
 
     // $FlowFixMe
-    for (const key of Object.keys(result)) {
+    for (const key of Object.keys(props)) {
         const propDef = component.getPropDefinition(key);
         // $FlowFixMe
-        const value = result[key];
+        const value = props[key];
 
         if (!propDef) {
             continue;
@@ -88,17 +86,21 @@ export function normalizeProps<P>(component : Component<P>, instance : ParentCom
 
         if (isDefined(value) && propDef.validate) {
             // $FlowFixMe
-            propDef.validate({ value, props: result });
+            propDef.validate({ value, props });
         }
 
         if (isDefined(value) && propDef.decorate) {
             // $FlowFixMe
-            result[key] = propDef.decorate({ value, props: result, state, close, focus, onError });
+            props[key] = propDef.decorate({ value, props, state, close, focus, onError });
         }
     }
 
-    // $FlowFixMe
-    return result;
+    for (const key of component.getPropNames()) {
+        const propDef = component.getPropDefinition(key);
+        if (propDef.required !== false && !isDefined(props[key])) {
+            throw new Error(`Expected prop "${ key }" to be defined`);
+        }
+    }
 }
 
 // $FlowFixMe

@@ -39,6 +39,92 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should enter a component, update a prop, and call a different prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-update-different-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', bar => {
+                    if (bar !== 'bar') {
+                        throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                    }
+                }),
+
+                run: `
+                    window.xprops.onProps(function() {
+                        window.xprops.foo('bar');
+                    });
+                `
+            });
+            
+            instance.render(document.body).then(expect('postRender', () => {
+    
+                instance.updateProps({
+                    bar: 'helloworld'
+                });
+            }));
+        });
+    });
+
+    it('should enter a component, decorate a prop, update a prop, and call a different prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-update-decorated-different-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'function',
+                            required: false,
+                            decorate: ({ props }) => {
+                                return () => {
+                                    if (!props.foo) {
+                                        throw new Error(`Expected props.foo to be defined`);
+                                    }
+
+                                    return props.foo('bar');
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', bar => {
+                    if (bar !== 'bar') {
+                        throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                    }
+                }),
+
+                run: `
+                    window.xprops.onProps(function() {
+                        window.xprops.baz('bar');
+                    });
+                `
+            });
+            
+            instance.render(document.body).then(expect('postRender', () => {
+    
+                instance.updateProps({
+                    baz: noop
+                });
+            }));
+        });
+    });
+
     it('should enter a component, update a prop with a default, then call the prop', () => {
         return wrapPromise(({ expect, error }) => {
 

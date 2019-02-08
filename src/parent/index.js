@@ -7,8 +7,8 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
-    noop, onResize, extend, extendUrl, appendChild, cleanup, type CleanupType, base64encode,
-    once, stringifyError, destroyElement, isDefined, getElementSafe } from 'belter/src';
+    noop, onResize, extendUrl, appendChild, cleanup, type CleanupType, base64encode,
+    once, stringifyError, destroyElement, getElementSafe } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -19,7 +19,7 @@ import type { ChildExportsType } from '../child';
 import type { DimensionsType } from '../types';
 
 import { RENDER_DRIVERS, type ContextDriverType } from './drivers';
-import { propsToQuery, normalizeProps } from './props';
+import { propsToQuery, extendProps } from './props';
 
 export type RenderOptionsType<P> = {|
     uid : string,
@@ -96,6 +96,9 @@ export class ParentComponent<P> {
     constructor(component : Component<P>, props : PropsInputType<P>) {
         this.initPromise = new ZalgoPromise();
         this.handledErrors = [];
+
+        // $FlowFixMe
+        this.props = {};
 
         this.clean = cleanup(this);
         this.state = {};
@@ -299,17 +302,7 @@ export class ParentComponent<P> {
         }
 
         const helpers = this.getHelpers();
-
-        // $FlowFixMe
-        this.props = this.props || {};
-        extend(this.props, normalizeProps(this.component, this, props, helpers, isUpdate));
-
-        for (const key of this.component.getPropNames()) {
-            const propDef = this.component.getPropDefinition(key);
-            if (propDef.required !== false && !isDefined(this.props[key])) {
-                throw new Error(`Expected prop "${ key }" to be defined`);
-            }
-        }
+        extendProps(this.component, this.props, props, helpers, isUpdate);
     }
 
     buildUrl() : ZalgoPromise<string> {
