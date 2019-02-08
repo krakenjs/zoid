@@ -857,7 +857,7 @@
             return awaitFrameLoadPromises.set(frame, promise), promise;
         }
         function awaitFrameWindow(frame) {
-            return frame.contentWindow ? promise_ZalgoPromise.resolve(frame.contentWindow) : awaitFrameLoad(frame).then(function(loadedFrame) {
+            return awaitFrameLoad(frame).then(function(loadedFrame) {
                 if (!loadedFrame.contentWindow) throw new Error("Could not find window in iframe");
                 return loadedFrame.contentWindow;
             });
@@ -2061,7 +2061,7 @@
         }
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_6__ || (win.__zoid_9_0_6__ = {}), win.__zoid_9_0_6__;
+            return win.__zoid_9_0_7__ || (win.__zoid_9_0_7__ = {}), win.__zoid_9_0_7__;
         }
         function getProxyElement(element) {
             return {
@@ -2254,7 +2254,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_6" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_6");
+                    if ("9_0_7" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_7");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2716,7 +2716,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_6",
+                    version: "9_0_7",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
