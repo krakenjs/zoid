@@ -998,7 +998,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_1__ : win.__post_robot_10_0_1__ = win.__post_robot_10_0_1__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_3__ : win.__post_robot_10_0_3__ = win.__post_robot_10_0_3__ || {};
         }
         var getObj = function() {
             return {};
@@ -1513,8 +1513,9 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_1__ = _extends({
-                id: uniqueID()
+            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_3__ = _extends({
+                id: uniqueID(),
+                origin: utils_getDomain(window)
             }, message), _serializeMessage), {
                 on: on,
                 send: send
@@ -1665,16 +1666,17 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_1__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_3__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
             });
             message && (markWindowKnown(source), receivedMessages.has(message.id) || (receivedMessages.set(message.id, !0), 
-            isWindowClosed(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
+            isWindowClosed(source) && !message.fireAndForget || (0 === message.origin.indexOf(PROTOCOL.FILE) && (origin = message.origin), 
+            RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
                 on: on,
                 send: send
-            })));
+            }))));
         }
         function on_on(name, options, handler) {
             if (!name) throw new Error("Expected name");
@@ -1849,7 +1851,7 @@
         }
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_8__ || (win.__zoid_9_0_8__ = {}), win.__zoid_9_0_8__;
+            return win.__zoid_9_0_9__ || (win.__zoid_9_0_9__ = {}), win.__zoid_9_0_9__;
         }
         function getProxyElement(element) {
             return {
@@ -1873,14 +1875,14 @@
                 globalStore().getOrSet("postMessageListeners", function() {
                     return addEventListener(window, "message", function(event) {
                         !function(event, _ref4) {
-                            var on = _ref4.on, send = _ref4.send, messageEvent = {
-                                source: event.source || event.sourceElement,
-                                origin: event.origin || event.originalEvent && event.originalEvent.origin,
-                                data: event.data
-                            };
-                            if (messageEvent.source) {
-                                if (!messageEvent.origin) throw new Error("Post message did not have origin domain");
-                                receive_receiveMessage(messageEvent, {
+                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
+                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
+                                if (!origin) throw new Error("Post message did not have origin domain");
+                                receive_receiveMessage({
+                                    source: source,
+                                    origin: origin,
+                                    data: data
+                                }, {
                                     on: on,
                                     send: send
                                 });
@@ -1985,7 +1987,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_7" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_7");
+                    if ("9_0_8" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_8");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2247,9 +2249,9 @@
                 this.component = void 0, this.driver = void 0, this.clean = void 0, this.event = void 0, 
                 this.initPromise = void 0, this.handledErrors = void 0, this.props = void 0, this.state = void 0, 
                 this.child = void 0, this.proxyWin = void 0, this.proxyContainer = void 0, this.initPromise = new promise_ZalgoPromise(), 
-                this.handledErrors = [], this.clean = cleanup(this), this.state = {}, this.component = component, 
-                this.setupEvents(props.onError), this.setProps(props), this.component.registerActiveComponent(this), 
-                this.clean.register(function() {
+                this.handledErrors = [], this.props = {}, this.clean = cleanup(this), this.state = {}, 
+                this.component = component, this.setupEvents(props.onError), this.setProps(props), 
+                this.component.registerActiveComponent(this), this.clean.register(function() {
                     return _this.component.destroyActiveComponent(_this);
                 }), this.watchForUnload();
             }
@@ -2401,7 +2403,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_7",
+                    version: "9_0_8",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -2442,54 +2444,53 @@
                     props: props
                 });
                 var helpers = this.getHelpers();
-                this.props = this.props || {}, extend(this.props, function(component, instance, props, helpers, isUpdate) {
-                    void 0 === isUpdate && (isUpdate = !1);
-                    for (var result = _extends({}, props = props || {}), propNames = isUpdate ? [] : [].concat(component.getPropNames()), _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
+                !function(component, props, inputProps, helpers, isUpdate) {
+                    void 0 === isUpdate && (isUpdate = !1), extend(props, inputProps = inputProps || {});
+                    for (var propNames = isUpdate ? [] : [].concat(component.getPropNames()), _i2 = 0, _Object$keys2 = Object.keys(inputProps); _i2 < _Object$keys2.length; _i2++) {
                         var key = _Object$keys2[_i2];
                         -1 === propNames.indexOf(key) && propNames.push(key);
                     }
                     for (var aliases = [], state = helpers.state, close = helpers.close, focus = helpers.focus, onError = helpers.onError, _i4 = 0; _i4 < propNames.length; _i4++) {
-                        var _key = propNames[_i4], propDef = component.getPropDefinition(_key), value = props[_key];
+                        var _key = propNames[_i4], propDef = component.getPropDefinition(_key), value = inputProps[_key];
                         if (propDef) {
                             var alias = propDef.alias;
-                            if (alias && (!isDefined(value) && isDefined(props[alias]) && (value = props[alias]), 
+                            if (alias && (!isDefined(value) && isDefined(inputProps[alias]) && (value = inputProps[alias]), 
                             aliases.push(alias)), propDef.value && (value = propDef.value({
-                                props: result,
+                                props: props,
                                 state: state,
                                 close: close,
                                 focus: focus,
                                 onError: onError
                             })), !isDefined(value) && propDef.default && (value = propDef.default({
-                                props: result,
+                                props: props,
                                 state: state,
                                 close: close,
                                 focus: focus,
                                 onError: onError
                             })), isDefined(value) && ("array" === propDef.type ? !Array.isArray(value) : typeof value !== propDef.type)) throw new TypeError("Prop is not of type " + propDef.type + ": " + _key);
-                            result[_key] = value;
+                            props[_key] = value;
                         }
                     }
-                    for (var _i6 = 0; _i6 < aliases.length; _i6++) delete result[aliases[_i6]];
-                    for (var _i8 = 0, _Object$keys4 = Object.keys(result); _i8 < _Object$keys4.length; _i8++) {
-                        var _key2 = _Object$keys4[_i8], _propDef = component.getPropDefinition(_key2), _value = result[_key2];
+                    for (var _i6 = 0; _i6 < aliases.length; _i6++) delete props[aliases[_i6]];
+                    for (var _i8 = 0, _Object$keys4 = Object.keys(props); _i8 < _Object$keys4.length; _i8++) {
+                        var _key2 = _Object$keys4[_i8], _propDef = component.getPropDefinition(_key2), _value = props[_key2];
                         _propDef && (isDefined(_value) && _propDef.validate && _propDef.validate({
                             value: _value,
-                            props: result
-                        }), isDefined(_value) && _propDef.decorate && (result[_key2] = _propDef.decorate({
+                            props: props
+                        }), isDefined(_value) && _propDef.decorate && (props[_key2] = _propDef.decorate({
                             value: _value,
-                            props: result,
+                            props: props,
                             state: state,
                             close: close,
                             focus: focus,
                             onError: onError
                         })));
                     }
-                    return result;
-                }(this.component, 0, props, helpers, isUpdate));
-                for (var _i2 = 0, _this$component$getPr2 = this.component.getPropNames(); _i2 < _this$component$getPr2.length; _i2++) {
-                    var key = _this$component$getPr2[_i2];
-                    if (!1 !== this.component.getPropDefinition(key).required && !isDefined(this.props[key])) throw new Error('Expected prop "' + key + '" to be defined');
-                }
+                    for (var _i10 = 0, _component$getPropNam2 = component.getPropNames(); _i10 < _component$getPropNam2.length; _i10++) {
+                        var _key3 = _component$getPropNam2[_i10];
+                        if (!1 !== component.getPropDefinition(_key3).required && !isDefined(props[_key3])) throw new Error('Expected prop "' + _key3 + '" to be defined');
+                    }
+                }(this.component, this.props, props, helpers, isUpdate);
             }, _proto.buildUrl = function() {
                 var propsDef, props, params, _this6 = this;
                 return (propsDef = _extends({}, this.component.props, this.component.builtinProps), 
@@ -2510,8 +2511,8 @@
                                         }) ? newobj["" + prefix + key + "[]"] = obj[key].join(",") : obj[key] && "object" == typeof obj[key] ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
                                         return newobj;
                                     }(queryValue, key);
-                                    for (var _i10 = 0, _Object$keys6 = Object.keys(result); _i10 < _Object$keys6.length; _i10++) {
-                                        var dotkey = _Object$keys6[_i10];
+                                    for (var _i12 = 0, _Object$keys6 = Object.keys(result); _i12 < _Object$keys6.length; _i12++) {
+                                        var dotkey = _Object$keys6[_i12];
                                         params[dotkey] = result[dotkey];
                                     }
                                     return;
@@ -2544,8 +2545,8 @@
             }, _proto.getInitialDomain = function() {
                 return this.component.getInitialDomain(this.props);
             }, _proto.getPropsForChild = function(domain) {
-                for (var result = {}, _i4 = 0, _Object$keys2 = Object.keys(this.props); _i4 < _Object$keys2.length; _i4++) {
-                    var key = _Object$keys2[_i4], prop = this.component.getPropDefinition(key);
+                for (var result = {}, _i2 = 0, _Object$keys2 = Object.keys(this.props); _i2 < _Object$keys2.length; _i2++) {
+                    var key = _Object$keys2[_i2], prop = this.component.getPropDefinition(key);
                     prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(domain, utils_getDomain(window)) || (result[key] = this.props[key]);
                 }
                 return result;
@@ -2588,8 +2589,8 @@
             }, _proto.delegate = function(context, target) {
                 var _this13 = this;
                 this.component.log("delegate");
-                for (var props = {}, _i6 = 0, _this$component$getPr4 = this.component.getPropNames(); _i6 < _this$component$getPr4.length; _i6++) {
-                    var propName = _this$component$getPr4[_i6];
+                for (var props = {}, _i4 = 0, _this$component$getPr2 = this.component.getPropNames(); _i4 < _this$component$getPr2.length; _i4++) {
+                    var propName = _this$component$getPr2[_i4];
                     this.component.getPropDefinition(propName).allowDelegate && (props[propName] = this.props[propName]);
                 }
                 for (var overridesPromise = send_send(target, POST_MESSAGE_DELEGATE + "_" + this.component.name, {
@@ -2609,15 +2610,15 @@
                     return _this13.clean.register(data.destroy), data.overrides;
                 }).catch(function(err) {
                     throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + stringifyError(err));
-                }), _loop = function(_i8, _this$driver$delegate2) {
-                    var key = _this$driver$delegate2[_i8];
+                }), _loop = function(_i6, _this$driver$delegate2) {
+                    var key = _this$driver$delegate2[_i6];
                     _this13[key] = function() {
                         var _this14 = this, _arguments = arguments;
                         return overridesPromise.then(function(overrides) {
                             return overrides[key].apply(_this14, _arguments);
                         });
                     };
-                }, _i8 = 0, _this$driver$delegate2 = this.driver.delegate; _i8 < _this$driver$delegate2.length; _i8++) _loop(_i8, _this$driver$delegate2);
+                }, _i6 = 0, _this$driver$delegate2 = this.driver.delegate; _i6 < _this$driver$delegate2.length; _i6++) _loop(_i6, _this$driver$delegate2);
             }, _proto.getWindowRef = function(target, domain, uid, context) {
                 if (domain === utils_getDomain(window)) {
                     var global = globalFor(window);

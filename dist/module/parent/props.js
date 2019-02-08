@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.normalizeProps = normalizeProps;
+exports.extendProps = extendProps;
 exports.propsToQuery = propsToQuery;
 
 var _src = require("zalgo-promise/src");
@@ -10,24 +10,19 @@ var _src2 = require("belter/src");
 
 var _constants = require("../constants");
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 /*  Normalize Props
     ---------------
 
     Turn props into normalized values, using defaults, function options, etc.
 */
-function normalizeProps(component, instance, props, helpers, isUpdate = false) {
+function extendProps(component, props, inputProps, helpers, isUpdate = false) {
   // eslint-disable-line complexity
   // $FlowFixMe
-  props = props || {};
-
-  const result = _extends({}, props); // eslint-disable-line no-undef
-
-
+  inputProps = inputProps || {};
+  (0, _src2.extend)(props, inputProps);
   const propNames = isUpdate ? [] : [...component.getPropNames()]; // $FlowFixMe
 
-  for (const key of Object.keys(props)) {
+  for (const key of Object.keys(inputProps)) {
     if (propNames.indexOf(key) === -1) {
       propNames.push(key);
     }
@@ -44,7 +39,7 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
   for (const key of propNames) {
     const propDef = component.getPropDefinition(key); // $FlowFixMe
 
-    let value = props[key];
+    let value = inputProps[key];
 
     if (!propDef) {
       continue;
@@ -53,8 +48,8 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
     const alias = propDef.alias;
 
     if (alias) {
-      if (!(0, _src2.isDefined)(value) && (0, _src2.isDefined)(props[alias])) {
-        value = props[alias];
+      if (!(0, _src2.isDefined)(value) && (0, _src2.isDefined)(inputProps[alias])) {
+        value = inputProps[alias];
       }
 
       aliases.push(alias);
@@ -62,7 +57,7 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
 
     if (propDef.value) {
       value = propDef.value({
-        props: result,
+        props,
         state,
         close,
         focus,
@@ -72,7 +67,7 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
 
     if (!(0, _src2.isDefined)(value) && propDef.default) {
       value = propDef.default({
-        props: result,
+        props,
         state,
         close,
         focus,
@@ -87,19 +82,19 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
     } // $FlowFixMe
 
 
-    result[key] = value;
+    props[key] = value;
   }
 
   for (const alias of aliases) {
     // $FlowFixMe
-    delete result[alias];
+    delete props[alias];
   } // $FlowFixMe
 
 
-  for (const key of Object.keys(result)) {
+  for (const key of Object.keys(props)) {
     const propDef = component.getPropDefinition(key); // $FlowFixMe
 
-    const value = result[key];
+    const value = props[key];
 
     if (!propDef) {
       continue;
@@ -109,25 +104,30 @@ function normalizeProps(component, instance, props, helpers, isUpdate = false) {
       // $FlowFixMe
       propDef.validate({
         value,
-        props: result
+        props
       });
     }
 
     if ((0, _src2.isDefined)(value) && propDef.decorate) {
       // $FlowFixMe
-      result[key] = propDef.decorate({
+      props[key] = propDef.decorate({
         value,
-        props: result,
+        props,
         state,
         close,
         focus,
         onError
       });
     }
-  } // $FlowFixMe
+  }
 
+  for (const key of component.getPropNames()) {
+    const propDef = component.getPropDefinition(key);
 
-  return result;
+    if (propDef.required !== false && !(0, _src2.isDefined)(props[key])) {
+      throw new Error(`Expected prop "${key}" to be defined`);
+    }
+  }
 } // $FlowFixMe
 
 

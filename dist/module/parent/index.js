@@ -36,7 +36,9 @@ class ParentComponent {
     this.proxyWin = void 0;
     this.proxyContainer = void 0;
     this.initPromise = new _src3.ZalgoPromise();
-    this.handledErrors = [];
+    this.handledErrors = []; // $FlowFixMe
+
+    this.props = {};
     this.clean = (0, _src4.cleanup)(this);
     this.state = {};
     this.component = component;
@@ -252,18 +254,8 @@ class ParentComponent {
       });
     }
 
-    const helpers = this.getHelpers(); // $FlowFixMe
-
-    this.props = this.props || {};
-    (0, _src4.extend)(this.props, (0, _props.normalizeProps)(this.component, this, props, helpers, isUpdate));
-
-    for (const key of this.component.getPropNames()) {
-      const propDef = this.component.getPropDefinition(key);
-
-      if (propDef.required !== false && !(0, _src4.isDefined)(this.props[key])) {
-        throw new Error(`Expected prop "${key}" to be defined`);
-      }
-    }
+    const helpers = this.getHelpers();
+    (0, _props.extendProps)(this.component, this.props, props, helpers, isUpdate);
   }
 
   buildUrl() {
