@@ -212,6 +212,7 @@ class ParentComponent {
     return {
       uid,
       context,
+      version: __ZOID__.__VERSION__,
       domain: (0, _src2.getDomain)(window),
       tag: this.component.tag,
       parent: this.getWindowRef(target, initialDomain, uid, context),

@@ -910,11 +910,11 @@
                 return element;
             }("iframe", {
                 attributes: _extends({
-                    frameBorder: "0",
                     allowTransparency: "true"
                 }, options.attributes || {}),
                 style: _extends({
-                    backgroundColor: "transparent"
+                    backgroundColor: "transparent",
+                    border: "none"
                 }, style),
                 html: options.html,
                 class: options.class
@@ -1849,7 +1849,7 @@
         }
         function globalFor(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_6__ || (win.__zoid_9_0_6__ = {}), win.__zoid_9_0_6__;
+            return win.__zoid_9_0_7__ || (win.__zoid_9_0_7__ = {}), win.__zoid_9_0_7__;
         }
         function getProxyElement(element) {
             return {
@@ -1985,6 +1985,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
+                    if ("9_0_6" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_6");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2400,6 +2401,7 @@
                 return {
                     uid: uid,
                     context: context,
+                    version: "9_0_6",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
