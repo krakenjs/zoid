@@ -11,6 +11,7 @@ module.exports = {
         ...postRobotGlobals.__POST_ROBOT__
     },
     __ZOID__: {
+        __VERSION__:           getCurrentVersion(pkg),
         __GLOBAL_KEY__:        `__zoid_${ getCurrentVersion(pkg) }__`,
         __POPUP_SUPPORT__:     true,
         __FRAMEWORK_SUPPORT__: false,

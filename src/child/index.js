@@ -65,6 +65,10 @@ export class ChildComponent<P> {
                 throw new Error(`No child payload found`);
             }
 
+            if (childPayload.version !== __ZOID__.__VERSION__) {
+                throw new Error(`Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
+            }
+
             const { parent, domain, exports, context, props } = childPayload;
 
             this.context = context;

@@ -56,6 +56,7 @@ export type WindowRef =
 export type ChildPayload = {|
     uid : string,
     tag : string,
+    version : string,
     context : $Values<typeof CONTEXT>,
     domain : string,
     parent : WindowRef,
@@ -265,6 +266,7 @@ export class ParentComponent<P> {
         return {
             uid,
             context,
+            version: __ZOID__.__VERSION__,
             domain:  getDomain(window),
             tag:     this.component.tag,
             parent:  this.getWindowRef(target, initialDomain, uid, context),
