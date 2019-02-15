@@ -362,7 +362,7 @@ function destroyAll() {
   global.activeComponents = global.activeComponents || [];
 
   while (global.activeComponents.length) {
-    results.push(global.activeComponents[0].destroy());
+    results.push(global.activeComponents[0].destroy(new Error(`zoid desroyed all`), false));
   }
 
   return _src2.ZalgoPromise.all(results).then(_src4.noop);
