@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { on, send, bridge, toProxyWindow } from 'post-robot/src';
+import { on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
 import { isRegex, noop, isElement } from 'belter/src';
@@ -11,6 +11,7 @@ import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../
 import { DelegateComponent } from '../delegate';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
 import { react, angular, vue, angular2 } from '../drivers';
+import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validate } from './validate';
@@ -130,7 +131,10 @@ export class Component<P> {
 
         this.allowedParentDomains = options.allowedParentDomains || WILDCARD;
 
-        if (Component.components[this.tag]) {
+        const global = getGlobal();
+        global.components = global.components || {};
+
+        if (global.components[this.tag]) {
             throw new Error(`Can not register multiple components with the same tag: ${ this.tag }`);
         }
 
@@ -181,7 +185,7 @@ export class Component<P> {
         this.registerChild();
         this.listenDelegate();
 
-        Component.components[this.tag] = this;
+        global.components[this.tag] = this;
     }
 
     getPropNames() : $ReadOnlyArray<string> {
@@ -373,29 +377,16 @@ export class Component<P> {
         this.logger.info(`${ this.name }_${ event }`, payload);
     }
 
-    static components : { [string] : Component<*> } = {}
-    static activeComponents : Array<ParentComponent<*> | DelegateComponent<*>> = [] // eslint-disable-line flowtype/no-mutable-array
-
     registerActiveComponent<Q>(instance : ParentComponent<Q> | DelegateComponent<Q>) {
-        Component.activeComponents.push(instance);
+        const global = getGlobal();
+        global.activeComponents = global.activeComponents || [];
+        global.activeComponents.push(instance);
     }
 
     destroyActiveComponent<Q>(instance : ParentComponent<Q> | DelegateComponent<Q>) {
-        Component.activeComponents.splice(Component.activeComponents.indexOf(instance), 1);
-    }
-
-    static destroyAll() : ZalgoPromise<void> {
-        if (bridge) {
-            bridge.destroyBridges();
-        }
-
-        const results = [];
-
-        while (Component.activeComponents.length) {
-            results.push(Component.activeComponents[0].destroy());
-        }
-
-        return ZalgoPromise.all(results).then(noop);
+        const global = getGlobal();
+        global.activeComponents = global.activeComponents || [];
+        global.activeComponents.splice(global.activeComponents.indexOf(instance), 1);
     }
 }
 
@@ -417,5 +408,25 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
 }
 
 export function destroyAll() : ZalgoPromise<void> {
-    return Component.destroyAll();
+    if (bridge) {
+        bridge.destroyBridges();
+    }
+
+    const results = [];
+
+    const global = getGlobal();
+    global.activeComponents = global.activeComponents || [];
+    while (global.activeComponents.length) {
+        results.push(global.activeComponents[0].destroy());
+    }
+
+    return ZalgoPromise.all(results).then(noop);
+}
+
+export const destroyComponents = destroyAll;
+
+export function destroy() {
+    destroyAll();
+    destroyGlobal();
+    destroyPostRobot();
 }

@@ -8,7 +8,7 @@ import { markWindowKnown, deserializeMessage } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
 
-import { globalFor } from '../lib';
+import { getGlobal } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { Component } from '../component';
 import type { PropsType } from '../component/props';
@@ -124,7 +124,7 @@ export class ChildComponent<P> {
                 throw new Error(`Parent component window is on a different domain - expected ${ getDomain() } - can not retrieve props`);
             }
 
-            const global = globalFor(parentComponentWindow);
+            const global = getGlobal(parentComponentWindow);
             props = assertExists('props', global && global.props[uid]);
         }
 
@@ -157,7 +157,7 @@ export class ChildComponent<P> {
 
             for (const frame of getAllFramesInWindow(ancestor)) {
                 if (isSameDomain(frame)) {
-                    const global = globalFor(frame);
+                    const global = getGlobal(frame);
 
                     if (global && global.windows && global.windows[uid]) {
                         return global.windows[uid];

@@ -13,7 +13,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEm
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { Component, onErrorPropType } from '../component';
-import { globalFor, getProxyElement, type ProxyElement } from '../lib';
+import { getGlobal, getProxyElement, type ProxyElement } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { DimensionsType } from '../types';
@@ -253,7 +253,7 @@ export class ParentComponent<P> {
             : { type: INITIAL_PROPS.UID, uid };
 
         if (propRef.type === INITIAL_PROPS.UID) {
-            const global = globalFor(window);
+            const global = getGlobal(window);
             global.props = global.props || {};
             global.props[uid] = value;
 
@@ -440,7 +440,7 @@ export class ParentComponent<P> {
     getWindowRef(target : CrossDomainWindowType, domain : string, uid : string, context : $Values<typeof CONTEXT>) : WindowRef {
         
         if (domain === getDomain(window)) {
-            const global = globalFor(window);
+            const global = getGlobal(window);
             global.windows = global.windows || {};
             global.windows[uid] = window;
             this.clean.register(() => {
