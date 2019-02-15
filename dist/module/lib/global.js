@@ -1,11 +1,12 @@
 "use strict";
 
 exports.__esModule = true;
-exports.globalFor = globalFor;
+exports.getGlobal = getGlobal;
+exports.destroyGlobal = destroyGlobal;
 
 var _src = require("cross-domain-utils/src");
 
-function globalFor(win) {
+function getGlobal(win = window) {
   if (!(0, _src.isSameDomain)(win)) {
     throw new Error(`Can not get global for window on different domain`);
   }
@@ -15,4 +16,8 @@ function globalFor(win) {
   }
 
   return win[__ZOID__.__GLOBAL_KEY__];
+}
+
+function destroyGlobal() {
+  delete window[__ZOID__.__GLOBAL_KEY__];
 }

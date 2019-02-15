@@ -3,7 +3,8 @@
 exports.__esModule = true;
 exports.create = create;
 exports.destroyAll = destroyAll;
-exports.Component = void 0;
+exports.destroy = destroy;
+exports.destroyComponents = exports.Component = void 0;
 
 var _src = require("post-robot/src");
 
@@ -22,6 +23,8 @@ var _delegate = require("../delegate");
 var _constants = require("../constants");
 
 var _drivers = require("../drivers");
+
+var _lib = require("../lib");
 
 var _validate = require("./validate");
 
@@ -58,8 +61,10 @@ class Component {
     this.tag = options.tag;
     this.name = this.tag.replace(/-/g, '_');
     this.allowedParentDomains = options.allowedParentDomains || _constants.WILDCARD;
+    const global = (0, _lib.getGlobal)();
+    global.components = global.components || {};
 
-    if (Component.components[this.tag]) {
+    if (global.components[this.tag]) {
       throw new Error(`Can not register multiple components with the same tag: ${this.tag}`);
     } // A json based spec describing what kind of props the component accepts. This is used to validate any props before
     // they are passed down to the child.
@@ -106,7 +111,7 @@ class Component {
     };
     this.registerChild();
     this.listenDelegate();
-    Component.components[this.tag] = this;
+    global.components[this.tag] = this;
   }
 
   getPropNames() {
@@ -315,34 +320,21 @@ class Component {
     this.logger.info(`${this.name}_${event}`, payload);
   }
 
-  // eslint-disable-line flowtype/no-mutable-array
   registerActiveComponent(instance) {
-    Component.activeComponents.push(instance);
+    const global = (0, _lib.getGlobal)();
+    global.activeComponents = global.activeComponents || [];
+    global.activeComponents.push(instance);
   }
 
   destroyActiveComponent(instance) {
-    Component.activeComponents.splice(Component.activeComponents.indexOf(instance), 1);
-  }
-
-  static destroyAll() {
-    if (_src.bridge) {
-      _src.bridge.destroyBridges();
-    }
-
-    const results = [];
-
-    while (Component.activeComponents.length) {
-      results.push(Component.activeComponents[0].destroy());
-    }
-
-    return _src2.ZalgoPromise.all(results).then(_src4.noop);
+    const global = (0, _lib.getGlobal)();
+    global.activeComponents = global.activeComponents || [];
+    global.activeComponents.splice(global.activeComponents.indexOf(instance), 1);
   }
 
 }
 
 exports.Component = Component;
-Component.components = {};
-Component.activeComponents = [];
 
 function create(options) {
   const component = new Component(options);
@@ -361,5 +353,26 @@ function create(options) {
 }
 
 function destroyAll() {
-  return Component.destroyAll();
+  if (_src.bridge) {
+    _src.bridge.destroyBridges();
+  }
+
+  const results = [];
+  const global = (0, _lib.getGlobal)();
+  global.activeComponents = global.activeComponents || [];
+
+  while (global.activeComponents.length) {
+    results.push(global.activeComponents[0].destroy());
+  }
+
+  return _src2.ZalgoPromise.all(results).then(_src4.noop);
+}
+
+const destroyComponents = destroyAll;
+exports.destroyComponents = destroyComponents;
+
+function destroy() {
+  destroyAll();
+  (0, _lib.destroyGlobal)();
+  (0, _src.destroy)();
 }

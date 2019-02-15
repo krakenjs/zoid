@@ -127,7 +127,7 @@ class ChildComponent {
         throw new Error(`Parent component window is on a different domain - expected ${(0, _src.getDomain)()} - can not retrieve props`);
       }
 
-      const global = (0, _lib.globalFor)(parentComponentWindow);
+      const global = (0, _lib.getGlobal)(parentComponentWindow);
       props = (0, _src4.assertExists)('props', global && global.props[uid]);
     }
 
@@ -162,7 +162,7 @@ class ChildComponent {
 
       for (const frame of (0, _src.getAllFramesInWindow)(ancestor)) {
         if ((0, _src.isSameDomain)(frame)) {
-          const global = (0, _lib.globalFor)(frame);
+          const global = (0, _lib.getGlobal)(frame);
 
           if (global && global.windows && global.windows[uid]) {
             return global.windows[uid];

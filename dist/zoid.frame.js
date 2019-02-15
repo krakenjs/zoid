@@ -953,7 +953,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_8__ : win.__post_robot_10_0_8__ = win.__post_robot_10_0_8__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_10__ : win.__post_robot_10_0_10__ = win.__post_robot_10_0_10__ || {};
         }
         var getObj = function() {
             return {};
@@ -1471,7 +1471,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_8__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_10__ = _extends({
                 id: uniqueID(),
                 origin: utils_getDomain(window)
             }, message), _serializeMessage), {
@@ -1619,7 +1619,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_8__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_10__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1705,7 +1705,7 @@
                 }
             };
         }
-        var send_send = function send(win, name, data, options) {
+        var src_bridge, send_send = function send(win, name, data, options) {
             var domain = (options = options || {}).domain || constants_WILDCARD, responseTimeout = options.timeout || -1, childTimeout = options.timeout || 5e3, fireAndForget = options.fireAndForget || !1;
             return promise_ZalgoPromise.try(function() {
                 return function(name, win, domain) {
@@ -1799,9 +1799,9 @@
                 send: send_send
             });
         }
-        function globalFor(win) {
-            if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_12__ || (win.__zoid_9_0_12__ = {}), win.__zoid_9_0_12__;
+        function lib_global_getGlobal(win) {
+            if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
+            return win.__zoid_9_0_13__ || (win.__zoid_9_0_13__ = {}), win.__zoid_9_0_13__;
         }
         function getProxyElement(element) {
             return {
@@ -1830,7 +1830,7 @@
                 });
             }, function(_ref5) {
                 var on = _ref5.on, send = _ref5.send;
-                globalStore().getOrSet("postMessageListeners", function() {
+                globalStore().getOrSet("postMessageListener", function() {
                     return addEventListener(window, "message", function(event) {
                         !function(event, _ref4) {
                             var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
@@ -1937,7 +1937,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_11" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_11");
+                    if ("9_0_12" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_12");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -1985,7 +1985,7 @@
                 var props, type = _ref2.type, uid = _ref2.uid;
                 if ("raw" === type) props = _ref2.value; else if ("uid" === type) {
                     if (!isSameDomain(parentComponentWindow)) throw new Error("Parent component window is on a different domain - expected " + utils_getDomain() + " - can not retrieve props");
-                    var global = globalFor(parentComponentWindow);
+                    var global = lib_global_getGlobal(parentComponentWindow);
                     props = assertExists("props", global && global.props[uid]);
                 }
                 if (!props) throw new Error("Could not find props");
@@ -2008,7 +2008,7 @@
                     for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
                         var frame = _getAllFramesInWindow2[_i2];
                         if (isSameDomain(frame)) {
-                            var global = globalFor(frame);
+                            var global = lib_global_getGlobal(frame);
                             if (global && global.windows && global.windows[uid]) return global.windows[uid];
                         }
                     }
@@ -2333,7 +2333,7 @@
                     uid: uid
                 };
                 if ("uid" === propRef.type) {
-                    var global = globalFor(window);
+                    var global = lib_global_getGlobal(window);
                     global.props = global.props || {}, global.props[uid] = value, this.clean.register(function() {
                         delete global.props[uid];
                     });
@@ -2344,7 +2344,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_11",
+                    version: "9_0_12",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -2562,7 +2562,7 @@
                 }, _i6 = 0, _this$driver$delegate2 = this.driver.delegate; _i6 < _this$driver$delegate2.length; _i6++) _loop(_i6, _this$driver$delegate2);
             }, _proto.getWindowRef = function(target, domain, uid, context) {
                 if (domain === utils_getDomain(window)) {
-                    var global = globalFor(window);
+                    var global = lib_global_getGlobal(window);
                     return global.windows = global.windows || {}, global.windows[uid] = window, this.clean.register(function() {
                         delete global.windows[uid];
                     }), {
@@ -2818,7 +2818,7 @@
             return once(_ref.value);
         }, component_Component = function() {
             function Component(options) {
-                if (this.tag = void 0, this.name = void 0, this.url = void 0, this.domain = void 0, 
+                this.tag = void 0, this.name = void 0, this.url = void 0, this.domain = void 0, 
                 this.bridgeUrl = void 0, this.props = void 0, this.builtinProps = void 0, this.dimensions = void 0, 
                 this.autoResize = void 0, this.allowedParentDomains = void 0, this.defaultContext = void 0, 
                 this.attributes = void 0, this.containerTemplate = void 0, this.prerenderTemplate = void 0, 
@@ -2850,8 +2850,9 @@
                     if ("string" != typeof options.url && "function" != typeof options.url) throw new TypeError("Expected url to be string or function");
                     if (options.prerenderTemplate && "function" != typeof options.prerenderTemplate) throw new Error("Expected options.prerenderTemplate to be a function");
                     if (options.containerTemplate && "function" != typeof options.containerTemplate) throw new Error("Expected options.containerTemplate to be a function");
-                }(options), this.tag = options.tag, this.name = this.tag.replace(/-/g, "_"), this.allowedParentDomains = options.allowedParentDomains || src_constants_WILDCARD, 
-                Component.components[this.tag]) throw new Error("Can not register multiple components with the same tag: " + this.tag);
+                }(options), this.tag = options.tag, this.name = this.tag.replace(/-/g, "_"), this.allowedParentDomains = options.allowedParentDomains || src_constants_WILDCARD;
+                var global = lib_global_getGlobal();
+                if (global.components = global.components || {}, global.components[this.tag]) throw new Error("Can not register multiple components with the same tag: " + this.tag);
                 this.builtinProps = {
                     window: {
                         type: "object",
@@ -2965,7 +2966,7 @@
                     info: src_util_noop,
                     warn: src_util_noop,
                     error: src_util_noop
-                }, this.registerChild(), this.listenDelegate(), Component.components[this.tag] = this;
+                }, this.registerChild(), this.listenDelegate(), global.components[this.tag] = this;
             }
             var _proto = Component.prototype;
             return _proto.getPropNames = function() {
@@ -3056,12 +3057,11 @@
             }, _proto.log = function(event, payload) {
                 this.logger.info(this.name + "_" + event, payload);
             }, _proto.registerActiveComponent = function(instance) {
-                Component.activeComponents.push(instance);
+                var global = lib_global_getGlobal();
+                global.activeComponents = global.activeComponents || [], global.activeComponents.push(instance);
             }, _proto.destroyActiveComponent = function(instance) {
-                Component.activeComponents.splice(Component.activeComponents.indexOf(instance), 1);
-            }, Component.destroyAll = function() {
-                for (var results = []; Component.activeComponents.length; ) results.push(Component.activeComponents[0].destroy());
-                return promise_ZalgoPromise.all(results).then(src_util_noop);
+                var global = lib_global_getGlobal();
+                global.activeComponents = global.activeComponents || [], global.activeComponents.splice(global.activeComponents.indexOf(instance), 1);
             }, Component;
         }();
         function create(options) {
@@ -3076,16 +3076,28 @@
                 return component.canRenderTo(win);
             }, init.xprops = component.xprops, init;
         }
-        function component_destroyAll() {
-            return component_Component.destroyAll();
+        function destroyAll() {
+            src_bridge && src_bridge.destroyBridges();
+            var results = [], global = lib_global_getGlobal();
+            for (global.activeComponents = global.activeComponents || []; global.activeComponents.length; ) results.push(global.activeComponents[0].destroy());
+            return promise_ZalgoPromise.all(results).then(src_util_noop);
         }
-        component_Component.components = {}, component_Component.activeComponents = [], 
+        var destroyComponents = destroyAll;
+        function component_destroy() {
+            var listener;
+            destroyAll(), delete window.__zoid_9_0_13__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            delete window.__post_robot_10_0_10__;
+        }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
             return PopupOpenError;
         }), __webpack_require__.d(__webpack_exports__, "create", function() {
             return create;
+        }), __webpack_require__.d(__webpack_exports__, "destroy", function() {
+            return component_destroy;
+        }), __webpack_require__.d(__webpack_exports__, "destroyComponents", function() {
+            return destroyComponents;
         }), __webpack_require__.d(__webpack_exports__, "destroyAll", function() {
-            return component_destroyAll;
+            return destroyAll;
         }), __webpack_require__.d(__webpack_exports__, "Component", function() {
             return component_Component;
         }), __webpack_require__.d(__webpack_exports__, "PROP_TYPE", function() {

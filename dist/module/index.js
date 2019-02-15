@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.EVENT = exports.CONTEXT = exports.PROP_SERIALIZATION = exports.PROP_TYPE = exports.Component = exports.destroyAll = exports.create = exports.PopupOpenError = void 0;
+exports.EVENT = exports.CONTEXT = exports.PROP_SERIALIZATION = exports.PROP_TYPE = exports.Component = exports.destroyAll = exports.destroyComponents = exports.destroy = exports.create = exports.PopupOpenError = void 0;
 
 var _src = require("belter/src");
 
@@ -10,6 +10,8 @@ exports.PopupOpenError = _src.PopupOpenError;
 var _component = require("./component");
 
 exports.create = _component.create;
+exports.destroy = _component.destroy;
+exports.destroyComponents = _component.destroyComponents;
 exports.destroyAll = _component.destroyAll;
 exports.Component = _component.Component;
 

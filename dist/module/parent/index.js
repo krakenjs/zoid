@@ -192,7 +192,7 @@ class ParentComponent {
     };
 
     if (propRef.type === _constants.INITIAL_PROPS.UID) {
-      const global = (0, _lib.globalFor)(window);
+      const global = (0, _lib.getGlobal)(window);
       global.props = global.props || {};
       global.props[uid] = value;
       this.clean.register(() => {
@@ -391,7 +391,7 @@ class ParentComponent {
 
   getWindowRef(target, domain, uid, context) {
     if (domain === (0, _src2.getDomain)(window)) {
-      const global = (0, _lib.globalFor)(window);
+      const global = (0, _lib.getGlobal)(window);
       global.windows = global.windows || {};
       global.windows[uid] = window;
       this.clean.register(() => {
