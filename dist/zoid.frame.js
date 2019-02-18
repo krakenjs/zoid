@@ -1801,7 +1801,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_14__ || (win.__zoid_9_0_14__ = {}), win.__zoid_9_0_14__;
+            return win.__zoid_9_0_15__ || (win.__zoid_9_0_15__ = {}), win.__zoid_9_0_15__;
         }
         function getProxyElement(element) {
             return {
@@ -1937,7 +1937,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_13" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_13");
+                    if ("9_0_14" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_14");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2344,7 +2344,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_13",
+                    version: "9_0_14",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -2494,7 +2494,11 @@
             }, _proto.updateProps = function(props) {
                 var _this7 = this;
                 return this.setProps(props, !0), this.initPromise.then(function() {
-                    if (_this7.child) return _this7.child.updateProps(_this7.getPropsForChild(_this7.getDomain()));
+                    if (_this7.child) return _this7.child.updateProps(_this7.getPropsForChild(_this7.getDomain())).catch(function(err) {
+                        if (_this7.child && _this7.proxyWin) return _this7.checkClose(_this7.proxyWin).then(function() {
+                            if (_this7.child) throw err;
+                        });
+                    });
                 });
             }, _proto.openFrame = function() {
                 var _this8 = this;
@@ -3085,7 +3089,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_14__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            destroyAll(), delete window.__zoid_9_0_15__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
             delete window.__post_robot_10_0_10__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
