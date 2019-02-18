@@ -346,7 +346,17 @@ export class ParentComponent<P> {
 
         return this.initPromise.then(() => {
             if (this.child) {
-                return this.child.updateProps(this.getPropsForChild(this.getDomain()));
+                return this.child.updateProps(this.getPropsForChild(this.getDomain())).catch(err => {
+                    if (!this.child || !this.proxyWin) {
+                        return;
+                    }
+
+                    return this.checkClose(this.proxyWin).then(() => {
+                        if (this.child) {
+                            throw err;
+                        }
+                    });
+                });
             }
         });
     }

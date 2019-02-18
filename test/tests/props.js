@@ -1,8 +1,10 @@
 /* @flow */
 /* eslint max-lines: off */
 
-import { wrapPromise, noop, parseQuery } from 'belter/src';
+import { wrapPromise, noop, parseQuery, destroyElement } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+
+import { onWindowOpen } from '../common';
 
 describe('zoid props cases', () => {
 
@@ -672,6 +674,65 @@ describe('zoid props cases', () => {
             });
             
             return instance.render(document.body);
+        });
+    });
+
+    it('should enter a component, update a prop, destroy the component, and not error out', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-update-prop-destroy-component',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component();
+
+            instance.render(document.body).then(expect('postRender', () => {
+                const updatePromise = instance.updateProps({
+                    foo: 'bar'
+                });
+
+                instance.close();
+
+                return updatePromise;
+            }));
+        });
+    });
+
+    it('should enter a component, update a prop, close the window, and not error out', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-update-prop-close-window',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component();
+
+            let openedWindow;
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                openedWindow = win;
+            }));
+
+            instance.render(document.body).then(expect('postRender', () => {
+                const updatePromise = instance.updateProps({
+                    foo: 'bar'
+                });
+
+                // $FlowFixMe
+                destroyElement(openedWindow.frameElement);
+
+                return updatePromise;
+            }));
         });
     });
 });
