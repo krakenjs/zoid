@@ -1854,7 +1854,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_15__ || (win.__zoid_9_0_15__ = {}), win.__zoid_9_0_15__;
+            return win.__zoid_9_0_16__ || (win.__zoid_9_0_16__ = {}), win.__zoid_9_0_16__;
         }
         function getProxyElement(element) {
             return {
@@ -1990,7 +1990,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_14" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_14");
+                    if ("9_0_15" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_15");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2397,7 +2397,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_14",
+                    version: "9_0_15",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -3266,7 +3266,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_15__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            destroyAll(), delete window.__zoid_9_0_16__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
             delete window.__post_robot_10_0_10__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
