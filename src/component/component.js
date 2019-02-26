@@ -22,10 +22,10 @@ type LoggerPayload = { [string] : ?string };
 
 // eslint-disable-next-line flowtype/require-exact-type
 type Logger = {
-    debug : (event : string, payload? : LoggerPayload) => void,
-    info : (event : string, payload? : LoggerPayload) => void,
-    warn : (event : string, payload? : LoggerPayload) => void,
-    error : (event : string, payload? : LoggerPayload) => void
+    debug : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
+    info : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
+    warn : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
+    error : (event : string, payload? : LoggerPayload) => any // eslint-disable-line flowtype/no-weak-types
 };
 
 /*  Component
