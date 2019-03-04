@@ -23,7 +23,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
   openOnClick: false,
 
   openFrame() {
-    return (0, _lib.getProxyElement)((0, _src4.iframe)({
+    return (0, _lib.getProxyObject)((0, _src4.iframe)({
       attributes: _extends({
         title: this.component.name
       }, this.component.attributes.iframe)
@@ -35,7 +35,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
       throw new Error(`Expected proxy frame to be passed`);
     }
 
-    return proxyFrame.getElement().then(frame => {
+    return proxyFrame.get().then(frame => {
       return (0, _src4.awaitFrameWindow)(frame).then(win => {
         const frameWatcher = (0, _src4.watchElementForClose)(frame, () => this.close());
         this.clean.register(() => frameWatcher.cancel());
@@ -47,7 +47,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
   },
 
   openPrerenderFrame() {
-    return (0, _lib.getProxyElement)((0, _src4.iframe)({
+    return (0, _lib.getProxyObject)((0, _src4.iframe)({
       attributes: _extends({
         name: `__zoid_prerender_frame__${this.component.name}_${(0, _src4.uniqueID)()}__`,
         title: `prerender__${this.component.name}`
@@ -60,7 +60,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
       throw new Error(`Expected proxy frame to be passed`);
     }
 
-    return proxyPrerenderFrame.getElement().then(prerenderFrame => {
+    return proxyPrerenderFrame.get().then(prerenderFrame => {
       this.clean.register(() => (0, _src4.destroyElement)(prerenderFrame));
       return (0, _src4.awaitFrameWindow)(prerenderFrame).then(prerenderFrameWindow => {
         return (0, _src3.assertSameDomain)(prerenderFrameWindow);
@@ -70,20 +70,7 @@ RENDER_DRIVERS[_constants.CONTEXT.IFRAME] = {
     });
   },
 
-  delegate: ['getProxyContainer', 'renderContainer', 'openFrame', 'openPrerenderFrame', 'prerender', 'open', 'openPrerender'],
-
-  resize({
-    width,
-    height
-  }) {
-    if (this.proxyContainer) {
-      this.proxyContainer.resize({
-        width,
-        height
-      });
-    }
-  }
-
+  delegate: ['getProxyContainer', 'renderContainer', 'openFrame', 'openPrerenderFrame', 'prerender', 'open', 'openPrerender']
 };
 
 if (__ZOID__.__POPUP_SUPPORT__) {

@@ -1801,19 +1801,15 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_16__ || (win.__zoid_9_0_16__ = {}), win.__zoid_9_0_16__;
+            return win.__zoid_9_0_17__ || (win.__zoid_9_0_17__ = {}), win.__zoid_9_0_17__;
         }
-        function getProxyElement(element) {
+        function getProxyObject(obj) {
             return {
-                resize: function(_ref) {
-                    var width = _ref.width, height = _ref.height;
-                    "number" == typeof width && (element.style.width = toCSS(width)), "number" == typeof height && (element.style.height = toCSS(height));
-                },
-                getElement: function() {
+                get: function() {
                     var _this = this;
                     return promise_ZalgoPromise.try(function() {
-                        if (_this.source && _this.source !== window) throw new Error("Can not call getElement from a remote window");
-                        return element;
+                        if (_this.source && _this.source !== window) throw new Error("Can not call get on proxy object from a remote window");
+                        return obj;
                     });
                 }
             };
@@ -1897,7 +1893,8 @@
             DISPLAY: "zoid-display",
             ERROR: "zoid-error",
             CLOSE: "zoid-close",
-            PROPS: "zoid-props"
+            PROPS: "zoid-props",
+            RESIZE: "zoid-resize"
         };
         function normalizeChildProp(component, props, key, value, helpers) {
             var prop = component.getPropDefinition(key);
@@ -1937,7 +1934,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_15" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_15");
+                    if ("9_0_16" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_16");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2123,7 +2120,7 @@
         RENDER_DRIVERS[CONTEXT.IFRAME] = {
             openOnClick: !1,
             openFrame: function() {
-                return getProxyElement(dom_iframe({
+                return getProxyObject(dom_iframe({
                     attributes: _extends({
                         title: this.component.name
                     }, this.component.attributes.iframe)
@@ -2132,7 +2129,7 @@
             open: function(proxyFrame) {
                 var _this = this;
                 if (!proxyFrame) throw new Error("Expected proxy frame to be passed");
-                return proxyFrame.getElement().then(function(frame) {
+                return proxyFrame.get().then(function(frame) {
                     return awaitFrameWindow(frame).then(function(win) {
                         var element, handler, interval, frameWatcher = (element = frame, handler = once(handler = function() {
                             return _this.close();
@@ -2156,7 +2153,7 @@
                 });
             },
             openPrerenderFrame: function() {
-                return getProxyElement(dom_iframe({
+                return getProxyObject(dom_iframe({
                     attributes: _extends({
                         name: "__zoid_prerender_frame__" + this.component.name + "_" + uniqueID() + "__",
                         title: "prerender__" + this.component.name
@@ -2166,7 +2163,7 @@
             openPrerender: function(proxyWin, proxyPrerenderFrame) {
                 var _this2 = this;
                 if (!proxyPrerenderFrame) throw new Error("Expected proxy frame to be passed");
-                return proxyPrerenderFrame.getElement().then(function(prerenderFrame) {
+                return proxyPrerenderFrame.get().then(function(prerenderFrame) {
                     return _this2.clean.register(function() {
                         return destroyElement(prerenderFrame);
                     }), awaitFrameWindow(prerenderFrame).then(function(prerenderFrameWindow) {
@@ -2176,20 +2173,14 @@
                     });
                 });
             },
-            delegate: [ "getProxyContainer", "renderContainer", "openFrame", "openPrerenderFrame", "prerender", "open", "openPrerender" ],
-            resize: function(_ref) {
-                this.proxyContainer && this.proxyContainer.resize({
-                    width: _ref.width,
-                    height: _ref.height
-                });
-            }
+            delegate: [ "getProxyContainer", "renderContainer", "openFrame", "openPrerenderFrame", "prerender", "open", "openPrerender" ]
         };
         var parent_ParentComponent = function() {
             function ParentComponent(component, props) {
                 var _this = this;
                 this.component = void 0, this.driver = void 0, this.clean = void 0, this.event = void 0, 
                 this.initPromise = void 0, this.handledErrors = void 0, this.props = void 0, this.state = void 0, 
-                this.child = void 0, this.proxyWin = void 0, this.proxyContainer = void 0, this.initPromise = new promise_ZalgoPromise(), 
+                this.child = void 0, this.proxyWin = void 0, this.initPromise = new promise_ZalgoPromise(), 
                 this.handledErrors = [], this.props = {}, this.clean = cleanup(this), this.state = {}, 
                 this.component = component, this.setupEvents(props.onError), this.setProps(props), 
                 this.component.registerActiveComponent(this), this.clean.register(function() {
@@ -2272,8 +2263,6 @@
                         return _this3.openPrerender(_ref2[0], _ref2[1]);
                     }), tasks.setState = promise_ZalgoPromise.all([ tasks.open.then(function(proxyWin) {
                         return _this3.proxyWin = proxyWin, _this3.setProxyWin(proxyWin);
-                    }), tasks.renderContainer.then(function(proxyContainer) {
-                        _this3.proxyContainer = proxyContainer;
                     }) ]), tasks.prerender = promise_ZalgoPromise.all([ tasks.openPrerender, tasks.setState ]).then(function(_ref3) {
                         return _this3.prerender(_ref3[0], {
                             context: context,
@@ -2312,7 +2301,7 @@
                 return promise_ZalgoPromise.try(function() {
                     return elementReady(container);
                 }).then(function(containerElement) {
-                    return getProxyElement(containerElement);
+                    return getProxyObject(containerElement);
                 });
             }, _proto.buildWindowName = function(_ref6) {
                 var childPayload = this.buildChildPayload({
@@ -2344,7 +2333,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_15",
+                    version: "9_0_16",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -2629,7 +2618,7 @@
             }, _proto.resize = function(_ref11) {
                 var _this20 = this, width = _ref11.width, height = _ref11.height;
                 return promise_ZalgoPromise.try(function() {
-                    if (_this20.driver.resize) return _this20.driver.resize.call(_this20, {
+                    _this20.event.trigger(EVENT.RESIZE, {
                         width: width,
                         height: height
                     });
@@ -2715,7 +2704,7 @@
                 });
             }, _proto.renderContainer = function(proxyContainer, _ref16) {
                 var _this25 = this, proxyFrame = _ref16.proxyFrame, proxyPrerenderFrame = _ref16.proxyPrerenderFrame, context = _ref16.context, uid = _ref16.uid;
-                return promise_ZalgoPromise.all([ proxyContainer.getElement().then(elementReady), proxyFrame ? proxyFrame.getElement() : null, proxyPrerenderFrame ? proxyPrerenderFrame.getElement() : null ]).then(function(_ref17) {
+                return promise_ZalgoPromise.all([ proxyContainer.get().then(elementReady), proxyFrame ? proxyFrame.get() : null, proxyPrerenderFrame ? proxyPrerenderFrame.get() : null ]).then(function(_ref17) {
                     var container = _ref17[0], innerContainer = _this25.renderTemplate(_this25.component.containerTemplate, {
                         context: context,
                         uid: uid,
@@ -2726,7 +2715,7 @@
                     });
                     if (innerContainer) return appendChild(container, innerContainer), _this25.clean.register(function() {
                         return destroyElement(innerContainer);
-                    }), _this25.proxyContainer = getProxyElement(innerContainer), _this25.proxyContainer;
+                    }), getProxyObject(innerContainer);
                 });
             }, _proto.destroy = function(err, trigger) {
                 var _this26 = this;
@@ -2795,19 +2784,21 @@
         function defaultContainerTemplate(_ref) {
             var uid = _ref.uid, frame = _ref.frame, prerenderFrame = _ref.prerenderFrame, doc = _ref.doc, event = _ref.event, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
             if (frame && prerenderFrame) {
+                var div = doc.createElement("div");
+                div.setAttribute("id", uid);
+                var style = doc.createElement("style");
+                return style.appendChild(doc.createTextNode("\n            #" + uid + " {\n                display: inline-block;\n                position: relative;\n                width: " + width + ";\n                height: " + height + ";\n            }\n\n            #" + uid + " > iframe {\n                display: inline-block;\n                position: absolute;\n                width: 100%;\n                height: 100%;\n                top: 0;\n                left: 0;\n                transition: opacity .2s ease-in-out;\n            }\n\n            #" + uid + " > iframe." + CLASS.INVISIBLE + " {\n                opacity: 0;\n            }\n\n            #" + uid + " > iframe." + CLASS.VISIBLE + " {\n                opacity: 1;\n        }\n        ")), 
+                div.appendChild(frame), div.appendChild(prerenderFrame), div.appendChild(style), 
                 prerenderFrame.classList.add(CLASS.VISIBLE), frame.classList.add(CLASS.INVISIBLE), 
                 event.on(EVENT.RENDERED, function() {
                     prerenderFrame.classList.remove(CLASS.VISIBLE), prerenderFrame.classList.add(CLASS.INVISIBLE), 
                     frame.classList.remove(CLASS.INVISIBLE), frame.classList.add(CLASS.VISIBLE), setTimeout(function() {
                         destroyElement(prerenderFrame);
                     }, 1);
-                });
-                var div = doc.createElement("div");
-                div.setAttribute("id", uid);
-                var style = doc.createElement("style");
-                return style.appendChild(doc.createTextNode("\n            #" + uid + " {\n                display: inline-block;\n                position: relative;\n                width: " + width + ";\n                height: " + height + ";\n            }\n\n            #" + uid + " > iframe {\n                display: inline-block;\n                position: absolute;\n                width: 100%;\n                height: 100%;\n                top: 0;\n                left: 0;\n                transition: opacity .2s ease-in-out;\n            }\n\n            #" + uid + " > iframe." + CLASS.INVISIBLE + " {\n                opacity: 0;\n            }\n\n            #" + uid + " > iframe." + CLASS.VISIBLE + " {\n                opacity: 1;\n        }\n        ")), 
-                div.appendChild(frame), div.appendChild(prerenderFrame), div.appendChild(style), 
-                div;
+                }), event.on(EVENT.RESIZE, function(_ref2) {
+                    var newWidth = _ref2.width, newHeight = _ref2.height;
+                    "number" == typeof newWidth && (div.style.width = toCSS(newWidth)), "number" == typeof newHeight && (div.style.height = toCSS(newHeight));
+                }), div;
             }
         }
         function defaultPrerenderTemplate(_ref) {
@@ -3089,7 +3080,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_16__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            destroyAll(), delete window.__zoid_9_0_17__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
             delete window.__post_robot_10_0_10__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {

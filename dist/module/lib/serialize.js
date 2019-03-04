@@ -1,34 +1,19 @@
 "use strict";
 
 exports.__esModule = true;
-exports.getProxyElement = getProxyElement;
+exports.getProxyObject = getProxyObject;
 
 var _src = require("zalgo-promise/src");
 
-var _src2 = require("belter/src");
-
-function getProxyElement(element) {
+function getProxyObject(obj) {
   return {
-    resize({
-      width,
-      height
-    }) {
-      if (typeof width === 'number') {
-        element.style.width = (0, _src2.toCSS)(width);
-      }
-
-      if (typeof height === 'number') {
-        element.style.height = (0, _src2.toCSS)(height);
-      }
-    },
-
-    getElement() {
+    get() {
       return _src.ZalgoPromise.try(() => {
         if (this.source && this.source !== window) {
-          throw new Error(`Can not call getElement from a remote window`);
+          throw new Error(`Can not call get on proxy object from a remote window`);
         }
 
-        return element;
+        return obj;
       });
     }
 

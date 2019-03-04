@@ -29,17 +29,6 @@ function defaultContainerTemplate({
       return;
     }
 
-    prerenderFrame.classList.add(CLASS.VISIBLE);
-    frame.classList.add(CLASS.INVISIBLE);
-    event.on(_constants.EVENT.RENDERED, () => {
-      prerenderFrame.classList.remove(CLASS.VISIBLE);
-      prerenderFrame.classList.add(CLASS.INVISIBLE);
-      frame.classList.remove(CLASS.INVISIBLE);
-      frame.classList.add(CLASS.VISIBLE);
-      setTimeout(() => {
-        (0, _src.destroyElement)(prerenderFrame);
-      }, 1);
-    });
     const div = doc.createElement('div');
     div.setAttribute('id', uid);
     const style = doc.createElement('style');
@@ -72,6 +61,29 @@ function defaultContainerTemplate({
     div.appendChild(frame);
     div.appendChild(prerenderFrame);
     div.appendChild(style);
+    prerenderFrame.classList.add(CLASS.VISIBLE);
+    frame.classList.add(CLASS.INVISIBLE);
+    event.on(_constants.EVENT.RENDERED, () => {
+      prerenderFrame.classList.remove(CLASS.VISIBLE);
+      prerenderFrame.classList.add(CLASS.INVISIBLE);
+      frame.classList.remove(CLASS.INVISIBLE);
+      frame.classList.add(CLASS.VISIBLE);
+      setTimeout(() => {
+        (0, _src.destroyElement)(prerenderFrame);
+      }, 1);
+    });
+    event.on(_constants.EVENT.RESIZE, ({
+      width: newWidth,
+      height: newHeight
+    }) => {
+      if (typeof newWidth === 'number') {
+        div.style.width = (0, _src.toCSS)(newWidth);
+      }
+
+      if (typeof newHeight === 'number') {
+        div.style.height = (0, _src.toCSS)(newHeight);
+      }
+    });
     return div;
   }
 }

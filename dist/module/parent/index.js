@@ -34,7 +34,6 @@ class ParentComponent {
     this.state = void 0;
     this.child = void 0;
     this.proxyWin = void 0;
-    this.proxyContainer = void 0;
     this.initPromise = new _src3.ZalgoPromise();
     this.handledErrors = []; // $FlowFixMe
 
@@ -106,8 +105,6 @@ class ParentComponent {
       tasks.setState = _src3.ZalgoPromise.all([tasks.open.then(proxyWin => {
         this.proxyWin = proxyWin;
         return this.setProxyWin(proxyWin);
-      }), tasks.renderContainer.then(proxyContainer => {
-        this.proxyContainer = proxyContainer;
       })]);
       tasks.prerender = _src3.ZalgoPromise.all([tasks.openPrerender, tasks.setState]).then(([proxyPrerenderWin]) => {
         return this.prerender(proxyPrerenderWin, {
@@ -158,7 +155,7 @@ class ParentComponent {
     return _src3.ZalgoPromise.try(() => {
       return (0, _src4.elementReady)(container);
     }).then(containerElement => {
-      return (0, _lib.getProxyElement)(containerElement);
+      return (0, _lib.getProxyObject)(containerElement);
     });
   }
 
@@ -492,12 +489,10 @@ class ParentComponent {
     height
   }) {
     return _src3.ZalgoPromise.try(() => {
-      if (this.driver.resize) {
-        return this.driver.resize.call(this, {
-          width,
-          height
-        });
-      }
+      this.event.trigger(_constants.EVENT.RESIZE, {
+        width,
+        height
+      });
     });
   }
 
@@ -619,9 +614,9 @@ class ParentComponent {
     context,
     uid
   }) {
-    return _src3.ZalgoPromise.all([proxyContainer.getElement().then(_src4.elementReady), // $FlowFixMe
-    proxyFrame ? proxyFrame.getElement() : null, // $FlowFixMe
-    proxyPrerenderFrame ? proxyPrerenderFrame.getElement() : null]).then(([container, frame, prerenderFrame]) => {
+    return _src3.ZalgoPromise.all([proxyContainer.get().then(_src4.elementReady), // $FlowFixMe
+    proxyFrame ? proxyFrame.get() : null, // $FlowFixMe
+    proxyPrerenderFrame ? proxyPrerenderFrame.get() : null]).then(([container, frame, prerenderFrame]) => {
       const innerContainer = this.renderTemplate(this.component.containerTemplate, {
         context,
         uid,
@@ -634,8 +629,7 @@ class ParentComponent {
       if (innerContainer) {
         (0, _src4.appendChild)(container, innerContainer);
         this.clean.register(() => (0, _src4.destroyElement)(innerContainer));
-        this.proxyContainer = (0, _lib.getProxyElement)(innerContainer);
-        return this.proxyContainer;
+        return (0, _lib.getProxyObject)(innerContainer);
       }
     });
   }
