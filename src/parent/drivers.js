@@ -7,15 +7,15 @@ import { iframe, popup, destroyElement, normalizeDimension, watchElementForClose
     awaitFrameWindow, uniqueID } from 'belter/src';
 
 import { CONTEXT } from '../constants';
-import { getProxyElement, type ProxyElement } from '../lib';
+import { getProxyObject, type ProxyObject } from '../lib';
 
 
 export type ContextDriverType = {|
     openOnClick : boolean,
-    openFrame? : () => ProxyElement<HTMLIFrameElement>,
-    open : (?ProxyElement<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
-    openPrerenderFrame? : () => ProxyElement<HTMLIFrameElement>,
-    openPrerender : (ProxyWindow, ?ProxyElement<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
+    openFrame? : () => ProxyObject<HTMLIFrameElement>,
+    open : (?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
+    openPrerenderFrame? : () => ProxyObject<HTMLIFrameElement>,
+    openPrerender : (ProxyWindow, ?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
     resize? : ({ width : ?number, height : ?number }) => void,
     delegate : $ReadOnlyArray<string>
 |};
@@ -25,8 +25,8 @@ export const RENDER_DRIVERS : { [string] : ContextDriverType } = {};
 RENDER_DRIVERS[CONTEXT.IFRAME] = {
     openOnClick: false,
 
-    openFrame() : ProxyElement<HTMLIFrameElement> {
-        return getProxyElement(iframe({
+    openFrame() : ProxyObject<HTMLIFrameElement> {
+        return getProxyObject(iframe({
             attributes: {
                 title: this.component.name,
                 ...this.component.attributes.iframe
@@ -34,12 +34,12 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         }));
     },
 
-    open(proxyFrame : ?ProxyElement<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
+    open(proxyFrame : ?ProxyObject<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
         if (!proxyFrame) {
             throw new Error(`Expected proxy frame to be passed`);
         }
 
-        return proxyFrame.getElement().then(frame => {
+        return proxyFrame.get().then(frame => {
             return awaitFrameWindow(frame).then(win => {
 
                 const frameWatcher = watchElementForClose(frame, () => this.close());
@@ -52,8 +52,8 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         });
     },
 
-    openPrerenderFrame() : ProxyElement<HTMLIFrameElement> {
-        return getProxyElement(iframe({
+    openPrerenderFrame() : ProxyObject<HTMLIFrameElement> {
+        return getProxyObject(iframe({
             attributes: {
                 name:  `__zoid_prerender_frame__${ this.component.name }_${ uniqueID() }__`,
                 title: `prerender__${ this.component.name }`,
@@ -62,12 +62,12 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         }));
     },
 
-    openPrerender(proxyWin : ProxyWindow, proxyPrerenderFrame : ?ProxyElement<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
+    openPrerender(proxyWin : ProxyWindow, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
         if (!proxyPrerenderFrame) {
             throw new Error(`Expected proxy frame to be passed`);
         }
         
-        return proxyPrerenderFrame.getElement().then(prerenderFrame => {
+        return proxyPrerenderFrame.get().then(prerenderFrame => {
             this.clean.register(() => destroyElement(prerenderFrame));
 
             return awaitFrameWindow(prerenderFrame).then(prerenderFrameWindow => {
@@ -86,13 +86,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         'prerender',
         'open',
         'openPrerender'
-    ],
-
-    resize({ width, height } : { width : ?number, height : ?number }) {
-        if (this.proxyContainer) {
-            this.proxyContainer.resize({ width, height });
-        }
-    }
+    ]
 };
 
 if (__ZOID__.__POPUP_SUPPORT__) {

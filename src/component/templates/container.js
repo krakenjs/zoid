@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint react/react-in-jsx-scope: off */
 
-import { destroyElement } from 'belter/src';
+import { destroyElement, toCSS } from 'belter/src';
 
 import { type RenderOptionsType } from '../../parent';
 import { EVENT } from '../../constants';
@@ -16,21 +16,6 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, e
         if (!frame || !prerenderFrame) {
             return;
         }
-    
-        prerenderFrame.classList.add(CLASS.VISIBLE);
-        frame.classList.add(CLASS.INVISIBLE);
-    
-        event.on(EVENT.RENDERED, () => {
-            prerenderFrame.classList.remove(CLASS.VISIBLE);
-            prerenderFrame.classList.add(CLASS.INVISIBLE);
-    
-            frame.classList.remove(CLASS.INVISIBLE);
-            frame.classList.add(CLASS.VISIBLE);
-    
-            setTimeout(() => {
-                destroyElement(prerenderFrame);
-            }, 1);
-        });
 
         const div = doc.createElement('div');
         div.setAttribute('id', uid);
@@ -66,6 +51,31 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, e
         div.appendChild(frame);
         div.appendChild(prerenderFrame);
         div.appendChild(style);
+
+        prerenderFrame.classList.add(CLASS.VISIBLE);
+        frame.classList.add(CLASS.INVISIBLE);
+    
+        event.on(EVENT.RENDERED, () => {
+            prerenderFrame.classList.remove(CLASS.VISIBLE);
+            prerenderFrame.classList.add(CLASS.INVISIBLE);
+    
+            frame.classList.remove(CLASS.INVISIBLE);
+            frame.classList.add(CLASS.VISIBLE);
+    
+            setTimeout(() => {
+                destroyElement(prerenderFrame);
+            }, 1);
+        });
+
+        event.on(EVENT.RESIZE, ({ width: newWidth, height: newHeight }) => {
+            if (typeof newWidth === 'number') {
+                div.style.width = toCSS(newWidth);
+            }
+    
+            if (typeof newHeight === 'number') {
+                div.style.height = toCSS(newHeight);
+            }
+        });
 
         return div;
     }

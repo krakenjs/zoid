@@ -1,32 +1,20 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { toCSS } from 'belter/src';
 
-export type ProxyElement<T : HTMLElement> = {|
-    resize : ({ width : ?number, height : ?number }) => void,
-    getElement : () => ZalgoPromise<T>
+export type ProxyObject<T> = {|
+    get : () => ZalgoPromise<T>
 |};
 
-export function getProxyElement<T : HTMLElement>(element : T) : ProxyElement<T> {
+export function getProxyObject<T>(obj : T) : ProxyObject<T> {
     return {
-        resize({ width, height } : { width : ?number, height : ?number }) {
-            if (typeof width === 'number') {
-                element.style.width = toCSS(width);
-            }
-    
-            if (typeof height === 'number') {
-                element.style.height = toCSS(height);
-            }
-        },
-
-        getElement() : ZalgoPromise<T> {
+        get() : ZalgoPromise<T> {
             return ZalgoPromise.try(() => {
                 if (this.source && this.source !== window) {
-                    throw new Error(`Can not call getElement from a remote window`);
+                    throw new Error(`Can not call get on proxy object from a remote window`);
                 }
     
-                return element;
+                return obj;
             });
         }
     };
