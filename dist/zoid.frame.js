@@ -1801,7 +1801,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_17__ || (win.__zoid_9_0_17__ = {}), win.__zoid_9_0_17__;
+            return win.__zoid_9_0_18__ || (win.__zoid_9_0_18__ = {}), win.__zoid_9_0_18__;
         }
         function getProxyObject(obj) {
             return {
@@ -1934,7 +1934,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_16" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_16");
+                    if ("9_0_17" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_17");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2283,7 +2283,7 @@
                         return _ref5[0].setName(_ref5[1]);
                     }), tasks.watchForClose = tasks.open.then(function(proxyWin) {
                         return _this3.watchForClose(proxyWin);
-                    }), tasks.onDisplay = tasks.prerender.then(function() {
+                    }), tasks.onDisplay = promise_ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(function() {
                         return _this3.event.trigger(EVENT.DISPLAY);
                     }), tasks.openBridge = tasks.open.then(function(proxyWin) {
                         return _this3.openBridge(proxyWin, initialDomain, context);
@@ -2333,7 +2333,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_16",
+                    version: "9_0_17",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -3080,7 +3080,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_17__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            destroyAll(), delete window.__zoid_9_0_18__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
             delete window.__post_robot_10_0_10__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {

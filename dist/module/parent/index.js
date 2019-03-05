@@ -131,7 +131,7 @@ class ParentComponent {
       tasks.watchForClose = tasks.open.then(proxyWin => {
         return this.watchForClose(proxyWin);
       });
-      tasks.onDisplay = tasks.prerender.then(() => {
+      tasks.onDisplay = _src3.ZalgoPromise.all([tasks.renderContainer, tasks.prerender]).then(() => {
         return this.event.trigger(_constants.EVENT.DISPLAY);
       });
       tasks.openBridge = tasks.open.then(proxyWin => {
