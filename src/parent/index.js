@@ -200,7 +200,7 @@ export class ParentComponent<P> {
                 return this.watchForClose(proxyWin);
             });
 
-            tasks.onDisplay = tasks.prerender.then(() => {
+            tasks.onDisplay = ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(() => {
                 return this.event.trigger(EVENT.DISPLAY);
             });
 
