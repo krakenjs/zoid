@@ -30,7 +30,8 @@ export type ChildHelpers<P> = {|
     resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
     onProps : ((PropsType<P>) => void) => void,
-    getParent : () => CrossDomainWindowType
+    getParent : () => CrossDomainWindowType,
+    getParentDomain : () => string
 |};
 
 /*  Child Component
@@ -49,6 +50,7 @@ export class ChildComponent<P> {
     props : PropsType<P>
     context : string
     parent : ParentExportsType<P>
+    parentDomain : string
     parentComponentWindow : CrossDomainWindowType
 
     onPropHandlers : Array<(PropsType<P>) => void> // eslint-disable-line flowtype/no-mutable-array
@@ -73,6 +75,7 @@ export class ChildComponent<P> {
 
             this.context = context;
             this.parentComponentWindow = this.getParentComponentWindow(parent);
+            this.parentDomain = domain;
             this.parent = deserializeMessage(this.parentComponentWindow, domain, exports);
 
             this.checkParentDomain(domain);
@@ -95,12 +98,13 @@ export class ChildComponent<P> {
 
     getHelpers() : ChildHelpers<P> {
         return {
-            focus:         () => this.focus(),
-            close:         () => this.close(),
-            resize:        ({ width, height }) => this.resize({ width, height }),
-            onError:       (err) => this.onError(err),
-            onProps:       (handler) => this.onProps(handler),
-            getParent:     () => this.parentComponentWindow
+            focus:           () => this.focus(),
+            close:           () => this.close(),
+            resize:          ({ width, height }) => this.resize({ width, height }),
+            onError:         (err) => this.onError(err),
+            onProps:         (handler) => this.onProps(handler),
+            getParent:       () => this.parentComponentWindow,
+            getParentDomain: () => this.parentDomain
         };
     }
 

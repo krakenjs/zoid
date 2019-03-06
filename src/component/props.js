@@ -149,6 +149,13 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             childDecorate: ({ getParent }) => getParent
         },
 
+        getParentDomain: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ getParentDomain }) => getParentDomain
+        },
+
         onDisplay: {
             type:          'function',
             required:      false,
