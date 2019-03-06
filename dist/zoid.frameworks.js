@@ -1854,7 +1854,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_18__ || (win.__zoid_9_0_18__ = {}), win.__zoid_9_0_18__;
+            return win.__zoid_9_0_19__ || (win.__zoid_9_0_19__ = {}), win.__zoid_9_0_19__;
         }
         function getProxyObject(obj) {
             return {
@@ -1982,15 +1982,15 @@
             function ChildComponent(component) {
                 var _this = this;
                 this.component = void 0, this.props = void 0, this.context = void 0, this.parent = void 0, 
-                this.parentComponentWindow = void 0, this.onPropHandlers = void 0, this.autoResize = void 0, 
-                promise_ZalgoPromise.try(function() {
+                this.parentDomain = void 0, this.parentComponentWindow = void 0, this.onPropHandlers = void 0, 
+                this.autoResize = void 0, promise_ZalgoPromise.try(function() {
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_17" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_17");
+                    if ("9_0_18" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_18");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
-                    _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
+                    _this.parentDomain = domain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
                     _this.checkParentDomain(domain);
                     var initialProps = _this.getPropsByRef(_this.parentComponentWindow, domain, props);
                     return _this.setProps(initialProps, domain), markWindowKnown(_this.parentComponentWindow), 
@@ -2025,6 +2025,9 @@
                     },
                     getParent: function() {
                         return _this2.parentComponentWindow;
+                    },
+                    getParentDomain: function() {
+                        return _this2.parentDomain;
                     }
                 };
             }, _proto.checkParentDomain = function(domain) {
@@ -2386,7 +2389,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_17",
+                    version: "9_0_18",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -3068,6 +3071,14 @@
                             return _ref7.getParent;
                         }
                     },
+                    getParentDomain: {
+                        type: "function",
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref8) {
+                            return _ref8.getParentDomain;
+                        }
+                    },
                     onDisplay: {
                         type: "function",
                         required: !1,
@@ -3102,8 +3113,8 @@
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref8) {
-                            return _ref8.onError;
+                        childDecorate: function(_ref9) {
+                            return _ref9.onError;
                         }
                     },
                     onProps: {
@@ -3111,8 +3122,8 @@
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
-                        childDecorate: function(_ref9) {
-                            return _ref9.onProps;
+                        childDecorate: function(_ref10) {
+                            return _ref10.onProps;
                         }
                     }
                 }, this.props = options.props || {};
@@ -3257,7 +3268,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_18__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            destroyAll(), delete window.__zoid_9_0_19__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
             delete window.__post_robot_10_0_10__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {

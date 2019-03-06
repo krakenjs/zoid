@@ -46,6 +46,7 @@ class ChildComponent {
     this.props = void 0;
     this.context = void 0;
     this.parent = void 0;
+    this.parentDomain = void 0;
     this.parentComponentWindow = void 0;
     this.onPropHandlers = void 0;
     this.autoResize = void 0;
@@ -72,6 +73,7 @@ class ChildComponent {
       } = childPayload;
       this.context = context;
       this.parentComponentWindow = this.getParentComponentWindow(parent);
+      this.parentDomain = domain;
       this.parent = (0, _src2.deserializeMessage)(this.parentComponentWindow, domain, exports);
       this.checkParentDomain(domain);
       const initialProps = this.getPropsByRef(this.parentComponentWindow, domain, props);
@@ -99,7 +101,8 @@ class ChildComponent {
       }),
       onError: err => this.onError(err),
       onProps: handler => this.onProps(handler),
-      getParent: () => this.parentComponentWindow
+      getParent: () => this.parentComponentWindow,
+      getParentDomain: () => this.parentDomain
     };
   }
 
