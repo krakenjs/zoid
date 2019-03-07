@@ -92,6 +92,36 @@ describe('zoid window prop cases', () => {
         });
     });
 
+    it('should pass a custom popup to a component and close it', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-custom-close-popup',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const win = window.open('', '');
+
+            const component = window.__component__();
+            return component({
+                window: win,
+
+                onClose: expect('onClose'),
+
+                doClose: expect('doClose', () => {
+                    win.close();
+                }),
+
+                run: `
+                    window.xprops.doClose();
+                `
+            }).render(document.body);
+        });
+    });
+
     it('should renderTo with a custom iframe passed through an iframe', () => {
         return wrapPromise(({ expect }) => {
 
@@ -200,6 +230,51 @@ describe('zoid window prop cases', () => {
                         
                         run: \`
                             window.xprops.passUIDGetter(() => window.uid);
+                        \`
+                    }).renderTo(window.parent, 'body');
+                `
+            }).render(document.body);
+        });
+    });
+
+    it('should renderTo with a custom popup passed through an iframe, and close the popup', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-custom-popup-close-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-custom-popup-close-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const win = window.open('', '');
+
+            return window.__component__().simple({
+                myCustomWindow: win,
+
+                customWindowClosed: expect('customWindowClosed'),
+
+                closeCustomWindow: expect('closeCustomWindow', () => {
+                    win.close();
+                }),
+
+                run: `
+                    window.__component__().remote({
+                        window: window.xprops.myCustomWindow,
+                        onClose: window.xprops.customWindowClosed,
+                        closeCustomWindow: window.xprops.closeCustomWindow,
+                        
+                        run: \`
+                            window.xprops.closeCustomWindow();
                         \`
                     }).renderTo(window.parent, 'body');
                 `
