@@ -3,7 +3,7 @@
 
 import { send, bridge, serializeMessage, ProxyWindow, toProxyWindow } from 'post-robot/src';
 import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
-    onCloseWindow, getDomain, type CrossDomainWindowType,
+    getDomain, type CrossDomainWindowType,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
@@ -197,7 +197,7 @@ export class ParentComponent<P> {
             });
 
             tasks.watchForClose = tasks.open.then(proxyWin => {
-                return this.watchForClose(proxyWin);
+                this.watchForClose(proxyWin);
             });
 
             tasks.onDisplay = ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(() => {
@@ -464,13 +464,21 @@ export class ParentComponent<P> {
     }
 
     watchForClose(proxyWin : ProxyWindow) : ZalgoPromise<void> {
-        return proxyWin.awaitWindow().then(win => {
-            const closeWindowListener = onCloseWindow(win, () => {
+        let cancelled = false;
+
+        this.clean.register(() => {
+            cancelled = true;
+        });
+
+        return ZalgoPromise.delay(2000).then(() => {
+            return proxyWin.isClosed();
+        }).then(isClosed => {
+            if (isClosed) {
                 this.component.log(`detect_close_child`);
                 return this.close();
-            }, 2000);
-
-            this.clean.register(closeWindowListener.cancel);
+            } else if (!cancelled) {
+                return this.watchForClose(proxyWin);
+            }
         });
     }
 
