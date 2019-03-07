@@ -241,12 +241,12 @@ export class ParentComponent<P> {
         return `__${ ZOID }__${ this.component.name }__${ base64encode(JSON.stringify(childPayload)) }__`;
     }
 
-    getPropsRef(proxyWin : ProxyWindow, target : CrossDomainWindowType, domain : string | RegExp, uid : string) : PropRef {
+    getPropsRef(proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, uid : string) : PropRef {
         const value = serializeMessage(proxyWin, domain, this.getPropsForChild(domain));
 
-        const propRef = isSameDomain(target)
-            ? { type: INITIAL_PROPS.RAW, value }
-            : { type: INITIAL_PROPS.UID, uid };
+        const propRef = (initialDomain === getDomain())
+            ? { type: INITIAL_PROPS.UID, uid }
+            : { type: INITIAL_PROPS.RAW, value };
 
         if (propRef.type === INITIAL_PROPS.UID) {
             const global = getGlobal(window);
@@ -269,7 +269,7 @@ export class ParentComponent<P> {
             domain:  getDomain(window),
             tag:     this.component.tag,
             parent:  this.getWindowRef(target, initialDomain, uid, context),
-            props:   this.getPropsRef(proxyWin, target, domain, uid),
+            props:   this.getPropsRef(proxyWin, initialDomain, domain, uid),
             exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
         };
     }
