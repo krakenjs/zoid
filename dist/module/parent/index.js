@@ -129,7 +129,7 @@ class ParentComponent {
         return proxyWin.setName(windowName);
       });
       tasks.watchForClose = tasks.open.then(proxyWin => {
-        return this.watchForClose(proxyWin);
+        this.watchForClose(proxyWin);
       });
       tasks.onDisplay = _src3.ZalgoPromise.all([tasks.renderContainer, tasks.prerender]).then(() => {
         return this.event.trigger(_constants.EVENT.DISPLAY);
@@ -178,14 +178,14 @@ class ParentComponent {
     return `__${_constants.ZOID}__${this.component.name}__${(0, _src4.base64encode)(JSON.stringify(childPayload))}__`;
   }
 
-  getPropsRef(proxyWin, target, domain, uid) {
+  getPropsRef(proxyWin, initialDomain, domain, uid) {
     const value = (0, _src.serializeMessage)(proxyWin, domain, this.getPropsForChild(domain));
-    const propRef = (0, _src2.isSameDomain)(target) ? {
-      type: _constants.INITIAL_PROPS.RAW,
-      value
-    } : {
+    const propRef = initialDomain === (0, _src2.getDomain)() ? {
       type: _constants.INITIAL_PROPS.UID,
       uid
+    } : {
+      type: _constants.INITIAL_PROPS.RAW,
+      value
     };
 
     if (propRef.type === _constants.INITIAL_PROPS.UID) {
@@ -215,7 +215,7 @@ class ParentComponent {
       domain: (0, _src2.getDomain)(window),
       tag: this.component.tag,
       parent: this.getWindowRef(target, initialDomain, uid, context),
-      props: this.getPropsRef(proxyWin, target, domain, uid),
+      props: this.getPropsRef(proxyWin, initialDomain, domain, uid),
       exports: (0, _src.serializeMessage)(proxyWin, domain, this.buildParentExports(proxyWin))
     };
   }
@@ -423,12 +423,19 @@ class ParentComponent {
   }
 
   watchForClose(proxyWin) {
-    return proxyWin.awaitWindow().then(win => {
-      const closeWindowListener = (0, _src2.onCloseWindow)(win, () => {
+    let cancelled = false;
+    this.clean.register(() => {
+      cancelled = true;
+    });
+    return _src3.ZalgoPromise.delay(2000).then(() => {
+      return proxyWin.isClosed();
+    }).then(isClosed => {
+      if (isClosed) {
         this.component.log(`detect_close_child`);
         return this.close();
-      }, 2000);
-      this.clean.register(closeWindowListener.cancel);
+      } else if (!cancelled) {
+        return this.watchForClose(proxyWin);
+      }
     });
   }
 
