@@ -337,6 +337,7 @@ class Component {
 exports.Component = Component;
 
 function create(options) {
+  (0, _src.setup)();
   const component = new Component(options);
 
   const init = props => component.init(props);

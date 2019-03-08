@@ -1019,7 +1019,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_13__ : win.__post_robot_10_0_13__ = win.__post_robot_10_0_13__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_14__ : win.__post_robot_10_0_14__ = win.__post_robot_10_0_14__ || {};
         }
         var getObj = function() {
             return {};
@@ -1527,7 +1527,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_13__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_14__ = _extends({
                 id: uniqueID(),
                 origin: utils_getDomain(window)
             }, message), _serializeMessage), {
@@ -1578,8 +1578,8 @@
             var name = _ref.name, win = _ref.win, domain = _ref.domain, requestListeners = windowStore("requestListeners");
             if (win === constants_WILDCARD && (win = null), domain === constants_WILDCARD && (domain = null), 
             !name) throw new Error("Name required to get request listener");
-            for (var _i2 = 0, _ref3 = [ win, getWildcard() ]; _i2 < _ref3.length; _i2++) {
-                var winQualifier = _ref3[_i2];
+            for (var _i4 = 0, _ref3 = [ win, getWildcard() ]; _i4 < _ref3.length; _i4++) {
+                var winQualifier = _ref3[_i4];
                 if (winQualifier) {
                     var nameListeners = requestListeners.get(winQualifier);
                     if (nameListeners) {
@@ -1587,8 +1587,8 @@
                         if (domainListeners) {
                             if (domain && "string" == typeof domain) {
                                 if (domainListeners[domain]) return domainListeners[domain];
-                                if (domainListeners[__DOMAIN_REGEX__]) for (var _i4 = 0, _domainListeners$__DO2 = domainListeners[__DOMAIN_REGEX__]; _i4 < _domainListeners$__DO2.length; _i4++) {
-                                    var _domainListeners$__DO3 = _domainListeners$__DO2[_i4], listener = _domainListeners$__DO3.listener;
+                                if (domainListeners[__DOMAIN_REGEX__]) for (var _i6 = 0, _domainListeners$__DO2 = domainListeners[__DOMAIN_REGEX__]; _i6 < _domainListeners$__DO2.length; _i6++) {
+                                    var _domainListeners$__DO3 = _domainListeners$__DO2[_i6], listener = _domainListeners$__DO3.listener;
                                     if (matchDomain(_domainListeners$__DO3.regex, domain)) return listener;
                                 }
                             }
@@ -1675,7 +1675,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_13__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_14__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1695,26 +1695,26 @@
                 var name = _ref4.name, win = _ref4.win, domain = _ref4.domain, requestListeners = windowStore("requestListeners");
                 if (!name || "string" != typeof name) throw new Error("Name required to add request listener");
                 if (Array.isArray(win)) {
-                    for (var listenersCollection = [], _i6 = 0, _win2 = win; _i6 < _win2.length; _i6++) listenersCollection.push(addRequestListener({
+                    for (var listenersCollection = [], _i8 = 0, _win2 = win; _i8 < _win2.length; _i8++) listenersCollection.push(addRequestListener({
                         name: name,
                         domain: domain,
-                        win: _win2[_i6]
+                        win: _win2[_i8]
                     }, listener));
                     return {
                         cancel: function() {
-                            for (var _i8 = 0; _i8 < listenersCollection.length; _i8++) listenersCollection[_i8].cancel();
+                            for (var _i10 = 0; _i10 < listenersCollection.length; _i10++) listenersCollection[_i10].cancel();
                         }
                     };
                 }
                 if (Array.isArray(domain)) {
-                    for (var _listenersCollection = [], _i10 = 0, _domain2 = domain; _i10 < _domain2.length; _i10++) _listenersCollection.push(addRequestListener({
+                    for (var _listenersCollection = [], _i12 = 0, _domain2 = domain; _i12 < _domain2.length; _i12++) _listenersCollection.push(addRequestListener({
                         name: name,
                         win: win,
-                        domain: _domain2[_i10]
+                        domain: _domain2[_i12]
                     }, listener));
                     return {
                         cancel: function() {
-                            for (var _i12 = 0; _i12 < _listenersCollection.length; _i12++) _listenersCollection[_i12].cancel();
+                            for (var _i14 = 0; _i14 < _listenersCollection.length; _i14++) _listenersCollection[_i14].cancel();
                         }
                     };
                 }
@@ -1819,7 +1819,7 @@
                     var totalAckTimeout = function(win) {
                         return windowStore("knownWindows").get(win, !1);
                     }(win) ? 1e4 : 2e3, totalResTimeout = responseTimeout, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, interval = safeInterval(function() {
-                        return isWindowClosed(win) ? promise.reject(new Error("Window closed for " + name + " before " + (responseListener.ack ? "response" : "ack"))) : (ackTimeout = Math.max(ackTimeout - 500, 0), 
+                        return isWindowClosed(win) ? promise.reject(new Error("Window closed for " + name + " before " + (responseListener.ack ? "response" : "ack"))) : responseListener.cancelled ? promise.reject(new Error("Response listener was cancelled for " + name)) : (ackTimeout = Math.max(ackTimeout - 500, 0), 
                         -1 !== resTimeout && (resTimeout = Math.max(resTimeout - 500, 0)), responseListener.ack || 0 !== ackTimeout ? 0 === resTimeout ? promise.reject(new Error("No response for postMessage " + logName + " in " + utils_getDomain() + " in " + totalResTimeout + "ms")) : void 0 : promise.reject(new Error("No ack for postMessage " + logName + " in " + utils_getDomain() + " in " + totalAckTimeout + "ms")));
                     }, 500);
                     promise.finally(function() {
@@ -1857,7 +1857,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_20__ || (win.__zoid_9_0_20__ = {}), win.__zoid_9_0_20__;
+            return win.__zoid_9_0_21__ || (win.__zoid_9_0_21__ = {}), win.__zoid_9_0_21__;
         }
         function getProxyObject(obj) {
             return {
@@ -1870,65 +1870,6 @@
                 }
             };
         }
-        !function() {
-            var _ref3, on, send, global;
-            global_getGlobal().initialized || (global_getGlobal().initialized = !0, on = (_ref3 = {
-                on: on_on,
-                send: send_send
-            }).on, send = _ref3.send, (global = global_getGlobal()).receiveMessage = global.receiveMessage || function(message) {
-                return receive_receiveMessage(message, {
-                    on: on,
-                    send: send
-                });
-            }, function(_ref5) {
-                var on = _ref5.on, send = _ref5.send;
-                globalStore().getOrSet("postMessageListener", function() {
-                    return addEventListener(window, "message", function(event) {
-                        !function(event, _ref4) {
-                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
-                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
-                                if (!origin) throw new Error("Post message did not have origin domain");
-                                receive_receiveMessage({
-                                    source: source,
-                                    origin: origin,
-                                    data: data
-                                }, {
-                                    on: on,
-                                    send: send
-                                });
-                            }
-                        }(event, {
-                            on: on,
-                            send: send
-                        });
-                    });
-                });
-            }({
-                on: on_on,
-                send: send_send
-            }), function(_ref7) {
-                var on = _ref7.on, send = _ref7.send;
-                globalStore("builtinListeners").getOrSet("helloListener", function() {
-                    var listener = on(MESSAGE_NAME.HELLO, {
-                        domain: constants_WILDCARD
-                    }, function(_ref2) {
-                        var source = _ref2.source, origin = _ref2.origin;
-                        return getHelloPromise(source).resolve({
-                            win: source,
-                            domain: origin
-                        }), {
-                            instanceID: getInstanceID()
-                        };
-                    }), parent = getAncestor();
-                    return parent && sayHello(parent, {
-                        send: send
-                    }).catch(src_util_noop), listener;
-                });
-            }({
-                on: on_on,
-                send: send_send
-            }));
-        }();
         var ZOID = "zoid", POST_MESSAGE_DELEGATE = ZOID + "_delegate", POST_MESSAGE_ALLOW_DELEGATE = ZOID + "_allow_delegate", PROP_TYPE = {
             STRING: "string",
             OBJECT: "object",
@@ -1990,7 +1931,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_19" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_19");
+                    if ("9_0_20" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_20");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = domain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2392,7 +2333,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_19",
+                    version: "9_0_20",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -3252,6 +3193,63 @@
             }, Component;
         }();
         function create(options) {
+            var _ref3, on, send, global;
+            global_getGlobal().initialized || (global_getGlobal().initialized = !0, on = (_ref3 = {
+                on: on_on,
+                send: send_send
+            }).on, send = _ref3.send, (global = global_getGlobal()).receiveMessage = global.receiveMessage || function(message) {
+                return receive_receiveMessage(message, {
+                    on: on,
+                    send: send
+                });
+            }, function(_ref5) {
+                var on = _ref5.on, send = _ref5.send;
+                globalStore().getOrSet("postMessageListener", function() {
+                    return addEventListener(window, "message", function(event) {
+                        !function(event, _ref4) {
+                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
+                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
+                                if (!origin) throw new Error("Post message did not have origin domain");
+                                receive_receiveMessage({
+                                    source: source,
+                                    origin: origin,
+                                    data: data
+                                }, {
+                                    on: on,
+                                    send: send
+                                });
+                            }
+                        }(event, {
+                            on: on,
+                            send: send
+                        });
+                    });
+                });
+            }({
+                on: on_on,
+                send: send_send
+            }), function(_ref7) {
+                var on = _ref7.on, send = _ref7.send;
+                globalStore("builtinListeners").getOrSet("helloListener", function() {
+                    var listener = on(MESSAGE_NAME.HELLO, {
+                        domain: constants_WILDCARD
+                    }, function(_ref2) {
+                        var source = _ref2.source, origin = _ref2.origin;
+                        return getHelloPromise(source).resolve({
+                            win: source,
+                            domain: origin
+                        }), {
+                            instanceID: getInstanceID()
+                        };
+                    }), parent = getAncestor();
+                    return parent && sayHello(parent, {
+                        send: send
+                    }).catch(src_util_noop), listener;
+                });
+            }({
+                on: on_on,
+                send: send_send
+            }));
             var component = new component_Component(options), init = function(props) {
                 return component.init(props);
             };
@@ -3272,8 +3270,13 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_20__, (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
-            delete window.__post_robot_10_0_13__;
+            destroyAll(), delete window.__zoid_9_0_21__, function() {
+                for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
+                    var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
+                    listener && (listener.cancelled = !0), responseListeners.del(hash);
+                }
+            }(), (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
+            delete window.__post_robot_10_0_14__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
             return PopupOpenError;
