@@ -11,7 +11,8 @@ const formatVersion = (version) => {
 
 module.exports = {
     __POST_ROBOT__: {
-        ...postRobotGlobals.__POST_ROBOT__
+        ...postRobotGlobals.__POST_ROBOT__,
+        __AUTO_SETUP__: false
     },
     __ZOID__: {
         __VERSION__:           formatVersion(pkg.version),

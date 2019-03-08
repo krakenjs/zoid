@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
+import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
 import { isRegex, noop, isElement } from 'belter/src';
@@ -395,6 +395,8 @@ export type ComponentDriverType<P, T : mixed> = {|
 |};
 
 export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> {
+    setupPostRobot();
+
     const component : Component<P> = new Component(options);
 
     const init = (props) => component.init(props);
