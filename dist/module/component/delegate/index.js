@@ -47,7 +47,11 @@ export var DelegateComponent = function (_BaseComponent) {
         }
 
         _this.focus = function () {
-            return options.overrides.focus.call(_this);
+            return ZalgoPromise.all([_this.isWindowClosed().then(function (closed) {
+                if (!closed) {
+                    window.open('', _this.childWindowName);
+                }
+            }), options.overrides.focus.call(_this)]).then(noop);
         };
 
         _this.clean.register('destroyFocusOverride', function () {
@@ -69,6 +73,7 @@ export var DelegateComponent = function (_BaseComponent) {
         }
 
         _this.childWindowName = options.childWindowName;
+        _this.isWindowClosed = options.isWindowClosed;
 
         ParentComponent.prototype.registerActiveComponent.call(_this);
 

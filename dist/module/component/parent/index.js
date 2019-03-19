@@ -45,7 +45,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed as _isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getElementSafe, onResize } from 'belter/src';
 
@@ -656,6 +656,9 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                 context: this.context,
 
                 childWindowName: this.childWindowName,
+                isWindowClosed: function isWindowClosed() {
+                    return _isWindowClosed(_this14.window);
+                },
 
                 props: props,
 
@@ -998,7 +1001,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
             // IE in metro mode -- child window needs to close itself, or close will hang
 
-            if (_this26.childExports && _this26.context === CONTEXT_TYPES.POPUP && !isWindowClosed(win)) {
+            if (_this26.childExports && _this26.context === CONTEXT_TYPES.POPUP && !_isWindowClosed(win)) {
                 _this26.childExports.close()['catch'](noop);
             }
         });
@@ -1070,7 +1073,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
     ParentComponent.prototype.focus = function focus() {
 
-        if (this.window && !isWindowClosed(this.window)) {
+        if (this.window && !_isWindowClosed(this.window)) {
             this.component.log('focus');
             this.window.focus();
         } else {
