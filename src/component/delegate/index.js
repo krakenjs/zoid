@@ -21,6 +21,8 @@ export type DelegateOptionsType = {
     context : string,
     props : DelegatePropsType,
     childWindowName : string,
+    isWindowClosed : () => ZalgoPromise<boolean>,
+    
     overrides : {
         focus : () => ZalgoPromise<void>,
         userClose : (string) => ZalgoPromise<void>,
@@ -43,6 +45,7 @@ export class DelegateComponent<P> extends BaseComponent<P> {
     on : (string, () => void) => CancelableType
 
     childWindowName : string
+    isWindowClosed : () => ZalgoPromise<boolean>
 
     constructor(component : Component<P>, source : CrossDomainWindowType, options : DelegateOptionsType) {
         super();
@@ -69,7 +72,14 @@ export class DelegateComponent<P> extends BaseComponent<P> {
         }
 
         this.focus = () => {
-            return options.overrides.focus.call(this);
+            return ZalgoPromise.all([
+                this.isWindowClosed().then(closed => {
+                    if (!closed) {
+                        window.open('', this.childWindowName);
+                    }
+                }),
+                options.overrides.focus.call(this)
+            ]).then(noop);
         };
 
         this.clean.register('destroyFocusOverride', () => {
@@ -90,6 +100,7 @@ export class DelegateComponent<P> extends BaseComponent<P> {
         }
 
         this.childWindowName = options.childWindowName;
+        this.isWindowClosed = options.isWindowClosed;
 
         ParentComponent.prototype.registerActiveComponent.call(this);
 

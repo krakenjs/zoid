@@ -662,6 +662,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 context: this.context,
 
                 childWindowName: this.childWindowName,
+                isWindowClosed:  () => isWindowClosed(this.window),
 
                 props,
 
