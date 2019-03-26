@@ -11,7 +11,7 @@ const CLASS = {
     INVISIBLE: 'invisible'
 };
 
-export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
+export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {
             return;
@@ -20,6 +20,9 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, e
         const div = doc.createElement('div');
         div.setAttribute('id', uid);
         const style = doc.createElement('style');
+        if (props.cspNonce) {
+            style.setAttribute('nonce', props.cspNonce);
+        }
 
         style.appendChild(doc.createTextNode(`
             #${ uid } {

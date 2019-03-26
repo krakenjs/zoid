@@ -131,6 +131,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
 
     const params = {};
 
+    // $FlowFixMe
     return ZalgoPromise.all(Object.keys(props).map(key => {
 
         const prop = propsDef[key];

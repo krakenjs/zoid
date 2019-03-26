@@ -3,7 +3,7 @@
 
 import { type RenderOptionsType } from '../../parent';
 
-export function defaultPrerenderTemplate<P>({ doc } : RenderOptionsType<P>) : ?HTMLElement {
+export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P>) : ?HTMLElement {
     if (__ZOID__.__DEFAULT_PRERENDER__) {
         const html = doc.createElement('html');
         const body = doc.createElement('body');
@@ -11,10 +11,19 @@ export function defaultPrerenderTemplate<P>({ doc } : RenderOptionsType<P>) : ?H
         const spinner = doc.createElement('div');
         spinner.classList.add('spinner');
 
+        if (props.cspNonce) {
+            style.setAttribute('nonce', props.cspNonce);
+        }
+
         html.appendChild(body);
         body.appendChild(spinner);
         body.appendChild(style);
         style.appendChild(doc.createTextNode(`
+            html, body {
+                width: 100%;
+                height: 100%;
+            }
+
             .spinner {
                 position: fixed;
                 max-height: 60vmin;

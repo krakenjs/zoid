@@ -11,6 +11,7 @@ export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 
 export type timeoutPropType = number;
 export type windowPropType = CrossDomainWindowType | ProxyWindow;
+export type cspNoncePropType = string;
 export type closePropType = () => ZalgoPromise<void>;
 export type focusPropType = () => ZalgoPromise<void>;
 export type resizePropType = ({ width : ?number, height : ?number }) => ZalgoPromise<void>;
@@ -25,6 +26,7 @@ export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-dis
 export type PropsInputType<P> = {
     timeout? : timeoutPropType,
     window? : windowPropType,
+    cspNonce? : cspNoncePropType,
 
     onDisplay? : onDisplayPropType,
     onRendered? : onRenderedPropType,
@@ -40,6 +42,7 @@ export type PropsType<P> = {|
     close? : ?closePropType,
     focus? : ?focusPropType,
     resize? : ?resizePropType,
+    cspNonce? : ?cspNoncePropType,
 
     onDisplay : onDisplayPropType,
     onRendered : onRenderedPropType,
@@ -140,6 +143,11 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             sendToChild:   false,
             childDecorate: ({ resize }) => resize
+        },
+
+        cspNonce: {
+            type:     'string',
+            required: false
         },
 
         getParent: {
