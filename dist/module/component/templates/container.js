@@ -18,6 +18,7 @@ function defaultContainerTemplate({
   frame,
   prerenderFrame,
   doc,
+  props,
   event,
   dimensions: {
     width,
@@ -32,6 +33,11 @@ function defaultContainerTemplate({
     const div = doc.createElement('div');
     div.setAttribute('id', uid);
     const style = doc.createElement('style');
+
+    if (props.cspNonce) {
+      style.setAttribute('nonce', props.cspNonce);
+    }
+
     style.appendChild(doc.createTextNode(`
             #${uid} {
                 display: inline-block;

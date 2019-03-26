@@ -159,7 +159,8 @@ function getQueryValue(prop, key, value) {
 }
 
 function propsToQuery(propsDef, props) {
-  const params = {};
+  const params = {}; // $FlowFixMe
+
   return _src.ZalgoPromise.all(Object.keys(props).map(key => {
     const prop = propsDef[key];
 

@@ -71,6 +71,10 @@ function getBuiltInProps() {
         resize
       }) => resize
     },
+    cspNonce: {
+      type: 'string',
+      required: false
+    },
     getParent: {
       type: 'function',
       required: false,
