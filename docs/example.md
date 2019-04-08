@@ -129,9 +129,16 @@ set up bindings for these frameworks:
 Drop the component in any `render()` method:
 
 ```javascript
+let MyReactLoginComponent = MyLoginComponent.driver('react', {
+    React:    React, 
+    ReactDOM: ReactDOM
+});
+```
+
+```javascript
 render: function() {
     return (
-        <MyLoginComponent.react prefilledEmail='foo@bar.com' onLogin={onLogin} />
+        <MyReactLoginComponent prefilledEmail='foo@bar.com' onLogin={onLogin} />
     );
 }
 ```
