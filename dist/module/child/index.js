@@ -61,7 +61,10 @@ class ChildComponent {
       }
 
       if (childPayload.version !== __ZOID__.__VERSION__) {
-        throw new Error(`Parent window has zoid version ${childPayload.version}, child window has version ${__ZOID__.__VERSION__}`);
+        const msg = `Parent window has zoid version ${childPayload.version}, child window has version ${__ZOID__.__VERSION__}`; // throw new Error(msg);
+        // eslint-disable-next-line no-console
+
+        console.log(msg);
       }
 
       const {
