@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow, ProxyWindow, toProxyWindow } from 'post-robot/src';
-import { assertSameDomain } from 'cross-domain-utils/src';
+import { assertSameDomain, closeWindow } from 'cross-domain-utils/src';
 import { iframe, popup, destroyElement, normalizeDimension, watchElementForClose,
     awaitFrameWindow, uniqueID } from 'belter/src';
 
@@ -107,7 +107,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                 });
 
                 this.clean.register(() => {
-                    win.close();
+                    closeWindow(win);
                     cleanUpWindow(win);
                 });
 
