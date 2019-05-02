@@ -90,7 +90,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
           height
         }, this.component.attributes.popup));
         this.clean.register(() => {
-          win.close();
+          (0, _src3.closeWindow)(win);
           (0, _src2.cleanUpWindow)(win);
         });
         return (0, _src2.toProxyWindow)(win);
