@@ -293,7 +293,7 @@ var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    containerTemplate: function containerTemplate(({ doc, uid, frame, prerenderFrame })) {
+    containerTemplate: function containerTemplate({ doc, uid, frame, prerenderFrame }) {
         let container = doc.createElement('div');
         container.id = uid;
         container.appendChild(frame);
