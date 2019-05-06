@@ -969,20 +969,20 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var name = this.name, entry = key[name];
                         entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
                             value: [ key, value ],
                             writable: !0
                         });
-                    } else {
-                        this._cleanupClosedWindows();
-                        var keys = this.keys, values = this.values, index = safeIndexOf(keys, key);
-                        if (-1 === index) {
-                            keys.push(key);
-                            values.push(value);
-                        } else values[index] = value;
-                    }
+                        return;
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var keys = this.keys, values = this.values, index = safeIndexOf(keys, key);
+                    if (-1 === index) {
+                        keys.push(key);
+                        values.push(value);
+                    } else values[index] = value;
                 };
                 CrossDomainSafeWeakMap.prototype.get = function(key) {
                     if (!key) throw new Error("WeakMap expected key");
@@ -992,14 +992,13 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (!this.isSafeToReadWrite(key)) {
-                        this._cleanupClosedWindows();
-                        var index = safeIndexOf(this.keys, key);
-                        if (-1 === index) return;
-                        return this.values[index];
-                    }
-                    var entry = key[this.name];
-                    if (entry && entry[0] === key) return entry[1];
+                    if (this.isSafeToReadWrite(key)) try {
+                        var entry = key[this.name];
+                        return entry && entry[0] === key ? entry[1] : void 0;
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var index = safeIndexOf(this.keys, key);
+                    if (-1 !== index) return this.values[index];
                 };
                 CrossDomainSafeWeakMap.prototype.delete = function(key) {
                     if (!key) throw new Error("WeakMap expected key");
@@ -1009,16 +1008,15 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var entry = key[this.name];
                         entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                    } else {
-                        this._cleanupClosedWindows();
-                        var keys = this.keys, index = safeIndexOf(keys, key);
-                        if (-1 !== index) {
-                            keys.splice(index, 1);
-                            this.values.splice(index, 1);
-                        }
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var keys = this.keys, index = safeIndexOf(keys, key);
+                    if (-1 !== index) {
+                        keys.splice(index, 1);
+                        this.values.splice(index, 1);
                     }
                 };
                 CrossDomainSafeWeakMap.prototype.has = function(key) {
@@ -1029,10 +1027,10 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var entry = key[this.name];
                         return !(!entry || entry[0] !== key);
-                    }
+                    } catch (err) {}
                     this._cleanupClosedWindows();
                     return -1 !== safeIndexOf(this.keys, key);
                 };
@@ -1067,12 +1065,14 @@
             function isAboutProtocol() {
                 return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === PROTOCOL.ABOUT;
             }
-            function getParent(win) {
+            function getParent() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 if (win) try {
                     if (win.parent && win.parent !== win) return win.parent;
                 } catch (err) {}
             }
-            function getOpener(win) {
+            function getOpener() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 if (win && !getParent(win)) try {
                     return win.opener;
                 } catch (err) {}
@@ -1339,7 +1339,8 @@
             function isOpener(parent, child) {
                 return parent === getOpener(child);
             }
-            function getAncestor(win) {
+            function getAncestor() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 return getOpener(win = win || window) || getParent(win) || void 0;
             }
             function getAncestors(win) {
@@ -1477,6 +1478,11 @@
             function normalizeMockUrl(url) {
                 if (!isMockDomain(getDomainFromUrl(url))) return url;
                 throw new Error("Mock urls not supported out of test mode");
+            }
+            function closeWindow(win) {
+                try {
+                    win.close();
+                } catch (err) {}
             }
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return isFileProtocol;
@@ -1624,6 +1630,9 @@
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return normalizeMockUrl;
+            });
+            __webpack_require__.d(__webpack_exports__, !1, function() {
+                return closeWindow;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return !0;
@@ -5192,29 +5201,30 @@
                     });
                 };
                 ParentComponent.prototype.getComponentParentRef = function() {
-                    var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                    if (this.context === constants.CONTEXT_TYPES.POPUP) return {
+                    if (this.component.getDomain(null, this.props.env) === Object(cross_domain_utils_src.f)(window)) {
+                        var _uid = Object(lib.T)();
+                        lib.u.windows = lib.u.windows || {};
+                        lib.u.windows[_uid] = window;
+                        this.clean.register(function() {
+                            delete lib.u.windows[_uid];
+                        });
+                        return {
+                            ref: constants.WINDOW_REFERENCES.GLOBAL,
+                            uid: _uid
+                        };
+                    }
+                    return this.context === constants.CONTEXT_TYPES.POPUP ? {
                         ref: constants.WINDOW_REFERENCES.OPENER
-                    };
-                    if (renderToWindow === window) return Object(cross_domain_utils_src.v)(window) ? {
+                    } : Object(cross_domain_utils_src.v)(window) ? {
                         ref: constants.WINDOW_REFERENCES.TOP
                     } : {
                         ref: constants.WINDOW_REFERENCES.PARENT,
                         distance: Object(cross_domain_utils_src.e)(window)
                     };
-                    var uid = Object(lib.T)();
-                    lib.u.windows[uid] = window;
-                    this.clean.register(function() {
-                        delete lib.u.windows[uid];
-                    });
-                    return {
-                        ref: constants.WINDOW_REFERENCES.GLOBAL,
-                        uid: uid
-                    };
                 };
                 ParentComponent.prototype.getRenderParentRef = function() {
                     var renderToWindow = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                    if (renderToWindow === window) return this.getComponentParentRef(renderToWindow);
+                    if (renderToWindow === window) return this.getComponentParentRef();
                     var uid = Object(lib.T)();
                     lib.u.windows[uid] = renderToWindow;
                     this.clean.register(function() {
@@ -5226,7 +5236,7 @@
                     };
                 };
                 ParentComponent.prototype.buildChildWindowName = function() {
-                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.T)(), tag = this.component.tag, sProps = Object(lib.M)(this.getPropsForChild()), componentParent = this.getComponentParentRef(renderTo), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
+                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.T)(), tag = this.component.tag, sProps = Object(lib.M)(this.getPropsForChild()), componentParent = this.getComponentParentRef(), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
                         type: constants.INITIAL_PROPS.RAW,
                         value: sProps
                     } : {

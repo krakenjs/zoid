@@ -330,30 +330,28 @@ export var ParentComponent = (_class = function (_BaseComponent) {
     };
 
     ParentComponent.prototype.getComponentParentRef = function getComponentParentRef() {
-        var renderToWindow = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
+        var domain = this.component.getDomain(null, this.props.env);
 
+        if (domain === getDomain(window)) {
+            var _uid = uniqueID();
+            global.windows = global.windows || {};
+            global.windows[_uid] = window;
+            this.clean.register(function () {
+                delete global.windows[_uid];
+            });
+
+            return { ref: WINDOW_REFERENCES.GLOBAL, uid: _uid };
+        }
 
         if (this.context === CONTEXT_TYPES.POPUP) {
             return { ref: WINDOW_REFERENCES.OPENER };
         }
 
-        if (renderToWindow === window) {
-
-            if (isTop(window)) {
-                return { ref: WINDOW_REFERENCES.TOP };
-            }
-
-            return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
+        if (isTop(window)) {
+            return { ref: WINDOW_REFERENCES.TOP };
         }
 
-        var uid = uniqueID();
-        global.windows[uid] = window;
-
-        this.clean.register(function () {
-            delete global.windows[uid];
-        });
-
-        return { ref: WINDOW_REFERENCES.GLOBAL, uid: uid };
+        return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
     };
 
     ParentComponent.prototype.getRenderParentRef = function getRenderParentRef() {
@@ -361,7 +359,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
 
         if (renderToWindow === window) {
-            return this.getComponentParentRef(renderToWindow);
+            return this.getComponentParentRef();
         }
 
         var uid = uniqueID();
@@ -385,7 +383,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
         var tag = this.component.tag;
         var sProps = serializeFunctions(this.getPropsForChild());
 
-        var componentParent = this.getComponentParentRef(renderTo);
+        var componentParent = this.getComponentParentRef();
         var renderParent = this.getRenderParentRef(renderTo);
 
         var secureProps = !sameDomain && !this.component.unsafeRenderTo;
