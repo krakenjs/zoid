@@ -1,6 +1,6 @@
 {
   "name": "zoid",
-  "version": "6.0.71",
+  "version": "6.0.72",
   "description": "Cross domain components.",
   "main": "index.js",
   "scripts": {
