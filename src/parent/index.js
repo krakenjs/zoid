@@ -216,7 +216,13 @@ export class ParentComponent<P> {
                 return this.event.trigger(EVENT.RENDERED);
             });
 
-            return ZalgoPromise.hash(tasks);
+            return ZalgoPromise.hash(tasks).catch(err => {
+                for (const taskName of Object.keys(tasks)) {
+                    tasks[taskName].reject(err);
+                }
+
+                throw err;
+            });
             
         }).catch(err => {
             return ZalgoPromise.all([
