@@ -332,35 +332,35 @@ export class ParentComponent<P> extends BaseComponent<P> {
     }
 
 
-    getComponentParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
+    getComponentParentRef() : { ref : string, uid? : string, distance? : number } {
+        let domain = this.component.getDomain(null, this.props.env);
+
+        if (domain === getDomain(window)) {
+            let uid = uniqueID();
+            global.windows = global.windows || {};
+            global.windows[uid] = window;
+            this.clean.register(() => {
+                delete global.windows[uid];
+            });
+
+            return { ref: WINDOW_REFERENCES.GLOBAL, uid };
+        }
 
         if (this.context === CONTEXT_TYPES.POPUP) {
             return { ref: WINDOW_REFERENCES.OPENER };
         }
 
-        if (renderToWindow === window) {
-
-            if (isTop(window)) {
-                return { ref: WINDOW_REFERENCES.TOP };
-            }
-
-            return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
+        if (isTop(window)) {
+            return { ref: WINDOW_REFERENCES.TOP };
         }
 
-        let uid = uniqueID();
-        global.windows[uid] = window;
-
-        this.clean.register(() => {
-            delete global.windows[uid];
-        });
-
-        return { ref: WINDOW_REFERENCES.GLOBAL, uid };
+        return { ref: WINDOW_REFERENCES.PARENT, distance: getDistanceFromTop(window) };
     }
 
     getRenderParentRef(renderToWindow : CrossDomainWindowType = window) : { ref : string, uid? : string, distance? : number } {
 
         if (renderToWindow === window) {
-            return this.getComponentParentRef(renderToWindow);
+            return this.getComponentParentRef();
         }
 
         let uid = uniqueID();
@@ -381,7 +381,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
         let tag    = this.component.tag;
         let sProps = serializeFunctions(this.getPropsForChild());
 
-        let componentParent = this.getComponentParentRef(renderTo);
+        let componentParent = this.getComponentParentRef();
         let renderParent    = this.getRenderParentRef(renderTo);
 
         let secureProps = !sameDomain && !this.component.unsafeRenderTo;
