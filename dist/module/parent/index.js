@@ -143,7 +143,13 @@ class ParentComponent {
       tasks.onRender = tasks.init.then(() => {
         return this.event.trigger(_constants.EVENT.RENDERED);
       });
-      return _src3.ZalgoPromise.hash(tasks);
+      return _src3.ZalgoPromise.hash(tasks).catch(err => {
+        for (const taskName of Object.keys(tasks)) {
+          tasks[taskName].reject(err);
+        }
+
+        throw err;
+      });
     }).catch(err => {
       return _src3.ZalgoPromise.all([this.onError(err), this.destroy(err)]).then(() => {
         throw err;

@@ -565,6 +565,11 @@
             if (0 !== getDomainFromUrl(url).indexOf(PROTOCOL.MOCK)) return url;
             throw new Error("Mock urls not supported out of test mode");
         }
+        function closeWindow(win) {
+            try {
+                win.close();
+            } catch (err) {}
+        }
         function util_safeIndexOf(collection, item) {
             for (var i = 0; i < collection.length; i++) try {
                 if (collection[i] === item) return i;
@@ -610,17 +615,16 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var name = this.name, entry = key[name];
-                    entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                    return void (entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
                         value: [ key, value ],
                         writable: !0
-                    });
-                } else {
-                    this._cleanupClosedWindows();
-                    var keys = this.keys, values = this.values, index = util_safeIndexOf(keys, key);
-                    -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
-                }
+                    }));
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var keys = this.keys, values = this.values, index = util_safeIndexOf(keys, key);
+                -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
             }, _proto.get = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -629,14 +633,13 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (!this.isSafeToReadWrite(key)) {
-                    this._cleanupClosedWindows();
-                    var index = util_safeIndexOf(this.keys, key);
-                    if (-1 === index) return;
-                    return this.values[index];
-                }
-                var entry = key[this.name];
-                if (entry && entry[0] === key) return entry[1];
+                if (this.isSafeToReadWrite(key)) try {
+                    var entry = key[this.name];
+                    return entry && entry[0] === key ? entry[1] : void 0;
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var index = util_safeIndexOf(this.keys, key);
+                if (-1 !== index) return this.values[index];
             }, _proto.delete = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -645,14 +648,13 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var entry = key[this.name];
                     entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                } else {
-                    this._cleanupClosedWindows();
-                    var keys = this.keys, index = util_safeIndexOf(keys, key);
-                    -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
-                }
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var keys = this.keys, index = util_safeIndexOf(keys, key);
+                -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
             }, _proto.has = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -661,10 +663,10 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
-                }
+                } catch (err) {}
                 return this._cleanupClosedWindows(), -1 !== util_safeIndexOf(this.keys, key);
             }, _proto.getOrSet = function(key, getter) {
                 if (this.has(key)) return this.get(key);
@@ -757,6 +759,9 @@
                     clearTimeout(timeout);
                 }
             };
+        }
+        function arrayFrom(item) {
+            return [].slice.call(item);
         }
         function isDefined(value) {
             return null != value;
@@ -892,8 +897,8 @@
                 void 0 === tag && (tag = "div"), void 0 === options && (options = {}), tag = tag.toLowerCase();
                 var el, styleText, doc, element = document.createElement(tag);
                 if (options.style && extend(element.style, options.style), options.class && (element.className = options.class.join(" ")), 
-                options.id && element.setAttribute("id", options.id), options.attributes) for (var _i6 = 0, _Object$keys2 = Object.keys(options.attributes); _i6 < _Object$keys2.length; _i6++) {
-                    var key = _Object$keys2[_i6];
+                options.id && element.setAttribute("id", options.id), options.attributes) for (var _i10 = 0, _Object$keys2 = Object.keys(options.attributes); _i10 < _Object$keys2.length; _i10++) {
+                    var key = _Object$keys2[_i10];
                     element.setAttribute(key, options.attributes[key]);
                 }
                 if (options.styleSheet && (el = element, styleText = options.styleSheet, void 0 === doc && (doc = window.document), 
@@ -997,7 +1002,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_14__ : win.__post_robot_10_0_14__ = win.__post_robot_10_0_14__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_16__ : win.__post_robot_10_0_16__ = win.__post_robot_10_0_16__ || {};
         }
         var getObj = function() {
             return {};
@@ -1416,7 +1421,7 @@
                 }),
                 close: function() {
                     return promise_ZalgoPromise.try(function() {
-                        win.close();
+                        closeWindow(win);
                     });
                 },
                 getName: function() {
@@ -1726,7 +1731,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_14__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_16__ = _extends({
                 id: uniqueID(),
                 origin: utils_getDomain(window)
             }, message), _serializeMessage), {
@@ -1884,7 +1889,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_14__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_16__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2064,7 +2069,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_22__ || (win.__zoid_9_0_22__ = {}), win.__zoid_9_0_22__;
+            return win.__zoid_9_0_23__ || (win.__zoid_9_0_23__ = {}), win.__zoid_9_0_23__;
         }
         function getProxyObject(obj) {
             return {
@@ -2192,7 +2197,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_22" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_22");
+                    if ("9_0_23" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_23");
                     var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = domain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
@@ -2471,11 +2476,7 @@
                         height: height = normalizeDimension(height, window.outerWidth)
                     }, _this3.component.attributes.popup));
                     return _this3.clean.register(function() {
-                        !function(win) {
-                            try {
-                                win.close();
-                            } catch (err) {}
-                        }(win), cleanUpWindow(win);
+                        closeWindow(win), cleanUpWindow(win);
                     }), setup_toProxyWindow(win);
                 });
             },
@@ -2602,7 +2603,10 @@
                         return _this3.runTimeout();
                     }), tasks.onRender = tasks.init.then(function() {
                         return _this3.event.trigger(EVENT.RENDERED);
-                    }), promise_ZalgoPromise.hash(tasks);
+                    }), promise_ZalgoPromise.hash(tasks).catch(function(err) {
+                        for (var _i2 = 0, _Object$keys2 = Object.keys(tasks); _i2 < _Object$keys2.length; _i2++) tasks[_Object$keys2[_i2]].reject(err);
+                        throw err;
+                    });
                 }).catch(function(err) {
                     return promise_ZalgoPromise.all([ _this3.onError(err), _this3.destroy(err) ]).then(function() {
                         throw err;
@@ -2644,7 +2648,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_22",
+                    version: "9_0_23",
                     domain: utils_getDomain(window),
                     tag: this.component.tag,
                     parent: this.getWindowRef(target, initialDomain, uid, context),
@@ -2783,8 +2787,8 @@
             }, _proto.getInitialDomain = function() {
                 return this.component.getInitialDomain(this.props);
             }, _proto.getPropsForChild = function(domain) {
-                for (var result = {}, _i2 = 0, _Object$keys2 = Object.keys(this.props); _i2 < _Object$keys2.length; _i2++) {
-                    var key = _Object$keys2[_i2], prop = this.component.getPropDefinition(key);
+                for (var result = {}, _i4 = 0, _Object$keys4 = Object.keys(this.props); _i4 < _Object$keys4.length; _i4++) {
+                    var key = _Object$keys4[_i4], prop = this.component.getPropDefinition(key);
                     prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(domain, utils_getDomain(window)) || (result[key] = this.props[key]);
                 }
                 return result;
@@ -2831,8 +2835,8 @@
             }, _proto.delegate = function(context, target) {
                 var _this13 = this;
                 this.component.log("delegate");
-                for (var props = {}, _i4 = 0, _this$component$getPr2 = this.component.getPropNames(); _i4 < _this$component$getPr2.length; _i4++) {
-                    var propName = _this$component$getPr2[_i4];
+                for (var props = {}, _i6 = 0, _this$component$getPr2 = this.component.getPropNames(); _i6 < _this$component$getPr2.length; _i6++) {
+                    var propName = _this$component$getPr2[_i6];
                     this.component.getPropDefinition(propName).allowDelegate && (props[propName] = this.props[propName]);
                 }
                 for (var overridesPromise = send_send(target, POST_MESSAGE_DELEGATE + "_" + this.component.name, {
@@ -2852,15 +2856,15 @@
                     return _this13.clean.register(data.destroy), data.overrides;
                 }).catch(function(err) {
                     throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + stringifyError(err));
-                }), _loop = function(_i6, _this$driver$delegate2) {
-                    var key = _this$driver$delegate2[_i6];
+                }), _loop = function(_i8, _this$driver$delegate2) {
+                    var key = _this$driver$delegate2[_i8];
                     _this13[key] = function() {
                         var _this14 = this, _arguments = arguments;
                         return overridesPromise.then(function(overrides) {
                             return overrides[key].apply(_this14, _arguments);
                         });
                     };
-                }, _i6 = 0, _this$driver$delegate2 = this.driver.delegate; _i6 < _this$driver$delegate2.length; _i6++) _loop(_i6, _this$driver$delegate2);
+                }, _i8 = 0, _this$driver$delegate2 = this.driver.delegate; _i8 < _this$driver$delegate2.length; _i8++) _loop(_i8, _this$driver$delegate2);
             }, _proto.getWindowRef = function(target, domain, uid, context) {
                 if (domain === utils_getDomain(window)) {
                     var global = lib_global_getGlobal(window);
@@ -2972,8 +2976,8 @@
                                 !function(win, el) {
                                     var tag = el.tagName.toLowerCase();
                                     if ("html" !== tag) throw new Error("Expected element to be html, got " + tag);
-                                    for (var documentElement = win.document.documentElement; documentElement.children && documentElement.children.length; ) documentElement.removeChild(documentElement.children[0]);
-                                    for (;el.children.length; ) documentElement.appendChild(el.children[0]);
+                                    for (var documentElement = win.document.documentElement, _i6 = 0, _arrayFrom2 = arrayFrom(documentElement.children); _i6 < _arrayFrom2.length; _i6++) documentElement.removeChild(_arrayFrom2[_i6]);
+                                    for (var _i8 = 0, _arrayFrom4 = arrayFrom(el.children); _i8 < _arrayFrom4.length; _i8++) documentElement.appendChild(_arrayFrom4[_i8]);
                                 }(prerenderWindow, el);
                                 var _ref13 = _this23.component.autoResize || {}, _ref13$width = _ref13.width, width = void 0 !== _ref13$width && _ref13$width, _ref13$height = _ref13.height, height = void 0 !== _ref13$height && _ref13$height, _ref13$element = _ref13.element, element = void 0 === _ref13$element ? "body" : _ref13$element;
                                 (element = getElementSafe(element, doc)) && (width || height) && onResize(element, function(_ref14) {
@@ -3477,13 +3481,13 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_22__, function() {
+            destroyAll(), delete window.__zoid_9_0_23__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
                 }
             }(), (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
-            delete window.__post_robot_10_0_14__;
+            delete window.__post_robot_10_0_16__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
             return PopupOpenError;
