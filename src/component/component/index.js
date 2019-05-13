@@ -3,7 +3,7 @@
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getDomain, getDomainFromUrl, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -424,7 +424,21 @@ export class Component<P> extends BaseComponent<P> {
     }
 
     isChild() : boolean {
-        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+        if (!isZoidComponentWindow()) {
+            return false;
+        }
+
+        const { tag, domain } = getComponentMeta();
+
+        if (domain && domain !== getDomain()) {
+            return false;
+        }
+
+        if (tag !== this.tag) {
+            return false;
+        }
+
+        return true;
     }
 
 

@@ -375,6 +375,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
     buildChildWindowName({ renderTo = window } : { renderTo : CrossDomainWindowType } = {}) : string {
 
+        let domain = this.component.getDomain(null, this.props.env);
         let sameDomain = isSameDomain(renderTo);
 
         let uid    = uniqueID();
@@ -398,7 +399,7 @@ export class ParentComponent<P> extends BaseComponent<P> {
             });
         }
 
-        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props });
+        return buildChildWindowName(this.component.name, this.component.version, { uid, tag, componentParent, renderParent, props, domain });
     }
 
 
