@@ -71,17 +71,17 @@ export class ChildComponent<P> {
                 throw new Error(`Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
             }
 
-            const { parent, domain, exports, context, props } = childPayload;
+            const { parent, parentDomain, exports, context, props } = childPayload;
 
             this.context = context;
             this.parentComponentWindow = this.getParentComponentWindow(parent);
-            this.parentDomain = domain;
-            this.parent = deserializeMessage(this.parentComponentWindow, domain, exports);
+            this.parentDomain = parentDomain;
+            this.parent = deserializeMessage(this.parentComponentWindow, parentDomain, exports);
 
-            this.checkParentDomain(domain);
+            this.checkParentDomain(parentDomain);
 
-            const initialProps = this.getPropsByRef(this.parentComponentWindow, domain, props);
-            this.setProps(initialProps, domain);
+            const initialProps = this.getPropsByRef(this.parentComponentWindow, parentDomain, props);
+            this.setProps(initialProps, parentDomain);
             markWindowKnown(this.parentComponentWindow);
             
             this.watchForClose();

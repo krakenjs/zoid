@@ -58,7 +58,8 @@ export type ChildPayload = {|
     tag : string,
     version : string,
     context : $Values<typeof CONTEXT>,
-    domain : string,
+    parentDomain : string,
+    childDomain : string,
     parent : WindowRef,
     props : PropRef,
     exports : string
@@ -142,7 +143,7 @@ export class ParentComponent<P> {
             this.driver = RENDER_DRIVERS[context];
             const uid = `${ ZOID }-${ this.component.tag }-${ uniqueID() }`;
             const domain = this.getDomain();
-            const initialDomain = this.getInitialDomain();
+            const childDomain = this.getChildDomain();
             
             this.component.checkAllowRender(target, domain, container);
 
@@ -189,7 +190,7 @@ export class ParentComponent<P> {
             });
 
             tasks.buildWindowName = tasks.open.then(proxyWin => {
-                return this.buildWindowName({ proxyWin, initialDomain, domain, target, context, uid });
+                return this.buildWindowName({ proxyWin, childDomain, domain, target, context, uid });
             });
 
             tasks.setWindowName =  ZalgoPromise.all([ tasks.open, tasks.buildWindowName ]).then(([ proxyWin, windowName ]) => {
@@ -205,7 +206,7 @@ export class ParentComponent<P> {
             });
 
             tasks.openBridge = tasks.open.then(proxyWin => {
-                return this.openBridge(proxyWin, initialDomain, context);
+                return this.openBridge(proxyWin, childDomain, context);
             });
 
             tasks.runTimeout = tasks.loadUrl.then(() => {
@@ -242,15 +243,15 @@ export class ParentComponent<P> {
         });
     }
 
-    buildWindowName({ proxyWin, initialDomain, domain, target, uid, context } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string }) : string {
-        const childPayload = this.buildChildPayload({ proxyWin, initialDomain, domain, target, context, uid });
+    buildWindowName({ proxyWin, childDomain, domain, target, uid, context } : { proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string }) : string {
+        const childPayload = this.buildChildPayload({ proxyWin, childDomain, domain, target, context, uid });
         return `__${ ZOID }__${ this.component.name }__${ base64encode(JSON.stringify(childPayload)) }__`;
     }
 
-    getPropsRef(proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, uid : string) : PropRef {
+    getPropsRef(proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, uid : string) : PropRef {
         const value = serializeMessage(proxyWin, domain, this.getPropsForChild(domain));
 
-        const propRef = (initialDomain === getDomain())
+        const propRef = (childDomain === getDomain())
             ? { type: INITIAL_PROPS.UID, uid }
             : { type: INITIAL_PROPS.RAW, value };
 
@@ -267,16 +268,17 @@ export class ParentComponent<P> {
         return propRef;
     }
 
-    buildChildPayload({ proxyWin, initialDomain, domain, target = window, context, uid } : { proxyWin : ProxyWindow, initialDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string } = {}) : ChildPayload {
+    buildChildPayload({ proxyWin, childDomain, domain, target = window, context, uid } : { proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string } = {}) : ChildPayload {
         return {
             uid,
             context,
-            version: __ZOID__.__VERSION__,
-            domain:  getDomain(window),
-            tag:     this.component.tag,
-            parent:  this.getWindowRef(target, initialDomain, uid, context),
-            props:   this.getPropsRef(proxyWin, initialDomain, domain, uid),
-            exports: serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
+            version:      __ZOID__.__VERSION__,
+            childDomain,
+            parentDomain: getDomain(window),
+            tag:          this.component.tag,
+            parent:       this.getWindowRef(target, childDomain, uid, context),
+            props:        this.getPropsRef(proxyWin, childDomain, domain, uid),
+            exports:      serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
         };
     }
 
@@ -317,8 +319,8 @@ export class ParentComponent<P> {
         return this.component.getDomain(this.props);
     }
 
-    getInitialDomain() : string {
-        return this.component.getInitialDomain(this.props);
+    getChildDomain() : string {
+        return this.component.getChildDomain(this.props);
     }
 
     getPropsForChild(domain : string | RegExp) : (PropsType<P>) {

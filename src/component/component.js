@@ -268,7 +268,7 @@ export class Component<P> {
         return this.url;
     }
 
-    getInitialDomain(props : PropsType<P>) : string {
+    getChildDomain(props : PropsType<P>) : string {
         if (this.domain && typeof this.domain === 'string') {
             return this.domain;
         }
@@ -282,7 +282,7 @@ export class Component<P> {
             return this.domain;
         }
 
-        return this.getInitialDomain(props);
+        return this.getChildDomain(props);
     }
 
     getBridgeUrl() : ?string {
@@ -293,7 +293,7 @@ export class Component<P> {
 
     isChild() : boolean {
         const payload = getChildPayload();
-        return Boolean(payload && payload.tag === this.tag);
+        return Boolean(payload && payload.tag === this.tag && payload.childDomain === getDomain());
     }
 
     getDefaultContainer<T : (string | HTMLElement)>(context : $Values<typeof CONTEXT>, container? : T) : T {
