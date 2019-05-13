@@ -76,7 +76,7 @@ class ParentComponent {
       this.driver = _drivers.RENDER_DRIVERS[context];
       const uid = `${_constants.ZOID}-${this.component.tag}-${(0, _src4.uniqueID)()}`;
       const domain = this.getDomain();
-      const initialDomain = this.getInitialDomain();
+      const childDomain = this.getChildDomain();
       this.component.checkAllowRender(target, domain, container);
 
       if (target !== window) {
@@ -118,7 +118,7 @@ class ParentComponent {
       tasks.buildWindowName = tasks.open.then(proxyWin => {
         return this.buildWindowName({
           proxyWin,
-          initialDomain,
+          childDomain,
           domain,
           target,
           context,
@@ -135,7 +135,7 @@ class ParentComponent {
         return this.event.trigger(_constants.EVENT.DISPLAY);
       });
       tasks.openBridge = tasks.open.then(proxyWin => {
-        return this.openBridge(proxyWin, initialDomain, context);
+        return this.openBridge(proxyWin, childDomain, context);
       });
       tasks.runTimeout = tasks.loadUrl.then(() => {
         return this.runTimeout();
@@ -167,7 +167,7 @@ class ParentComponent {
 
   buildWindowName({
     proxyWin,
-    initialDomain,
+    childDomain,
     domain,
     target,
     uid,
@@ -175,7 +175,7 @@ class ParentComponent {
   }) {
     const childPayload = this.buildChildPayload({
       proxyWin,
-      initialDomain,
+      childDomain,
       domain,
       target,
       context,
@@ -184,9 +184,9 @@ class ParentComponent {
     return `__${_constants.ZOID}__${this.component.name}__${(0, _src4.base64encode)(JSON.stringify(childPayload))}__`;
   }
 
-  getPropsRef(proxyWin, initialDomain, domain, uid) {
+  getPropsRef(proxyWin, childDomain, domain, uid) {
     const value = (0, _src.serializeMessage)(proxyWin, domain, this.getPropsForChild(domain));
-    const propRef = initialDomain === (0, _src2.getDomain)() ? {
+    const propRef = childDomain === (0, _src2.getDomain)() ? {
       type: _constants.INITIAL_PROPS.UID,
       uid
     } : {
@@ -208,7 +208,7 @@ class ParentComponent {
 
   buildChildPayload({
     proxyWin,
-    initialDomain,
+    childDomain,
     domain,
     target = window,
     context,
@@ -218,10 +218,11 @@ class ParentComponent {
       uid,
       context,
       version: __ZOID__.__VERSION__,
-      domain: (0, _src2.getDomain)(window),
+      childDomain,
+      parentDomain: (0, _src2.getDomain)(window),
       tag: this.component.tag,
-      parent: this.getWindowRef(target, initialDomain, uid, context),
-      props: this.getPropsRef(proxyWin, initialDomain, domain, uid),
+      parent: this.getWindowRef(target, childDomain, uid, context),
+      props: this.getPropsRef(proxyWin, childDomain, domain, uid),
       exports: (0, _src.serializeMessage)(proxyWin, domain, this.buildParentExports(proxyWin))
     };
   }
@@ -273,8 +274,8 @@ class ParentComponent {
     return this.component.getDomain(this.props);
   }
 
-  getInitialDomain() {
-    return this.component.getInitialDomain(this.props);
+  getChildDomain() {
+    return this.component.getChildDomain(this.props);
   }
 
   getPropsForChild(domain) {

@@ -214,7 +214,7 @@ class Component {
     return this.url;
   }
 
-  getInitialDomain(props) {
+  getChildDomain(props) {
     if (this.domain && typeof this.domain === 'string') {
       return this.domain;
     }
@@ -228,7 +228,7 @@ class Component {
       return this.domain;
     }
 
-    return this.getInitialDomain(props);
+    return this.getChildDomain(props);
   }
 
   getBridgeUrl() {
@@ -239,7 +239,7 @@ class Component {
 
   isChild() {
     const payload = (0, _child.getChildPayload)();
-    return Boolean(payload && payload.tag === this.tag);
+    return Boolean(payload && payload.tag === this.tag && payload.childDomain === (0, _src3.getDomain)());
   }
 
   getDefaultContainer(context, container) {

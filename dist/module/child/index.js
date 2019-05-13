@@ -66,18 +66,18 @@ class ChildComponent {
 
       const {
         parent,
-        domain,
+        parentDomain,
         exports,
         context,
         props
       } = childPayload;
       this.context = context;
       this.parentComponentWindow = this.getParentComponentWindow(parent);
-      this.parentDomain = domain;
-      this.parent = (0, _src2.deserializeMessage)(this.parentComponentWindow, domain, exports);
-      this.checkParentDomain(domain);
-      const initialProps = this.getPropsByRef(this.parentComponentWindow, domain, props);
-      this.setProps(initialProps, domain);
+      this.parentDomain = parentDomain;
+      this.parent = (0, _src2.deserializeMessage)(this.parentComponentWindow, parentDomain, exports);
+      this.checkParentDomain(parentDomain);
+      const initialProps = this.getPropsByRef(this.parentComponentWindow, parentDomain, props);
+      this.setProps(initialProps, parentDomain);
       (0, _src2.markWindowKnown)(this.parentComponentWindow);
       this.watchForClose();
       return this.parent.init(this.buildExports());

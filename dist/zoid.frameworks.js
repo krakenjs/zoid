@@ -1861,7 +1861,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_24__ || (win.__zoid_9_0_24__ = {}), win.__zoid_9_0_24__;
+            return win.__zoid_9_0_25__ || (win.__zoid_9_0_25__ = {}), win.__zoid_9_0_25__;
         }
         function getProxyObject(obj) {
             return {
@@ -1935,13 +1935,13 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_23" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_23");
-                    var parent = childPayload.parent, domain = childPayload.domain, exports = childPayload.exports, props = childPayload.props;
+                    if ("9_0_24" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_24");
+                    var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
-                    _this.parentDomain = domain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, domain, exports), 
-                    _this.checkParentDomain(domain);
-                    var initialProps = _this.getPropsByRef(_this.parentComponentWindow, domain, props);
-                    return _this.setProps(initialProps, domain), markWindowKnown(_this.parentComponentWindow), 
+                    _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
+                    _this.checkParentDomain(parentDomain);
+                    var initialProps = _this.getPropsByRef(_this.parentComponentWindow, parentDomain, props);
+                    return _this.setProps(initialProps, parentDomain), markWindowKnown(_this.parentComponentWindow), 
                     _this.watchForClose(), _this.parent.init(_this.buildExports());
                 }).then(function() {
                     return _this.watchForResize();
@@ -2249,7 +2249,7 @@
                 var _this3 = this;
                 return promise_ZalgoPromise.try(function() {
                     _this3.component.log("render"), _this3.driver = RENDER_DRIVERS[context];
-                    var uid = ZOID + "-" + _this3.component.tag + "-" + uniqueID(), domain = _this3.getDomain(), initialDomain = _this3.getInitialDomain();
+                    var uid = ZOID + "-" + _this3.component.tag + "-" + uniqueID(), domain = _this3.getDomain(), childDomain = _this3.getChildDomain();
                     _this3.component.checkAllowRender(target, domain, container), target !== window && _this3.delegate(context, target);
                     var tasks = {};
                     return tasks.init = _this3.initPromise, tasks.buildUrl = _this3.buildUrl(), tasks.onRender = _this3.event.trigger(EVENT.RENDER), 
@@ -2277,7 +2277,7 @@
                     }), tasks.buildWindowName = tasks.open.then(function(proxyWin) {
                         return _this3.buildWindowName({
                             proxyWin: proxyWin,
-                            initialDomain: initialDomain,
+                            childDomain: childDomain,
                             domain: domain,
                             target: target,
                             context: context,
@@ -2290,7 +2290,7 @@
                     }), tasks.onDisplay = promise_ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(function() {
                         return _this3.event.trigger(EVENT.DISPLAY);
                     }), tasks.openBridge = tasks.open.then(function(proxyWin) {
-                        return _this3.openBridge(proxyWin, initialDomain, context);
+                        return _this3.openBridge(proxyWin, childDomain, context);
                     }), tasks.runTimeout = tasks.loadUrl.then(function() {
                         return _this3.runTimeout();
                     }), tasks.onRender = tasks.init.then(function() {
@@ -2313,15 +2313,15 @@
             }, _proto.buildWindowName = function(_ref6) {
                 var childPayload = this.buildChildPayload({
                     proxyWin: _ref6.proxyWin,
-                    initialDomain: _ref6.initialDomain,
+                    childDomain: _ref6.childDomain,
                     domain: _ref6.domain,
                     target: _ref6.target,
                     context: _ref6.context,
                     uid: _ref6.uid
                 });
                 return "__" + ZOID + "__" + this.component.name + "__" + base64encode(JSON.stringify(childPayload)) + "__";
-            }, _proto.getPropsRef = function(proxyWin, initialDomain, domain, uid) {
-                var value = setup_serializeMessage(proxyWin, domain, this.getPropsForChild(domain)), propRef = initialDomain === utils_getDomain() ? {
+            }, _proto.getPropsRef = function(proxyWin, childDomain, domain, uid) {
+                var value = setup_serializeMessage(proxyWin, domain, this.getPropsForChild(domain)), propRef = childDomain === utils_getDomain() ? {
                     type: "uid",
                     uid: uid
                 } : {
@@ -2336,15 +2336,16 @@
                 }
                 return propRef;
             }, _proto.buildChildPayload = function(_temp) {
-                var _ref7 = void 0 === _temp ? {} : _temp, proxyWin = _ref7.proxyWin, initialDomain = _ref7.initialDomain, domain = _ref7.domain, _ref7$target = _ref7.target, target = void 0 === _ref7$target ? window : _ref7$target, context = _ref7.context, uid = _ref7.uid;
+                var _ref7 = void 0 === _temp ? {} : _temp, proxyWin = _ref7.proxyWin, childDomain = _ref7.childDomain, domain = _ref7.domain, _ref7$target = _ref7.target, target = void 0 === _ref7$target ? window : _ref7$target, context = _ref7.context, uid = _ref7.uid;
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_23",
-                    domain: utils_getDomain(window),
+                    version: "9_0_24",
+                    childDomain: childDomain,
+                    parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
-                    parent: this.getWindowRef(target, initialDomain, uid, context),
-                    props: this.getPropsRef(proxyWin, initialDomain, domain, uid),
+                    parent: this.getWindowRef(target, childDomain, uid, context),
+                    props: this.getPropsRef(proxyWin, childDomain, domain, uid),
                     exports: setup_serializeMessage(proxyWin, domain, this.buildParentExports(proxyWin))
                 };
             }, _proto.setProxyWin = function(proxyWin) {
@@ -2479,8 +2480,8 @@
                 });
             }, _proto.getDomain = function() {
                 return this.component.getDomain(this.props);
-            }, _proto.getInitialDomain = function() {
-                return this.component.getInitialDomain(this.props);
+            }, _proto.getChildDomain = function() {
+                return this.component.getChildDomain(this.props);
             }, _proto.getPropsForChild = function(domain) {
                 for (var result = {}, _i4 = 0, _Object$keys4 = Object.keys(this.props); _i4 < _Object$keys4.length; _i4++) {
                     var key = _Object$keys4[_i4], prop = this.component.getPropDefinition(key);
@@ -3147,15 +3148,15 @@
                 return "function" == typeof this.url ? this.url({
                     props: props
                 }) : this.url;
-            }, _proto.getInitialDomain = function(props) {
+            }, _proto.getChildDomain = function(props) {
                 return this.domain && "string" == typeof this.domain ? this.domain : getDomainFromUrl(this.getUrl(props));
             }, _proto.getDomain = function(props) {
-                return util_isRegex(this.domain) ? this.domain : this.getInitialDomain(props);
+                return util_isRegex(this.domain) ? this.domain : this.getChildDomain(props);
             }, _proto.getBridgeUrl = function() {
                 if (this.bridgeUrl) return this.bridgeUrl;
             }, _proto.isChild = function() {
                 var payload = getChildPayload();
-                return Boolean(payload && payload.tag === this.tag);
+                return Boolean(payload && payload.tag === this.tag && payload.childDomain === utils_getDomain());
             }, _proto.getDefaultContainer = function(context, container) {
                 if (container) {
                     if ("string" != typeof container && !isElement(container)) throw new TypeError("Expected string or element selector to be passed");
@@ -3281,7 +3282,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_24__, function() {
+            destroyAll(), delete window.__zoid_9_0_25__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
