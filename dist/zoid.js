@@ -5236,7 +5236,7 @@
                     };
                 };
                 ParentComponent.prototype.buildChildWindowName = function() {
-                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.T)(), tag = this.component.tag, sProps = Object(lib.M)(this.getPropsForChild()), componentParent = this.getComponentParentRef(), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
+                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, domain = this.component.getDomain(null, this.props.env), sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.T)(), tag = this.component.tag, sProps = Object(lib.M)(this.getPropsForChild()), componentParent = this.getComponentParentRef(), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
                         type: constants.INITIAL_PROPS.RAW,
                         value: sProps
                     } : {
@@ -5263,7 +5263,8 @@
                         tag: tag,
                         componentParent: componentParent,
                         renderParent: renderParent,
-                        props: props
+                        props: props,
+                        domain: domain
                     });
                 };
                 ParentComponent.prototype.sendToParent = function(name, data) {
@@ -6327,7 +6328,9 @@
                     return isZoidComponentWindow();
                 };
                 Component.prototype.isChild = function() {
-                    return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+                    if (!isZoidComponentWindow()) return !1;
+                    var _getComponentMeta = getComponentMeta(), tag = _getComponentMeta.tag, domain = _getComponentMeta.domain;
+                    return (!domain || domain === Object(cross_domain_utils_src.f)()) && tag === this.tag;
                 };
                 Component.prototype.createError = function(message, tag) {
                     return new Error("[" + (tag || this.tag) + "] " + message);

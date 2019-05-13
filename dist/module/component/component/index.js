@@ -41,7 +41,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 import { on, send } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
+import { getDomain, getDomainFromUrl, matchDomain } from 'cross-domain-utils/src';
 
 import { BaseComponent } from '../base';
 import { ChildComponent } from '../child';
@@ -401,7 +401,23 @@ export var Component = (_class = function (_BaseComponent) {
     };
 
     Component.prototype.isChild = function isChild() {
-        return isZoidComponentWindow() && getComponentMeta().tag === this.tag;
+        if (!isZoidComponentWindow()) {
+            return false;
+        }
+
+        var _getComponentMeta = getComponentMeta(),
+            tag = _getComponentMeta.tag,
+            domain = _getComponentMeta.domain;
+
+        if (domain && domain !== getDomain()) {
+            return false;
+        }
+
+        if (tag !== this.tag) {
+            return false;
+        }
+
+        return true;
     };
 
     Component.prototype.createError = function createError(message, tag) {
