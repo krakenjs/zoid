@@ -377,7 +377,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
             _ref6$renderTo = _ref6.renderTo,
             renderTo = _ref6$renderTo === undefined ? window : _ref6$renderTo;
 
-        var domain = this.component.getDomain(null, this.props.env);
+        var childDomain = this.component.getDomain(null, this.props.env);
         var sameDomain = isSameDomain(renderTo);
 
         var uid = uniqueID();
@@ -399,7 +399,7 @@ export var ParentComponent = (_class = function (_BaseComponent) {
             });
         }
 
-        return _buildChildWindowName(this.component.name, this.component.version, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props, domain: domain });
+        return _buildChildWindowName(this.component.name, this.component.version, { uid: uid, tag: tag, componentParent: componentParent, renderParent: renderParent, props: props, childDomain: childDomain });
     };
 
     /*  Send to Parent

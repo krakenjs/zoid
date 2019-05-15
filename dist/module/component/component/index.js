@@ -407,9 +407,9 @@ export var Component = (_class = function (_BaseComponent) {
 
         var _getComponentMeta = getComponentMeta(),
             tag = _getComponentMeta.tag,
-            domain = _getComponentMeta.domain;
+            childDomain = _getComponentMeta.childDomain;
 
-        if (domain && domain !== getDomain()) {
+        if (childDomain && childDomain !== getDomain()) {
             return false;
         }
 

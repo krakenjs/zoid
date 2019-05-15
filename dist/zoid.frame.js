@@ -1460,7 +1460,7 @@
                     if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
                 }
                 try {
-                    obj && obj.__cross_domain_utils_window_check__;
+                    if (obj && "__unlikely_value__" === obj.__cross_domain_utils_window_check__) return !1;
                 } catch (err) {
                     return !0;
                 }
@@ -5151,7 +5151,7 @@
                     };
                 };
                 ParentComponent.prototype.buildChildWindowName = function() {
-                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, domain = this.component.getDomain(null, this.props.env), sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.R)(), tag = this.component.tag, sProps = Object(lib.K)(this.getPropsForChild()), componentParent = this.getComponentParentRef(), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
+                    var _ref6$renderTo = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).renderTo, renderTo = void 0 === _ref6$renderTo ? window : _ref6$renderTo, childDomain = this.component.getDomain(null, this.props.env), sameDomain = Object(cross_domain_utils_src.t)(renderTo), uid = Object(lib.R)(), tag = this.component.tag, sProps = Object(lib.K)(this.getPropsForChild()), componentParent = this.getComponentParentRef(), renderParent = this.getRenderParentRef(renderTo), props = sameDomain || this.component.unsafeRenderTo ? {
                         type: constants.INITIAL_PROPS.RAW,
                         value: sProps
                     } : {
@@ -5179,7 +5179,7 @@
                         componentParent: componentParent,
                         renderParent: renderParent,
                         props: props,
-                        domain: domain
+                        childDomain: childDomain
                     });
                 };
                 ParentComponent.prototype.sendToParent = function(name, data) {
@@ -6244,8 +6244,8 @@
                 };
                 Component.prototype.isChild = function() {
                     if (!isZoidComponentWindow()) return !1;
-                    var _getComponentMeta = getComponentMeta(), tag = _getComponentMeta.tag, domain = _getComponentMeta.domain;
-                    return (!domain || domain === Object(cross_domain_utils_src.f)()) && tag === this.tag;
+                    var _getComponentMeta = getComponentMeta(), tag = _getComponentMeta.tag, childDomain = _getComponentMeta.childDomain;
+                    return (!childDomain || childDomain === Object(cross_domain_utils_src.f)()) && tag === this.tag;
                 };
                 Component.prototype.createError = function(message, tag) {
                     return new Error("[" + (tag || this.tag) + "] " + message);
