@@ -428,9 +428,9 @@ export class Component<P> extends BaseComponent<P> {
             return false;
         }
 
-        const { tag, domain } = getComponentMeta();
+        const { tag, childDomain } = getComponentMeta();
 
-        if (domain && domain !== getDomain()) {
+        if (childDomain && childDomain !== getDomain()) {
             return false;
         }
 
