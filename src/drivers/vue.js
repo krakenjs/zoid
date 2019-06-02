@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend, noop } from 'belter/src';
+import { noop } from 'belter/src';
 
 import type { Component, ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
@@ -38,9 +38,8 @@ export const vue : ComponentDriverType<*, VueType> = {
 
             mounted() {
                 const el = this.$el;
-
-                // $FlowFixMe
-                this.parent = component.init(extend({}, this.$attrs));
+                
+                this.parent = component.init({ ...this.$attrs });
                 this.parent.render(el, CONTEXT.IFRAME);
             },
 
@@ -48,7 +47,7 @@ export const vue : ComponentDriverType<*, VueType> = {
                 $attrs: {
                     handler: function handler() {
                         if (this.parent && this.$attrs) {
-                            this.parent.updateProps(extend({}, this.$attrs)).catch(noop);
+                            this.parent.updateProps({ ...this.$attrs }).catch(noop);
                         }
                     },
                     deep: true

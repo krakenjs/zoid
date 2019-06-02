@@ -10,7 +10,6 @@ window.__angular_component__ = () => {
     });
 };
 
-// $FlowFixMe
 window.angular.module('app', [ window.__angular_component__().driver('angular', window.angular).name ]);
 window.angular.bootstrap(document.body, [ 'app' ]);
 
@@ -34,7 +33,6 @@ describe('zoid drivers', () => {
                     return window.React.createElement(
                         'div',
                         null,
-                        // $FlowFixMe
                         window.React.createElement(ReactZoidComponent, {
 
                             foo: expect('foo', bar => {
@@ -93,7 +91,6 @@ describe('zoid drivers', () => {
 
                 render() : Object {
                     return window.React.createElement('div', null,
-                        // $FlowFixMe
                         window.React.createElement(ReactZoidComponent, {
                             foo:    this.state.foo,
                             onLoad: this.state.onLoad,

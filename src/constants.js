@@ -24,10 +24,9 @@ export const INITIAL_PROPS = {
 };
 
 export const WINDOW_REFERENCES = {
-    OPENER: `opener`,
-    TOP:    `top`,
-    PARENT: `parent`,
-    GLOBAL: `global`
+    OPENER: ('opener' : 'opener'),
+    PARENT: ('parent' : 'parent'),
+    GLOBAL: ('global' : 'global')
 };
 
 export const PROP_SERIALIZATION = {

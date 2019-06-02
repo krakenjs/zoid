@@ -11,7 +11,6 @@ export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainW
 
         const reset = () => {
             win.open = winOpen;
-            // $FlowFixMe
             win.document.createElement = documentCreateElement;
         };
 
@@ -32,12 +31,10 @@ export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainW
                 let timeout;
 
                 const interval = setInterval(() => {
-                    // $FlowFixMe
                     if (el.contentWindow) {
                         reset();
                         clearTimeout(timeout);
                         clearInterval(interval);
-                        // $FlowFixMe
                         resolve(el.contentWindow);
                     }
                 }, 10);

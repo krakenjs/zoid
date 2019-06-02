@@ -23,7 +23,6 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
 
     const propNames = isUpdate ? [] : [ ...component.getPropNames() ];
 
-    // $FlowFixMe
     for (const key of Object.keys(inputProps)) {
         if (propNames.indexOf(key) === -1) {
             propNames.push(key);
@@ -36,7 +35,6 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
 
     for (const key of propNames) {
         const propDef = component.getPropDefinition(key);
-        // $FlowFixMe
         let value = inputProps[key];
 
         if (!propDef) {
@@ -70,14 +68,12 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
     }
 
     for (const alias of aliases) {
-        // $FlowFixMe
         delete props[alias];
     }
 
     // $FlowFixMe
     for (const key of Object.keys(props)) {
         const propDef = component.getPropDefinition(key);
-        // $FlowFixMe
         const value = props[key];
 
         if (!propDef) {
@@ -90,7 +86,6 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
         }
 
         if (isDefined(value) && propDef.decorate) {
-            // $FlowFixMe
             props[key] = propDef.decorate({ value, props, state, close, focus, onError });
         }
     }
@@ -132,7 +127,9 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
     const params = {};
 
     // $FlowFixMe
-    return ZalgoPromise.all(Object.keys(props).map(key => {
+    const keys = Object.keys(props);
+    
+    return ZalgoPromise.all(keys.map(key => {
 
         const prop = propsDef[key];
 
@@ -161,9 +158,7 @@ export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props 
             }
 
             return ZalgoPromise.all([
-                // $FlowFixMe
                 getQueryParam(prop, key, value),
-                // $FlowFixMe
                 getQueryValue(prop, key, value)
             ]).then(([ queryParam, queryValue ]) => {
 

@@ -145,13 +145,10 @@ export class ChildComponent<P> {
         if (type === WINDOW_REFERENCES.OPENER) {
             return assertExists('opener', getOpener(window));
     
-        } else if (type === WINDOW_REFERENCES.PARENT) {
-            // $FlowFixMe
-            const distance = ref.distance;
-            return assertExists('parent', getNthParentFromTop(window, distance));
+        } else if (type === WINDOW_REFERENCES.PARENT && typeof ref.distance === 'number') {
+            return assertExists('parent', getNthParentFromTop(window, ref.distance));
 
-        } else if (type === WINDOW_REFERENCES.GLOBAL) {
-            // $FlowFixMe
+        } else if (type === WINDOW_REFERENCES.GLOBAL && ref.uid && typeof ref.uid === 'string') {
             const { uid } = ref;
             const ancestor = getAncestor(window);
 
@@ -178,7 +175,6 @@ export class ChildComponent<P> {
         this.props = this.props || {};
         return this.props;
     }
-
 
     setProps(props : PropsType<P>, origin : string, isUpdate : boolean = false) {
         const helpers = this.getHelpers();

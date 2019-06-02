@@ -334,8 +334,7 @@ export class ParentComponent<P> {
             if (prop && prop.sameDomain && !matchDomain(domain, getDomain(window))) {
                 continue;
             }
-
-            // $FlowFixMe
+            
             result[key] = this.props[key];
         }
 
@@ -624,14 +623,17 @@ export class ParentComponent<P> {
         });
     }
 
-    renderContainer(proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, uid } : { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<?ProxyObject<HTMLElement>> {
-        return ZalgoPromise.all([
-            proxyContainer.get().then(elementReady),
+    renderContainer(proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, uid } :
+        { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<?ProxyObject<HTMLElement>> {
+        
+
+        return ZalgoPromise.hash({
+            container:      proxyContainer.get().then(elementReady),
             // $FlowFixMe
-            proxyFrame ? proxyFrame.get() : null,
+            frame:          proxyFrame ? proxyFrame.get() : null,
             // $FlowFixMe
-            proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
-        ]).then(([ container, frame, prerenderFrame ]) => {
+            prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
+        }).then(({ container, frame, prerenderFrame }) => {
             const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, frame, prerenderFrame, doc: document });
             if (innerContainer) {
                 appendChild(container, innerContainer);

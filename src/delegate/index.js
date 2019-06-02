@@ -59,6 +59,7 @@ export class DelegateComponent<P>  {
 
         // $FlowFixMe
         this.props = {};
+        
         for (const propName of Object.keys(options.props)) {
             const propDef = this.component.getPropDefinition(propName);
             if (propDef && propDef.allowDelegate && options.props[propName]) {

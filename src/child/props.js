@@ -28,7 +28,6 @@ export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindow
 
     const result = {};
 
-    // $FlowFixMe
     for (const key of Object.keys(props)) {
         const prop = component.getPropDefinition(key);
 

@@ -75,13 +75,14 @@ type ZoidRenderer = {|
 
 export type ZoidComponentInstance<P> = {| ...ParentHelpers<P>, ...ZoidRenderer |};
 
-export type ZoidComponent<P> = {|
+// eslint-disable-next-line flowtype/require-exact-type
+export type ZoidComponent<P> = {
     (PropsInputType<P>) : ZoidComponentInstance<P>,
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
     xprops? : PropsType<P>,
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>
-|};
+};
 
 export class Component<P> {
 
@@ -204,9 +205,7 @@ export class Component<P> {
         return propNames;
     }
 
-    // $FlowFixMe
     getPropDefinition(name : string) : MixedPropDefinitionType<P> {
-        // $FlowFixMe
         return this.props[name] || this.builtinProps[name];
     }
 
@@ -277,8 +276,7 @@ export class Component<P> {
     }
 
     getDomain(props : PropsType<P>) : string | RegExp {
-        if (isRegex(this.domain)) {
-            // $FlowFixMe
+        if (this.domain && isRegex(this.domain)) {
             return this.domain;
         }
 
@@ -296,7 +294,7 @@ export class Component<P> {
         return Boolean(payload && payload.tag === this.tag && payload.childDomain === getDomain());
     }
 
-    getDefaultContainer<T : (string | HTMLElement)>(context : $Values<typeof CONTEXT>, container? : T) : T {
+    getDefaultContainer(context : $Values<typeof CONTEXT>, container? : string | HTMLElement) : string | HTMLElement {
         if (container) {
             if (typeof container !== 'string' && !isElement(container)) {
                 throw new TypeError(`Expected string or element selector to be passed`);
@@ -306,7 +304,6 @@ export class Component<P> {
         }
 
         if (context === CONTEXT.POPUP) {
-            // $FlowFixMe
             return 'body';
         }
 
@@ -404,8 +401,7 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
     init.isChild = () => component.isChild();
     init.canRenderTo = (win) => component.canRenderTo(win);
     init.xprops = component.xprops;
-
-    // $FlowFixMe
+    
     return init;
 }
 

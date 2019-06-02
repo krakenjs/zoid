@@ -16,8 +16,6 @@ function validatePropDefinitions<P>(options : ComponentOptionsType<P>) {
 
     if (options.props) {
         for (const key of Object.keys(options.props)) {
-
-            // $FlowFixMe
             const prop = options.props[key];
 
             if (!prop || !(typeof prop === 'object')) {

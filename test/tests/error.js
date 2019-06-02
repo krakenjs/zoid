@@ -51,7 +51,6 @@ describe('zoid error cases', () => {
             return component({
 
                 onError: expect('onError', err => {
-                    // $FlowFixMe
                     if (!err || err.message.indexOf('xxxxx') === -1) {
                         throw new Error(`Expected error to contain original error from child window`);
                     }

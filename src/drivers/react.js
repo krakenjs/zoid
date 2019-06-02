@@ -45,8 +45,7 @@ export const react : ComponentDriverType<*, ReactLibraryType> = {
 
             componentDidMount() {
                 component.log(`instantiate_react_component`);
-
-                // $FlowFixMe
+                
                 const el = ReactDOM.findDOMNode(this);
 
                 const parent = component.init(extend({}, this.props));
