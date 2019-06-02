@@ -36,6 +36,7 @@ const angular = {
             return (0, _src.replaceObject)($scope.props, item => {
               if (typeof item === 'function') {
                 return function angularWrapped() {
+                  // $FlowFixMe
                   const result = item.apply(this, arguments);
                   safeApply();
                   return result;

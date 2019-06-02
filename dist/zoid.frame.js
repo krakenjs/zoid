@@ -539,6 +539,11 @@
             } catch (err) {
                 if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
             }
+            try {
+                if (obj && "__unlikely_value__" === obj.__cross_domain_utils_window_check__) return !1;
+            } catch (err) {
+                return !0;
+            }
             return !1;
         }
         function util_safeIndexOf(collection, item) {
@@ -705,13 +710,13 @@
                     if (stack) return stack;
                     if (message) return message;
                 }
-                return "function" == typeof err.toString ? err.toString() : {}.toString.call(err);
+                return err && err.toString && "function" == typeof err.toString ? err.toString() : {}.toString.call(err);
             } catch (newErr) {
                 return "Error while stringifying error: " + stringifyError(newErr, level + 1);
             }
         }
         function stringify(item) {
-            return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
+            return "string" == typeof item ? item : item && item.toString && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
         }
         function extend(obj, source) {
             if (!source) return obj;
@@ -966,7 +971,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_16__ : win.__post_robot_10_0_16__ = win.__post_robot_10_0_16__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_18__ : win.__post_robot_10_0_18__ = win.__post_robot_10_0_18__ || {};
         }
         var getObj = function() {
             return {};
@@ -1256,10 +1261,13 @@
             }, _proto.matchWindow = function(win) {
                 var _this5 = this;
                 return promise_ZalgoPromise.try(function() {
-                    return _this5.actualWindow ? win === _this5.actualWindow : promise_ZalgoPromise.all([ _this5.getInstanceID(), getWindowInstanceID(win, {
-                        send: _this5.send
-                    }) ]).then(function(_ref3) {
-                        var match = _ref3[0] === _ref3[1];
+                    return _this5.actualWindow ? win === _this5.actualWindow : promise_ZalgoPromise.hash({
+                        proxyInstanceID: _this5.getInstanceID(),
+                        knownWindowInstanceID: getWindowInstanceID(win, {
+                            send: _this5.send
+                        })
+                    }).then(function(_ref3) {
+                        var match = _ref3.proxyInstanceID === _ref3.knownWindowInstanceID;
                         return match && _this5.setWindow(win), match;
                     });
                 });
@@ -1478,7 +1486,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_16__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_18__ = _extends({
                 id: uniqueID(),
                 origin: utils_getDomain(window)
             }, message), _serializeMessage), {
@@ -1626,7 +1634,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_16__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_18__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1808,7 +1816,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_25__ || (win.__zoid_9_0_25__ = {}), win.__zoid_9_0_25__;
+            return win.__zoid_9_0_26__ || (win.__zoid_9_0_26__ = {}), win.__zoid_9_0_26__;
         }
         function getProxyObject(obj) {
             return {
@@ -1882,7 +1890,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_24" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_24");
+                    if ("9_0_25" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_25");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2201,26 +2209,41 @@
                     var tasks = {};
                     return tasks.init = _this3.initPromise, tasks.buildUrl = _this3.buildUrl(), tasks.onRender = _this3.event.trigger(EVENT.RENDER), 
                     tasks.getProxyContainer = _this3.getProxyContainer(container), tasks.openFrame = _this3.openFrame(), 
-                    tasks.openPrerenderFrame = _this3.openPrerenderFrame(), tasks.renderContainer = promise_ZalgoPromise.all([ tasks.getProxyContainer, tasks.openFrame, tasks.openPrerenderFrame ]).then(function(_ref) {
-                        return _this3.renderContainer(_ref[0], {
+                    tasks.openPrerenderFrame = _this3.openPrerenderFrame(), tasks.renderContainer = promise_ZalgoPromise.hash({
+                        proxyContainer: tasks.getProxyContainer,
+                        proxyFrame: tasks.openFrame,
+                        proxyPrerenderFrame: tasks.openPrerenderFrame
+                    }).then(function(_ref) {
+                        return _this3.renderContainer(_ref.proxyContainer, {
                             context: context,
                             uid: uid,
-                            proxyFrame: _ref[1],
-                            proxyPrerenderFrame: _ref[2]
+                            proxyFrame: _ref.proxyFrame,
+                            proxyPrerenderFrame: _ref.proxyPrerenderFrame
                         });
                     }), tasks.open = _this3.driver.openOnClick ? _this3.open() : tasks.openFrame.then(function(proxyFrame) {
                         return _this3.open(proxyFrame);
-                    }), tasks.openPrerender = promise_ZalgoPromise.all([ tasks.open, tasks.openPrerenderFrame ]).then(function(_ref2) {
-                        return _this3.openPrerender(_ref2[0], _ref2[1]);
-                    }), tasks.setState = promise_ZalgoPromise.all([ tasks.open.then(function(proxyWin) {
+                    }), tasks.openPrerender = promise_ZalgoPromise.hash({
+                        proxyWin: tasks.open,
+                        proxyPrerenderFrame: tasks.openPrerenderFrame
+                    }).then(function(_ref2) {
+                        return _this3.openPrerender(_ref2.proxyWin, _ref2.proxyPrerenderFrame);
+                    }), tasks.setState = tasks.open.then(function(proxyWin) {
                         return _this3.proxyWin = proxyWin, _this3.setProxyWin(proxyWin);
-                    }) ]), tasks.prerender = promise_ZalgoPromise.all([ tasks.openPrerender, tasks.setState ]).then(function(_ref3) {
-                        return _this3.prerender(_ref3[0], {
+                    }), tasks.prerender = promise_ZalgoPromise.hash({
+                        proxyPrerenderWin: tasks.openPrerender,
+                        state: tasks.setState
+                    }).then(function(_ref3) {
+                        return _this3.prerender(_ref3.proxyPrerenderWin, {
                             context: context,
                             uid: uid
                         });
-                    }), tasks.loadUrl = promise_ZalgoPromise.all([ tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender ]).then(function(_ref4) {
-                        return _ref4[0].setLocation(_ref4[1]);
+                    }), tasks.loadUrl = promise_ZalgoPromise.hash({
+                        proxyWin: tasks.open,
+                        url: tasks.buildUrl,
+                        windowName: tasks.setWindowName,
+                        prerender: tasks.prerender
+                    }).then(function(_ref4) {
+                        return _ref4.proxyWin.setLocation(_ref4.url);
                     }), tasks.buildWindowName = tasks.open.then(function(proxyWin) {
                         return _this3.buildWindowName({
                             proxyWin: proxyWin,
@@ -2230,11 +2253,17 @@
                             context: context,
                             uid: uid
                         });
-                    }), tasks.setWindowName = promise_ZalgoPromise.all([ tasks.open, tasks.buildWindowName ]).then(function(_ref5) {
-                        return _ref5[0].setName(_ref5[1]);
+                    }), tasks.setWindowName = promise_ZalgoPromise.hash({
+                        proxyWin: tasks.open,
+                        windowName: tasks.buildWindowName
+                    }).then(function(_ref5) {
+                        return _ref5.proxyWin.setName(_ref5.windowName);
                     }), tasks.watchForClose = tasks.open.then(function(proxyWin) {
                         _this3.watchForClose(proxyWin);
-                    }), tasks.onDisplay = promise_ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(function() {
+                    }), tasks.onDisplay = promise_ZalgoPromise.hash({
+                        container: tasks.renderContainer,
+                        prerender: tasks.prerender
+                    }).then(function() {
                         return _this3.event.trigger(EVENT.DISPLAY);
                     }), tasks.openBridge = tasks.open.then(function(proxyWin) {
                         return _this3.openBridge(proxyWin, childDomain, context);
@@ -2287,7 +2316,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_24",
+                    version: "9_0_25",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -3028,41 +3057,41 @@
             }, Component;
         }();
         function create(options) {
-            var _ref3, on, send, global;
-            global_getGlobal().initialized || (global_getGlobal().initialized = !0, on = (_ref3 = {
-                on: on_on,
-                send: send_send
-            }).on, send = _ref3.send, (global = global_getGlobal()).receiveMessage = global.receiveMessage || function(message) {
-                return receive_receiveMessage(message, {
-                    on: on,
-                    send: send
-                });
-            }, function(_ref5) {
-                var on = _ref5.on, send = _ref5.send;
-                globalStore().getOrSet("postMessageListener", function() {
-                    return addEventListener(window, "message", function(event) {
-                        !function(event, _ref4) {
-                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
-                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
-                                if (!origin) throw new Error("Post message did not have origin domain");
-                                receive_receiveMessage({
-                                    source: source,
-                                    origin: origin,
-                                    data: data
-                                }, {
-                                    on: on,
-                                    send: send
-                                });
-                            }
-                        }(event, {
-                            on: on,
-                            send: send
-                        });
+            var _ref5, on, send;
+            global_getGlobal().initialized || (global_getGlobal().initialized = !0, function(_ref3) {
+                var on = _ref3.on, send = _ref3.send, global = global_getGlobal();
+                global.receiveMessage = global.receiveMessage || function(message) {
+                    return receive_receiveMessage(message, {
+                        on: on,
+                        send: send
                     });
-                });
+                };
             }({
                 on: on_on,
                 send: send_send
+            }), on = (_ref5 = {
+                on: on_on,
+                send: send_send
+            }).on, send = _ref5.send, globalStore().getOrSet("postMessageListener", function() {
+                return addEventListener(window, "message", function(event) {
+                    !function(event, _ref4) {
+                        var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
+                        if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
+                            if (!origin) throw new Error("Post message did not have origin domain");
+                            receive_receiveMessage({
+                                source: source,
+                                origin: origin,
+                                data: data
+                            }, {
+                                on: on,
+                                send: send
+                            });
+                        }
+                    }(event, {
+                        on: on,
+                        send: send
+                    });
+                });
             }), function(_ref7) {
                 var on = _ref7.on, send = _ref7.send;
                 globalStore("builtinListeners").getOrSet("helloListener", function() {
@@ -3105,13 +3134,13 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_25__, function() {
+            destroyAll(), delete window.__zoid_9_0_26__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
                 }
             }(), (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
-            delete window.__post_robot_10_0_16__;
+            delete window.__post_robot_10_0_18__;
         }
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", function() {
             return PopupOpenError;

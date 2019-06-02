@@ -44,6 +44,7 @@ const angular2 = {
       return (0, _src.replaceObject)(_extends({}, component.internalProps, component.props), item => {
         if (typeof item === 'function') {
           return function angular2Wrapped() {
+            // $FlowFixMe
             return component.zone.run(() => item.apply(this, arguments));
           };
         }

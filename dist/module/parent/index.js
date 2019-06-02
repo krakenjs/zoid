@@ -90,7 +90,15 @@ class ParentComponent {
       tasks.getProxyContainer = this.getProxyContainer(container);
       tasks.openFrame = this.openFrame();
       tasks.openPrerenderFrame = this.openPrerenderFrame();
-      tasks.renderContainer = _src3.ZalgoPromise.all([tasks.getProxyContainer, tasks.openFrame, tasks.openPrerenderFrame]).then(([proxyContainer, proxyFrame, proxyPrerenderFrame]) => {
+      tasks.renderContainer = _src3.ZalgoPromise.hash({
+        proxyContainer: tasks.getProxyContainer,
+        proxyFrame: tasks.openFrame,
+        proxyPrerenderFrame: tasks.openPrerenderFrame
+      }).then(({
+        proxyContainer,
+        proxyFrame,
+        proxyPrerenderFrame
+      }) => {
         return this.renderContainer(proxyContainer, {
           context,
           uid,
@@ -99,20 +107,39 @@ class ParentComponent {
         });
       });
       tasks.open = this.driver.openOnClick ? this.open() : tasks.openFrame.then(proxyFrame => this.open(proxyFrame));
-      tasks.openPrerender = _src3.ZalgoPromise.all([tasks.open, tasks.openPrerenderFrame]).then(([proxyWin, proxyPrerenderFrame]) => {
+      tasks.openPrerender = _src3.ZalgoPromise.hash({
+        proxyWin: tasks.open,
+        proxyPrerenderFrame: tasks.openPrerenderFrame
+      }).then(({
+        proxyWin,
+        proxyPrerenderFrame
+      }) => {
         return this.openPrerender(proxyWin, proxyPrerenderFrame);
       });
-      tasks.setState = _src3.ZalgoPromise.all([tasks.open.then(proxyWin => {
+      tasks.setState = tasks.open.then(proxyWin => {
         this.proxyWin = proxyWin;
         return this.setProxyWin(proxyWin);
-      })]);
-      tasks.prerender = _src3.ZalgoPromise.all([tasks.openPrerender, tasks.setState]).then(([proxyPrerenderWin]) => {
+      });
+      tasks.prerender = _src3.ZalgoPromise.hash({
+        proxyPrerenderWin: tasks.openPrerender,
+        state: tasks.setState
+      }).then(({
+        proxyPrerenderWin
+      }) => {
         return this.prerender(proxyPrerenderWin, {
           context,
           uid
         });
       });
-      tasks.loadUrl = _src3.ZalgoPromise.all([tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender]).then(([proxyWin, url]) => {
+      tasks.loadUrl = _src3.ZalgoPromise.hash({
+        proxyWin: tasks.open,
+        url: tasks.buildUrl,
+        windowName: tasks.setWindowName,
+        prerender: tasks.prerender
+      }).then(({
+        proxyWin,
+        url
+      }) => {
         return proxyWin.setLocation(url);
       });
       tasks.buildWindowName = tasks.open.then(proxyWin => {
@@ -125,13 +152,22 @@ class ParentComponent {
           uid
         });
       });
-      tasks.setWindowName = _src3.ZalgoPromise.all([tasks.open, tasks.buildWindowName]).then(([proxyWin, windowName]) => {
+      tasks.setWindowName = _src3.ZalgoPromise.hash({
+        proxyWin: tasks.open,
+        windowName: tasks.buildWindowName
+      }).then(({
+        proxyWin,
+        windowName
+      }) => {
         return proxyWin.setName(windowName);
       });
       tasks.watchForClose = tasks.open.then(proxyWin => {
         this.watchForClose(proxyWin);
       });
-      tasks.onDisplay = _src3.ZalgoPromise.all([tasks.renderContainer, tasks.prerender]).then(() => {
+      tasks.onDisplay = _src3.ZalgoPromise.hash({
+        container: tasks.renderContainer,
+        prerender: tasks.prerender
+      }).then(() => {
         return this.event.trigger(_constants.EVENT.DISPLAY);
       });
       tasks.openBridge = tasks.open.then(proxyWin => {

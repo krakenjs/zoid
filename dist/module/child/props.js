@@ -34,7 +34,8 @@ function normalizeChildProps(parentComponentWindow, component, props, origin, he
 
     if (prop && prop.sameDomain && (origin !== (0, _src.getDomain)(window) || !(0, _src.isSameDomain)(parentComponentWindow))) {
       continue;
-    }
+    } // $FlowFixMe
+
 
     const value = normalizeChildProp(component, props, key, props[key], helpers);
     result[key] = value;
