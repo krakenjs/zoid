@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { send, bridge, serializeMessage, ProxyWindow, toProxyWindow } from 'post-robot/src';
+import { send, bridge, serializeMessage, ProxyWindow, toProxyWindow, type CrossDomainFunctionType } from 'post-robot/src';
 import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
     getDomain, type CrossDomainWindowType,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain } from 'cross-domain-utils/src';
@@ -40,8 +40,8 @@ export type RenderOptionsType<P> = {|
 export type ParentExportsType<P> = {|
     init : (ChildExportsType<P>) => ZalgoPromise<void>,
     close : () => ZalgoPromise<void>,
-    checkClose : () => ZalgoPromise<void>,
-    resize : ({ width? : ?number, height? : ?number }) => ZalgoPromise<void>,
+    checkClose : CrossDomainFunctionType<[], void>,
+    resize : CrossDomainFunctionType<[{ width? : ?number, height? : ?number }], void>,
     onError : (mixed) => ZalgoPromise<void>
 |};
 
@@ -162,7 +162,7 @@ export class ParentComponent<P> {
             tasks.openFrame = this.openFrame();
             tasks.openPrerenderFrame = this.openPrerenderFrame();
 
-            tasks.renderContainer = ZalgoPromise.all([ tasks.getProxyContainer, tasks.openFrame, tasks.openPrerenderFrame ]).then(([ proxyContainer, proxyFrame, proxyPrerenderFrame ]) => {
+            tasks.renderContainer = ZalgoPromise.hash({ proxyContainer: tasks.getProxyContainer, proxyFrame: tasks.openFrame, proxyPrerenderFrame: tasks.openPrerenderFrame }).then(({ proxyContainer, proxyFrame, proxyPrerenderFrame }) => {
                 return this.renderContainer(proxyContainer, { context, uid, proxyFrame, proxyPrerenderFrame });
             });
 
@@ -170,22 +170,20 @@ export class ParentComponent<P> {
                 ? this.open()
                 : tasks.openFrame.then(proxyFrame => this.open(proxyFrame));
 
-            tasks.openPrerender = ZalgoPromise.all([ tasks.open, tasks.openPrerenderFrame ]).then(([ proxyWin, proxyPrerenderFrame ]) => {
+            tasks.openPrerender = ZalgoPromise.hash({ proxyWin: tasks.open, proxyPrerenderFrame: tasks.openPrerenderFrame }).then(({ proxyWin, proxyPrerenderFrame }) => {
                 return this.openPrerender(proxyWin, proxyPrerenderFrame);
             });
 
-            tasks.setState = ZalgoPromise.all([
-                tasks.open.then(proxyWin => {
-                    this.proxyWin = proxyWin;
-                    return this.setProxyWin(proxyWin);
-                })
-            ]);
+            tasks.setState = tasks.open.then(proxyWin => {
+                this.proxyWin = proxyWin;
+                return this.setProxyWin(proxyWin);
+            });
             
-            tasks.prerender = ZalgoPromise.all([ tasks.openPrerender, tasks.setState ]).then(([ proxyPrerenderWin ]) => {
+            tasks.prerender = ZalgoPromise.hash({ proxyPrerenderWin: tasks.openPrerender, state: tasks.setState }).then(({ proxyPrerenderWin }) => {
                 return this.prerender(proxyPrerenderWin, { context, uid });
             });
 
-            tasks.loadUrl = ZalgoPromise.all([ tasks.open, tasks.buildUrl, tasks.setWindowName, tasks.prerender ]).then(([ proxyWin, url ]) => {
+            tasks.loadUrl = ZalgoPromise.hash({ proxyWin: tasks.open, url: tasks.buildUrl, windowName: tasks.setWindowName, prerender: tasks.prerender }).then(({ proxyWin, url }) => {
                 return proxyWin.setLocation(url);
             });
 
@@ -193,7 +191,7 @@ export class ParentComponent<P> {
                 return this.buildWindowName({ proxyWin, childDomain, domain, target, context, uid });
             });
 
-            tasks.setWindowName =  ZalgoPromise.all([ tasks.open, tasks.buildWindowName ]).then(([ proxyWin, windowName ]) => {
+            tasks.setWindowName =  ZalgoPromise.hash({ proxyWin: tasks.open, windowName: tasks.buildWindowName }).then(({ proxyWin, windowName }) => {
                 return proxyWin.setName(windowName);
             });
 
@@ -201,7 +199,7 @@ export class ParentComponent<P> {
                 this.watchForClose(proxyWin);
             });
 
-            tasks.onDisplay = ZalgoPromise.all([ tasks.renderContainer, tasks.prerender ]).then(() => {
+            tasks.onDisplay = ZalgoPromise.hash({ container: tasks.renderContainer, prerender: tasks.prerender }).then(() => {
                 return this.event.trigger(EVENT.DISPLAY);
             });
 

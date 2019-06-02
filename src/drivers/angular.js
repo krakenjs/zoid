@@ -53,6 +53,7 @@ export const angular : ComponentDriverType<*, Angular> = {
                         return replaceObject($scope.props, item => {
                             if (typeof item === 'function') {
                                 return function angularWrapped() : mixed {
+                                    // $FlowFixMe
                                     const result = item.apply(this, arguments);
                                     safeApply();
                                     return result;

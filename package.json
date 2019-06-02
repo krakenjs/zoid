@@ -9,7 +9,6 @@
     "lint": "eslint --ext .js --ext .jsx src/ test/ *.js",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",
-    "flow:build": "flow gen-flow-files ./src/index.js --out-dir ./dist/module",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --progress",
@@ -48,9 +47,9 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "flow-bin": "^0.81",
+    "flow-bin": "^0.100.0",
     "grumbler-scripts": "^3",
-    "jsx-pragmatic": "^1.0.13",
+    "jsx-pragmatic": "^2",
     "mocha": "^4",
     "serve": "^10.0.0"
   },

@@ -4,7 +4,7 @@
 import { isSameDomain, matchDomain, getDomain, getOpener,
     getNthParentFromTop, getAncestor, getAllFramesInWindow,
     type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
-import { markWindowKnown, deserializeMessage } from 'post-robot/src';
+import { markWindowKnown, deserializeMessage, type CrossDomainFunctionType } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
 
@@ -20,8 +20,8 @@ import { getChildPayload } from './window';
 export * from './window';
 
 export type ChildExportsType<P> = {|
-    updateProps : (props : (PropsType<P>)) => ZalgoPromise<void>,
-    close : () => ZalgoPromise<void>
+    updateProps : CrossDomainFunctionType<[ PropsType<P> ], void>,
+    close : CrossDomainFunctionType<[], void>
 |};
 
 export type ChildHelpers<P> = {|

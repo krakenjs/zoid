@@ -36,6 +36,7 @@ export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindow
             continue;
         }
 
+        // $FlowFixMe
         const value = normalizeChildProp(component, props, key, props[key], helpers);
 
         result[key] = value;

@@ -55,6 +55,7 @@ export const angular2 : ComponentDriverType<*, Angular2> = {
             return replaceObject({ ...component.internalProps, ...component.props }, item => {
                 if (typeof item === 'function') {
                     return function angular2Wrapped() : void {
+                        // $FlowFixMe
                         return component.zone.run(() => item.apply(this, arguments));
                     };
                 }
