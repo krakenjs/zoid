@@ -158,12 +158,13 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                 return _this2.switchPrerender();
             });
 
+            // $FlowFixMe
             tasks.open = _this2.driver.openOnClick ? _this2.open() : tasks.openContainer.then(function () {
                 return _this2.open();
             });
 
-            tasks.listen = ZalgoPromise.all([tasks.getDomain, tasks.open]).then(function (_ref2) {
-                var domain = _ref2[0];
+            tasks.listen = ZalgoPromise.hash({ domain: tasks.getDomain, open: tasks.open }).then(function (_ref2) {
+                var domain = _ref2.domain;
 
                 _this2.listen(_this2.window, domain);
             });
