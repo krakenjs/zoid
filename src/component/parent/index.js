@@ -153,11 +153,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 return this.switchPrerender();
             });
 
+            // $FlowFixMe
             tasks.open = this.driver.openOnClick
                 ? this.open()
                 : tasks.openContainer.then(() => this.open());
 
-            tasks.listen = ZalgoPromise.all([ tasks.getDomain, tasks.open ]).then(([ domain ]) => {
+            tasks.listen = ZalgoPromise.hash({ domain: tasks.getDomain, open: tasks.open }).then(({ domain }) => {
                 this.listen(this.window, domain);
             });
 
