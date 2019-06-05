@@ -16,7 +16,6 @@ rm -rf node_modules/post-robot node_modules/zalgo-promise node_modules/beaver-lo
 npm install post-robot zalgo-promise beaver-logger cross-domain-safe-weakmap cross-domain-utils belter;
 
 git checkout dist;
-rm -rf dist/*;
 npm run build -- --level=${1-patch};
 
 git add dist;
