@@ -2077,7 +2077,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_25__ || (win.__zoid_9_0_25__ = {}), win.__zoid_9_0_25__;
+            return win.__zoid_9_0_26__ || (win.__zoid_9_0_26__ = {}), win.__zoid_9_0_26__;
         }
         function getProxyObject(obj) {
             return {
@@ -2205,7 +2205,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_25" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_25");
+                    if ("9_0_26" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_26");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2264,8 +2264,8 @@
             }, _proto.getParentComponentWindow = function(ref) {
                 var win, n, type = ref.type;
                 if ("opener" === type) return assertExists("opener", getOpener(window));
-                if ("parent" === type) return assertExists("parent", (win = window, void 0 === (n = ref.distance) && (n = 1), 
-                function(win, n) {
+                if ("parent" === type && "number" == typeof ref.distance) return assertExists("parent", (win = window, 
+                void 0 === (n = ref.distance) && (n = 1), function(win, n) {
                     void 0 === n && (n = 1);
                     for (var parent = win, i = 0; i < n; i++) {
                         if (!parent) return;
@@ -2273,7 +2273,7 @@
                     }
                     return parent;
                 }(win, getDistanceFromTop(win) - n)));
-                if ("global" === type) {
+                if ("global" === type && ref.uid && "string" == typeof ref.uid) {
                     var uid = ref.uid, ancestor = getAncestor(window);
                     if (!ancestor) throw new Error("Can not find ancestor window");
                     for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
@@ -2677,7 +2677,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_25",
+                    version: "9_0_26",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -2767,9 +2767,9 @@
                     }
                 }(this.component, this.props, props, helpers, isUpdate);
             }, _proto.buildUrl = function() {
-                var propsDef, props, params, _this6 = this;
+                var propsDef, props, params, keys, _this6 = this;
                 return (propsDef = _extends({}, this.component.props, this.component.builtinProps), 
-                props = this.props, params = {}, promise_ZalgoPromise.all(Object.keys(props).map(function(key) {
+                props = this.props, params = {}, keys = Object.keys(props), promise_ZalgoPromise.all(keys.map(function(key) {
                     var prop = propsDef[key];
                     if (prop) return promise_ZalgoPromise.resolve().then(function() {
                         var value = props[key];
@@ -3047,13 +3047,17 @@
                 });
             }, _proto.renderContainer = function(proxyContainer, _ref16) {
                 var _this25 = this, proxyFrame = _ref16.proxyFrame, proxyPrerenderFrame = _ref16.proxyPrerenderFrame, context = _ref16.context, uid = _ref16.uid;
-                return promise_ZalgoPromise.all([ proxyContainer.get().then(elementReady), proxyFrame ? proxyFrame.get() : null, proxyPrerenderFrame ? proxyPrerenderFrame.get() : null ]).then(function(_ref17) {
-                    var container = _ref17[0], innerContainer = _this25.renderTemplate(_this25.component.containerTemplate, {
+                return promise_ZalgoPromise.hash({
+                    container: proxyContainer.get().then(elementReady),
+                    frame: proxyFrame ? proxyFrame.get() : null,
+                    prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
+                }).then(function(_ref17) {
+                    var container = _ref17.container, innerContainer = _this25.renderTemplate(_this25.component.containerTemplate, {
                         context: context,
                         uid: uid,
                         container: container,
-                        frame: _ref17[1],
-                        prerenderFrame: _ref17[2],
+                        frame: _ref17.frame,
+                        prerenderFrame: _ref17.prerenderFrame,
                         doc: document
                     });
                     if (innerContainer) return appendChild(container, innerContainer), _this25.clean.register(function() {
@@ -3376,7 +3380,7 @@
             }, _proto.getChildDomain = function(props) {
                 return this.domain && "string" == typeof this.domain ? this.domain : getDomainFromUrl(this.getUrl(props));
             }, _proto.getDomain = function(props) {
-                return util_isRegex(this.domain) ? this.domain : this.getChildDomain(props);
+                return this.domain && util_isRegex(this.domain) ? this.domain : this.getChildDomain(props);
             }, _proto.getBridgeUrl = function() {
                 if (this.bridgeUrl) return this.bridgeUrl;
             }, _proto.isChild = function() {
@@ -3511,7 +3515,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_25__, function() {
+            destroyAll(), delete window.__zoid_9_0_26__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
