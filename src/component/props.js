@@ -73,7 +73,7 @@ export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P,
 export type StringPropDefinitionType<T : string, P> = PropDefinitionType<T, P, 'string'>;
 export type NumberPropDefinitionType<T : number, P> = PropDefinitionType<T, P, 'number'>;
 export type FunctionPropDefinitionType<T : Function, P> = PropDefinitionType<T, P, 'function'>;
-export type ArrayPropDefinitionType<T : Array<*>, P> = PropDefinitionType<T, P, 'array'>; // eslint-disable-line flowtype/no-mutable-array
+export type ArrayPropDefinitionType<T : Array<*> | $ReadOnlyArray<*>, P> = PropDefinitionType<T, P, 'array'>; // eslint-disable-line flowtype/no-mutable-array
 export type ObjectPropDefinitionType<T : Object, P> = PropDefinitionType<T, P, 'object'>;
 
 export type MixedPropDefinitionType<P> = BooleanPropDefinitionType<*, P> | StringPropDefinitionType<*, P> | NumberPropDefinitionType<*, P> | FunctionPropDefinitionType<*, P> | ObjectPropDefinitionType<*, P> | ArrayPropDefinitionType<*, P>;
