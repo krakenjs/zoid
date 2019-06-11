@@ -415,7 +415,7 @@ export function destroyAll() : ZalgoPromise<void> {
     const global = getGlobal();
     global.activeComponents = global.activeComponents || [];
     while (global.activeComponents.length) {
-        results.push(global.activeComponents[0].destroy(new Error(`zoid desroyed all`), false));
+        results.push(global.activeComponents[0].destroy(new Error(`zoid destroyed all`), false));
     }
 
     return ZalgoPromise.all(results).then(noop);
