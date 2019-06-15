@@ -231,6 +231,8 @@ A function which should return a DOM element, rendered on the parent page and co
 
 zoid will pass `opts.frame` and `opts.prerenderFrame` to this function, which is a pre-generated element your component will be rendered into. These must be inserted somewhere into the DOM element you return, for frame-based components
 
+The `opts` parameter is [the same](#opts) as the parameter used in `prerenderTemplate`
+
 Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You can use [babel](https://babeljs.io/docs/plugins/transform-react-jsx/) with a `/* @jsx node */` comment, to transpile the jsx down to regular javascript.
 
 ```javascript
@@ -302,6 +304,8 @@ var MyLoginZoidComponent = zoid.create({
     }
 });
 ```
+
+If no `containerTemplate` function is defined, then a default is used. The default template can be found [here](https://github.com/krakenjs/zoid/blob/master/src/component/templates/container.js).
 
 #### prerenderTemplate `(opts) => HTMLElement`
 
@@ -381,6 +385,25 @@ Data automatically passed to `containerTemplate` and `prerenderTemplate`, used t
 - `prerenderFrame`: Frame element that will be pre-rendered into. Only applies to `containerTemplate` when rendering an iframe using `prerenderTemplate`
 - `close`: Close the component. Useful if you want to render a close button outside the component
 - `focus`: Focus the component. Valid for popup components only. Useful if you want a clickable background overlay to re-focus the popup window.
+- `event`: Object that can be used to listen for the following events: `RENDER`, `RENDERED`, `DISPLAY`, `ERROR`, `CLOSED`, `PROPS`, `RESIZE`
+
+##### Listening to zoid events
+
+In the `containerTemplate` and `prerenderFunctions`, it is possible to attach functions that fire at events in the zoid lifecycle:
+
+```javascript
+event.on(EVENT.RENDERED, () => {
+  prerenderFrame.classList.remove(CLASS.VISIBLE);
+  prerenderFrame.classList.add(CLASS.INVISIBLE);
+
+  frame.classList.remove(CLASS.INVISIBLE);
+  frame.classList.add(CLASS.VISIBLE);
+
+  setTimeout(() => {
+    destroyElement(prerenderFrame);
+  }, 1);
+});
+```
 
 #### autoResize `{ height: boolean, width: boolean, element: string }`
 
