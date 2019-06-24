@@ -1869,7 +1869,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_27__ || (win.__zoid_9_0_27__ = {}), win.__zoid_9_0_27__;
+            return win.__zoid_9_0_28__ || (win.__zoid_9_0_28__ = {}), win.__zoid_9_0_28__;
         }
         function getProxyObject(obj) {
             return {
@@ -1943,7 +1943,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_26" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_26");
+                    if ("9_0_27" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_27");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2259,13 +2259,10 @@
                     _this3.component.log("render"), _this3.driver = RENDER_DRIVERS[context];
                     var uid = ZOID + "-" + _this3.component.tag + "-" + uniqueID(), domain = _this3.getDomain(), childDomain = _this3.getChildDomain();
                     _this3.component.checkAllowRender(target, domain, container), target !== window && _this3.delegate(context, target);
-                    var tasks = {};
-                    return tasks.init = _this3.initPromise, tasks.buildUrl = _this3.buildUrl(), tasks.onRender = _this3.event.trigger(EVENT.RENDER), 
-                    tasks.getProxyContainer = _this3.getProxyContainer(container), tasks.openFrame = _this3.openFrame(), 
-                    tasks.openPrerenderFrame = _this3.openPrerenderFrame(), tasks.renderContainer = promise_ZalgoPromise.hash({
-                        proxyContainer: tasks.getProxyContainer,
-                        proxyFrame: tasks.openFrame,
-                        proxyPrerenderFrame: tasks.openPrerenderFrame
+                    var tasks = {}, init = _this3.initPromise, buildUrl = _this3.buildUrl(), onRender = _this3.event.trigger(EVENT.RENDER), getProxyContainer = _this3.getProxyContainer(container), openFrame = _this3.openFrame(), openPrerenderFrame = _this3.openPrerenderFrame(), renderContainer = promise_ZalgoPromise.hash({
+                        proxyContainer: getProxyContainer,
+                        proxyFrame: openFrame,
+                        proxyPrerenderFrame: openPrerenderFrame
                     }).then(function(_ref) {
                         return _this3.renderContainer(_ref.proxyContainer, {
                             context: context,
@@ -2273,31 +2270,24 @@
                             proxyFrame: _ref.proxyFrame,
                             proxyPrerenderFrame: _ref.proxyPrerenderFrame
                         });
-                    }), tasks.open = _this3.driver.openOnClick ? _this3.open() : tasks.openFrame.then(function(proxyFrame) {
+                    }), open = _this3.driver.openOnClick ? _this3.open() : openFrame.then(function(proxyFrame) {
                         return _this3.open(proxyFrame);
-                    }), tasks.openPrerender = promise_ZalgoPromise.hash({
-                        proxyWin: tasks.open,
-                        proxyPrerenderFrame: tasks.openPrerenderFrame
+                    }), openPrerender = promise_ZalgoPromise.hash({
+                        proxyWin: open,
+                        proxyPrerenderFrame: openPrerenderFrame
                     }).then(function(_ref2) {
                         return _this3.openPrerender(_ref2.proxyWin, _ref2.proxyPrerenderFrame);
-                    }), tasks.setState = tasks.open.then(function(proxyWin) {
+                    }), setState = open.then(function(proxyWin) {
                         return _this3.proxyWin = proxyWin, _this3.setProxyWin(proxyWin);
-                    }), tasks.prerender = promise_ZalgoPromise.hash({
-                        proxyPrerenderWin: tasks.openPrerender,
-                        state: tasks.setState
+                    }), prerender = promise_ZalgoPromise.hash({
+                        proxyPrerenderWin: openPrerender,
+                        state: setState
                     }).then(function(_ref3) {
                         return _this3.prerender(_ref3.proxyPrerenderWin, {
                             context: context,
                             uid: uid
                         });
-                    }), tasks.loadUrl = promise_ZalgoPromise.hash({
-                        proxyWin: tasks.open,
-                        url: tasks.buildUrl,
-                        windowName: tasks.setWindowName,
-                        prerender: tasks.prerender
-                    }).then(function(_ref4) {
-                        return _ref4.proxyWin.setLocation(_ref4.url);
-                    }), tasks.buildWindowName = tasks.open.then(function(proxyWin) {
+                    }), buildWindowName = open.then(function(proxyWin) {
                         return _this3.buildWindowName({
                             proxyWin: proxyWin,
                             childDomain: childDomain,
@@ -2306,25 +2296,53 @@
                             context: context,
                             uid: uid
                         });
-                    }), tasks.setWindowName = promise_ZalgoPromise.hash({
-                        proxyWin: tasks.open,
-                        windowName: tasks.buildWindowName
+                    }), setWindowName = promise_ZalgoPromise.hash({
+                        proxyWin: open,
+                        windowName: buildWindowName
+                    }).then(function(_ref4) {
+                        return _ref4.proxyWin.setName(_ref4.windowName);
+                    }), loadUrl = promise_ZalgoPromise.hash({
+                        proxyWin: open,
+                        url: buildUrl,
+                        windowName: setWindowName,
+                        prerender: prerender
                     }).then(function(_ref5) {
-                        return _ref5.proxyWin.setName(_ref5.windowName);
-                    }), tasks.watchForClose = tasks.open.then(function(proxyWin) {
+                        return _ref5.proxyWin.setLocation(_ref5.url);
+                    }), watchForClose = open.then(function(proxyWin) {
                         _this3.watchForClose(proxyWin);
-                    }), tasks.onDisplay = promise_ZalgoPromise.hash({
-                        container: tasks.renderContainer,
-                        prerender: tasks.prerender
+                    }), onDisplay = promise_ZalgoPromise.hash({
+                        container: renderContainer,
+                        prerender: prerender
                     }).then(function() {
                         return _this3.event.trigger(EVENT.DISPLAY);
-                    }), tasks.openBridge = tasks.open.then(function(proxyWin) {
+                    }), openBridge = open.then(function(proxyWin) {
                         return _this3.openBridge(proxyWin, childDomain, context);
-                    }), tasks.runTimeout = tasks.loadUrl.then(function() {
+                    }), runTimeout = loadUrl.then(function() {
                         return _this3.runTimeout();
-                    }), tasks.onRender = tasks.init.then(function() {
+                    }), onRendered = init.then(function() {
                         return _this3.event.trigger(EVENT.RENDERED);
-                    }), promise_ZalgoPromise.hash(tasks).catch(function(err) {
+                    });
+                    return promise_ZalgoPromise.hash({
+                        init: init,
+                        buildUrl: buildUrl,
+                        onRender: onRender,
+                        getProxyContainer: getProxyContainer,
+                        openFrame: openFrame,
+                        openPrerenderFrame: openPrerenderFrame,
+                        renderContainer: renderContainer,
+                        open: open,
+                        openPrerender: openPrerender,
+                        setState: setState,
+                        prerender: prerender,
+                        loadUrl: loadUrl,
+                        buildWindowName: buildWindowName,
+                        setWindowName: setWindowName,
+                        watchForClose: watchForClose,
+                        onDisplay: onDisplay,
+                        openBridge: openBridge,
+                        runTimeout: runTimeout,
+                        onRendered: onRendered
+                    }).catch(function(err) {
                         for (var _i2 = 0, _Object$keys2 = Object.keys(tasks); _i2 < _Object$keys2.length; _i2++) tasks[_Object$keys2[_i2]].reject(err);
                         throw err;
                     });
@@ -2369,7 +2387,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_26",
+                    version: "9_0_27",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -3309,13 +3327,13 @@
         function destroyAll() {
             src_bridge && src_bridge.destroyBridges();
             var results = [], global = lib_global_getGlobal();
-            for (global.activeComponents = global.activeComponents || []; global.activeComponents.length; ) results.push(global.activeComponents[0].destroy(new Error("zoid desroyed all"), !1));
+            for (global.activeComponents = global.activeComponents || []; global.activeComponents.length; ) results.push(global.activeComponents[0].destroy(new Error("zoid destroyed all"), !1));
             return promise_ZalgoPromise.all(results).then(src_util_noop);
         }
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_27__, function() {
+            destroyAll(), delete window.__zoid_9_0_28__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
