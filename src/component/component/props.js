@@ -53,6 +53,7 @@ type onDisplayPropType = EventHandlerType<void>;
 type onEnterPropType = EventHandlerType<void>;
 type onRenderPropType = EventHandlerType<void>;
 type onClosePropType = EventHandlerType<string>;
+type onResizePropType = EventHandlerType<void>;
 type onTimeoutPropType = EventHandlerType<Error>;
 type onErrorPropType = EventHandlerType<mixed>;
 
@@ -69,6 +70,7 @@ export type BuiltInPropsType = {
     onEnter : onEnterPropType,
     onRender : onRenderPropType,
     onClose : onClosePropType,
+    onResize : onResizePropType,
     onTimeout : onTimeoutPropType,
     onError? : onErrorPropType
 };
@@ -86,6 +88,7 @@ export type PropsType = {
     onEnter? : onEnterPropType,
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
+    onResize? : onResizePropType,
     onTimeout? : onTimeoutPropType,
     onError? : onErrorPropType
 };
@@ -103,6 +106,7 @@ export type BuiltInPropsDefinitionType<P> = {
     onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
+    onResize : FunctionPropDefinitionType<onResizePropType, P>,
     onTimeout : FunctionPropDefinitionType<onTimeoutPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>
 };
@@ -211,6 +215,13 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             noop:        true,
             once:        true,
             promisify:   true,
+            sendToChild: false
+        },
+
+        onResize: {
+            type:        'function',
+            required:    false,
+            noop:        true,
             sendToChild: false
         },
 

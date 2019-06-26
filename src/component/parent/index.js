@@ -894,6 +894,9 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             this.component.log(`resize`, { height: stringify(height), width: stringify(width) });
             this.driver.resize.call(this, width, height);
+            if (this.props.onResize) {
+                this.props.onResize();
+            }
         });
     }
 
