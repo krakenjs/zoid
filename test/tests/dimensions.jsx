@@ -232,6 +232,7 @@ describe('zoid dimensions cases', () => {
 
             const component = window.__component__();
             return component({
+                onResize:  expect('onResize'),
                 onResized: expect('onResized', () => {
                     return componentWindowPromise.then(componentWindow => {
                         if (componentWindow.innerWidth !== expectedWidth) {

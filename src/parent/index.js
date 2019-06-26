@@ -119,6 +119,7 @@ export class ParentComponent<P> {
         this.event.on(EVENT.DISPLAY,  () => this.props.onDisplay());
         this.event.on(EVENT.RENDERED, () => this.props.onRendered());
         this.event.on(EVENT.CLOSE,    () => this.props.onClose());
+        this.event.on(EVENT.RESIZE,   () => this.props.onResize());
         this.event.on(EVENT.PROPS,    (props) => this.props.onProps(props));
 
         this.event.on(EVENT.ERROR, err => {
