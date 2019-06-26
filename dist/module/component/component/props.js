@@ -111,6 +111,13 @@ export function getInternalProps() {
             sendToChild: false
         },
 
+        onResize: {
+            type: 'function',
+            required: false,
+            noop: true,
+            sendToChild: false
+        },
+
         // When we time-out before getting an INIT message from the child. Defaults to onError if no handler passed.
 
         onTimeout: {

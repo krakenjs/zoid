@@ -5249,6 +5249,7 @@
                             width: Object(lib.O)(width)
                         });
                         _this21.driver.resize.call(_this21, width, height);
+                        _this21.props.onResize && _this21.props.onResize();
                     });
                 };
                 ParentComponent.prototype.hide = function() {
@@ -5826,6 +5827,12 @@
                             noop: !0,
                             once: !0,
                             promisify: !0,
+                            sendToChild: !1
+                        },
+                        onResize: {
+                            type: "function",
+                            required: !1,
+                            noop: !0,
                             sendToChild: !1
                         },
                         onTimeout: {

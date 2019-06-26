@@ -884,6 +884,9 @@ export var ParentComponent = (_class = function (_BaseComponent) {
         return ZalgoPromise['try'](function () {
             _this21.component.log('resize', { height: stringify(height), width: stringify(width) });
             _this21.driver.resize.call(_this21, width, height);
+            if (_this21.props.onResize) {
+                _this21.props.onResize();
+            }
         });
     };
 
