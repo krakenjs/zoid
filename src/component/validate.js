@@ -49,7 +49,7 @@ export function validate<P>(options : ?ComponentOptionsType<P>) { // eslint-igno
     }
 
     // eslint-disable-next-line security/detect-unsafe-regex, unicorn/no-unsafe-regex
-    if (!options.tag || !options.tag.match(/^([a-z0-9]+-)+[a-z0-9]+$/)) {
+    if (!options.tag || !options.tag.match(/^([a-z0-9][a-z0-9-]*)+[a-z0-9]+$/)) {
         throw new Error(`Invalid options.tag: ${ options.tag }`);
     }
 
