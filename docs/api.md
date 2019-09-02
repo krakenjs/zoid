@@ -18,7 +18,9 @@ tag: 'my-component-tag'
 
 #### url `string | ({ props }) => string` [required]
 
-The full url that will be loaded when your component is rendered, or a function returning the url
+The full url that will be loaded when your component is rendered, or a function returning the url.
+
+This must include a protocol (http:, https:, or about:); it cannot be scheme-relative.
 
 ```javascript
 url: 'https://www.my-site.com/mycomponent'
