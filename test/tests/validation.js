@@ -44,6 +44,31 @@ describe('zoid validation errors', () => {
         });
     });
 
+    it('should throw validation errors when a component is created with trailing dash in tag name', () => {
+        return expectError('Malformed tag name', () => {
+            window.zoid.create({
+                url: 'http://foo.com/bar',
+                tag: 'my-component-'
+            });
+        });
+    });
+
+    it('should throw validation errors when a component is created with leading dash in tag name', () => {
+        return expectError('Malformed tag name', () => {
+            window.zoid.create({
+                url: 'http://foo.com/bar',
+                tag: '-my-component'
+            });
+        });
+    });
+
+    it('should NOT throw validation errors when a component is created NO dash in tag name', () => {
+        return window.zoid.create({
+            url: 'http://foo.com/bar',
+            tag: 'component'
+        });
+    });
+
     it('should throw validation errors when a component is created with Special chars in tag name', () => {
         return expectError('Special chars in tag name', () => {
             window.zoid.create({
