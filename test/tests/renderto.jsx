@@ -635,8 +635,7 @@ describe('zoid renderto cases', () => {
                     if (!remoteWindow) {
                         throw new Error(`Expected remote window to be populated`);
                     }
-
-                    // $FlowFixMe
+                    
                     destroyElement(simpleWindow.frameElement);
                     return onCloseWindow(remoteWindow, expect('onCloseWindow'));
                 }),

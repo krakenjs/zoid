@@ -3,7 +3,6 @@
 /* eslint max-lines: off */
 
 import { wrapPromise } from 'belter/src';
-import { assertSameDomain } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen } from '../common';
@@ -35,9 +34,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -82,9 +79,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -125,9 +120,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             const instance = component({
@@ -172,9 +165,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -226,9 +217,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -286,9 +275,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -345,9 +332,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -401,9 +386,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -474,9 +457,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -541,9 +522,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -608,9 +587,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -674,9 +651,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -730,9 +705,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({
@@ -787,9 +760,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => {
-                return assertSameDomain(win);
-            }));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
             return component({

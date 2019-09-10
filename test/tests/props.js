@@ -728,7 +728,6 @@ describe('zoid props cases', () => {
                     foo: 'bar'
                 });
 
-                // $FlowFixMe
                 destroyElement(openedWindow.frameElement);
 
                 return updatePromise;

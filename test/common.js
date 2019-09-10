@@ -3,7 +3,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 
-export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<CrossDomainWindowType> {
+export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<SameDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
 
         const winOpen = window.open;

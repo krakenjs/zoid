@@ -246,7 +246,6 @@ describe('zoid error cases', () => {
 
             onWindowOpen().then(expect('onWindowOpen', openedWindow => {
                 setTimeout(() => {
-                    // $FlowFixMe
                     destroyElement(openedWindow.frameElement);
                 }, 200);
             }));
@@ -271,7 +270,6 @@ describe('zoid error cases', () => {
 
             onWindowOpen().then(expect('onWindowOpen', openedWindow => {
                 setTimeout(() => {
-                    // $FlowFixMe
                     destroyElement(openedWindow.frameElement);
                 }, 1);
             }));
@@ -331,7 +329,6 @@ describe('zoid error cases', () => {
                     `;
                 },
                 onLoad: expect('onLoad', () => {
-                    // $FlowFixMe
                     openedWindow.location.reload();
                     destroyElement(openedWindow.frameElement);
                 }),
@@ -365,7 +362,6 @@ describe('zoid error cases', () => {
                     `;
                 },
                 onLoad: expect('onLoad', () => {
-                    // $FlowFixMe
                     openedWindow.location.reload();
                     setTimeout(() => {
                         destroyElement(openedWindow.frameElement);
@@ -401,7 +397,6 @@ describe('zoid error cases', () => {
                     `;
                 },
                 onLoad: expect('onLoad', () => {
-                    // $FlowFixMe
                     openedWindow.location.reload();
                     openedWindow.close();
                 }),
@@ -435,7 +430,6 @@ describe('zoid error cases', () => {
                     `;
                 },
                 onLoad: expect('onLoad', () => {
-                    // $FlowFixMe
                     openedWindow.location.reload();
                     setTimeout(() => {
                         openedWindow.close();
