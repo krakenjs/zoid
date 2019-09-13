@@ -2082,7 +2082,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_29__ || (win.__zoid_9_0_29__ = {}), win.__zoid_9_0_29__;
+            return win.__zoid_9_0_30__ || (win.__zoid_9_0_30__ = {}), win.__zoid_9_0_30__;
         }
         function getProxyObject(obj) {
             return {
@@ -2175,9 +2175,14 @@
         };
         function normalizeChildProp(component, props, key, value, helpers) {
             var prop = component.getPropDefinition(key);
-            return prop && "function" == typeof prop.childDecorate ? prop.childDecorate(_extends({
-                value: value
-            }, helpers)) : value;
+            return prop && "function" == typeof prop.childDecorate ? prop.childDecorate({
+                value: value,
+                close: helpers.close,
+                focus: helpers.focus,
+                onError: helpers.onError,
+                onProps: helpers.onProps,
+                resize: helpers.resize
+            }) : value;
         }
         function parseChildWindowName(windowName) {
             return inlineMemoize(parseChildWindowName, (function() {
@@ -2213,7 +2218,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_29" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_29");
+                    if ("9_0_30" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_30");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2707,7 +2712,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_29",
+                    version: "9_0_30",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -2755,7 +2760,7 @@
                         var key = _Object$keys2[_i2];
                         -1 === propNames.indexOf(key) && propNames.push(key);
                     }
-                    for (var aliases = [], state = helpers.state, close = helpers.close, focus = helpers.focus, onError = helpers.onError, _i4 = 0; _i4 < propNames.length; _i4++) {
+                    for (var aliases = [], state = helpers.state, close = helpers.close, focus = helpers.focus, event = helpers.event, onError = helpers.onError, _i4 = 0; _i4 < propNames.length; _i4++) {
                         var _key = propNames[_i4], propDef = component.getPropDefinition(_key), value = inputProps[_key];
                         if (propDef) {
                             var alias = propDef.alias;
@@ -2765,12 +2770,14 @@
                                 state: state,
                                 close: close,
                                 focus: focus,
+                                event: event,
                                 onError: onError
                             })), !isDefined(value) && propDef.default && (value = propDef.default({
                                 props: props,
                                 state: state,
                                 close: close,
                                 focus: focus,
+                                event: event,
                                 onError: onError
                             })), isDefined(value) && ("array" === propDef.type ? !Array.isArray(value) : typeof value !== propDef.type)) throw new TypeError("Prop is not of type " + propDef.type + ": " + _key);
                             props[_key] = value;
@@ -2788,6 +2795,7 @@
                             state: state,
                             close: close,
                             focus: focus,
+                            event: event,
                             onError: onError
                         })));
                     }
@@ -3560,7 +3568,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_29__, function() {
+            destroyAll(), delete window.__zoid_9_0_30__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
