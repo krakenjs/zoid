@@ -2082,7 +2082,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_28__ || (win.__zoid_9_0_28__ = {}), win.__zoid_9_0_28__;
+            return win.__zoid_9_0_29__ || (win.__zoid_9_0_29__ = {}), win.__zoid_9_0_29__;
         }
         function getProxyObject(obj) {
             return {
@@ -2170,7 +2170,8 @@
             ERROR: "zoid-error",
             CLOSE: "zoid-close",
             PROPS: "zoid-props",
-            RESIZE: "zoid-resize"
+            RESIZE: "zoid-resize",
+            FOCUS: "zoid-focus"
         };
         function normalizeChildProp(component, props, key, value, helpers) {
             var prop = component.getPropDefinition(key);
@@ -2212,7 +2213,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_28" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_28");
+                    if ("9_0_29" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_29");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2561,6 +2562,8 @@
                     return _this2.props.onClose();
                 })), this.event.on(EVENT.RESIZE, (function() {
                     return _this2.props.onResize();
+                })), this.event.on(EVENT.FOCUS, (function() {
+                    return _this2.props.onFocus();
                 })), this.event.on(EVENT.PROPS, (function(props) {
                     return _this2.props.onProps(props);
                 })), this.event.on(EVENT.ERROR, (function(err) {
@@ -2704,7 +2707,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_28",
+                    version: "9_0_29",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -2887,7 +2890,8 @@
             }, _proto.focus = function() {
                 var _this12 = this;
                 return promise_ZalgoPromise.try((function() {
-                    if (_this12.proxyWin) return _this12.proxyWin.focus().then(src_util_noop);
+                    var proxyWin = _this12.proxyWin;
+                    if (proxyWin) return _this12.event.trigger(EVENT.FOCUS), proxyWin.focus().then(src_util_noop);
                 }));
             }, _proto.delegate = function(context, target) {
                 var _this13 = this;
@@ -3337,6 +3341,13 @@
                         allowDelegate: !0,
                         default: props_defaultNoop
                     },
+                    onFocus: {
+                        type: "function",
+                        required: !1,
+                        sendToChild: !1,
+                        allowDelegate: !0,
+                        default: props_defaultNoop
+                    },
                     onError: {
                         type: "function",
                         required: !1,
@@ -3549,7 +3560,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_28__, function() {
+            destroyAll(), delete window.__zoid_9_0_29__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
