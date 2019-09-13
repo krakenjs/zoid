@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, noop } from 'belter/src';
+import { once, noop, type EventEmitterType } from 'belter/src';
 import { isWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ProxyWindow, toProxyWindow } from 'post-robot/src';
 
@@ -61,18 +61,18 @@ export type PropsType<P> = {|
 type PropDefinitionType<T, P, S : string> = {|
     type : S,
     alias? : string,
-    value? : ({ props : P, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void> }) => ?T,
+    value? : ({| props : P, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => ?T,
+    default? : ({| props : P, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => ?T,
+    decorate? : ({| value : T, props : PropsType<P>, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => T,
     required? : boolean,
     queryParam? : boolean | string | ({ value : T }) => (string | ZalgoPromise<string>),
-    queryValue? : ({ value : T }) => (ZalgoPromise<mixed> | mixed),
+    queryValue? : ({| value : T |}) => (ZalgoPromise<mixed> | mixed),
     sendToChild? : boolean,
     allowDelegate? : boolean,
-    validate? : ({ value : T, props : PropsInputType<P> }) => void,
-    decorate? : ({ value : T, props : PropsType<P>, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void> }) => T,
-    default? : ({ props : P, state : Object }) => ?T,
+    validate? : ({| value : T, props : PropsInputType<P> |}) => void,
     sameDomain? : boolean,
     serialization? : $Values<typeof PROP_SERIALIZATION>,
-    childDecorate? : ({ value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void> }) => ?T
+    childDecorate? : ({| value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void> |}) => ?T
 |};
 
 export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;

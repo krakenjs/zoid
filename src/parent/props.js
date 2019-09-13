@@ -31,7 +31,7 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
 
     const aliases = [];
 
-    const { state, close, focus, onError } = helpers;
+    const { state, close, focus, event, onError } = helpers;
 
     for (const key of propNames) {
         const propDef = component.getPropDefinition(key);
@@ -50,11 +50,11 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
         }
 
         if (propDef.value) {
-            value = propDef.value({ props, state, close, focus, onError });
+            value = propDef.value({ props, state, close, focus, event, onError });
         }
 
         if (!isDefined(value) && propDef.default) {
-            value = propDef.default({ props, state, close, focus, onError });
+            value = propDef.default({ props, state, close, focus, event, onError });
         }
 
         if (isDefined(value)) {
@@ -86,7 +86,7 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
         }
 
         if (isDefined(value) && propDef.decorate) {
-            props[key] = propDef.decorate({ value, props, state, close, focus, onError });
+            props[key] = propDef.decorate({ value, props, state, close, focus, event, onError });
         }
     }
 
