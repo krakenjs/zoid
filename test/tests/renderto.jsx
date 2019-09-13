@@ -393,8 +393,8 @@ describe('zoid renderto cases', () => {
             };
 
             return window.__component__().simple({
-                doFocus: expect('doFocus', () => doFocus()),
-                onFocus: expect('onFocus'),
+                doFocus:   expect('doFocus', () => doFocus()),
+                onFocused: expect('onFocused'),
 
                 run: expect('run', () => {
                     return `
@@ -407,7 +407,7 @@ describe('zoid renderto cases', () => {
                         }
 
                         window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP).then(() => {
-                            win.focus = window.xprops.onFocus;
+                            win.focus = window.xprops.onFocused;
                             return window.xprops.doFocus();
                         });
                     `;
@@ -442,7 +442,7 @@ describe('zoid renderto cases', () => {
             };
 
             return window.__component__().simple({
-                onFocus: expect('onFocus'),
+                onFocused: expect('onFocused'),
 
                 run: expect('run', () => {
                     return `
@@ -455,7 +455,7 @@ describe('zoid renderto cases', () => {
                         }
 
                         window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP).then(() => {
-                            win.focus = window.xprops.onFocus;
+                            win.focus = window.xprops.onFocused;
                             window.doFocus();
                         });
                     `;
@@ -635,7 +635,7 @@ describe('zoid renderto cases', () => {
                     if (!remoteWindow) {
                         throw new Error(`Expected remote window to be populated`);
                     }
-                    
+
                     destroyElement(simpleWindow.frameElement);
                     return onCloseWindow(remoteWindow, expect('onCloseWindow'));
                 }),

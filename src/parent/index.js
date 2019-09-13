@@ -120,6 +120,7 @@ export class ParentComponent<P> {
         this.event.on(EVENT.RENDERED, () => this.props.onRendered());
         this.event.on(EVENT.CLOSE,    () => this.props.onClose());
         this.event.on(EVENT.RESIZE,   () => this.props.onResize());
+        this.event.on(EVENT.FOCUS,    () => this.props.onFocus());
         this.event.on(EVENT.PROPS,    (props) => this.props.onProps(props));
 
         this.event.on(EVENT.ERROR, err => {
@@ -410,8 +411,10 @@ export class ParentComponent<P> {
 
     focus() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-            if (this.proxyWin) {
-                return this.proxyWin.focus().then(noop);
+            const proxyWin = this.proxyWin;
+            if (proxyWin) {
+                this.event.trigger(EVENT.FOCUS);
+                return proxyWin.focus().then(noop);
             }
         });
     }

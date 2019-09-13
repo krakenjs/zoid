@@ -21,6 +21,7 @@ export type onRenderedPropType = EventHandlerType<void>;
 export type onRenderPropType = EventHandlerType<void>;
 export type onClosePropType = EventHandlerType<void>;
 export type onResizePropType = EventHandlerType<void>;
+export type onFocusPropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
 export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
 
@@ -34,6 +35,7 @@ export type PropsInputType<P> = {
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
     onResize? : onResizePropType,
+    onFocus? : onFocusPropType,
     onError? : onErrorPropType,
     onProps? : onPropsPropType<P>
 } & P;
@@ -51,6 +53,7 @@ export type PropsType<P> = {|
     onRender : onRenderPropType,
     onClose : onClosePropType,
     onResize : onResizePropType,
+    onFocus : onFocusPropType,
     onError : onErrorPropType,
     onProps : onPropsPropType<P>
 |} & P;
@@ -98,6 +101,7 @@ export type BuiltInPropsDefinitionType<P> = {
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
     onResize : FunctionPropDefinitionType<onClosePropType, P>,
+    onFocus : FunctionPropDefinitionType<onFocusPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>,
     onProps : FunctionPropDefinitionType<onPropsPropType<P>, P>
 };
@@ -203,6 +207,14 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
         },
 
         onResize: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            allowDelegate: true,
+            default:       defaultNoop
+        },
+
+        onFocus: {
             type:          'function',
             required:      false,
             sendToChild:   false,
