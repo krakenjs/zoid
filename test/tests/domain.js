@@ -131,6 +131,58 @@ describe('parent domain check', () => {
                 return component().render(document.body).catch(expect('onError'));
             });
         });
+
+        it('xprops.getParentDomain should pass the correct domain', () => {
+            return wrapPromise(({ expect }) => {
+                window.__component__ = () => {
+                    return window.zoid.create({
+                        tag:    'test-get-parent-domain',
+                        url:    '/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    });
+                };
+    
+                const component = window.__component__();
+                return component({
+                    passParentDomain: expect('passParentDomain', (parentDomain) => {
+                        if (!parentDomain || parentDomain !== getDomain()) {
+                            throw new Error(`Expected parent domain to be ${ getDomain() }, got ${ parentDomain }`);
+                        }
+                    }),
+                    run: () => {
+                        return `
+                            window.xprops.passParentDomain(window.xprops.getParentDomain());
+                        `;
+                    }
+                }).render(document.body);
+            });
+        });
+
+        it('xprops.getParentDomain should pass the correct domain', () => {
+            return wrapPromise(({ expect }) => {
+                window.__component__ = () => {
+                    return window.zoid.create({
+                        tag:    'test-get-parent',
+                        url:    '/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    });
+                };
+    
+                const component = window.__component__();
+                return component({
+                    isParentCorrect: expect('isParentCorrect', (result) => {
+                        if (!result) {
+                            throw new Error(`Expected parent window to be correct`);
+                        }
+                    }),
+                    run: () => {
+                        return `
+                            window.xprops.isParentCorrect(window.xprops.getParent() === window.parent);
+                        `;
+                    }
+                }).render(document.body);
+            });
+        });
     });
 
 });

@@ -72,7 +72,7 @@ type PropDefinitionType<T, P, S : string> = {|
     validate? : ({| value : T, props : PropsInputType<P> |}) => void,
     sameDomain? : boolean,
     serialization? : $Values<typeof PROP_SERIALIZATION>,
-    childDecorate? : ({| value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void> |}) => ?T
+    childDecorate? : ({| value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>, getParentDomain : () => string, getParent : () => CrossDomainWindowType |}) => ?T
 |};
 
 export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;
