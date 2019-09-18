@@ -61,8 +61,8 @@
             try {
                 if (!item) return !1;
                 if ("undefined" != typeof Promise && item instanceof Promise) return !0;
-                if ("undefined" != typeof window && window.Window && item instanceof window.Window) return !1;
-                if ("undefined" != typeof window && window.constructor && item instanceof window.constructor) return !1;
+                if ("undefined" != typeof window && "function" == typeof window.Window && item instanceof window.Window) return !1;
+                if ("undefined" != typeof window && "function" == typeof window.constructor && item instanceof window.constructor) return !1;
                 var _toString = {}.toString;
                 if (_toString) {
                     var name = _toString.call(item);
@@ -2082,7 +2082,7 @@
         }
         function lib_global_getGlobal(win) {
             if (void 0 === win && (win = window), !isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            return win.__zoid_9_0_30__ || (win.__zoid_9_0_30__ = {}), win.__zoid_9_0_30__;
+            return win.__zoid_9_0_31__ || (win.__zoid_9_0_31__ = {}), win.__zoid_9_0_31__;
         }
         function getProxyObject(obj) {
             return {
@@ -2181,7 +2181,9 @@
                 focus: helpers.focus,
                 onError: helpers.onError,
                 onProps: helpers.onProps,
-                resize: helpers.resize
+                resize: helpers.resize,
+                getParent: helpers.getParent,
+                getParentDomain: helpers.getParentDomain
             }) : value;
         }
         function parseChildWindowName(windowName) {
@@ -2218,7 +2220,7 @@
                     _this.component = component, _this.onPropHandlers = [];
                     var childPayload = getChildPayload();
                     if (!childPayload) throw new Error("No child payload found");
-                    if ("9_0_30" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_30");
+                    if ("9_0_31" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_31");
                     var parent = childPayload.parent, parentDomain = childPayload.parentDomain, exports = childPayload.exports, props = childPayload.props;
                     _this.context = childPayload.context, _this.parentComponentWindow = _this.getParentComponentWindow(parent), 
                     _this.parentDomain = parentDomain, _this.parent = setup_deserializeMessage(_this.parentComponentWindow, parentDomain, exports), 
@@ -2712,7 +2714,7 @@
                 return {
                     uid: uid,
                     context: context,
-                    version: "9_0_30",
+                    version: "9_0_31",
                     childDomain: childDomain,
                     parentDomain: utils_getDomain(window),
                     tag: this.component.tag,
@@ -3568,7 +3570,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             var listener;
-            destroyAll(), delete window.__zoid_9_0_30__, function() {
+            destroyAll(), delete window.__zoid_9_0_31__, function() {
                 for (var responseListeners = globalStore("responseListeners"), _i2 = 0, _responseListeners$ke2 = responseListeners.keys(); _i2 < _responseListeners$ke2.length; _i2++) {
                     var hash = _responseListeners$ke2[_i2], listener = responseListeners.get(hash);
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
