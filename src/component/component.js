@@ -310,20 +310,22 @@ export class Component<P> {
         throw new Error(`Expected element to be passed to render iframe`);
     }
 
-    getDefaultContext(context : ?$Values<typeof CONTEXT>, props : PropsInputType<P>) : $Values<typeof CONTEXT> {
-        if (props.window) {
-            return toProxyWindow(props.window).getType();
-        }
-
-        if (context) {
-            if (context !== CONTEXT.IFRAME && context !== CONTEXT.POPUP) {
-                throw new Error(`Unrecognized context: ${ context }`);
+    getDefaultContext(context : ?$Values<typeof CONTEXT>, props : PropsInputType<P>) : ZalgoPromise<$Values<typeof CONTEXT>> {
+        return ZalgoPromise.try(() => {
+            if (props.window) {
+                return toProxyWindow(props.window).getType();
             }
-            
-            return context;
-        }
-
-        return this.defaultContext;
+    
+            if (context) {
+                if (context !== CONTEXT.IFRAME && context !== CONTEXT.POPUP) {
+                    throw new Error(`Unrecognized context: ${ context }`);
+                }
+                
+                return context;
+            }
+    
+            return this.defaultContext;
+        });
     }
 
     init(props : PropsInputType<P>) : ZoidComponentInstance<P> {
@@ -333,15 +335,19 @@ export class Component<P> {
         
         const parent = new ParentComponent(this, props);
 
-        const render = (target, container, context) => ZalgoPromise.try(() => {
-            if (!isWindow(target)) {
-                throw new Error(`Must pass window to renderTo`);
-            }
+        const render = (target, container, context) => {
+            return ZalgoPromise.try(() => {
+                if (!isWindow(target)) {
+                    throw new Error(`Must pass window to renderTo`);
+                }
 
-            context = this.getDefaultContext(context, props);
-            container = this.getDefaultContainer(context, container);
-            return parent.render(target, container, context);
-        });
+                return this.getDefaultContext(context, props);
+                
+            }).then(finalContext => {
+                container = this.getDefaultContainer(finalContext, container);
+                return parent.render(target, container, finalContext);
+            });
+        };
 
         return {
             ...parent.getHelpers(),
