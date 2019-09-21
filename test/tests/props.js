@@ -677,6 +677,51 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should pass promise props in the url correctly', () => {
+        return wrapPromise(({ expect }) => {
+
+            const promiseValue = 'helloworld';
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-promise-props-query-param',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        promiseProp: {
+                            type:       'function',
+                            queryParam: true,
+                            queryValue: ({ value }) => {
+                                return ZalgoPromise.delay(50).then(() => value());
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                promiseProp: expect('promiseProp', () => promiseValue),
+                getQuery:    expect('getQuery', rawQuery => {
+                    const query = JSON.stringify(parseQuery(rawQuery), null, 4);
+
+                    const expected = JSON.stringify({
+                        'promiseProp': promiseValue
+                    }, null, 4);
+
+                    if (query !== expected) {
+                        throw new Error(`Expected query string to be:\n\n${ expected }\n\nbut got:\n\n${ query }`);
+                    }
+                }),
+                run: `
+                    window.xprops.getQuery(window.location.search.slice(1));
+                `
+            });
+            
+            return instance.render(document.body);
+        });
+    });
+
     it('should enter a component, update a prop, destroy the component, and not error out', () => {
         return wrapPromise(({ expect }) => {
 
