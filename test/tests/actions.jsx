@@ -5,7 +5,7 @@ import { onCloseWindow } from 'cross-domain-utils/src';
 import { wrapPromise } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, runOnClick } from '../common';
 
 describe('zoid actions', () => {
 
@@ -69,7 +69,11 @@ describe('zoid actions', () => {
             }));
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+            const instance = component();
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 return closeComponent();
             });
@@ -101,7 +105,11 @@ describe('zoid actions', () => {
             }));
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+            const instance = component();
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 const winClose = win.close;
                 win.close = expect('close', () => {
@@ -137,7 +145,11 @@ describe('zoid actions', () => {
             }));
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+            const instance = component();
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 win.focus = expect('windowFocus');
                 return focusComponent();
             });
@@ -187,7 +199,10 @@ describe('zoid actions', () => {
 
             const component = window.__component__();
             const instance = component();
-            return instance.render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 win.focus = expect('windowFocus');
                 return instance.focus();
             });

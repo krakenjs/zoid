@@ -2,6 +2,8 @@
 
 import { wrapPromise } from 'belter/src';
 
+import { runOnClick } from '../common';
+
 describe('zoid bridge cases', () => {
 
     it('should render a component with popup context with ie user-agent', () => {
@@ -18,7 +20,7 @@ describe('zoid bridge cases', () => {
             window.navigator.mockUserAgent = 'Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko';
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 functionProp: expect('functionProp'),
 
                 run: expect('run', () => {
@@ -26,7 +28,11 @@ describe('zoid bridge cases', () => {
                         window.xprops.functionProp();
                     `;
                 })
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         }, { timeout: 5000 });
     });
 
@@ -43,8 +49,11 @@ describe('zoid bridge cases', () => {
             window.navigator.mockUserAgent = 'Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko';
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.POPUP)
-                .catch(expect('catch'));
+            const instance = component();
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).catch(expect('catch'));
         });
     });
 });

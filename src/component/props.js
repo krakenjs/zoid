@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, noop, type EventEmitterType } from 'belter/src';
-import { isWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from 'cross-domain-utils/src';
 import { ProxyWindow, toProxyWindow } from 'post-robot/src';
 
 import { PROP_SERIALIZATION } from '../constants';
@@ -119,6 +119,18 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             validate({ value } : { value : CrossDomainWindowType | ProxyWindow }) {
                 if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
                     throw new Error(`Expected Window or ProxyWindow`);
+                }
+
+                if (isWindow(value)) {
+                    // $FlowFixMe
+                    if (isWindowClosed(value)) {
+                        throw new Error(`Window is closed`);
+                    }
+
+                    // $FlowFixMe
+                    if (!isSameDomain(value)) {
+                        throw new Error(`Window is not same domain`);
+                    }
                 }
             },
             decorate({ value } : { value : CrossDomainWindowType | ProxyWindow }) : ProxyWindow {

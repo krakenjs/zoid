@@ -2,11 +2,12 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
+import { createElement, destroyElement } from 'belter/src';
 
 export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<SameDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
 
-        const winOpen = window.open;
+        const winOpen = win.open;
         const documentCreateElement = win.document.createElement;
 
         const reset = () => {
@@ -55,4 +56,73 @@ export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainW
 
         return openedWindow;
     });
+}
+
+let isClick = false;
+let clickTimeout;
+
+function doClick() {
+    isClick = true;
+
+    clearTimeout(clickTimeout);
+    clickTimeout = setTimeout(() => {
+        isClick = false;
+    }, 1);
+}
+
+
+const HTMLElementClick = window.HTMLElement.prototype.click;
+window.HTMLElement.prototype.click = function overrideHTMLElementClick() : void {
+    doClick();
+    return HTMLElementClick.apply(this, arguments);
+};
+
+const windowOpen = window.open;
+window.open = function patchedWindowOpen() : CrossDomainWindowType {
+
+    if (!isClick) {
+        const win : Object = {
+            closed: true,
+            close() {
+                // pass
+            },
+            location: {
+                href:     '',
+                pathname: '',
+                protocol: '',
+                host:     '',
+                hostname: ''
+            }
+        };
+
+        win.parent = win.top = win;
+        win.opener = window;
+
+        return win;
+    }
+
+    return windowOpen.apply(this, arguments);
+};
+
+export function runOnClick<T>(handler : () => T) : T {
+    const testButton = createElement('button', { id: 'testButton' }, document.body);
+    let didError = false;
+    let result;
+    let error;
+    testButton.addEventListener('click', () => {
+        try {
+            result = handler();
+        } catch (err) {
+            didError = true;
+            error = err;
+        }
+    });
+    testButton.click();
+    destroyElement(testButton);
+    if (didError) {
+        throw error;
+    } else {
+        // $FlowFixMe
+        return result;
+    }
 }

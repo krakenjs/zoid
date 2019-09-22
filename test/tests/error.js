@@ -4,7 +4,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise, noop, destroyElement } from 'belter/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, runOnClick } from '../common';
 
 describe('zoid error cases', () => {
 
@@ -183,6 +183,26 @@ describe('zoid error cases', () => {
         });
     });
 
+    it('should call onError when a popup is opened without a click event', () => {
+        return wrapPromise(({ expect, avoid }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-popup-no-onclick',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                onClose: avoid('onClose'),
+                onError: expect('onError')
+            });
+            
+            return instance.render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
+        }, { timeout: 5000 });
+    });
+
     it('should call onclose when a popup is closed by someone other than zoid', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
@@ -200,10 +220,14 @@ describe('zoid error cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onClose: expect('onClose'),
                 onError: avoid('onError')
-            }).render('body', window.zoid.CONTEXT.POPUP).then(() => {
+            });
+            
+            return runOnClick(() => {
+                return instance.render('body', window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 if (!openedWindow) {
                     throw new Error(`Expected window to have been opened`);
                 }
@@ -227,10 +251,14 @@ describe('zoid error cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onClose: expect('onClose'),
                 onError: avoid('onError')
-            }).render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
+            });
+            
+            return runOnClick(() => {
+                return instance.render('body', window.zoid.CONTEXT.POPUP);
+            }).catch(expect('catch'));
         }, { timeout: 5000 });
     });
 
@@ -251,10 +279,14 @@ describe('zoid error cases', () => {
             }));
             
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onClose: expect('onClose'),
                 onError: avoid('onError')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+            });
+            
+            return runOnClick(() => {
+                return instance.render('body');
+            }).catch(noop);
         }, { timeout: 5000 });
     });
 
@@ -390,7 +422,7 @@ describe('zoid error cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 run: () => {
                     return `
                         window.xprops.onLoad();
@@ -402,7 +434,11 @@ describe('zoid error cases', () => {
                 }),
                 onClose: expect('onClose'),
                 onError: avoid('onError')
-            }).render('body', window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render('body', window.zoid.CONTEXT.POPUP);
+            });
         }, { timeout: 9000 });
     });
 
@@ -423,7 +459,7 @@ describe('zoid error cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 run: () => {
                     return `
                         window.xprops.onLoad();
@@ -437,7 +473,11 @@ describe('zoid error cases', () => {
                 }),
                 onClose: expect('onClose'),
                 onError: avoid('onError')
-            }).render('body', window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render('body', window.zoid.CONTEXT.POPUP);
+            });
         }, { timeout: 5000 });
     });
 

@@ -5,7 +5,7 @@
 import { wrapPromise } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, runOnClick } from '../common';
 
 describe('zoid dimensions cases', () => {
 
@@ -82,9 +82,13 @@ describe('zoid dimensions cases', () => {
             const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onRendered: expect('onRendered')
-            }).render(document.body, window.zoid.CONTEXT.POPUP).then(() => {
+            });
+            
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            }).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
 

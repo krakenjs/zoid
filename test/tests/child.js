@@ -3,7 +3,7 @@
 import { wrapPromise } from 'belter/src';
 import { onCloseWindow } from 'cross-domain-utils/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, runOnClick } from '../common';
 
 describe('zoid child cases', () => {
     it('should render a popup component to an iframe and focus from the child', () => {
@@ -18,7 +18,7 @@ describe('zoid child cases', () => {
             };
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 didFocus: expect('didFocus', (focused) => {
                     if (!focused) {
                         throw new Error(`Expected window to have been focused`);
@@ -37,7 +37,11 @@ describe('zoid child cases', () => {
                         });
                     `;
                 }
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 
@@ -57,7 +61,7 @@ describe('zoid child cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onClose: expect('onClose'),
 
                 run: () => {
@@ -65,7 +69,11 @@ describe('zoid child cases', () => {
                         window.xprops.close();
                     `;
                 }
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         }, { timeout: 5000 });
     });
 
@@ -85,7 +93,7 @@ describe('zoid child cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onClose: expect('onClose'),
 
                 run: () => {
@@ -93,7 +101,11 @@ describe('zoid child cases', () => {
                         window.close();
                     `;
                 }
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         }, { timeout: 5000 });
     });
 
@@ -111,7 +123,7 @@ describe('zoid child cases', () => {
             };
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onError: expect('onError', err => {
                     if (!(err instanceof Error)) {
                         throw new TypeError(`Expected an error to be passed up`);
@@ -133,7 +145,11 @@ describe('zoid child cases', () => {
                         window.xprops.onError(err);
                     `;
                 }
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 });

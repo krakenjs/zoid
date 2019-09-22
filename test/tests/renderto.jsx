@@ -75,6 +75,8 @@ describe('zoid renderto cases', () => {
             return window.__component__().simple({
                 foo: expect('foo'),
 
+                runOnClick: true,
+
                 run() : string {
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
                         if (getOpener(win) !== this.source) {
@@ -83,13 +85,15 @@ describe('zoid renderto cases', () => {
                     }));
 
                     return `
-                        window.__component__().remote({
+                        const instance = window.__component__().remote({
                             foo: window.xprops.foo,
 
                             run: () => \`
                                 window.xprops.foo();
                             \`
-                        }).renderTo(window.parent, 'body', window.zoid.CONTEXT.POPUP);
+                        });
+                        
+                        return instance.renderTo(window.parent, 'body', window.zoid.CONTEXT.POPUP);
                     `;
                 }
             }).render(document.body);
@@ -127,6 +131,8 @@ describe('zoid renderto cases', () => {
 
             return window.__component__().simple({
                 prerenderScriptLoaded: expect('prerenderScriptLoaded'),
+
+                runOnClick: true,
 
                 run: expect('run', () => {
                     return `
@@ -260,6 +266,8 @@ describe('zoid renderto cases', () => {
                     }
                 }),
 
+                runOnClick: true,
+
                 run() : string {
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
                         componentWindow = win;
@@ -352,6 +360,8 @@ describe('zoid renderto cases', () => {
             };
 
             return window.__component__().simple({
+                runOnClick: true,
+
                 run: () => {
                     onWindowOpen().then(expect('onWindowOpen', win => {
                         onCloseWindow(win, expect('onCloseWindow'), 50);
@@ -395,6 +405,8 @@ describe('zoid renderto cases', () => {
             return window.__component__().simple({
                 doFocus:   expect('doFocus', () => doFocus()),
                 onFocused: expect('onFocused'),
+
+                runOnClick: true,
 
                 run: expect('run', () => {
                     return `
@@ -443,6 +455,8 @@ describe('zoid renderto cases', () => {
 
             return window.__component__().simple({
                 onFocused: expect('onFocused'),
+
+                runOnClick: true,
 
                 run: expect('run', () => {
                     return `

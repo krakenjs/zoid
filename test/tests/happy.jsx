@@ -5,7 +5,7 @@ import { wrapPromise } from 'belter/src';
 import { getParent, getOpener } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, runOnClick } from '../common';
 
 describe('zoid happy cases', () => {
 
@@ -99,9 +99,13 @@ describe('zoid happy cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onRendered: expect('onRendered')
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 
@@ -124,9 +128,13 @@ describe('zoid happy cases', () => {
             }));
 
             const component = window.__component__();
-            return component({
+            const instance = component({
                 onRendered: expect('onRendered')
-            }).render();
+            });
+
+            return runOnClick(() => {
+                return instance.render();
+            });
         });
     });
 
@@ -182,7 +190,7 @@ describe('zoid happy cases', () => {
         });
     });
 
-    it('should enter a component rendered as an iframe and call a prop', () => {
+    it('should enter a component rendered as a popup and call a prop', () => {
         return wrapPromise(({ expect }) => {
             const expectedValue = 'bar';
 
@@ -195,7 +203,7 @@ describe('zoid happy cases', () => {
             };
 
             const component = window.__component__();
-            return component({
+            const instance = component({
 
                 foo: expect('foo', bar => {
                     if (bar !== expectedValue) {
@@ -206,7 +214,11 @@ describe('zoid happy cases', () => {
                 run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
-            }).render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 
@@ -367,7 +379,7 @@ describe('zoid happy cases', () => {
         });
     });
 
-    it('should prerender to an iframe', () => {
+    it('should prerender to a popup', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
                 return window.zoid.create({
@@ -391,7 +403,11 @@ describe('zoid happy cases', () => {
             window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.POPUP);
+            const instance = component();
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 });

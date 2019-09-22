@@ -5,6 +5,8 @@ import { send } from 'post-robot/src';
 import { uniqueID, wrapPromise } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
+import { runOnClick } from '../common';
+
 describe('zoid window prop cases', () => {
 
     it('should pass a custom iframe to a component', () => {
@@ -64,7 +66,9 @@ describe('zoid window prop cases', () => {
                 });
             };
 
-            const win = window.open('', '');
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
             const uid = uniqueID();
     
             const component = window.__component__();
@@ -103,7 +107,9 @@ describe('zoid window prop cases', () => {
                 });
             };
 
-            const win = window.open('', '');
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
 
             const component = window.__component__();
             return component({
@@ -202,7 +208,9 @@ describe('zoid window prop cases', () => {
                 };
             };
 
-            const win = window.open('', '');
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
             const uid = uniqueID();
 
             return window.__component__().simple({
@@ -256,7 +264,9 @@ describe('zoid window prop cases', () => {
                 };
             };
 
-            const win = window.open('', '');
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
 
             return window.__component__().simple({
                 myCustomWindow: win,
