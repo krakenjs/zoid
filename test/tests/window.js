@@ -46,7 +46,7 @@ describe('zoid window prop cases', () => {
                     });
                 }),
     
-                run: `
+                run: () => `
                     window.xprops.passUIDGetter(() => window.uid);
                 `
             }).render(document.body);
@@ -85,7 +85,7 @@ describe('zoid window prop cases', () => {
                     });
                 }),
     
-                run: `
+                run: () => `
                     window.xprops.passUIDGetter(() => window.uid);
                 `
             }).render(document.body);
@@ -115,7 +115,7 @@ describe('zoid window prop cases', () => {
                     win.close();
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.doClose();
                 `
             }).render(document.body);
@@ -168,13 +168,13 @@ describe('zoid window prop cases', () => {
                     });
                 }),
     
-                run: `
+                run: () => `
                     window.__component__().remote({
                         window: window.xprops.myCustomWindow,
 
                         passUIDGetter: window.xprops.passUIDGetter,
                         
-                        run: \`
+                        run: () => \`
                             window.xprops.passUIDGetter(() => window.uid);
                         \`
                     }).renderTo(window.parent, 'body');
@@ -222,13 +222,13 @@ describe('zoid window prop cases', () => {
                     });
                 }),
     
-                run: `
+                run: () => `
                     window.__component__().remote({
                         window: window.xprops.myCustomWindow,
 
                         passUIDGetter: window.xprops.passUIDGetter,
                         
-                        run: \`
+                        run: () => \`
                             window.xprops.passUIDGetter(() => window.uid);
                         \`
                     }).renderTo(window.parent, 'body');
@@ -267,13 +267,13 @@ describe('zoid window prop cases', () => {
                     win.close();
                 }),
 
-                run: `
+                run: () => `
                     window.__component__().remote({
                         window: window.xprops.myCustomWindow,
                         onClose: window.xprops.customWindowClosed,
                         closeCustomWindow: window.xprops.closeCustomWindow,
                         
-                        run: \`
+                        run: () => \`
                             window.xprops.closeCustomWindow();
                         \`
                     }).renderTo(window.parent, 'body');

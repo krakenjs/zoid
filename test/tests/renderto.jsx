@@ -43,7 +43,7 @@ describe('zoid renderto cases', () => {
                         window.__component__().remote({
                             foo: window.xprops.foo,
 
-                            run: \`
+                            run: () => \`
                                 window.xprops.foo();
                             \`
                         }).renderTo(window.parent, 'body');
@@ -86,7 +86,7 @@ describe('zoid renderto cases', () => {
                         window.__component__().remote({
                             foo: window.xprops.foo,
 
-                            run: \`
+                            run: () => \`
                                 window.xprops.foo();
                             \`
                         }).renderTo(window.parent, 'body', window.zoid.CONTEXT.POPUP);
@@ -220,7 +220,7 @@ describe('zoid renderto cases', () => {
                                 }, 100);
                             },
 
-                            run: \`
+                            run: () => \`
                                 setTimeout(() => {
                                     window.frameElement.parentNode.removeChild(window.frameElement)
                                 }, 100);
@@ -273,7 +273,7 @@ describe('zoid renderto cases', () => {
                                 }, 100);
                             },
 
-                            run: \`
+                            run: () => \`
                                 setTimeout(() => {
                                     window.close();
                                 }, 100);
@@ -766,7 +766,7 @@ describe('zoid renderto cases', () => {
                         window.__component__().remote({
                             foo: window.xprops.foo,
 
-                            run: \`
+                            run: () => \`
                                 window.xprops.foo();
                             \`
                         }).renderTo(window.parent, 'body');

@@ -21,23 +21,24 @@ describe('zoid props cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                run: `
+                run: () => `
                     window.xprops.onProps(function() {
+                        console.warn('bleh');
                         window.xprops.foo('bar');
                     });
-                `
+                `,
+                postRun: () => {
+                    return instance.updateProps({
+                        foo: expect('foo', bar => {
+                            if (bar !== 'bar') {
+                                throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                            }
+                        })
+                    });
+                }
             });
             
-            instance.render(document.body).then(expect('postRender', () => {
-    
-                instance.updateProps({
-                    foo: expect('foo', bar => {
-                        if (bar !== 'bar') {
-                            throw new Error(`Expected bar to be 'bar', got ${ bar }`);
-                        }
-                    })
-                });
-            }));
+            return instance.render(document.body);
         });
     });
 
@@ -60,19 +61,20 @@ describe('zoid props cases', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.onProps(function() {
                         window.xprops.foo('bar');
                     });
-                `
+                `,
+
+                postRun: () => {
+                    return instance.updateProps({
+                        bar: 'helloworld'
+                    });
+                }
             });
             
-            instance.render(document.body).then(expect('postRender', () => {
-    
-                instance.updateProps({
-                    bar: 'helloworld'
-                });
-            }));
+            return instance.render(document.body);
         });
     });
 
@@ -111,19 +113,20 @@ describe('zoid props cases', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.onProps(function() {
                         window.xprops.baz('bar');
                     });
-                `
+                `,
+
+                postRun: () => {
+                    return instance.updateProps({
+                        baz: noop
+                    });
+                }
             });
             
-            instance.render(document.body).then(expect('postRender', () => {
-    
-                instance.updateProps({
-                    baz: noop
-                });
-            }));
+            return instance.render(document.body);
         });
     });
 
@@ -148,19 +151,18 @@ describe('zoid props cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                run: `
+                run: () => `
                     window.xprops.onProps(function() {
                         window.xprops.meep();
                     });
-                `
+                `,
+
+                postRun: () => {
+                    return instance.updateProps({
+                        meep: expect('meepv2')
+                    });
+                }
             });
-            
-            return instance.render(document.body).then(expect('postRender', () => {
-    
-                instance.updateProps({
-                    meep: expect('meepv2')
-                });
-            }));
         });
     });
 
@@ -186,20 +188,22 @@ describe('zoid props cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                run: `
+                run: () => `
                     window.xprops.onProps(function() {
                         window.xprops.meep();
                     });
-                `
+                `,
+
+                postRun: () => {
+                    doExpect = true;
+    
+                    return instance.updateProps({
+                        meep: error('meepv2')
+                    });
+                }
             });
             
-            return instance.render(document.body).then(expect('postRender', () => {
-                doExpect = true;
-    
-                instance.updateProps({
-                    meep: error('meepv2')
-                });
-            }));
+            return instance.render(document.body);
         });
     });
 
@@ -226,7 +230,7 @@ describe('zoid props cases', () => {
                     }
                 }),
     
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
             }).render(document.body);
@@ -256,7 +260,7 @@ describe('zoid props cases', () => {
                     }
                 }),
     
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
             }).render(document.body);
@@ -286,7 +290,7 @@ describe('zoid props cases', () => {
                     }
                 }),
     
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
             }).render(document.body);
@@ -338,7 +342,7 @@ describe('zoid props cases', () => {
                     result[3]();
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.objectProp);
                 `
             }).render(document.body);
@@ -390,7 +394,7 @@ describe('zoid props cases', () => {
                     result.fn();
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.objectProp);
                 `
             }).render(document.body);
@@ -420,7 +424,7 @@ describe('zoid props cases', () => {
                     fn();
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo(window.xprops.functionProp);
                 `
             }).render(document.body);
@@ -476,7 +480,7 @@ describe('zoid props cases', () => {
                         throw new Error(`Expected val to not be passed`);
                     }
                 }),
-                run: `
+                run: () => `
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
@@ -510,7 +514,7 @@ describe('zoid props cases', () => {
                         throw new Error(`Expected val to not be passed`);
                     }
                 }),
-                run: `
+                run: () => `
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
@@ -539,7 +543,7 @@ describe('zoid props cases', () => {
             const component = window.__component__();
             const instance = component({
                 foo: expect('foo'),
-                run: `
+                run: () => `
                     window.xprops.bar();
                 `
             });
@@ -568,7 +572,7 @@ describe('zoid props cases', () => {
             const component = window.__component__();
             const instance = component({
                 bar: expect('bar'),
-                run: `
+                run: () => `
                     window.xprops.foo();
                 `
             });
@@ -668,7 +672,7 @@ describe('zoid props cases', () => {
                         throw new Error(`Expected query string to be:\n\n${ expected }\n\nbut got:\n\n${ query }`);
                     }
                 }),
-                run: `
+                run: () => `
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });
@@ -713,7 +717,7 @@ describe('zoid props cases', () => {
                         throw new Error(`Expected query string to be:\n\n${ expected }\n\nbut got:\n\n${ query }`);
                     }
                 }),
-                run: `
+                run: () => `
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });

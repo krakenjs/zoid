@@ -30,13 +30,11 @@ on('eval', ({ data: { code } }) => {
 });
 
 if (window.xprops.run) {
-    if (typeof window.xprops.run === 'function') {
-        window.xprops.run({ run: xEval }).then(code => {
-            eval(`(function() { ${ code } }).call(this);`); // eslint-disable-line no-eval, security/detect-eval-with-expression
-        });
-    } else if (typeof window.xprops.run === 'string') {
-        eval(`(function() { ${ window.xprops.run } }).call(this);`); // eslint-disable-line no-eval, security/detect-eval-with-expression
-    } else {
-        throw new TypeError(`Can not run ${ typeof window.xprops.run }`);
-    }
+    window.xprops.run().then(code => {
+        eval(`(function() { ${ code } }).call(this);`); // eslint-disable-line no-eval, security/detect-eval-with-expression
+    }).then(() => {
+        if (window.xprops.postRun) {
+            return window.xprops.postRun();
+        }
+    });
 }

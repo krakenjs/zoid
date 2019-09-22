@@ -175,7 +175,7 @@ describe('zoid happy cases', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
             }).render(document.body);
@@ -203,7 +203,7 @@ describe('zoid happy cases', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
             }).render(document.body, window.zoid.CONTEXT.POPUP);
@@ -332,7 +332,7 @@ describe('zoid happy cases', () => {
 
                 onClose: avoid('onClose'),
 
-                run: `
+                run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
             }).render(document.body);

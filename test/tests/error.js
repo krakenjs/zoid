@@ -56,7 +56,7 @@ describe('zoid error cases', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.onError(new Error('xxxxx'));
                 `
             }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(noop);

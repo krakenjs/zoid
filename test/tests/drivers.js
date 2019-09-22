@@ -41,7 +41,7 @@ describe('zoid drivers', () => {
                                 }
                             }),
 
-                            run: `
+                            run: () => `
                                 window.xprops.foo('bar');
                             `
                         })
@@ -95,7 +95,7 @@ describe('zoid drivers', () => {
                             foo:    this.state.foo,
                             onLoad: this.state.onLoad,
 
-                            run: `
+                            run: () => `
                                 window.xprops.onLoad().then(() => {
                                     window.xprops.foo('bar');
                                 });
@@ -131,7 +131,7 @@ describe('zoid drivers', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo('bar');
                 `
             };
@@ -165,7 +165,7 @@ describe('zoid drivers', () => {
                     });
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.onLoad().then(() => {
                         window.xprops.foo('bar');
                     });
@@ -216,7 +216,7 @@ describe('zoid drivers', () => {
                                     throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                                 }
                             }),
-                            run: `window.xprops.foo('bar');`
+                            run: () => `window.xprops.foo('bar');`
                         }
                     });
                 })
@@ -269,14 +269,14 @@ describe('zoid drivers', () => {
                                     }
                                 }));
                             }),
-                            run: expect('run', ({ run }) => {
-                                return run(`
+                            run: expect('run', () => {
+                                return `
                                     return window.xprops.onLoad().then(() => {
                                         window.xprops.onProps(() => {
                                             window.xprops.foo('bar');
                                         });
                                     });
-                                `);
+                                `;
                             })
                         }
                     };
@@ -305,7 +305,7 @@ describe('zoid drivers', () => {
                     }
                 }),
 
-                run: `
+                run: () => `
                     window.xprops.foo('bar');
                 `
             };
@@ -370,7 +370,7 @@ describe('zoid drivers', () => {
                             });
                         }),
 
-                        run: `
+                        run: () => `
                             window.xprops.onLoad().then(() => {
                                 window.xprops.foo('bar');
                             });
