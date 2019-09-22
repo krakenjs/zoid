@@ -153,8 +153,6 @@ export class ParentComponent<P> {
                 this.delegate(context, target);
             }
 
-            const tasks = {};
-
             const init = this.initPromise;
             const buildUrl = this.buildUrl();
             const onRender = this.event.trigger(EVENT.RENDER);
@@ -221,12 +219,6 @@ export class ParentComponent<P> {
                 init, buildUrl, onRender, getProxyContainer, openFrame, openPrerenderFrame, renderContainer, open,
                 openPrerender, setState, prerender, loadUrl, buildWindowName, setWindowName, watchForClose, onDisplay,
                 openBridge, runTimeout, onRendered
-            }).catch(err => {
-                for (const taskName of Object.keys(tasks)) {
-                    tasks[taskName].reject(err);
-                }
-
-                throw err;
             });
             
         }).catch(err => {
@@ -234,6 +226,8 @@ export class ParentComponent<P> {
                 this.onError(err),
                 this.destroy(err)
             ]).then(() => {
+                throw err;
+            }, () => {
                 throw err;
             });
         }).then(noop);
