@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-nested-callbacks: off */
 
-import { send } from 'post-robot/src';
+import { send, once } from 'post-robot/src';
 import { uniqueID, wrapPromise } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
@@ -242,6 +242,50 @@ describe('zoid window prop cases', () => {
                     }).renderTo(window.parent, 'body');
                 `
             }).render(document.body);
+        });
+    });
+
+    it('should pass a custom popup to a component with a loaded url', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-custom-popup-loaded-url',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const win = runOnClick(() => {
+                return window.open('/base/test/windows/basicchild/index.htm', '__custom_popup_test__');
+            });
+
+            return once('initBasicChild', expect('initBasicChild', () => {
+                const uid = uniqueID();
+
+                const component = window.__component__();
+                return component({
+                    window: win,
+        
+                    passUIDGetter: expect(`passUIDGetter`, getUID => {
+                        return send(win, 'eval', {
+                            code: `
+                                window.uid = ${ JSON.stringify(uid) };
+                            `
+                        }).then(() => {
+                            return getUID();
+                        }).then(childUID => {
+                            if (childUID !== uid) {
+                                throw new Error(`Expected uid to match`);
+                            }
+                        });
+                    }),
+        
+                    run: () => `
+                        window.xprops.passUIDGetter(() => window.uid);
+                    `
+                }).render(document.body);
+            }));
         });
     });
 
