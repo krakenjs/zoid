@@ -61,9 +61,43 @@ export type PropsType<P> = {|
 type PropDefinitionType<T, P, S : string> = {|
     type : S,
     alias? : string,
-    value? : ({| props : P, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => ?T,
-    default? : ({| props : P, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => ?T,
-    decorate? : ({| value : T, props : PropsType<P>, state : Object, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, event : EventEmitterType |}) => T,
+    value? : ({|
+        props : P,
+        state : Object,
+        close : () => ZalgoPromise<void>,
+        focus : () => ZalgoPromise<void>,
+        onError : (mixed) => ZalgoPromise<void>,
+        event : EventEmitterType
+    |}) => ?T,
+    default? : ({|
+        props : P,
+        state : Object,
+        close : () => ZalgoPromise<void>,
+        focus : () => ZalgoPromise<void>,
+        onError : (mixed) => ZalgoPromise<void>,
+        event : EventEmitterType
+    |}) => ?T,
+    decorate? : ({|
+        value : T,
+        props : PropsType<P>,
+        state : Object,
+        close : () => ZalgoPromise<void>,
+        focus : () => ZalgoPromise<void>,
+        onError : (mixed) => ZalgoPromise<void>,
+        event : EventEmitterType
+    |}) => T,
+    childDecorate? : ({|
+        value : T,
+        close : () => ZalgoPromise<void>,
+        focus : () => ZalgoPromise<void>,
+        onError : (mixed) => ZalgoPromise<void>,
+        onProps : ((PropsType<P>) => void) => void,
+        resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
+        getParentDomain : () => string,
+        getParent : () => CrossDomainWindowType,
+        show : () => ZalgoPromise<void>,
+        hide : () => ZalgoPromise<void>
+    |}) => ?T,
     required? : boolean,
     queryParam? : boolean | string | ({ value : T }) => (string | ZalgoPromise<string>),
     queryValue? : ({| value : T |}) => (ZalgoPromise<mixed> | mixed),
@@ -71,8 +105,7 @@ type PropDefinitionType<T, P, S : string> = {|
     allowDelegate? : boolean,
     validate? : ({| value : T, props : PropsInputType<P> |}) => void,
     sameDomain? : boolean,
-    serialization? : $Values<typeof PROP_SERIALIZATION>,
-    childDecorate? : ({| value : T, close : () => ZalgoPromise<void>, focus : () => ZalgoPromise<void>, onError : (mixed) => ZalgoPromise<void>, onProps : ((PropsType<P>) => void) => void, resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>, getParentDomain : () => string, getParent : () => CrossDomainWindowType |}) => ?T
+    serialization? : $Values<typeof PROP_SERIALIZATION>
 |};
 
 export type BooleanPropDefinitionType<T : boolean, P> = PropDefinitionType<T, P, 'boolean'>;
@@ -182,6 +215,20 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             sendToChild:   false,
             childDecorate: ({ getParentDomain }) => getParentDomain
+        },
+
+        show: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ show }) => show
+        },
+
+        hide: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ hide }) => hide
         },
 
         onDisplay: {

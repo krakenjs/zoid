@@ -8,7 +8,7 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup, type CleanupType, base64encode,
-    once, stringifyError, destroyElement, getElementSafe } from 'belter/src';
+    once, stringifyError, destroyElement, getElementSafe, showElement, hideElement } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -42,7 +42,9 @@ export type ParentExportsType<P> = {|
     close : () => ZalgoPromise<void>,
     checkClose : CrossDomainFunctionType<[], void>,
     resize : CrossDomainFunctionType<[{ width? : ?number, height? : ?number }], void>,
-    onError : (mixed) => ZalgoPromise<void>
+    onError : (mixed) => ZalgoPromise<void>,
+    show : () => ZalgoPromise<void>,
+    hide : () => ZalgoPromise<void>
 |};
 
 export type PropRef =
@@ -74,7 +76,9 @@ export type ParentHelpers<P> = {|
     resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
     updateProps : PropsInputType<P> => ZalgoPromise<void>,
-    event : EventEmitterType
+    event : EventEmitterType,
+    show : () => ZalgoPromise<void>,
+    hide : () => ZalgoPromise<void>
 |};
 
 export class ParentComponent<P> {
@@ -91,7 +95,10 @@ export class ParentComponent<P> {
     state : StateType
     child : ?ChildExportsType<P>
 
+    proxyContainer : ?ProxyObject<HTMLElement>
     proxyWin : ?ProxyWindow
+
+    visible : boolean = true
 
     constructor(component : Component<P>, props : PropsInputType<P>) {
         this.initPromise = new ZalgoPromise();
@@ -163,7 +170,10 @@ export class ParentComponent<P> {
             const openPrerenderFrame = this.openPrerenderFrame();
 
             const renderContainer = ZalgoPromise.hash({ proxyContainer: getProxyContainer, proxyFrame: openFrame, proxyPrerenderFrame: openPrerenderFrame }).then(({ proxyContainer, proxyFrame, proxyPrerenderFrame }) => {
-                return this.renderContainer(proxyContainer, { context, uid, proxyFrame, proxyPrerenderFrame });
+                return this.renderContainer(proxyContainer, { context, uid, proxyFrame, proxyPrerenderFrame, visible: this.visible });
+            }).then(proxyContainer => {
+                this.proxyContainer = proxyContainer;
+                return proxyContainer;
             });
 
             const open = this.driver.openOnClick
@@ -294,8 +304,30 @@ export class ParentComponent<P> {
             focus:       () => this.focus(),
             resize:      ({ width, height }) => this.resize({ width, height }),
             onError:     (err) => this.onError(err),
-            updateProps: (props) => this.updateProps(props)
+            updateProps: (props) => this.updateProps(props),
+            show:        () => this.show(),
+            hide:        () => this.hide()
         };
+    }
+
+    show() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.visible = true;
+            if (this.proxyContainer) {
+                return this.proxyContainer.get()
+                    .then(showElement);
+            }
+        });
+    }
+
+    hide() : ZalgoPromise<void> {
+        return ZalgoPromise.try(() => {
+            this.visible = false;
+            if (this.proxyContainer) {
+                return this.proxyContainer.get()
+                    .then(hideElement);
+            }
+        });
     }
 
     setProps(props : PropsInputType<P>, isUpdate : boolean = false) {
@@ -521,10 +553,12 @@ export class ParentComponent<P> {
         const close      = () => this.close();
         const checkClose = () => this.checkClose(win);
         const resize     = ({ width, height }) => this.resize({ width, height });
+        const show       = () => this.show();
+        const hide       = () => this.hide();
 
         init.onError = onError;
 
-        return { init, close, checkClose, resize, onError };
+        return { init, close, checkClose, resize, onError, show, hide };
     }
 
     resize({ width, height } : { width? : ?number, height? : ?number }) : ZalgoPromise<void> {
@@ -625,8 +659,8 @@ export class ParentComponent<P> {
         });
     }
 
-    renderContainer(proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, uid } :
-        { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<?ProxyObject<HTMLElement>> {
+    renderContainer(proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, uid, visible } :
+        { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement>, visible : boolean }) : ZalgoPromise<?ProxyObject<HTMLElement>> {
         
 
         return ZalgoPromise.hash({
@@ -638,8 +672,12 @@ export class ParentComponent<P> {
         }).then(({ container, frame, prerenderFrame }) => {
             const innerContainer = this.renderTemplate(this.component.containerTemplate, { context, uid, container, frame, prerenderFrame, doc: document });
             if (innerContainer) {
+                if (!visible) {
+                    hideElement(innerContainer);
+                }
                 appendChild(container, innerContainer);
                 this.clean.register(() => destroyElement(innerContainer));
+                this.proxyContainer = getProxyObject(innerContainer);
                 return getProxyObject(innerContainer);
             }
         });

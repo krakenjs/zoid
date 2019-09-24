@@ -85,7 +85,9 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
         'openPrerenderFrame',
         'prerender',
         'open',
-        'openPrerender'
+        'openPrerender',
+        'show',
+        'hide'
     ]
 };
 
@@ -124,7 +126,9 @@ if (__ZOID__.__POPUP_SUPPORT__) {
         delegate: [
             'getProxyContainer',
             'renderContainer',
-            'setProxyWin'
+            'setProxyWin',
+            'show',
+            'hide'
         ]
     };
 }

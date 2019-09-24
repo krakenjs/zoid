@@ -31,7 +31,9 @@ export type ChildHelpers<P> = {|
     onError : (mixed) => ZalgoPromise<void>,
     onProps : ((PropsType<P>) => void) => void,
     getParent : () => CrossDomainWindowType,
-    getParentDomain : () => string
+    getParentDomain : () => string,
+    show : () => ZalgoPromise<void>,
+    hide : () => ZalgoPromise<void>
 |};
 
 /*  Child Component
@@ -104,8 +106,18 @@ export class ChildComponent<P> {
             onError:         (err) => this.onError(err),
             onProps:         (handler) => this.onProps(handler),
             getParent:       () => this.parentComponentWindow,
-            getParentDomain: () => this.parentDomain
+            getParentDomain: () => this.parentDomain,
+            show:            () => this.show(),
+            hide:            () => this.hide()
         };
+    }
+
+    show() : ZalgoPromise<void> {
+        return this.parent.show();
+    }
+
+    hide() : ZalgoPromise<void> {
+        return this.parent.hide();
     }
 
     checkParentDomain(domain : string) {
