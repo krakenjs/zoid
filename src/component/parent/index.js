@@ -3,7 +3,7 @@
 
 import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, assertSameDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getElementSafe, onResize } from 'belter/src';
 
@@ -599,6 +599,11 @@ export class ParentComponent<P> extends BaseComponent<P> {
     open() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`, { windowName: this.childWindowName });
+            if (this.props.win) {
+                this.clean.set('window', this.props.win);
+                assertSameDomain(this.window).name = this.childWindowName;
+                return;
+            }
             return this.driver.open.call(this);
         });
     }

@@ -1,6 +1,7 @@
 /* @flow */
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
+import type { SameDomainWindowType } from 'cross-domain-utils/src';
 
 import { uniqueID } from '../../lib';
 import { type DimensionsType } from '../../types';
@@ -48,6 +49,7 @@ type versionPropType = string;
 type timeoutPropType = number;
 type logLevelPropType = string;
 type dimensionsPropType = DimensionsType;
+type winPropType = SameDomainWindowType;
 
 type onDisplayPropType = EventHandlerType<void>;
 type onEnterPropType = EventHandlerType<void>;
@@ -65,6 +67,7 @@ export type BuiltInPropsType = {
     timeout? : timeoutPropType,
     logLevel : logLevelPropType,
     dimensions? : dimensionsPropType,
+    win? : winPropType,
 
     onDisplay : onDisplayPropType,
     onEnter : onEnterPropType,
@@ -83,6 +86,7 @@ export type PropsType = {
     timeout? : timeoutPropType,
     logLevel? : logLevelPropType,
     dimensions? : dimensionsPropType,
+    win? : winPropType,
 
     onDisplay? : onDisplayPropType,
     onEnter? : onEnterPropType,
@@ -101,6 +105,7 @@ export type BuiltInPropsDefinitionType<P> = {
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     logLevel : StringPropDefinitionType<logLevelPropType, P>,
     dimensions : ObjectPropDefinitionType<dimensionsPropType, P>,
+    win : ObjectPropDefinitionType<winPropType, P>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P>,
     onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
@@ -155,6 +160,12 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
             type:        'string',
             required:    false,
             promise:     true,
+            sendToChild: false
+        },
+
+        win: {
+            type:        'object',
+            required:    false,
             sendToChild: false
         },
 

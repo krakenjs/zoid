@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint complexity: off */
 
 import type { Component } from '../component';
 import type { MixedPropDefinitionType, PropsType } from '../component/props';
@@ -36,10 +37,12 @@ export function validateProp<T, P>(prop : MixedPropDefinitionType<P>, key : stri
 
         // Since we're sending everything by post-message, everything must be json serializable
 
-        try {
-            JSON.stringify(value);
-        } catch (err) {
-            throw new Error(`Unable to serialize prop: ${ key }`);
+        if (prop.sendToChild !== false) {
+            try {
+                JSON.stringify(value);
+            } catch (err) {
+                throw new Error(`Unable to serialize prop: ${ key }`);
+            }
         }
 
     } else if (prop.type === 'number') {

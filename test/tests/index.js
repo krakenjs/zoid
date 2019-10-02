@@ -13,4 +13,4 @@ import './logging';
 import './parentDomainCheck';
 import './angular2';
 import './vue';
-
+import './win';
