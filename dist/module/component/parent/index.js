@@ -45,7 +45,7 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
-import { isSameDomain, isWindowClosed as _isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed as _isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getElementSafe, onResize } from 'belter/src';
 
@@ -597,6 +597,11 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
         return ZalgoPromise['try'](function () {
             _this11.component.log('open_' + _this11.context, { windowName: _this11.childWindowName });
+            if (_this11.props.win) {
+                _this11.clean.set('window', _this11.props.win);
+                assertSameDomain(_this11.window).name = _this11.childWindowName;
+                return;
+            }
             return _this11.driver.open.call(_this11);
         });
     };

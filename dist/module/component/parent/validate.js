@@ -1,6 +1,9 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // $FlowFixMe
+
+/* eslint complexity: off */
+
 export function validateProp(prop, key, value, props) {
     var required = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
@@ -33,10 +36,12 @@ export function validateProp(prop, key, value, props) {
 
         // Since we're sending everything by post-message, everything must be json serializable
 
-        try {
-            JSON.stringify(value);
-        } catch (err) {
-            throw new Error('Unable to serialize prop: ' + key);
+        if (prop.sendToChild !== false) {
+            try {
+                JSON.stringify(value);
+            } catch (err) {
+                throw new Error('Unable to serialize prop: ' + key);
+            }
         }
     } else if (prop.type === 'number') {
 

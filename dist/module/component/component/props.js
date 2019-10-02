@@ -1,5 +1,6 @@
 import 'zalgo-promise/src';
 
+
 import { uniqueID } from '../../lib';
 import '../../types';
 
@@ -48,6 +49,12 @@ export function getInternalProps() {
             type: 'string',
             required: false,
             promise: true,
+            sendToChild: false
+        },
+
+        win: {
+            type: 'object',
+            required: false,
             sendToChild: false
         },
 
