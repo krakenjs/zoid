@@ -160,13 +160,22 @@ export class ParentComponent<P> {
                 this.delegate(context, target);
             }
 
+            const windowProp = this.props.window;
+
             const init = this.initPromise;
             const buildUrl = this.buildUrl();
             const onRender = this.event.trigger(EVENT.RENDER);
 
             const getProxyContainer = this.getProxyContainer(container);
+            const getProxyWindow = windowProp
+                ? ZalgoPromise.resolve(toProxyWindow(windowProp))
+                : this.getProxyWindow();
 
-            const openFrame = this.openFrame();
+            const buildWindowName = getProxyWindow.then(proxyWin => {
+                return this.buildWindowName({ proxyWin, childDomain, domain, target, context, uid });
+            });
+
+            const openFrame = buildWindowName.then(windowName => this.openFrame({ windowName }));
             const openPrerenderFrame = this.openPrerenderFrame();
 
             const renderContainer = ZalgoPromise.hash({ proxyContainer: getProxyContainer, proxyFrame: openFrame, proxyPrerenderFrame: openPrerenderFrame }).then(({ proxyContainer, proxyFrame, proxyPrerenderFrame }) => {
@@ -176,9 +185,11 @@ export class ParentComponent<P> {
                 return proxyContainer;
             });
 
-            const open = this.driver.openOnClick
-                ? this.open()
-                : openFrame.then(proxyFrame => this.open(proxyFrame));
+            const open = ZalgoPromise.hash({ windowName: buildWindowName, proxyFrame: openFrame, proxyWin: getProxyWindow }).then(({ windowName, proxyWin, proxyFrame }) => {
+                return windowProp
+                    ? proxyWin
+                    : this.open({ windowName, proxyWin, proxyFrame });
+            });
 
             const openPrerender = ZalgoPromise.hash({ proxyWin: open, proxyPrerenderFrame: openPrerenderFrame }).then(({ proxyWin, proxyPrerenderFrame }) => {
                 return this.openPrerender(proxyWin, proxyPrerenderFrame);
@@ -193,12 +204,10 @@ export class ParentComponent<P> {
                 return this.prerender(proxyPrerenderWin, { context, uid });
             });
 
-            const buildWindowName = open.then(proxyWin => {
-                return this.buildWindowName({ proxyWin, childDomain, domain, target, context, uid });
-            });
-
             const setWindowName =  ZalgoPromise.hash({ proxyWin: open, windowName: buildWindowName }).then(({ proxyWin, windowName }) => {
-                return proxyWin.setName(windowName);
+                if (windowProp) {
+                    return proxyWin.setName(windowName);
+                }
             });
 
             const loadUrl = ZalgoPromise.hash({ proxyWin: open, url: buildUrl, windowName: setWindowName, prerender }).then(({ proxyWin, url }) => {
@@ -241,6 +250,12 @@ export class ParentComponent<P> {
                 throw err;
             });
         }).then(noop);
+    }
+
+    getProxyWindow() : ZalgoPromise<ProxyWindow> {
+        return ZalgoPromise.try(() => {
+            return new ProxyWindow({ send });
+        });
     }
 
     getProxyContainer(container : string | HTMLElement) : ZalgoPromise<ProxyObject<HTMLElement>> {
@@ -394,10 +409,10 @@ export class ParentComponent<P> {
         });
     }
 
-    openFrame() : ZalgoPromise<?ProxyObject<HTMLIFrameElement>> {
+    openFrame({ windowName } : { windowName : string }) : ZalgoPromise<?ProxyObject<HTMLIFrameElement>> {
         return ZalgoPromise.try(() => {
             if (this.driver.openFrame) {
-                return this.driver.openFrame.call(this);
+                return this.driver.openFrame.call(this, { windowName });
             }
         });
     }
@@ -410,22 +425,14 @@ export class ParentComponent<P> {
         });
     }
     
-    open(proxyFrame : ?ProxyObject<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
+    open({ proxyWin, proxyFrame, windowName } : { proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string }) : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
             this.component.log(`open`);
 
-            const windowProp = this.props.window;
-
-            if (windowProp) {
-                this.clean.register(() => windowProp.close());
-                return toProxyWindow(windowProp);
-            }
-
-            return this.driver.open.call(this, proxyFrame);
-
-        }).then(proxyWin => {
-            this.proxyWin = proxyWin;
-            return proxyWin;
+            return this.driver.open.call(this, { windowName, proxyFrame }).then(win => {
+                proxyWin.setWindow(win, { send });
+                return proxyWin;
+            });
         });
     }
 

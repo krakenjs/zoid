@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { cleanUpWindow, ProxyWindow, toProxyWindow } from 'post-robot/src';
-import { assertSameDomain, closeWindow } from 'cross-domain-utils/src';
+import { assertSameDomain, closeWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { iframe, popup, destroyElement, normalizeDimension, watchElementForClose,
     awaitFrameWindow, uniqueID } from 'belter/src';
 
@@ -11,9 +11,8 @@ import { getProxyObject, type ProxyObject } from '../lib';
 
 
 export type ContextDriverType = {|
-    openOnClick : boolean,
-    openFrame? : () => ProxyObject<HTMLIFrameElement>,
-    open : (?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
+    openFrame? : ({ windowName : string }) => ProxyObject<HTMLIFrameElement>,
+    open : ({ windowName : string, proxyFrame : ?ProxyObject<HTMLIFrameElement> }) => ZalgoPromise<CrossDomainWindowType>,
     openPrerenderFrame? : () => ProxyObject<HTMLIFrameElement>,
     openPrerender : (ProxyWindow, ?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>,
     resize? : ({ width : ?number, height : ?number }) => void,
@@ -23,18 +22,17 @@ export type ContextDriverType = {|
 export const RENDER_DRIVERS : { [string] : ContextDriverType } = {};
 
 RENDER_DRIVERS[CONTEXT.IFRAME] = {
-    openOnClick: false,
-
-    openFrame() : ProxyObject<HTMLIFrameElement> {
+    openFrame({ windowName } : { windowName : string }) : ProxyObject<HTMLIFrameElement> {
         return getProxyObject(iframe({
             attributes: {
+                name:  windowName,
                 title: this.component.name,
                 ...this.component.attributes.iframe
             }
         }));
     },
 
-    open(proxyFrame : ?ProxyObject<HTMLIFrameElement>) : ZalgoPromise<ProxyWindow> {
+    open({ proxyFrame } : { proxyFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<CrossDomainWindowType> {
         if (!proxyFrame) {
             throw new Error(`Expected proxy frame to be passed`);
         }
@@ -47,7 +45,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
                 this.clean.register(() => destroyElement(frame));
                 this.clean.register(() => cleanUpWindow(win));
 
-                return toProxyWindow(win);
+                return win;
             });
         });
     },
@@ -79,6 +77,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
     },
 
     delegate: [
+        'getProxyWindow',
         'getProxyContainer',
         'renderContainer',
         'openFrame',
@@ -93,9 +92,7 @@ RENDER_DRIVERS[CONTEXT.IFRAME] = {
 
 if (__ZOID__.__POPUP_SUPPORT__) {
     RENDER_DRIVERS[CONTEXT.POPUP] = {
-        openOnClick: true,
-
-        open() : ZalgoPromise<ProxyWindow> {
+        open({ windowName } : { windowName : string }) : ZalgoPromise<CrossDomainWindowType> {
             return ZalgoPromise.try(() => {
                 let { width, height } = this.component.dimensions;
 
@@ -103,6 +100,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                 height = normalizeDimension(height, window.outerWidth);
 
                 const win = popup('', {
+                    name: windowName,
                     width,
                     height,
                     ...this.component.attributes.popup
@@ -113,7 +111,7 @@ if (__ZOID__.__POPUP_SUPPORT__) {
                     cleanUpWindow(win);
                 });
 
-                return toProxyWindow(win);
+                return win;
             });
         },
 
