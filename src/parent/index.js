@@ -167,9 +167,7 @@ export class ParentComponent<P> {
             const onRender = this.event.trigger(EVENT.RENDER);
 
             const getProxyContainer = this.getProxyContainer(container);
-            const getProxyWindow = windowProp
-                ? ZalgoPromise.resolve(toProxyWindow(windowProp))
-                : this.getProxyWindow();
+            const getProxyWindow = this.getProxyWindow();
 
             const buildWindowName = getProxyWindow.then(proxyWin => {
                 return this.buildWindowName({ proxyWin, childDomain, domain, target, context, uid });
@@ -254,6 +252,14 @@ export class ParentComponent<P> {
 
     getProxyWindow() : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
+            const windowProp = this.props.window;
+
+            if (windowProp) {
+                const proxyWin = toProxyWindow(windowProp);
+                this.clean.register(() => windowProp.close());
+                return proxyWin;
+            }
+
             return new ProxyWindow({ send });
         });
     }
