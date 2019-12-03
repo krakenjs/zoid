@@ -706,4 +706,23 @@ describe('zoid error cases', () => {
             throw new Error(`Expected xprops to not be set`);
         }
     });
+
+    it('should not call onError when the window navigates away', () => {
+        return wrapPromise(({ avoid }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-error-unload',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                onError: avoid('onError')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
+                window.dispatchEvent(new Event('unload'));
+            });
+        });
+    });
 });

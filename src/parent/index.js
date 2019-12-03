@@ -143,6 +143,8 @@ export class ParentComponent<P> {
                 });
             }
         });
+
+        this.clean.register(() => this.event.reset());
     }
 
     render(target : CrossDomainWindowType, container : string | HTMLElement, context : $Values<typeof CONTEXT>) : ZalgoPromise<void> {
@@ -606,7 +608,7 @@ export class ParentComponent<P> {
                 this.child.close.fireAndForget().catch(noop);
             }
 
-            return this.destroy(new Error(`Window closed`), false);
+            return this.destroy(new Error(`Window closed`));
         });
     }
 
@@ -696,20 +698,16 @@ export class ParentComponent<P> {
         });
     }
 
-    destroy(err? : mixed, trigger? : boolean = true) : ZalgoPromise<void> {
+    destroy(err? : mixed) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
-            if (!err) {
-                trigger = false;
-                err = new Error('Component destroyed');
-            }
-            this.component.log(`destroy`);
-            return this.onError(err, trigger);
-        }).then(() => {
             return this.clean.all();
+        }).then(() => {
+            this.initPromise.asyncReject(err || new Error('Component destroyed'));
+            this.component.log(`destroy`);
         });
     }
 
-    onError(err : mixed, trigger? : boolean = true) : ZalgoPromise<void> {
+    onError(err : mixed) : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             if (this.handledErrors.indexOf(err) !== -1) {
                 return;
@@ -718,9 +716,7 @@ export class ParentComponent<P> {
             this.handledErrors.push(err);
             this.initPromise.asyncReject(err);
 
-            if (trigger) {
-                return this.event.trigger(EVENT.ERROR, err);
-            }
+            return this.event.trigger(EVENT.ERROR, err);
         });
     }
 
