@@ -260,6 +260,20 @@ function supportsPopups(ua) {
 
   return !(isIosWebview(ua) || isAndroidWebview(ua) || isOperaMini(ua) || isFirefoxIOS(ua) || isEdgeIOS(ua) || isFacebookWebView(ua) || isQQBrowser(ua) || isElectron() || isMacOsCna() || isStandAlone());
 }
+function isChrome(ua) {
+  if (ua === void 0) {
+    ua = getUserAgent();
+  }
+
+  return /Chrome|Chromium|CriOS/.test(ua);
+}
+function isSafari(ua) {
+  if (ua === void 0) {
+    ua = getUserAgent();
+  }
+
+  return /Safari/.test(ua) && !isChrome(ua);
+}
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -2252,8 +2266,8 @@ function memoizePromise(method) {
   var cache = {}; // eslint-disable-next-line flowtype/no-weak-types
 
   function memoizedPromiseFunction() {
-    var _this2 = this,
-        _arguments = arguments;
+    var _arguments = arguments,
+        _this2 = this;
 
     for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
       args[_key2] = arguments[_key2];
@@ -2466,8 +2480,8 @@ function patchMethod(obj, name, handler) {
   var original = obj[name];
 
   obj[name] = function patchedMethod() {
-    var _this3 = this,
-        _arguments2 = arguments;
+    var _arguments2 = arguments,
+        _this3 = this;
 
     return handler({
       context: this,
@@ -2750,6 +2764,9 @@ function eventEmitter() {
       }
 
       return this.trigger.apply(this, [eventName].concat(args));
+    },
+    reset: function reset() {
+      handlers = {};
     }
   };
 }
@@ -3000,8 +3017,8 @@ function debounce(method, time) {
   var timeout;
 
   var debounceWrapper = function debounceWrapper() {
-    var _this4 = this,
-        _arguments3 = arguments;
+    var _arguments3 = arguments,
+        _this4 = this;
 
     clearTimeout(timeout);
     timeout = setTimeout(function () {
@@ -4652,14 +4669,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_27__"];
+    return win["__post_robot_10_0_29__"];
   }
 
-  var global = win["__post_robot_10_0_27__"] = win["__post_robot_10_0_27__"] || {};
+  var global = win["__post_robot_10_0_29__"] = win["__post_robot_10_0_29__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_27__"];
+  delete window["__post_robot_10_0_29__"];
 }
 
 var getObj = function getObj() {
@@ -5796,7 +5813,11 @@ function getSerializedWindow(winPromise, _ref) {
   var send = _ref.send,
       _ref$id = _ref.id,
       id = _ref$id === void 0 ? uniqueID() : _ref$id;
-  var windowName;
+  var windowNamePromise = winPromise.then(function (win) {
+    if (isSameDomain(win)) {
+      return assertSameDomain(win).name;
+    }
+  });
   return {
     id: id,
     getType: function getType() {
@@ -5820,7 +5841,11 @@ function getSerializedWindow(winPromise, _ref) {
           return;
         }
 
-        return windowName;
+        if (isSameDomain(win)) {
+          return assertSameDomain(win).name;
+        }
+
+        return windowNamePromise;
       });
     },
     focus: function focus() {
@@ -5871,7 +5896,7 @@ function getSerializedWindow(winPromise, _ref) {
           frame.setAttribute('name', name);
         }
 
-        windowName = name;
+        windowNamePromise = promise_ZalgoPromise.resolve(name);
       });
     }
   };
@@ -6476,7 +6501,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_27__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_29__"] = _extends({
     id: uniqueID(),
     origin: utils_getDomain(window)
   }, message), _serializeMessage), {
@@ -6902,7 +6927,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_27__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_29__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;
@@ -6924,12 +6949,8 @@ function receive_receiveMessage(event, _ref2) {
       send = _ref2.send;
   var receivedMessages = globalStore('receivedMessages');
 
-  if (!window || window.closed) {
-    throw new Error("Message received in closed window");
-  }
-
   try {
-    if (!event.source) {
+    if (!window || window.closed || !event.source) {
       return;
     }
   } catch (err) {
@@ -7379,14 +7400,14 @@ function lib_global_getGlobal(win) {
     throw new Error("Can not get global for window on different domain");
   }
 
-  if (!win["__zoid_9_0_35__"]) {
-    win["__zoid_9_0_35__"] = {};
+  if (!win["__zoid_9_0_36__"]) {
+    win["__zoid_9_0_36__"] = {};
   }
 
-  return win["__zoid_9_0_35__"];
+  return win["__zoid_9_0_36__"];
 }
 function destroyGlobal() {
-  delete window["__zoid_9_0_35__"];
+  delete window["__zoid_9_0_36__"];
 }
 // CONCATENATED MODULE: ./src/lib/serialize.js
 
@@ -7613,8 +7634,8 @@ function () {
         throw new Error("No child payload found");
       }
 
-      if (childPayload.version !== "9_0_35") {
-        throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version " + "9_0_35");
+      if (childPayload.version !== "9_0_36") {
+        throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version " + "9_0_36");
       }
 
       var parent = childPayload.parent,
@@ -8324,6 +8345,9 @@ function () {
         });
       }
     });
+    this.clean.register(function () {
+      return _this2.event.reset();
+    });
   };
 
   _proto.render = function render(target, container, context) {
@@ -8581,7 +8605,7 @@ function () {
     return {
       uid: uid,
       context: context,
-      version: "9_0_35",
+      version: "9_0_36",
       childDomain: childDomain,
       parentDomain: utils_getDomain(window),
       tag: this.component.tag,
@@ -8841,8 +8865,8 @@ function () {
 
       // $FlowFixMe
       _this16[key] = function overriddenFunction() {
-        var _this17 = this,
-            _arguments = arguments;
+        var _arguments = arguments,
+            _this17 = this;
 
         return overridesPromise.then(function (overrides) {
           return overrides[key].apply(_this17, _arguments);
@@ -9025,7 +9049,7 @@ function () {
         _this25.child.close.fireAndForget().catch(src_util_noop);
       }
 
-      return _this25.destroy(new Error("Window closed"), false);
+      return _this25.destroy(new Error("Window closed"));
     });
   };
 
@@ -9170,33 +9194,20 @@ function () {
     });
   };
 
-  _proto.destroy = function destroy(err, trigger) {
+  _proto.destroy = function destroy(err) {
     var _this29 = this;
 
-    if (trigger === void 0) {
-      trigger = true;
-    }
-
     return promise_ZalgoPromise.try(function () {
-      if (!err) {
-        trigger = false;
-        err = new Error('Component destroyed');
-      }
+      return _this29.clean.all();
+    }).then(function () {
+      _this29.initPromise.asyncReject(err || new Error('Component destroyed'));
 
       _this29.component.log("destroy");
-
-      return _this29.onError(err, trigger);
-    }).then(function () {
-      return _this29.clean.all();
     });
   };
 
-  _proto.onError = function onError(err, trigger) {
+  _proto.onError = function onError(err) {
     var _this30 = this;
-
-    if (trigger === void 0) {
-      trigger = true;
-    }
 
     return promise_ZalgoPromise.try(function () {
       if (_this30.handledErrors.indexOf(err) !== -1) {
@@ -9207,9 +9218,7 @@ function () {
 
       _this30.initPromise.asyncReject(err);
 
-      if (trigger) {
-        return _this30.event.trigger(EVENT.ERROR, err);
-      }
+      return _this30.event.trigger(EVENT.ERROR, err);
     });
   };
 
@@ -9525,8 +9534,8 @@ var angular2 = {
       return replaceObject(_extends({}, component.internalProps, {}, component.props), function (item) {
         if (typeof item === 'function') {
           return function angular2Wrapped() {
-            var _this = this,
-                _arguments = arguments;
+            var _arguments = arguments,
+                _this = this;
 
             // $FlowFixMe
             return component.zone.run(function () {
