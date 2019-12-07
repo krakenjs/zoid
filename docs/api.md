@@ -326,7 +326,7 @@ var MyLoginZoidComponent = zoid.create({
     tag: 'my-login',
     url: 'https://www.mysite.com/login',
 
-    prerenderTemplate: function({ doc ) {
+    prerenderTemplate: function({ doc }) {
         return (
             <p>
                 Please wait while the component loads...
