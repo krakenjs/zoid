@@ -97,6 +97,7 @@ Implement the component in the iframe:
 - [Building PayPal's Button with zoid](https://medium.com/@bluepnume/less-is-more-reducing-thousands-of-paypal-buttons-into-a-single-iframe-using-zoid-d902d71d8875#.o3ib7y58n)
 - [PayPal Checkout - zoid powered Button and Checkout components](https://github.com/paypal/paypal-checkout)
 - [Post-Robot - the cross-domain messaging library which powers zoid](https://github.com/krakenjs/post-robot)
+- [Implementing Zoid video tutorial](https://www.youtube.com/watch?v=UpXavGv7FaI)
 
 #### Framework Specific
 
