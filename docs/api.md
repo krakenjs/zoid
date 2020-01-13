@@ -257,8 +257,8 @@ var MyLoginZoidComponent = zoid.create({
                     `}
                 </style>
 
-                <frame el={ frame } />
-                <frame el={ prerenderFrame } />
+                <node el={ frame } />
+                <node el={ prerenderFrame } />
             </div>
         ).render(dom({ doc }));
     }
