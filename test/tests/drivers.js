@@ -90,17 +90,16 @@ describe('zoid drivers', () => {
                 }
 
                 render() : Object {
-                    return window.React.createElement('div', null,
-                        window.React.createElement(ReactZoidComponent, {
-                            foo:    this.state.foo,
-                            onLoad: this.state.onLoad,
+                    return window.React.createElement('div', null, window.React.createElement(ReactZoidComponent, {
+                        foo:    this.state.foo,
+                        onLoad: this.state.onLoad,
 
-                            run: () => `
+                        run: () => `
                                 window.xprops.onLoad().then(() => {
                                     window.xprops.foo('bar');
                                 });
                             `
-                        }));
+                    }));
                 }
             };
 
