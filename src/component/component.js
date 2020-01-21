@@ -6,7 +6,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
 import { isRegex, noop, isElement } from 'belter/src';
 
-import { ChildComponent, getChildPayload } from '../child';
+import { getChildPayload, childComponent } from '../child';
 import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../parent';
 import { DelegateComponent } from '../delegate';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
@@ -229,14 +229,16 @@ export class Component<P> {
         }
     }
 
-    registerChild() {
+    registerChild() : ZalgoPromise<void> {
         if (this.isChild()) {
             if (window.xprops) {
                 throw new Error(`Can not register ${ this.name } as child - can not attach multiple components to the same window`);
             }
 
-            const child = new ChildComponent(this);
+            const child = childComponent(this);
+
             window.xprops = this.xprops = child.getProps();
+            child.init();
         }
     }
 
