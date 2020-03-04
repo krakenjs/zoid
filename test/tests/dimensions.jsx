@@ -42,7 +42,6 @@ describe('zoid dimensions cases', () => {
             }).render(document.body).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
-
                 if (componentWindow.innerWidth !== expectedWidth) {
                     throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
                 }
