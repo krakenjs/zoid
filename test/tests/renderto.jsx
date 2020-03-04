@@ -6,7 +6,7 @@ import { onCloseWindow, getParent, getOpener, isWindowClosed } from 'cross-domai
 import { wrapPromise, destroyElement } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen } from '../common';
+import { onWindowOpen, getContainer } from '../common';
 
 describe('zoid renderto cases', () => {
 
@@ -849,6 +849,118 @@ describe('zoid renderto cases', () => {
                     `;
                 }
             }).render(document.body);
+        });
+    });
+
+    it('should render a component to the parent as a popup from the shadow-dom and call a prop', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-popup-shadow-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-popup-shadow-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const { container, destroy } = getContainer({ shadow: true });
+
+            return window.__component__().simple({
+                foo: expect('foo', () => {
+                    destroy();
+                }),
+
+                onError: avoid('onError', err => {
+                    throw err;
+                }),
+
+                runOnClick: true,
+
+                run() : string {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                        if (getOpener(win) !== this.source) {
+                            throw new Error(`Expected window opener to be child frame`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo:     window.xprops.foo,
+                            onError: window.xprops.onError,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        });
+                        
+                        return instance.renderTo(window.parent, 'body', window.zoid.CONTEXT.POPUP);
+                    `;
+                }
+            }).render(container);
+        });
+    });
+
+    it.skip('should render a component to the parent as an iframe from the shadow-dom and call a prop', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-shadow-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-iframe-shadow-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const { container, destroy } = getContainer({ shadow: true });
+
+            return window.__component__().simple({
+                foo: expect('foo', () => {
+                    destroy();
+                }),
+
+                onError: avoid('onError', err => {
+                    throw err;
+                }),
+
+                runOnClick: true,
+
+                run() : string {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: window.xprops.foo,
+                            onError: window.xprops.onError,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        });
+                        
+                        return instance.renderTo(window.parent, 'body', window.zoid.CONTEXT.IFRAME);
+                    `;
+                }
+            }).render(container);
         });
     });
 });

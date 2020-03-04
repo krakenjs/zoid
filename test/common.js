@@ -124,3 +124,40 @@ export function runOnClick<T>(handler : () => T) : T {
         return result;
     }
 }
+
+export function getContainer({ parent, shadow = false } : { parent? : ?HTMLElement, shadow? : boolean } = {}) : { container : HTMLElement, destroy : () => void } {
+    const parentContainer = parent = parent || document.body;
+    
+    if (!parentContainer) {
+        throw new Error(`Expected body to be present`);
+    }
+
+    const container = document.createElement('div');
+    parentContainer.appendChild(container);
+
+    if (!shadow) {
+        return {
+            container,
+            destroy: () => { parentContainer.removeChild(container); }
+        };
+    }
+
+    if (!container.attachShadow) {
+        throw new Error(`Expected container to have attachShadow`);
+    }
+
+    container.attachShadow({ mode: 'open' });
+    const shadowRoot = container.shadowRoot;
+
+    if (!shadowRoot) {
+        throw new Error(`Expected container to have shadowRoot`);
+    }
+
+    const shadowContainer = document.createElement('div');
+    shadowRoot.appendChild(shadowContainer);
+
+    return {
+        container: shadowContainer,
+        destroy:   () => { parentContainer.removeChild(container); }
+    };
+}

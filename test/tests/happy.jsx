@@ -5,7 +5,7 @@ import { wrapPromise } from 'belter/src';
 import { getParent, getOpener } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen, runOnClick } from '../common';
+import { onWindowOpen, runOnClick, getContainer } from '../common';
 
 describe('zoid happy cases', () => {
 
@@ -427,33 +427,13 @@ describe('zoid happy cases', () => {
                     throw new Error(`Expected window parent to be current window`);
                 }
             }));
-            
-            const body = document.body;
 
-            if (!body) {
-                throw new Error(`Expected body to be present`);
-            }
-
-            const testElement = document.createElement('div');
-            body.appendChild(testElement);
-
-            if (!testElement.attachShadow) {
-                throw new Error(`Expected testElement to have attachShadow`);
-            }
-
-            testElement.attachShadow({ mode: 'open' });
-            const container = document.createElement('div');
-
-            if (!testElement.shadowRoot) {
-                throw new Error(`Expected testElement to have shadowRoot`);
-            }
-
-            testElement.shadowRoot.appendChild(container);
+            const { container, destroy } = getContainer({ shadow: true });
 
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered', () => {
-                    body.removeChild(testElement);
+                    destroy();
                 })
             }).render(container);
         });
