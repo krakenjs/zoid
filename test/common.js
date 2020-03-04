@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
-import { createElement, destroyElement } from 'belter/src';
+import { createElement, destroyElement, uniqueID } from 'belter/src';
 
 export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<SameDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
@@ -125,7 +125,7 @@ export function runOnClick<T>(handler : () => T) : T {
     }
 }
 
-export function getContainer({ parent, shadow = false } : { parent? : ?HTMLElement, shadow? : boolean } = {}) : { container : HTMLElement, destroy : () => void } {
+export function getContainer({ parent, shadow = false, slots = false } : { parent? : ?HTMLElement, shadow? : boolean, slots? : boolean } = {}) : { container : HTMLElement, destroy : () => void } {
     const parentContainer = parent = parent || document.body;
     
     if (!parentContainer) {
@@ -142,22 +142,45 @@ export function getContainer({ parent, shadow = false } : { parent? : ?HTMLEleme
         };
     }
 
-    if (!container.attachShadow) {
-        throw new Error(`Expected container to have attachShadow`);
+    const customElementName = `zoid-custom-element-${ uniqueID() }`;
+    const customSlotName = `zoid-custom-slot-${ uniqueID() }`;
+    
+    const shadowContainer = document.createElement(slots ? 'slot' : 'div');
+    shadowContainer.setAttribute('name', customSlotName);
+
+    customElements.define(customElementName, class extends HTMLElement {
+        connectedCallback() {
+            this.attachShadow({ mode: 'open' });
+
+            const shadowRoot = this.shadowRoot;
+
+            if (!shadowRoot) {
+                throw new Error(`Expected container to have shadowRoot`);
+            }
+
+            shadowRoot.appendChild(shadowContainer);
+        }
+    });
+
+    const customElement = document.createElement(customElementName);
+    parentContainer.appendChild(customElement);
+
+    if (!slots) {
+        return {
+            container: shadowContainer,
+            destroy:   () => { parentContainer.removeChild(customElement); }
+        };
     }
 
-    container.attachShadow({ mode: 'open' });
-    const shadowRoot = container.shadowRoot;
-
-    if (!shadowRoot) {
-        throw new Error(`Expected container to have shadowRoot`);
-    }
-
-    const shadowContainer = document.createElement('div');
-    shadowRoot.appendChild(shadowContainer);
+    const slotProviderElement = document.createElement('div');
+    slotProviderElement.setAttribute('slot', customSlotName);
+    parentContainer.appendChild(slotProviderElement);
 
     return {
-        container: shadowContainer,
-        destroy:   () => { parentContainer.removeChild(container); }
+        container: slotProviderElement,
+        destroy:   () => {
+            parentContainer.removeChild(slotProviderElement);
+            parentContainer.removeChild(customElement);
+        }
     };
 }

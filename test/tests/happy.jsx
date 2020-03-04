@@ -439,4 +439,31 @@ describe('zoid happy cases', () => {
         });
     });
 
+    it('should render a component into the shadow dom with slots', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-shadow-dom-slots',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', win => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const { container, destroy } = getContainer({ shadow: true, slots: true });
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered', () => {
+                    destroy();
+                })
+            }).render(container);
+        });
+    });
 });

@@ -963,4 +963,116 @@ describe('zoid renderto cases', () => {
             }).render(container);
         });
     });
+
+    it('should render a component to the parent as a popup from the shadow-dom using slots and call a prop', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-popup-shadow-slots-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-popup-shadow-slots-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const { container, destroy } = getContainer({ shadow: true, slots: true });
+
+            return window.__component__().simple({
+                foo: expect('foo', () => {
+                    destroy();
+                }),
+
+                onError: avoid('onError', err => {
+                    throw err;
+                }),
+
+                runOnClick: true,
+
+                run() : string {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                        if (getOpener(win) !== this.source) {
+                            throw new Error(`Expected window opener to be child frame`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: window.xprops.foo,
+                            onError: window.xprops.onError,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        });
+                        
+                        return instance.renderTo(window.parent, 'body', window.zoid.CONTEXT.POPUP);
+                    `;
+                }
+            }).render(container);
+        });
+    });
+
+    it('should render a component to the parent as an iframe from the shadow-dom using slots and call a prop', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-shadow-slots-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-iframe-shadow-slots-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const { container, destroy } = getContainer({ shadow: true, slots: true });
+
+            return window.__component__().simple({
+                foo: expect('foo', () => {
+                    destroy();
+                }),
+
+                onError: avoid('onError', err => {
+                    throw err;
+                }),
+
+                runOnClick: true,
+
+                run() : string {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: window.xprops.foo,
+                            onError: window.xprops.onError,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        });
+                        
+                        return instance.renderTo(window.parent, 'body', window.zoid.CONTEXT.IFRAME);
+                    `;
+                }
+            }).render(container);
+        });
+    });
 });
