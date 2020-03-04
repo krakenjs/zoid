@@ -1,6 +1,7 @@
 /* @flow */
 
 import './tests';
+import { noop } from 'belter/src';
 
 window.mockDomain = 'mock://www.parent.com';
 
@@ -14,9 +15,8 @@ window.console.karma = (...args) => {
 };
 
 beforeEach(() => {
-    window.addEventListener('error', () => {
-        // pass
-    });
+    // eslint-disable-next-line unicorn/prefer-add-event-listener
+    window.onerror = noop;
 });
 
 window.name = '__zoid_test_parent_window__';
@@ -34,5 +34,5 @@ afterEach((done) => {
     window.name = '';
     delete window.__component__;
     delete window.navigator.mockUserAgent;
-    return window.zoid.destroyAll().then(() => done());
+    return window.zoid.destroyAll().then(done);
 });

@@ -3,7 +3,7 @@
 
 import { extend, noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component';
+import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 declare class ReactClassType {
@@ -33,9 +33,9 @@ type ReactLibraryType = {|
     ReactDOM : ReactDomType
 |};
 
-export const react : ComponentDriverType<*, ReactLibraryType> = {
+export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassType> = {
 
-    register(component : Component<*>, { React, ReactDOM } : ReactLibraryType) : (typeof ReactClassType) {
+    register: (tag, propsDef, init, { React, ReactDOM }) => {
 
         // $FlowFixMe
         return class extends React.Component {
@@ -44,11 +44,8 @@ export const react : ComponentDriverType<*, ReactLibraryType> = {
             }
 
             componentDidMount() {
-                component.log(`instantiate_react_component`);
-                
                 const el = ReactDOM.findDOMNode(this);
-
-                const parent = component.init(extend({}, this.props));
+                const parent = init(extend({}, this.props));
                 parent.render(el, CONTEXT.IFRAME);
                 this.setState({ parent });
             }

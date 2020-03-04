@@ -2,7 +2,7 @@
 
 import { noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component';
+import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 type VueComponent = {|
@@ -25,11 +25,11 @@ type VueType = {|
     component : (string, VueComponent) => RegisteredVueComponent
 |};
 
-export const vue : ComponentDriverType<*, VueType> = {
+export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent> = {
 
-    register<P>(component : Component<P>, Vue : VueType) : RegisteredVueComponent {
+    register: (tag, propsDef, init, Vue) => {
 
-        return Vue.component(component.tag, {
+        return Vue.component(tag, {
             render(createElement) : Element {
                 return createElement('div');
             },
@@ -39,7 +39,7 @@ export const vue : ComponentDriverType<*, VueType> = {
             mounted() {
                 const el = this.$el;
                 
-                this.parent = component.init({ ...this.$attrs });
+                this.parent = init({ ...this.$attrs });
                 this.parent.render(el, CONTEXT.IFRAME);
             },
 

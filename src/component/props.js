@@ -14,7 +14,11 @@ export type windowPropType = CrossDomainWindowType | ProxyWindow;
 export type cspNoncePropType = string;
 export type closePropType = () => ZalgoPromise<void>;
 export type focusPropType = () => ZalgoPromise<void>;
+export type showPropType = () => ZalgoPromise<void>;
+export type hidePropType = () => ZalgoPromise<void>;
 export type resizePropType = ({ width : ?number, height : ?number }) => ZalgoPromise<void>;
+export type getParentPropType = () => CrossDomainWindowType;
+export type getParentDomainPropType = () => string;
 
 export type onDisplayPropType = EventHandlerType<void>;
 export type onRenderedPropType = EventHandlerType<void>;
@@ -40,7 +44,7 @@ export type PropsInputType<P> = {
     onProps? : onPropsPropType<P>
 } & P;
 
-export type PropsType<P> = {|
+export type PropsType<P> = {
     timeout? : timeoutPropType,
     window? : ?windowPropType,
     close? : ?closePropType,
@@ -56,7 +60,7 @@ export type PropsType<P> = {|
     onFocus : onFocusPropType,
     onError : onErrorPropType,
     onProps : onPropsPropType<P>
-|} & P;
+} & P;
 
 type PropDefinitionType<T, P, S : string> = {|
     type : S,
@@ -87,7 +91,7 @@ type PropDefinitionType<T, P, S : string> = {|
         event : EventEmitterType
     |}) => T,
     childDecorate? : ({|
-        value : T,
+        value : ?T,
         close : () => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
@@ -121,13 +125,17 @@ export type UserPropsDefinitionType<P> = {
     [string] : MixedPropDefinitionType<P>
 };
 
-// eslint-disable-next-line flowtype/require-exact-type
-export type BuiltInPropsDefinitionType<P> = {
+export type BuiltInPropsDefinitionType<P> = {|
     timeout : NumberPropDefinitionType<timeoutPropType, P>,
     window : ObjectPropDefinitionType<windowPropType, P>,
     close : FunctionPropDefinitionType<closePropType, P>,
     focus : FunctionPropDefinitionType<focusPropType, P>,
     resize : FunctionPropDefinitionType<resizePropType, P>,
+    cspNonce : StringPropDefinitionType<cspNoncePropType, P>,
+    getParent : FunctionPropDefinitionType<getParentPropType, P>,
+    getParentDomain : FunctionPropDefinitionType<getParentDomainPropType, P>,
+    hide : FunctionPropDefinitionType<hidePropType, P>,
+    show : FunctionPropDefinitionType<showPropType, P>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P>,
     onRendered : FunctionPropDefinitionType<onRenderedPropType, P>,
@@ -137,7 +145,12 @@ export type BuiltInPropsDefinitionType<P> = {
     onFocus : FunctionPropDefinitionType<onFocusPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>,
     onProps : FunctionPropDefinitionType<onPropsPropType<P>, P>
-};
+|};
+
+export type PropsDefinitionType<P> = {|
+    ...BuiltInPropsDefinitionType<P>,
+    [ string ] : MixedPropDefinitionType<P>
+|};
 
 const defaultNoop = () => noop;
 const decorateOnce = ({ value }) => once(value);
@@ -150,19 +163,21 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             allowDelegate: true,
             validate({ value } : { value : CrossDomainWindowType | ProxyWindow }) {
-                if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
-                    throw new Error(`Expected Window or ProxyWindow`);
-                }
-
-                if (isWindow(value)) {
-                    // $FlowFixMe
-                    if (isWindowClosed(value)) {
-                        throw new Error(`Window is closed`);
+                if (__DEBUG__) {
+                    if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
+                        throw new Error(`Expected Window or ProxyWindow`);
                     }
-
-                    // $FlowFixMe
-                    if (!isSameDomain(value)) {
-                        throw new Error(`Window is not same domain`);
+    
+                    if (isWindow(value)) {
+                        // $FlowFixMe
+                        if (isWindowClosed(value)) {
+                            throw new Error(`Window is closed`);
+                        }
+    
+                        // $FlowFixMe
+                        if (!isSameDomain(value)) {
+                            throw new Error(`Window is not same domain`);
+                        }
                     }
                 }
             },

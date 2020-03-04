@@ -3,7 +3,7 @@
 
 import { replaceObject } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component';
+import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 type Angular2Injection = {||};
@@ -45,12 +45,9 @@ const equals = (obj1, obj2) => {
     return true;
 };
 
-export const angular2 : ComponentDriverType<*, Angular2> = {
+export const angular2 : ComponentDriverType<*, Angular2, Angular2Module> = {
 
-    register(zoid : Component<*>, { Component : AngularComponent, NgModule, ElementRef, NgZone }) : Angular2Module {
-
-        zoid.log('initializing angular2 component');
-
+    register: (tag, propsDef, init, { Component : AngularComponent, NgModule, ElementRef, NgZone }) => {
         const getProps = (component) => {
             return replaceObject({ ...component.internalProps, ...component.props }, item => {
                 if (typeof item === 'function') {
@@ -65,7 +62,7 @@ export const angular2 : ComponentDriverType<*, Angular2> = {
 
         const ComponentInstance =
             AngularComponent({
-                selector: zoid.tag,
+                selector: tag,
                 template: '<div></div>',
                 inputs:   [ 'props' ]
             }).Class({
@@ -77,7 +74,7 @@ export const angular2 : ComponentDriverType<*, Angular2> = {
                 ngOnInit () {
                     const targetElement = this.elementRef.nativeElement;
                     
-                    this.parent = zoid.init(getProps(this));
+                    this.parent = init(getProps(this));
                     this.parent.render(targetElement, CONTEXT.IFRAME);
                 },
                 ngDoCheck() {

@@ -3,29 +3,25 @@
 
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindow, getDomainFromUrl, type CrossDomainWindowType, isSameTopWindow, getDomain, matchDomain, isSameDomain } from 'cross-domain-utils/src';
-import { isRegex, noop, isElement } from 'belter/src';
+import { isWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { noop, isElement, cleanup, memoize } from 'belter/src';
 
-import { getChildPayload, childComponent } from '../child';
-import { ParentComponent, type RenderOptionsType, type ParentHelpers } from '../parent';
-import { DelegateComponent } from '../delegate';
+import { getChildPayload, childComponent, type ChildComponent } from '../child';
+import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
 import { react, angular, vue, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
-import { validate } from './validate';
+import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
-import { getBuiltInProps, type UserPropsDefinitionType, type BuiltInPropsDefinitionType, type PropsInputType, type PropsType, type MixedPropDefinitionType } from './props';
+import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType, type PropsType } from './props';
 
 type LoggerPayload = { [string] : ?string };
 
 // eslint-disable-next-line flowtype/require-exact-type
 type Logger = {
-    debug : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
-    info : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
-    warn : (event : string, payload? : LoggerPayload) => any, // eslint-disable-line flowtype/no-weak-types
-    error : (event : string, payload? : LoggerPayload) => any // eslint-disable-line flowtype/no-weak-types
+    info : (event : string, payload? : LoggerPayload) => any // eslint-disable-line flowtype/no-weak-types
 };
 
 /*  Component
@@ -68,6 +64,34 @@ export type ComponentOptionsType<P> = {|
     logger? : Logger
 |};
 
+export type NormalizedComponentOptionsType<P> = {|
+    tag : string,
+    name : string,
+
+    url : string | ({ props : PropsType<P> }) => string,
+    domain : ?(string | RegExp),
+    bridgeUrl : ?string,
+
+    propsDef : PropsDefinitionType<P>,
+    dimensions : CssDimensionsType,
+    autoResize : { width? : boolean, height? : boolean, element? : string },
+
+    allowedParentDomains : StringMatcherType,
+
+    attributes : {
+        iframe? : { [string] : string },
+        popup? : { [string] : string }
+    },
+
+    defaultContext : $Values<typeof CONTEXT>,
+
+    containerTemplate : (RenderOptionsType<P>) => ?HTMLElement,
+    prerenderTemplate : ?(RenderOptionsType<P>) => ?HTMLElement,
+
+    validate : ?({ props : PropsInputType<P> }) => void,
+    logger : Logger
+|};
+
 type ZoidRenderer = {|
     render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
     renderTo : (target : CrossDomainWindowType, container? : string, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
@@ -84,219 +108,118 @@ export type ZoidComponent<P> = {
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>
 };
 
-export class Component<P> {
+function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComponentOptionsType<P> {
+    let {
+        tag,
+        url,
+        domain,
+        bridgeUrl,
+        props: propsDef = {},
+        dimensions = {},
+        autoResize = {},
+        allowedParentDomains = WILDCARD,
+        attributes = {},
+        defaultContext = CONTEXT.IFRAME,
+        containerTemplate = (__ZOID__.__DEFAULT_CONTAINER__ ? defaultContainerTemplate : null),
+        prerenderTemplate = (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null),
+        validate,
+        logger = { info: noop }
+    } = options;
 
-    tag : string
-    name : string
-    
-    url : string | ({ props : PropsType<P> }) => string
-    domain : void | string | RegExp
-    bridgeUrl : void | string
+    const name = tag.replace(/-/g, '_');
+    const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = dimensions;
 
-    props : UserPropsDefinitionType<P>
-    builtinProps : BuiltInPropsDefinitionType<P>
+    propsDef = { ...getBuiltInProps(), ...propsDef };
 
-    dimensions : CssDimensionsType
-    autoResize : void | { width? : boolean, height? : boolean, element? : string }
-
-    allowedParentDomains : StringMatcherType
-
-    defaultContext : $Values<typeof CONTEXT>
-    
-    attributes : {
-        iframe? : { [string] : string },
-        popup? : { [string] : string }
+    if (!containerTemplate) {
+        throw new Error(`Container template required`);
     }
 
-    containerTemplate : (RenderOptionsType<P>) => ?HTMLElement
-    prerenderTemplate : ?(RenderOptionsType<P>) => ?HTMLElement
+    return {
+        name,
+        tag,
+        url,
+        domain,
+        bridgeUrl,
+        propsDef,
+        dimensions: { width, height },
+        autoResize,
+        allowedParentDomains,
+        attributes,
+        defaultContext,
+        containerTemplate,
+        prerenderTemplate,
+        validate,
+        logger
+    };
+}
 
-    validate : void | ({ props : PropsInputType<P> }) => void
+let clean = cleanup();
 
-    driverCache : { [string] : mixed }
+export type Component<P> = {|
+    init : (PropsInputType<P>) => ZoidComponentInstance<P>,
+    driver : (string, mixed) => mixed,
+    isChild : () => boolean,
+    canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>,
+    registerChild : () => ?ChildComponent<P>
+|};
 
-    xprops : ?PropsType<P>
-
-    logger : Logger
-
-    propNames : $ReadOnlyArray<string>
-
-    constructor(options : ComponentOptionsType<P>) {
-        validate(options);
-
-        // The tag name of the component. Used by some drivers (e.g. angular) to turn the component into an html element,
-        // e.g. <my-component>
-
-        this.tag = options.tag;
-        this.name = this.tag.replace(/-/g, '_');
-
-        this.allowedParentDomains = options.allowedParentDomains || WILDCARD;
-
-        const global = getGlobal();
-        global.components = global.components || {};
-
-        if (global.components[this.tag]) {
-            throw new Error(`Can not register multiple components with the same tag: ${ this.tag }`);
-        }
-
-        // A json based spec describing what kind of props the component accepts. This is used to validate any props before
-        // they are passed down to the child.
-
-        this.builtinProps = getBuiltInProps();
-        this.props = options.props || {};
-
-        // The dimensions of the component, e.g. { width: '300px', height: '150px' }
-
-        const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = options.dimensions || {};
-        this.dimensions = { width, height };
-
-        this.url = options.url;
-        this.domain = options.domain;
-        this.bridgeUrl = options.bridgeUrl;
-
-        this.attributes = options.attributes || {};
-        this.attributes.iframe = this.attributes.iframe || {};
-        this.attributes.popup = this.attributes.popup || {};
-
-        this.defaultContext = options.defaultContext || CONTEXT.IFRAME;
-
-        this.autoResize = options.autoResize;
-
-        if (options.containerTemplate) {
-            this.containerTemplate = options.containerTemplate;
-        } else if (__ZOID__.__DEFAULT_CONTAINER__) {
-            this.containerTemplate = defaultContainerTemplate;
-        }
-
-        if (options.prerenderTemplate) {
-            this.prerenderTemplate = options.prerenderTemplate;
-        } else if (__ZOID__.__DEFAULT_PRERENDER__) {
-            this.prerenderTemplate = defaultPrerenderTemplate;
-        }
-
-        this.validate = options.validate;
-
-        this.logger = options.logger || {
-            debug: noop,
-            info:  noop,
-            warn:  noop,
-            error: noop
-        };
-
-        this.registerChild();
-        this.listenDelegate();
-
-        global.components[this.tag] = this;
+export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
+    if (__DEBUG__) {
+        validateOptions(opts);
     }
 
-    getPropNames() : $ReadOnlyArray<string> {
-        if (this.propNames) {
-            return this.propNames;
-        }
+    const options = normalizeOptions(opts);
 
-        const propNames = Object.keys(this.props);
-        for (const key of Object.keys(this.builtinProps)) {
-            if (propNames.indexOf(key) === -1) {
-                propNames.push(key);
-            }
-        }
+    const {
+        name,
+        tag,
+        defaultContext,
+        propsDef
+    } = options;
 
-        this.propNames = propNames;
-        return propNames;
-    }
+    const global = getGlobal();
+    const driverCache = {};
 
-    getPropDefinition(name : string) : MixedPropDefinitionType<P> {
-        return this.props[name] || this.builtinProps[name];
-    }
+    const isChild = () : boolean => {
+        const payload = getChildPayload();
+        return Boolean(payload && payload.tag === tag && payload.childDomain === getDomain());
+    };
 
-    driver(name : string, dep : mixed) : mixed {
-        if (__ZOID__.__FRAMEWORK_SUPPORT__) {
-            const drivers = { react, angular, vue, angular2 };
-
-            if (!drivers[name]) {
-                throw new Error(`Could not find driver for framework: ${ name }`);
-            }
-    
-            this.driverCache = this.driverCache || {};
-    
-            if (!this.driverCache[name]) {
-                this.driverCache[name] = drivers[name].register(this, dep);
-            }
-    
-            return this.driverCache[name];
-        } else {
-            throw new Error(`Driver support not enabled`);
-        }
-    }
-
-    registerChild() : ZalgoPromise<void> {
-        if (this.isChild()) {
+    const registerChild = memoize(() : ?ChildComponent<P> => {
+        if (isChild()) {
             if (window.xprops) {
-                throw new Error(`Can not register ${ this.name } as child - can not attach multiple components to the same window`);
+                delete global.components[tag];
+                throw new Error(`Can not register ${ name } as child - child already registered`);
             }
 
-            const child = childComponent(this);
-
-            window.xprops = this.xprops = child.getProps();
+            const child = childComponent(options);
             child.init();
+            return child;
         }
-    }
+    });
 
-    listenDelegate() {
-        on(`${ POST_MESSAGE.ALLOW_DELEGATE }_${ this.name }`, () => {
+    const listenForDelegate = () => {
+        on(`${ POST_MESSAGE.ALLOW_DELEGATE }_${ name }`, () => {
             return true;
         });
 
-        on(`${ POST_MESSAGE.DELEGATE }_${ this.name }`, ({ source, data: { context, props, overrides } }) => {
-            const delegate = new DelegateComponent(this, source, { context, props, overrides });
-            return delegate.getDelegate();
+        on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { overrides } }) => {
+            return {
+                parent: parentComponent(options, overrides, source)
+            };
         });
-    }
+    };
 
-    canRenderTo(win : CrossDomainWindowType) : ZalgoPromise<boolean> {
-        return send(win, `${ POST_MESSAGE.ALLOW_DELEGATE }_${ this.name }`).then(({ data }) => {
+    const canRenderTo = (win : CrossDomainWindowType) : ZalgoPromise<boolean> => {
+        return send(win, `${ POST_MESSAGE.ALLOW_DELEGATE }_${ name }`).then(({ data }) => {
             return data;
         }).catch(() => {
             return false;
         });
-    }
+    };
 
-    getUrl(props : PropsType<P>) : string {
-        if (typeof this.url === 'function') {
-            return this.url({ props });
-        }
-
-        return this.url;
-    }
-
-    getChildDomain(props : PropsType<P>) : string {
-        if (this.domain && typeof this.domain === 'string') {
-            return this.domain;
-        }
-
-        return getDomainFromUrl(this.getUrl(props));
-    }
-
-    getDomain(props : PropsType<P>) : string | RegExp {
-        if (this.domain && isRegex(this.domain)) {
-            return this.domain;
-        }
-
-        return this.getChildDomain(props);
-    }
-
-    getBridgeUrl() : ?string {
-        if (this.bridgeUrl) {
-            return this.bridgeUrl;
-        }
-    }
-
-    isChild() : boolean {
-        const payload = getChildPayload();
-        return Boolean(payload && payload.tag === this.tag && payload.childDomain === getDomain());
-    }
-
-    getDefaultContainer(context : $Values<typeof CONTEXT>, container? : string | HTMLElement) : string | HTMLElement {
+    const getDefaultContainer = (context : $Values<typeof CONTEXT>, container? : string | HTMLElement) : string | HTMLElement => {
         if (container) {
             if (typeof container !== 'string' && !isElement(container)) {
                 throw new TypeError(`Expected string or element selector to be passed`);
@@ -310,9 +233,9 @@ export class Component<P> {
         }
 
         throw new Error(`Expected element to be passed to render iframe`);
-    }
+    };
 
-    getDefaultContext(context : ?$Values<typeof CONTEXT>, props : PropsInputType<P>) : ZalgoPromise<$Values<typeof CONTEXT>> {
+    const getDefaultContext = (props : PropsInputType<P>, context : ?$Values<typeof CONTEXT>) : ZalgoPromise<$Values<typeof CONTEXT>> => {
         return ZalgoPromise.try(() => {
             if (props.window) {
                 return toProxyWindow(props.window).getType();
@@ -326,16 +249,21 @@ export class Component<P> {
                 return context;
             }
     
-            return this.defaultContext;
+            return defaultContext;
         });
-    }
+    };
 
-    init(props : PropsInputType<P>) : ZoidComponentInstance<P> {
-
+    const getDefaultInputProps = () : PropsInputType<P> => {
         // $FlowFixMe
-        props = props || {};
-        
-        const parent = new ParentComponent(this, props);
+        return {};
+    };
+
+    const init = (props : PropsInputType<P>) : ZoidComponentInstance<P> => {
+        props = props || getDefaultInputProps();
+        const parent = parentComponent(options);
+        parent.setProps(props);
+
+        clean.register(() => parent.destroy(new Error(`zoid destroyed all`)));
 
         const render = (target, container, context) => {
             return ZalgoPromise.try(() => {
@@ -343,10 +271,10 @@ export class Component<P> {
                     throw new Error(`Must pass window to renderTo`);
                 }
 
-                return this.getDefaultContext(context, props);
+                return getDefaultContext(props, context);
                 
             }).then(finalContext => {
-                container = this.getDefaultContainer(finalContext, container);
+                container = getDefaultContainer(finalContext, container);
                 return parent.render(target, container, finalContext);
             });
         };
@@ -356,59 +284,62 @@ export class Component<P> {
             render:   (container, context) => render(window, container, context),
             renderTo: (target, container, context) => render(target, container, context)
         };
-    }
+    };
 
-    checkAllowRender(target : CrossDomainWindowType, domain : string | RegExp, container : string | HTMLElement) {
-        if (target === window) {
-            return;
+    const driver = (driverName : string, dep : mixed) : mixed => {
+        if (__ZOID__.__FRAMEWORK_SUPPORT__) {
+            const drivers = { react, angular, vue, angular2 };
+
+            if (!drivers[driverName]) {
+                throw new Error(`Could not find driver for framework: ${ driverName }`);
+            }
+    
+            if (!driverCache[driverName]) {
+                driverCache[driverName] = drivers[driverName].register(tag, propsDef, init, dep);
+            }
+    
+            return driverCache[driverName];
+        } else {
+            throw new Error(`Driver support not enabled`);
         }
+    };
 
-        if (!isSameTopWindow(window, target)) {
-            throw new Error(`Can only renderTo an adjacent frame`);
-        }
+    registerChild();
+    listenForDelegate();
 
-        const origin = getDomain();
-
-        if (!matchDomain(domain, origin) && !isSameDomain(target)) {
-            throw new Error(`Can not render remotely to ${ domain.toString() } - can only render to ${ origin }`);
-        }
-
-        if (container && typeof container !== 'string') {
-            throw new Error(`Container passed to renderTo must be a string selector, got ${ typeof container } }`);
-        }
+    global.components = global.components || {};
+    if (global.components[tag]) {
+        throw new Error(`Can not register multiple components with the same tag: ${ tag }`);
     }
+    global.components[tag] = true;
 
-    log(event : string, payload? : LoggerPayload) {
-        this.logger.info(`${ this.name }_${ event }`, payload);
-    }
-
-    registerActiveComponent<Q>(instance : ParentComponent<Q> | DelegateComponent<Q>) {
-        const global = getGlobal();
-        global.activeComponents = global.activeComponents || [];
-        global.activeComponents.push(instance);
-    }
-
-    destroyActiveComponent<Q>(instance : ParentComponent<Q> | DelegateComponent<Q>) {
-        const global = getGlobal();
-        global.activeComponents = global.activeComponents || [];
-        global.activeComponents.splice(global.activeComponents.indexOf(instance), 1);
-    }
+    return {
+        init,
+        driver,
+        isChild,
+        canRenderTo,
+        registerChild
+    };
 }
 
-export type ComponentDriverType<P, T : mixed> = {|
-    register : (Component<P>, T) => mixed
+export type ComponentDriverType<P, L, D> = {|
+    register : (string, PropsDefinitionType<P>, (PropsInputType<P>) => ZoidComponentInstance<P>, L) => D
 |};
 
 export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> {
     setupPostRobot();
 
-    const component : Component<P> = new Component(options);
+    const comp = component(options);
 
-    const init = (props) => component.init(props);
-    init.driver = (name, dep) => component.driver(name, dep);
-    init.isChild = () => component.isChild();
-    init.canRenderTo = (win) => component.canRenderTo(win);
-    init.xprops = component.xprops;
+    const init = (props) => comp.init(props);
+    init.driver = (name, dep) => comp.driver(name, dep);
+    init.isChild = () => comp.isChild();
+    init.canRenderTo = (win) => comp.canRenderTo(win);
+
+    const child = comp.registerChild();
+    if (child) {
+        window.xprops = init.xprops = child.getProps();
+    }
     
     return init;
 }
@@ -418,15 +349,9 @@ export function destroyAll() : ZalgoPromise<void> {
         bridge.destroyBridges();
     }
 
-    const results = [];
-
-    const global = getGlobal();
-    global.activeComponents = global.activeComponents || [];
-    while (global.activeComponents.length) {
-        results.push(global.activeComponents[0].destroy(new Error(`zoid destroyed all`), false));
-    }
-
-    return ZalgoPromise.all(results).then(noop);
+    const destroyPromise = clean.all();
+    clean = cleanup();
+    return destroyPromise;
 }
 
 export const destroyComponents = destroyAll;

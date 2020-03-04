@@ -3,12 +3,12 @@
 
 import { destroyElement, toCSS } from 'belter/src';
 
-import { type RenderOptionsType } from '../../parent';
+import { type RenderOptionsType } from '../../parent/parent';
 import { EVENT } from '../../constants';
 
 const CLASS = {
-    VISIBLE:   'visible',
-    INVISIBLE: 'invisible'
+    VISIBLE:   'zoid-visible',
+    INVISIBLE: 'zoid-invisible'
 };
 
 export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {

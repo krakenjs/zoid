@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint react/react-in-jsx-scope: off */
 
-import { type RenderOptionsType } from '../../parent';
+import { type RenderOptionsType } from '../../parent/parent';
 
 export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P>) : ?HTMLElement {
     if (__ZOID__.__DEFAULT_PRERENDER__) {

@@ -44,7 +44,8 @@ export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
 
         __ZOID__: {
             ...zoidGlobals,
-            __POPUP_SUPPORT__: false
+            __DEFAULT_PRERENDER__: false,
+            __POPUP_SUPPORT__:     false
         }
     }
 });
@@ -63,7 +64,8 @@ export const WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
 
         __ZOID__: {
             ...zoidGlobals,
-            __POPUP_SUPPORT__: false
+            __DEFAULT_PRERENDER__: false,
+            __POPUP_SUPPORT__:     false
         }
     }
 });

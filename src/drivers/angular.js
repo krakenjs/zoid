@@ -2,7 +2,7 @@
 
 import { dasherizeToCamel, replaceObject, noop } from 'belter/src';
 
-import type { Component, ComponentDriverType } from '../component';
+import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 type AngularModule = {|
@@ -17,15 +17,15 @@ type Angular = {|
     module : (string, $ReadOnlyArray<string>) => AngularModule
 |};
 
-export const angular : ComponentDriverType<*, Angular> = {
+export const angular : ComponentDriverType<*, Angular, AngularModule> = {
 
-    register(component : Component<*>, ng : Angular) : AngularModule {
+    register: (tag, propsDef, init, ng) => {
 
-        const module = ng.module(component.tag, []).directive(dasherizeToCamel(component.tag), () => {
+        const module = ng.module(tag, []).directive(dasherizeToCamel(tag), () => {
 
             const scope = {};
 
-            for (const key of component.getPropNames()) {
+            for (const key of Object.keys(propsDef)) {
                 scope[key] = '=';
             }
 
@@ -37,8 +37,6 @@ export const angular : ComponentDriverType<*, Angular> = {
                 restrict: 'E',
 
                 controller: [ '$scope', '$element', ($scope, $element) => {
-                    component.log(`instantiate_angular_component`);
-
                     function safeApply() {
                         if ($scope.$root.$$phase !== '$apply' && $scope.$root.$$phase !== '$digest') {
                             try {
@@ -63,7 +61,7 @@ export const angular : ComponentDriverType<*, Angular> = {
                         });
                     };
 
-                    const instance = component.init(getProps());
+                    const instance = init(getProps());
                     instance.render($element[0], CONTEXT.IFRAME);
 
                     $scope.$watch(() => {

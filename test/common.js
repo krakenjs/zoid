@@ -9,15 +9,13 @@ export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainW
 
         const winOpen = win.open;
         const documentCreateElement = win.document.createElement;
-
+        
         const reset = () => {
-            win.open = winOpen;
             win.document.createElement = documentCreateElement;
         };
 
         win.open = function patchedWindowOpen() : CrossDomainWindowType {
             const popup = winOpen.apply(this, arguments);
-            reset();
             resolve(popup);
             return popup;
         };

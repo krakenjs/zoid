@@ -35,6 +35,13 @@
     "krakenjs",
     "kraken"
   ],
+  "browserslist": [
+    "IE >= 11",
+    "chrome >= 27",
+    "firefox >= 30",
+    "safari >= 7",
+    "opera >= 23"
+  ],
   "licenses": [
     {
       "type": "Apache 2.0",

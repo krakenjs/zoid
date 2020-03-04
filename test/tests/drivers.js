@@ -2,18 +2,20 @@
 
 import { wrapPromise } from 'belter/src';
 
-window.__angular_component__ = () => {
-    return window.zoid.create({
-        tag:    'test-render-angular',
-        url:    'mock://www.child.com/base/test/windows/child/index.htm',
-        domain: 'mock://www.child.com'
-    });
-};
-
-window.angular.module('app', [ window.__angular_component__().driver('angular', window.angular).name ]);
-window.angular.bootstrap(document.body, [ 'app' ]);
-
 describe('zoid drivers', () => {
+
+    before(() => {
+        window.__angular_component__ = () => {
+            return window.zoid.create({
+                tag:    'test-render-angular',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com'
+            });
+        };
+        
+        window.angular.module('app', [ window.__angular_component__().driver('angular', window.angular).name ]);
+        window.angular.bootstrap(document.body, [ 'app' ]);
+    });
 
     it('should enter a component rendered with react and call a prop', () => {
         return wrapPromise(({ expect }) => {

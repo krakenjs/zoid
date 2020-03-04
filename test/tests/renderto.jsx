@@ -134,10 +134,17 @@ describe('zoid renderto cases', () => {
 
                 runOnClick: true,
 
+                done: expect('done'),
+
                 run: expect('run', () => {
                     return `
                         window.prerenderScriptLoaded = window.xprops.prerenderScriptLoaded;
-                        window.__component__().remote().renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
+                        window.__component__().remote({
+                            done: window.xprops.done,
+                            run: () => \`
+                                window.xprops.done();
+                            \`
+                        }).renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
                     `;
                 })
             }).render(document.body);
@@ -176,9 +183,15 @@ describe('zoid renderto cases', () => {
             window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
 
             return window.__component__().simple({
-                run: expect('run', () => {
+                done: expect('done'),
+                run:  expect('run', () => {
                     return `
-                        window.__component__().remote().renderTo(window.parent, 'body');
+                        window.__component__().remote({
+                            done: window.xprops.done,
+                            run: () => \`
+                                window.xprops.done();
+                            \`
+                        }).renderTo(window.parent, 'body');
                     `;
                 })
             }).render(document.body);
@@ -776,6 +789,55 @@ describe('zoid renderto cases', () => {
                 foo: expect('foo'),
 
                 run: () => {
+                    return `
+                        window.__component__().remote({
+                            foo: window.xprops.foo,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        }).renderTo(window.parent, 'body');
+                    `;
+                }
+            }).render(document.body);
+        });
+    });
+
+    it('should render a component to the parent with a required prop without allowDelegate', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-required-prop-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-iframe-required-prop-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com',
+                        props:  {
+                            foo: {
+                                type:     'function',
+                                required: true
+                            }
+                        }
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                foo: expect('foo'),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
                     return `
                         window.__component__().remote({
                             foo: window.xprops.foo,

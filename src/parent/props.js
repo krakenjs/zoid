@@ -3,8 +3,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { dotify, isDefined, extend } from 'belter/src';
 
-import type { Component } from '../component';
-import type { BuiltInPropsDefinitionType, PropsInputType, PropsType, MixedPropDefinitionType } from '../component/props';
+import type { PropsInputType, PropsType, PropsDefinitionType, MixedPropDefinitionType } from '../component/props';
 import { PROP_SERIALIZATION } from '../constants';
 
 import type { ParentHelpers } from './index';
@@ -15,13 +14,13 @@ import type { ParentHelpers } from './index';
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function extendProps<P>(component : Component<P>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) { // eslint-disable-line complexity
+export function extendProps<P>(propsDef : PropsDefinitionType<P>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) { // eslint-disable-line complexity
 
     // $FlowFixMe
     inputProps = inputProps || {};
     extend(props, inputProps);
 
-    const propNames = isUpdate ? [] : [ ...component.getPropNames() ];
+    const propNames = isUpdate ? [] : [ ...Object.keys(propsDef) ];
 
     for (const key of Object.keys(inputProps)) {
         if (propNames.indexOf(key) === -1) {
@@ -34,7 +33,9 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
     const { state, close, focus, event, onError } = helpers;
 
     for (const key of propNames) {
-        const propDef = component.getPropDefinition(key);
+        const propDef = propsDef[key];
+
+        // $FlowFixMe
         let value = inputProps[key];
 
         if (!propDef) {
@@ -73,14 +74,14 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
 
     // $FlowFixMe
     for (const key of Object.keys(props)) {
-        const propDef = component.getPropDefinition(key);
+        const propDef = propsDef[key];
         const value = props[key];
 
         if (!propDef) {
             continue;
         }
 
-        if (isDefined(value) && propDef.validate) {
+        if (__DEBUG__ && isDefined(value) && propDef.validate) {
             // $FlowFixMe
             propDef.validate({ value, props });
         }
@@ -90,9 +91,11 @@ export function extendProps<P>(component : Component<P>, props : PropsType<P>, i
         }
     }
 
-    for (const key of component.getPropNames()) {
-        const propDef = component.getPropDefinition(key);
-        if (propDef.required !== false && !isDefined(props[key])) {
+    for (const key of Object.keys(propsDef)) {
+        const propDef = propsDef[key];
+        // $FlowFixMe
+        const propVal = props[key];
+        if (propDef.required !== false && !isDefined(propVal)) {
             throw new Error(`Expected prop "${ key }" to be defined`);
         }
     }
@@ -122,7 +125,7 @@ function getQueryValue<T, P>(prop : MixedPropDefinitionType<P>, key : string, va
     });
 }
 
-export function propsToQuery<P>(propsDef : BuiltInPropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string }> {
+export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string }> {
 
     const params = {};
 

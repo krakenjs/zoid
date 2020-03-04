@@ -2,42 +2,43 @@
 
 import { getDomain, isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import type { Component } from '../component';
-import type { PropsType, MixedPropDefinitionType } from '../component/props';
+import type { PropsDefinitionType, PropsType } from '../component/props';
 
 import type { ChildHelpers } from './index';
 
-export function normalizeChildProp<T, P>(component : Component<P>, props : (PropsType<P>), key : string, value : T, helpers : ChildHelpers<P>) : ?T  {
-
-    // $FlowFixMe
-    const prop : MixedPropDefinitionType<P> = component.getPropDefinition(key);
-
-    if (!prop) {
+// $FlowFixMe
+export function normalizeChildProp<P, T>(propsDef : PropsDefinitionType<P>, props : PropsType<P>, key : string, value : ?T, helpers : ChildHelpers<P>) : ?T  {
+    if (!propsDef.hasOwnProperty(key)) {
         return value;
     }
 
+    const prop = propsDef[key];
+
     if (typeof prop.childDecorate === 'function') {
         const { close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide } = helpers;
-        return prop.childDecorate({ value, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide });
+        const decoratedValue = prop.childDecorate({ value, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide });
+
+        // $FlowFixMe
+        return decoratedValue;
     }
 
     return value;
 }
 
 // eslint-disable-next-line max-params
-export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindowType, component : Component<P>, props : (PropsType<P>), origin : string, helpers : ChildHelpers<P>, isUpdate : boolean = false) : (PropsType<P>) {
+export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindowType, propsDef : PropsDefinitionType<P>, props : PropsType<P>, origin : string, helpers : ChildHelpers<P>, isUpdate : boolean = false) : (PropsType<P>) {
 
     const result = {};
 
     for (const key of Object.keys(props)) {
-        const prop = component.getPropDefinition(key);
+        const prop = propsDef[key];
 
         if (prop && prop.sameDomain && (origin !== getDomain(window) || !isSameDomain(parentComponentWindow))) {
             continue;
         }
 
         // $FlowFixMe
-        const value = normalizeChildProp(component, props, key, props[key], helpers);
+        const value = normalizeChildProp(propsDef, props, key, props[key], helpers);
 
         result[key] = value;
         if (prop && prop.alias && !result[prop.alias]) {
@@ -46,9 +47,9 @@ export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindow
     }
 
     if (!isUpdate) {
-        for (const key of component.getPropNames()) {
+        for (const key of Object.keys(propsDef)) {
             if (!props.hasOwnProperty(key)) {
-                result[key] = normalizeChildProp(component, props, key, props[key], helpers);
+                result[key] = normalizeChildProp(propsDef, props, key, null, helpers);
             }
         }
     }
