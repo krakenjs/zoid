@@ -262,9 +262,13 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
         props = props || getDefaultInputProps();
         props.onDestroy = memoize(props.onDestroy || noop);
         const parent = parentComponent(options);
+        
+        parent.init();
         parent.setProps(props);
 
-        clean.register(() => parent.destroy(new Error(`zoid destroyed all`)));
+        clean.register(() => {
+            parent.destroy(new Error(`zoid destroyed all components`));
+        });
 
         const render = (target, container, context) => {
             return ZalgoPromise.try(() => {
@@ -279,9 +283,9 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
                 return parent.render(target, container, finalContext);
 
             }).catch(err => {
-                // $FlowFixMe
-                props.onDestroy();
-                throw err;
+                return parent.destroy(err).then(() => {
+                    throw err;
+                });
             });
         };
 

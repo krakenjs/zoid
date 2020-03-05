@@ -123,6 +123,7 @@ type DelegateOverrides = {|
 |};
 
 type ParentComponent<P> = {|
+    init : () => void,
     render : (CrossDomainWindowType, string | HTMLElement, $Values<typeof CONTEXT>) => ZalgoPromise<void>,
     setProps : (newProps : PropsInputType<P>, isUpdate? : boolean) => void,
     destroy : (err? : mixed) => ZalgoPromise<void>,
@@ -757,6 +758,10 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         }
     };
 
+    const init = () => {
+        setupEvents();
+    };
+
     const render = (target : CrossDomainWindowType, container : string | HTMLElement, context : $Values<typeof CONTEXT>) : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
             const uid = `${ ZOID }-${ tag }-${ uniqueID() }`;
@@ -764,7 +769,6 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             const childDomain = getChildDomain();
             
             checkAllowRender(target, domain, container);
-            setupEvents();
 
             const delegatePromise = ZalgoPromise.try(() => {
                 if (target !== window) {
@@ -864,6 +868,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     };
 
     return {
+        init,
         render,
         destroy,
         setProps,
