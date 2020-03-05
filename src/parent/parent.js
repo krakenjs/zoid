@@ -664,12 +664,12 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     };
 
     const updateProps = (newProps : PropsInputType<P>) : ZalgoPromise<void> => {
-        const child = childComponent;
-        const proxyWin = currentProxyWin;
-
         setProps(newProps, true);
 
         return initPromise.then(() => {
+            const child = childComponent;
+            const proxyWin = currentProxyWin;
+            
             if (!child || !proxyWin) {
                 return;
             }

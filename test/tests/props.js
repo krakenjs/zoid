@@ -783,4 +783,41 @@ describe('zoid props cases', () => {
             }));
         });
     });
+
+    it('should enter a component, and update a prop after a delay', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-update-prop-delay',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                onFoo: expect('onFoo'),
+
+                run: () => {
+                    setTimeout(() => {
+                        instance.updateProps({ foo: 'bar' });
+                    }, 200);
+
+                    return `
+                        console.warn(3333);
+                        window.xprops.onProps(function(props) {
+                            console.warn('AAA', props);
+                            if (props.foo === 'bar') {
+                                props.onFoo();
+                            }
+                        });
+                    `;
+                }
+            });
+            
+            return instance.render(document.body);
+        });
+    });
+
 });

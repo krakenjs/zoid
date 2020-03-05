@@ -184,7 +184,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         }
 
         for (const handler of onPropHandlers) {
-            handler.call(props);
+            handler(props);
         }
     };
     
