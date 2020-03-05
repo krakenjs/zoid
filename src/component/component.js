@@ -260,6 +260,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
 
     const init = (props : PropsInputType<P>) : ZoidComponentInstance<P> => {
         props = props || getDefaultInputProps();
+        props.onDestroy = memoize(props.onDestroy || noop);
         const parent = parentComponent(options);
         parent.setProps(props);
 
@@ -276,6 +277,11 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             }).then(finalContext => {
                 container = getDefaultContainer(finalContext, container);
                 return parent.render(target, container, finalContext);
+
+            }).catch(err => {
+                // $FlowFixMe
+                props.onDestroy();
+                throw err;
             });
         };
 

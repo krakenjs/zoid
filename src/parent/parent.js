@@ -170,6 +170,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         event.on(EVENT.DISPLAY,  () => props.onDisplay());
         event.on(EVENT.RENDERED, () => props.onRendered());
         event.on(EVENT.CLOSE,    () => props.onClose());
+        event.on(EVENT.DESTROY,  () => props.onDestroy());
         event.on(EVENT.RESIZE,   () => props.onResize());
         event.on(EVENT.FOCUS,    () => props.onFocus());
         event.on(EVENT.PROPS,    (newProps) => props.onProps(newProps));
@@ -392,7 +393,10 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     };
 
     const destroy = (err? : mixed) : ZalgoPromise<void> => {
+        // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise.try(() => {
+            return event.trigger(EVENT.DESTROY);
+        }).then(() => {
             return clean.all();
         }).then(() => {
             initPromise.asyncReject(err || new Error('Component destroyed'));
@@ -402,7 +406,6 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     const close = overrides ? overrides.close : () : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
             return event.trigger(EVENT.CLOSE);
-
         }).then(() => {
             return destroy(new Error(`Window closed`));
         });

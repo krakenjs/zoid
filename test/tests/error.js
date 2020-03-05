@@ -27,7 +27,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch', err => {
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch', err => {
                 if (!(err instanceof window.zoid.PopupOpenError)) {
                     throw err;
                 }
@@ -38,7 +40,7 @@ describe('zoid error cases', () => {
     });
 
     it('should enter a component, throw an integration error, and return the error to the parent with the original stack', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-error-from-child',
@@ -49,6 +51,8 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
+
+                onDestroy: avoid('onDestroy'),
 
                 onError: expect('onError', err => {
                     if (!err || err.message.indexOf('xxxxx') === -1) {
@@ -75,8 +79,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                timeout: 1,
-                onError: expect('onError')
+                timeout:   1,
+                onError:   expect('onError'),
+                onDestroy: expect('onDestroy')
             }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
         });
     });
@@ -153,7 +158,6 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
 
-
             return ZalgoPromise.try(() => {
                 component();
             }).catch(expect('catch'));
@@ -195,8 +199,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                onClose: avoid('onClose'),
-                onError: expect('onError')
+                onClose:   avoid('onClose'),
+                onError:   expect('onError'),
+                onDestroy: expect('onDestroy')
             });
             
             return instance.render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
@@ -221,8 +226,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -252,8 +258,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -280,8 +287,9 @@ describe('zoid error cases', () => {
             
             const component = window.__component__();
             const instance = component({
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -308,8 +316,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             }).render('body', window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
         }, { timeout: 5000 });
     });
@@ -333,7 +342,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render(document.body).catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render(document.body).catch(expect('catch'));
         });
     });
 
@@ -364,8 +375,9 @@ describe('zoid error cases', () => {
                     openedWindow.location.reload();
                     destroyElement(openedWindow.frameElement);
                 }),
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             }).render('body', window.zoid.CONTEXT.IFRAME);
         }, { timeout: 9000 });
     });
@@ -399,8 +411,9 @@ describe('zoid error cases', () => {
                         destroyElement(openedWindow.frameElement);
                     }, 50);
                 }),
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             }).render('body', window.zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
@@ -432,8 +445,9 @@ describe('zoid error cases', () => {
                     openedWindow.location.reload();
                     openedWindow.close();
                 }),
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             });
 
             return runOnClick(() => {
@@ -471,8 +485,9 @@ describe('zoid error cases', () => {
                         openedWindow.close();
                     }, 50);
                 }),
-                onClose: expect('onClose'),
-                onError: avoid('onError')
+                onClose:   expect('onClose'),
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             });
 
             return runOnClick(() => {
@@ -526,7 +541,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render(document.body).catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render(document.body).catch(expect('catch'));
         });
     });
 
@@ -542,13 +559,14 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render({}).catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render({}).catch(expect('catch'));
         });
     });
 
     it('should error out where an invalid window is passed', () => {
         return wrapPromise(({ expect }) => {
-
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-render-invalid-window',
@@ -558,7 +576,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().renderTo({}, 'body').catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).renderTo({}, 'body').catch(expect('catch'));
         });
     });
 
@@ -574,7 +594,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render().catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render().catch(expect('catch'));
         });
     });
 
@@ -590,7 +612,9 @@ describe('zoid error cases', () => {
             };
 
             const component = window.__component__();
-            return component().render('body', 'meep').catch(expect('catch'));
+            return component({
+                onDestroy: expect('onDestroy')
+            }).render('body', 'meep').catch(expect('catch'));
         });
     });
 
@@ -708,7 +732,7 @@ describe('zoid error cases', () => {
     });
 
     it('should not call onError when the window navigates away', () => {
-        return wrapPromise(({ avoid }) => {
+        return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
                 return window.zoid.create({
                     tag:    'test-error-unload',
@@ -719,7 +743,8 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                onError: avoid('onError')
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
             }).render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
                 window.dispatchEvent(new Event('unload'));
             });

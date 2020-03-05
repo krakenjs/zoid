@@ -50,6 +50,7 @@ export const EVENT = {
     DISPLAY:  'zoid-display',
     ERROR:    'zoid-error',
     CLOSE:    'zoid-close',
+    DESTROY:  'zoid-destroy',
     PROPS:    'zoid-props',
     RESIZE:   'zoid-resize',
     FOCUS:    'zoid-focus'

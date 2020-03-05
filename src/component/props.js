@@ -24,6 +24,7 @@ export type onDisplayPropType = EventHandlerType<void>;
 export type onRenderedPropType = EventHandlerType<void>;
 export type onRenderPropType = EventHandlerType<void>;
 export type onClosePropType = EventHandlerType<void>;
+export type onDestroyPropType = EventHandlerType<void>;
 export type onResizePropType = EventHandlerType<void>;
 export type onFocusPropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
@@ -38,6 +39,7 @@ export type PropsInputType<P> = {
     onRendered? : onRenderedPropType,
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
+    onDestroy? : onDestroyPropType,
     onResize? : onResizePropType,
     onFocus? : onFocusPropType,
     onError? : onErrorPropType,
@@ -56,6 +58,7 @@ export type PropsType<P> = {
     onRendered : onRenderedPropType,
     onRender : onRenderPropType,
     onClose : onClosePropType,
+    onDestroy : onDestroyPropType,
     onResize : onResizePropType,
     onFocus : onFocusPropType,
     onError : onErrorPropType,
@@ -141,6 +144,7 @@ export type BuiltInPropsDefinitionType<P> = {|
     onRendered : FunctionPropDefinitionType<onRenderedPropType, P>,
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
+    onDestroy : FunctionPropDefinitionType<onDestroyPropType, P>,
     onResize : FunctionPropDefinitionType<onClosePropType, P>,
     onFocus : FunctionPropDefinitionType<onFocusPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>,
@@ -272,6 +276,15 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
         },
 
         onClose: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            allowDelegate: true,
+            default:       defaultNoop,
+            decorate:      decorateOnce
+        },
+
+        onDestroy: {
             type:          'function',
             required:      false,
             sendToChild:   false,
