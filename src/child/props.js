@@ -49,7 +49,7 @@ export function normalizeChildProps<P>(parentComponentWindow : CrossDomainWindow
     if (!isUpdate) {
         for (const key of Object.keys(propsDef)) {
             if (!props.hasOwnProperty(key)) {
-                result[key] = normalizeChildProp(propsDef, props, key, null, helpers);
+                result[key] = normalizeChildProp(propsDef, props, key, undefined, helpers);
             }
         }
     }
