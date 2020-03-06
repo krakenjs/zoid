@@ -908,7 +908,7 @@ describe('zoid renderto cases', () => {
         });
     });
 
-    it.skip('should render a component to the parent as an iframe from the shadow-dom and call a prop', () => {
+    it('should render a component to the parent as an iframe from the shadow-dom and call a prop', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {

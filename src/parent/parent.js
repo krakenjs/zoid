@@ -8,7 +8,8 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup, base64encode, isRegex,
-    once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, awaitFrameWindow, popup, normalizeDimension, watchElementForClose } from 'belter/src';
+    once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe,
+    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -210,6 +211,10 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return ZalgoPromise.try(() => {
             return elementReady(container);
         }).then(containerElement => {
+            if (isShadowElement(containerElement)) {
+                containerElement = insertShadowSlot(containerElement);
+            }
+
             return getProxyObject(containerElement);
         });
     };
@@ -604,7 +609,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<?ProxyObject<HTMLElement>> => {
 
         return ZalgoPromise.hash({
-            container:      proxyContainer.get().then(elementReady),
+            container:      proxyContainer.get(),
             // $FlowFixMe
             frame:          proxyFrame ? proxyFrame.get() : null,
             // $FlowFixMe
