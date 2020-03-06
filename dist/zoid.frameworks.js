@@ -1158,24 +1158,6 @@
             void 0 === doc && (doc = document);
             return isElement(id) ? id : "string" == typeof id ? doc.querySelector(id) : void 0;
         }
-        function elementReady(id) {
-            return new promise_ZalgoPromise((function(resolve, reject) {
-                var name = stringify(id);
-                var el = getElementSafe(id);
-                if (el) return resolve(el);
-                if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
-                var interval = setInterval((function() {
-                    if (el = getElementSafe(id)) {
-                        clearInterval(interval);
-                        return resolve(el);
-                    }
-                    if (isDocumentReady()) {
-                        clearInterval(interval);
-                        return reject(new Error("Document is ready and element " + name + " does not exist"));
-                    }
-                }), 10);
-            }));
-        }
         function PopupOpenError(message) {
             this.message = message;
         }
@@ -1327,6 +1309,10 @@
                     clearTimeout(timeout);
                 }
             };
+        }
+        function isShadowElement(element) {
+            for (;element.parentNode; ) element = element.parentNode;
+            return "[object ShadowRoot]" === element.toString();
         }
         function toPx(val) {
             return function(val) {
@@ -2377,8 +2363,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_39__ || (win.__zoid_9_0_39__ = {});
-            return win.__zoid_9_0_39__;
+            win.__zoid_9_0_40__ || (win.__zoid_9_0_40__ = {});
+            return win.__zoid_9_0_40__;
         }
         function getProxyObject(obj) {
             return {
@@ -2566,8 +2552,43 @@
             };
             var getProxyContainer = function(container) {
                 return promise_ZalgoPromise.try((function() {
-                    return elementReady(container);
+                    return id = container, new promise_ZalgoPromise((function(resolve, reject) {
+                        var name = stringify(id);
+                        var el = getElementSafe(id);
+                        if (el) return resolve(el);
+                        if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
+                        var interval = setInterval((function() {
+                            if (el = getElementSafe(id)) {
+                                clearInterval(interval);
+                                return resolve(el);
+                            }
+                            if (isDocumentReady()) {
+                                clearInterval(interval);
+                                return reject(new Error("Document is ready and element " + name + " does not exist"));
+                            }
+                        }), 10);
+                    }));
+                    var id;
                 })).then((function(containerElement) {
+                    isShadowElement(containerElement) && (containerElement = function(element) {
+                        var shadowHost = function(element) {
+                            var shadowRoot = function(element) {
+                                for (;element.parentNode; ) element = element.parentNode;
+                                if (isShadowElement(element)) return element;
+                            }(element);
+                            if (shadowRoot.host) return shadowRoot.host;
+                        }(element);
+                        if (!shadowHost) throw new Error("Element is not in shadow dom");
+                        if (isShadowElement(shadowHost)) throw new Error("Host element is also in shadow dom");
+                        var slotName = "shadow-slot-" + uniqueID();
+                        var slot = document.createElement("slot");
+                        slot.setAttribute("name", slotName);
+                        element.appendChild(slot);
+                        var slotProvider = document.createElement("div");
+                        slotProvider.setAttribute("slot", slotName);
+                        shadowHost.appendChild(slotProvider);
+                        return slotProvider;
+                    }(containerElement));
                     return getProxyObject(containerElement);
                 }));
             };
@@ -2866,7 +2887,7 @@
             var renderContainer = function(proxyContainer, _ref9) {
                 var proxyFrame = _ref9.proxyFrame, proxyPrerenderFrame = _ref9.proxyPrerenderFrame, context = _ref9.context, uid = _ref9.uid;
                 return promise_ZalgoPromise.hash({
-                    container: proxyContainer.get().then(elementReady),
+                    container: proxyContainer.get(),
                     frame: proxyFrame ? proxyFrame.get() : null,
                     prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
                 }).then((function(_ref10) {
@@ -3206,7 +3227,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_38",
+                                    version: "9_0_39",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3769,7 +3790,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_38" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_38");
+                        if ("9_0_39" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_39");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4110,7 +4131,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_39__;
+            delete window.__zoid_9_0_40__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
