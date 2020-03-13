@@ -919,7 +919,9 @@
             function getAllFramesInWindow(win) {
                 var top = getTop(win);
                 if (!top) throw new Error("Can not determine top window");
-                return [].concat(getAllChildFrames(top), [ top ]);
+                var result = [].concat(getAllChildFrames(top), [ top ]);
+                -1 === result.indexOf(win) && (result = [].concat(result, [ win ], getAllChildFrames(win)));
+                return result;
             }
             function getAllWindows() {
                 var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, frames = getAllFramesInWindow(win), opener = getNextOpener(win);
@@ -932,7 +934,11 @@
                 if (!frame.contentWindow) return !0;
                 if (!frame.parentNode) return !0;
                 var doc = frame.ownerDocument;
-                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                if (doc && doc.documentElement && !doc.documentElement.contains(frame)) {
+                    for (var parent = frame; parent.parentNode && parent.parentNode !== parent; ) parent = parent.parentNode;
+                    if (!parent.host || !doc.documentElement.contains(parent.host)) return !0;
+                }
+                return !1;
             }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
@@ -1174,6 +1180,13 @@
                     win.close();
                 } catch (err) {}
             }
+            function getFrameForWindow(win) {
+                if (isSameDomain(win)) return assertSameDomain(win).frameElement;
+                for (var _i21 = 0, _document$querySelect2 = document.querySelectorAll("iframe"), _length20 = null == _document$querySelect2 ? 0 : _document$querySelect2.length; _i21 < _length20; _i21++) {
+                    var frame = _document$querySelect2[_i21];
+                    if (frame && frame.contentWindow && frame.contentWindow === win) return frame;
+                }
+            }
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return isFileProtocol;
             });
@@ -1323,6 +1336,9 @@
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return closeWindow;
+            });
+            __webpack_require__.d(__webpack_exports__, !1, function() {
+                return getFrameForWindow;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return !0;
@@ -2393,29 +2409,30 @@
             };
             global.a.receivedMessages = global.a.receivedMessages || [];
             function receiveMessage(event) {
-                if (!window || window.closed) throw new Error("Message recieved in closed window");
-                try {
-                    if (!event.source) return;
-                } catch (err) {
-                    return;
-                }
-                var source = event.source, origin = event.origin, message = function(message) {
-                    var parsedMessage = void 0;
+                if (window && !window.closed) {
                     try {
-                        parsedMessage = Object(lib.f)(message);
+                        if (!event.source) return;
                     } catch (err) {
                         return;
                     }
-                    if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.b.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
-                }(event.data);
-                if (message) {
-                    if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
-                    0 !== message.sourceDomain.indexOf(conf.b.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(conf.b.FILE_PROTOCOL) || (origin = message.sourceDomain);
-                    if (-1 === global.a.receivedMessages.indexOf(message.id)) {
-                        global.a.receivedMessages.push(message.id);
-                        if (!Object(src.y)(source) || message.fireAndForget) {
-                            message.data && (message.data = Object(lib.b)(source, origin, message.data));
-                            RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+                    var source = event.source, origin = event.origin, message = function(message) {
+                        var parsedMessage = void 0;
+                        try {
+                            parsedMessage = Object(lib.f)(message);
+                        } catch (err) {
+                            return;
+                        }
+                        if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.b.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                    }(event.data);
+                    if (message) {
+                        if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
+                        0 !== message.sourceDomain.indexOf(conf.b.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(conf.b.FILE_PROTOCOL) || (origin = message.sourceDomain);
+                        if (-1 === global.a.receivedMessages.indexOf(message.id)) {
+                            global.a.receivedMessages.push(message.id);
+                            if (!Object(src.y)(source) || message.fireAndForget) {
+                                message.data && (message.data = Object(lib.b)(source, origin, message.data));
+                                RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+                            }
                         }
                     }
                 }
@@ -4130,6 +4147,10 @@
                     }
                 };
             }
+            function isShadowElement(element) {
+                for (;element.parentNode; ) element = element.parentNode;
+                return "[object ShadowRoot]" === element.toString();
+            }
             var base32 = __webpack_require__("./node_modules/hi-base32/src/base32.js"), base32_default = __webpack_require__.n(base32), constants = __webpack_require__("./src/constants.js");
             function normalize(str) {
                 return str.replace(/^[^a-z0-9A-Z]+|[^a-z0-9A-Z]+$/g, "").replace(/[^a-z0-9A-Z]+/g, "_");
@@ -5530,8 +5551,34 @@
                 ParentComponent.prototype.openContainer = function(element) {
                     var _this33 = this;
                     return src.a.try(function() {
-                        var el;
+                        var el = void 0;
                         if (!(el = element ? Object(lib.t)(element) : document.body)) throw new Error("Could not find element to open container into");
+                        isShadowElement(el) && (el = function(element) {
+                            var shadowHost = function(element) {
+                                var shadowRoot = function(element) {
+                                    for (;element.parentNode; ) element = element.parentNode;
+                                    if (isShadowElement(element)) return element;
+                                }(element);
+                                if (shadowRoot.host) return shadowRoot.host;
+                            }(element);
+                            if (!shadowHost) throw new Error("Element is not in shadow dom");
+                            if (isShadowElement(shadowHost)) throw new Error("Host element is also in shadow dom");
+                            var chars, slotName = "shadow-slot-" + (chars = "0123456789abcdef", "xxxxxxxxxx".replace(/./g, function() {
+                                return chars.charAt(Math.floor(Math.random() * chars.length));
+                            }) + "_" + function(str) {
+                                if ("function" == typeof btoa) return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(m, p1) {
+                                    return String.fromCharCode(parseInt(p1, 16));
+                                }));
+                                if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
+                                throw new Error("Can not find window.btoa or Buffer");
+                            }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase()), slot = document.createElement("slot");
+                            slot.setAttribute("name", slotName);
+                            element.appendChild(slot);
+                            var slotProvider = document.createElement("div");
+                            slotProvider.setAttribute("slot", slotName);
+                            shadowHost.appendChild(slotProvider);
+                            return slotProvider;
+                        }(el));
                         if (_this33.component.containerTemplate) {
                             var container = _this33.renderTemplate(_this33.component.containerTemplate, {
                                 container: el
