@@ -2678,8 +2678,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_39__ || (win.__zoid_9_0_39__ = {});
-            return win.__zoid_9_0_39__;
+            win.__zoid_9_0_40__ || (win.__zoid_9_0_40__ = {});
+            return win.__zoid_9_0_40__;
         }
         function getProxyObject(obj) {
             return {
@@ -2783,13 +2783,15 @@
             }));
         }
         function parentComponent(options, overrides, parentWin) {
+            void 0 === overrides && (overrides = {});
             void 0 === parentWin && (parentWin = window);
             var propsDef = options.propsDef, containerTemplate = options.containerTemplate, prerenderTemplate = options.prerenderTemplate, tag = options.tag, name = options.name, attributes = options.attributes, dimensions = options.dimensions, autoResize = options.autoResize, url = options.url, domainMatch = options.domain;
             var initPromise = new promise_ZalgoPromise;
             var handledErrors = [];
             var clean = cleanup();
             var state = {};
-            var event = overrides ? overrides.event : (triggered = {}, handlers = {}, {
+            var event = overrides.event ? overrides.event : (triggered = {}, handlers = {}, 
+            {
                 on: function(eventName, handler) {
                     var handlerList = handlers[eventName] = handlers[eventName] || [];
                     handlerList.push(handler);
@@ -2836,11 +2838,25 @@
                 }
             });
             var triggered, handlers;
-            var props = overrides ? overrides.props : {};
+            var props = overrides.props ? overrides.props : {};
             var currentProxyWin;
             var currentProxyContainer;
             var childComponent;
             var visible = !0;
+            var onErrorOverride = overrides.onError;
+            var getProxyContainerOverride = overrides.getProxyContainer;
+            var showOverride = overrides.show;
+            var hideOverride = overrides.hide;
+            var closeOverride = overrides.close;
+            var renderContainerOverride = overrides.renderContainer;
+            var getProxyWindowOverride = overrides.getProxyWindow;
+            var setProxyWinOverride = overrides.setProxyWin;
+            var openFrameOverride = overrides.openFrame;
+            var openPrerenderFrameOverride = overrides.openPrerenderFrame;
+            var prerenderOverride = overrides.prerender;
+            var openOverride = overrides.open;
+            var openPrerenderOverride = overrides.openPrerender;
+            var watchForUnloadOverride = overrides.watchForUnload;
             var getPropsForChild = function(domain) {
                 var result = {};
                 for (var _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
@@ -2851,7 +2867,7 @@
                 return result;
             };
             var getProxyWindow = function() {
-                return promise_ZalgoPromise.try((function() {
+                return getProxyWindowOverride ? getProxyWindowOverride() : promise_ZalgoPromise.try((function() {
                     var windowProp = props.window;
                     if (windowProp) {
                         var _proxyWin = setup_toProxyWindow(windowProp);
@@ -2866,7 +2882,7 @@
                 }));
             };
             var getProxyContainer = function(container) {
-                return promise_ZalgoPromise.try((function() {
+                return getProxyContainerOverride ? getProxyContainerOverride(container) : promise_ZalgoPromise.try((function() {
                     return id = container, new promise_ZalgoPromise((function(resolve, reject) {
                         var name = stringify(id);
                         var el = getElementSafe(id);
@@ -2927,18 +2943,18 @@
                 return propRef;
             };
             var setProxyWin = function(proxyWin) {
-                return promise_ZalgoPromise.try((function() {
+                return setProxyWinOverride ? setProxyWinOverride(proxyWin) : promise_ZalgoPromise.try((function() {
                     currentProxyWin = proxyWin;
                 }));
             };
             var show = function() {
-                return promise_ZalgoPromise.try((function() {
+                return showOverride ? showOverride() : promise_ZalgoPromise.try((function() {
                     visible = !0;
                     if (currentProxyContainer) return currentProxyContainer.get().then(showElement);
                 }));
             };
             var hide = function() {
-                return promise_ZalgoPromise.try((function() {
+                return hideOverride ? hideOverride() : promise_ZalgoPromise.try((function() {
                     visible = !1;
                     if (currentProxyContainer) return currentProxyContainer.get().then(hideElement);
                 }));
@@ -2956,7 +2972,9 @@
             };
             var openFrame = function(context, _ref) {
                 var windowName = _ref.windowName;
-                return promise_ZalgoPromise.try((function() {
+                return openFrameOverride ? openFrameOverride(context, {
+                    windowName: windowName
+                }) : promise_ZalgoPromise.try((function() {
                     if (context === CONTEXT.IFRAME) return getProxyObject(dom_iframe({
                         attributes: _extends({
                             name: windowName,
@@ -2966,7 +2984,7 @@
                 }));
             };
             var openPrerenderFrame = function(context) {
-                return promise_ZalgoPromise.try((function() {
+                return openPrerenderFrameOverride ? openPrerenderFrameOverride(context) : promise_ZalgoPromise.try((function() {
                     if (context === CONTEXT.IFRAME) return getProxyObject(dom_iframe({
                         attributes: _extends({
                             name: "__zoid_prerender_frame__" + name + "_" + uniqueID() + "__",
@@ -2976,7 +2994,7 @@
                 }));
             };
             var openPrerender = function(context, proxyWin, proxyPrerenderFrame) {
-                return promise_ZalgoPromise.try((function() {
+                return openPrerenderOverride ? openPrerenderOverride(context, proxyWin, proxyPrerenderFrame) : promise_ZalgoPromise.try((function() {
                     if (context === CONTEXT.IFRAME) {
                         if (!proxyPrerenderFrame) throw new Error("Expected proxy frame to be passed");
                         return proxyPrerenderFrame.get().then((function(prerenderFrame) {
@@ -3046,8 +3064,8 @@
                     initPromise.asyncReject(err || new Error("Component destroyed"));
                 }));
             };
-            var close = overrides ? overrides.close : function() {
-                return promise_ZalgoPromise.try((function() {
+            var close = function() {
+                return closeOverride ? closeOverride() : promise_ZalgoPromise.try((function() {
                     return event.trigger(EVENT.CLOSE);
                 })).then((function() {
                     return destroy(new Error("Window closed"));
@@ -3055,7 +3073,11 @@
             };
             var open = function(context, _ref3) {
                 var proxyWin = _ref3.proxyWin, proxyFrame = _ref3.proxyFrame, windowName = _ref3.windowName;
-                return promise_ZalgoPromise.try((function() {
+                return openOverride ? openOverride(context, {
+                    proxyWin: proxyWin,
+                    proxyFrame: proxyFrame,
+                    windowName: windowName
+                }) : promise_ZalgoPromise.try((function() {
                     if (context === CONTEXT.IFRAME) {
                         if (!proxyFrame) throw new Error("Expected proxy frame to be passed");
                         return proxyFrame.get().then((function(frame) {
@@ -3160,6 +3182,7 @@
                     var closeParentWindowListener = onCloseWindow(parentWin, destroy, 3e3);
                     clean.register(closeParentWindowListener.cancel);
                     clean.register(unloadWindowListener.cancel);
+                    if (watchForUnloadOverride) return watchForUnloadOverride();
                 }));
             };
             var checkWindowClose = function(proxyWin) {
@@ -3181,8 +3204,8 @@
                     return closed;
                 }));
             };
-            var onError = overrides ? overrides.onError : function(err) {
-                return promise_ZalgoPromise.try((function() {
+            var onError = function(err) {
+                return onErrorOverride ? onErrorOverride(err) : promise_ZalgoPromise.try((function() {
                     if (-1 === handledErrors.indexOf(err)) {
                         handledErrors.push(err);
                         initPromise.asyncReject(err);
@@ -3210,7 +3233,10 @@
             };
             var prerender = function(proxyPrerenderWin, _ref7) {
                 var context = _ref7.context, uid = _ref7.uid;
-                return promise_ZalgoPromise.try((function() {
+                return prerenderOverride ? prerenderOverride(proxyPrerenderWin, {
+                    context: context,
+                    uid: uid
+                }) : promise_ZalgoPromise.try((function() {
                     if (prerenderTemplate) {
                         var prerenderWindow = proxyPrerenderWin.getWindow();
                         if (prerenderWindow && isSameDomain(prerenderWindow) && function(win) {
@@ -3253,7 +3279,12 @@
             };
             var renderContainer = function(proxyContainer, _ref9) {
                 var proxyFrame = _ref9.proxyFrame, proxyPrerenderFrame = _ref9.proxyPrerenderFrame, context = _ref9.context, uid = _ref9.uid;
-                return promise_ZalgoPromise.hash({
+                return renderContainerOverride ? renderContainerOverride(proxyContainer, {
+                    proxyFrame: proxyFrame,
+                    proxyPrerenderFrame: proxyPrerenderFrame,
+                    context: context,
+                    uid: uid
+                }) : promise_ZalgoPromise.hash({
                     container: proxyContainer.get(),
                     frame: proxyFrame ? proxyFrame.get() : null,
                     prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
@@ -3273,8 +3304,7 @@
                         clean.register((function() {
                             return destroyElement(innerContainer);
                         }));
-                        proxyContainer = getProxyObject(innerContainer);
-                        return getProxyObject(innerContainer);
+                        return currentProxyContainer = getProxyObject(innerContainer);
                     }
                 }));
             };
@@ -3429,8 +3459,7 @@
                                         props: delegateProps,
                                         event: event,
                                         close: close,
-                                        onError: onError,
-                                        watchForUnload: watchForUnload
+                                        onError: onError
                                     }
                                 }).then((function(_ref11) {
                                     var parent = _ref11.data.parent;
@@ -3441,77 +3470,74 @@
                                 })).catch((function(err) {
                                     throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + stringifyError(err));
                                 }));
-                                getProxyContainer = function() {
+                                getProxyContainerOverride = function() {
                                     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
                                     return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.getProxyContainer.apply(childOverrides, args);
                                     }));
                                 };
-                                renderContainer = function() {
+                                renderContainerOverride = function() {
                                     for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
                                     return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.renderContainer.apply(childOverrides, args);
                                     }));
                                 };
-                                show = function() {
+                                showOverride = function() {
                                     for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) args[_key3] = arguments[_key3];
                                     return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.show.apply(childOverrides, args);
                                     }));
                                 };
-                                hide = function() {
+                                hideOverride = function() {
                                     for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) args[_key4] = arguments[_key4];
                                     return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.hide.apply(childOverrides, args);
                                     }));
                                 };
-                                var originalWatchForUnload = watchForUnload;
-                                watchForUnload = function() {
+                                watchForUnloadOverride = function() {
                                     for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) args[_key5] = arguments[_key5];
-                                    return originalWatchForUnload().then((function() {
-                                        return childOverridesPromise;
-                                    })).then((function(childOverrides) {
+                                    return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.watchForUnload.apply(childOverrides, args);
                                     }));
                                 };
                                 if (context === CONTEXT.IFRAME) {
-                                    getProxyWindow = function() {
+                                    getProxyWindowOverride = function() {
                                         for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) args[_key6] = arguments[_key6];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.getProxyWindow.apply(childOverrides, args);
                                         }));
                                     };
-                                    openFrame = function() {
+                                    openFrameOverride = function() {
                                         for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) args[_key7] = arguments[_key7];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.openFrame.apply(childOverrides, args);
                                         }));
                                     };
-                                    openPrerenderFrame = function() {
+                                    openPrerenderFrameOverride = function() {
                                         for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) args[_key8] = arguments[_key8];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.openPrerenderFrame.apply(childOverrides, args);
                                         }));
                                     };
-                                    prerender = function() {
+                                    prerenderOverride = function() {
                                         for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) args[_key9] = arguments[_key9];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.prerender.apply(childOverrides, args);
                                         }));
                                     };
-                                    open = function() {
+                                    openOverride = function() {
                                         for (var _len10 = arguments.length, args = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) args[_key10] = arguments[_key10];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.open.apply(childOverrides, args);
                                         }));
                                     };
-                                    openPrerender = function() {
+                                    openPrerenderOverride = function() {
                                         for (var _len11 = arguments.length, args = new Array(_len11), _key11 = 0; _key11 < _len11; _key11++) args[_key11] = arguments[_key11];
                                         return childOverridesPromise.then((function(childOverrides) {
                                             return childOverrides.openPrerender.apply(childOverrides, args);
                                         }));
                                     };
-                                } else context === CONTEXT.POPUP && (setProxyWin = function() {
+                                } else context === CONTEXT.POPUP && (setProxyWinOverride = function() {
                                     for (var _len12 = arguments.length, args = new Array(_len12), _key12 = 0; _key12 < _len12; _key12++) args[_key12] = arguments[_key12];
                                     return childOverridesPromise.then((function(childOverrides) {
                                         return childOverrides.setProxyWin.apply(childOverrides, args);
@@ -3595,7 +3621,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_39",
+                                    version: "9_0_40",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3641,7 +3667,6 @@
                                 proxyPrerenderFrame: _ref12.proxyPrerenderFrame
                             });
                         })).then((function(proxyContainer) {
-                            currentProxyContainer = proxyContainer;
                             return proxyContainer;
                         }));
                         var openPromise = promise_ZalgoPromise.hash({
@@ -4033,7 +4058,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_39" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_39");
+                        if ("9_0_40" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_40");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4371,7 +4396,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_39__;
+            delete window.__zoid_9_0_40__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
