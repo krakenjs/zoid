@@ -1075,4 +1075,93 @@ describe('zoid renderto cases', () => {
             }).render(container);
         });
     });
+
+    it('should render a component to the parent as an iframe and hide and show', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-showhide-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-iframe-showhide-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const instance = window.__component__().simple({
+                foo: expect('foo', ({ show, hide, createElementWithDimensions }) => {
+                    return hide().then(() => {
+                        return createElementWithDimensions().then(({ width, height }) => {
+                            if (width !== 0) {
+                                throw new Error(`Expected width to be 0, got ${ width }`);
+                            }
+
+                            if (height !== 0) {
+                                throw new Error(`Expected height to be 0, got ${ height }`);
+                            }
+                        });
+                    }).then(() => {
+                        return show();
+                    }).then(() => {
+                        return createElementWithDimensions().then(({ width, height }) => {
+                            if (width !== 50) {
+                                throw new Error(`Expected width to be 50, got ${ width }`);
+                            }
+
+                            if (height !== 50) {
+                                throw new Error(`Expected height to be 50, got ${ height }`);
+                            }
+                        });
+                    });
+                }),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', win => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: ({ createElementWithDimensions }) => {
+                                return window.xprops.foo({
+                                    createElementWithDimensions,
+                                    show: instance.show,
+                                    hide: instance.hide
+                                });
+                            },
+
+                            run: () => \`
+                                window.xprops.foo({
+                                    createElementWithDimensions: () => {
+                                        const el = document.createElement('div');
+                                        el.style.height = '50px';
+                                        el.style.width = '50px';
+                                        document.body.appendChild(el);
+
+                                        return {
+                                            height: el.offsetWidth,
+                                            width: el.offsetWidth
+                                        };
+                                    }
+                                });
+                            \`
+                        });
+                        
+                        instance.renderTo(window.parent, 'body');
+                    `;
+                }
+            });
+            
+            return instance.render(document.body);
+        });
+    });
 });
