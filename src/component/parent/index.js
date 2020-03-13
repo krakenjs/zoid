@@ -5,7 +5,7 @@ import { flush } from 'beaver-logger/client';
 import { send, bridge } from 'post-robot/src';
 import { isSameDomain, isWindowClosed, isTop, isSameTopWindow, matchDomain, getDistanceFromTop, onCloseWindow, getDomain, assertSameDomain, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getElementSafe, onResize } from 'belter/src';
+import { getElementSafe, onResize, isShadowElement, insertShadowSlot } from 'belter/src';
 
 import { BaseComponent } from '../base';
 import { buildChildWindowName, getParentDomain, getParentComponentWindow } from '../window';
@@ -1226,6 +1226,10 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
             if (!el) {
                 throw new Error(`Could not find element to open container into`);
+            }
+
+            if (isShadowElement(el)) {
+                el = insertShadowSlot(el);
             }
 
             if (!this.component.containerTemplate) {
