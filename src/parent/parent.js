@@ -503,7 +503,6 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         
                         const frameWatcher = watchElementForClose(frame, close);
                         clean.register(() => frameWatcher.cancel());
-                        clean.register(() => closeWindow(win));
                         clean.register(() => destroyElement(frame));
                         clean.register(() => cleanUpWindow(win));
         
