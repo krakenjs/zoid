@@ -2301,8 +2301,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_41__ || (win.__zoid_9_0_41__ = {});
-            return win.__zoid_9_0_41__;
+            win.__zoid_9_0_42__ || (win.__zoid_9_0_42__ = {});
+            return win.__zoid_9_0_42__;
         }
         function getProxyObject(obj) {
             return {
@@ -2721,9 +2721,6 @@
                                 }(frame, close);
                                 clean.register((function() {
                                     return frameWatcher.cancel();
-                                }));
-                                clean.register((function() {
-                                    return closeWindow(win);
                                 }));
                                 clean.register((function() {
                                     return destroyElement(frame);
@@ -3191,7 +3188,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_40",
+                                    version: "9_0_41",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3597,7 +3594,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_40" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_40");
+                        if ("9_0_41" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_41");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -3929,7 +3926,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_41__;
+            delete window.__zoid_9_0_42__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
