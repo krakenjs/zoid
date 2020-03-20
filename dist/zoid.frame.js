@@ -5525,6 +5525,8 @@
                             Object(client.c)();
                             return _this34.clean.all();
                         }
+                    }).then(function() {
+                        if (_this34.props && _this34.props.onDestroy) return _this34.props.onDestroy();
                     });
                 };
                 ParentComponent.prototype.tryInit = function(method) {
@@ -5880,6 +5882,14 @@
                             sendToChild: !1
                         },
                         onClose: {
+                            type: "function",
+                            required: !1,
+                            noop: !0,
+                            once: !0,
+                            promisify: !0,
+                            sendToChild: !1
+                        },
+                        onDestroy: {
                             type: "function",
                             required: !1,
                             noop: !0,

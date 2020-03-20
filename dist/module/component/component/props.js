@@ -118,6 +118,15 @@ export function getInternalProps() {
             sendToChild: false
         },
 
+        onDestroy: {
+            type: 'function',
+            required: false,
+            noop: true,
+            once: true,
+            promisify: true,
+            sendToChild: false
+        },
+
         onResize: {
             type: 'function',
             required: false,

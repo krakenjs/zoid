@@ -1283,6 +1283,10 @@ export var ParentComponent = (_class = function (_BaseComponent) {
                 flush();
                 return _this34.clean.all();
             }
+        }).then(function () {
+            if (_this34.props && _this34.props.onDestroy) {
+                return _this34.props.onDestroy();
+            }
         });
     };
 
