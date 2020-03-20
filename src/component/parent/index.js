@@ -1288,6 +1288,10 @@ export class ParentComponent<P> extends BaseComponent<P> {
                 flush();
                 return this.clean.all();
             }
+        }).then(() => {
+            if (this.props && this.props.onDestroy) {
+                return this.props.onDestroy();
+            }
         });
     }
 

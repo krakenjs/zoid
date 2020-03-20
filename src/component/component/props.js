@@ -55,6 +55,7 @@ type onDisplayPropType = EventHandlerType<void>;
 type onEnterPropType = EventHandlerType<void>;
 type onRenderPropType = EventHandlerType<void>;
 type onClosePropType = EventHandlerType<string>;
+type onDestroyPropType = EventHandlerType<void>;
 type onResizePropType = EventHandlerType<void>;
 type onTimeoutPropType = EventHandlerType<Error>;
 type onErrorPropType = EventHandlerType<mixed>;
@@ -73,6 +74,7 @@ export type BuiltInPropsType = {
     onEnter : onEnterPropType,
     onRender : onRenderPropType,
     onClose : onClosePropType,
+    onDestroy : onDestroyPropType,
     onResize : onResizePropType,
     onTimeout : onTimeoutPropType,
     onError? : onErrorPropType
@@ -92,6 +94,7 @@ export type PropsType = {
     onEnter? : onEnterPropType,
     onRender? : onRenderPropType,
     onClose? : onClosePropType,
+    onDestroy? : onDestroyPropType,
     onResize? : onResizePropType,
     onTimeout? : onTimeoutPropType,
     onError? : onErrorPropType
@@ -111,6 +114,7 @@ export type BuiltInPropsDefinitionType<P> = {
     onEnter : FunctionPropDefinitionType<onEnterPropType, P>,
     onRender : FunctionPropDefinitionType<onRenderPropType, P>,
     onClose : FunctionPropDefinitionType<onClosePropType, P>,
+    onDestroy : FunctionPropDefinitionType<onDestroyPropType, P>,
     onResize : FunctionPropDefinitionType<onResizePropType, P>,
     onTimeout : FunctionPropDefinitionType<onTimeoutPropType, P>,
     onError : FunctionPropDefinitionType<onErrorPropType, P>
@@ -221,6 +225,15 @@ export function getInternalProps<P>() : BuiltInPropsDefinitionType<P> {
         // When the user closes the component.
 
         onClose: {
+            type:        'function',
+            required:    false,
+            noop:        true,
+            once:        true,
+            promisify:   true,
+            sendToChild: false
+        },
+
+        onDestroy: {
             type:        'function',
             required:    false,
             noop:        true,
