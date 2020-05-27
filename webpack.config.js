@@ -7,11 +7,17 @@ import { argv } from 'yargs';
 import pkg from './package.json';
 import globals from './globals';
 
-const zoidGlobals = {
-    ...globals.__ZOID__,
-    __GLOBAL_KEY__:  `__zoid_${ getNextVersion(pkg, argv.level) }__`
-};
+const __NEXT_VERSION__ = getNextVersion(pkg, argv.level);
 
+const zoidGlobals = {
+    ...globals,
+
+    __ZOID__: {
+        ...globals.__ZOID__,
+        __VERSION__:    __NEXT_VERSION__,
+        __GLOBAL_KEY__: `__zoid_${ __NEXT_VERSION__ }__`
+    }
+};
 
 export const FILE_NAME = 'zoid';
 export const MODULE_NAME = 'zoid';
@@ -19,7 +25,7 @@ export const MODULE_NAME = 'zoid';
 export const WEBPACK_CONFIG = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
-    vars:       globals,
+    vars:       zoidGlobals,
     minify:     false
 });
 
@@ -27,7 +33,7 @@ export const WEBPACK_CONFIG_MIN = getWebpackConfig({
     filename:   `${ FILE_NAME }.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
-    vars:       globals
+    vars:       zoidGlobals
 });
 
 export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
@@ -35,15 +41,15 @@ export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
     modulename: MODULE_NAME,
     minify:     false,
     vars:       {
-        ...globals,
+        ...zoidGlobals,
 
         __POST_ROBOT__: {
-            ...globals.__POST_ROBOT__,
+            ...zoidGlobals.__POST_ROBOT__,
             __IE_POPUP_SUPPORT__: false
         },
 
         __ZOID__: {
-            ...zoidGlobals,
+            ...zoidGlobals.__ZOID__,
             __DEFAULT_PRERENDER__: false,
             __POPUP_SUPPORT__:     false
         }
@@ -55,15 +61,15 @@ export const WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
     modulename: MODULE_NAME,
     minify:     true,
     vars:       {
-        ...globals,
+        ...zoidGlobals,
 
         __POST_ROBOT__: {
-            ...globals.__POST_ROBOT__,
+            ...zoidGlobals.__POST_ROBOT__,
             __IE_POPUP_SUPPORT__: false
         },
 
         __ZOID__: {
-            ...zoidGlobals,
+            ...zoidGlobals.__ZOID__,
             __DEFAULT_PRERENDER__: false,
             __POPUP_SUPPORT__:     false
         }
@@ -75,16 +81,16 @@ export const WEBPACK_CONFIG_FRAMEWORK = getWebpackConfig({
     modulename: MODULE_NAME,
     minify:     false,
     vars:       {
-        ...globals,
+        ...zoidGlobals,
 
         __POST_ROBOT__: {
-            ...globals.__POST_ROBOT__,
-            __IE_POPUP_SUPPORT__: false
+            ...zoidGlobals.__POST_ROBOT__,
+            __IE_POPUP_SUPPORT__: true
         },
 
         __ZOID__: {
-            ...zoidGlobals,
-            __POPUP_SUPPORT__:     false,
+            ...zoidGlobals.__ZOID__,
+            __POPUP_SUPPORT__:     true,
             __FRAMEWORK_SUPPORT__: true
         }
     }
@@ -95,16 +101,16 @@ export const WEBPACK_CONFIG_FRAMEWORK_MIN = getWebpackConfig({
     modulename: MODULE_NAME,
     minify:     true,
     vars:       {
-        ...globals,
+        ...zoidGlobals,
 
         __POST_ROBOT__: {
-            ...globals.__POST_ROBOT__,
-            __IE_POPUP_SUPPORT__: false
+            ...zoidGlobals.__POST_ROBOT__,
+            __IE_POPUP_SUPPORT__: true
         },
 
         __ZOID__: {
-            ...zoidGlobals,
-            __POPUP_SUPPORT__:     false,
+            ...zoidGlobals.__ZOID__,
+            __POPUP_SUPPORT__:     true,
             __FRAMEWORK_SUPPORT__: true
         }
     }
@@ -115,10 +121,10 @@ export const WEBPACK_CONFIG_TEST = getWebpackConfig({
     entry:          './test/zoid.js',
     libraryTarget:  undefined,
     vars:           {
-        ...globals,
+        ...zoidGlobals,
 
         __ZOID__: {
-            ...zoidGlobals,
+            ...zoidGlobals.__ZOID__,
             __POPUP_SUPPORT__:     true,
             __FRAMEWORK_SUPPORT__: true
         }
