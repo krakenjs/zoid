@@ -6,11 +6,11 @@ import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
 type AngularModule = {|
-    directive : (string, () => {
+    directive : (string, () => {|
         scope : { [string] : '=' | '@' },
         restrict : string,
         controller : $ReadOnlyArray<string | Function>
-    }) => AngularModule
+    |}) => AngularModule
 |};
 
 type Angular = {|

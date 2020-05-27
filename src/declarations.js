@@ -1,6 +1,6 @@
 /* @flow */
 
-declare var __ZOID__ : {
+declare var __ZOID__ : {|
     __VERSION__ : string,
     __GLOBAL_KEY__ : string,
     __POPUP_SUPPORT__ : boolean,
@@ -8,4 +8,4 @@ declare var __ZOID__ : {
     __FRAMEWORK_SUPPORT__ : boolean,
     __DEFAULT_CONTAINER__ : boolean,
     __DEFAULT_PRERENDER__ : boolean
-};
+|};

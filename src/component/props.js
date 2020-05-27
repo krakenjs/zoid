@@ -16,7 +16,7 @@ export type closePropType = () => ZalgoPromise<void>;
 export type focusPropType = () => ZalgoPromise<void>;
 export type showPropType = () => ZalgoPromise<void>;
 export type hidePropType = () => ZalgoPromise<void>;
-export type resizePropType = ({ width : ?number, height : ?number }) => ZalgoPromise<void>;
+export type resizePropType = ({| width : ?number, height : ?number |}) => ZalgoPromise<void>;
 export type getParentPropType = () => CrossDomainWindowType;
 export type getParentDomainPropType = () => string;
 
@@ -30,6 +30,7 @@ export type onFocusPropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
 export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
 
+// eslint-disable-next-line flowtype/require-exact-type
 export type PropsInputType<P> = {
     timeout? : timeoutPropType,
     window? : windowPropType,
@@ -46,6 +47,7 @@ export type PropsInputType<P> = {
     onProps? : onPropsPropType<P>
 } & P;
 
+// eslint-disable-next-line flowtype/require-exact-type
 export type PropsType<P> = {
     timeout? : timeoutPropType,
     window? : ?windowPropType,
@@ -99,14 +101,14 @@ type PropDefinitionType<T, P, S : string> = {|
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
         onProps : ((PropsType<P>) => void) => void,
-        resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
+        resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
         getParentDomain : () => string,
         getParent : () => CrossDomainWindowType,
         show : () => ZalgoPromise<void>,
         hide : () => ZalgoPromise<void>
     |}) => ?T,
     required? : boolean,
-    queryParam? : boolean | string | ({ value : T }) => (string | ZalgoPromise<string>),
+    queryParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
     queryValue? : ({| value : T |}) => (ZalgoPromise<mixed> | mixed),
     sendToChild? : boolean,
     allowDelegate? : boolean,
@@ -166,7 +168,7 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             sendToChild:   false,
             required:      false,
             allowDelegate: true,
-            validate({ value } : { value : CrossDomainWindowType | ProxyWindow }) {
+            validate:      ({ value }) => {
                 if (__DEBUG__) {
                     if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
                         throw new Error(`Expected Window or ProxyWindow`);
@@ -185,7 +187,7 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
                     }
                 }
             },
-            decorate({ value } : { value : CrossDomainWindowType | ProxyWindow }) : ProxyWindow {
+            decorate: ({ value }) => {
                 return toProxyWindow(value);
             }
         },

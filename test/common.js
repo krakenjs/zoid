@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { createElement, destroyElement, uniqueID } from 'belter/src';
 
-export function onWindowOpen({ win = window, time = 500 } : { win? : SameDomainWindowType, time? : number } = {}) : ZalgoPromise<SameDomainWindowType> {
+export function onWindowOpen({ win = window, time = 500 } : {| win? : SameDomainWindowType, time? : number |} = {}) : ZalgoPromise<SameDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
 
         const winOpen = win.open;
@@ -125,7 +125,7 @@ export function runOnClick<T>(handler : () => T) : T {
     }
 }
 
-export function getContainer({ parent, shadow = false, slots = false } : { parent? : ?HTMLElement, shadow? : boolean, slots? : boolean } = {}) : { container : HTMLElement, destroy : () => void } {
+export function getContainer({ parent, shadow = false, slots = false } : {| parent? : ?HTMLElement, shadow? : boolean, slots? : boolean |} = {}) : {| container : HTMLElement, destroy : () => void |} {
     const parentContainer = parent = parent || document.body;
     
     if (!parentContainer) {

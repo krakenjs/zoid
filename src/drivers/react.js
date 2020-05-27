@@ -6,21 +6,19 @@ import { extend, noop } from 'belter/src';
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
-declare class ReactClassType {
+// eslint-disable-next-line flowtype/require-exact-type
+declare class ReactClassType {}
 
-}
+// eslint-disable-next-line flowtype/require-exact-type
+declare class __ReactComponent {}
 
 type ReactElementType = {|
 
 |};
 
-declare class __ReactComponent {
-
-}
-
 type ReactType = {|
     Component : __ReactComponent,
-    createClass : ({ render : () => ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void }) => (typeof ReactClassType),
+    createClass : ({| render : () => ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void |}) => (typeof ReactClassType),
     createElement : (string, ?{ [string] : mixed }, ...children : $ReadOnlyArray<ReactElementType>) => ReactElementType
 |};
 

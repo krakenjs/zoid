@@ -41,7 +41,7 @@ export type ParentExportsType<P> = {|
     init : (ChildExportsType<P>) => ZalgoPromise<void>,
     close : () => ZalgoPromise<void>,
     checkClose : CrossDomainFunctionType<[], boolean>,
-    resize : CrossDomainFunctionType<[{ width? : ?number, height? : ?number }], void>,
+    resize : CrossDomainFunctionType<[{| width? : ?number, height? : ?number |}], void>,
     onError : (mixed) => ZalgoPromise<void>,
     show : () => ZalgoPromise<void>,
     hide : () => ZalgoPromise<void>
@@ -73,7 +73,7 @@ export type ParentHelpers<P> = {|
     state : StateType,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
-    resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
+    resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
     updateProps : PropsInputType<P> => ZalgoPromise<void>,
     event : EventEmitterType,
@@ -91,13 +91,13 @@ type Show = () => ZalgoPromise<void>;
 type Hide = () => ZalgoPromise<void>;
 type Close = () => ZalgoPromise<void>;
 type OnError = (mixed) => ZalgoPromise<void>;
-type RenderContainer = (proxyContainer : ProxyObject<HTMLElement>, { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) => ZalgoPromise<?ProxyObject<HTMLElement>>;
+type RenderContainer = (proxyContainer : ProxyObject<HTMLElement>, {| context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> |}) => ZalgoPromise<?ProxyObject<HTMLElement>>;
 type SetProxyWin = (ProxyWindow) => ZalgoPromise<void>;
 type GetProxyWindow = () => ZalgoPromise<ProxyWindow>;
-type OpenFrame = (context : $Values<typeof CONTEXT>, { windowName : string }) => ZalgoPromise<?ProxyObject<HTMLIFrameElement>>;
+type OpenFrame = (context : $Values<typeof CONTEXT>, {| windowName : string |}) => ZalgoPromise<?ProxyObject<HTMLIFrameElement>>;
 type OpenPrerenderFrame = (context : $Values<typeof CONTEXT>) => ZalgoPromise<?ProxyObject<HTMLIFrameElement>>;
-type Prerender = (proxyPrerenderWin : ProxyWindow, { context : $Values<typeof CONTEXT>, uid : string }) => ZalgoPromise<void>;
-type Open = (context : $Values<typeof CONTEXT>, { proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string }) => ZalgoPromise<ProxyWindow>;
+type Prerender = (proxyPrerenderWin : ProxyWindow, {| context : $Values<typeof CONTEXT>, uid : string |}) => ZalgoPromise<void>;
+type Open = (context : $Values<typeof CONTEXT>, {| proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string |}) => ZalgoPromise<ProxyWindow>;
 type OpenPrerender = (context : $Values<typeof CONTEXT>, proxyWin : ProxyWindow, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>;
 type WatchForUnload = () => ZalgoPromise<void>;
 
@@ -345,7 +345,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return getChildDomain();
     };
 
-    const openFrame = (context : $Values<typeof CONTEXT>, { windowName } : { windowName : string }) : ZalgoPromise<?ProxyObject<HTMLIFrameElement>> => {
+    const openFrame = (context : $Values<typeof CONTEXT>, { windowName } : {| windowName : string |}) : ZalgoPromise<?ProxyObject<HTMLIFrameElement>> => {
         if (openFrameOverride) {
             return openFrameOverride(context, { windowName });
         }
@@ -458,7 +458,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const resize = ({ width, height } : { width? : ?number, height? : ?number }) : ZalgoPromise<void> => {
+    const resize = ({ width, height } : {| width? : ?number, height? : ?number |}) : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
             event.trigger(EVENT.RESIZE, { width, height });
         });
@@ -487,7 +487,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const open = (context : $Values<typeof CONTEXT>, { proxyWin, proxyFrame, windowName } : { proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string }) : ZalgoPromise<ProxyWindow> => {
+    const open = (context : $Values<typeof CONTEXT>, { proxyWin, proxyFrame, windowName } : {| proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string |}) : ZalgoPromise<ProxyWindow> => {
         if (openOverride) {
             return openOverride(context,  { proxyWin, proxyFrame, windowName });
         }
@@ -616,7 +616,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return { init: initChild, close, checkClose, resize, onError, show, hide };
     };
 
-    const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : { proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string } = {}) : ChildPayload => {
+    const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |} = {}) : ChildPayload => {
         return {
             uid,
             context,
@@ -630,12 +630,12 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         };
     };
 
-    const buildWindowName = ({ proxyWin, childDomain, domain, target, uid, context } : { proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string }) : string => {
+    const buildWindowName = ({ proxyWin, childDomain, domain, target, uid, context } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |}) : string => {
         const childPayload = buildChildPayload({ proxyWin, childDomain, domain, target, context, uid });
         return `__${ ZOID }__${ name }__${ base64encode(JSON.stringify(childPayload)) }__`;
     };
 
-    const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : { context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement }) : ?HTMLElement => {
+    const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : {| context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement |}) : ?HTMLElement => {
         // $FlowFixMe
         return renderer({
             container, context, uid, doc, frame, prerenderFrame,
@@ -643,7 +643,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const prerender = (proxyPrerenderWin : ProxyWindow, { context, uid } : { context : $Values<typeof CONTEXT>, uid : string }) : ZalgoPromise<void> => {
+    const prerender = (proxyPrerenderWin : ProxyWindow, { context, uid } : {| context : $Values<typeof CONTEXT>, uid : string |}) : ZalgoPromise<void> => {
         if (prerenderOverride) {
             return prerenderOverride(proxyPrerenderWin, { context, uid });
         }
@@ -689,7 +689,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     };
 
     const renderContainer : RenderContainer = (proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, uid } :
-        { context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> }) : ZalgoPromise<?ProxyObject<HTMLElement>> => {
+        {| context : $Values<typeof CONTEXT>, uid : string, proxyFrame : ?ProxyObject<HTMLIFrameElement>, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement> |}) : ZalgoPromise<?ProxyObject<HTMLElement>> => {
 
         if (renderContainerOverride) {
             return renderContainerOverride(proxyContainer, { proxyFrame, proxyPrerenderFrame, context, uid });

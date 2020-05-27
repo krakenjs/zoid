@@ -13,12 +13,12 @@ type Angular2Component = {||};
 type Angular2Module = {||};
 
 type Angular2 = {|
-    Component : ({ selector : string, template : string, inputs : $ReadOnlyArray<string> }) => {
-        Class : ({ constructor : $ReadOnlyArray<Angular2Injection | Function>, ngOnInit : () => void, ngDoCheck : () => void }) => Angular2Component
-    },
-    NgModule : ({ declarations : $ReadOnlyArray<Angular2Component>, exports : $ReadOnlyArray<Angular2Component> }) => {
-        Class : ({ constructor : () => void }) => Angular2Module
-    },
+    Component : ({| selector : string, template : string, inputs : $ReadOnlyArray<string> |}) => {|
+        Class : ({| constructor : $ReadOnlyArray<Angular2Injection | Function>, ngOnInit : () => void, ngDoCheck : () => void |}) => Angular2Component
+    |},
+    NgModule : ({| declarations : $ReadOnlyArray<Angular2Component>, exports : $ReadOnlyArray<Angular2Component> |}) => {|
+        Class : ({| constructor : () => void |}) => Angular2Module
+    |},
     ElementRef : Angular2Injection,
     NgZone : Angular2Injection
 |};

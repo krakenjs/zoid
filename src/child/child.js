@@ -26,7 +26,7 @@ export type ChildExportsType<P> = {|
 export type ChildHelpers<P> = {|
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
-    resize : ({ width : ?number, height : ?number }) => ZalgoPromise<void>,
+    resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
     onProps : ((PropsType<P>) => void) => void,
     getParent : () => CrossDomainWindowType,
@@ -148,7 +148,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         });
     };
 
-    const resize = ({ width, height } : { width : ?number, height : ?number }) : ZalgoPromise<void> => {
+    const resize = ({ width, height } : {| width : ?number, height : ?number |}) : ZalgoPromise<void> => {
         return parent.resize.fireAndForget({ width, height });
     };
 
@@ -188,7 +188,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         }
     };
     
-    const getAutoResize = () : { width : boolean, height : boolean, element : ?HTMLElement } => {
+    const getAutoResize = () : {| width : boolean, height : boolean, element : ?HTMLElement |} => {
         let { width = false, height = false, element = 'body' } = autoResize;
         element = getElementSafe(element);
         return { width, height, element };

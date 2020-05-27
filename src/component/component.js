@@ -38,57 +38,65 @@ export type ComponentOptionsType<P> = {|
 
     tag : string,
 
-    url : string | ({ props : PropsType<P> }) => string,
+    url : string | ({| props : PropsType<P> |}) => string,
     domain? : string | RegExp,
     bridgeUrl? : string,
 
     props? : UserPropsDefinitionType<P>,
 
     dimensions? : CssDimensionsType,
-    autoResize? : { width? : boolean, height? : boolean, element? : string },
+    autoResize? : {| width? : boolean, height? : boolean, element? : string |},
 
     allowedParentDomains? : StringMatcherType,
 
-    attributes? : {
+    attributes? : {|
         iframe? : { [string] : string },
         popup? : { [string] : string }
-    },
+    |},
 
     defaultContext? : $Values<typeof CONTEXT>,
 
     containerTemplate? : (RenderOptionsType<P>) => ?HTMLElement,
     prerenderTemplate? : (RenderOptionsType<P>) => ?HTMLElement,
 
-    validate? : ({ props : PropsInputType<P> }) => void,
+    validate? : ({| props : PropsInputType<P> |}) => void,
 
     logger? : Logger
+|};
+
+type AttributesType = {|
+    iframe? : { [string] : string },
+    popup? : { [string] : string }
+|};
+
+type AutoResizeType = {|
+    width? : boolean,
+    height? : boolean,
+    element? : string
 |};
 
 export type NormalizedComponentOptionsType<P> = {|
     tag : string,
     name : string,
 
-    url : string | ({ props : PropsType<P> }) => string,
+    url : string | ({| props : PropsType<P> |}) => string,
     domain : ?(string | RegExp),
     bridgeUrl : ?string,
 
     propsDef : PropsDefinitionType<P>,
     dimensions : CssDimensionsType,
-    autoResize : { width? : boolean, height? : boolean, element? : string },
+    autoResize : AutoResizeType,
 
     allowedParentDomains : StringMatcherType,
 
-    attributes : {
-        iframe? : { [string] : string },
-        popup? : { [string] : string }
-    },
+    attributes : AttributesType,
 
     defaultContext : $Values<typeof CONTEXT>,
 
     containerTemplate : (RenderOptionsType<P>) => ?HTMLElement,
     prerenderTemplate : ?(RenderOptionsType<P>) => ?HTMLElement,
 
-    validate : ?({ props : PropsInputType<P> }) => void,
+    validate : ?({| props : PropsInputType<P> |}) => void,
     logger : Logger
 |};
 
@@ -108,6 +116,16 @@ export type ZoidComponent<P> = {
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>
 };
 
+const getDefaultAttributes = () : AttributesType => {
+    // $FlowFixMe
+    return {};
+};
+
+const getDefaultAutoResize = () : AutoResizeType => {
+    // $FlowFixMe
+    return {};
+};
+
 function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComponentOptionsType<P> {
     let {
         tag,
@@ -116,9 +134,9 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
         bridgeUrl,
         props: propsDef = {},
         dimensions = {},
-        autoResize = {},
+        autoResize = getDefaultAutoResize(),
         allowedParentDomains = WILDCARD,
-        attributes = {},
+        attributes = getDefaultAttributes(),
         defaultContext = CONTEXT.IFRAME,
         containerTemplate = (__ZOID__.__DEFAULT_CONTAINER__ ? defaultContainerTemplate : null),
         prerenderTemplate = (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null),
