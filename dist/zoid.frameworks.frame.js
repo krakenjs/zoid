@@ -1003,8 +1003,70 @@
                 }
             };
         }
+        function defineLazyProp(obj, key, getter) {
+            if (Array.isArray(obj)) {
+                if ("number" != typeof key) throw new TypeError("Array key must be number");
+            } else if ("object" == typeof obj && null !== obj && "string" != typeof key) throw new TypeError("Object key must be string");
+            Object.defineProperty(obj, key, {
+                configurable: !0,
+                enumerable: !0,
+                get: function() {
+                    delete obj[key];
+                    var value = getter();
+                    obj[key] = value;
+                    return value;
+                },
+                set: function(value) {
+                    delete obj[key];
+                    obj[key] = value;
+                }
+            });
+        }
         function arrayFrom(item) {
             return [].slice.call(item);
+        }
+        function isObjectObject(obj) {
+            return "object" == typeof (item = obj) && null !== item && "[object Object]" === {}.toString.call(obj);
+            var item;
+        }
+        function isPlainObject(obj) {
+            if (!isObjectObject(obj)) return !1;
+            var constructor = obj.constructor;
+            if ("function" != typeof constructor) return !1;
+            var prototype = constructor.prototype;
+            return !!isObjectObject(prototype) && !!prototype.hasOwnProperty("isPrototypeOf");
+        }
+        function replaceObject(item, replacer, fullKey) {
+            void 0 === fullKey && (fullKey = "");
+            if (Array.isArray(item)) {
+                var length = item.length;
+                var result = [];
+                var _loop2 = function(i) {
+                    defineLazyProp(result, i, (function() {
+                        var itemKey = fullKey ? fullKey + "." + i : "" + i;
+                        var child = replacer(item[i], i, itemKey);
+                        (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
+                        return child;
+                    }));
+                };
+                for (var i = 0; i < length; i++) _loop2(i);
+                return result;
+            }
+            if (isPlainObject(item)) {
+                var _result = {};
+                var _loop3 = function(key) {
+                    if (!item.hasOwnProperty(key)) return "continue";
+                    defineLazyProp(_result, key, (function() {
+                        var itemKey = fullKey ? fullKey + "." + key : "" + key;
+                        var child = replacer(item[key], key, itemKey);
+                        (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
+                        return child;
+                    }));
+                };
+                for (var key in item) _loop3(key);
+                return _result;
+            }
+            throw new Error("Pass an object or array");
         }
         function isDefined(value) {
             return null != value;
@@ -3370,6 +3432,147 @@
                 }
             };
         }
+        var react = {
+            register: function(tag, propsDef, init, _ref) {
+                var React = _ref.React, ReactDOM = _ref.ReactDOM;
+                return function(_React$Component) {
+                    !function(subClass, superClass) {
+                        subClass.prototype = Object.create(superClass.prototype);
+                        subClass.prototype.constructor = subClass;
+                        subClass.__proto__ = superClass;
+                    }(_class, _React$Component);
+                    function _class() {
+                        return _React$Component.apply(this, arguments) || this;
+                    }
+                    var _proto = _class.prototype;
+                    _proto.render = function() {
+                        return React.createElement("div", null);
+                    };
+                    _proto.componentDidMount = function() {
+                        var el = ReactDOM.findDOMNode(this);
+                        var parent = init(extend({}, this.props));
+                        parent.render(el, CONTEXT.IFRAME);
+                        this.setState({
+                            parent: parent
+                        });
+                    };
+                    _proto.componentDidUpdate = function() {
+                        this.state && this.state.parent && this.state.parent.updateProps(extend({}, this.props)).catch(src_util_noop);
+                    };
+                    return _class;
+                }(React.Component);
+            }
+        };
+        var vue = {
+            register: function(tag, propsDef, init, Vue) {
+                return Vue.component(tag, {
+                    render: function(createElement) {
+                        return createElement("div");
+                    },
+                    inheritAttrs: !1,
+                    mounted: function() {
+                        var el = this.$el;
+                        this.parent = init(_extends({}, this.$attrs));
+                        this.parent.render(el, CONTEXT.IFRAME);
+                    },
+                    watch: {
+                        $attrs: {
+                            handler: function() {
+                                this.parent && this.$attrs && this.parent.updateProps(_extends({}, this.$attrs)).catch(src_util_noop);
+                            },
+                            deep: !0
+                        }
+                    }
+                });
+            }
+        };
+        var angular = {
+            register: function(tag, propsDef, init, ng) {
+                return ng.module(tag, []).directive(tag.replace(/-([a-z])/g, (function(g) {
+                    return g[1].toUpperCase();
+                })), (function() {
+                    var scope = {};
+                    for (var _i2 = 0, _Object$keys2 = Object.keys(propsDef); _i2 < _Object$keys2.length; _i2++) scope[_Object$keys2[_i2]] = "=";
+                    scope.props = "=";
+                    return {
+                        scope: scope,
+                        restrict: "E",
+                        controller: [ "$scope", "$element", function($scope, $element) {
+                            function safeApply() {
+                                if ("$apply" !== $scope.$root.$$phase && "$digest" !== $scope.$root.$$phase) try {
+                                    $scope.$apply();
+                                } catch (err) {}
+                            }
+                            var getProps = function() {
+                                return replaceObject($scope.props, (function(item) {
+                                    return "function" == typeof item ? function() {
+                                        var result = item.apply(this, arguments);
+                                        safeApply();
+                                        return result;
+                                    } : item;
+                                }));
+                            };
+                            var instance = init(getProps());
+                            instance.render($element[0], CONTEXT.IFRAME);
+                            $scope.$watch((function() {
+                                instance.updateProps(getProps()).catch(src_util_noop);
+                            }));
+                        } ]
+                    };
+                }));
+            }
+        };
+        var angular2 = {
+            register: function(tag, propsDef, init, _ref) {
+                var NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
+                var getProps = function(component) {
+                    return replaceObject(_extends({}, component.internalProps, component.props), (function(item) {
+                        return "function" == typeof item ? function() {
+                            var _arguments = arguments, _this = this;
+                            return component.zone.run((function() {
+                                return item.apply(_this, _arguments);
+                            }));
+                        } : item;
+                    }));
+                };
+                var ComponentInstance = (0, _ref.Component)({
+                    selector: tag,
+                    template: "<div></div>",
+                    inputs: [ "props" ]
+                }).Class({
+                    constructor: [ ElementRef, NgZone, function(elementRef, zone) {
+                        this._props = {};
+                        this.elementRef = elementRef;
+                        this.zone = zone;
+                    } ],
+                    ngOnInit: function() {
+                        var targetElement = this.elementRef.nativeElement;
+                        this.parent = init(getProps(this));
+                        this.parent.render(targetElement, CONTEXT.IFRAME);
+                    },
+                    ngDoCheck: function() {
+                        if (this.parent && !function(obj1, obj2) {
+                            var checked = {};
+                            for (var key in obj1) if (obj1.hasOwnProperty(key)) {
+                                checked[key] = !0;
+                                if (obj1[key] !== obj2[key]) return !1;
+                            }
+                            for (var _key in obj2) if (!checked[_key]) return !1;
+                            return !0;
+                        }(this._props, this.props)) {
+                            this._props = _extends({}, this.props);
+                            this.parent.updateProps(getProps(this));
+                        }
+                    }
+                });
+                return NgModule({
+                    declarations: [ ComponentInstance ],
+                    exports: [ ComponentInstance ]
+                }).Class({
+                    constructor: function() {}
+                });
+            }
+        };
         function defaultContainerTemplate(_ref) {
             var uid = _ref.uid, frame = _ref.frame, prerenderFrame = _ref.prerenderFrame, doc = _ref.doc, props = _ref.props, event = _ref.event, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
             if (frame && prerenderFrame) {
@@ -3400,6 +3603,20 @@
                 return div;
             }
         }
+        function defaultPrerenderTemplate(_ref) {
+            var doc = _ref.doc, props = _ref.props;
+            var html = doc.createElement("html");
+            var body = doc.createElement("body");
+            var style = doc.createElement("style");
+            var spinner = doc.createElement("div");
+            spinner.classList.add("spinner");
+            props.cspNonce && style.setAttribute("nonce", props.cspNonce);
+            html.appendChild(body);
+            body.appendChild(spinner);
+            body.appendChild(style);
+            style.appendChild(doc.createTextNode("\n            html, body {\n                width: 100%;\n                height: 100%;\n            }\n\n            .spinner {\n                position: fixed;\n                max-height: 60vmin;\n                max-width: 60vmin;\n                height: 40px;\n                width: 40px;\n                top: 50%;\n                left: 50%;\n                box-sizing: border-box;\n                border: 3px solid rgba(0, 0, 0, .2);\n                border-top-color: rgba(33, 128, 192, 0.8);\n                border-radius: 100%;\n                animation: rotation .7s infinite linear;\n            }\n\n            @keyframes rotation {\n                from {\n                    transform: translateX(-50%) translateY(-50%) rotate(0deg);\n                }\n                to {\n                    transform: translateX(-50%) translateY(-50%) rotate(359deg);\n                }\n            }\n        "));
+            return html;
+        }
         var props_defaultNoop = function() {
             return src_util_noop;
         };
@@ -3409,7 +3626,7 @@
         var component_clean = cleanup();
         function component_component(opts) {
             var options = function(options) {
-                var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, propsDef = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? null : _options$prerenderTem, validate = options.validate, _options$logger = options.logger, logger = void 0 === _options$logger ? {
+                var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, propsDef = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? defaultPrerenderTemplate : _options$prerenderTem, validate = options.validate, _options$logger = options.logger, logger = void 0 === _options$logger ? {
                     info: src_util_noop
                 } : _options$logger;
                 var name = tag.replace(/-/g, "_");
@@ -3582,8 +3799,9 @@
                     logger: logger
                 };
             }(opts);
-            var name = options.name, tag = options.tag, defaultContext = options.defaultContext;
+            var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef;
             var global = lib_global_getGlobal();
+            var driverCache = {};
             var isChild = function() {
                 var payload = getChildPayload();
                 return Boolean(payload && payload.tag === tag && payload.childDomain === getDomain());
@@ -3762,6 +3980,52 @@
                     return child;
                 }
             }));
+            var init = function(props) {
+                (props = props || {}).onDestroy = memoize(props.onDestroy || src_util_noop);
+                var parent = parentComponent(options);
+                parent.init();
+                parent.setProps(props);
+                component_clean.register((function() {
+                    parent.destroy(new Error("zoid destroyed all components"));
+                }));
+                var _render = function(target, container, context) {
+                    return promise_ZalgoPromise.try((function() {
+                        if (!isWindow(target)) throw new Error("Must pass window to renderTo");
+                        return function(props, context) {
+                            return promise_ZalgoPromise.try((function() {
+                                if (props.window) return setup_toProxyWindow(props.window).getType();
+                                if (context) {
+                                    if (context !== CONTEXT.IFRAME && context !== CONTEXT.POPUP) throw new Error("Unrecognized context: " + context);
+                                    return context;
+                                }
+                                return defaultContext;
+                            }));
+                        }(props, context);
+                    })).then((function(finalContext) {
+                        container = function(context, container) {
+                            if (container) {
+                                if ("string" != typeof container && !isElement(container)) throw new TypeError("Expected string or element selector to be passed");
+                                return container;
+                            }
+                            if (context === CONTEXT.POPUP) return "body";
+                            throw new Error("Expected element to be passed to render iframe");
+                        }(finalContext, container);
+                        return parent.render(target, container, finalContext);
+                    })).catch((function(err) {
+                        return parent.destroy(err).then((function() {
+                            throw err;
+                        }));
+                    }));
+                };
+                return _extends({}, parent.getHelpers(), {
+                    render: function(container, context) {
+                        return _render(window, container, context);
+                    },
+                    renderTo: function(target, container, context) {
+                        return _render(target, container, context);
+                    }
+                });
+            };
             registerChild();
             !function() {
                 on_on("zoid_allow_delegate_" + name, (function() {
@@ -3777,54 +4041,17 @@
             if (global.components[tag]) throw new Error("Can not register multiple components with the same tag: " + tag);
             global.components[tag] = !0;
             return {
-                init: function(props) {
-                    (props = props || {}).onDestroy = memoize(props.onDestroy || src_util_noop);
-                    var parent = parentComponent(options);
-                    parent.init();
-                    parent.setProps(props);
-                    component_clean.register((function() {
-                        parent.destroy(new Error("zoid destroyed all components"));
-                    }));
-                    var _render = function(target, container, context) {
-                        return promise_ZalgoPromise.try((function() {
-                            if (!isWindow(target)) throw new Error("Must pass window to renderTo");
-                            return function(props, context) {
-                                return promise_ZalgoPromise.try((function() {
-                                    if (props.window) return setup_toProxyWindow(props.window).getType();
-                                    if (context) {
-                                        if (context !== CONTEXT.IFRAME && context !== CONTEXT.POPUP) throw new Error("Unrecognized context: " + context);
-                                        return context;
-                                    }
-                                    return defaultContext;
-                                }));
-                            }(props, context);
-                        })).then((function(finalContext) {
-                            container = function(context, container) {
-                                if (container) {
-                                    if ("string" != typeof container && !isElement(container)) throw new TypeError("Expected string or element selector to be passed");
-                                    return container;
-                                }
-                                if (context === CONTEXT.POPUP) return "body";
-                                throw new Error("Expected element to be passed to render iframe");
-                            }(finalContext, container);
-                            return parent.render(target, container, finalContext);
-                        })).catch((function(err) {
-                            return parent.destroy(err).then((function() {
-                                throw err;
-                            }));
-                        }));
-                    };
-                    return _extends({}, parent.getHelpers(), {
-                        render: function(container, context) {
-                            return _render(window, container, context);
-                        },
-                        renderTo: function(target, container, context) {
-                            return _render(target, container, context);
-                        }
-                    });
-                },
+                init: init,
                 driver: function(driverName, dep) {
-                    throw new Error("Driver support not enabled");
+                    var drivers = {
+                        react: react,
+                        angular: angular,
+                        vue: vue,
+                        angular2: angular2
+                    };
+                    if (!drivers[driverName]) throw new Error("Could not find driver for framework: " + driverName);
+                    driverCache[driverName] || (driverCache[driverName] = drivers[driverName].register(tag, propsDef, init, dep));
+                    return driverCache[driverName];
                 },
                 isChild: isChild,
                 canRenderTo: function(win) {

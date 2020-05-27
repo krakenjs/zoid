@@ -922,6 +922,7 @@
                 throw new Error("Arguments not serializable -- can not be used to memoize");
             }
         }
+        var memoizedFunctions = [];
         function memoize(method, options) {
             var _this = this;
             void 0 === options && (options = {});
@@ -946,8 +947,12 @@
             memoizedFunction.reset = function() {
                 cacheMap.delete(options.thisNamespace ? _this : method);
             };
-            return setFunctionName(memoizedFunction, getFunctionName(method) + "::memoized");
+            memoizedFunctions.push(memoizedFunction);
+            return setFunctionName(memoizedFunction, (options.name || getFunctionName(method)) + "::memoized");
         }
+        memoize.clear = function() {
+            for (var _i2 = 0; _i2 < memoizedFunctions.length; _i2++) memoizedFunctions[_i2].reset();
+        };
         function memoizePromise(method) {
             var cache = {};
             function memoizedPromiseFunction() {
@@ -1110,7 +1115,7 @@
                 })).map((function(key) {
                     return urlEncode(key) + "=" + urlEncode(obj[key]);
                 })).join("&");
-            }(_extends({}, parseQuery(originalQuery), {}, props)) : originalQuery;
+            }(_extends({}, parseQuery(originalQuery), props)) : originalQuery;
         }
         function appendChild(container, child) {
             container.appendChild(child);
@@ -1448,7 +1453,8 @@
             return serializeType("error", {
                 message: _ref.message,
                 stack: _ref.stack,
-                code: _ref.code
+                code: _ref.code,
+                data: _ref.data
             });
         }, _SERIALIZER.promise = function() {}, _SERIALIZER.regex = function(val) {
             return serializeType("regex", val.source);
@@ -1472,9 +1478,10 @@
         var DESERIALIZER = ((_DESERIALIZER = {}).function = function() {
             throw new Error("Function serialization is not implemented; nothing to deserialize");
         }, _DESERIALIZER.error = function(_ref2) {
-            var stack = _ref2.stack, code = _ref2.code;
+            var stack = _ref2.stack, code = _ref2.code, data = _ref2.data;
             var error = new Error(_ref2.message);
             error.code = code;
+            data && (error.data = data);
             error.stack = stack + "\n\n" + error.stack;
             return error;
         }, _DESERIALIZER.promise = function() {
@@ -2678,8 +2685,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_41__ || (win.__zoid_9_0_41__ = {});
-            return win.__zoid_9_0_41__;
+            win.__zoid_9_0_43__ || (win.__zoid_9_0_43__ = {});
+            return win.__zoid_9_0_43__;
         }
         function getProxyObject(obj) {
             return {
@@ -2817,13 +2824,13 @@
                     var handlerList = handlers[eventName];
                     var promises = [];
                     if (handlerList) {
-                        var _loop = function(_i2) {
-                            var handler = handlerList[_i2];
+                        var _loop = function(_i4) {
+                            var handler = handlerList[_i4];
                             promises.push(promise_ZalgoPromise.try((function() {
                                 return handler.apply(void 0, args);
                             })));
                         };
-                        for (var _i2 = 0; _i2 < handlerList.length; _i2++) _loop(_i2);
+                        for (var _i4 = 0; _i4 < handlerList.length; _i4++) _loop(_i4);
                     }
                     return promise_ZalgoPromise.all(promises).then(src_util_noop);
                 },
@@ -3009,7 +3016,7 @@
                         }));
                     }
                     if (context === CONTEXT.POPUP) return proxyWin;
-                    throw new Error("No render target found");
+                    throw new Error("No render context available for " + context);
                 }));
             };
             var focus = function() {
@@ -3163,7 +3170,7 @@
                         }));
                         return win;
                     }
-                    throw new Error("No render target found");
+                    throw new Error("No render context available for " + context);
                 })).then((function(win) {
                     proxyWin.setWindow(win, {
                         send: send_send
@@ -3583,7 +3590,6 @@
                             }));
                         }(propsDef, props).then((function(query) {
                             return function(url, options) {
-                                void 0 === options && (options = {});
                                 var query = options.query || {};
                                 var hash = options.hash || {};
                                 var originalUrl;
@@ -3618,7 +3624,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_41",
+                                    version: "9_0_43",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -4014,7 +4020,7 @@
                             return _ref12.onProps;
                         }
                     }
-                }, {}, propsDef);
+                }, propsDef);
                 if (!containerTemplate) throw new Error("Container template required");
                 return {
                     name: name,
@@ -4055,7 +4061,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_41" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_41");
+                        if ("9_0_43" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_43");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4393,7 +4399,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_41__;
+            delete window.__zoid_9_0_43__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4411,4 +4417,3 @@
         }
     } ]);
 }));
-//# sourceMappingURL=zoid.js.map
