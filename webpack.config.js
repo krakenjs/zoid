@@ -116,6 +116,46 @@ export const WEBPACK_CONFIG_FRAMEWORK_MIN = getWebpackConfig({
     }
 });
 
+export const WEBPACK_CONFIG_FRAMEWORK_FRAME = getWebpackConfig({
+    filename:   `${ FILE_NAME }.frameworks.frame.js`,
+    modulename: MODULE_NAME,
+    minify:     false,
+    vars:       {
+        ...zoidGlobals,
+
+        __POST_ROBOT__: {
+            ...zoidGlobals.__POST_ROBOT__,
+            __IE_POPUP_SUPPORT__: false
+        },
+
+        __ZOID__: {
+            ...zoidGlobals.__ZOID__,
+            __POPUP_SUPPORT__:     false,
+            __FRAMEWORK_SUPPORT__: true
+        }
+    }
+});
+
+export const WEBPACK_CONFIG_FRAMEWORK_FRAME_MIN = getWebpackConfig({
+    filename:   `${ FILE_NAME }.frameworks.frame.min.js`,
+    modulename: MODULE_NAME,
+    minify:     true,
+    vars:       {
+        ...zoidGlobals,
+
+        __POST_ROBOT__: {
+            ...zoidGlobals.__POST_ROBOT__,
+            __IE_POPUP_SUPPORT__: false
+        },
+
+        __ZOID__: {
+            ...zoidGlobals.__ZOID__,
+            __POPUP_SUPPORT__:     false,
+            __FRAMEWORK_SUPPORT__: true
+        }
+    }
+});
+
 export const WEBPACK_CONFIG_TEST = getWebpackConfig({
     test:           true,
     entry:          './test/zoid.js',
@@ -131,4 +171,9 @@ export const WEBPACK_CONFIG_TEST = getWebpackConfig({
     }
 });
 
-export default [ WEBPACK_CONFIG, WEBPACK_CONFIG_MIN, WEBPACK_CONFIG_FRAME, WEBPACK_CONFIG_FRAME_MIN, WEBPACK_CONFIG_FRAMEWORK, WEBPACK_CONFIG_FRAMEWORK_MIN ];
+export default [
+    WEBPACK_CONFIG, WEBPACK_CONFIG_MIN,
+    WEBPACK_CONFIG_FRAME, WEBPACK_CONFIG_FRAME_MIN,
+    WEBPACK_CONFIG_FRAMEWORK, WEBPACK_CONFIG_FRAMEWORK_MIN,
+    WEBPACK_CONFIG_FRAMEWORK_FRAME, WEBPACK_CONFIG_FRAMEWORK_FRAME_MIN
+];
