@@ -404,7 +404,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             } else if (context === CONTEXT.POPUP && __ZOID__.__POPUP_SUPPORT__) {
                 return proxyWin;
             } else {
-                throw new Error(`No render target found`);
+                throw new Error(`No render context available for ${ context }`);
             }
         });
     };
@@ -527,7 +527,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
 
                 return win;
             } else {
-                throw new Error(`No render target found`);
+                throw new Error(`No render context available for ${ context }`);
             }
 
         }).then(win => {
