@@ -122,6 +122,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
     }
 
     if (childPayload.version !== __ZOID__.__VERSION__) {
+        // eslint-disable-next-line no-console
         console.warn(`Zoid version mismatch detected. Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
     }
 
