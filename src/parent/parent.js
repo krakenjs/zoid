@@ -180,6 +180,8 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     let openPrerenderOverride : ?OpenPrerender = overrides.openPrerender;
     let watchForUnloadOverride : ?WatchForUnload = overrides.watchForUnload;
 
+    const computedAttributes = typeof attributes === 'function' ? attributes({ props }) : attributes;
+
     const getPropsForChild = (domain : string | RegExp) : PropsType<P> => {
         const result = {};
 
@@ -356,7 +358,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     attributes: {
                         name:  windowName,
                         title: name,
-                        ...attributes.iframe
+                        ...computedAttributes.iframe
                     }
                 }));
             }
@@ -374,7 +376,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     attributes: {
                         name:  `__zoid_prerender_frame__${ name }_${ uniqueID() }__`,
                         title: `prerender__${ name }`,
-                        ...attributes.iframe
+                        ...computedAttributes.iframe
                     }
                 }));
             }
@@ -519,7 +521,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     name: windowName,
                     width,
                     height,
-                    ...attributes.popup
+                    ...computedAttributes.popup
                 });
     
                 clean.register(() => closeWindow(win));

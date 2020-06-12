@@ -89,7 +89,7 @@ export type NormalizedComponentOptionsType<P> = {|
 
     allowedParentDomains : StringMatcherType,
 
-    attributes : AttributesType,
+    attributes : AttributesType | ({| props : PropsType<P> |}) => AttributesType,
 
     defaultContext : $Values<typeof CONTEXT>,
 
