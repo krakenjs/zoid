@@ -64,7 +64,7 @@ export type ComponentOptionsType<P> = {|
     logger? : Logger
 |};
 
-type AttributesType = {|
+export type AttributesType = {|
     iframe? : { [string] : string },
     popup? : { [string] : string }
 |};
@@ -89,7 +89,7 @@ export type NormalizedComponentOptionsType<P> = {|
 
     allowedParentDomains : StringMatcherType,
 
-    attributes : AttributesType,
+    attributes : AttributesType | ({| props : PropsType<P> |}) => AttributesType,
 
     defaultContext : $Values<typeof CONTEXT>,
 

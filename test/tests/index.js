@@ -10,5 +10,6 @@ import './validation';
 import './domain';
 import './window';
 import './dimensions';
+import './attributes';
 import './child';
 import './bridge';

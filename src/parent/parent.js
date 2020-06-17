@@ -17,7 +17,7 @@ import { getGlobal, getProxyObject, type ProxyObject } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
 import type { DimensionsType } from '../types';
-import type { NormalizedComponentOptionsType } from '../component';
+import type { NormalizedComponentOptionsType, AttributesType } from '../component';
 
 import { propsToQuery, extendProps } from './props';
 
@@ -323,6 +323,14 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return url;
     };
 
+    const getAttributes = () : AttributesType => {
+        if (typeof attributes === 'function') {
+            return attributes({ props });
+        }
+
+        return attributes;
+    };
+
     const buildUrl = () : ZalgoPromise<string> => {
         return propsToQuery(propsDef, props).then(query => {
             return extendUrl(normalizeMockUrl(getUrl()), { query });
@@ -356,7 +364,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     attributes: {
                         name:  windowName,
                         title: name,
-                        ...attributes.iframe
+                        ...getAttributes().iframe
                     }
                 }));
             }
@@ -374,7 +382,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     attributes: {
                         name:  `__zoid_prerender_frame__${ name }_${ uniqueID() }__`,
                         title: `prerender__${ name }`,
-                        ...attributes.iframe
+                        ...getAttributes().iframe
                     }
                 }));
             }
@@ -519,7 +527,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     name: windowName,
                     width,
                     height,
-                    ...attributes.popup
+                    ...getAttributes().popup
                 });
     
                 clean.register(() => closeWindow(win));
