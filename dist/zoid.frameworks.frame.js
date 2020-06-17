@@ -2370,8 +2370,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_43__ || (win.__zoid_9_0_43__ = {});
-            return win.__zoid_9_0_43__;
+            win.__zoid_9_0_44__ || (win.__zoid_9_0_44__ = {});
+            return win.__zoid_9_0_44__;
         }
         function getProxyObject(obj) {
             return {
@@ -2656,6 +2656,11 @@
                     props: props
                 }) : url;
             };
+            var getAttributes = function() {
+                return "function" == typeof attributes ? attributes({
+                    props: props
+                }) : attributes;
+            };
             var getChildDomain = function() {
                 return domainMatch && "string" == typeof domainMatch ? domainMatch : getDomainFromUrl(getUrl());
             };
@@ -2671,7 +2676,7 @@
                         attributes: _extends({
                             name: windowName,
                             title: name
-                        }, attributes.iframe)
+                        }, getAttributes().iframe)
                     }));
                 }));
             };
@@ -2681,7 +2686,7 @@
                         attributes: _extends({
                             name: "__zoid_prerender_frame__" + name + "_" + uniqueID() + "__",
                             title: "prerender__" + name
-                        }, attributes.iframe)
+                        }, getAttributes().iframe)
                     }));
                 }));
             };
@@ -3256,7 +3261,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_43",
+                                    version: "9_0_44",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3818,7 +3823,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_43" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_43");
+                        if ("9_0_44" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_44");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4159,7 +4164,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_43__;
+            delete window.__zoid_9_0_44__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
