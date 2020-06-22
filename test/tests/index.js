@@ -13,3 +13,5 @@ import './dimensions';
 import './attributes';
 import './child';
 import './bridge';
+import './clone';
+import './eligible';

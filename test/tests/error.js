@@ -750,4 +750,23 @@ describe('zoid error cases', () => {
             });
         });
     });
+
+    it('should call onDestroy even if component is not eligible', () => {
+        return wrapPromise(({ expect, avoid }) => {
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:      'test-error-ondestroy-ineligible',
+                    url:      'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    eligible: () => ({ eligible: false })
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                onError:   avoid('onError'),
+                onDestroy: expect('onDestroy')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(expect('error'));
+        });
+    });
 });

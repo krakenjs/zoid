@@ -4,7 +4,7 @@
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop, isElement, cleanup, memoize } from 'belter/src';
+import { noop, isElement, cleanup, memoize, identity } from 'belter/src';
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
@@ -54,6 +54,8 @@ export type ComponentOptionsType<P> = {|
         popup? : { [string] : string }
     |},
 
+    eligible? : ({| props : PropsInputType<P> |}) => {| eligible : boolean, reason? : string |},
+
     defaultContext? : $Values<typeof CONTEXT>,
 
     containerTemplate? : (RenderOptionsType<P>) => ?HTMLElement,
@@ -91,6 +93,8 @@ export type NormalizedComponentOptionsType<P> = {|
 
     attributes : AttributesType | ({| props : PropsType<P> |}) => AttributesType,
 
+    eligible : ({| props : PropsInputType<P> |}) => {| eligible : boolean, reason? : string |},
+
     defaultContext : $Values<typeof CONTEXT>,
 
     containerTemplate : (RenderOptionsType<P>) => ?HTMLElement,
@@ -100,12 +104,13 @@ export type NormalizedComponentOptionsType<P> = {|
     logger : Logger
 |};
 
-type ZoidRenderer = {|
+export type ZoidComponentInstance<P> = {|
+    ...ParentHelpers<P>,
+    isEligible : () => boolean,
+    clone : () => ZoidComponentInstance<P>,
     render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
     renderTo : (target : CrossDomainWindowType, container? : string, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
-
-export type ZoidComponentInstance<P> = {| ...ParentHelpers<P>, ...ZoidRenderer |};
 
 // eslint-disable-next-line flowtype/require-exact-type
 export type ZoidComponent<P> = {
@@ -141,6 +146,7 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
         containerTemplate = (__ZOID__.__DEFAULT_CONTAINER__ ? defaultContainerTemplate : null),
         prerenderTemplate = (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null),
         validate,
+        eligible = () => ({ eligible: true }),
         logger = { info: noop }
     } = options;
 
@@ -168,7 +174,8 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
         containerTemplate,
         prerenderTemplate,
         validate,
-        logger
+        logger,
+        eligible
     };
 }
 
@@ -176,6 +183,7 @@ let clean = cleanup();
 
 export type Component<P> = {|
     init : (PropsInputType<P>) => ZoidComponentInstance<P>,
+    instances : $ReadOnlyArray<ZoidComponentInstance<P>>,
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>,
@@ -193,11 +201,13 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
         name,
         tag,
         defaultContext,
-        propsDef
+        propsDef,
+        eligible
     } = options;
 
     const global = getGlobal();
     const driverCache = {};
+    const instances = [];
 
     const isChild = () : boolean => {
         const payload = getChildPayload();
@@ -277,12 +287,34 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
     };
 
     const init = (props : PropsInputType<P>) : ZoidComponentInstance<P> => {
+        // eslint-disable-next-line prefer-const
+        let instance;
         props = props || getDefaultInputProps();
-        props.onDestroy = memoize(props.onDestroy || noop);
+
+        const { eligible: eligibility, reason } = eligible({ props });
+        const isEligible = () => eligibility;
+
+        const onDestroy = props.onDestroy;
+        props.onDestroy = (...args) => {
+            if (instance && eligibility) {
+                instances.splice(instances.indexOf(instance), 1);
+            }
+
+            if (onDestroy) {
+                return onDestroy(...args);
+            }
+        };
+
         const parent = parentComponent(options);
-        
         parent.init();
-        parent.setProps(props);
+
+        if (eligibility) {
+            parent.setProps(props);
+        } else {
+            if (props.onDestroy) {
+                props.onDestroy();
+            }
+        }
 
         clean.register(() => {
             parent.destroy(new Error(`zoid destroyed all components`));
@@ -290,6 +322,12 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
 
         const render = (target, container, context) => {
             return ZalgoPromise.try(() => {
+                if (!eligibility) {
+                    return parent.destroy().then(() => {
+                        throw new Error(reason || `${ name } component is not eligible`);
+                    });
+                }
+
                 if (!isWindow(target)) {
                     throw new Error(`Must pass window to renderTo`);
                 }
@@ -307,11 +345,23 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             });
         };
 
-        return {
+        const clone = ({ decorate = identity } = {}) => {
+            return init(decorate(props));
+        };
+
+        instance = {
             ...parent.getHelpers(),
+            isEligible,
+            clone,
             render:   (container, context) => render(window, container, context),
             renderTo: (target, container, context) => render(target, container, context)
         };
+
+        if (eligibility) {
+            instances.push(instance);
+        }
+
+        return instance;
     };
 
     const driver = (driverName : string, dep : mixed) : mixed => {
@@ -343,6 +393,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
 
     return {
         init,
+        instances,
         driver,
         isChild,
         canRenderTo,
@@ -363,6 +414,7 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
     init.driver = (name, dep) => comp.driver(name, dep);
     init.isChild = () => comp.isChild();
     init.canRenderTo = (win) => comp.canRenderTo(win);
+    init.instances = comp.instances;
 
     const child = comp.registerChild();
     if (child) {
