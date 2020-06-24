@@ -1274,7 +1274,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_33__ : win.__post_robot_10_0_33__ = win.__post_robot_10_0_33__ || {};
+            return win !== window ? win.__post_robot_10_0_35__ : win.__post_robot_10_0_35__ = win.__post_robot_10_0_35__ || {};
         }
         var getObj = function() {
             return {};
@@ -1515,8 +1515,8 @@
                 },
                 setLocation: function(href) {
                     return winPromise.then((function(win) {
-                        0 === href.indexOf("/") && (href = window.location.protocol + "//" + window.location.host + href);
-                        if (!href.match(/^https?:\/\//)) throw new Error("Expected url to be http or https url, got " + JSON.stringify(href));
+                        var domain = window.location.protocol + "//" + window.location.host;
+                        if (0 === href.indexOf("/")) href = "" + domain + href; else if (!href.match(/^https?:\/\//) && 0 !== href.indexOf(domain)) throw new Error("Expected url to be http or https url, or absolute path, got " + JSON.stringify(href));
                         if (isSameDomain(win)) try {
                             if (win.location && "function" == typeof win.location.replace) {
                                 win.location.replace(href);
@@ -1925,7 +1925,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_33__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_35__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -2074,7 +2074,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_33__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_35__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2312,8 +2312,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_45__ || (win.__zoid_9_0_45__ = {});
-            return win.__zoid_9_0_45__;
+            win.__zoid_9_0_46__ || (win.__zoid_9_0_46__ = {});
+            return win.__zoid_9_0_46__;
         }
         function getProxyObject(obj) {
             return {
@@ -3203,7 +3203,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_45",
+                                    version: "9_0_46",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3433,7 +3433,14 @@
                         sendToChild: !1,
                         required: !1,
                         allowDelegate: !0,
-                        validate: function(_ref2) {},
+                        validate: function(_ref2) {
+                            var value = _ref2.value;
+                            if (!isWindow(value) && !window_ProxyWindow.isProxyWindow(value)) throw new Error("Expected Window or ProxyWindow");
+                            if (isWindow(value)) {
+                                if (isWindowClosed(value)) throw new Error("Window is closed");
+                                if (!isSameDomain(value)) throw new Error("Window is not same domain");
+                            }
+                        },
                         decorate: function(_ref3) {
                             return setup_toProxyWindow(_ref3.value);
                         }
@@ -3615,7 +3622,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_45" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_45");
+                        if ("9_0_46" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_46");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -3969,7 +3976,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_45__;
+            delete window.__zoid_9_0_46__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -3982,7 +3989,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_33__;
+                delete window.__post_robot_10_0_35__;
             }();
         }
     } ]);
