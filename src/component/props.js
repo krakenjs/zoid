@@ -169,21 +169,19 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             allowDelegate: true,
             validate:      ({ value }) => {
-                if (__DEBUG__) {
-                    if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
-                        throw new Error(`Expected Window or ProxyWindow`);
+                if (!isWindow(value) && !ProxyWindow.isProxyWindow(value)) {
+                    throw new Error(`Expected Window or ProxyWindow`);
+                }
+
+                if (isWindow(value)) {
+                    // $FlowFixMe
+                    if (isWindowClosed(value)) {
+                        throw new Error(`Window is closed`);
                     }
-    
-                    if (isWindow(value)) {
-                        // $FlowFixMe
-                        if (isWindowClosed(value)) {
-                            throw new Error(`Window is closed`);
-                        }
-    
-                        // $FlowFixMe
-                        if (!isSameDomain(value)) {
-                            throw new Error(`Window is not same domain`);
-                        }
+
+                    // $FlowFixMe
+                    if (!isSameDomain(value)) {
+                        throw new Error(`Window is not same domain`);
                     }
                 }
             },
