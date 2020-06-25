@@ -723,6 +723,14 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
+    const getBridgeUrl = () : ?string => {
+        if (typeof options.bridgeUrl === 'function') {
+            return options.bridgeUrl({ props });
+        }
+
+        return options.bridgeUrl;
+    };
+
     const openBridge = (proxyWin : ProxyWindow, domain : string, context : $Values<typeof CONTEXT>) : ?ZalgoPromise<?CrossDomainWindowType> => {
         if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
             return ZalgoPromise.try(() => {
@@ -733,7 +741,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     return;
                 }
 
-                const bridgeUrl = options.bridgeUrl;
+                const bridgeUrl = getBridgeUrl();
 
                 if (!bridgeUrl) {
                     throw new Error(`Bridge needed to render ${ context }`);
