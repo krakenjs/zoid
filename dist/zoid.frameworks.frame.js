@@ -711,6 +711,9 @@
             } catch (err) {
                 return !0;
             }
+            try {
+                if ("postMessage" in obj && "self" in obj && "location" in obj) return !0;
+            } catch (err) {}
             return !1;
         }
         function closeWindow(win) {
@@ -1336,7 +1339,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_35__ : win.__post_robot_10_0_35__ = win.__post_robot_10_0_35__ || {};
+            return win !== window ? win.__post_robot_10_0_37__ : win.__post_robot_10_0_37__ = win.__post_robot_10_0_37__ || {};
         }
         var getObj = function() {
             return {};
@@ -1543,12 +1546,16 @@
             var windowNamePromise = winPromise.then((function(win) {
                 if (isSameDomain(win)) return assertSameDomain(win).name;
             }));
+            var windowTypePromise = winPromise.then((function(window) {
+                if (isWindowClosed(window)) throw new Error("Window is closed, can not determine type");
+                return getOpener(window) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
+            }));
+            windowNamePromise.catch(src_util_noop);
+            windowTypePromise.catch(src_util_noop);
             return {
                 id: id,
                 getType: function() {
-                    return winPromise.then((function(win) {
-                        return getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
-                    }));
+                    return windowTypePromise;
                 },
                 getInstanceID: memoizePromise((function() {
                     return winPromise.then((function(win) {
@@ -1987,7 +1994,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_35__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_37__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -2136,7 +2143,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_35__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_37__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2257,8 +2264,8 @@
             return promise_ZalgoPromise.try((function() {
                 !function(name, win, domain) {
                     if (!name) throw new Error("Expected name");
-                    if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Expected domain to be a string, array, or regex");
-                    if (isWindowClosed(win)) throw new Error("Target window is closed");
+                    if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Can not send " + name + ". Expected domain " + JSON.stringify(domain) + " to be a string, array, or regex");
+                    if (isWindowClosed(win)) throw new Error("Can not send " + name + ". Target window is closed");
                 }(name, win, domain);
                 if (function(parent, child) {
                     var actualParent = getAncestor(child);
@@ -2374,8 +2381,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_46__ || (win.__zoid_9_0_46__ = {});
-            return win.__zoid_9_0_46__;
+            win.__zoid_9_0_47__ || (win.__zoid_9_0_47__ = {});
+            return win.__zoid_9_0_47__;
         }
         function getProxyObject(obj) {
             return {
@@ -3265,7 +3272,7 @@
                                     uid: uid = _ref4.uid,
                                     context: context,
                                     tag: tag,
-                                    version: "9_0_46",
+                                    version: "9_0_47",
                                     childDomain: childDomain,
                                     parentDomain: getDomain(window),
                                     parent: getWindowRef(0, childDomain, uid, context),
@@ -3840,7 +3847,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_46" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_46");
+                        if ("9_0_47" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_47");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4203,7 +4210,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_46__;
+            delete window.__zoid_9_0_47__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4216,7 +4223,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_35__;
+                delete window.__post_robot_10_0_37__;
             }();
         }
     } ]);
