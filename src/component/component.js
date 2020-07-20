@@ -17,7 +17,7 @@ import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType, type PropsType } from './props';
 
-type LoggerPayload = { [string] : ?string };
+type LoggerPayload = { [string] : ?string | ?boolean };
 
 // eslint-disable-next-line flowtype/require-exact-type
 type Logger = {
@@ -268,15 +268,15 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             if (props.window) {
                 return toProxyWindow(props.window).getType();
             }
-    
+
             if (context) {
                 if (context !== CONTEXT.IFRAME && context !== CONTEXT.POPUP) {
                     throw new Error(`Unrecognized context: ${ context }`);
                 }
-                
+
                 return context;
             }
-    
+
             return defaultContext;
         });
     };
@@ -333,7 +333,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
                 }
 
                 return getDefaultContext(props, context);
-                
+
             }).then(finalContext => {
                 container = getDefaultContainer(finalContext, container);
                 return parent.render(target, container, finalContext);
@@ -371,11 +371,11 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             if (!drivers[driverName]) {
                 throw new Error(`Could not find driver for framework: ${ driverName }`);
             }
-    
+
             if (!driverCache[driverName]) {
                 driverCache[driverName] = drivers[driverName].register(tag, propsDef, init, dep);
             }
-    
+
             return driverCache[driverName];
         } else {
             throw new Error(`Driver support not enabled`);
@@ -420,7 +420,7 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
     if (child) {
         window.xprops = init.xprops = child.getProps();
     }
-    
+
     return init;
 }
 
