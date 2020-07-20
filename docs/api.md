@@ -474,14 +474,22 @@ validate: function({ props }) {
 }
 ```
 
-#### bridgeUrl `string `
+#### bridgeUrl `string | ({ props }) => string`
 
-The url for a [post-robot bridge](https://github.com/krakenjs/post-robot#parent-to-popup-messaging). Will be automatically loaded in a hidden iframe when a popup component is rendered, to allow communication between the parent window and the popup in IE/Edge.
+The url or a function returning the url for a [post-robot bridge](https://github.com/krakenjs/post-robot#parent-to-popup-messaging). Will be automatically loaded in a hidden iframe when a popup component is rendered, to allow communication between the parent window and the popup in IE/Edge.
 
 This is only necessary if you are creating a popup component which needs to run in IE and/or Edge.
 
 ```javascript
 bridgeUrl: 'https://foo.com/bridge'
+```
+
+```javascript
+bridgeUrl: ({ props }) => {
+    return (props.env === 'development')
+        ? 'http://foo.dev/bridge'
+        : 'https://foo.com/bridge';
+}
 ```
 
 # `Component`
