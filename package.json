@@ -37,9 +37,9 @@
   ],
   "browserslist": [
     "IE >= 11",
-    "chrome >= 27",
-    "firefox >= 30",
-    "safari >= 7",
+    "chrome >= 41",
+    "firefox >= 43",
+    "safari >= 8",
     "opera >= 23"
   ],
   "licenses": [

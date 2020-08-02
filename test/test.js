@@ -6,7 +6,6 @@ import { noop } from 'belter/src';
 window.mockDomain = 'mock://www.parent.com';
 
 window.console.karma = (...args) => {
-    // eslint-disable-next-line compat/compat
     const karma = window.karma || (window.top && window.top.karma) || (window.parent && window.parent.karma) || (window.opener && window.opener.karma);
     if (karma) {
         karma.log('debug', args);
