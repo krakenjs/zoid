@@ -153,6 +153,7 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
     const name = tag.replace(/-/g, '_');
     const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = dimensions;
 
+    // $FlowFixMe
     propsDef = { ...getBuiltInProps(), ...propsDef };
 
     if (!containerTemplate) {

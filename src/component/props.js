@@ -109,7 +109,7 @@ type PropDefinitionType<T, P, S : string> = {|
     |}) => ?T,
     required? : boolean,
     queryParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
-    queryValue? : ({| value : T |}) => (ZalgoPromise<mixed> | mixed),
+    queryValue? : ({| value : T |}) => (ZalgoPromise<string> | string),
     sendToChild? : boolean,
     allowDelegate? : boolean,
     validate? : ({| value : T, props : PropsInputType<P> |}) => void,

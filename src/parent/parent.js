@@ -16,7 +16,7 @@ import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
 import { getGlobal, getProxyObject, type ProxyObject } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
-import type { DimensionsType } from '../types';
+import type { CssDimensionsType } from '../types';
 import type { NormalizedComponentOptionsType, AttributesType } from '../component';
 
 import { propsToQuery, extendProps } from './props';
@@ -27,10 +27,10 @@ export type RenderOptionsType<P> = {|
     tag : string,
     context : string,
     close : (?string) => ZalgoPromise<void>,
-    focus : () => ZalgoPromise<ProxyWindow>,
+    focus : () => ZalgoPromise<void>,
     doc : Document,
     container? : HTMLElement,
-    dimensions : DimensionsType,
+    dimensions : CssDimensionsType,
     state : Object,
     event : EventEmitterType,
     frame : ?HTMLIFrameElement,
@@ -360,13 +360,15 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         
         return ZalgoPromise.try(() => {
             if (context === CONTEXT.IFRAME && __ZOID__.__IFRAME_SUPPORT__) {
-                return getProxyObject(iframe({
-                    attributes: {
-                        name:  windowName,
-                        title: name,
-                        ...getAttributes().iframe
-                    }
-                }));
+
+                // $FlowFixMe
+                const attrs = {
+                    name:  windowName,
+                    title: name,
+                    ...getAttributes().iframe
+                };
+
+                return getProxyObject(iframe({ attributes: attrs }));
             }
         });
     };
@@ -378,12 +380,14 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
 
         return ZalgoPromise.try(() => {
             if (context === CONTEXT.IFRAME && __ZOID__.__IFRAME_SUPPORT__) {
+                // $FlowFixMe
+                const attrs = {
+                    name:  `__zoid_prerender_frame__${ name }_${ uniqueID() }__`,
+                    title: `prerender__${ name }`,
+                    ...getAttributes().iframe
+                };
                 return getProxyObject(iframe({
-                    attributes: {
-                        name:  `__zoid_prerender_frame__${ name }_${ uniqueID() }__`,
-                        title: `prerender__${ name }`,
-                        ...getAttributes().iframe
-                    }
+                    attributes: attrs
                 }));
             }
         });
@@ -522,13 +526,16 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);
-    
-                const win = popup('', {
+
+                // $FlowFixMe
+                const attrs = {
                     name: windowName,
                     width,
                     height,
                     ...getAttributes().popup
-                });
+                };
+    
+                const win = popup('', attrs);
     
                 clean.register(() => closeWindow(win));
                 clean.register(() => cleanUpWindow(win));

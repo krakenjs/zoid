@@ -42,6 +42,7 @@ export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassT
             }
 
             componentDidMount() {
+                // $FlowFixMe
                 const el = ReactDOM.findDOMNode(this);
                 const parent = init(extend({}, this.props));
                 parent.render(el, CONTEXT.IFRAME);

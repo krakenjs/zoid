@@ -102,7 +102,7 @@ export function extendProps<P>(propsDef : PropsDefinitionType<P>, props : PropsT
 }
 
 // $FlowFixMe
-function getQueryParam<T, P>(prop : MixedPropDefinitionType<P>, key : string, value : T) : ZalgoPromise<string> {
+function getQueryParam<P>(prop : MixedPropDefinitionType<P>, key : string, value : string) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryParam === 'function') {
             return prop.queryParam({ value });
@@ -115,7 +115,7 @@ function getQueryParam<T, P>(prop : MixedPropDefinitionType<P>, key : string, va
 }
 
 // $FlowFixMe
-function getQueryValue<T, P>(prop : MixedPropDefinitionType<P>, key : string, value : T) : ZalgoPromise<mixed> {
+function getQueryValue<P>(prop : MixedPropDefinitionType<P>, key : string, value : string) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryValue === 'function' && isDefined(value)) {
             return prop.queryValue({ value });
