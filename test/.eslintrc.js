@@ -2,6 +2,7 @@
 
 module.exports = {
     rules: {
-        'compat/compat': 'off'
+        'compat/compat': 'off',
+        'max-lines': 'off'
     }
 }
