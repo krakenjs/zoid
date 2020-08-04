@@ -220,7 +220,7 @@ describe('zoid error cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 
@@ -252,7 +252,7 @@ describe('zoid error cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 setTimeout(() => openedWindow.close(), 1);
             }));
 
@@ -279,7 +279,7 @@ describe('zoid error cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 setTimeout(() => {
                     destroyElement(openedWindow.frameElement);
                 }, 200);
@@ -308,7 +308,7 @@ describe('zoid error cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 setTimeout(() => {
                     destroyElement(openedWindow.frameElement);
                 }, 1);
@@ -360,7 +360,7 @@ describe('zoid error cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 
@@ -394,7 +394,7 @@ describe('zoid error cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 
@@ -430,7 +430,7 @@ describe('zoid error cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 
@@ -468,7 +468,7 @@ describe('zoid error cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 

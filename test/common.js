@@ -4,55 +4,94 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { createElement, destroyElement, uniqueID } from 'belter/src';
 
-export function onWindowOpen({ win = window, time = 500 } : {| win? : SameDomainWindowType, time? : number |} = {}) : ZalgoPromise<SameDomainWindowType> {
+export function monkeyPatchFunction<T, A>(obj : Object, name : string, handler : ({| call : () => T, args : A |}) => void) : {| cancel : () => void |} {
+    const original = obj[name];
+
+    if (!original.monkeyPatch) {
+        original.monkeyPatch = {
+            handlers: []
+        };
+    
+        obj[name] = function monkeyPatched() : T {
+            let called = false;
+            let result;
+
+            const call = () => {
+                if (!called) {
+                    called = true;
+                    result = original.apply(this, arguments);
+                }
+
+                return result;
+            };
+
+            for (const monkeyHandler of original.monkeyPatch.handlers) {
+                monkeyHandler({ args: arguments, call });
+            }
+
+            return call();
+        };
+    }
+
+    original.monkeyPatch.handlers.push(handler);
+
+    const cancel = () => {
+        original.monkeyPatch.handlers.splice(original.monkeyPatch.handlers.indexOf(handler), 1);
+    };
+
+    return {
+        cancel
+    };
+}
+
+export function onWindowOpen({ win = window, doc = win.document, time = 500 } : {| win? : SameDomainWindowType, doc? : HTMLElement, time? : number |} = {}) : ZalgoPromise<SameDomainWindowType> {
     return new ZalgoPromise((resolve, reject) => {
+        const winOpenMonkeyPatch = monkeyPatchFunction(win, 'open', ({ call, args }) => {
+            const popup = call();
+            resolve({ win: popup, popup: { args } });
+            winOpenMonkeyPatch.cancel();
+        });
 
-        const winOpen = win.open;
-        const documentCreateElement = win.document.createElement;
-        
-        const reset = () => {
-            win.document.createElement = documentCreateElement;
-        };
-
-        win.open = function patchedWindowOpen() : CrossDomainWindowType {
-            const popup = winOpen.apply(this, arguments);
-            resolve(popup);
-            return popup;
-        };
-
-        // $FlowFixMe
-        document.createElement = function docCreateElement(tagName) : HTMLElement {
-            const el = documentCreateElement.apply(this, arguments);
+        const createElementMonkeyPatch = monkeyPatchFunction(doc, 'createElement', ({ call, args: [ tagName ] }) => {
+            const el = call();
 
             if (tagName && tagName.toLowerCase() === 'iframe') {
-
                 // eslint-disable-next-line prefer-const
                 let timeout;
 
-                const interval = setInterval(() => {
+                const cleanup = () => {
+                    createElementMonkeyPatch.cancel();
+                    // eslint-disable-next-line no-use-before-define
+                    appendChildMonkeyPatch.cancel();
+                    clearTimeout(timeout);
+                };
+
+                const check = () => {
                     if (el.contentWindow) {
-                        reset();
-                        clearTimeout(timeout);
-                        clearInterval(interval);
-                        resolve(el.contentWindow);
+                        cleanup();
+                        resolve({ win: el.contentWindow, iframe: { element: el } });
                     }
-                }, 10);
+                };
+
+                const appendChildMonkeyPatch = monkeyPatchFunction(win.HTMLElement.prototype, 'appendChild', ({ call: callAppend }) => {
+                    callAppend();
+                    check();
+                });
 
                 timeout = setTimeout(() => {
-                    clearInterval(interval);
+                    cleanup();
                     return reject(new Error(`Window not opened in ${ time }ms`));
                 }, time);
             }
+        });
 
-            return el;
-        };
-    }).then(openedWindow => {
+    }).then(({ win: openedWindow, ...rest }) => {
 
         if (!openedWindow || isWindowClosed(openedWindow)) {
             throw new Error(`Expected win to be open`);
         }
 
-        return openedWindow;
+        return { win: openedWindow, ...rest };
     });
 }
 

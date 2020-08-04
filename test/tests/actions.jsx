@@ -32,7 +32,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 
@@ -64,7 +64,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 
@@ -100,7 +100,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 
@@ -140,7 +140,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 
@@ -168,7 +168,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 
@@ -193,7 +193,7 @@ describe('zoid actions', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', openedWindow => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win: openedWindow }) => {
                 win = openedWindow;
             }));
 

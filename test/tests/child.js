@@ -56,7 +56,7 @@ describe('zoid child cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 return onCloseWindow(win, expect('onCloseWindow'), 50);
             }));
 
@@ -88,7 +88,7 @@ describe('zoid child cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 return onCloseWindow(win, expect('onCloseWindow'), 50);
             }));
 

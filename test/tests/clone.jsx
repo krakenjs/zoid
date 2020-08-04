@@ -20,7 +20,7 @@ describe('zoid clone cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -44,7 +44,7 @@ describe('zoid clone cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -74,7 +74,7 @@ describe('zoid clone cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -119,7 +119,7 @@ describe('zoid clone cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }

@@ -768,7 +768,7 @@ describe('zoid props cases', () => {
 
             let openedWindow;
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 openedWindow = win;
             }));
 

@@ -20,7 +20,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -44,7 +44,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -68,7 +68,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -92,7 +92,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getOpener(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -121,7 +121,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getOpener(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -149,7 +149,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -233,7 +233,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -422,7 +422,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -450,7 +450,7 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', win => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                 if (getParent(win) !== window) {
                     throw new Error(`Expected window parent to be current window`);
                 }
@@ -464,6 +464,70 @@ describe('zoid happy cases', () => {
                     destroy();
                 })
             }).render(container);
+        });
+    });
+
+    it('should render a component with iframe context', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-iframe-window-name',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win, iframe: { element } }) => {
+                const name = element.getAttribute('name');
+
+                if (!name || name === 'about:blank' || name.indexOf('__zoid__') !== 0) {
+                    throw new Error(`Expected window name to be set when calling window.open`);
+                }
+
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered')
+            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+        });
+    });
+
+    it('should render a component with popup context', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-popup-window-name',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win, popup: { args } }) => {
+                const [ , name ] = args;
+
+                if (!name || name === 'about:blank' || name.indexOf('__zoid__') !== 0) {
+                    throw new Error(`Expected window name to be set when calling window.open`);
+                }
+
+                if (getOpener(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const component = window.__component__();
+            const instance = component({
+                onRendered: expect('onRendered')
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
         });
     });
 });

@@ -33,7 +33,7 @@ describe('zoid renderto cases', () => {
                 foo: expect('foo'),
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         if (getParent(win) !== window) {
                             throw new Error(`Expected window parent to be current window`);
                         }
@@ -78,7 +78,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }
@@ -227,7 +227,7 @@ describe('zoid renderto cases', () => {
                 }),
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         componentWindow = win;
                     }));
 
@@ -282,7 +282,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
                         componentWindow = win;
                     }));
 
@@ -334,7 +334,7 @@ describe('zoid renderto cases', () => {
 
             return window.__component__().simple({
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         onCloseWindow(win, expect('onCloseWindow'), 50);
                     }));
 
@@ -376,7 +376,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         onCloseWindow(win, expect('onCloseWindow'), 50);
                     }));
 
@@ -646,14 +646,14 @@ describe('zoid renderto cases', () => {
             let simpleWindow;
             let remoteWindow;
 
-            onWindowOpen().then(expect('onSimpleWindowOpen', win => {
+            onWindowOpen().then(expect('onSimpleWindowOpen', ({ win }) => {
                 simpleWindow = win;
             }));
 
             return window.__component__().simple({
 
                 onLoad: expect('onLoad', () => {
-                    onWindowOpen().then(expect('onRemoteWindowOpen', win => {
+                    onWindowOpen().then(expect('onRemoteWindowOpen', ({ win }) => {
                         remoteWindow = win;
                     }));
                 }),
@@ -832,7 +832,7 @@ describe('zoid renderto cases', () => {
                 foo: expect('foo'),
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         if (getParent(win) !== window) {
                             throw new Error(`Expected window parent to be current window`);
                         }
@@ -885,7 +885,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }
@@ -941,7 +941,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         if (getParent(win) !== window) {
                             throw new Error(`Expected window parent to be current window`);
                         }
@@ -997,7 +997,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }
@@ -1053,7 +1053,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
-                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         if (getParent(win) !== window) {
                             throw new Error(`Expected window parent to be current window`);
                         }
@@ -1123,7 +1123,7 @@ describe('zoid renderto cases', () => {
                 }),
 
                 run: () => {
-                    onWindowOpen().then(expect('onWindowOpen', win => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
                         if (getParent(win) !== window) {
                             throw new Error(`Expected window parent to be current window`);
                         }

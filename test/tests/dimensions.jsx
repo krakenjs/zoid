@@ -34,7 +34,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -78,7 +78,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             const instance = component({
@@ -123,7 +123,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             const instance = component({
@@ -168,7 +168,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -220,7 +220,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -278,7 +278,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -335,7 +335,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -389,7 +389,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -460,7 +460,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -525,7 +525,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -590,7 +590,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -654,7 +654,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -708,7 +708,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({
@@ -763,7 +763,7 @@ describe('zoid dimensions cases', () => {
                 });
             };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', win => win));
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
 
             const component = window.__component__();
             return component({

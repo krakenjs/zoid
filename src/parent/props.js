@@ -82,7 +82,6 @@ export function extendProps<P>(propsDef : PropsDefinitionType<P>, props : PropsT
         }
 
         if (__DEBUG__ && isDefined(value) && propDef.validate) {
-            // $FlowFixMe
             propDef.validate({ value, props });
         }
 
