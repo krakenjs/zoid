@@ -62,9 +62,9 @@
     "serve": "^10.0.0"
   },
   "dependencies": {
-    "belter": "^1.0.87",
-    "cross-domain-utils": "^2.0.3",
+    "belter": "^1.0.123",
+    "cross-domain-utils": "^2.0.33",
     "post-robot": "^10",
-    "zalgo-promise": "^1.0.22"
+    "zalgo-promise": "^1.0.45"
   }
 }

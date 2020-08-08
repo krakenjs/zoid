@@ -180,7 +180,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     let openPrerenderOverride : ?OpenPrerender = overrides.openPrerender;
     let watchForUnloadOverride : ?WatchForUnload = overrides.watchForUnload;
 
-    const getPropsForChild = (domain : string | RegExp) : PropsType<P> => {
+    const getPropsForChild = (domain : string | RegExp) : ZalgoPromise<PropsType<P>> => {
         const result = {};
 
         for (const key of Object.keys(props)) {
@@ -198,7 +198,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         }
 
         // $FlowFixMe
-        return result;
+        return ZalgoPromise.hash(result);
     };
 
     const setupEvents = () => {
@@ -259,24 +259,26 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const getPropsRef = (proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, uid : string) : PropRef => {
-        const value = serializeMessage(proxyWin, domain, getPropsForChild(domain));
+    const getPropsRef = (proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, uid : string) : ZalgoPromise<PropRef> => {
+        return getPropsForChild(domain).then(childProps => {
+            const value = serializeMessage(proxyWin, domain, childProps);
 
-        const propRef = (childDomain === getDomain())
-            ? { type: INITIAL_PROPS.UID, uid }
-            : { type: INITIAL_PROPS.RAW, value };
+            const propRef = (childDomain === getDomain())
+                ? { type: INITIAL_PROPS.UID, uid }
+                : { type: INITIAL_PROPS.RAW, value };
 
-        if (propRef.type === INITIAL_PROPS.UID) {
-            const global = getGlobal(window);
-            global.props = global.props || {};
-            global.props[uid] = value;
+            if (propRef.type === INITIAL_PROPS.UID) {
+                const global = getGlobal(window);
+                global.props = global.props || {};
+                global.props[uid] = value;
 
-            clean.register(() => {
-                delete global.props[uid];
-            });
-        }
+                clean.register(() => {
+                    delete global.props[uid];
+                });
+            }
 
-        return propRef;
+            return propRef;
+        });
     };
 
     const setProxyWin = (proxyWin : ProxyWindow) : ZalgoPromise<void> => {
@@ -631,23 +633,26 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return { init: initChild, close, checkClose, resize, onError, show, hide };
     };
 
-    const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |} = {}) : ChildPayload => {
-        return {
-            uid,
-            context,
-            tag,
-            version:      __ZOID__.__VERSION__,
-            childDomain,
-            parentDomain: getDomain(window),
-            parent:       getWindowRef(target, childDomain, uid, context),
-            props:        getPropsRef(proxyWin, childDomain, domain, uid),
-            exports:      serializeMessage(proxyWin, domain, buildParentExports(proxyWin))
-        };
+    const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |} = {}) : ZalgoPromise<ChildPayload> => {
+        return getPropsRef(proxyWin, childDomain, domain, uid).then(propsRef => {
+            return {
+                uid,
+                context,
+                tag,
+                version:      __ZOID__.__VERSION__,
+                childDomain,
+                parentDomain: getDomain(window),
+                parent:       getWindowRef(target, childDomain, uid, context),
+                props:        propsRef,
+                exports:      serializeMessage(proxyWin, domain, buildParentExports(proxyWin))
+            };
+        });
     };
 
-    const buildWindowName = ({ proxyWin, childDomain, domain, target, uid, context } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |}) : string => {
-        const childPayload = buildChildPayload({ proxyWin, childDomain, domain, target, context, uid });
-        return `__${ ZOID }__${ name }__${ base64encode(JSON.stringify(childPayload)) }__`;
+    const buildWindowName = ({ proxyWin, childDomain, domain, target, uid, context } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |}) : ZalgoPromise<string> => {
+        return buildChildPayload({ proxyWin, childDomain, domain, target, context, uid }).then(childPayload => {
+            return `__${ ZOID }__${ name }__${ base64encode(JSON.stringify(childPayload)) }__`;
+        });
     };
 
     const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : {| context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement |}) : ?HTMLElement => {
@@ -789,11 +794,13 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                 return;
             }
 
-            return child.updateProps(getPropsForChild(getDomainMatcher())).catch(err => {
-                return checkWindowClose(proxyWin).then(closed => {
-                    if (!closed) {
-                        throw err;
-                    }
+            return getPropsForChild(getDomainMatcher()).then(childProps => {
+                return child.updateProps(childProps).catch(err => {
+                    return checkWindowClose(proxyWin).then(closed => {
+                        if (!closed) {
+                            throw err;
+                        }
+                    });
                 });
             });
         });
