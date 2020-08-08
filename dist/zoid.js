@@ -347,11 +347,17 @@
             };
             ZalgoPromise.hash = function(promises) {
                 var result = {};
-                return ZalgoPromise.all(Object.keys(promises).map((function(key) {
-                    return ZalgoPromise.resolve(promises[key]).then((function(value) {
-                        result[key] = value;
-                    }));
-                }))).then((function() {
+                var awaitPromises = [];
+                var _loop = function(key) {
+                    if (promises.hasOwnProperty(key)) {
+                        var value = promises[key];
+                        utils_isPromise(value) ? awaitPromises.push(value.then((function(res) {
+                            result[key] = res;
+                        }))) : result[key] = value;
+                    }
+                };
+                for (var key in promises) _loop(key);
+                return ZalgoPromise.all(awaitPromises).then((function() {
                     return result;
                 }));
             };
@@ -2704,8 +2710,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_48__ || (win.__zoid_9_0_48__ = {});
-            return win.__zoid_9_0_48__;
+            win.__zoid_9_0_49__ || (win.__zoid_9_0_49__ = {});
+            return win.__zoid_9_0_49__;
         }
         function getProxyObject(obj) {
             return {
@@ -2890,7 +2896,7 @@
                     var prop = propsDef[key];
                     prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(domain, getDomain(window)) || (result[key] = props[key]);
                 }
-                return result;
+                return promise_ZalgoPromise.hash(result);
             };
             var getProxyWindow = function() {
                 return getProxyWindowOverride ? getProxyWindowOverride() : promise_ZalgoPromise.try((function() {
@@ -2948,25 +2954,6 @@
                     }(containerElement));
                     return getProxyObject(containerElement);
                 }));
-            };
-            var getPropsRef = function(proxyWin, childDomain, domain, uid) {
-                var value = setup_serializeMessage(proxyWin, domain, getPropsForChild(domain));
-                var propRef = childDomain === getDomain() ? {
-                    type: "uid",
-                    uid: uid
-                } : {
-                    type: "raw",
-                    value: value
-                };
-                if ("uid" === propRef.type) {
-                    var global = lib_global_getGlobal(window);
-                    global.props = global.props || {};
-                    global.props[uid] = value;
-                    clean.register((function() {
-                        delete global.props[uid];
-                    }));
-                }
-                return propRef;
             };
             var setProxyWin = function(proxyWin) {
                 return setProxyWinOverride ? setProxyWinOverride(proxyWin) : promise_ZalgoPromise.try((function() {
@@ -3416,10 +3403,13 @@
             var updateProps = function(newProps) {
                 setProps(newProps, !0);
                 return initPromise.then((function() {
+                    var child = childComponent;
                     var proxyWin = currentProxyWin;
-                    if (childComponent && proxyWin) return childComponent.updateProps(getPropsForChild(getDomainMatcher())).catch((function(err) {
-                        return checkWindowClose(proxyWin).then((function(closed) {
-                            if (!closed) throw err;
+                    if (child && proxyWin) return getPropsForChild(getDomainMatcher()).then((function(childProps) {
+                        return child.updateProps(childProps).catch((function(err) {
+                            return checkWindowClose(proxyWin).then((function(closed) {
+                                if (!closed) throw err;
+                            }));
                         }));
                     }));
                 }));
@@ -3635,46 +3625,71 @@
                         var getProxyContainerPromise = getProxyContainer(container);
                         var getProxyWindowPromise = getProxyWindow();
                         var buildWindowNamePromise = getProxyWindowPromise.then((function(proxyWin) {
-                            return function(_ref5) {
-                                var childPayload = (proxyWin = (_ref4 = void 0 === (_temp = {
-                                    proxyWin: _ref5.proxyWin,
-                                    childDomain: _ref5.childDomain,
-                                    domain: _ref5.domain,
-                                    target: _ref5.target,
-                                    context: _ref5.context,
-                                    uid: _ref5.uid
-                                }) ? {} : _temp).proxyWin, childDomain = _ref4.childDomain, domain = _ref4.domain, 
-                                context = (void 0 === _ref4.target && window, _ref4.context), {
-                                    uid: uid = _ref4.uid,
-                                    context: context,
-                                    tag: tag,
-                                    version: "9_0_48",
-                                    childDomain: childDomain,
-                                    parentDomain: getDomain(window),
-                                    parent: getWindowRef(0, childDomain, uid, context),
-                                    props: getPropsRef(proxyWin, childDomain, domain, uid),
-                                    exports: setup_serializeMessage(proxyWin, domain, (win = proxyWin, {
-                                        init: initChild,
-                                        close: close,
-                                        checkClose: function() {
-                                            return checkWindowClose(win);
-                                        },
-                                        resize: resize,
-                                        onError: onError,
-                                        show: show,
-                                        hide: hide
-                                    }))
-                                });
-                                var _temp, _ref4, proxyWin, childDomain, domain, context, uid, win;
-                                return "__zoid__" + name + "__" + base64encode(JSON.stringify(childPayload)) + "__";
+                            return function(_temp) {
+                                var _ref4 = void 0 === _temp ? {} : _temp, proxyWin = _ref4.proxyWin, childDomain = _ref4.childDomain, domain = _ref4.domain, context = (void 0 === _ref4.target && window, 
+                                _ref4.context), uid = _ref4.uid;
+                                return function(proxyWin, childDomain, domain, uid) {
+                                    return getPropsForChild(domain).then((function(childProps) {
+                                        var value = setup_serializeMessage(proxyWin, domain, childProps);
+                                        var propRef = childDomain === getDomain() ? {
+                                            type: "uid",
+                                            uid: uid
+                                        } : {
+                                            type: "raw",
+                                            value: value
+                                        };
+                                        if ("uid" === propRef.type) {
+                                            var global = lib_global_getGlobal(window);
+                                            global.props = global.props || {};
+                                            global.props[uid] = value;
+                                            clean.register((function() {
+                                                delete global.props[uid];
+                                            }));
+                                        }
+                                        return propRef;
+                                    }));
+                                }(proxyWin, childDomain, domain, uid).then((function(propsRef) {
+                                    return {
+                                        uid: uid,
+                                        context: context,
+                                        tag: tag,
+                                        version: "9_0_49",
+                                        childDomain: childDomain,
+                                        parentDomain: getDomain(window),
+                                        parent: getWindowRef(0, childDomain, uid, context),
+                                        props: propsRef,
+                                        exports: setup_serializeMessage(proxyWin, domain, (win = proxyWin, {
+                                            init: initChild,
+                                            close: close,
+                                            checkClose: function() {
+                                                return checkWindowClose(win);
+                                            },
+                                            resize: resize,
+                                            onError: onError,
+                                            show: show,
+                                            hide: hide
+                                        }))
+                                    };
+                                    var win;
+                                }));
                             }({
-                                proxyWin: proxyWin,
-                                childDomain: childDomain,
-                                domain: domain,
-                                target: target,
-                                context: context,
-                                uid: uid
-                            });
+                                proxyWin: (_ref5 = {
+                                    proxyWin: proxyWin,
+                                    childDomain: childDomain,
+                                    domain: domain,
+                                    target: target,
+                                    context: context,
+                                    uid: uid
+                                }).proxyWin,
+                                childDomain: _ref5.childDomain,
+                                domain: _ref5.domain,
+                                target: _ref5.target,
+                                context: _ref5.context,
+                                uid: _ref5.uid
+                            }).then((function(childPayload) {
+                                return "__zoid__" + name + "__" + base64encode(JSON.stringify(childPayload)) + "__";
+                            }));
+                            var _ref5;
                         }));
                         var openFramePromise = buildWindowNamePromise.then((function(windowName) {
                             return openFrame(context, {
@@ -4100,7 +4115,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_48" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_48");
+                        if ("9_0_49" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_49");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4460,7 +4475,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_48__;
+            delete window.__zoid_9_0_49__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
