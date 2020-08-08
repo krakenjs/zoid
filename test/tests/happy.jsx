@@ -1,6 +1,7 @@
 /* @flow */
 /** @jsx node */
 
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise } from 'belter/src';
 import { getParent, getOpener } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
@@ -523,6 +524,66 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             const instance = component({
                 onRendered: expect('onRendered')
+            });
+
+            return runOnClick(() => {
+                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+            });
+        });
+    });
+
+    it('should enter a component rendered as an iframe and call a promise prop', () => {
+        return wrapPromise(({ expect }) => {
+            const expectedValue = 'bar';
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-iframe-with-promise-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+
+                foo: ZalgoPromise.resolve(expect('foo', bar => {
+                    if (bar !== expectedValue) {
+                        throw new Error(`Expected bar to be ${ JSON.stringify(expectedValue) }, got ${ JSON.stringify(bar) }`);
+                    }
+                })),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(expectedValue) });
+                `
+            }).render(document.body);
+        });
+    });
+
+    it('should enter a component rendered as a popup and call a promise prop', () => {
+        return wrapPromise(({ expect }) => {
+            const expectedValue = 'bar';
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-render-popup-with-promise-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+
+                foo: ZalgoPromise.resolve(expect('foo', bar => {
+                    if (bar !== expectedValue) {
+                        throw new Error(`Expected bar to be ${ JSON.stringify(expectedValue) }, got ${ JSON.stringify(bar) }`);
+                    }
+                })),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(expectedValue) });
+                `
             });
 
             return runOnClick(() => {
