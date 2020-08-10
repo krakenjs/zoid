@@ -86,6 +86,10 @@ function getDefaultProps<P>() : PropsType<P> {
     return {};
 }
 
+type InternalState = {|
+    visible : boolean
+|};
+
 type GetProxyContainer = (container : string | HTMLElement) => ZalgoPromise<ProxyObject<HTMLElement>>;
 type Show = () => ZalgoPromise<void>;
 type Hide = () => ZalgoPromise<void>;
@@ -100,6 +104,8 @@ type Prerender = (proxyPrerenderWin : ProxyWindow, {| context : $Values<typeof C
 type Open = (context : $Values<typeof CONTEXT>, {| proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string |}) => ZalgoPromise<ProxyWindow>;
 type OpenPrerender = (context : $Values<typeof CONTEXT>, proxyWin : ProxyWindow, proxyPrerenderFrame : ?ProxyObject<HTMLIFrameElement>) => ZalgoPromise<ProxyWindow>;
 type WatchForUnload = () => ZalgoPromise<void>;
+type GetInternalState = () => ZalgoPromise<InternalState>;
+type SetInternalState = (InternalState) => ZalgoPromise<InternalState>;
 
 type ParentDelegateOverrides<P> = {|
     props : PropsType<P>,
@@ -117,7 +123,9 @@ type ParentDelegateOverrides<P> = {|
     prerender : Prerender,
     open : Open,
     openPrerender : OpenPrerender,
-    watchForUnload : WatchForUnload
+    watchForUnload : WatchForUnload,
+    getInternalState : GetInternalState,
+    setInternalState : SetInternalState
 |};
 
 type DelegateOverrides = {|
@@ -156,14 +164,15 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     const handledErrors = [];
     const clean = cleanup();
     const state = {};
+    let internalState = {
+        visible: true
+    };
     const event = overrides.event ? overrides.event : eventEmitter();
     const props = overrides.props ? overrides.props : getDefaultProps();
 
     let currentProxyWin : ?ProxyWindow;
     let currentProxyContainer : ?ProxyObject<HTMLElement>;
     let childComponent : ?ChildExportsType<P>;
-
-    let visible : boolean = true;
 
     const onErrorOverride : ?OnError = overrides.onError;
     let getProxyContainerOverride : ?GetProxyContainer = overrides.getProxyContainer;
@@ -179,6 +188,8 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
     let openOverride : ?Open = overrides.open;
     let openPrerenderOverride : ?OpenPrerender = overrides.openPrerender;
     let watchForUnloadOverride : ?WatchForUnload = overrides.watchForUnload;
+    const getInternalStateOverride : ?GetInternalState = overrides.getInternalState;
+    const setInternalStateOverride : ?SetInternalState = overrides.setInternalState;
 
     const getPropsForChild = (domain : string | RegExp) : ZalgoPromise<PropsType<P>> => {
         const result = {};
@@ -223,6 +234,27 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
 
         clean.register(event.reset);
+    };
+
+    const getInternalState = () => {
+        return ZalgoPromise.try(() => {
+            if (getInternalStateOverride) {
+                return getInternalStateOverride();
+            }
+
+            return internalState;
+        });
+    };
+
+    const setInternalState = (newInternalState)  => {
+        return ZalgoPromise.try(() => {
+            if (setInternalStateOverride) {
+                return setInternalStateOverride(newInternalState);
+            }
+
+            internalState = { ...internalState, ...newInternalState };
+            return internalState;
+        });
     };
 
     const getProxyWindow = () : ZalgoPromise<ProxyWindow> => {
@@ -296,12 +328,10 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             return showOverride();
         }
 
-        return ZalgoPromise.try(() => {
-            visible = true;
-            if (currentProxyContainer) {
-                return currentProxyContainer.get().then(showElement);
-            }
-        });
+        return ZalgoPromise.hash({
+            setState:    setInternalState({ visible: true }),
+            showElement: currentProxyContainer ? currentProxyContainer.get().then(showElement) : null
+        }).then(noop);
     };
 
     const hide = () : ZalgoPromise<void> => {
@@ -309,12 +339,10 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             return hideOverride();
         }
 
-        return ZalgoPromise.try(() => {
-            visible = false;
-            if (currentProxyContainer) {
-                return currentProxyContainer.get().then(hideElement);
-            }
-        });
+        return ZalgoPromise.hash({
+            setState:    setInternalState({ visible: false }),
+            showElement: currentProxyContainer ? currentProxyContainer.get().then(hideElement) : null
+        }).then(noop);
     };
 
     const getUrl = () : string => {
@@ -720,8 +748,9 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             // $FlowFixMe
             frame:          proxyFrame ? proxyFrame.get() : null,
             // $FlowFixMe
-            prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
-        }).then(({ container, frame, prerenderFrame }) => {
+            prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null,
+            internalState:  getInternalState()
+        }).then(({ container, frame, prerenderFrame, internalState: { visible } }) => {
             const innerContainer = renderTemplate(containerTemplate, { context, uid, container, frame, prerenderFrame, doc: document });
             if (innerContainer) {
                 if (!visible) {
@@ -816,7 +845,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         }
 
         const childOverridesPromise = send(target, `${ POST_MESSAGE.DELEGATE }_${ name }`, {
-            overrides: { props: delegateProps, event, close, onError }
+            overrides: { props: delegateProps, event, close, onError, getInternalState, setInternalState }
         }).then(({ data: { parent } }) => {
             clean.register(() => {
                 if (!isWindowClosed(target)) {

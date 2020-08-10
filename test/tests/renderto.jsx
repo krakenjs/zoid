@@ -1164,4 +1164,78 @@ describe('zoid renderto cases', () => {
             return instance.render(document.body);
         });
     });
+
+    it('should render a component to the parent as an iframe and hide before render completes', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: window.zoid.create({
+                        tag:    'test-renderto-iframe-hide-before-render-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: window.zoid.create({
+                        tag:    'test-renderto-iframe-hide-before-render-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const instance = window.__component__().simple({
+                foo: expect('foo', ({ createElementWithDimensions }) => {
+                    return createElementWithDimensions().then(({ width, height }) => {
+                        if (width !== 0) {
+                            throw new Error(`Expected width to be 0, got ${ width }`);
+                        }
+
+                        if (height !== 0) {
+                            throw new Error(`Expected height to be 0, got ${ height }`);
+                        }
+                    });
+                }),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: ({ createElementWithDimensions }) => {
+                                return window.xprops.foo({
+                                    createElementWithDimensions
+                                });
+                            },
+
+                            run: () => \`
+                                window.xprops.foo({
+                                    createElementWithDimensions: () => {
+                                        const el = document.createElement('div');
+                                        el.style.height = '50px';
+                                        el.style.width = '50px';
+                                        document.body.appendChild(el);
+
+                                        return {
+                                            height: el.offsetWidth,
+                                            width: el.offsetWidth
+                                        };
+                                    }
+                                });
+                            \`
+                        });
+                        
+                        instance.hide();
+                        instance.renderTo(window.parent, 'body');
+                    `;
+                }
+            });
+            
+            return instance.render(document.body);
+        });
+    });
 });
