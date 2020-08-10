@@ -2772,8 +2772,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_51__ || (win.__zoid_9_0_51__ = {});
-            return win.__zoid_9_0_51__;
+            win.__zoid_9_0_52__ || (win.__zoid_9_0_52__ = {});
+            return win.__zoid_9_0_52__;
         }
         function getProxyObject(obj) {
             return {
@@ -2884,6 +2884,9 @@
             var handledErrors = [];
             var clean = cleanup();
             var state = {};
+            var internalState = {
+                visible: !0
+            };
             var event = overrides.event ? overrides.event : (triggered = {}, handlers = {}, 
             {
                 on: function(eventName, handler) {
@@ -2936,7 +2939,6 @@
             var currentProxyWin;
             var currentProxyContainer;
             var childComponent;
-            var visible = !0;
             var onErrorOverride = overrides.onError;
             var getProxyContainerOverride = overrides.getProxyContainer;
             var showOverride = overrides.show;
@@ -2951,6 +2953,8 @@
             var openOverride = overrides.open;
             var openPrerenderOverride = overrides.openPrerender;
             var watchForUnloadOverride = overrides.watchForUnload;
+            var getInternalStateOverride = overrides.getInternalState;
+            var setInternalStateOverride = overrides.setInternalState;
             var getPropsForChild = function(domain) {
                 var result = {};
                 for (var _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
@@ -2959,6 +2963,16 @@
                     prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(domain, getDomain(window)) || (result[key] = props[key]);
                 }
                 return promise_ZalgoPromise.hash(result);
+            };
+            var getInternalState = function() {
+                return promise_ZalgoPromise.try((function() {
+                    return getInternalStateOverride ? getInternalStateOverride() : internalState;
+                }));
+            };
+            var setInternalState = function(newInternalState) {
+                return promise_ZalgoPromise.try((function() {
+                    return setInternalStateOverride ? setInternalStateOverride(newInternalState) : internalState = _extends({}, internalState, newInternalState);
+                }));
             };
             var getProxyWindow = function() {
                 return getProxyWindowOverride ? getProxyWindowOverride() : promise_ZalgoPromise.try((function() {
@@ -3023,16 +3037,20 @@
                 }));
             };
             var show = function() {
-                return showOverride ? showOverride() : promise_ZalgoPromise.try((function() {
-                    visible = !0;
-                    if (currentProxyContainer) return currentProxyContainer.get().then(showElement);
-                }));
+                return showOverride ? showOverride() : promise_ZalgoPromise.hash({
+                    setState: setInternalState({
+                        visible: !0
+                    }),
+                    showElement: currentProxyContainer ? currentProxyContainer.get().then(showElement) : null
+                }).then(src_util_noop);
             };
             var hide = function() {
-                return hideOverride ? hideOverride() : promise_ZalgoPromise.try((function() {
-                    visible = !1;
-                    if (currentProxyContainer) return currentProxyContainer.get().then(hideElement);
-                }));
+                return hideOverride ? hideOverride() : promise_ZalgoPromise.hash({
+                    setState: setInternalState({
+                        visible: !1
+                    }),
+                    showElement: currentProxyContainer ? currentProxyContainer.get().then(hideElement) : null
+                }).then(src_util_noop);
             };
             var getUrl = function() {
                 return "function" == typeof url ? url({
@@ -3364,9 +3382,10 @@
                 }) : promise_ZalgoPromise.hash({
                     container: proxyContainer.get(),
                     frame: proxyFrame ? proxyFrame.get() : null,
-                    prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null
+                    prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null,
+                    internalState: getInternalState()
                 }).then((function(_ref10) {
-                    var container = _ref10.container;
+                    var container = _ref10.container, visible = _ref10.internalState.visible;
                     var innerContainer = renderTemplate(containerTemplate, {
                         context: context,
                         uid: uid,
@@ -3539,7 +3558,9 @@
                                         props: delegateProps,
                                         event: event,
                                         close: close,
-                                        onError: onError
+                                        onError: onError,
+                                        getInternalState: getInternalState,
+                                        setInternalState: setInternalState
                                     }
                                 }).then((function(_ref11) {
                                     var parent = _ref11.data.parent;
@@ -3715,7 +3736,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_51",
+                                        version: "9_0_52",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4319,7 +4340,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_51" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_51");
+                        if ("9_0_52" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_52");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4688,7 +4709,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_51__;
+            delete window.__zoid_9_0_52__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
