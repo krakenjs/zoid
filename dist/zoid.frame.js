@@ -2331,8 +2331,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_52__ || (win.__zoid_9_0_52__ = {});
-            return win.__zoid_9_0_52__;
+            win.__zoid_9_0_53__ || (win.__zoid_9_0_53__ = {});
+            return win.__zoid_9_0_53__;
         }
         function getProxyObject(obj) {
             return {
@@ -3242,7 +3242,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_52",
+                                        version: "9_0_53",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3671,7 +3671,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_52" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_52");
+                        if ("9_0_53" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_53");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4025,7 +4025,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_52__;
+            delete window.__zoid_9_0_53__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
