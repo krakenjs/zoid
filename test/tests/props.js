@@ -805,9 +805,7 @@ describe('zoid props cases', () => {
                     }, 200);
 
                     return `
-                        console.warn(3333);
                         window.xprops.onProps(function(props) {
-                            console.warn('AAA', props);
                             if (props.foo === 'bar') {
                                 props.onFoo();
                             }
