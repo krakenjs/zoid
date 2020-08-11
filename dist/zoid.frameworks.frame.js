@@ -1345,7 +1345,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_38__ : win.__post_robot_10_0_38__ = win.__post_robot_10_0_38__ || {};
+            return win !== window ? win.__post_robot_10_0_39__ : win.__post_robot_10_0_39__ = win.__post_robot_10_0_39__ || {};
         }
         var getObj = function() {
             return {};
@@ -1982,11 +1982,8 @@
         }
         var SEND_MESSAGE_STRATEGIES = {};
         SEND_MESSAGE_STRATEGIES.postrobot_post_message = function(win, serializedMessage, domain) {
-            (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ "*" ]).map((function(dom) {
-                return 0 === dom.indexOf("file:") ? "*" : dom;
-            })).forEach((function(dom) {
-                win.postMessage(serializedMessage, dom);
-            }));
+            0 === domain.indexOf("file:") && (domain = "*");
+            win.postMessage(serializedMessage, domain);
         };
         SEND_MESSAGE_STRATEGIES.postrobot_global = function(win, serializedMessage) {
             if (!function(win) {
@@ -2002,30 +1999,41 @@
                 data: serializedMessage
             });
         };
-        function send_sendMessage(win, domain, message, _ref) {
-            var _serializeMessage;
-            var on = _ref.on, send = _ref.send;
-            if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_38__ = _extends({
-                id: uniqueID(),
-                origin: getDomain(window)
-            }, message), _serializeMessage), {
-                on: on,
-                send: send
-            });
-            var strategies = Object.keys(SEND_MESSAGE_STRATEGIES);
-            var errors = [];
-            for (var _i2 = 0; _i2 < strategies.length; _i2++) {
-                var strategyName = strategies[_i2];
-                try {
-                    SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
-                } catch (err) {
-                    errors.push(err);
-                }
-            }
-            if (errors.length === strategies.length) throw new Error("All post-robot messaging strategies failed:\n\n" + errors.map((function(err, i) {
-                return i + ". " + stringifyError(err);
-            })).join("\n\n"));
+        function send_sendMessage(win, domain, message, _ref2) {
+            var on = _ref2.on, send = _ref2.send;
+            return promise_ZalgoPromise.try((function() {
+                var domainBuffer = windowStore().getOrSet(win, (function() {
+                    return {};
+                }));
+                domainBuffer.buffer = domainBuffer.buffer || [];
+                domainBuffer.buffer.push(message);
+                domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
+                    if (isWindowClosed(win)) throw new Error("Window is closed");
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_39__ = domainBuffer.buffer || [], 
+                    _ref), {
+                        on: on,
+                        send: send
+                    });
+                    var _ref;
+                    delete domainBuffer.buffer;
+                    var strategies = Object.keys(SEND_MESSAGE_STRATEGIES);
+                    var errors = [];
+                    for (var _i2 = 0; _i2 < strategies.length; _i2++) {
+                        var strategyName = strategies[_i2];
+                        try {
+                            SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
+                        } catch (err) {
+                            errors.push(err);
+                        }
+                    }
+                    if (errors.length === strategies.length) throw new Error("All post-robot messaging strategies failed:\n\n" + errors.map((function(err, i) {
+                        return i + ". " + stringifyError(err);
+                    })).join("\n\n"));
+                }));
+                return domainBuffer.flush.then((function() {
+                    delete domainBuffer.flush;
+                }));
+            })).then(src_util_noop);
         }
         function getResponseListener(hash) {
             return globalStore("responseListeners").get(hash);
@@ -2071,23 +2079,43 @@
                 domain: origin
             });
             var logName = "postrobot_method" === message.name && message.data && "string" == typeof message.data.name ? message.data.name + "()" : message.name;
-            function sendResponse(type, ack, response) {
-                void 0 === response && (response = {});
+            function sendResponse(ack, data, error) {
+                return promise_ZalgoPromise.flush().then((function() {
+                    if (!message.fireAndForget && !isWindowClosed(source)) try {
+                        return send_sendMessage(source, origin, {
+                            id: uniqueID(),
+                            origin: getDomain(window),
+                            type: "postrobot_message_response",
+                            hash: message.hash,
+                            name: message.name,
+                            ack: ack,
+                            data: data,
+                            error: error
+                        }, {
+                            on: on,
+                            send: send
+                        });
+                    } catch (err) {
+                        throw new Error("Send response message failed for " + logName + " in " + getDomain() + "\n\n" + stringifyError(err));
+                    }
+                }));
+            }
+            return promise_ZalgoPromise.all([ promise_ZalgoPromise.flush().then((function() {
                 if (!message.fireAndForget && !isWindowClosed(source)) try {
-                    send_sendMessage(source, origin, _extends({
-                        type: type,
-                        ack: ack,
+                    return send_sendMessage(source, origin, {
+                        id: uniqueID(),
+                        origin: getDomain(window),
+                        type: "postrobot_message_ack",
                         hash: message.hash,
                         name: message.name
-                    }, response), {
+                    }, {
                         on: on,
                         send: send
                     });
                 } catch (err) {
-                    throw new Error("Send response message failed for " + logName + " in " + getDomain() + "\n\n" + stringifyError(err));
+                    throw new Error("Send ack message failed for " + logName + " in " + getDomain() + "\n\n" + stringifyError(err));
                 }
-            }
-            return promise_ZalgoPromise.all([ sendResponse("postrobot_message_ack"), promise_ZalgoPromise.try((function() {
+            })), promise_ZalgoPromise.try((function() {
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!matchDomain(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                 return options.handler({
@@ -2096,13 +2124,9 @@
                     data: message.data
                 });
             })).then((function(data) {
-                return sendResponse("postrobot_message_response", "success", {
-                    data: data
-                });
+                return sendResponse("success", data);
             }), (function(error) {
-                return sendResponse("postrobot_message_response", "error", {
-                    error: error
-                });
+                return sendResponse("error", null, error);
             })) ]).then(src_util_noop).catch((function(err) {
                 if (options && options.handleError) return options.handleError(err);
                 throw err;
@@ -2144,7 +2168,7 @@
                 return;
             }
             var source = event.source, origin = event.origin;
-            var message = function(message, source, origin, _ref) {
+            var messages = function(message, source, origin, _ref) {
                 var on = _ref.on, send = _ref.send;
                 var parsedMessage;
                 try {
@@ -2155,21 +2179,31 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_38__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
+                    var parseMessages = parsedMessage.__post_robot_10_0_39__;
+                    if (Array.isArray(parseMessages)) return parseMessages;
+                }
             }(event.data, source, origin, {
                 on: on,
                 send: send
             });
-            if (message) {
+            if (messages) {
                 markWindowKnown(source);
-                if (!receivedMessages.has(message.id)) {
+                for (var _i2 = 0; _i2 < messages.length; _i2++) {
+                    var message = messages[_i2];
+                    if (receivedMessages.has(message.id)) return;
                     receivedMessages.set(message.id, !0);
-                    if (!isWindowClosed(source) || message.fireAndForget) {
-                        0 === message.origin.indexOf("file:") && (origin = "file://");
-                        RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
+                    if (isWindowClosed(source) && !message.fireAndForget) return;
+                    0 === message.origin.indexOf("file:") && (origin = "file://");
+                    try {
+                        "postrobot_message_request" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_request(source, origin, message, {
                             on: on,
                             send: send
-                        });
+                        }) : "postrobot_message_response" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_response(source, origin, message) : "postrobot_message_ack" === message.type && RECEIVE_MESSAGE_TYPES.postrobot_message_ack(source, origin, message);
+                    } catch (err) {
+                        setTimeout((function() {
+                            throw err;
+                        }), 0);
                     }
                 }
             }
@@ -2269,7 +2303,7 @@
             };
         }
         var send_send = function send(win, name, data, options) {
-            var domain = (options = options || {}).domain || "*";
+            var domainMatcher = (options = options || {}).domain || "*";
             var responseTimeout = options.timeout || -1;
             var childTimeout = options.timeout || 5e3;
             var fireAndForget = options.fireAndForget || !1;
@@ -2278,7 +2312,7 @@
                     if (!name) throw new Error("Expected name");
                     if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Can not send " + name + ". Expected domain " + JSON.stringify(domain) + " to be a string, array, or regex");
                     if (isWindowClosed(win)) throw new Error("Can not send " + name + ". Target window is closed");
-                }(name, win, domain);
+                }(name, win, domainMatcher);
                 if (function(parent, child) {
                     var actualParent = getAncestor(child);
                     if (actualParent) return actualParent === parent;
@@ -2300,21 +2334,23 @@
             })).then((function(_temp) {
                 return function(win, targetDomain, actualDomain, _ref) {
                     var send = _ref.send;
-                    return "string" == typeof targetDomain ? promise_ZalgoPromise.resolve(targetDomain) : promise_ZalgoPromise.try((function() {
-                        return actualDomain || sayHello(win, {
-                            send: send
-                        }).then((function(_ref2) {
-                            return _ref2.domain;
+                    return promise_ZalgoPromise.try((function() {
+                        return "string" == typeof targetDomain ? targetDomain : promise_ZalgoPromise.try((function() {
+                            return actualDomain || sayHello(win, {
+                                send: send
+                            }).then((function(_ref2) {
+                                return _ref2.domain;
+                            }));
+                        })).then((function(normalizedDomain) {
+                            if (!matchDomain(targetDomain, targetDomain)) throw new Error("Domain " + stringify(targetDomain) + " does not match " + stringify(targetDomain));
+                            return normalizedDomain;
                         }));
-                    })).then((function(normalizedDomain) {
-                        if (!matchDomain(targetDomain, targetDomain)) throw new Error("Domain " + stringify(targetDomain) + " does not match " + stringify(targetDomain));
-                        return normalizedDomain;
                     }));
-                }(win, domain, (void 0 === _temp ? {} : _temp).domain, {
+                }(win, domainMatcher, (void 0 === _temp ? {} : _temp).domain, {
                     send: send
                 });
             })).then((function(targetDomain) {
-                domain = targetDomain;
+                var domain = targetDomain;
                 var logName = "postrobot_method" === name && data && "string" == typeof data.name ? data.name + "()" : name;
                 var promise = new promise_ZalgoPromise;
                 var hash = name + "_" + uniqueID();
@@ -2356,21 +2392,22 @@
                         reqPromises.splice(reqPromises.indexOf(promise, 1));
                     })).catch(src_util_noop);
                 }
-                try {
-                    send_sendMessage(win, domain, {
-                        type: "postrobot_message_request",
-                        hash: hash,
-                        name: name,
-                        data: data,
-                        fireAndForget: fireAndForget
-                    }, {
-                        on: on_on,
-                        send: send
-                    });
-                } catch (err) {
+                return send_sendMessage(win, domain, {
+                    id: uniqueID(),
+                    origin: getDomain(window),
+                    type: "postrobot_message_request",
+                    hash: hash,
+                    name: name,
+                    data: data,
+                    fireAndForget: fireAndForget
+                }, {
+                    on: on_on,
+                    send: send
+                }).then((function() {
+                    return fireAndForget ? promise.resolve() : promise;
+                }), (function(err) {
                     throw new Error("Send request message failed for " + logName + " in " + getDomain() + "\n\n" + stringifyError(err));
-                }
-                return fireAndForget ? promise.resolve() : promise;
+                }));
             }));
         };
         function setup_serializeMessage(destination, domain, obj) {
@@ -2393,8 +2430,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_53__ || (win.__zoid_9_0_53__ = {});
-            return win.__zoid_9_0_53__;
+            win.__zoid_9_0_54__ || (win.__zoid_9_0_54__ = {});
+            return win.__zoid_9_0_54__;
         }
         function getProxyObject(obj) {
             return {
@@ -3304,7 +3341,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_53",
+                                        version: "9_0_54",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3889,7 +3926,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_53" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_53");
+                        if ("9_0_54" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_54");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4175,21 +4212,23 @@
                             return addEventListener(window, "message", (function(event) {
                                 !function(event, _ref4) {
                                     var on = _ref4.on, send = _ref4.send;
-                                    var source = event.source || event.sourceElement;
-                                    var origin = event.origin || event.originalEvent && event.originalEvent.origin;
-                                    var data = event.data;
-                                    "null" === origin && (origin = "file://");
-                                    if (source) {
-                                        if (!origin) throw new Error("Post message did not have origin domain");
-                                        receive_receiveMessage({
-                                            source: source,
-                                            origin: origin,
-                                            data: data
-                                        }, {
-                                            on: on,
-                                            send: send
-                                        });
-                                    }
+                                    promise_ZalgoPromise.try((function() {
+                                        var source = event.source || event.sourceElement;
+                                        var origin = event.origin || event.originalEvent && event.originalEvent.origin;
+                                        var data = event.data;
+                                        "null" === origin && (origin = "file://");
+                                        if (source) {
+                                            if (!origin) throw new Error("Post message did not have origin domain");
+                                            receive_receiveMessage({
+                                                source: source,
+                                                origin: origin,
+                                                data: data
+                                            }, {
+                                                on: on,
+                                                send: send
+                                            });
+                                        }
+                                    }));
                                 }(event, {
                                     on: on,
                                     send: send
@@ -4216,7 +4255,7 @@
                             var parent = getAncestor();
                             parent && sayHello(parent, {
                                 send: send
-                            }).catch(src_util_noop);
+                            }).catch((function(err) {}));
                             return listener;
                         }));
                     }({
@@ -4252,7 +4291,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_53__;
+            delete window.__zoid_9_0_54__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4265,7 +4304,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_38__;
+                delete window.__post_robot_10_0_39__;
             }();
         }
     } ]);
