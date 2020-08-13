@@ -599,8 +599,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
     open() : ZalgoPromise<void> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`, { windowName: this.childWindowName });
-            if (this.props.win) {
-                this.clean.set('window', this.props.win);
+            const win = this.props.win;
+
+            if (win) {
+                this.clean.set('window', win);
+                window.addEventListener('beforeunload', () => win.close());
+                window.addEventListener('unload', () => win.close());
                 assertSameDomain(this.window).name = this.childWindowName;
                 return;
             }
