@@ -597,8 +597,16 @@ export var ParentComponent = (_class = function (_BaseComponent) {
 
         return ZalgoPromise['try'](function () {
             _this11.component.log('open_' + _this11.context, { windowName: _this11.childWindowName });
-            if (_this11.props.win) {
-                _this11.clean.set('window', _this11.props.win);
+            var win = _this11.props.win;
+
+            if (win) {
+                _this11.clean.set('window', win);
+                window.addEventListener('beforeunload', function () {
+                    return win.close();
+                });
+                window.addEventListener('unload', function () {
+                    return win.close();
+                });
                 assertSameDomain(_this11.window).name = _this11.childWindowName;
                 return;
             }

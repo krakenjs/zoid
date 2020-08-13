@@ -1160,6 +1160,9 @@
                 } catch (err) {
                     return !0;
                 }
+                try {
+                    if ("postMessage" in obj && "self" in obj && "location" in obj) return !0;
+                } catch (err) {}
                 return !1;
             }
             function isBrowser() {
@@ -3448,12 +3451,16 @@
                     return promise;
                 };
                 ZalgoPromise.hash = function(promises) {
-                    var result = {};
-                    return ZalgoPromise.all(Object.keys(promises).map(function(key) {
-                        return ZalgoPromise.resolve(promises[key]).then(function(value) {
-                            result[key] = value;
-                        });
-                    })).then(function() {
+                    var result = {}, awaitPromises = [], _loop = function(key) {
+                        if (promises.hasOwnProperty(key)) {
+                            var value = promises[key];
+                            utils_isPromise(value) ? awaitPromises.push(value.then(function(res) {
+                                result[key] = res;
+                            })) : result[key] = value;
+                        }
+                    };
+                    for (var key in promises) _loop(key);
+                    return ZalgoPromise.all(awaitPromises).then(function() {
                         return result;
                     });
                 };
@@ -4105,6 +4112,18 @@
                 return BaseComponent;
             }(), client = __webpack_require__("./node_modules/beaver-logger/client/index.js");
             __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), "function" == typeof Symbol && Symbol.iterator;
+            function uniqueID() {
+                var chars = "0123456789abcdef";
+                return "xxxxxxxxxx".replace(/./g, function() {
+                    return chars.charAt(Math.floor(Math.random() * chars.length));
+                }) + "_" + function(str) {
+                    if ("function" == typeof btoa) return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(m, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
+                    throw new Error("Can not find window.btoa or Buffer");
+                }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+            }
             var dom__typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -5108,8 +5127,15 @@
                         _this11.component.log("open_" + _this11.context, {
                             windowName: _this11.childWindowName
                         });
-                        if (!_this11.props.win) return _this11.driver.open.call(_this11);
-                        _this11.clean.set("window", _this11.props.win);
+                        var win = _this11.props.win;
+                        if (!win) return _this11.driver.open.call(_this11);
+                        _this11.clean.set("window", win);
+                        window.addEventListener("beforeunload", function() {
+                            return win.close();
+                        });
+                        window.addEventListener("unload", function() {
+                            return win.close();
+                        });
                         Object(cross_domain_utils_src.a)(_this11.window).name = _this11.childWindowName;
                     });
                 };
@@ -5478,15 +5504,7 @@
                             }(element);
                             if (!shadowHost) throw new Error("Element is not in shadow dom");
                             if (isShadowElement(shadowHost)) throw new Error("Host element is also in shadow dom");
-                            var chars, slotName = "shadow-slot-" + (chars = "0123456789abcdef", "xxxxxxxxxx".replace(/./g, function() {
-                                return chars.charAt(Math.floor(Math.random() * chars.length));
-                            }) + "_" + function(str) {
-                                if ("function" == typeof btoa) return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(m, p1) {
-                                    return String.fromCharCode(parseInt(p1, 16));
-                                }));
-                                if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
-                                throw new Error("Can not find window.btoa or Buffer");
-                            }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase()), slot = document.createElement("slot");
+                            var slotName = "shadow-slot-" + uniqueID(), slot = document.createElement("slot");
                             slot.setAttribute("name", slotName);
                             element.appendChild(slot);
                             var slotProvider = document.createElement("div");
