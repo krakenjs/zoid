@@ -7,5 +7,5 @@ window.MyLoginZoidComponent = zoid.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: './login.htm'
+    url: new URL('login.htm', window.location.href).href
 });
