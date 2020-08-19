@@ -36,6 +36,10 @@
             document.querySelector('#email').value = window.xprops.prefilledEmail;
         }
 
+        window.xprops.onProps((newProps) => {
+            document.querySelector('#email').value = newProps.prefilledEmail;
+        });
+
         // Handle the button click to log the user in
 
         document.querySelector('#loginButton').addEventListener('click', function(event) {

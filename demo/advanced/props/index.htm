@@ -12,6 +12,9 @@
 
     <h3>Log in on xyz.com</h3>
 
+    <input id="email" placeholder="Custom Email" />
+    <br /><br />
+
     <div id="container"></div>
 
     <div id="result"></div>
@@ -20,7 +23,7 @@
 
         // Render the component
 
-        MyLoginZoidComponent({
+        var instance = MyLoginZoidComponent({
 
             prefilledEmail: 'foo@bar.com',
 
@@ -29,8 +32,15 @@
                 document.querySelector('#result').innerText = email + ' logged in!';
             }
 
-        }).render('#container');
+        });
+        
+        instance.render('#container');
 
+        document.querySelector('#email').addEventListener('keyup', function(event) {
+            instance.updateProps({
+                prefilledEmail: event.target.value
+            });
+        });
     </script>
 
 </body>
