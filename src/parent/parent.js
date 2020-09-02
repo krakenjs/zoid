@@ -25,7 +25,7 @@ export type RenderOptionsType<P> = {|
     uid : string,
     props : PropsInputType<P>,
     tag : string,
-    context : string,
+    context : $Values<typeof CONTEXT>,
     close : (?string) => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
     doc : Document,
