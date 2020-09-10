@@ -726,12 +726,14 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             element = getElementSafe(element, doc);
             
             if (element && (width || height)) {
-                onResize(element, ({ width: newWidth, height: newHeight }) => {
+                const prerenderResizeListener = onResize(element, ({ width: newWidth, height: newHeight }) => {
                     resize({
                         width:  width ? newWidth : undefined,
                         height: height ? newHeight : undefined
                     });
                 }, { width, height, win: prerenderWindow });
+
+                event.on(EVENT.RENDERED, prerenderResizeListener.cancel);
             }
         });
     };
