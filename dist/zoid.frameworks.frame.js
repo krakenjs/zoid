@@ -1312,23 +1312,24 @@
             };
             var observer;
             var timeout;
-            if (void 0 !== win.ResizeObserver) (observer = new win.ResizeObserver(check)).observe(el); else if (void 0 !== win.MutationObserver) {
+            win.addEventListener("resize", check);
+            if (void 0 !== win.ResizeObserver) {
+                (observer = new win.ResizeObserver(check)).observe(el);
+                timeout = safeInterval(check, 10 * interval);
+            } else if (void 0 !== win.MutationObserver) {
                 (observer = new win.MutationObserver(check)).observe(el, {
                     attributes: !0,
                     childList: !0,
                     subtree: !0,
                     characterData: !1
                 });
-                win.addEventListener("resize", check);
-            } else !function loop() {
-                check();
-                timeout = setTimeout(loop, interval);
-            }();
+                timeout = safeInterval(check, 10 * interval);
+            } else timeout = safeInterval(check, interval);
             return {
                 cancel: function() {
                     observer.disconnect();
                     window.removeEventListener("resize", check);
-                    clearTimeout(timeout);
+                    timeout.cancel();
                 }
             };
         }
@@ -2435,8 +2436,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_55__ || (win.__zoid_9_0_55__ = {});
-            return win.__zoid_9_0_55__;
+            win.__zoid_9_0_56__ || (win.__zoid_9_0_56__ = {});
+            return win.__zoid_9_0_56__;
         }
         function getProxyObject(obj) {
             return {
@@ -2968,16 +2969,19 @@
                                     for (var _i8 = 0, _arrayFrom4 = arrayFrom(el.children); _i8 < _arrayFrom4.length; _i8++) documentElement.appendChild(_arrayFrom4[_i8]);
                                 }(prerenderWindow, el);
                                 var _autoResize$width = autoResize.width, width = void 0 !== _autoResize$width && _autoResize$width, _autoResize$height = autoResize.height, height = void 0 !== _autoResize$height && _autoResize$height, _autoResize$element = autoResize.element, element = void 0 === _autoResize$element ? "body" : _autoResize$element;
-                                (element = getElementSafe(element, doc)) && (width || height) && onResize(element, (function(_ref8) {
-                                    resize({
-                                        width: width ? _ref8.width : void 0,
-                                        height: height ? _ref8.height : void 0
+                                if ((element = getElementSafe(element, doc)) && (width || height)) {
+                                    var prerenderResizeListener = onResize(element, (function(_ref8) {
+                                        resize({
+                                            width: width ? _ref8.width : void 0,
+                                            height: height ? _ref8.height : void 0
+                                        });
+                                    }), {
+                                        width: width,
+                                        height: height,
+                                        win: prerenderWindow
                                     });
-                                }), {
-                                    width: width,
-                                    height: height,
-                                    win: prerenderWindow
-                                });
+                                    event.on(EVENT.RENDERED, prerenderResizeListener.cancel);
+                                }
                             }
                         }
                     }
@@ -3346,7 +3350,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_55",
+                                        version: "9_0_56",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3931,7 +3935,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_55" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_55");
+                        if ("9_0_56" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_56");
                         var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4296,7 +4300,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_55__;
+            delete window.__zoid_9_0_56__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
