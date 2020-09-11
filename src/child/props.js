@@ -15,8 +15,8 @@ export function normalizeChildProp<P, T>(propsDef : PropsDefinitionType<P>, prop
     const prop = propsDef[key];
 
     if (typeof prop.childDecorate === 'function') {
-        const { close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide } = helpers;
-        const decoratedValue = prop.childDecorate({ value, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide });
+        const { uid, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide } = helpers;
+        const decoratedValue = prop.childDecorate({ value, uid, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide });
 
         // $FlowFixMe
         return decoratedValue;

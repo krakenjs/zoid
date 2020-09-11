@@ -12,6 +12,7 @@ export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 export type timeoutPropType = number;
 export type windowPropType = CrossDomainWindowType | ProxyWindow;
 export type cspNoncePropType = string;
+export type uidPropType = string;
 export type closePropType = () => ZalgoPromise<void>;
 export type focusPropType = () => ZalgoPromise<void>;
 export type showPropType = () => ZalgoPromise<void>;
@@ -54,6 +55,7 @@ export type PropsType<P> = {
     close? : ?closePropType,
     focus? : ?focusPropType,
     resize? : ?resizePropType,
+    uid : uidPropType,
     cspNonce? : ?cspNoncePropType,
 
     onDisplay : onDisplayPropType,
@@ -97,6 +99,7 @@ type PropDefinitionType<T, P, S : string> = {|
     |}) => T,
     childDecorate? : ({|
         value : ?T,
+        uid : string,
         close : () => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
@@ -136,6 +139,7 @@ export type BuiltInPropsDefinitionType<P> = {|
     close : FunctionPropDefinitionType<closePropType, P>,
     focus : FunctionPropDefinitionType<focusPropType, P>,
     resize : FunctionPropDefinitionType<resizePropType, P>,
+    uid : StringPropDefinitionType<uidPropType, P>,
     cspNonce : StringPropDefinitionType<cspNoncePropType, P>,
     getParent : FunctionPropDefinitionType<getParentPropType, P>,
     getParentDomain : FunctionPropDefinitionType<getParentDomainPropType, P>,
@@ -215,6 +219,13 @@ export function getBuiltInProps<P>() : BuiltInPropsDefinitionType<P> {
             required:      false,
             sendToChild:   false,
             childDecorate: ({ resize }) => resize
+        },
+
+        uid: {
+            type:          'string',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ uid }) => uid
         },
 
         cspNonce: {

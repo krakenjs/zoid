@@ -24,6 +24,7 @@ export type ChildExportsType<P> = {|
 |};
 
 export type ChildHelpers<P> = {|
+    uid : string,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
     resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
@@ -125,7 +126,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         throw new Error(`Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
     }
 
-    const { parent: parentRef, parentDomain, exports, context, props: propsRef } = childPayload;
+    const { uid, parent: parentRef, parentDomain, exports, context, props: propsRef } = childPayload;
     const parentComponentWindow = getParentComponentWindow(parentRef);
     const parent = deserializeMessage(parentComponentWindow, parentDomain, exports);
 
@@ -155,7 +156,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
     const getHelpers = () : ChildHelpers<P> => {
         return {
             show, hide, close, focus, onError, resize,
-            onProps, getParent, getParentDomain
+            onProps, getParent, getParentDomain, uid
         };
     };
 
