@@ -2374,8 +2374,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_56__ || (win.__zoid_9_0_56__ = {});
-            return win.__zoid_9_0_56__;
+            win.__zoid_9_0_57__ || (win.__zoid_9_0_57__ = {});
+            return win.__zoid_9_0_57__;
         }
         function getProxyObject(obj) {
             return {
@@ -2418,6 +2418,7 @@
             var prop = propsDef[key];
             return "function" == typeof prop.childDecorate ? prop.childDecorate({
                 value: value,
+                uid: helpers.uid,
                 close: helpers.close,
                 focus: helpers.focus,
                 onError: helpers.onError,
@@ -3288,7 +3289,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_56",
+                                        version: "9_0_57",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3569,6 +3570,14 @@
                             return _ref6.resize;
                         }
                     },
+                    uid: {
+                        type: "string",
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref7) {
+                            return _ref7.uid;
+                        }
+                    },
                     cspNonce: {
                         type: "string",
                         required: !1
@@ -3577,32 +3586,32 @@
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref7) {
-                            return _ref7.getParent;
+                        childDecorate: function(_ref8) {
+                            return _ref8.getParent;
                         }
                     },
                     getParentDomain: {
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref8) {
-                            return _ref8.getParentDomain;
+                        childDecorate: function(_ref9) {
+                            return _ref9.getParentDomain;
                         }
                     },
                     show: {
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref9) {
-                            return _ref9.show;
+                        childDecorate: function(_ref10) {
+                            return _ref10.show;
                         }
                     },
                     hide: {
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref10) {
-                            return _ref10.hide;
+                        childDecorate: function(_ref11) {
+                            return _ref11.hide;
                         }
                     },
                     onDisplay: {
@@ -3661,8 +3670,8 @@
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref11) {
-                            return _ref11.onError;
+                        childDecorate: function(_ref12) {
+                            return _ref12.onError;
                         }
                     },
                     onProps: {
@@ -3670,8 +3679,8 @@
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
-                        childDecorate: function(_ref12) {
-                            return _ref12.onProps;
+                        childDecorate: function(_ref13) {
+                            return _ref13.onProps;
                         }
                     }
                 }, propsDef);
@@ -3717,8 +3726,8 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_56" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_56");
-                        var parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
+                        if ("9_0_57" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_57");
+                        var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
                             if ("opener" === type) return assertExists("opener", getOpener(window));
@@ -3799,7 +3808,8 @@
                                 resize: resize,
                                 onProps: onProps,
                                 getParent: getParent,
-                                getParentDomain: getParentDomain
+                                getParentDomain: getParentDomain,
+                                uid: uid
                             }, isUpdate);
                             props ? extend(props, normalizedProps) : props = normalizedProps;
                             for (var _i4 = 0; _i4 < onPropHandlers.length; _i4++) (0, onPropHandlers[_i4])(props);
@@ -4073,7 +4083,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_56__;
+            delete window.__zoid_9_0_57__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
