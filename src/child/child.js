@@ -6,7 +6,7 @@ import { isSameDomain, matchDomain, getDomain, getOpener,
     type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage, type CrossDomainFunctionType } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { extend, waitForDocumentBody, onResize, getElementSafe, assertExists } from 'belter/src';
+import { extend, onResize, elementReady, assertExists, noop } from 'belter/src';
 
 import { getGlobal } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
@@ -189,16 +189,15 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         }
     };
     
-    const getAutoResize = () : {| width : boolean, height : boolean, element : ?HTMLElement |} => {
-        let { width = false, height = false, element = 'body' } = autoResize;
-        element = getElementSafe(element);
-        return { width, height, element };
+    const getAutoResize = () : ZalgoPromise<{| width : boolean, height : boolean, element : ?HTMLElement |}> => {
+        const { width = false, height = false, element: elementRef = 'body' } = autoResize;
+        return elementReady(elementRef).catch(noop).then(element => {
+            return { width, height, element };
+        });
     };
 
     const watchForResize = () : ?ZalgoPromise<void> => {
-        return waitForDocumentBody().then(() => {
-            const { width, height, element } = getAutoResize();
-
+        return getAutoResize().then(({ width, height, element }) => {
             if (!element || (!width && !height) || context === CONTEXT.POPUP) {
                 return;
             }
