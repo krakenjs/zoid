@@ -1131,22 +1131,23 @@
         function isDocumentReady() {
             return Boolean(document.body) && "complete" === document.readyState;
         }
+        function isDocumentInteractive() {
+            return Boolean(document.body) && "interactive" === document.readyState;
+        }
         function urlEncode(str) {
             return str.replace(/\?/g, "%3F").replace(/&/g, "%26").replace(/#/g, "%23").replace(/\+/g, "%2B");
         }
-        function waitForDocumentReady() {
-            return inlineMemoize(waitForDocumentReady, (function() {
-                return new promise_ZalgoPromise((function(resolve) {
-                    if (isDocumentReady()) return resolve();
-                    var interval = setInterval((function() {
-                        if (isDocumentReady()) {
-                            clearInterval(interval);
-                            return resolve();
-                        }
-                    }), 10);
-                }));
+        memoize((function() {
+            return new promise_ZalgoPromise((function(resolve) {
+                if (isDocumentReady() || isDocumentInteractive()) return resolve();
+                var interval = setInterval((function() {
+                    if (isDocumentReady() || isDocumentInteractive()) {
+                        clearInterval(interval);
+                        return resolve();
+                    }
+                }), 10);
             }));
-        }
+        }));
         function parseQuery(queryString) {
             return inlineMemoize(parseQuery, (function() {
                 var params = {};
@@ -1179,6 +1180,24 @@
         function getElementSafe(id, doc) {
             void 0 === doc && (doc = document);
             return isElement(id) ? id : "string" == typeof id ? doc.querySelector(id) : void 0;
+        }
+        function elementReady(id) {
+            return new promise_ZalgoPromise((function(resolve, reject) {
+                var name = stringify(id);
+                var el = getElementSafe(id);
+                if (el) return resolve(el);
+                if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
+                var interval = setInterval((function() {
+                    if (el = getElementSafe(id)) {
+                        clearInterval(interval);
+                        return resolve(el);
+                    }
+                    if (isDocumentReady()) {
+                        clearInterval(interval);
+                        return reject(new Error("Document is ready and element " + name + " does not exist"));
+                    }
+                }), 10);
+            }));
         }
         function PopupOpenError(message) {
             this.message = message;
@@ -2436,8 +2455,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_57__ || (win.__zoid_9_0_57__ = {});
-            return win.__zoid_9_0_57__;
+            win.__zoid_9_0_58__ || (win.__zoid_9_0_58__ = {});
+            return win.__zoid_9_0_58__;
         }
         function getProxyObject(obj) {
             return {
@@ -2656,23 +2675,7 @@
             };
             var getProxyContainer = function(container) {
                 return getProxyContainerOverride ? getProxyContainerOverride(container) : promise_ZalgoPromise.try((function() {
-                    return id = container, new promise_ZalgoPromise((function(resolve, reject) {
-                        var name = stringify(id);
-                        var el = getElementSafe(id);
-                        if (el) return resolve(el);
-                        if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
-                        var interval = setInterval((function() {
-                            if (el = getElementSafe(id)) {
-                                clearInterval(interval);
-                                return resolve(el);
-                            }
-                            if (isDocumentReady()) {
-                                clearInterval(interval);
-                                return reject(new Error("Document is ready and element " + name + " does not exist"));
-                            }
-                        }), 10);
-                    }));
-                    var id;
+                    return elementReady(container);
                 })).then((function(containerElement) {
                     isShadowElement(containerElement) && (containerElement = function(element) {
                         var shadowHost = function(element) {
@@ -3351,7 +3354,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_57",
+                                        version: "9_0_58",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3944,7 +3947,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_57" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_57");
+                        if ("9_0_58" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_58");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4060,28 +4063,27 @@
                                         close: child_destroy
                                     });
                                 })).then((function() {
-                                    return waitForDocumentReady().then((function() {
-                                        if (document.body) return document.body;
-                                        throw new Error("Document ready but document.body not present");
-                                    })).then((function() {
-                                        var _getAutoResize = function() {
-                                            var _autoResize$width = autoResize.width, _autoResize$height = autoResize.height, _autoResize$element = autoResize.element, element = void 0 === _autoResize$element ? "body" : _autoResize$element;
-                                            return {
-                                                width: void 0 !== _autoResize$width && _autoResize$width,
-                                                height: void 0 !== _autoResize$height && _autoResize$height,
-                                                element: element = getElementSafe(element)
-                                            };
-                                        }(), width = _getAutoResize.width, height = _getAutoResize.height, element = _getAutoResize.element;
-                                        element && (width || height) && context !== CONTEXT.POPUP && onResize(element, (function(_ref3) {
+                                    return (_autoResize$width = autoResize.width, width = void 0 !== _autoResize$width && _autoResize$width, 
+                                    _autoResize$height = autoResize.height, height = void 0 !== _autoResize$height && _autoResize$height, 
+                                    _autoResize$element = autoResize.element, elementReady(void 0 === _autoResize$element ? "body" : _autoResize$element).catch(src_util_noop).then((function(element) {
+                                        return {
+                                            width: width,
+                                            height: height,
+                                            element: element
+                                        };
+                                    }))).then((function(_ref3) {
+                                        var width = _ref3.width, height = _ref3.height, element = _ref3.element;
+                                        element && (width || height) && context !== CONTEXT.POPUP && onResize(element, (function(_ref4) {
                                             resize({
-                                                width: width ? _ref3.width : void 0,
-                                                height: height ? _ref3.height : void 0
+                                                width: width ? _ref4.width : void 0,
+                                                height: height ? _ref4.height : void 0
                                             });
                                         }), {
                                             width: width,
                                             height: height
                                         });
                                     }));
+                                    var _autoResize$width, width, _autoResize$height, height, _autoResize$element;
                                 })).catch((function(err) {
                                     onError(err);
                                 }));
@@ -4310,7 +4312,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_57__;
+            delete window.__zoid_9_0_58__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
