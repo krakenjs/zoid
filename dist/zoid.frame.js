@@ -1323,8 +1323,14 @@
             }()) return currentScript;
             throw new Error("Can not determine current script");
         }));
+        var currentUID = uniqueID();
         memoize((function() {
-            var script = getCurrentScript();
+            var script;
+            try {
+                script = getCurrentScript();
+            } catch (err) {
+                return currentUID;
+            }
             var uid = script.getAttribute("data-uid");
             if (uid && "string" == typeof uid) return uid;
             uid = uniqueID();
@@ -1345,7 +1351,8 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_39__ : win.__post_robot_10_0_39__ = win.__post_robot_10_0_39__ || {};
+            var globalKey = "__post_robot_10_0_40__";
+            return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
             return {};
@@ -2009,7 +2016,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_39__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_40__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -2180,7 +2187,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_39__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_40__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2430,8 +2437,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_59__ || (win.__zoid_9_0_59__ = {});
-            return win.__zoid_9_0_59__;
+            win.__zoid_9_0_60__ || (win.__zoid_9_0_60__ = {});
+            return win.__zoid_9_0_60__;
         }
         function getProxyObject(obj) {
             return {
@@ -3329,7 +3336,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_59",
+                                        version: "9_0_60",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3551,7 +3558,8 @@
         var props_decorateOnce = function(_ref) {
             return once(_ref.value);
         };
-        var component_clean = cleanup();
+        var cleanInstances = cleanup();
+        var cleanZoid = cleanup();
         function component_component(opts) {
             var options = function(options) {
                 var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, propsDef = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? null : _options$prerenderTem, validate = options.validate, _options$eligible = options.eligible, eligible = void 0 === _options$eligible ? function() {
@@ -3766,7 +3774,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_59" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_59");
+                        if ("9_0_60" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_60");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -3938,8 +3946,8 @@
                         parent: parentComponent(options, _ref.data.overrides, _ref.source)
                     };
                 }));
-                component_clean.register(allowDelegateListener.cancel);
-                component_clean.register(delegateListener.cancel);
+                cleanZoid.register(allowDelegateListener.cancel);
+                cleanZoid.register(delegateListener.cancel);
             }();
             global.components = global.components || {};
             if (global.components[tag]) throw new Error("Can not register multiple components with the same tag: " + tag);
@@ -3958,7 +3966,7 @@
                     var parent = parentComponent(options);
                     parent.init();
                     eligibility ? parent.setProps(props) : props.onDestroy && props.onDestroy();
-                    component_clean.register((function() {
+                    cleanInstances.register((function() {
                         parent.destroy(new Error("zoid destroyed all components"));
                     }));
                     var _render = function(target, container, context) {
@@ -4116,15 +4124,16 @@
             child && (window.xprops = init.xprops = child.getProps());
             return init;
         }
-        function destroyAll() {
-            var destroyPromise = component_clean.all();
-            component_clean = cleanup();
+        function destroyComponents() {
+            var destroyPromise = cleanInstances.all();
+            cleanInstances = cleanup();
             return destroyPromise;
         }
-        var destroyComponents = destroyAll;
+        var destroyAll = destroyComponents;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_59__;
+            delete window.__zoid_9_0_60__;
+            cleanZoid.all();
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4137,7 +4146,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_39__;
+                delete window.__post_robot_10_0_40__;
             }();
         }
     } ]);
