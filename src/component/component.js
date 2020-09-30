@@ -229,15 +229,18 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
     });
 
     const listenForDelegate = () => {
-        on(`${ POST_MESSAGE.ALLOW_DELEGATE }_${ name }`, () => {
+        const allowDelegateListener = on(`${ POST_MESSAGE.ALLOW_DELEGATE }_${ name }`, () => {
             return true;
         });
 
-        on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { overrides } }) => {
+        const delegateListener = on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { overrides } }) => {
             return {
                 parent: parentComponent(options, overrides, source)
             };
         });
+
+        clean.register(allowDelegateListener.cancel);
+        clean.register(delegateListener.cancel);
     };
 
     const canRenderTo = (win : CrossDomainWindowType) : ZalgoPromise<boolean> => {

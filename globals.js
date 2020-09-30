@@ -21,6 +21,7 @@ module.exports = {
         __POPUP_SUPPORT__:     true,
         __FRAMEWORK_SUPPORT__: false,
         __DEFAULT_CONTAINER__: true,
-        __DEFAULT_PRERENDER__: true
+        __DEFAULT_PRERENDER__: true,
+        __SCRIPT_NAMESPACE__:  false
     }
 };
