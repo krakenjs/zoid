@@ -1279,19 +1279,24 @@
             var _ref2 = void 0 === _temp ? {} : _temp, _ref2$width = _ref2.width, width = void 0 === _ref2$width || _ref2$width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height, _ref2$interval = _ref2.interval, interval = void 0 === _ref2$interval ? 100 : _ref2$interval, _ref2$win = _ref2.win, win = void 0 === _ref2$win ? window : _ref2$win;
             var currentWidth = el.offsetWidth;
             var currentHeight = el.offsetHeight;
+            var canceled = !1;
             handler({
                 width: currentWidth,
                 height: currentHeight
             });
             var check = function() {
-                var newWidth = el.offsetWidth;
-                var newHeight = el.offsetHeight;
-                (width && newWidth !== currentWidth || height && newHeight !== currentHeight) && handler({
-                    width: newWidth,
-                    height: newHeight
-                });
-                currentWidth = newWidth;
-                currentHeight = newHeight;
+                if (!canceled && function(el) {
+                    return Boolean(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+                }(el)) {
+                    var newWidth = el.offsetWidth;
+                    var newHeight = el.offsetHeight;
+                    (width && newWidth !== currentWidth || height && newHeight !== currentHeight) && handler({
+                        width: newWidth,
+                        height: newHeight
+                    });
+                    currentWidth = newWidth;
+                    currentHeight = newHeight;
+                }
             };
             var observer;
             var timeout;
@@ -1310,6 +1315,7 @@
             } else timeout = safeInterval(check, interval);
             return {
                 cancel: function() {
+                    canceled = !0;
                     observer.disconnect();
                     window.removeEventListener("resize", check);
                     timeout.cancel();
@@ -1320,6 +1326,37 @@
             for (;element.parentNode; ) element = element.parentNode;
             return "[object ShadowRoot]" === element.toString();
         }
+        var currentScript = "undefined" != typeof document ? document.currentScript : null;
+        var getCurrentScript = memoize((function() {
+            if (currentScript) return currentScript;
+            if (currentScript = function() {
+                try {
+                    var stack = function() {
+                        try {
+                            throw new Error("_");
+                        } catch (err) {
+                            return err.stack || "";
+                        }
+                    }();
+                    var stackDetails = /.*at [^(]*\((.*):(.+):(.+)\)$/gi.exec(stack);
+                    var scriptLocation = stackDetails && stackDetails[1];
+                    if (!scriptLocation) return;
+                    for (var _i20 = 0, _Array$prototype$slic2 = [].slice.call(document.getElementsByTagName("script")).reverse(); _i20 < _Array$prototype$slic2.length; _i20++) {
+                        var script = _Array$prototype$slic2[_i20];
+                        if (script.src && script.src === scriptLocation) return script;
+                    }
+                } catch (err) {}
+            }()) return currentScript;
+            throw new Error("Can not determine current script");
+        }));
+        memoize((function() {
+            var script = getCurrentScript();
+            var uid = script.getAttribute("data-uid");
+            if (uid && "string" == typeof uid) return uid;
+            uid = uniqueID();
+            script.setAttribute("data-uid", uid);
+            return uid;
+        }));
         function isPerc(str) {
             return "string" == typeof str && /^[0-9]+%$/.test(str);
         }
@@ -2772,8 +2809,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_58__ || (win.__zoid_9_0_58__ = {});
-            return win.__zoid_9_0_58__;
+            win.__zoid_9_0_59__ || (win.__zoid_9_0_59__ = {});
+            return win.__zoid_9_0_59__;
         }
         function getProxyObject(obj) {
             return {
@@ -3724,7 +3761,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_58",
+                                        version: "9_0_59",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4194,7 +4231,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_58" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_58");
+                        if ("9_0_59" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_59");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4358,14 +4395,16 @@
             }));
             registerChild();
             !function() {
-                on_on("zoid_allow_delegate_" + name, (function() {
+                var allowDelegateListener = on_on("zoid_allow_delegate_" + name, (function() {
                     return !0;
                 }));
-                on_on("zoid_delegate_" + name, (function(_ref) {
+                var delegateListener = on_on("zoid_delegate_" + name, (function(_ref) {
                     return {
                         parent: parentComponent(options, _ref.data.overrides, _ref.source)
                     };
                 }));
+                component_clean.register(allowDelegateListener.cancel);
+                component_clean.register(delegateListener.cancel);
             }();
             global.components = global.components || {};
             if (global.components[tag]) throw new Error("Can not register multiple components with the same tag: " + tag);
@@ -4556,7 +4595,7 @@
         var destroyComponents = destroyAll;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_58__;
+            delete window.__zoid_9_0_59__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
