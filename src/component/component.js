@@ -180,7 +180,8 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
     };
 }
 
-let clean = cleanup();
+let cleanInstances = cleanup();
+const cleanZoid = cleanup();
 
 export type Component<P> = {|
     init : (PropsInputType<P>) => ZoidComponentInstance<P>,
@@ -239,8 +240,8 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             };
         });
 
-        clean.register(allowDelegateListener.cancel);
-        clean.register(delegateListener.cancel);
+        cleanZoid.register(allowDelegateListener.cancel);
+        cleanZoid.register(delegateListener.cancel);
     };
 
     const canRenderTo = (win : CrossDomainWindowType) : ZalgoPromise<boolean> => {
@@ -320,7 +321,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             }
         }
 
-        clean.register(() => {
+        cleanInstances.register(() => {
             parent.destroy(new Error(`zoid destroyed all components`));
         });
 
@@ -428,20 +429,25 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
     return init;
 }
 
-export function destroyAll() : ZalgoPromise<void> {
+export function destroyComponents() : ZalgoPromise<void> {
     if (bridge) {
         bridge.destroyBridges();
     }
 
-    const destroyPromise = clean.all();
-    clean = cleanup();
+    const destroyPromise = cleanInstances.all();
+    cleanInstances = cleanup();
     return destroyPromise;
 }
 
-export const destroyComponents = destroyAll;
+function destroyZoid() : ZalgoPromise<void> {
+    return cleanZoid.all();
+}
+
+export const destroyAll = destroyComponents;
 
 export function destroy() {
     destroyAll();
     destroyGlobal();
+    destroyZoid();
     destroyPostRobot();
 }
