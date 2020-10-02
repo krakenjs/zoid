@@ -63,7 +63,7 @@
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         __webpack_require__.d(__webpack_exports__, "PopupOpenError", (function() {
-            return PopupOpenError;
+            return dom_PopupOpenError;
         }));
         __webpack_require__.d(__webpack_exports__, "create", (function() {
             return create;
@@ -89,6 +89,11 @@
         __webpack_require__.d(__webpack_exports__, "EVENT", (function() {
             return EVENT;
         }));
+        function _inheritsLoose(subClass, superClass) {
+            subClass.prototype = Object.create(superClass.prototype);
+            subClass.prototype.constructor = subClass;
+            subClass.__proto__ = superClass;
+        }
         function _extends() {
             return (_extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -888,6 +893,61 @@
             };
             return CrossDomainSafeWeakMap;
         }();
+        function _getPrototypeOf(o) {
+            return (_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function(o) {
+                return o.__proto__ || Object.getPrototypeOf(o);
+            })(o);
+        }
+        function _setPrototypeOf(o, p) {
+            return (_setPrototypeOf = Object.setPrototypeOf || function(o, p) {
+                o.__proto__ = p;
+                return o;
+            })(o, p);
+        }
+        function _isNativeReflectConstruct() {
+            if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
+            if (Reflect.construct.sham) return !1;
+            if ("function" == typeof Proxy) return !0;
+            try {
+                Date.prototype.toString.call(Reflect.construct(Date, [], (function() {})));
+                return !0;
+            } catch (e) {
+                return !1;
+            }
+        }
+        function construct_construct(Parent, args, Class) {
+            return (construct_construct = _isNativeReflectConstruct() ? Reflect.construct : function(Parent, args, Class) {
+                var a = [ null ];
+                a.push.apply(a, args);
+                var instance = new (Function.bind.apply(Parent, a));
+                Class && _setPrototypeOf(instance, Class.prototype);
+                return instance;
+            }).apply(null, arguments);
+        }
+        function wrapNativeSuper_wrapNativeSuper(Class) {
+            var _cache = "function" == typeof Map ? new Map : void 0;
+            return (wrapNativeSuper_wrapNativeSuper = function(Class) {
+                if (null === Class || !(fn = Class, -1 !== Function.toString.call(fn).indexOf("[native code]"))) return Class;
+                var fn;
+                if ("function" != typeof Class) throw new TypeError("Super expression must either be null or a function");
+                if (void 0 !== _cache) {
+                    if (_cache.has(Class)) return _cache.get(Class);
+                    _cache.set(Class, Wrapper);
+                }
+                function Wrapper() {
+                    return construct_construct(Class, arguments, _getPrototypeOf(this).constructor);
+                }
+                Wrapper.prototype = Object.create(Class.prototype, {
+                    constructor: {
+                        value: Wrapper,
+                        enumerable: !1,
+                        writable: !0,
+                        configurable: !0
+                    }
+                });
+                return _setPrototypeOf(Wrapper, Class);
+            })(Class);
+        }
         function getFunctionName(fn) {
             return fn.name || fn.__name__ || fn.displayName || "anonymous";
         }
@@ -1024,6 +1084,12 @@
             for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
             return obj;
         }
+        memoize((function(obj) {
+            if (Object.values) return Object.values(obj);
+            var result = [];
+            for (var key in obj) obj.hasOwnProperty(key) && result.push(obj[key]);
+            return result;
+        }));
         function identity(item) {
             return item;
         }
@@ -1087,11 +1153,19 @@
             if (null == thing) throw new Error("Expected " + name + " to be present");
             return thing;
         }
-        memoize((function(obj) {
-            var result = [];
-            for (var key in obj) obj.hasOwnProperty(key) && result.push(obj[key]);
-            return result;
-        }));
+        var util_ExtendableError = function(_Error) {
+            _inheritsLoose(ExtendableError, _Error);
+            function ExtendableError(message) {
+                var _this7;
+                (_this7 = _Error.call(this, message) || this).name = _this7.constructor.name;
+                "function" == typeof Error.captureStackTrace ? Error.captureStackTrace(function(self) {
+                    if (void 0 === self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    return self;
+                }(_this7), _this7.constructor) : _this7.stack = new Error(message).stack;
+                return _this7;
+            }
+            return ExtendableError;
+        }(wrapNativeSuper_wrapNativeSuper(Error));
         function isDocumentReady() {
             return Boolean(document.body) && "complete" === document.readyState;
         }
@@ -1163,10 +1237,13 @@
                 }), 10);
             }));
         }
-        function PopupOpenError(message) {
-            this.message = message;
-        }
-        PopupOpenError.prototype = Object.create(Error.prototype);
+        var dom_PopupOpenError = function(_ExtendableError) {
+            _inheritsLoose(PopupOpenError, _ExtendableError);
+            function PopupOpenError() {
+                return _ExtendableError.apply(this, arguments) || this;
+            }
+            return PopupOpenError;
+        }(util_ExtendableError);
         var awaitFrameLoadPromises;
         function awaitFrameLoad(frame) {
             if ((awaitFrameLoadPromises = awaitFrameLoadPromises || new weakmap_CrossDomainSafeWeakMap).has(frame)) {
@@ -1387,7 +1464,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_40__";
+            var globalKey = "__post_robot_10_0_41__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -2332,7 +2409,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_40__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_41__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -2393,8 +2470,7 @@
                 }
             }
         }
-        var _RECEIVE_MESSAGE_TYPE;
-        var RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {}).postrobot_message_request = function(source, origin, message, _ref) {
+        function handleRequest(source, origin, message, _ref) {
             var on = _ref.on, send = _ref.send;
             var options = getRequestListener({
                 name: message.name,
@@ -2454,7 +2530,8 @@
                 if (options && options.handleError) return options.handleError(err);
                 throw err;
             }));
-        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_ack = function(source, origin, message) {
+        }
+        function handleAck(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2466,7 +2543,8 @@
                 }
                 options.ack = !0;
             }
-        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_response = function(source, origin, message) {
+        }
+        function handleResponse(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2481,7 +2559,7 @@
                     data: message.data
                 });
             }
-        }, _RECEIVE_MESSAGE_TYPE);
+        }
         function receive_receiveMessage(event, _ref2) {
             var on = _ref2.on, send = _ref2.send;
             var receivedMessages = globalStore("receivedMessages");
@@ -2503,7 +2581,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_40__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_41__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2519,10 +2597,10 @@
                     if (isWindowClosed(source) && !message.fireAndForget) return;
                     0 === message.origin.indexOf("file:") && (origin = "file://");
                     try {
-                        "postrobot_message_request" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_request(source, origin, message, {
+                        "postrobot_message_request" === message.type ? handleRequest(source, origin, message, {
                             on: on,
                             send: send
-                        }) : "postrobot_message_response" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_response(source, origin, message) : "postrobot_message_ack" === message.type && RECEIVE_MESSAGE_TYPES.postrobot_message_ack(source, origin, message);
+                        }) : "postrobot_message_response" === message.type ? handleResponse(source, origin, message) : "postrobot_message_ack" === message.type && handleAck(source, origin, message);
                     } catch (err) {
                         setTimeout((function() {
                             throw err;
@@ -2816,8 +2894,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_60__ || (win.__zoid_9_0_60__ = {});
-            return win.__zoid_9_0_60__;
+            win.__zoid_9_0_61__ || (win.__zoid_9_0_61__ = {});
+            return win.__zoid_9_0_61__;
         }
         function getProxyObject(obj) {
             return {
@@ -3267,11 +3345,11 @@
                             try {
                                 win = window.open("", name, params, !0);
                             } catch (err) {
-                                throw new PopupOpenError("Can not open popup window - " + (err.stack || err.message));
+                                throw new dom_PopupOpenError("Can not open popup window - " + (err.stack || err.message));
                             }
                             if (isWindowClosed(win)) {
                                 var err;
-                                throw new PopupOpenError("Can not open popup window - blocked");
+                                throw new dom_PopupOpenError("Can not open popup window - blocked");
                             }
                             window.addEventListener("unload", (function() {
                                 return win.close();
@@ -3768,7 +3846,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_60",
+                                        version: "9_0_61",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4239,7 +4317,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_60" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_60");
+                        if ("9_0_61" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_61");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4603,7 +4681,7 @@
         var destroyAll = destroyComponents;
         function component_destroy() {
             destroyAll();
-            delete window.__zoid_9_0_60__;
+            delete window.__zoid_9_0_61__;
             cleanZoid.all();
             !function() {
                 !function() {
@@ -4617,7 +4695,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_40__;
+                delete window.__post_robot_10_0_41__;
             }();
         }
     } ]);
