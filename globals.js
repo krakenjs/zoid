@@ -5,7 +5,7 @@ const postRobotGlobals = require('post-robot/globals');
 
 const pkg = require('./package.json');
 
-const formatVersion = (version) => {
+const formatVersion = (version) : string => {
     return version.replace(/[^\d]+/g, '_');
 };
 
@@ -15,7 +15,7 @@ module.exports = {
         __AUTO_SETUP__: false
     },
     __ZOID__: {
-        __VERSION__:           formatVersion(pkg.version),
+        __VERSION__:           `${ formatVersion(pkg.version) }`,
         __GLOBAL_KEY__:        `__zoid_${ formatVersion(pkg.version) }__`,
         __IFRAME_SUPPORT__:    true,
         __POPUP_SUPPORT__:     true,

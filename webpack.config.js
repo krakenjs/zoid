@@ -1,6 +1,7 @@
 /* @flow */
 /* eslint import/no-nodejs-modules: off, import/no-default-export: off */
 
+import type { WebpackConfig } from 'grumbler-scripts/config/types';
 import { getWebpackConfig, getNextVersion } from 'grumbler-scripts/config/webpack.config';
 import { argv } from 'yargs';
 
@@ -22,21 +23,21 @@ const zoidGlobals = {
 export const FILE_NAME = 'zoid';
 export const MODULE_NAME = 'zoid';
 
-export const WEBPACK_CONFIG = getWebpackConfig({
+export const WEBPACK_CONFIG : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
     vars:       zoidGlobals,
     minify:     false
 });
 
-export const WEBPACK_CONFIG_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_MIN : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
     vars:       zoidGlobals
 });
 
-export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAME : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frame.js`,
     modulename: MODULE_NAME,
     minify:     false,
@@ -56,7 +57,7 @@ export const WEBPACK_CONFIG_FRAME = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAME_MIN : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frame.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
@@ -76,7 +77,7 @@ export const WEBPACK_CONFIG_FRAME_MIN = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_FRAMEWORK = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAMEWORK : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frameworks.js`,
     modulename: MODULE_NAME,
     minify:     false,
@@ -96,7 +97,7 @@ export const WEBPACK_CONFIG_FRAMEWORK = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_FRAMEWORK_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAMEWORK_MIN : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frameworks.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
@@ -116,7 +117,7 @@ export const WEBPACK_CONFIG_FRAMEWORK_MIN = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_FRAMEWORK_FRAME = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAMEWORK_FRAME : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frameworks.frame.js`,
     modulename: MODULE_NAME,
     minify:     false,
@@ -136,7 +137,7 @@ export const WEBPACK_CONFIG_FRAMEWORK_FRAME = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_FRAMEWORK_FRAME_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_FRAMEWORK_FRAME_MIN : WebpackConfig = getWebpackConfig({
     filename:   `${ FILE_NAME }.frameworks.frame.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
@@ -156,7 +157,7 @@ export const WEBPACK_CONFIG_FRAMEWORK_FRAME_MIN = getWebpackConfig({
     }
 });
 
-export const WEBPACK_CONFIG_TEST = getWebpackConfig({
+export const WEBPACK_CONFIG_TEST : WebpackConfig = getWebpackConfig({
     test:           true,
     entry:          './test/zoid.js',
     libraryTarget:  undefined,

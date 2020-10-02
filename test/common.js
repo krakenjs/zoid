@@ -44,11 +44,11 @@ export function monkeyPatchFunction<T, A>(obj : Object, name : string, handler :
     };
 }
 
-export function onWindowOpen({ win = window, doc = win.document, time = 500 } : {| win? : SameDomainWindowType, doc? : HTMLElement, time? : number |} = {}) : ZalgoPromise<SameDomainWindowType> {
+export function onWindowOpen({ win = window, doc = win.document, time = 500 } : {| win? : SameDomainWindowType, doc? : HTMLElement, time? : number |} = {}) : ZalgoPromise<{| win : SameDomainWindowType, iframe : ?{| element : HTMLIFrameElement |}, popup : ?{| args : [ string, string, string ] |} |}> {
     return new ZalgoPromise((resolve, reject) => {
         const winOpenMonkeyPatch = monkeyPatchFunction(win, 'open', ({ call, args }) => {
             const popup = call();
-            resolve({ win: popup, popup: { args } });
+            resolve({ win: popup, popup: { args }, iframe: null });
             winOpenMonkeyPatch.cancel();
         });
 
@@ -69,7 +69,7 @@ export function onWindowOpen({ win = window, doc = win.document, time = 500 } : 
                 const check = () => {
                     if (el.contentWindow) {
                         cleanup();
-                        resolve({ win: el.contentWindow, iframe: { element: el } });
+                        resolve({ win: el.contentWindow, iframe: { element: el }, popup: null });
                     }
                 };
 
@@ -85,13 +85,13 @@ export function onWindowOpen({ win = window, doc = win.document, time = 500 } : 
             }
         });
 
-    }).then(({ win: openedWindow, ...rest }) => {
+    }).then(({ win: openedWindow, iframe, popup }) => {
 
         if (!openedWindow || isWindowClosed(openedWindow)) {
             throw new Error(`Expected win to be open`);
         }
 
-        return { win: openedWindow, ...rest };
+        return { win: openedWindow, iframe, popup };
     });
 }
 

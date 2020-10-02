@@ -479,7 +479,12 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', ({ win, iframe: { element } }) => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win, iframe }) => {
+                if (!iframe) {
+                    throw new Error(`Expected iframe to be opened`);
+                }
+
+                const { element } = iframe;
                 const name = element.getAttribute('name');
 
                 if (!name || name === 'about:blank' || name.indexOf('__zoid__') !== 0) {
@@ -509,7 +514,12 @@ describe('zoid happy cases', () => {
                 });
             };
 
-            onWindowOpen().then(expect('onWindowOpen', ({ win, popup: { args } }) => {
+            onWindowOpen().then(expect('onWindowOpen', ({ win, popup }) => {
+                if (!popup) {
+                    throw new Error(`Expected popup to be rendered`);
+                }
+
+                const { args } = popup;
                 const [ , name ] = args;
 
                 if (!name || name === 'about:blank' || name.indexOf('__zoid__') !== 0) {
