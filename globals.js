@@ -5,7 +5,7 @@ const postRobotGlobals = require('post-robot/globals');
 
 const pkg = require('./package.json');
 
-const formatVersion = (version) : string => {
+const formatVersion = (version) => {
     return version.replace(/[^\d]+/g, '_');
 };
 
