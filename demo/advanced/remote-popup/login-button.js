@@ -7,7 +7,7 @@ window.MyLoginButtonComponent = zoid.create({
 
     // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    url: './login-button.htm',
+    url: new URL('login-button.htm', window.location.href).href,
 
     // The size of the component on their page
 
