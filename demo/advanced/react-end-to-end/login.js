@@ -1,5 +1,5 @@
 
-window.MyLoginZoidComponent = zoid.create({
+window.LoginZoidComponent = zoid.create({
 
     // The html tag used to render my component
 
