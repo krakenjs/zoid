@@ -15,3 +15,4 @@ import './child';
 import './bridge';
 import './clone';
 import './eligible';
+import './remove';

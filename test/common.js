@@ -67,7 +67,7 @@ export function onWindowOpen({ win = window, doc = win.document, time = 500 } : 
                 };
 
                 const check = () => {
-                    if (el.contentWindow) {
+                    if (el.contentWindow && el.name.match(/^__zoid_/)) {
                         cleanup();
                         resolve({ win: el.contentWindow, iframe: { element: el }, popup: null });
                     }
@@ -222,4 +222,12 @@ export function getContainer({ parent, shadow = false, slots = false } : {| pare
             parentContainer.removeChild(customElement);
         }
     };
+}
+
+export function getBody(win? : SameDomainWindowType = window) : HTMLBodyElement {
+    if (!win.document.body) {
+        throw new Error(`Window has no body`);
+    }
+
+    return win.document.body;
 }

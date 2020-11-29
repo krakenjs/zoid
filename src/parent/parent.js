@@ -8,7 +8,7 @@ import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain,
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup, base64encode, isRegex,
-    once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe,
+    once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, memoize,
     awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
@@ -412,7 +412,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             if (context === CONTEXT.IFRAME && __ZOID__.__IFRAME_SUPPORT__) {
                 // $FlowFixMe
                 const attrs = {
-                    name:  `__zoid_prerender_frame__${ name }_${ uniqueID() }__`,
+                    name:  `__${ ZOID }_prerender_frame__${ name }_${ uniqueID() }__`,
                     title: `prerender__${ name }`,
                     ...getAttributes().iframe
                 };
@@ -517,17 +517,27 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const close = () : ZalgoPromise<void> => {
-        if (closeOverride) {
-            return closeOverride();
-        }
-
+    const close = memoize(() : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
-            return event.trigger(EVENT.CLOSE);
-        }).then(() => {
-            return destroy(new Error(`Window closed`));
+
+            if (closeOverride) {
+                // $FlowFixMe
+                const source = closeOverride.__source__;
+
+                if (isWindowClosed(source)) {
+                    return;
+                }
+
+                return closeOverride();
+            }
+
+            return ZalgoPromise.try(() => {
+                return event.trigger(EVENT.CLOSE);
+            }).then(() => {
+                return destroy(new Error(`Window closed`));
+            });
         });
-    };
+    });
 
     const open = (context : $Values<typeof CONTEXT>, { proxyWin, proxyFrame, windowName } : {| proxyWin : ProxyWindow, proxyFrame : ?ProxyObject<HTMLIFrameElement>, windowName : string |}) : ZalgoPromise<ProxyWindow> => {
         if (openOverride) {
@@ -542,12 +552,8 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         
                 return proxyFrame.get().then(frame => {
                     return awaitFrameWindow(frame).then(win => {
-        
-                        const frameWatcher = watchElementForClose(frame, close);
-                        clean.register(() => frameWatcher.cancel());
                         clean.register(() => destroyElement(frame));
                         clean.register(() => cleanUpWindow(win));
-        
                         return win;
                     });
                 });
@@ -759,6 +765,9 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     hideElement(innerContainer);
                 }
                 appendChild(container, innerContainer);
+                const containerWatcher = watchElementForClose(innerContainer, close);
+                
+                clean.register(() => containerWatcher.cancel());
                 clean.register(() => destroyElement(innerContainer));
                 currentProxyContainer = getProxyObject(innerContainer);
                 return currentProxyContainer;
