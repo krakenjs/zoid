@@ -991,46 +991,61 @@
                 throw new Error("Arguments not serializable -- can not be used to memoize");
             }
         }
-        var memoizedFunctions = [];
+        function getEmptyObject() {
+            return {};
+        }
+        var memoizeGlobalIndex = 0;
+        var memoizeGlobalIndexValidFrom = 0;
         function memoize(method, options) {
-            var _this = this;
             void 0 === options && (options = {});
-            var cacheMap = new weakmap_CrossDomainSafeWeakMap;
+            var _options$thisNamespac = options.thisNamespace, thisNamespace = void 0 !== _options$thisNamespac && _options$thisNamespac, cacheTime = options.time;
+            var simpleCache;
+            var thisCache;
+            var memoizeIndex = memoizeGlobalIndex;
+            memoizeGlobalIndex += 1;
             var memoizedFunction = function() {
                 for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
-                var cache = cacheMap.getOrSet(options.thisNamespace ? this : method, (function() {
-                    return {};
-                }));
-                var key = serializeArgs(args);
-                var cacheTime = options.time;
-                cache[key] && cacheTime && Date.now() - cache[key].time < cacheTime && delete cache[key];
-                if (cache[key]) return cache[key].value;
+                if (memoizeIndex < memoizeGlobalIndexValidFrom) {
+                    simpleCache = null;
+                    thisCache = null;
+                    memoizeIndex = memoizeGlobalIndex;
+                    memoizeGlobalIndex += 1;
+                }
+                var cache;
+                cache = thisNamespace ? (thisCache = thisCache || new weakmap_CrossDomainSafeWeakMap).getOrSet(this, getEmptyObject) : simpleCache = simpleCache || {};
+                var cacheKey = serializeArgs(args);
+                var cacheResult = cache[cacheKey];
+                if (cacheResult && cacheTime && Date.now() - cacheResult.time < cacheTime) {
+                    delete cache[cacheKey];
+                    cacheResult = null;
+                }
+                if (cacheResult) return cacheResult.value;
                 var time = Date.now();
                 var value = method.apply(this, arguments);
-                cache[key] = {
+                cache[cacheKey] = {
                     time: time,
                     value: value
                 };
-                return cache[key].value;
+                return value;
             };
             memoizedFunction.reset = function() {
-                cacheMap.delete(options.thisNamespace ? _this : method);
+                simpleCache = null;
+                thisCache = null;
             };
-            memoizedFunctions.push(memoizedFunction);
             return setFunctionName(memoizedFunction, (options.name || getFunctionName(method)) + "::memoized");
         }
         memoize.clear = function() {
-            for (var _i2 = 0; _i2 < memoizedFunctions.length; _i2++) memoizedFunctions[_i2].reset();
+            memoizeGlobalIndexValidFrom = memoizeGlobalIndex;
         };
         function memoizePromise(method) {
             var cache = {};
             function memoizedPromiseFunction() {
-                var _arguments = arguments, _this2 = this;
+                var _arguments = arguments, _this = this;
                 for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
                 var key = serializeArgs(args);
                 if (cache.hasOwnProperty(key)) return cache[key];
                 cache[key] = promise_ZalgoPromise.try((function() {
-                    return method.apply(_this2, _arguments);
+                    return method.apply(_this, _arguments);
                 })).finally((function() {
                     delete cache[key];
                 }));
@@ -1187,6 +1202,7 @@
         function cleanup(obj) {
             var tasks = [];
             var cleaned = !1;
+            var cleanErr;
             return {
                 set: function(name, item) {
                     if (!cleaned) {
@@ -1198,9 +1214,12 @@
                     return item;
                 },
                 register: function(method) {
-                    cleaned ? method() : tasks.push(once(method));
+                    cleaned ? method(cleanErr) : tasks.push(once((function() {
+                        return method(cleanErr);
+                    })));
                 },
-                all: function() {
+                all: function(err) {
+                    cleanErr = err;
                     var results = [];
                     cleaned = !0;
                     for (;tasks.length; ) {
@@ -1218,13 +1237,13 @@
         var util_ExtendableError = function(_Error) {
             _inheritsLoose(ExtendableError, _Error);
             function ExtendableError(message) {
-                var _this7;
-                (_this7 = _Error.call(this, message) || this).name = _this7.constructor.name;
+                var _this6;
+                (_this6 = _Error.call(this, message) || this).name = _this6.constructor.name;
                 "function" == typeof Error.captureStackTrace ? Error.captureStackTrace(function(self) {
                     if (void 0 === self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
                     return self;
-                }(_this7), _this7.constructor) : _this7.stack = new Error(message).stack;
-                return _this7;
+                }(_this6), _this6.constructor) : _this6.stack = new Error(message).stack;
+                return _this6;
             }
             return ExtendableError;
         }(wrapNativeSuper_wrapNativeSuper(Error));
@@ -1412,7 +1431,7 @@
             element && element.parentNode && element.parentNode.removeChild(element);
         }
         function isElementClosed(el) {
-            return !el || !el.parentNode;
+            return !(el && el.parentNode && el.ownerDocument && el.ownerDocument.documentElement && el.ownerDocument.documentElement.contains(el));
         }
         function onResize(el, handler, _temp) {
             var _ref2 = void 0 === _temp ? {} : _temp, _ref2$width = _ref2.width, width = void 0 === _ref2$width || _ref2$width, _ref2$height = _ref2.height, height = void 0 === _ref2$height || _ref2$height, _ref2$interval = _ref2.interval, interval = void 0 === _ref2$interval ? 100 : _ref2$interval, _ref2$win = _ref2.win, win = void 0 === _ref2$win ? window : _ref2$win;
@@ -1480,8 +1499,8 @@
                     var stackDetails = /.*at [^(]*\((.*):(.+):(.+)\)$/gi.exec(stack);
                     var scriptLocation = stackDetails && stackDetails[1];
                     if (!scriptLocation) return;
-                    for (var _i20 = 0, _Array$prototype$slic2 = [].slice.call(document.getElementsByTagName("script")).reverse(); _i20 < _Array$prototype$slic2.length; _i20++) {
-                        var script = _Array$prototype$slic2[_i20];
+                    for (var _i22 = 0, _Array$prototype$slic2 = [].slice.call(document.getElementsByTagName("script")).reverse(); _i22 < _Array$prototype$slic2.length; _i22++) {
+                        var script = _Array$prototype$slic2[_i22];
                         if (script.src && script.src === scriptLocation) return script;
                     }
                 } catch (err) {}
@@ -1498,8 +1517,9 @@
             }
             var uid = script.getAttribute("data-uid");
             if (uid && "string" == typeof uid) return uid;
+            if ((uid = script.getAttribute("data-uid-auto")) && "string" == typeof uid) return uid;
             uid = uniqueID();
-            script.setAttribute("data-uid", uid);
+            script.setAttribute("data-uid-auto", uid);
             return uid;
         }));
         function isPerc(str) {
@@ -1526,7 +1546,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_41__";
+            var globalKey = "__post_robot_10_0_42__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -2471,7 +2491,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_41__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_42__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -2643,7 +2663,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_41__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_42__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2956,8 +2976,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_62__ || (win.__zoid_9_0_62__ = {});
-            return win.__zoid_9_0_62__;
+            win.__zoid_9_0_63__ || (win.__zoid_9_0_63__ = {});
+            return win.__zoid_9_0_63__;
         }
         function getProxyObject(obj) {
             return {
@@ -3099,13 +3119,13 @@
                     var handlerList = handlers[eventName];
                     var promises = [];
                     if (handlerList) {
-                        var _loop = function(_i4) {
-                            var handler = handlerList[_i4];
+                        var _loop = function(_i2) {
+                            var handler = handlerList[_i2];
                             promises.push(promise_ZalgoPromise.try((function() {
                                 return handler.apply(void 0, args);
                             })));
                         };
-                        for (var _i4 = 0; _i4 < handlerList.length; _i4++) _loop(_i4);
+                        for (var _i2 = 0; _i2 < handlerList.length; _i2++) _loop(_i2);
                     }
                     return promise_ZalgoPromise.all(promises).then(src_util_noop);
                 },
@@ -3326,18 +3346,24 @@
                 return promise_ZalgoPromise.try((function() {
                     return event.trigger(EVENT.DESTROY);
                 })).catch(src_util_noop).then((function() {
-                    return clean.all();
+                    return clean.all(err);
                 })).then((function() {
                     initPromise.asyncReject(err || new Error("Component destroyed"));
                 }));
             };
-            var close = function() {
-                return closeOverride ? closeOverride() : promise_ZalgoPromise.try((function() {
-                    return event.trigger(EVENT.CLOSE);
-                })).then((function() {
-                    return destroy(new Error("Window closed"));
+            var close = memoize((function(err) {
+                return promise_ZalgoPromise.try((function() {
+                    if (closeOverride) {
+                        if (isWindowClosed(closeOverride.__source__)) return;
+                        return closeOverride();
+                    }
+                    return promise_ZalgoPromise.try((function() {
+                        return event.trigger(EVENT.CLOSE);
+                    })).then((function() {
+                        return destroy(err || new Error("Component closed"));
+                    }));
                 }));
-            };
+            }));
             var open = function(context, _ref3) {
                 var proxyWin = _ref3.proxyWin, proxyFrame = _ref3.proxyFrame, windowName = _ref3.windowName;
                 return openOverride ? openOverride(context, {
@@ -3349,24 +3375,6 @@
                         if (!proxyFrame) throw new Error("Expected proxy frame to be passed");
                         return proxyFrame.get().then((function(frame) {
                             return awaitFrameWindow(frame).then((function(win) {
-                                var frameWatcher = function(element, handler) {
-                                    handler = once(handler);
-                                    var interval;
-                                    isElementClosed(element) ? handler() : interval = safeInterval((function() {
-                                        if (isElementClosed(element)) {
-                                            interval.cancel();
-                                            handler();
-                                        }
-                                    }), 50);
-                                    return {
-                                        cancel: function() {
-                                            interval && interval.cancel();
-                                        }
-                                    };
-                                }(frame, close);
-                                clean.register((function() {
-                                    return frameWatcher.cancel();
-                                }));
                                 clean.register((function() {
                                     return destroyElement(frame);
                                 }));
@@ -3454,14 +3462,14 @@
                 return proxyWin.isClosed().then((function(isClosed) {
                     if (isClosed) {
                         closed = !0;
-                        return close();
+                        return close(new Error("Detected component window close"));
                     }
                     return promise_ZalgoPromise.delay(200).then((function() {
                         return proxyWin.isClosed();
                     })).then((function(secondIsClosed) {
                         if (secondIsClosed) {
                             closed = !0;
-                            return close();
+                            return close(new Error("Detected component window close"));
                         }
                     }));
                 })).then((function() {
@@ -3569,6 +3577,63 @@
                     if (innerContainer) {
                         visible || hideElement(innerContainer);
                         appendChild(container, innerContainer);
+                        var containerWatcher = function(element, handler) {
+                            handler = once(handler);
+                            var cancelled = !1;
+                            var mutationObservers = [];
+                            var interval;
+                            var sacrificialFrame;
+                            var sacrificialFrameWin;
+                            var cancel = function() {
+                                cancelled = !0;
+                                for (var _i18 = 0; _i18 < mutationObservers.length; _i18++) mutationObservers[_i18].disconnect();
+                                interval && interval.cancel();
+                                sacrificialFrameWin && sacrificialFrameWin.removeEventListener("unload", elementClosed);
+                                sacrificialFrame && destroyElement(sacrificialFrame);
+                            };
+                            var elementClosed = function() {
+                                if (!cancelled) {
+                                    handler();
+                                    cancel();
+                                }
+                            };
+                            if (isElementClosed(element)) {
+                                elementClosed();
+                                return {
+                                    cancel: cancel
+                                };
+                            }
+                            if (window.MutationObserver) {
+                                var mutationElement = element.parentElement;
+                                for (;mutationElement; ) {
+                                    var mutationObserver = new window.MutationObserver((function() {
+                                        isElementClosed(element) && elementClosed();
+                                    }));
+                                    mutationObserver.observe(mutationElement, {
+                                        childList: !0
+                                    });
+                                    mutationObservers.push(mutationObserver);
+                                    mutationElement = mutationElement.parentElement;
+                                }
+                            }
+                            (sacrificialFrame = document.createElement("iframe")).setAttribute("name", "__detect_close_" + uniqueID() + "__");
+                            sacrificialFrame.style.display = "none";
+                            awaitFrameWindow(sacrificialFrame).then((function(frameWin) {
+                                (sacrificialFrameWin = assertSameDomain(frameWin)).addEventListener("unload", elementClosed);
+                            }));
+                            element.appendChild(sacrificialFrame);
+                            interval = safeInterval((function() {
+                                isElementClosed(element) && elementClosed();
+                            }), 1e3);
+                            return {
+                                cancel: cancel
+                            };
+                        }(innerContainer, (function() {
+                            return close(new Error("Detected container element removed from DOM"));
+                        }));
+                        clean.register((function() {
+                            return containerWatcher.cancel();
+                        }));
                         clean.register((function() {
                             return destroyElement(innerContainer);
                         }));
@@ -3735,11 +3800,11 @@
                                         setInternalState: setInternalState
                                     }
                                 }).then((function(_ref11) {
-                                    var parent = _ref11.data.parent;
-                                    clean.register((function() {
-                                        if (!isWindowClosed(target)) return parent.destroy();
+                                    var parentComp = _ref11.data.parent;
+                                    clean.register((function(err) {
+                                        if (!isWindowClosed(target)) return parentComp.destroy(err);
                                     }));
-                                    return parent.getDelegateOverrides();
+                                    return parentComp.getDelegateOverrides();
                                 })).catch((function(err) {
                                     throw new Error("Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n" + stringifyError(err));
                                 }));
@@ -3908,7 +3973,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_62",
+                                        version: "9_0_63",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4012,7 +4077,7 @@
                             return _ref17.proxyWin.setLocation(_ref17.builtUrl);
                         }));
                         var watchForClosePromise = openPromise.then((function(proxyWin) {
-                            !function watchForClose(proxyWin) {
+                            !function watchForClose(proxyWin, context) {
                                 var cancelled = !1;
                                 clean.register((function() {
                                     cancelled = !0;
@@ -4020,9 +4085,9 @@
                                 return promise_ZalgoPromise.delay(2e3).then((function() {
                                     return proxyWin.isClosed();
                                 })).then((function(isClosed) {
-                                    return isClosed ? close() : cancelled ? void 0 : watchForClose(proxyWin);
+                                    return isClosed ? close(new Error("Detected " + context + " close")) : cancelled ? void 0 : watchForClose(proxyWin, context);
                                 }));
-                            }(proxyWin);
+                            }(proxyWin, context);
                         }));
                         var onDisplayPromise = promise_ZalgoPromise.hash({
                             container: renderContainerPromise,
@@ -4517,7 +4582,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_62" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_62");
+                        if ("9_0_63" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_63");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4692,14 +4757,17 @@
                 var parent = parentComponent(options);
                 parent.init();
                 eligibility ? parent.setProps(props) : props.onDestroy && props.onDestroy();
-                cleanInstances.register((function() {
-                    parent.destroy(new Error("zoid destroyed all components"));
+                cleanInstances.register((function(err) {
+                    parent.destroy(err || new Error("zoid destroyed all components"));
                 }));
                 var _render = function(target, container, context) {
                     return promise_ZalgoPromise.try((function() {
-                        if (!eligibility) return parent.destroy().then((function() {
-                            throw new Error(reason || name + " component is not eligible");
-                        }));
+                        if (!eligibility) {
+                            var err = new Error(reason || name + " component is not eligible");
+                            return parent.destroy(err).then((function() {
+                                throw err;
+                            }));
+                        }
                         if (!isWindow(target)) throw new Error("Must pass window to renderTo");
                         return function(props, context) {
                             return promise_ZalgoPromise.try((function() {
@@ -4881,17 +4949,16 @@
             child && (window.xprops = init.xprops = child.getProps());
             return init;
         }
-        function destroyComponents() {
+        function destroyComponents(err) {
             src_bridge && src_bridge.destroyBridges();
-            var destroyPromise = cleanInstances.all();
+            var destroyPromise = cleanInstances.all(err);
             cleanInstances = cleanup();
             return destroyPromise;
         }
         var destroyAll = destroyComponents;
-        function component_destroy() {
+        function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_62__;
-            cleanZoid.all();
+            delete window.__zoid_9_0_63__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4904,8 +4971,9 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_41__;
+                delete window.__post_robot_10_0_42__;
             }();
+            return cleanZoid.all(err);
         }
     } ]);
 }));
