@@ -506,18 +506,18 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const destroy = (err? : mixed) : ZalgoPromise<void> => {
+    const destroy = (err : mixed) : ZalgoPromise<void> => {
         // eslint-disable-next-line promise/no-promise-in-callback
         return ZalgoPromise.try(() => {
             return event.trigger(EVENT.DESTROY);
         }).catch(noop).then(() => {
-            return clean.all();
+            return clean.all(err);
         }).then(() => {
             initPromise.asyncReject(err || new Error('Component destroyed'));
         });
     };
 
-    const close = memoize(() : ZalgoPromise<void> => {
+    const close = memoize((err? : mixed) : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
 
             if (closeOverride) {
@@ -534,7 +534,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             return ZalgoPromise.try(() => {
                 return event.trigger(EVENT.CLOSE);
             }).then(() => {
-                return destroy(new Error(`Window closed`));
+                return destroy(err || new Error(`Component closed`));
             });
         });
     });
@@ -603,7 +603,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
-    const watchForClose = (proxyWin : ProxyWindow) : ZalgoPromise<void> => {
+    const watchForClose = (proxyWin : ProxyWindow, context : $Values<typeof CONTEXT>) : ZalgoPromise<void> => {
         let cancelled = false;
 
         clean.register(() => {
@@ -614,9 +614,9 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             return proxyWin.isClosed();
         }).then(isClosed => {
             if (isClosed) {
-                return close();
+                return close(new Error(`Detected ${ context } close`));
             } else if (!cancelled) {
-                return watchForClose(proxyWin);
+                return watchForClose(proxyWin, context);
             }
         });
     };
@@ -627,7 +627,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         return proxyWin.isClosed().then(isClosed => {
             if (isClosed) {
                 closed = true;
-                return close();
+                return close(new Error(`Detected component window close`));
             }
 
             return ZalgoPromise.delay(200)
@@ -635,7 +635,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                 .then(secondIsClosed => {
                     if (secondIsClosed) {
                         closed = true;
-                        return close();
+                        return close(new Error(`Detected component window close`));
                     }
                 });
         }).then(() => {
@@ -765,7 +765,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
                     hideElement(innerContainer);
                 }
                 appendChild(container, innerContainer);
-                const containerWatcher = watchElementForClose(innerContainer, close);
+                const containerWatcher = watchElementForClose(innerContainer, () => close(new Error(`Detected container element removed from DOM`)));
                 
                 clean.register(() => containerWatcher.cancel());
                 clean.register(() => destroyElement(innerContainer));
@@ -858,12 +858,14 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         const childOverridesPromise = send(target, `${ POST_MESSAGE.DELEGATE }_${ name }`, {
             overrides: { props: delegateProps, event, close, onError, getInternalState, setInternalState }
         }).then(({ data: { parent } }) => {
-            clean.register(() => {
+            const parentComp : ParentComponent<P> = parent;
+
+            clean.register(err => {
                 if (!isWindowClosed(target)) {
-                    return parent.destroy();
+                    return parentComp.destroy(err);
                 }
             });
-            return parent.getDelegateOverrides();
+            return parentComp.getDelegateOverrides();
 
         }).catch(err => {
             throw new Error(`Unable to delegate rendering. Possibly the component is not loaded in the target window.\n\n${ stringifyError(err) }`);
@@ -989,7 +991,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
             });
 
             const watchForClosePromise = openPromise.then(proxyWin => {
-                watchForClose(proxyWin);
+                watchForClose(proxyWin, context);
             });
 
             const onDisplayPromise = ZalgoPromise.hash({ container: renderContainerPromise, prerender: prerenderPromise }).then(() => {

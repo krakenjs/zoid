@@ -321,15 +321,17 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
             }
         }
 
-        cleanInstances.register(() => {
-            parent.destroy(new Error(`zoid destroyed all components`));
+        cleanInstances.register(err => {
+            parent.destroy(err || new Error(`zoid destroyed all components`));
         });
 
         const render = (target, container, context) => {
             return ZalgoPromise.try(() => {
                 if (!eligibility) {
-                    return parent.destroy().then(() => {
-                        throw new Error(reason || `${ name } component is not eligible`);
+                    const err = new Error(reason || `${ name } component is not eligible`);
+
+                    return parent.destroy(err).then(() => {
+                        throw err;
                     });
                 }
 
@@ -429,25 +431,21 @@ export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> 
     return init;
 }
 
-export function destroyComponents() : ZalgoPromise<void> {
+export function destroyComponents(err? : mixed) : ZalgoPromise<void> {
     if (bridge) {
         bridge.destroyBridges();
     }
 
-    const destroyPromise = cleanInstances.all();
+    const destroyPromise = cleanInstances.all(err);
     cleanInstances = cleanup();
     return destroyPromise;
 }
 
-function destroyZoid() : ZalgoPromise<void> {
-    return cleanZoid.all();
-}
-
 export const destroyAll = destroyComponents;
 
-export function destroy() {
+export function destroy(err? : mixed) : ZalgoPromise<void> {
     destroyAll();
     destroyGlobal();
-    destroyZoid();
     destroyPostRobot();
+    return cleanZoid.all(err);
 }
