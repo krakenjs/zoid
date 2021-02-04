@@ -35,9 +35,9 @@ type ReactLibraryType = {|
 /**
  * Util to check if component is currently mounted
  */
-function isMounted(component, ReactDOM) {
+function isMounted(component, ReactDOM) : boolean {
     try {
-        return !!ReactDOM.findDOMNode(component);
+        return Boolean(ReactDOM.findDOMNode(component));
     }
     catch (error) {
         // Error: Unable to find node on an unmounted component
@@ -63,14 +63,14 @@ export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassT
                 parent.render(el, CONTEXT.IFRAME)
                     .catch(error => {
                         // component failed to render, possibly because it was closed or destroyed.
-                        if(!isMounted(this, ReactDOM)) {
+                        if (!isMounted(this, ReactDOM)) {
                             // not mounted anymore, we can safely ignore the error
-                            return
+                            return;
                         }
                         // still mounted, throw error inside react to allow a parent component or ErrorBoundary to handle it
                         this.setState(() => {
-                            throw error
-                        })
+                            throw error;
+                        });
                     });
                 this.setState({ parent });
             }
