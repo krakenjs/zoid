@@ -35,7 +35,7 @@ type ReactLibraryType = {|
 /**
  * Util to check if component is currently mounted
  */
-function isMounted(component, ReactDOM) : boolean {
+function isMounted(component : typeof ReactClassType, ReactDOM : ReactDomType) : boolean {
     try {
         return Boolean(ReactDOM.findDOMNode(component));
     }
