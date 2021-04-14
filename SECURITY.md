@@ -1,7 +1,7 @@
 # Security Policy
 ## How is Zoid secure?
 Zoid uses [Post Robot](https://github.com/krakenjs/post-robot) to do [post messaging](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) between multiple domains.
-Zoid helps secure messaging through iframe sanboxing, domain validation, and data protection.
+Zoid helps secure messaging through iframe sandboxing, domain validation, and data protection.
 - __Iframe sandboxing__ is a default browser feature that blocks others from accessing the data of your iframe instance. 
 - __Domain Validation__ checks the domain of the connection made to the Zoid child component, if requested. If domains don’t match accepted domains the connect fails. This is to stop access to secure components.
 - __Data Protection__ is the way Zoid manages checking domains of where the data was sent from to help protect against malicious data being injected through events.
