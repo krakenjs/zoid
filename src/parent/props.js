@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { dotify, isDefined, extend } from 'belter/src';
+import { dotify, isDefined, extend, base64encode } from 'belter/src';
 
 import type { PropsInputType, PropsType, PropsDefinitionType, MixedPropDefinitionType } from '../component/props';
 import { PROP_SERIALIZATION } from '../constants';
@@ -124,7 +124,7 @@ function getQueryValue<P>(prop : MixedPropDefinitionType<P>, key : string, value
     });
 }
 
-export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string }> {
+export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string | boolean }> {
 
     const params = {};
 
@@ -175,7 +175,7 @@ export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (Prop
                     if (prop.serialization === PROP_SERIALIZATION.JSON) {
                         result = JSON.stringify(queryValue);
                     } else if (prop.serialization === PROP_SERIALIZATION.BASE64) {
-                        result = btoa(JSON.stringify(queryValue));
+                        result = base64encode(JSON.stringify(queryValue));
                     } else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                         result = dotify(queryValue, key);
 
