@@ -89,10 +89,16 @@
         __webpack_require__.d(__webpack_exports__, "EVENT", (function() {
             return EVENT;
         }));
+        function _setPrototypeOf(o, p) {
+            return (_setPrototypeOf = Object.setPrototypeOf || function(o, p) {
+                o.__proto__ = p;
+                return o;
+            })(o, p);
+        }
         function _inheritsLoose(subClass, superClass) {
             subClass.prototype = Object.create(superClass.prototype);
             subClass.prototype.constructor = subClass;
-            subClass.__proto__ = superClass;
+            _setPrototypeOf(subClass, superClass);
         }
         function _extends() {
             return (_extends = Object.assign || function(target) {
@@ -872,12 +878,6 @@
                 return o.__proto__ || Object.getPrototypeOf(o);
             })(o);
         }
-        function _setPrototypeOf(o, p) {
-            return (_setPrototypeOf = Object.setPrototypeOf || function(o, p) {
-                o.__proto__ = p;
-                return o;
-            })(o, p);
-        }
         function _isNativeReflectConstruct() {
             if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
             if (Reflect.construct.sham) return !1;
@@ -936,8 +936,8 @@
         function base64encode(str) {
             if ("function" == typeof btoa) return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (function(m, p1) {
                 return String.fromCharCode(parseInt(p1, 16));
-            })));
-            if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
+            }))).replace(/[=]/g, "");
+            if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64").replace(/[=]/g, "");
             throw new Error("Can not find window.btoa or Buffer");
         }
         function uniqueID() {
@@ -1228,7 +1228,7 @@
             return Boolean(document.body) && "interactive" === document.readyState;
         }
         function urlEncode(str) {
-            return str.replace(/\?/g, "%3F").replace(/&/g, "%26").replace(/#/g, "%23").replace(/\+/g, "%2B");
+            return encodeURIComponent(str);
         }
         memoize((function() {
             return new promise_ZalgoPromise((function(resolve) {
@@ -1258,9 +1258,11 @@
             return props && Object.keys(props).length ? function(obj) {
                 void 0 === obj && (obj = {});
                 return Object.keys(obj).filter((function(key) {
-                    return "string" == typeof obj[key];
+                    return "string" == typeof obj[key] || "boolean" == typeof obj[key];
                 })).map((function(key) {
-                    return urlEncode(key) + "=" + urlEncode(obj[key]);
+                    var val = obj[key];
+                    if ("string" != typeof val && "boolean" != typeof val) throw new TypeError("Invalid type for query");
+                    return urlEncode(key) + "=" + urlEncode(val.toString());
                 })).join("&");
             }(_extends({}, parseQuery(originalQuery), props)) : originalQuery;
         }
@@ -2597,8 +2599,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_63__ || (win.__zoid_9_0_63__ = {});
-            return win.__zoid_9_0_63__;
+            win.__zoid_9_0_64__ || (win.__zoid_9_0_64__ = {});
+            return win.__zoid_9_0_64__;
         }
         function getProxyObject(obj) {
             return {
@@ -3463,7 +3465,7 @@
                                         var queryParam = _ref[0], queryValue = _ref[1];
                                         var result;
                                         if ("boolean" == typeof queryValue) result = queryValue.toString(); else if ("string" == typeof queryValue) result = queryValue.toString(); else if ("object" == typeof queryValue && null !== queryValue) {
-                                            if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = btoa(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
+                                            if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = base64encode(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
                                                 result = function dotify(obj, prefix, newobj) {
                                                     void 0 === prefix && (prefix = "");
                                                     void 0 === newobj && (newobj = {});
@@ -3541,7 +3543,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_63",
+                                        version: "9_0_64",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4131,7 +4133,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_63" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_63");
+                        if ("9_0_64" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_64");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4501,7 +4503,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_63__;
+            delete window.__zoid_9_0_64__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
