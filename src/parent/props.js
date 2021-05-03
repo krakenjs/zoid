@@ -124,7 +124,7 @@ function getQueryValue<P>(prop : MixedPropDefinitionType<P>, key : string, value
     });
 }
 
-export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string | boolean }> {
+export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string }> {
 
     const params = {};
 
