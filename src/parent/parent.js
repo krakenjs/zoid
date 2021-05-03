@@ -363,6 +363,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
 
     const buildUrl = () : ZalgoPromise<string> => {
         return propsToQuery(propsDef, props).then(query => {
+            // $FlowFixMe
             return extendUrl(normalizeMockUrl(getUrl()), { query });
         });
     };
