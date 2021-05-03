@@ -143,7 +143,7 @@ export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (Prop
 
             const value = props[key];
 
-            if (!value) {
+            if (value === null || typeof value === 'undefined') {
                 return;
             }
 

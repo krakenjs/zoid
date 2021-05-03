@@ -681,6 +681,54 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should pass boolean props in the url correctly', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return window.zoid.create({
+                    tag:    'test-props-boolean-query-param',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        trueProp: {
+                            type:       'boolean',
+                            queryParam: true
+                        },
+
+                        falseProp: {
+                            type:       'boolean',
+                            queryParam: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                trueProp:   true,
+                falseProp:  false,
+
+                getQuery: expect('getQuery', rawQuery => {
+                    const query = JSON.stringify(parseQuery(rawQuery), null, 4);
+
+                    const expected = JSON.stringify({
+                        'trueProp':                'true',
+                        'falseProp':               'false'
+                    }, null, 4);
+
+                    if (query !== expected) {
+                        throw new Error(`Expected query string to be:\n\n${ expected }\n\nbut got:\n\n${ query }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.getQuery(window.location.search.slice(1));
+                `
+            });
+
+            return instance.render(document.body);
+        });
+    });
+
     it('should pass promise props in the url correctly', () => {
         return wrapPromise(({ expect }) => {
 
