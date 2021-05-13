@@ -232,7 +232,6 @@ export function getContainer({ parent, shadow = false, slots = false, nested = f
             container: innerWrapperContainer,
             destroy:   () => {
                 parentContainer.removeChild(customElement);
-                parentContainer.removeChild(innerWrapper);
             }
         };
     }
