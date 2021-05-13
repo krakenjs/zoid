@@ -458,7 +458,6 @@ describe('zoid happy cases', () => {
             }));
 
             const { container, destroy } = getContainer({ shadow: true, nested: true });
-
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered', () => {

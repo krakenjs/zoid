@@ -212,20 +212,14 @@ export function getContainer({ parent, shadow = false, slots = false, nested = f
     const customElement = document.createElement(customElementName);
     parentContainer.appendChild(customElement);
 
-    if (!slots) {
-        return {
-            container: shadowContainer,
-            destroy:   () => { parentContainer.removeChild(customElement); }
-        };
-    }
-
     if (nested) {
-        const innerWrapper = document.createElement('inner-element-wrapper');
+        const innerWrapper = document.createElement(innerWrapperName);
         innerWrapper.setAttribute('id', 'inner-element-wrapper-id');
 
         const customElementShadowRoot = customElement.shadowRoot;
         const innerWrapperShadowRoot = innerWrapper.shadowRoot;
         const innerWrapperContainer = document.createElement('div');
+        innerWrapperContainer.setAttribute('id', 'super id');
 
         if (customElementShadowRoot) {
             customElementShadowRoot.appendChild(innerWrapper);
@@ -235,13 +229,20 @@ export function getContainer({ parent, shadow = false, slots = false, nested = f
             innerWrapperShadowRoot.appendChild(innerWrapperContainer);
         }
 
-
         return {
             container: innerWrapperContainer,
             destroy:   () => {
                 parentContainer.removeChild(customElement);
                 parentContainer.removeChild(innerWrapper);
             }
+        };
+    }
+
+
+    if (!slots) {
+        return {
+            container: shadowContainer,
+            destroy:   () => { parentContainer.removeChild(customElement); }
         };
     }
 
