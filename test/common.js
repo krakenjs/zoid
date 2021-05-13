@@ -214,16 +214,15 @@ export function getContainer({ parent, shadow = false, slots = false, nested = f
 
     if (nested) {
         const innerWrapper = document.createElement(innerWrapperName);
-        innerWrapper.setAttribute('id', 'inner-element-wrapper-id');
 
         const customElementShadowRoot = customElement.shadowRoot;
-        const innerWrapperShadowRoot = innerWrapper.shadowRoot;
-        const innerWrapperContainer = document.createElement('div');
-        innerWrapperContainer.setAttribute('id', 'super id');
 
         if (customElementShadowRoot) {
             customElementShadowRoot.appendChild(innerWrapper);
         }
+
+        const innerWrapperShadowRoot = innerWrapper.shadowRoot;
+        const innerWrapperContainer = document.createElement('div');
 
         if (innerWrapperShadowRoot) {
             innerWrapperShadowRoot.appendChild(innerWrapperContainer);
