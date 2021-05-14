@@ -3,4 +3,7 @@ node_js:
   - 'lts/*'
 before_install:
   - rm -rf node_modules
+  - npm install -g codecov
 script: npm test
+after_success:
+  - codecov

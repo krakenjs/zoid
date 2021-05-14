@@ -1,6 +1,16 @@
-<p align="center"><img width="45%"  src="https://cdn.rawgit.com/krakenjs/zoid/master/zoid.png"></p>
+<p align="center"><img width="45%" alt="zoid" src="https://cdn.rawgit.com/krakenjs/zoid/master/zoid.png"></p>
 
 ----
+[![build status][build-badge]][build]
+[![code coverage][coverage-badge]][coverage]
+[![npm version][version-badge]][package]
+
+[build-badge]: https://img.shields.io/github/workflow/status/krakenjs/zoid/build?logo=github&style=flat-square
+[build]: https://github.com/krakenjs/zoid/actions?query=workflow%3Abuild
+[coverage-badge]: https://img.shields.io/codecov/c/github/krakenjs/zoid.svg?style=flat-square
+[coverage]: https://codecov.io/github/krakenjs/zoid/
+[version-badge]: https://img.shields.io/npm/v/zoid.svg?style=flat-square
+[package]: https://www.npmjs.com/package/zoid
 
 A cross-domain component toolkit, supporting:
 
