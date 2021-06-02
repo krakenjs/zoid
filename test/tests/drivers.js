@@ -225,7 +225,7 @@ describe('zoid drivers', () => {
         });
     });
 
-    it.only('should enter a component rendered with vue and update a prop with camel-case and kebab-case', () => {
+    it('should enter a component rendered with vue and update a prop with camel-case and kebab-case', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
