@@ -225,7 +225,7 @@ describe('zoid drivers', () => {
         });
     });
 
-    it('should enter a component rendered with vue and update a prop', () => {
+    it.only('should enter a component rendered with vue and update a prop with camel-case and kebab-case', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
@@ -253,10 +253,11 @@ describe('zoid drivers', () => {
                 render: expect('render', function render(createElement) : Object {
                     return createElement(vueComponent, {
                         attrs: {
-                            zomg:    Math.random(),
-                            foo:     this.state.foo,
-                            onLoad:  this.state.onLoad,
-                            run:     this.state.run
+                            'foo':       this.state.foo,
+                            'onLoad':    this.state.onLoad,
+                            'baz':       this.state.baz,
+                            'on-test':   this.state.onTest,
+                            'run':       this.state.run
                         }
                     });
                 }),
@@ -266,15 +267,27 @@ describe('zoid drivers', () => {
                             onLoad: expect('onLoad', () => {
                                 window.Vue.set(this.state, 'foo', expect('foo', bar => {
                                     if (bar !== 'bar') {
-                                        throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                                        throw new Error(`Expected foo to be 'bar', got ${ bar }`);
+                                    }
+                                }));
+                            }),
+                            onTest: expect('onTest', () => {
+                                window.Vue.set(this.state, 'baz', expect('baz', bar => {
+                                    if (bar !== 'bar') {
+                                        throw new Error(`Expected baz to be 'bar', got ${ bar }`);
                                     }
                                 }));
                             }),
                             run: expect('run', () => {
                                 return `
                                     return window.xprops.onLoad().then(() => {
-                                        window.xprops.onProps(() => {
-                                            window.xprops.foo('bar');
+                                        return window.xprops.onTest().then(() => {
+                                            window.xprops.onProps(() => {
+                                                window.xprops.foo('bar');
+                                            });
+                                            window.xprops.onProps(() => {
+                                                window.xprops.baz('bar');
+                                            });
                                         });
                                     });
                                 `;

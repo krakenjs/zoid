@@ -1,6 +1,6 @@
 /* @flow */
 
-import { noop } from 'belter/src';
+import { noop, dasherizeToCamel } from 'belter/src';
 
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
@@ -25,6 +25,16 @@ type VueType = {|
     component : (string, VueComponent) => RegisteredVueComponent
 |};
 
+function propsToCamelCase(props : Object) : Object {
+    for (const key of Object.keys(props)) {
+        if (key.includes('-')) {
+            props[dasherizeToCamel(key)] = props[key];
+            delete props[key];
+        }
+    }
+    return props;
+}
+
 export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent> = {
 
     register: (tag, propsDef, init, Vue) => {
@@ -38,8 +48,7 @@ export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent> = {
 
             mounted() {
                 const el = this.$el;
-                
-                this.parent = init({ ...this.$attrs });
+                this.parent = init({ ...propsToCamelCase(this.$attrs) });
                 this.parent.render(el, CONTEXT.IFRAME);
             },
 
