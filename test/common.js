@@ -164,7 +164,7 @@ export function runOnClick<T>(handler : () => T) : T {
     }
 }
 
-export function getContainer({ parent, shadow = false, slots = false } : {| parent? : ?HTMLElement, shadow? : boolean, slots? : boolean |} = {}) : {| container : HTMLElement, destroy : () => void |} {
+export function getContainer({ parent, shadow = false, slots = false, nested = false } : {| parent? : ?HTMLElement, shadow? : boolean, slots? : boolean, nested? : boolean |} = {}) : {| container : HTMLElement, destroy : () => void |} {
     const parentContainer = parent = parent || document.body;
     
     if (!parentContainer) {
@@ -183,6 +183,7 @@ export function getContainer({ parent, shadow = false, slots = false } : {| pare
 
     const customElementName = `zoid-custom-element-${ uniqueID() }`;
     const customSlotName = `zoid-custom-slot-${ uniqueID() }`;
+    const innerWrapperName = `zoid-inner-wrapper-${ uniqueID() }`;
     
     const shadowContainer = document.createElement(slots ? 'slot' : 'div');
     shadowContainer.setAttribute('name', customSlotName);
@@ -201,8 +202,40 @@ export function getContainer({ parent, shadow = false, slots = false } : {| pare
         }
     });
 
+    customElements.define(innerWrapperName, class extends HTMLElement {
+        connectedCallback() {
+            const shadowRoot = this.attachShadow({ mode: 'open' });
+            shadowRoot.appendChild(shadowContainer);
+        }
+    });
+
     const customElement = document.createElement(customElementName);
     parentContainer.appendChild(customElement);
+
+    if (nested) {
+        const innerWrapper = document.createElement(innerWrapperName);
+
+        const customElementShadowRoot = customElement.shadowRoot;
+
+        if (customElementShadowRoot) {
+            customElementShadowRoot.appendChild(innerWrapper);
+        }
+
+        const innerWrapperShadowRoot = innerWrapper.shadowRoot;
+        const innerWrapperContainer = document.createElement('div');
+
+        if (innerWrapperShadowRoot) {
+            innerWrapperShadowRoot.appendChild(innerWrapperContainer);
+        }
+
+        return {
+            container: innerWrapperContainer,
+            destroy:   () => {
+                parentContainer.removeChild(customElement);
+            }
+        };
+    }
+
 
     if (!slots) {
         return {
@@ -222,6 +255,7 @@ export function getContainer({ parent, shadow = false, slots = false } : {| pare
             parentContainer.removeChild(customElement);
         }
     };
+
 }
 
 export function getBody(win? : SameDomainWindowType = window) : HTMLBodyElement {
