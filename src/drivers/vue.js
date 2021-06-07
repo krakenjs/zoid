@@ -26,13 +26,15 @@ type VueType = {|
 |};
 
 function propsToCamelCase(props : Object) : Object {
-    for (const key of Object.keys(props)) {
+    return Object.keys(props).reduce((acc, key) => {
+        const value = props[key];
         if (key.includes('-')) {
-            props[dasherizeToCamel(key)] = props[key];
-            delete props[key];
+            acc[dasherizeToCamel(key)] = value;
+        } else {
+            acc[key] = value;
         }
-    }
-    return props;
+        return acc;
+    }, {});
 }
 
 export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent> = {
