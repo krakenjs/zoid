@@ -942,7 +942,7 @@
         }
         function uniqueID() {
             var chars = "0123456789abcdef";
-            return "xxxxxxxxxx".replace(/./g, (function() {
+            return "uid_" + "xxxxxxxxxx".replace(/./g, (function() {
                 return chars.charAt(Math.floor(Math.random() * chars.length));
             })) + "_" + base64encode((new Date).toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         }
@@ -1432,7 +1432,21 @@
             var uid = script.getAttribute("data-uid");
             if (uid && "string" == typeof uid) return uid;
             if ((uid = script.getAttribute("data-uid-auto")) && "string" == typeof uid) return uid;
-            uid = uniqueID();
+            if (script.src) {
+                var hashedString = function(str) {
+                    var hash = "";
+                    for (var i = 0; i < str.length; i++) {
+                        var total = str[i].charCodeAt(0) * i;
+                        str[i + 1] && (total += str[i + 1].charCodeAt(0) * (i - 1));
+                        hash += String.fromCharCode(97 + Math.abs(total) % 26);
+                    }
+                    return hash;
+                }(JSON.stringify({
+                    src: script.src,
+                    dataset: script.dataset
+                }));
+                uid = "uid_" + hashedString.slice(hashedString.length - 30);
+            } else uid = uniqueID();
             script.setAttribute("data-uid-auto", uid);
             return uid;
         }));
@@ -2537,8 +2551,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_65__ || (win.__zoid_9_0_65__ = {});
-            return win.__zoid_9_0_65__;
+            win.__zoid_9_0_66__ || (win.__zoid_9_0_66__ = {});
+            return win.__zoid_9_0_66__;
         }
         function getProxyObject(obj) {
             return {
@@ -2759,16 +2773,15 @@
                 return getProxyContainerOverride ? getProxyContainerOverride(container) : promise_ZalgoPromise.try((function() {
                     return elementReady(container);
                 })).then((function(containerElement) {
-                    isShadowElement(containerElement) && (containerElement = function(element) {
+                    isShadowElement(containerElement) && (containerElement = function insertShadowSlot(element) {
                         var shadowHost = function(element) {
                             var shadowRoot = function(element) {
                                 for (;element.parentNode; ) element = element.parentNode;
                                 if (isShadowElement(element)) return element;
                             }(element);
-                            if (shadowRoot.host) return shadowRoot.host;
+                            if (shadowRoot && shadowRoot.host) return shadowRoot.host;
                         }(element);
                         if (!shadowHost) throw new Error("Element is not in shadow dom");
-                        if (isShadowElement(shadowHost)) throw new Error("Host element is also in shadow dom");
                         var slotName = "shadow-slot-" + uniqueID();
                         var slot = document.createElement("slot");
                         slot.setAttribute("name", slotName);
@@ -2776,7 +2789,7 @@
                         var slotProvider = document.createElement("div");
                         slotProvider.setAttribute("slot", slotName);
                         shadowHost.appendChild(slotProvider);
-                        return slotProvider;
+                        return isShadowElement(shadowHost) ? insertShadowSlot(slotProvider) : slotProvider;
                     }(containerElement));
                     return getProxyObject(containerElement);
                 }));
@@ -3481,7 +3494,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_65",
+                                        version: "9_0_66",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3919,7 +3932,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_65" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_65");
+                        if ("9_0_66" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_66");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4280,7 +4293,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_65__;
+            delete window.__zoid_9_0_66__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
