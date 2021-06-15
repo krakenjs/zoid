@@ -3,27 +3,34 @@
 
 import { extend, noop } from 'belter/src';
 
-import type { ComponentDriverType } from '../component';
+import type { ComponentDriverType, ZoidComponentInstance } from '../component';
 import { CONTEXT } from '../constants';
 
 // eslint-disable-next-line flowtype/require-exact-type
 declare class ReactClassType {}
 
 // eslint-disable-next-line flowtype/require-exact-type
-declare class __ReactComponent {}
+declare class _ReactComponentType {
+    state : {| parent? : ZoidComponentInstance<*> |},
+    props : mixed,
+    setState : (newStateOrFn : mixed) => void
+}
+
+// eslint-disable-next-line flowtype/require-exact-type
+type Class<T> = { new(): T };
 
 type ReactElementType = {|
 
 |};
 
 type ReactType = {|
-    Component : __ReactComponent,
+    Component : typeof _ReactComponentType,
     createClass : ({| render : () => ReactElementType, componentDidMount : () => void, componentDidUpdate : () => void |}) => (typeof ReactClassType),
     createElement : (string, ?{ [string] : mixed }, ...children : $ReadOnlyArray<ReactElementType>) => ReactElementType
 |};
 
 type ReactDomType = {|
-    findDOMNode : (typeof ReactClassType) => HTMLElement
+    findDOMNode : (_ReactComponentType) => HTMLElement
 |};
 
 type ReactLibraryType = {|
@@ -31,21 +38,44 @@ type ReactLibraryType = {|
     ReactDOM : ReactDomType
 |};
 
-export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassType> = {
 
-    register: (tag, propsDef, init, { React, ReactDOM }) => {
+/**
+ * Util to check if component is currently mounted
+ */
+function isMounted(component : _ReactComponentType, ReactDOM : ReactDomType) : boolean {
+    try {
+        return Boolean(ReactDOM.findDOMNode(component));
+    }
+    catch (error) {
+        // Error: Unable to find node on an unmounted component
+        return false;
+    }
+}
 
-        // $FlowFixMe
-        return class extends React.Component {
+export const react : ComponentDriverType<*, ReactLibraryType, Class<_ReactComponentType>> = {
+
+    register: (tag, propsDef, init, { React, ReactDOM }) : Class<_ReactComponentType> => {
+
+        return class ZoidReactComponent extends React.Component {
             render() : ReactElementType {
                 return React.createElement('div', null);
             }
 
             componentDidMount() {
-                // $FlowFixMe
                 const el = ReactDOM.findDOMNode(this);
                 const parent = init(extend({}, this.props));
-                parent.render(el, CONTEXT.IFRAME);
+                parent.render(el, CONTEXT.IFRAME)
+                    .catch(error => {
+                        // component failed to render, possibly because it was closed or destroyed.
+                        if (!isMounted(this, ReactDOM)) {
+                            // not mounted anymore, we can safely ignore the error
+                            return;
+                        }
+                        // still mounted, throw error inside react to allow a parent component or ErrorBoundary to handle it
+                        this.setState(() => {
+                            throw error;
+                        });
+                    });
                 this.setState({ parent });
             }
 
