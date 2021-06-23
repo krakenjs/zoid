@@ -2618,8 +2618,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_66__ || (win.__zoid_9_0_66__ = {});
-            return win.__zoid_9_0_66__;
+            win.__zoid_9_0_67__ || (win.__zoid_9_0_67__ = {});
+            return win.__zoid_9_0_67__;
         }
         function getProxyObject(obj) {
             return {
@@ -2671,7 +2671,8 @@
                 getParent: helpers.getParent,
                 getParentDomain: helpers.getParentDomain,
                 show: helpers.show,
-                hide: helpers.hide
+                hide: helpers.hide,
+                export: helpers.export
             }) : value;
         }
         function parseChildWindowName(windowName) {
@@ -2726,7 +2727,7 @@
         function parentComponent(options, overrides, parentWin) {
             void 0 === overrides && (overrides = {});
             void 0 === parentWin && (parentWin = window);
-            var propsDef = options.propsDef, containerTemplate = options.containerTemplate, prerenderTemplate = options.prerenderTemplate, tag = options.tag, name = options.name, attributes = options.attributes, dimensions = options.dimensions, autoResize = options.autoResize, url = options.url, domainMatch = options.domain;
+            var propsDef = options.propsDef, containerTemplate = options.containerTemplate, prerenderTemplate = options.prerenderTemplate, tag = options.tag, name = options.name, attributes = options.attributes, dimensions = options.dimensions, autoResize = options.autoResize, url = options.url, domainMatch = options.domain, xports = options.exports;
             var initPromise = new promise_ZalgoPromise;
             var handledErrors = [];
             var clean = cleanup();
@@ -3072,6 +3073,12 @@
                         initPromise.asyncReject(err);
                         return event.trigger(EVENT.ERROR, err);
                     }
+                }));
+            };
+            var exportsPromise = new promise_ZalgoPromise;
+            var resolveExports = function(actualExports) {
+                return promise_ZalgoPromise.try((function() {
+                    exportsPromise.resolve(actualExports);
                 }));
             };
             initChild.onError = onError;
@@ -3561,7 +3568,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_66",
+                                        version: "9_0_67",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3575,7 +3582,8 @@
                                             resize: resize,
                                             onError: onError,
                                             show: show,
-                                            hide: hide
+                                            hide: hide,
+                                            export: resolveExports
                                         }))
                                     };
                                     var win;
@@ -3744,6 +3752,13 @@
                             setProxyWin: setProxyWin
                         };
                     }));
+                },
+                getExports: function() {
+                    return xports({
+                        getExports: function() {
+                            return exportsPromise;
+                        }
+                    });
                 }
             };
         }
@@ -3947,7 +3962,7 @@
                     };
                 } : _options$eligible, _options$logger = options.logger, logger = void 0 === _options$logger ? {
                     info: src_util_noop
-                } : _options$logger;
+                } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports;
                 var name = tag.replace(/-/g, "_");
                 var _dimensions$width = dimensions.width, width = void 0 === _dimensions$width ? "300px" : _dimensions$width, _dimensions$height = dimensions.height, height = void 0 === _dimensions$height ? "150px" : _dimensions$height;
                 propsDef = _extends({}, {
@@ -4041,6 +4056,14 @@
                             return _ref11.hide;
                         }
                     },
+                    export: {
+                        type: "function",
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref12) {
+                            return _ref12.export;
+                        }
+                    },
                     onDisplay: {
                         type: "function",
                         required: !1,
@@ -4097,8 +4120,8 @@
                         type: "function",
                         required: !1,
                         sendToChild: !1,
-                        childDecorate: function(_ref12) {
-                            return _ref12.onError;
+                        childDecorate: function(_ref13) {
+                            return _ref13.onError;
                         }
                     },
                     onProps: {
@@ -4106,8 +4129,8 @@
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
-                        childDecorate: function(_ref13) {
-                            return _ref13.onProps;
+                        childDecorate: function(_ref14) {
+                            return _ref14.onProps;
                         }
                     }
                 }, propsDef);
@@ -4131,7 +4154,8 @@
                     prerenderTemplate: prerenderTemplate,
                     validate: validate,
                     logger: logger,
-                    eligible: eligible
+                    eligible: eligible,
+                    exports: xports
                 };
             }(opts);
             var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef, eligible = options.eligible;
@@ -4154,8 +4178,8 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_66" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_66");
-                        var uid = childPayload.uid, parentDomain = childPayload.parentDomain, exports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
+                        if ("9_0_67" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_67");
+                        var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
                             if ("opener" === type) return assertExists("opener", getOpener(window));
@@ -4185,7 +4209,7 @@
                             }
                             throw new Error("Unable to find " + type + " parent component window");
                         }(childPayload.parent);
-                        var parent = setup_deserializeMessage(parentComponentWindow, parentDomain, exports);
+                        var parent = setup_deserializeMessage(parentComponentWindow, parentDomain, parentExports);
                         var show = parent.show, hide = parent.hide, close = parent.close;
                         var getParent = function() {
                             return parentComponentWindow;
@@ -4207,6 +4231,9 @@
                                 width: _ref2.width,
                                 height: _ref2.height
                             });
+                        };
+                        var xport = function(xports) {
+                            return parent.export(xports);
                         };
                         var setProps = function(newProps, origin, isUpdate) {
                             void 0 === isUpdate && (isUpdate = !1);
@@ -4237,7 +4264,8 @@
                                 onProps: onProps,
                                 getParent: getParent,
                                 getParentDomain: getParentDomain,
-                                uid: uid
+                                uid: uid,
+                                export: xport
                             }, isUpdate);
                             props ? extend(props, normalizedProps) : props = normalizedProps;
                             for (var _i4 = 0; _i4 < onPropHandlers.length; _i4++) (0, onPropHandlers[_i4])(props);
@@ -4367,7 +4395,7 @@
                         }));
                     }));
                 };
-                instance = _extends({}, parent.getHelpers(), {
+                instance = _extends({}, parent.getExports(), parent.getHelpers(), {
                     isEligible: function() {
                         return eligibility;
                     },
@@ -4524,7 +4552,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_66__;
+            delete window.__zoid_9_0_67__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
