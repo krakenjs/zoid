@@ -34,7 +34,7 @@ type Logger = {
     contains all of the configuration needed for them to set themselves up.
 */
 
-export type ComponentOptionsType<P> = {|
+export type ComponentOptionsType<P, X> = {|
 
     tag : string,
 
@@ -42,7 +42,7 @@ export type ComponentOptionsType<P> = {|
     domain? : string | RegExp,
     bridgeUrl? : string,
 
-    props? : UserPropsDefinitionType<P>,
+    props? : UserPropsDefinitionType<P, X>,
 
     dimensions? : CssDimensionsType,
     autoResize? : {| width? : boolean, height? : boolean, element? : string |},
@@ -77,7 +77,7 @@ type AutoResizeType = {|
     element? : string
 |};
 
-export type NormalizedComponentOptionsType<P> = {|
+export type NormalizedComponentOptionsType<P, X> = {|
     tag : string,
     name : string,
 
@@ -85,7 +85,7 @@ export type NormalizedComponentOptionsType<P> = {|
     domain : ?(string | RegExp),
     bridgeUrl : ?string,
 
-    propsDef : PropsDefinitionType<P>,
+    propsDef : PropsDefinitionType<P, X>,
     dimensions : CssDimensionsType,
     autoResize : AutoResizeType,
 
@@ -101,20 +101,23 @@ export type NormalizedComponentOptionsType<P> = {|
     prerenderTemplate : ?(RenderOptionsType<P>) => ?HTMLElement,
 
     validate : ?({| props : PropsInputType<P> |}) => void,
-    logger : Logger
+    logger : Logger,
+
+    exports : ({| getExports : () => ZalgoPromise<X> |}) => X
 |};
 
-export type ZoidComponentInstance<P> = {|
+export type ZoidComponentInstance<P, X = void> = {|
     ...ParentHelpers<P>,
+    ...X,
     isEligible : () => boolean,
-    clone : () => ZoidComponentInstance<P>,
+    clone : () => ZoidComponentInstance<P, X>,
     render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
     renderTo : (target : CrossDomainWindowType, container? : string, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
 
 // eslint-disable-next-line flowtype/require-exact-type
-export type ZoidComponent<P> = {
-    (PropsInputType<P>) : ZoidComponentInstance<P>,
+export type ZoidComponent<P, X = void> = {
+    (PropsInputType<P>) : ZoidComponentInstance<P, X>,
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
     xprops? : PropsType<P>,
@@ -131,7 +134,12 @@ const getDefaultAutoResize = () : AutoResizeType => {
     return {};
 };
 
-function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComponentOptionsType<P> {
+const getDefaultExports = <X>() : () => X => {
+    // $FlowFixMe
+    return noop;
+};
+
+function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : NormalizedComponentOptionsType<P, X> {
     let {
         tag,
         url,
@@ -147,7 +155,8 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
         prerenderTemplate = (__ZOID__.__DEFAULT_PRERENDER__ ? defaultPrerenderTemplate : null),
         validate,
         eligible = () => ({ eligible: true }),
-        logger = { info: noop }
+        logger = { info: noop },
+        exports: xports = getDefaultExports()
     } = options;
 
     const name = tag.replace(/-/g, '_');
@@ -176,23 +185,24 @@ function normalizeOptions<P>(options : ComponentOptionsType<P>) : NormalizedComp
         prerenderTemplate,
         validate,
         logger,
-        eligible
+        eligible,
+        exports:     xports
     };
 }
 
 let cleanInstances = cleanup();
 const cleanZoid = cleanup();
 
-export type Component<P> = {|
-    init : (PropsInputType<P>) => ZoidComponentInstance<P>,
-    instances : $ReadOnlyArray<ZoidComponentInstance<P>>,
+export type Component<P, X> = {|
+    init : (PropsInputType<P>) => ZoidComponentInstance<P, X>,
+    instances : $ReadOnlyArray<ZoidComponentInstance<P, X>>,
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>,
     registerChild : () => ?ChildComponent<P>
 |};
 
-export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
+export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P, X> {
     if (__DEBUG__) {
         validateOptions(opts);
     }
@@ -291,7 +301,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
         return {};
     };
 
-    const init = (props : PropsInputType<P>) : ZoidComponentInstance<P> => {
+    const init = (props : PropsInputType<P>) : ZoidComponentInstance<P, X> => {
         // eslint-disable-next-line prefer-const
         let instance;
         props = props || getDefaultInputProps();
@@ -357,6 +367,7 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
         };
 
         instance = {
+            ...parent.getExports(),
             ...parent.getHelpers(),
             isEligible,
             clone,
@@ -408,11 +419,11 @@ export function component<P>(opts : ComponentOptionsType<P>) : Component<P> {
     };
 }
 
-export type ComponentDriverType<P, L, D> = {|
-    register : (string, PropsDefinitionType<P>, (PropsInputType<P>) => ZoidComponentInstance<P>, L) => D
+export type ComponentDriverType<P, L, D, X> = {|
+    register : (string, PropsDefinitionType<P, X>, (PropsInputType<P>) => ZoidComponentInstance<P, X>, L) => D
 |};
 
-export function create<P>(options : ComponentOptionsType<P>) : ZoidComponent<P> {
+export function create<P, X>(options : ComponentOptionsType<P, X>) : ZoidComponent<P, X> {
     setupPostRobot();
 
     const comp = component(options);

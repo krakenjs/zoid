@@ -23,7 +23,7 @@ export type ChildExportsType<P> = {|
     close : CrossDomainFunctionType<[], void>
 |};
 
-export type ChildHelpers<P> = {|
+export type ChildHelpers<P, X> = {|
     uid : string,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
@@ -33,7 +33,8 @@ export type ChildHelpers<P> = {|
     getParent : () => CrossDomainWindowType,
     getParentDomain : () => string,
     show : () => ZalgoPromise<void>,
-    hide : () => ZalgoPromise<void>
+    hide : () => ZalgoPromise<void>,
+    export : (X) => ZalgoPromise<void>
 |};
 
 function getParentComponentWindow(ref : WindowRef) : CrossDomainWindowType {
@@ -111,7 +112,7 @@ export type ChildComponent<P> = {|
     init : () => ZalgoPromise<void>
 |};
 
-export function childComponent<P>(options : NormalizedComponentOptionsType<P>) : ChildComponent<P> {
+export function childComponent<P, X>(options : NormalizedComponentOptionsType<P, X>) : ChildComponent<P> {
     const { propsDef, autoResize, allowedParentDomains } = options;
 
     const onPropHandlers = [];
@@ -128,7 +129,7 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
 
     const { uid, parent: parentRef, parentDomain, exports: parentExports, context, props: propsRef } = childPayload;
     const parentComponentWindow = getParentComponentWindow(parentRef);
-    const parent : ParentExportsType<P> = deserializeMessage(parentComponentWindow, parentDomain, parentExports);
+    const parent : ParentExportsType<P, X> = deserializeMessage(parentComponentWindow, parentDomain, parentExports);
 
     const { show, hide, close } = parent;
 
@@ -153,10 +154,14 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         return parent.resize.fireAndForget({ width, height });
     };
 
-    const getHelpers = () : ChildHelpers<P> => {
+    const xport = (xports : X) : ZalgoPromise<void> => {
+        return parent.export(xports);
+    };
+
+    const getHelpers = () : ChildHelpers<P, X> => {
         return {
             show, hide, close, focus, onError, resize,
-            onProps, getParent, getParentDomain, uid
+            onProps, getParent, getParentDomain, uid, export: xport
         };
     };
 

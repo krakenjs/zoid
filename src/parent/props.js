@@ -14,7 +14,7 @@ import type { ParentHelpers } from './index';
     Turn props into normalized values, using defaults, function options, etc.
 */
 
-export function extendProps<P>(propsDef : PropsDefinitionType<P>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) { // eslint-disable-line complexity
+export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) { // eslint-disable-line complexity
 
     // $FlowFixMe
     inputProps = inputProps || {};
@@ -101,7 +101,7 @@ export function extendProps<P>(propsDef : PropsDefinitionType<P>, props : PropsT
 }
 
 // $FlowFixMe
-function getQueryParam<P>(prop : MixedPropDefinitionType<P>, key : string, value : string) : ZalgoPromise<string> {
+function getQueryParam<P, X>(prop : MixedPropDefinitionType<P, X>, key : string, value : string) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryParam === 'function') {
             return prop.queryParam({ value });
@@ -114,7 +114,7 @@ function getQueryParam<P>(prop : MixedPropDefinitionType<P>, key : string, value
 }
 
 // $FlowFixMe
-function getQueryValue<P>(prop : MixedPropDefinitionType<P>, key : string, value : string) : ZalgoPromise<string> {
+function getQueryValue<P, X>(prop : MixedPropDefinitionType<P, X>, key : string, value : string) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
         if (typeof prop.queryValue === 'function' && isDefined(value)) {
             return prop.queryValue({ value });
@@ -124,7 +124,7 @@ function getQueryValue<P>(prop : MixedPropDefinitionType<P>, key : string, value
     });
 }
 
-export function propsToQuery<P>(propsDef : PropsDefinitionType<P>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string | boolean }> {
+export function propsToQuery<P, X>(propsDef : PropsDefinitionType<P, X>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string | boolean }> {
 
     const params = {};
 

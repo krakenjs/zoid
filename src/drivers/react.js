@@ -31,7 +31,7 @@ type ReactLibraryType = {|
     ReactDOM : ReactDomType
 |};
 
-export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassType> = {
+export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassType, *> = {
 
     register: (tag, propsDef, init, { React, ReactDOM }) => {
 

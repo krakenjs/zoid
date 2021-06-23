@@ -37,14 +37,15 @@ export type RenderOptionsType<P> = {|
     prerenderFrame : ?HTMLIFrameElement
 |};
 
-export type ParentExportsType<P> = {|
+export type ParentExportsType<P, X> = {|
     init : (ChildExportsType<P>) => ZalgoPromise<void>,
     close : () => ZalgoPromise<void>,
     checkClose : CrossDomainFunctionType<[], boolean>,
     resize : CrossDomainFunctionType<[{| width? : ?number, height? : ?number |}], void>,
     onError : (mixed) => ZalgoPromise<void>,
     show : () => ZalgoPromise<void>,
-    hide : () => ZalgoPromise<void>
+    hide : () => ZalgoPromise<void>,
+    export : (X) => ZalgoPromise<void>
 |};
 
 export type PropRef =
@@ -143,13 +144,14 @@ type DelegateOverrides = {|
     watchForUnload : WatchForUnload
 |};
 
-type ParentComponent<P> = {|
+type ParentComponent<P, X> = {|
     init : () => void,
     render : (CrossDomainWindowType, string | HTMLElement, $Values<typeof CONTEXT>) => ZalgoPromise<void>,
     setProps : (newProps : PropsInputType<P>, isUpdate? : boolean) => void,
     destroy : (err? : mixed) => ZalgoPromise<void>,
     getHelpers : () => ParentHelpers<P>,
-    getDelegateOverrides : () => ZalgoPromise<DelegateOverrides>
+    getDelegateOverrides : () => ZalgoPromise<DelegateOverrides>,
+    getExports : () => X
 |};
 
 const getDefaultOverrides = <P>() : ParentDelegateOverrides<P> => {
@@ -157,8 +159,8 @@ const getDefaultOverrides = <P>() : ParentDelegateOverrides<P> => {
     return {};
 };
 
-export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, overrides? : ParentDelegateOverrides<P> = getDefaultOverrides(), parentWin : CrossDomainWindowType = window) : ParentComponent<P> {
-    const { propsDef, containerTemplate, prerenderTemplate, tag, name, attributes, dimensions, autoResize, url, domain: domainMatch, validate } = options;
+export function parentComponent<P, X>(options : NormalizedComponentOptionsType<P, X>, overrides? : ParentDelegateOverrides<P> = getDefaultOverrides(), parentWin : CrossDomainWindowType = window) : ParentComponent<P, X> {
+    const { propsDef, containerTemplate, prerenderTemplate, tag, name, attributes, dimensions, autoResize, url, domain: domainMatch, validate, exports: xports } = options;
 
     const initPromise = new ZalgoPromise();
     const handledErrors = [];
@@ -660,11 +662,25 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         });
     };
 
+    const exportsPromise : ZalgoPromise<X> = new ZalgoPromise();
+
+    const getExports = () : X => {
+        return xports({
+            getExports: () => exportsPromise
+        });
+    };
+
+    const resolveExports = (actualExports : X) : ZalgoPromise<void> => {
+        return ZalgoPromise.try(() => {
+            exportsPromise.resolve(actualExports);
+        });
+    };
+
     initChild.onError = onError;
 
-    const buildParentExports = (win : ProxyWindow) : ParentExportsType<P> => {
+    const buildParentExports = (win : ProxyWindow) : ParentExportsType<P, X> => {
         const checkClose = () => checkWindowClose(win);
-        return { init: initChild, close, checkClose, resize, onError, show, hide };
+        return { init: initChild, close, checkClose, resize, onError, show, hide, export: resolveExports };
     };
 
     const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |} = {}) : ZalgoPromise<ChildPayload> => {
@@ -858,7 +874,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         const childOverridesPromise = send(target, `${ POST_MESSAGE.DELEGATE }_${ name }`, {
             overrides: { props: delegateProps, event, close, onError, getInternalState, setInternalState }
         }).then(({ data: { parent } }) => {
-            const parentComp : ParentComponent<P> = parent;
+            const parentComp : ParentComponent<P, X> = parent;
 
             clean.register(err => {
                 if (!isWindowClosed(target)) {
@@ -1034,6 +1050,7 @@ export function parentComponent<P>(options : NormalizedComponentOptionsType<P>, 
         destroy,
         setProps,
         getHelpers,
-        getDelegateOverrides
+        getDelegateOverrides,
+        getExports
     };
 }

@@ -45,7 +45,7 @@ const equals = (obj1, obj2) => {
     return true;
 };
 
-export const angular2 : ComponentDriverType<*, Angular2, Angular2Module> = {
+export const angular2 : ComponentDriverType<*, Angular2, Angular2Module, *> = {
 
     register: (tag, propsDef, init, { Component : AngularComponent, NgModule, ElementRef, NgZone }) => {
         const getProps = (component) => {

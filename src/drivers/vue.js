@@ -37,7 +37,7 @@ function propsToCamelCase(props : Object) : Object {
     }, {});
 }
 
-export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent> = {
+export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent, *> = {
 
     register: (tag, propsDef, init, Vue) => {
 

@@ -3,6 +3,7 @@
 import './happy';
 import './props';
 import './actions';
+import './exports';
 import './drivers';
 import './error';
 import './renderto';
