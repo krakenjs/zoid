@@ -12,7 +12,7 @@ import { getGlobal } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { NormalizedComponentOptionsType } from '../component';
 import type { PropsType } from '../component/props';
-import type { WindowRef, PropRef } from '../parent';
+import type { WindowRef, PropRef, ParentExportsType } from '../parent';
 import type { StringMatcherType } from '../types';
 
 import { normalizeChildProps } from './props';
@@ -126,9 +126,9 @@ export function childComponent<P>(options : NormalizedComponentOptionsType<P>) :
         throw new Error(`Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
     }
 
-    const { uid, parent: parentRef, parentDomain, exports, context, props: propsRef } = childPayload;
+    const { uid, parent: parentRef, parentDomain, exports: parentExports, context, props: propsRef } = childPayload;
     const parentComponentWindow = getParentComponentWindow(parentRef);
-    const parent = deserializeMessage(parentComponentWindow, parentDomain, exports);
+    const parent : ParentExportsType<P> = deserializeMessage(parentComponentWindow, parentDomain, parentExports);
 
     const { show, hide, close } = parent;
 
