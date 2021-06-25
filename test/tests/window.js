@@ -5,7 +5,8 @@ import { send, once } from 'post-robot/src';
 import { uniqueID, wrapPromise } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { runOnClick } from '../common';
+import { runOnClick, getBody } from '../common';
+import { zoid } from '../zoid';
 
 describe('zoid window prop cases', () => {
 
@@ -13,14 +14,14 @@ describe('zoid window prop cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-custom-iframe',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
 
-            const body = document.body;
+            const body = getBody();
             if (!body) {
                 throw new Error(`Can not find body`);
             }
@@ -51,7 +52,7 @@ describe('zoid window prop cases', () => {
                 run: () => `
                     window.xprops.passUIDGetter(() => window.uid);
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -59,7 +60,7 @@ describe('zoid window prop cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-custom-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -92,7 +93,7 @@ describe('zoid window prop cases', () => {
                 run: () => `
                     window.xprops.passUIDGetter(() => window.uid);
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -100,7 +101,7 @@ describe('zoid window prop cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-custom-close-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -124,7 +125,7 @@ describe('zoid window prop cases', () => {
                 run: () => `
                     window.xprops.doClose();
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -133,13 +134,13 @@ describe('zoid window prop cases', () => {
 
             window.__component__ = () => {
                 return {
-                    simple: window.zoid.create({
+                    simple: zoid.create({
                         tag:    'test-renderto-custom-iframe-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
                     }),
 
-                    remote: window.zoid.create({
+                    remote: zoid.create({
                         tag:    'test-renderto-custom-iframe-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -147,7 +148,7 @@ describe('zoid window prop cases', () => {
                 };
             };
 
-            const body = document.body;
+            const body = getBody();
             if (!body) {
                 throw new Error(`Can not find body`);
             }
@@ -185,7 +186,7 @@ describe('zoid window prop cases', () => {
                         \`
                     }).renderTo(window.parent, 'body');
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -194,13 +195,13 @@ describe('zoid window prop cases', () => {
 
             window.__component__ = () => {
                 return {
-                    simple: window.zoid.create({
+                    simple: zoid.create({
                         tag:    'test-renderto-custom-popup-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
                     }),
 
-                    remote: window.zoid.create({
+                    remote: zoid.create({
                         tag:    'test-renderto-custom-popup-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -241,7 +242,7 @@ describe('zoid window prop cases', () => {
                         \`
                     }).renderTo(window.parent, 'body');
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -249,7 +250,7 @@ describe('zoid window prop cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-custom-popup-loaded-url',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -284,7 +285,7 @@ describe('zoid window prop cases', () => {
                     run: () => `
                         window.xprops.passUIDGetter(() => window.uid);
                     `
-                }).render(document.body);
+                }).render(getBody());
             }));
         });
     });
@@ -294,13 +295,13 @@ describe('zoid window prop cases', () => {
 
             window.__component__ = () => {
                 return {
-                    simple: window.zoid.create({
+                    simple: zoid.create({
                         tag:    'test-renderto-custom-popup-close-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
                     }),
 
-                    remote: window.zoid.create({
+                    remote: zoid.create({
                         tag:    'test-renderto-custom-popup-close-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -332,7 +333,7 @@ describe('zoid window prop cases', () => {
                         \`
                     }).renderTo(window.parent, 'body');
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -340,7 +341,7 @@ describe('zoid window prop cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-bogus-window',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -350,6 +351,7 @@ describe('zoid window prop cases', () => {
             const component = window.__component__();
 
             return ZalgoPromise.try(() => {
+                // $FlowFixMe
                 component({
                     window: {
                         location: 'meep'

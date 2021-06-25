@@ -3,13 +3,16 @@
 
 import { wrapPromise } from 'belter/src';
 
+import { zoid } from '../zoid';
+import { getBody } from '../common';
+
 describe('zoid eligible cases', () => {
 
     it('should initialize a component, with no eligibility and check it is eligible', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-eligible-undefined',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -26,7 +29,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body);
+            return instance.render(getBody());
         });
     });
 
@@ -34,7 +37,7 @@ describe('zoid eligible cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-eligible-true',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -52,7 +55,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body);
+            return instance.render(getBody());
         });
     });
 
@@ -60,7 +63,7 @@ describe('zoid eligible cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-eligible-true-prop',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -79,7 +82,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body);
+            return instance.render(getBody());
         });
     });
 
@@ -87,7 +90,7 @@ describe('zoid eligible cases', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-eligible-false',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -105,7 +108,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body).catch(expect('renderError'));
+            return instance.render(getBody()).catch(expect('renderError'));
         });
     });
 
@@ -113,7 +116,7 @@ describe('zoid eligible cases', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-eligible-false-prop',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -132,7 +135,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body).catch(expect('renderError'));
+            return instance.render(getBody()).catch(expect('renderError'));
         });
     });
 
@@ -140,7 +143,7 @@ describe('zoid eligible cases', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-eligible-false-validate',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -167,7 +170,7 @@ describe('zoid eligible cases', () => {
                 throw new Error(`Expected component to be eligible`);
             }
 
-            return instance.render(document.body).catch(expect('renderError'));
+            return instance.render(getBody()).catch(expect('renderError'));
         });
     });
 });

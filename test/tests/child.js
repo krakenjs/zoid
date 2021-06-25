@@ -3,14 +3,15 @@
 import { wrapPromise } from 'belter/src';
 import { onCloseWindow } from 'cross-domain-utils/src';
 
-import { onWindowOpen, runOnClick } from '../common';
+import { zoid } from '../zoid';
+import { onWindowOpen, runOnClick, getBody } from '../common';
 
 describe('zoid child cases', () => {
     it('should render a popup component to an iframe and focus from the child', () => {
 
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-focus-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -40,7 +41,7 @@ describe('zoid child cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });
@@ -49,7 +50,7 @@ describe('zoid child cases', () => {
 
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-close-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -72,7 +73,7 @@ describe('zoid child cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         }, { timeout: 5000 });
     });
@@ -81,7 +82,7 @@ describe('zoid child cases', () => {
 
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-close-manually-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -104,7 +105,7 @@ describe('zoid child cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         }, { timeout: 5000 });
     });
@@ -115,7 +116,7 @@ describe('zoid child cases', () => {
             const code = 'OH_NO';
             
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-error-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -133,8 +134,11 @@ describe('zoid child cases', () => {
                         throw new Error(`Expected error message to be ${ JSON.stringify(message) }, got ${ JSON.stringify(err.message) }`);
                     }
 
-                    if (err.code !== code) {
-                        throw new Error(`Expected error code to be ${ JSON.stringify(code) }, got ${ JSON.stringify(err.code) }`);
+                    // $FlowFixMe
+                    const errCode = err.code;
+                    
+                    if (errCode !== code) {
+                        throw new Error(`Expected error code to be ${ JSON.stringify(code) }, got ${ JSON.stringify(errCode) }`);
                     }
                 }),
 
@@ -148,7 +152,7 @@ describe('zoid child cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });

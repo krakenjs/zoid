@@ -1,6 +1,7 @@
 /* @flow */
 
 // eslint-disable-next-line import/no-namespace
-import * as zoid from '../src/index';
+import * as _zoid from '../src/index';
 
-window.zoid = zoid;
+window.__zoid__ = _zoid;
+export const zoid = _zoid;

@@ -5,6 +5,7 @@ import { wrapPromise } from 'belter/src';
 import { getParent } from 'cross-domain-utils/src';
 
 import { onWindowOpen, getContainer } from '../common';
+import { zoid } from '../zoid';
 
 describe('zoid remove cases', () => {
 
@@ -15,7 +16,7 @@ describe('zoid remove cases', () => {
             const { container, destroy } = getContainer();
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-remove-destroy',
                     url:    () => '/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -58,7 +59,7 @@ describe('zoid remove cases', () => {
             const { container, destroy } = getContainer({ shadow: true });
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-remove-destroy-shadow',
                     url:    () => '/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'

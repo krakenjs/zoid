@@ -5,7 +5,8 @@ import { wrapPromise } from 'belter/src';
 import { getParent } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { onWindowOpen } from '../common';
+import { zoid } from '../zoid';
+import { onWindowOpen, getBody } from '../common';
 
 describe('zoid clone cases', () => {
 
@@ -13,7 +14,7 @@ describe('zoid clone cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-clone',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -29,7 +30,7 @@ describe('zoid clone cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).clone().render(document.body);
+            }).clone().render(getBody());
         });
     });
 
@@ -37,7 +38,7 @@ describe('zoid clone cases', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-clone-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -59,7 +60,7 @@ describe('zoid clone cases', () => {
                         onRendered: expect('onRendered')
                     };
                 }
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -67,7 +68,7 @@ describe('zoid clone cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-clone-instances',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -95,7 +96,7 @@ describe('zoid clone cases', () => {
                 throw new Error(`Expected 2 instances, got ${ component.instances.length }`);
             }
             
-            return clone.render(document.body).then(() => {
+            return clone.render(getBody()).then(() => {
                 return ZalgoPromise.all([
                     component.instances[0].close(),
                     clone.close()
@@ -112,7 +113,7 @@ describe('zoid clone cases', () => {
         return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-clone-instances-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -146,7 +147,7 @@ describe('zoid clone cases', () => {
                 throw new Error(`Expected 2 instances, got ${ component.instances.length }`);
             }
             
-            return clone.render(document.body).then(() => {
+            return clone.render(getBody()).then(() => {
                 return ZalgoPromise.all([
                     component.instances[0].close(),
                     clone.close()
@@ -163,7 +164,7 @@ describe('zoid clone cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-render-iframe-clone-ineligible',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -180,7 +181,7 @@ describe('zoid clone cases', () => {
                         onDestroy: expect('onDestroy2')
                     };
                 }
-            }).render(document.body).catch(expect('catch')).then(() => {
+            }).render(getBody()).catch(expect('catch')).then(() => {
                 if (component.instances.length !== 0) {
                     throw new Error(`Expected 0 instances, got ${ component.instances.length }`);
                 }

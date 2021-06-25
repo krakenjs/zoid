@@ -4,7 +4,8 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise, noop, destroyElement } from 'belter/src';
 
-import { onWindowOpen, runOnClick } from '../common';
+import { onWindowOpen, runOnClick, getBody } from '../common';
+import { zoid } from '../zoid';
 
 describe('zoid error cases', () => {
 
@@ -19,7 +20,7 @@ describe('zoid error cases', () => {
             };
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-popup-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -29,8 +30,8 @@ describe('zoid error cases', () => {
             const component = window.__component__();
             return component({
                 onDestroy: expect('onDestroy')
-            }).render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch', err => {
-                if (!(err instanceof window.zoid.PopupOpenError)) {
+            }).render('body', zoid.CONTEXT.POPUP).catch(expect('catch', err => {
+                if (!(err instanceof zoid.PopupOpenError)) {
                     throw err;
                 }
 
@@ -42,7 +43,7 @@ describe('zoid error cases', () => {
     it('should enter a component, throw an integration error, and return the error to the parent with the original stack', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -55,7 +56,10 @@ describe('zoid error cases', () => {
                 onDestroy: avoid('onDestroy'),
 
                 onError: expect('onError', err => {
-                    if (!err || err.message.indexOf('xxxxx') === -1) {
+                    // $FlowFixMe
+                    const message = err.message ? err.message.toString() : '';
+
+                    if (!err || message.indexOf('xxxxx') === -1) {
                         throw new Error(`Expected error to contain original error from child window`);
                     }
                 }),
@@ -63,14 +67,14 @@ describe('zoid error cases', () => {
                 run: () => `
                     window.xprops.onError(new Error('xxxxx'));
                 `
-            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(noop);
+            }).render(getBody(), zoid.CONTEXT.IFRAME).catch(noop);
         });
     });
 
     it('should enter a component and timeout, then call onError', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-from-child-onerror',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -82,14 +86,14 @@ describe('zoid error cases', () => {
                 timeout:   1,
                 onError:   expect('onError'),
                 onDestroy: expect('onDestroy')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
+            }).render(getBody(), zoid.CONTEXT.IFRAME).catch(expect('catch'));
         });
     });
 
     it('should run validate function on props, and pass up error when thrown', () => {
         return wrapPromise(({ expect, expectError }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-prop-validate',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -117,7 +121,7 @@ describe('zoid error cases', () => {
     it('should run validate function on props, and not call onError when error is thrown', () => {
         return wrapPromise(({ expect, avoid, expectError }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-prop-validate-onerror',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -146,7 +150,7 @@ describe('zoid error cases', () => {
     it('should run validate function on component, and pass up error when thrown', () => {
         return wrapPromise(({ expect, expectError }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-error-validate',
                     url:      '/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -167,7 +171,7 @@ describe('zoid error cases', () => {
     it('should run validate function on component, and not call onError when error is thrown', () => {
         return wrapPromise(({ expect, avoid, expectError }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-error-validate-onerror',
                     url:      '/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -190,7 +194,7 @@ describe('zoid error cases', () => {
     it('should call onError when a popup is opened without a click event', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-popup-no-onclick',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -204,14 +208,14 @@ describe('zoid error cases', () => {
                 onDestroy: expect('onDestroy')
             });
             
-            return instance.render('body', window.zoid.CONTEXT.POPUP).catch(expect('catch'));
+            return instance.render('body', zoid.CONTEXT.POPUP).catch(expect('catch'));
         }, { timeout: 5000 });
     });
 
     it('should call onclose when a popup is closed by someone other than zoid', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-popup-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -232,7 +236,7 @@ describe('zoid error cases', () => {
             });
             
             return runOnClick(() => {
-                return instance.render('body', window.zoid.CONTEXT.POPUP);
+                return instance.render('body', zoid.CONTEXT.POPUP);
             }).then(() => {
                 if (!openedWindow) {
                     throw new Error(`Expected window to have been opened`);
@@ -245,7 +249,7 @@ describe('zoid error cases', () => {
     it('should call onclose when a popup is closed by someone other than zoid during render', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-popup-closed-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -264,7 +268,7 @@ describe('zoid error cases', () => {
             });
             
             return runOnClick(() => {
-                return instance.render('body', window.zoid.CONTEXT.POPUP);
+                return instance.render('body', zoid.CONTEXT.POPUP);
             }).catch(expect('catch'));
         }, { timeout: 5000 });
     });
@@ -272,7 +276,7 @@ describe('zoid error cases', () => {
     it('should call onclose when an iframe is closed by someone other than zoid', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-iframe-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -301,7 +305,7 @@ describe('zoid error cases', () => {
     it('should call onclose when an iframe is closed by someone other than zoid during render', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-iframe-closed-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -319,7 +323,7 @@ describe('zoid error cases', () => {
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
                 onDestroy: expect('onDestroy')
-            }).render('body', window.zoid.CONTEXT.IFRAME).catch(expect('catch'));
+            }).render('body', zoid.CONTEXT.IFRAME).catch(expect('catch'));
         }, { timeout: 5000 });
     });
 
@@ -327,7 +331,7 @@ describe('zoid error cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-prerender-incorrect-document',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -344,14 +348,14 @@ describe('zoid error cases', () => {
             const component = window.__component__();
             return component({
                 onDestroy: expect('onDestroy')
-            }).render(document.body).catch(expect('catch'));
+            }).render(getBody()).catch(expect('catch'));
         });
     });
 
     it('should call onclose when an iframe is closed immediately after changing location', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-iframe-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -378,14 +382,14 @@ describe('zoid error cases', () => {
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
                 onDestroy: expect('onDestroy')
-            }).render('body', window.zoid.CONTEXT.IFRAME);
+            }).render('body', zoid.CONTEXT.IFRAME);
         }, { timeout: 9000 });
     });
 
     it('should call onclose when an iframe is closed after changing location after a small delay', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-iframe-immediately-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -414,14 +418,14 @@ describe('zoid error cases', () => {
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
                 onDestroy: expect('onDestroy')
-            }).render('body', window.zoid.CONTEXT.IFRAME);
+            }).render('body', zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
 
     it('should call onclose when an popup is closed immediately after changing location', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-popup-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -451,7 +455,7 @@ describe('zoid error cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render('body', window.zoid.CONTEXT.POPUP);
+                return instance.render('body', zoid.CONTEXT.POPUP);
             });
         }, { timeout: 9000 });
     });
@@ -459,7 +463,7 @@ describe('zoid error cases', () => {
     it('should call onclose when an popup is closed after changing location after a small delay', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-onclose-popup-immediately-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -491,7 +495,7 @@ describe('zoid error cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render('body', window.zoid.CONTEXT.POPUP);
+                return instance.render('body', zoid.CONTEXT.POPUP);
             });
         }, { timeout: 5000 });
     });
@@ -499,14 +503,14 @@ describe('zoid error cases', () => {
 
     it('should error out when a component is created with a duplicate tag', () => {
         return wrapPromise(({ expect }) => {
-            window.zoid.create({
+            zoid.create({
                 tag:    'test-error-duplicate-tag',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
                 domain: 'mock://www.child.com'
             });
 
             return ZalgoPromise.try(() => {
-                window.zoid.create({
+                zoid.create({
                     tag:    'test-error-duplicate-tag',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -517,7 +521,7 @@ describe('zoid error cases', () => {
 
     it('should error out when an unknown driver is requested', () => {
         return wrapPromise(({ expect }) => {
-            const component = window.zoid.create({
+            const component = zoid.create({
                 tag:    'test-error-unknown-driver',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
                 domain: 'mock://www.child.com'
@@ -533,7 +537,7 @@ describe('zoid error cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-domain-invalid-regex',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: /^mock:\/\/www\.meep\.com$/
@@ -543,7 +547,7 @@ describe('zoid error cases', () => {
             const component = window.__component__();
             return component({
                 onDestroy: expect('onDestroy')
-            }).render(document.body).catch(expect('catch'));
+            }).render(getBody()).catch(expect('catch'));
         });
     });
 
@@ -551,7 +555,7 @@ describe('zoid error cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-invalid-element',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -568,7 +572,7 @@ describe('zoid error cases', () => {
     it('should error out where an invalid window is passed', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-invalid-window',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -586,7 +590,7 @@ describe('zoid error cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-no-element',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -604,7 +608,7 @@ describe('zoid error cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-invalid-context',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -621,7 +625,7 @@ describe('zoid error cases', () => {
     it('should error out when trying to register a child when one is already active', () => {
         return wrapPromise(({ expect }) => {
 
-            const component = window.zoid.create({
+            const component = zoid.create({
                 tag:    'test-xprops-present',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
                 domain: 'mock://www.child.com'
@@ -632,7 +636,7 @@ describe('zoid error cases', () => {
                 let error;
 
                 try {
-                    window.zoid.create({
+                    zoid.create({
                         tag:    'test-xprops-present',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -642,7 +646,7 @@ describe('zoid error cases', () => {
                 }
 
                 delete window.xprops;
-                window.zoid.create({
+                zoid.create({
                     tag:    'test-xprops-present',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -657,14 +661,14 @@ describe('zoid error cases', () => {
                         throw new Error(`Expected error to be thrown in child`);
                     }
                 })
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
     it('should not set xprops when window name does not contain zoid', () => {
         window.name = `__transformer__test_create_window_name_no_zoid__abc123__`;
 
-        window.zoid.create({
+        zoid.create({
             tag:    'test-create-window-name-no-zoid',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
             domain: 'mock://www.child.com'
@@ -678,7 +682,7 @@ describe('zoid error cases', () => {
     it('should not set xprops when window name does contain component name', () => {
         window.name = `__zoid__`;
 
-        window.zoid.create({
+        zoid.create({
             tag:    'test-create-window-name-no-component-name-passed',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
             domain: 'mock://www.child.com'
@@ -692,7 +696,7 @@ describe('zoid error cases', () => {
     it('should not set xprops when window name does not match component name', () => {
         window.name = `__zoid__some_other_component__abc123__`;
 
-        window.zoid.create({
+        zoid.create({
             tag:    'test-create-window-name-non-matching-component',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
             domain: 'mock://www.child.com'
@@ -706,7 +710,7 @@ describe('zoid error cases', () => {
     it('should not set xprops when payload is not sent', () => {
         window.name = `__zoid__test_create_window_name_no_payload__`;
 
-        window.zoid.create({
+        zoid.create({
             tag:    'test-create-window-name-no-payload',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
             domain: 'mock://www.child.com'
@@ -720,7 +724,7 @@ describe('zoid error cases', () => {
     it('should not set xprops when payload is not correctly formatted', () => {
         window.name = `__zoid__test_create_window_name_bad_payload__abc123__`;
 
-        window.zoid.create({
+        zoid.create({
             tag:    'test-create-window-name-bad-payload',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
             domain: 'mock://www.child.com'
@@ -734,7 +738,7 @@ describe('zoid error cases', () => {
     it('should not call onError when the window navigates away', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-error-unload',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -745,7 +749,7 @@ describe('zoid error cases', () => {
             return component({
                 onError:   avoid('onError'),
                 onDestroy: expect('onDestroy')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
+            }).render(getBody(), zoid.CONTEXT.IFRAME).then(() => {
                 window.dispatchEvent(new Event('unload'));
             });
         });
@@ -754,7 +758,7 @@ describe('zoid error cases', () => {
     it('should call onDestroy even if component is not eligible', () => {
         return wrapPromise(({ expect, avoid }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:      'test-error-ondestroy-ineligible',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
@@ -766,7 +770,7 @@ describe('zoid error cases', () => {
             return component({
                 onError:   avoid('onError'),
                 onDestroy: expect('onDestroy')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME).catch(expect('error'));
+            }).render(getBody(), zoid.CONTEXT.IFRAME).catch(expect('error'));
         });
     });
 });

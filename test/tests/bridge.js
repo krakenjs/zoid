@@ -2,7 +2,8 @@
 
 import { wrapPromise } from 'belter/src';
 
-import { runOnClick } from '../common';
+import { zoid } from '../zoid';
+import { runOnClick, getBody } from '../common';
 
 describe('zoid bridge cases', () => {
 
@@ -10,7 +11,7 @@ describe('zoid bridge cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:       'test-render-popup-post-bridge',
                     url:       'mock://www.child.com/base/test/windows/child/index.htm',
                     bridgeUrl: 'mock://www.child.com/base/test/windows/bridge/index.htm'
@@ -31,7 +32,7 @@ describe('zoid bridge cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         }, { timeout: 5000 });
     });
@@ -40,7 +41,7 @@ describe('zoid bridge cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:       'test-render-popup-post-bridge-no-url',
                     url:       'mock://www.child.com/base/test/windows/child/index.htm'
                 });
@@ -52,7 +53,7 @@ describe('zoid bridge cases', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).catch(expect('catch'));
         });
     });

@@ -6,7 +6,8 @@ import { wrapPromise } from 'belter/src';
 import { getParent, getOpener } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen, runOnClick, getContainer } from '../common';
+import { onWindowOpen, runOnClick, getContainer, getBody } from '../common';
+import { zoid } from '../zoid';
 
 describe('zoid happy cases', () => {
 
@@ -14,7 +15,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-url-function',
                     url:    () => '/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -30,7 +31,7 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -38,7 +39,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-default',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -54,7 +55,7 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -62,7 +63,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -78,7 +79,7 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+            }).render(getBody(), zoid.CONTEXT.IFRAME);
         });
     });
 
@@ -86,7 +87,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -105,7 +106,7 @@ describe('zoid happy cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });
@@ -114,7 +115,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:            'test-render-popup-no-element',
                     url:            'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:         'mock://www.child.com',
@@ -143,7 +144,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-string-selector',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -168,7 +169,7 @@ describe('zoid happy cases', () => {
             const expectedValue = 'bar';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-with-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -187,7 +188,7 @@ describe('zoid happy cases', () => {
                 run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -196,7 +197,7 @@ describe('zoid happy cases', () => {
             const expectedValue = 'bar';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-popup-with-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -218,7 +219,7 @@ describe('zoid happy cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });
@@ -227,7 +228,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-domain-regex',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: /^mock:\/\/www\.child\.com$/
@@ -243,7 +244,7 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -251,7 +252,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-ischild',
                     url:    () => '/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -270,7 +271,7 @@ describe('zoid happy cases', () => {
                         window.xprops.isChildResult(window.__component__().isChild());
                     `;
                 }
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -278,7 +279,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-ischild-negative',
                     url:    () => '/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -294,7 +295,7 @@ describe('zoid happy cases', () => {
                 }),
                 run: () => {
                     return `
-                        const component = window.zoid.create({
+                        const component = zoid.create({
                             tag:    'test-render-ischild-negative-second',
                             url:    () => '/base/test/windows/child/index.htm',
                             domain: 'mock://www.child.com'
@@ -303,7 +304,7 @@ describe('zoid happy cases', () => {
                         window.xprops.isChildResult(component.isChild());
                     `;
                 }
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -312,7 +313,7 @@ describe('zoid happy cases', () => {
             const expectedValue = 'bar';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-render-iframe-in-iframe-with-prop',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -348,14 +349,14 @@ describe('zoid happy cases', () => {
                 run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
     it('should prerender to an iframe', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-render-prerender-iframe',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -376,14 +377,14 @@ describe('zoid happy cases', () => {
             window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
 
             const component = window.__component__();
-            return component().render(document.body);
+            return component().render(getBody());
         });
     });
 
     it('should prerender to a popup', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-render-prerender-popup',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -407,7 +408,7 @@ describe('zoid happy cases', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });
@@ -416,7 +417,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-shadow-dom',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -444,7 +445,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-nested-shadow-dom',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -471,7 +472,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-shadow-dom-slots',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -499,7 +500,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-window-name',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -526,7 +527,7 @@ describe('zoid happy cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body, window.zoid.CONTEXT.IFRAME);
+            }).render(getBody(), zoid.CONTEXT.IFRAME);
         });
     });
 
@@ -534,7 +535,7 @@ describe('zoid happy cases', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-popup-window-name',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -564,7 +565,7 @@ describe('zoid happy cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });
@@ -574,7 +575,7 @@ describe('zoid happy cases', () => {
             const expectedValue = 'bar';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-iframe-with-promise-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -593,7 +594,7 @@ describe('zoid happy cases', () => {
                 run: () => `
                     window.xprops.foo(${ JSON.stringify(expectedValue) });
                 `
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -602,7 +603,7 @@ describe('zoid happy cases', () => {
             const expectedValue = 'bar';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-popup-with-promise-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -624,7 +625,7 @@ describe('zoid happy cases', () => {
             });
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             });
         });
     });

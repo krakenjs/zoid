@@ -5,7 +5,8 @@
 import { wrapPromise } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen, runOnClick } from '../common';
+import { zoid } from '../zoid';
+import { onWindowOpen, runOnClick, getBody } from '../common';
 
 describe('zoid dimensions cases', () => {
 
@@ -18,7 +19,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -39,7 +40,7 @@ describe('zoid dimensions cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body).then(() => {
+            }).render(getBody()).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
                 if (componentWindow.innerWidth !== expectedWidth) {
@@ -62,7 +63,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-popup-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -86,7 +87,7 @@ describe('zoid dimensions cases', () => {
             });
             
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
@@ -111,7 +112,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-resize',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -129,7 +130,7 @@ describe('zoid dimensions cases', () => {
             const instance = component({
                 onRendered: expect('onRendered')
             });
-            return instance.render(document.body).then(() => {
+            return instance.render(getBody()).then(() => {
                 return instance.resize({ width, height });
 
             }).then(() => {
@@ -156,7 +157,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-resize-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -191,7 +192,7 @@ describe('zoid dimensions cases', () => {
                     `;
                 }
 
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -204,7 +205,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -245,7 +246,7 @@ describe('zoid dimensions cases', () => {
                     `;
                 }
 
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -258,7 +259,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-width-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -302,7 +303,7 @@ describe('zoid dimensions cases', () => {
                     `;
                 }
 
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -315,7 +316,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-height-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -359,7 +360,7 @@ describe('zoid dimensions cases', () => {
                     `;
                 }
 
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -372,7 +373,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-custom-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -414,7 +415,7 @@ describe('zoid dimensions cases', () => {
                     `;
                 }
 
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -427,7 +428,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -475,7 +476,7 @@ describe('zoid dimensions cases', () => {
                         }
                     });
                 })
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -488,7 +489,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = 100;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-width-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -540,7 +541,7 @@ describe('zoid dimensions cases', () => {
                         }
                     });
                 })
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -553,7 +554,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-height-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -605,7 +606,7 @@ describe('zoid dimensions cases', () => {
                         }
                     });
                 })
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -618,7 +619,7 @@ describe('zoid dimensions cases', () => {
             const expectedHeight = height;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-autoresize-custom-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -669,7 +670,7 @@ describe('zoid dimensions cases', () => {
                         }
                     });
                 })
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
@@ -685,14 +686,14 @@ describe('zoid dimensions cases', () => {
             el.style.width = `${ width }px`;
             el.style.height = `${ height }px`;
 
-            if (!document.body) {
-                throw new Error(`Could not find document.body`);
+            if (!getBody()) {
+                throw new Error(`Could not find getBody()`);
             }
 
-            document.body.appendChild(el);
+            getBody().appendChild(el);
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-100-percent-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -740,14 +741,14 @@ describe('zoid dimensions cases', () => {
             el.style.width = `${ width * 2 }px`;
             el.style.height = `${ height * 2 }px`;
 
-            if (!document.body) {
-                throw new Error(`Could not find document.body`);
+            if (!getBody()) {
+                throw new Error(`Could not find getBody()`);
             }
             
-            document.body.appendChild(el);
+            getBody().appendChild(el);
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-50-percent-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',

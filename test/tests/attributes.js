@@ -2,7 +2,8 @@
 
 import { wrapPromise } from 'belter/src';
 
-import { onWindowOpen } from '../common';
+import { zoid } from '../zoid';
+import { onWindowOpen, getBody } from '../common';
 
 describe('zoid attributes cases', () => {
     it('should render a component to an iframe with specified static attributes', () => {
@@ -10,7 +11,7 @@ describe('zoid attributes cases', () => {
             const expectedScrolling = 'no';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-static-attributes',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
@@ -27,7 +28,7 @@ describe('zoid attributes cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered')
-            }).render(document.body).then(() => {
+            }).render(getBody()).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
                 const scrolling = componentWindow.frameElement.getAttribute('scrolling');
@@ -44,13 +45,13 @@ describe('zoid attributes cases', () => {
             const expectedScrolling = 'no';
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:        'test-render-iframe-dynamic-attributes',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    attributes: data => ({
+                    attributes: ({ props }) => ({
                         iframe: {
-                            scrolling: data.props.scrolling
+                            scrolling: props.scrolling
                         }
                     }),
                     props: {
@@ -67,7 +68,7 @@ describe('zoid attributes cases', () => {
             return component({
                 scrolling:  'no',
                 onRendered: expect('onRendered')
-            }).render(document.body).then(() => {
+            }).render(getBody()).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {
                 const scrolling = componentWindow.frameElement.getAttribute('scrolling');

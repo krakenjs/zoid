@@ -24,7 +24,7 @@ if (!window.xprops) {
 
 const xEval = (code) => {
     return ZalgoPromise.try(() => {
-        return eval(`(function() { ${ code } })()`);
+        return eval(`(function() { ${ code.replace(/zoid\.zoid/g, 'window.zoid') } })()`);
     });
 };
 
@@ -38,10 +38,10 @@ if (window.xprops.run) {
 
         if (window.xprops.runOnClick) {
             runOnClick(() => {
-                eval(wrappedCode);
+                xEval(wrappedCode);
             });
         } else {
-            eval(wrappedCode);
+            xEval(wrappedCode);
         }
     }).then(() => {
         if (window.xprops.postRun) {

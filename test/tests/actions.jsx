@@ -5,7 +5,8 @@ import { onCloseWindow } from 'cross-domain-utils/src';
 import { wrapPromise } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
-import { onWindowOpen, runOnClick } from '../common';
+import { zoid } from '../zoid';
+import { onWindowOpen, runOnClick, getBody } from '../common';
 
 describe('zoid actions', () => {
 
@@ -15,7 +16,7 @@ describe('zoid actions', () => {
             let closeComponent;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-close-iframe',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -37,7 +38,7 @@ describe('zoid actions', () => {
             }));
 
             const component = window.__component__();
-            return component().render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
+            return component().render(getBody(), zoid.CONTEXT.IFRAME).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 return closeComponent();
             });
@@ -50,7 +51,7 @@ describe('zoid actions', () => {
             let closeComponent;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-close-popup',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -72,7 +73,7 @@ describe('zoid actions', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 return closeComponent();
@@ -86,7 +87,7 @@ describe('zoid actions', () => {
             let closeComponent;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-close-popup-from-child',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -108,7 +109,7 @@ describe('zoid actions', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 const winClose = win.close;
@@ -126,7 +127,7 @@ describe('zoid actions', () => {
             let focusComponent;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-focus-popup',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
@@ -148,7 +149,7 @@ describe('zoid actions', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).then(() => {
                 win.focus = expect('windowFocus');
                 return focusComponent();
@@ -161,7 +162,7 @@ describe('zoid actions', () => {
             let win;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-helper-close-iframe',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com'
@@ -174,7 +175,7 @@ describe('zoid actions', () => {
 
             const component = window.__component__();
             const instance = component();
-            return instance.render(document.body, window.zoid.CONTEXT.IFRAME).then(() => {
+            return instance.render(getBody(), zoid.CONTEXT.IFRAME).then(() => {
                 onCloseWindow(win, expect('onCloseWindow'), 50);
                 return instance.close();
             });
@@ -186,7 +187,7 @@ describe('zoid actions', () => {
             let win;
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:               'test-container-helper-focus-popup',
                     url:               '/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com'
@@ -201,7 +202,7 @@ describe('zoid actions', () => {
             const instance = component();
 
             return runOnClick(() => {
-                return instance.render(document.body, window.zoid.CONTEXT.POPUP);
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
             }).then(() => {
                 win.focus = expect('windowFocus');
                 return instance.focus();

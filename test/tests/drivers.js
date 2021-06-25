@@ -2,11 +2,14 @@
 
 import { wrapPromise } from 'belter/src';
 
+import { zoid } from '../zoid';
+import { getBody } from '../common';
+
 describe('zoid drivers', () => {
 
     before(() => {
         window.__angular_component__ = () => {
-            return window.zoid.create({
+            return zoid.create({
                 tag:    'test-render-angular',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
                 domain: 'mock://www.child.com'
@@ -14,14 +17,14 @@ describe('zoid drivers', () => {
         };
         
         window.angular.module('app', [ window.__angular_component__().driver('angular', window.angular).name ]);
-        window.angular.bootstrap(document.body, [ 'app' ]);
+        window.angular.bootstrap(getBody(), [ 'app' ]);
     });
 
     it('should enter a component rendered with react and call a prop', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-react-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -53,11 +56,11 @@ describe('zoid drivers', () => {
 
             const container = document.createElement('div');
 
-            if (!document.body) {
-                throw new Error(`Expected document.body to be present`);
+            if (!getBody()) {
+                throw new Error(`Expected getBody() to be present`);
             }
 
-            document.body.appendChild(container);
+            getBody().appendChild(container);
             window.ReactDOM.render(window.React.createElement(Main, null), container);
         });
     });
@@ -66,7 +69,7 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-react-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -107,11 +110,11 @@ describe('zoid drivers', () => {
 
             const container = document.createElement('div');
 
-            if (!document.body) {
-                throw new Error(`Expected document.body to be present`);
+            if (!getBody()) {
+                throw new Error(`Expected getBody() to be present`);
             }
 
-            document.body.appendChild(container);
+            getBody().appendChild(container);
             window.ReactDOM.render(window.React.createElement(Main, null), container);
         });
     });
@@ -120,7 +123,7 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = window.__angular_component__;
 
-            const injector = window.angular.element(document.body).injector();
+            const injector = window.angular.element(getBody()).injector();
             const $compile = injector.get('$compile');
             const $rootScope = injector.get('$rootScope');
             const $scope = $rootScope.$new();
@@ -140,10 +143,10 @@ describe('zoid drivers', () => {
             $compile(`
                 <test-render-angular props="testProps"></test-render-angular>
             `)($scope, expect('compile', expect('angularCompile', element => {
-                if (!document.body) {
-                    throw new Error(`Expected document.body to be present`);
+                if (!getBody()) {
+                    throw new Error(`Expected getBody() to be present`);
                 }
-                document.body.appendChild(element[0]);
+                getBody().appendChild(element[0]);
             })));
         });
     });
@@ -152,7 +155,7 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
             window.__component__ = window.__angular_component__;
             
-            const injector = window.angular.element(document.body).injector();
+            const injector = window.angular.element(getBody()).injector();
             const $compile = injector.get('$compile');
             const $rootScope = injector.get('$rootScope');
             const $scope = $rootScope.$new();
@@ -176,10 +179,10 @@ describe('zoid drivers', () => {
             $compile(`
                 <test-render-angular props="testProps"></test-render-angular>
             `)($scope, expect('compile', expect('angularCompile', element => {
-                if (!document.body) {
-                    throw new Error(`Expected document.body to be present`);
+                if (!getBody()) {
+                    throw new Error(`Expected getBody() to be present`);
                 }
-                document.body.appendChild(element[0]);
+                getBody().appendChild(element[0]);
             })));
         });
     });
@@ -188,25 +191,25 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-vue',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
 
-            if (!document.body) {
-                throw new Error('Can not find document.body');
+            if (!getBody()) {
+                throw new Error('Can not find getBody()');
             }
 
             const app = document.createElement('div');
             const vueComponent = window.__component__().driver('vue', window.Vue);
 
-            if (!document.body) {
-                throw new Error(`Expected document.body to be present`);
+            if (!getBody()) {
+                throw new Error(`Expected getBody() to be present`);
             }
 
-            document.body.appendChild(app);
+            getBody().appendChild(app);
 
             new window.Vue({
                 render: expect('render', createElement => {
@@ -229,25 +232,25 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-vue-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
 
-            if (!document.body) {
-                throw new Error('Can not find document.body');
+            if (!getBody()) {
+                throw new Error('Can not find getBody()');
             }
 
             const app = document.createElement('div');
             const vueComponent = window.__component__().driver('vue', window.Vue);
 
-            if (!document.body) {
-                throw new Error(`Expected document.body to be present`);
+            if (!getBody()) {
+                throw new Error(`Expected getBody() to be present`);
             }
 
-            document.body.appendChild(app);
+            getBody().appendChild(app);
 
             new window.Vue({
                 render: expect('render', function render(createElement) : Object {
@@ -303,7 +306,7 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-angular2',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
@@ -357,7 +360,7 @@ describe('zoid drivers', () => {
         return wrapPromise(({ expect }) => {
 
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-angular2-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'

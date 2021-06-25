@@ -3,13 +3,16 @@
 import { wrapPromise } from 'belter/src';
 import { getDomain } from 'cross-domain-utils/src';
 
+import { zoid } from '../zoid';
+import { getBody } from '../common';
+
 describe('parent domain check', () => {
 
     describe('should not throw error when: ', () => {
 
         it('allowedParentDomains is a wildcard', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:                  'test-parent-domain-wildcard',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
@@ -18,13 +21,13 @@ describe('parent domain check', () => {
             };
 
             const component = window.__component__();
-            return component().render(document.body);
+            return component().render(getBody());
         });
 
         it('allowedParentDomains is specified as string', () => {
             it('allowedParentDomains is a wildcard', () => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:                  'test-parent-domain-string',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
@@ -33,14 +36,14 @@ describe('parent domain check', () => {
                 };
     
                 const component = window.__component__();
-                return component().render(document.body);
+                return component().render(getBody());
             });
         });
 
         it('allowedParentDomains is specified as array of strings and parent domian match', () => {
             it('allowedParentDomains is a wildcard', () => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:                  'test-parent-domain-array',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
@@ -49,13 +52,13 @@ describe('parent domain check', () => {
                 };
     
                 const component = window.__component__();
-                return component().render(document.body);
+                return component().render(getBody());
             });
         });
 
         it('allowedParentDomains is specified as array of strings with a wildcard', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:                  'test-parent-domain-array-wildcard',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
@@ -64,12 +67,12 @@ describe('parent domain check', () => {
             };
 
             const component = window.__component__();
-            return component().render(document.body);
+            return component().render(getBody());
         });
 
         it('allowedParentDomains is specified as a regex and parent domian match', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:                  'test-parent-domain-regex',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
@@ -78,7 +81,7 @@ describe('parent domain check', () => {
             };
 
             const component = window.__component__();
-            return component().render(document.body);
+            return component().render(getBody());
         });
 
     });
@@ -87,7 +90,7 @@ describe('parent domain check', () => {
         it('allowedParentDomains is specified as string and parent domain does not match', () => {
             return wrapPromise(({ expect }) => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:                  'test-parent-domain-string-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
@@ -96,14 +99,14 @@ describe('parent domain check', () => {
                 };
     
                 const component = window.__component__();
-                return component().render(document.body).catch(expect('onError'));
+                return component().render(getBody()).catch(expect('onError'));
             });
         });
 
         it('allowedParentDomains is specified as array of strings and parent domain does not match', () => {
             return wrapPromise(({ expect }) => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:                  'test-parent-domain-array-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
@@ -112,14 +115,14 @@ describe('parent domain check', () => {
                 };
     
                 const component = window.__component__();
-                return component().render(document.body).catch(expect('onError'));
+                return component().render(getBody()).catch(expect('onError'));
             });
         });
 
         it('allowedParentDomains is specified as array of regex expressions and parent domain does not match', () => {
             return wrapPromise(({ expect }) => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:                  'test-parent-domain-regex-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
@@ -128,14 +131,14 @@ describe('parent domain check', () => {
                 };
     
                 const component = window.__component__();
-                return component().render(document.body).catch(expect('onError'));
+                return component().render(getBody()).catch(expect('onError'));
             });
         });
 
         it('xprops.getParentDomain should pass the correct domain', () => {
             return wrapPromise(({ expect }) => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:    'test-get-parent-domain',
                         url:    '/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -154,14 +157,14 @@ describe('parent domain check', () => {
                             window.xprops.passParentDomain(window.xprops.getParentDomain());
                         `;
                     }
-                }).render(document.body);
+                }).render(getBody());
             });
         });
 
         it('xprops.getParentDomain should pass the correct domain', () => {
             return wrapPromise(({ expect }) => {
                 window.__component__ = () => {
-                    return window.zoid.create({
+                    return zoid.create({
                         tag:    'test-get-parent',
                         url:    '/base/test/windows/child/index.htm',
                         domain: 'mock://www.child.com'
@@ -180,7 +183,7 @@ describe('parent domain check', () => {
                             window.xprops.isParentCorrect(window.xprops.getParent() === window.parent);
                         `;
                     }
-                }).render(document.body);
+                }).render(getBody());
             });
         });
     });

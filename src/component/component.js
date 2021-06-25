@@ -34,6 +34,11 @@ type Logger = {
     contains all of the configuration needed for them to set themselves up.
 */
 
+type Attributes = {|
+    iframe? : { [string] : string },
+    popup? : { [string] : string }
+|};
+
 export type ComponentOptionsType<P, X> = {|
 
     tag : string,
@@ -49,10 +54,7 @@ export type ComponentOptionsType<P, X> = {|
 
     allowedParentDomains? : StringMatcherType,
 
-    attributes? : {|
-        iframe? : { [string] : string },
-        popup? : { [string] : string }
-    |},
+    attributes? : Attributes | ({| props : PropsType<P> |}) => Attributes,
 
     eligible? : ({| props : PropsInputType<P> |}) => {| eligible : boolean, reason? : string |},
 
@@ -63,7 +65,9 @@ export type ComponentOptionsType<P, X> = {|
 
     validate? : ({| props : PropsInputType<P> |}) => void,
 
-    logger? : Logger
+    logger? : Logger,
+
+    exports? : ({| getExports : () => ZalgoPromise<X> |}) => X
 |};
 
 export type AttributesType = {|
@@ -117,11 +121,13 @@ export type ZoidComponentInstance<P, X = void> = {|
 
 // eslint-disable-next-line flowtype/require-exact-type
 export type ZoidComponent<P, X = void> = {
-    (PropsInputType<P>) : ZoidComponentInstance<P, X>,
-    driver : (string, mixed) => mixed,
+    (props? : PropsInputType<P> | void) : ZoidComponentInstance<P, X>,
+    // eslint-disable-next-line no-undef
+    driver : <T>(string, mixed) => T,
     isChild : () => boolean,
     xprops? : PropsType<P>,
-    canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>
+    canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>,
+    instances : $ReadOnlyArray<ZoidComponentInstance<P, X>>
 };
 
 const getDefaultAttributes = () : AttributesType => {
@@ -194,7 +200,7 @@ let cleanInstances = cleanup();
 const cleanZoid = cleanup();
 
 export type Component<P, X> = {|
-    init : (PropsInputType<P>) => ZoidComponentInstance<P, X>,
+    init : (props? : PropsInputType<P> | void) => ZoidComponentInstance<P, X>,
     instances : $ReadOnlyArray<ZoidComponentInstance<P, X>>,
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
@@ -301,10 +307,10 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
         return {};
     };
 
-    const init = (props : PropsInputType<P>) : ZoidComponentInstance<P, X> => {
+    const init = (inputProps? : PropsInputType<P> | void) : ZoidComponentInstance<P, X> => {
         // eslint-disable-next-line prefer-const
         let instance;
-        props = props || getDefaultInputProps();
+        const props = inputProps || getDefaultInputProps();
 
         const { eligible: eligibility, reason } = eligible({ props });
         const isEligible = () => eligibility;
@@ -428,7 +434,7 @@ export function create<P, X>(options : ComponentOptionsType<P, X>) : ZoidCompone
 
     const comp = component(options);
 
-    const init = (props) => comp.init(props);
+    const init = (props? : PropsInputType<P> | void) => comp.init(props);
     init.driver = (name, dep) => comp.driver(name, dep);
     init.isChild = () => comp.isChild();
     init.canRenderTo = (win) => comp.canRenderTo(win);

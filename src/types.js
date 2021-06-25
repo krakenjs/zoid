@@ -17,4 +17,4 @@ export type CancelableType = {|
     cancel : () => void
 |};
 
-export type StringMatcherType = string | $ReadOnlyArray<string>;
+export type StringMatcherType = string | $ReadOnlyArray<string> | RegExp;

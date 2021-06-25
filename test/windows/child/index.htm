@@ -1,6 +1,11 @@
 <body>
     <div id="container"></div>
-    
+
+    <script src="/base/test/zoid.js"></script>
+    <script>
+        window.zoid = __zoid__;
+    </script>
+
     <script>
         window.mockDomain = 'mock://www.child.com';
 
@@ -34,10 +39,10 @@
 
         window.__coverage__ = parentWindow.__coverage__;
         if (parentWindow.__component__) {
-            window.__component__ = eval(`(${ parentWindow.__component__.toString() })`);
+            const parentComponent = parentWindow.__component__.toString().replace(/zoid\.zoid/g, 'window.zoid');
+            window.__component__ = eval(`(${parentComponent})`);
         }
     </script>
 
-    <script src="/base/test/zoid.js"></script>
     <script src="/base/test/windows/child/index.js"></script>
 </body>

@@ -1,6 +1,6 @@
 <body>
     <div id="container"></div>
-    
+
     <script>
         function getAncestor(win) {
             if (win.opener) {
@@ -11,7 +11,7 @@
                 return win.parent;
             }
         }
-        
+
         window.mockDomain = getAncestor(window).mockDomain;
 
         var parentWindow = window;
@@ -36,5 +36,8 @@
     </script>
 
     <script src="/base/test/zoid.js"></script>
+    <script>
+        window.zoid = __zoid__;
+    </script>
     <script src="/base/test/windows/basicchild/index.js"></script>
 </body>

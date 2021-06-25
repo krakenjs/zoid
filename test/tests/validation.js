@@ -2,6 +2,9 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 
+import { zoid } from '../zoid';
+import { getBody } from '../common';
+
 describe('zoid validation errors', () => {
 
     function expectError(description, method) : ZalgoPromise<void> {
@@ -18,19 +21,22 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with no options', () => {
         return expectError('Empty options', () => {
-            window.zoid.create();
+            // $FlowFixMe
+            zoid.create();
         });
     });
 
     it('should throw validation errors when a component is created with Empty options', () => {
         return expectError('Empty options', () => {
-            window.zoid.create({});
+            // $FlowFixMe
+            zoid.create({});
         });
     });
 
     it('should throw validation errors when a component is created with no tag', () => {
         return expectError('Empty options', () => {
-            window.zoid.create({
+            // $FlowFixMe
+            zoid.create({
                 url: 'http://foo.com/bar'
             });
         });
@@ -38,7 +44,8 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with no url', () => {
         return expectError('Empty options', () => {
-            window.zoid.create({
+            // $FlowFixMe
+            zoid.create({
                 tag: 'my-component-no-url'
             });
         });
@@ -46,7 +53,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with trailing dash in tag name', () => {
         return expectError('Malformed tag name', () => {
-            window.zoid.create({
+            zoid.create({
                 url: 'http://foo.com/bar',
                 tag: 'my-component-'
             });
@@ -55,7 +62,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with leading dash in tag name', () => {
         return expectError('Malformed tag name', () => {
-            window.zoid.create({
+            zoid.create({
                 url: 'http://foo.com/bar',
                 tag: '-my-component'
             });
@@ -63,7 +70,7 @@ describe('zoid validation errors', () => {
     });
 
     it('should NOT throw validation errors when a component is created NO dash in tag name', () => {
-        return window.zoid.create({
+        return zoid.create({
             url: 'http://foo.com/bar',
             tag: 'component'
         });
@@ -71,7 +78,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Special chars in tag name', () => {
         return expectError('Special chars in tag name', () => {
-            window.zoid.create({
+            zoid.create({
                 url: 'http://foo.com/bar',
                 tag: 'special$%&-chars'
             });
@@ -80,9 +87,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with String passed for dimensions', () => {
         return expectError('String passed for dimensions', () => {
-            window.zoid.create({
+            zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-dimensions',
+                // $FlowFixMe
                 dimensions: 'moo'
             });
         });
@@ -90,9 +98,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Empty options passed for dimensions', () => {
         return expectError('Empty options passed for dimensions', () => {
-            window.zoid.create({
+            zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-empty-dimensions',
+                // $FlowFixMe
                 dimensions: {}
             });
         });
@@ -100,7 +109,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Strings passed for dimensions', () => {
         return expectError('Strings passed for dimensions', () => {
-            window.zoid.create({
+            zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-dimensions-object',
                 dimensions: {
@@ -113,7 +122,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with String passed for height', () => {
         return expectError('String passed for height', () => {
-            window.zoid.create({
+            zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-height',
                 dimensions: {
@@ -126,7 +135,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with String passed for width', () => {
         return expectError('String passed for height', () => {
-            window.zoid.create({
+            zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-width',
                 dimensions: {
@@ -139,9 +148,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Props passed as string', () => {
         return expectError('Props passed as string', () => {
-            window.zoid.create({
+            zoid.create({
                 url:   'http://foo.com/bar',
                 tag:   'my-component-props-string',
+                // $FlowFixMe
                 props: 'foo'
             });
         });
@@ -149,10 +159,11 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Prop passed as string', () => {
         return expectError('Prop passed as string', () => {
-            window.zoid.create({
+            zoid.create({
                 tag:   'my-component-prop-string',
                 url:   'http://zombo.com',
                 props: {
+                    // $FlowFixMe
                     moo: 'wat'
                 }
             });
@@ -161,10 +172,11 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Invalid prop type passed', () => {
         return expectError('Invalid prop type passed', () => {
-            window.zoid.create({
+            zoid.create({
                 tag:   'my-component-invalid-prop-type',
                 url:   'http://zombo.com',
                 props: {
+                    // $FlowFixMe
                     moo: {
                         type: 'invalid'
                     }
@@ -175,10 +187,11 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Empty prop definition', () => {
         return expectError('Empty prop definition', () => {
-            window.zoid.create({
+            zoid.create({
                 tag:   'my-component-no-prop-type',
                 url:   'http://zombo.com',
                 props: {
+                    // $FlowFixMe
                     onSomething: {
 
                     }
@@ -189,7 +202,7 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Required and default passed', () => {
         return expectError('Required and default passed', () => {
-            window.zoid.create({
+            zoid.create({
                 tag:   'my-component-required-and-default',
                 url:   'http://zombo.com',
                 props: {
@@ -209,9 +222,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with non-function passed for prerenderTemplate', () => {
         return expectError('String passed for height', () => {
-            window.zoid.create({
+            zoid.create({
                 url:               'http://foo.com/bar',
                 tag:               'my-component-prerender-non-function',
+                // $FlowFixMe
                 prerenderTemplate: 'foo'
             });
         });
@@ -219,9 +233,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with non-function passed for containerTemplate', () => {
         return expectError('String passed for height', () => {
-            window.zoid.create({
+            zoid.create({
                 url:               'http://foo.com/bar',
                 tag:               'my-component-container-non-function',
+                // $FlowFixMe
                 containerTemplate: 'foo'
             });
         });
@@ -229,9 +244,10 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Invalid default context', () => {
         return expectError('Invalid default context', () => {
-            window.zoid.create({
+            zoid.create({
                 tag:            'my-component-invalid-default-context',
                 url:            'http://zombo.com',
+                // $FlowFixMe
                 defaultContext: 'moo'
             });
         });
@@ -239,8 +255,9 @@ describe('zoid validation errors', () => {
 
     it('should throw validation errors when a component is created with Invalid url passed', () => {
         return expectError('Invalid url passed', () => {
-            window.zoid.create({
+            zoid.create({
                 tag: 'my-component-invalid-url',
+                // $FlowFixMe
                 url: 12345
             });
         });
@@ -249,7 +266,7 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is rendered with String passed for function prop', () => {
         return expectError('String passed for function prop', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-string-passed-as-function-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -271,7 +288,7 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is rendered with Object passed for string prop', () => {
         return expectError('Object passed for string prop', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-object-passed-as-string-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -293,7 +310,7 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is rendered with Object passed as number prop', () => {
         return expectError('Object passed as number prop', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-object-passed-as-number-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -315,7 +332,7 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is rendered with Unserializable object passed for object prop', () => {
         return expectError('Unserializable object passed for object prop', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-unserializable-object',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -333,14 +350,14 @@ describe('zoid validation errors', () => {
             const component = window.__component__();
             return component({
                 objectProp: obj
-            }).render(document.body);
+            }).render(getBody());
         });
     });
 
     it('should throw validation errors when a component is rendered with object passed for array prop', () => {
         return expectError('Object passed for array', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-object-passed-for-array',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -362,7 +379,7 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is rendered with no props passed', () => {
         return expectError('No props passed', () => {
             window.__component__ = () => {
-                return window.zoid.create({
+                return zoid.create({
                     tag:    'test-render-no-props-passed-when-required',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
@@ -374,13 +391,13 @@ describe('zoid validation errors', () => {
                 });
             };
 
-            return window.__component__().render();
+            return window.__component__()().render(getBody());
         });
     });
 
     it('should throw validation errors when a component is created with a function prop with queryParam true', () => {
         return expectError('Function queryParam true', () => {
-            return window.zoid.create({
+            return zoid.create({
                 tag:    'test-render-function-queryparam-true',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
                 domain: 'mock://www.child.com',
