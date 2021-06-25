@@ -114,8 +114,7 @@ type PropDefinitionType<T, P, S : string, X> = {|
     |}) => ?T,
     required? : boolean,
     queryParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
-    // eslint-disable-next-line no-undef
-    queryValue? : <V>({| value : T |}) => (ZalgoPromise<V> | V),
+    queryValue? : ({| value : T |}) => (ZalgoPromise<string> | string),
     sendToChild? : boolean,
     allowDelegate? : boolean,
     validate? : ({| value : T, props : PropsInputType<P> |}) => void,
