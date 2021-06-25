@@ -2551,8 +2551,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_67__ || (win.__zoid_9_0_67__ = {});
-            return win.__zoid_9_0_67__;
+            win.__zoid_9_0_68__ || (win.__zoid_9_0_68__ = {});
+            return win.__zoid_9_0_68__;
         }
         function getProxyObject(obj) {
             return {
@@ -3501,7 +3501,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_67",
+                                        version: "9_0_68",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3956,7 +3956,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_67" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_67");
+                        if ("9_0_68" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_68");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4139,10 +4139,11 @@
             if (global.components[tag]) throw new Error("Can not register multiple components with the same tag: " + tag);
             global.components[tag] = !0;
             return {
-                init: function init(props) {
+                init: function init(inputProps) {
                     var instance;
+                    var props = inputProps || {};
                     var _eligible = eligible({
-                        props: props = props || {}
+                        props: props
                     }), eligibility = _eligible.eligible, reason = _eligible.reason;
                     var onDestroy = props.onDestroy;
                     props.onDestroy = function() {
@@ -4321,7 +4322,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_67__;
+            delete window.__zoid_9_0_68__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
