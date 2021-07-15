@@ -79,7 +79,9 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
+                    // $FlowFixMe[object-this-reference]
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
+                        // $FlowFixMe[object-this-reference]
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }
@@ -283,6 +285,7 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
+                    // $FlowFixMe[object-this-reference]
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
                         componentWindow = win;
                     }));
@@ -886,7 +889,9 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
+                    // $FlowFixMe[object-this-reference]
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
+                        // $FlowFixMe[object-this-reference]
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }
@@ -998,7 +1003,9 @@ describe('zoid renderto cases', () => {
                 runOnClick: true,
 
                 run() : string {
+                    // $FlowFixMe[object-this-reference]
                     onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
+                        // $FlowFixMe[object-this-reference]
                         if (getOpener(win) !== this.source) {
                             throw new Error(`Expected window opener to be child frame`);
                         }

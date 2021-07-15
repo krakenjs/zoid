@@ -49,8 +49,11 @@ export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent, *> = 
             inheritAttrs: false,
 
             mounted() {
+                // $FlowFixMe[object-this-reference]
                 const el = this.$el;
+                // $FlowFixMe[object-this-reference]
                 this.parent = init({ ...propsToCamelCase(this.$attrs) });
+                // $FlowFixMe[object-this-reference]
                 this.parent.render(el, CONTEXT.IFRAME);
             },
 

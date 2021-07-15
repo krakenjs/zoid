@@ -67,19 +67,28 @@ export const angular2 : ComponentDriverType<*, Angular2, Angular2Module, *> = {
                 inputs:   [ 'props' ]
             }).Class({
                 constructor: [ ElementRef, NgZone, function angularConstructor(elementRef, zone) {
+                    // $FlowFixMe[object-this-reference]
                     this._props = {};
+                    // $FlowFixMe[object-this-reference]
                     this.elementRef = elementRef;
+                    // $FlowFixMe[object-this-reference]
                     this.zone = zone;
                 } ],
                 ngOnInit () {
+                    // $FlowFixMe[object-this-reference]
                     const targetElement = this.elementRef.nativeElement;
                     
+                    // $FlowFixMe[object-this-reference]
                     this.parent = init(getProps(this));
+                    // $FlowFixMe[object-this-reference]
                     this.parent.render(targetElement, CONTEXT.IFRAME);
                 },
                 ngDoCheck() {
+                    // $FlowFixMe[object-this-reference]
                     if (this.parent && !equals(this._props, this.props)) {
+                        // $FlowFixMe[object-this-reference]
                         this._props = { ...this.props };
+                        // $FlowFixMe[object-this-reference]
                         this.parent.updateProps(getProps(this));
                     }
                 }

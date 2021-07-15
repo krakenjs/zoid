@@ -146,12 +146,12 @@ const getDefaultExports = <X>() : () => X => {
 };
 
 function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : NormalizedComponentOptionsType<P, X> {
-    let {
+    const {
         tag,
         url,
         domain,
         bridgeUrl,
-        props: propsDef = {},
+        props = {},
         dimensions = {},
         autoResize = getDefaultAutoResize(),
         allowedParentDomains = WILDCARD,
@@ -168,8 +168,12 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
     const name = tag.replace(/-/g, '_');
     const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = dimensions;
 
-    // $FlowFixMe
-    propsDef = { ...getBuiltInProps(), ...propsDef };
+    // $FlowFixMe[incompatible-type]
+    // $FlowFixMe[cannot-spread-inexact]
+    const propsDef : PropsDefinitionType<P, X> = {
+        ...getBuiltInProps(),
+        ...props
+    };
 
     if (!containerTemplate) {
         throw new Error(`Container template required`);
@@ -428,6 +432,8 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
 export type ComponentDriverType<P, L, D, X> = {|
     register : (string, PropsDefinitionType<P, X>, (PropsInputType<P>) => ZoidComponentInstance<P, X>, L) => D
 |};
+
+export type ZoidProps<P> = PropsType<P>;
 
 export function create<P, X>(options : ComponentOptionsType<P, X>) : ZoidComponent<P, X> {
     setupPostRobot();

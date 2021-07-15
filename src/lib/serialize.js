@@ -10,6 +10,7 @@ export function getProxyObject<T>(obj : T) : ProxyObject<T> {
     return {
         get() : ZalgoPromise<T> {
             return ZalgoPromise.try(() => {
+                // $FlowFixMe[object-this-reference]
                 if (this.source && this.source !== window) {
                     throw new Error(`Can not call get on proxy object from a remote window`);
                 }

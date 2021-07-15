@@ -23,7 +23,7 @@ import { propsToQuery, extendProps } from './props';
 
 export type RenderOptionsType<P> = {|
     uid : string,
-    props : PropsInputType<P>,
+    props : PropsType<P>,
     tag : string,
     context : $Values<typeof CONTEXT>,
     close : (?string) => ZalgoPromise<void>,
@@ -170,7 +170,7 @@ export function parentComponent<P, X>(options : NormalizedComponentOptionsType<P
         visible: true
     };
     const event = overrides.event ? overrides.event : eventEmitter();
-    const props = overrides.props ? overrides.props : getDefaultProps();
+    const props : PropsType<P> = overrides.props ? overrides.props : getDefaultProps();
 
     let currentProxyWin : ?ProxyWindow;
     let currentProxyContainer : ?ProxyObject<HTMLElement>;
@@ -706,7 +706,6 @@ export function parentComponent<P, X>(options : NormalizedComponentOptionsType<P
     };
 
     const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : {| context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement |}) : ?HTMLElement => {
-        // $FlowFixMe
         return renderer({
             container, context, uid, doc, frame, prerenderFrame,
             focus, close, state, props, tag, dimensions, event

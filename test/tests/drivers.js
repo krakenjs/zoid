@@ -268,6 +268,7 @@ describe('zoid drivers', () => {
                     return {
                         state: {
                             onLoad: expect('onLoad', () => {
+                                // $FlowFixMe[object-this-reference]
                                 window.Vue.set(this.state, 'foo', expect('foo', bar => {
                                     if (bar !== 'bar') {
                                         throw new Error(`Expected foo to be 'bar', got ${ bar }`);
@@ -275,6 +276,7 @@ describe('zoid drivers', () => {
                                 }));
                             }),
                             onTest: expect('onTest', () => {
+                                // $FlowFixMe[object-this-reference]
                                 window.Vue.set(this.state, 'baz', expect('baz', bar => {
                                     if (bar !== 'bar') {
                                         throw new Error(`Expected baz to be 'bar', got ${ bar }`);
@@ -336,6 +338,7 @@ describe('zoid drivers', () => {
                 `
             }).Class({
                 constructor() {
+                    // $FlowFixMe[object-this-reference]
                     this.testProps = props;
                 }
             });

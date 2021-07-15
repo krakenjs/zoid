@@ -745,7 +745,7 @@ describe('zoid props cases', () => {
                         promiseProp: {
                             type:       'function',
                             queryParam: true,
-                            queryValue: ({ value }) => {
+                            queryValue: <T>({ value } : {| value : () => T |}) : ZalgoPromise<T> => {
                                 return ZalgoPromise.delay(50).then(() => value());
                             }
                         }
