@@ -259,8 +259,9 @@
                             }
                         }
                         if (_result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected)) {
-                            _result2.resolved ? promise.resolve(_result2.value) : promise.reject(_result2.error);
-                            _result2.errorHandled = !0;
+                            var promiseResult = _result2;
+                            promiseResult.resolved ? promise.resolve(promiseResult.value) : promise.reject(promiseResult.error);
+                            promiseResult.errorHandled = !0;
                         } else utils_isPromise(_result2) ? _result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected) ? _result2.resolved ? promise.resolve(_result2.value) : promise.reject(_result2.error) : chain(_result2, promise) : promise.resolve(_result2);
                     }
                     handlers.length = 0;
@@ -325,7 +326,7 @@
             ZalgoPromise.all = function(promises) {
                 var promise = new ZalgoPromise;
                 var count = promises.length;
-                var results = [];
+                var results = [].slice();
                 if (!count) {
                     promise.resolve(results);
                     return promise;
@@ -1182,11 +1183,11 @@
             var tasks = [];
             var cleaned = !1;
             var cleanErr;
-            return {
+            var cleaner = {
                 set: function(name, item) {
                     if (!cleaned) {
                         obj[name] = item;
-                        this.register((function() {
+                        cleaner.register((function() {
                             delete obj[name];
                         }));
                     }
@@ -1208,6 +1209,7 @@
                     return promise_ZalgoPromise.all(results).then(src_util_noop);
                 }
             };
+            return cleaner;
         }
         function assertExists(name, thing) {
             if (null == thing) throw new Error("Expected " + name + " to be present");
@@ -1289,10 +1291,9 @@
                 if (isDocumentReady()) return reject(new Error("Document is ready and element " + name + " does not exist"));
                 var interval = setInterval((function() {
                     if (el = getElementSafe(id)) {
+                        resolve(el);
                         clearInterval(interval);
-                        return resolve(el);
-                    }
-                    if (isDocumentReady()) {
+                    } else if (isDocumentReady()) {
                         clearInterval(interval);
                         return reject(new Error("Document is ready and element " + name + " does not exist"));
                     }
@@ -1531,7 +1532,7 @@
         }
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_42__";
+            var globalKey = "__post_robot_10_0_43__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -2196,7 +2197,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_42__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_43__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -2336,7 +2337,7 @@
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!matchDomain(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + (pattern = options.domain, 
-                Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString()));
+                Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() + ")" : pattern.toString()));
                 var pattern;
                 if (source !== options.win) throw new Error("Response source does not match registered window");
                 deleteResponseListener(message.hash);
@@ -2368,7 +2369,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_42__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_43__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2618,8 +2619,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_69__ || (win.__zoid_9_0_69__ = {});
-            return win.__zoid_9_0_69__;
+            win.__zoid_9_0_70__ || (win.__zoid_9_0_70__ = {});
+            return win.__zoid_9_0_70__;
         }
         function getProxyObject(obj) {
             return {
@@ -2710,19 +2711,18 @@
                 window.close();
             }));
         }
-        function props_getQueryParam(prop, key, value) {
-            return promise_ZalgoPromise.try((function() {
-                return "function" == typeof prop.queryParam ? prop.queryParam({
-                    value: value
-                }) : "string" == typeof prop.queryParam ? prop.queryParam : key;
-            }));
-        }
-        function getQueryValue(prop, key, value) {
-            return promise_ZalgoPromise.try((function() {
-                return "function" == typeof prop.queryValue && isDefined(value) ? prop.queryValue({
-                    value: value
-                }) : value;
-            }));
+        var props_defaultNoop = function() {
+            return src_util_noop;
+        };
+        var props_decorateOnce = function(_ref) {
+            return once(_ref.value);
+        };
+        function eachProp(props, propsDef, handler) {
+            for (var _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
+                var key = _Object$keys2[_i2];
+                var propDef = propsDef[key];
+                propDef && handler(key, propDef, props[key]);
+            }
         }
         function parentComponent(options, overrides, parentWin) {
             void 0 === overrides && (overrides = {});
@@ -2736,7 +2736,7 @@
                 visible: !0
             };
             var event = overrides.event ? overrides.event : (triggered = {}, handlers = {}, 
-            {
+            emitter = {
                 on: function(eventName, handler) {
                     var handlerList = handlers[eventName] = handlers[eventName] || [];
                     handlerList.push(handler);
@@ -2751,7 +2751,7 @@
                     };
                 },
                 once: function(eventName, handler) {
-                    var listener = this.on(eventName, (function() {
+                    var listener = emitter.on(eventName, (function() {
                         listener.cancel();
                         handler();
                     }));
@@ -2776,13 +2776,13 @@
                     if (triggered[eventName]) return promise_ZalgoPromise.resolve();
                     triggered[eventName] = !0;
                     for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) args[_key4 - 1] = arguments[_key4];
-                    return this.trigger.apply(this, [ eventName ].concat(args));
+                    return emitter.trigger.apply(emitter, [ eventName ].concat(args));
                 },
                 reset: function() {
                     handlers = {};
                 }
             });
-            var triggered, handlers;
+            var triggered, handlers, emitter;
             var props = overrides.props ? overrides.props : {};
             var currentProxyWin;
             var currentProxyContainer;
@@ -2892,6 +2892,80 @@
                 return "function" == typeof attributes ? attributes({
                     props: props
                 }) : attributes;
+            };
+            var buildUrl = function() {
+                return function(propsDef, props) {
+                    var params = {};
+                    return promise_ZalgoPromise.all(function(props, propsDef, handler) {
+                        var results = [];
+                        eachProp(props, propsDef, (function(key, propDef, value) {
+                            var result = function(key, propDef, value) {
+                                return promise_ZalgoPromise.resolve().then((function() {
+                                    if (null != value && propDef.queryParam) return promise_ZalgoPromise.hash({
+                                        queryParam: promise_ZalgoPromise.try((function() {
+                                            return "function" == typeof propDef.queryParam ? propDef.queryParam({
+                                                value: value
+                                            }) : "string" == typeof propDef.queryParam ? propDef.queryParam : key;
+                                        })),
+                                        queryValue: promise_ZalgoPromise.try((function() {
+                                            return "function" == typeof propDef.queryValue && isDefined(value) ? propDef.queryValue({
+                                                value: value
+                                            }) : value;
+                                        }))
+                                    }).then((function(_ref) {
+                                        var queryParam = _ref.queryParam, queryValue = _ref.queryValue;
+                                        var result;
+                                        if ("boolean" == typeof queryValue) result = queryValue.toString(); else if ("string" == typeof queryValue) result = queryValue.toString(); else if ("object" == typeof queryValue && null !== queryValue) {
+                                            if (propDef.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (propDef.serialization === PROP_SERIALIZATION.BASE64) result = base64encode(JSON.stringify(queryValue)); else if (propDef.serialization === PROP_SERIALIZATION.DOTIFY || !propDef.serialization) {
+                                                result = function dotify(obj, prefix, newobj) {
+                                                    void 0 === prefix && (prefix = "");
+                                                    void 0 === newobj && (newobj = {});
+                                                    prefix = prefix ? prefix + "." : prefix;
+                                                    for (var key in obj) obj.hasOwnProperty(key) && null != obj[key] && "function" != typeof obj[key] && (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every((function(val) {
+                                                        return "object" != typeof val;
+                                                    })) ? newobj["" + prefix + key + "[]"] = obj[key].join(",") : obj[key] && "object" == typeof obj[key] ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
+                                                    return newobj;
+                                                }(queryValue, key);
+                                                for (var _i10 = 0, _Object$keys6 = Object.keys(result); _i10 < _Object$keys6.length; _i10++) {
+                                                    var dotkey = _Object$keys6[_i10];
+                                                    params[dotkey] = result[dotkey];
+                                                }
+                                                return;
+                                            }
+                                        } else "number" == typeof queryValue && (result = queryValue.toString());
+                                        params[queryParam] = result;
+                                    }));
+                                }));
+                            }(key, propDef, value);
+                            results.push(result);
+                        }));
+                        return results;
+                    }(props, propsDef)).then((function() {
+                        return params;
+                    }));
+                }(propsDef, props).then((function(query) {
+                    return function(url, options) {
+                        var query = options.query || {};
+                        var hash = options.hash || {};
+                        var originalUrl;
+                        var originalHash;
+                        var _url$split = url.split("#");
+                        originalHash = _url$split[1];
+                        var _originalUrl$split = (originalUrl = _url$split[0]).split("?");
+                        originalUrl = _originalUrl$split[0];
+                        var queryString = extendQuery(_originalUrl$split[1], query);
+                        var hashString = extendQuery(originalHash, hash);
+                        queryString && (originalUrl = originalUrl + "?" + queryString);
+                        hashString && (originalUrl = originalUrl + "#" + hashString);
+                        return originalUrl;
+                    }(function(url) {
+                        if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf("mock:"))) return url;
+                        var domain;
+                        throw new Error("Mock urls not supported out of test mode");
+                    }(getUrl()), {
+                        query: query
+                    });
+                }));
             };
             var getChildDomain = function() {
                 return domainMatch && "string" == typeof domainMatch ? domainMatch : getDomainFromUrl(getUrl());
@@ -3294,23 +3368,23 @@
                         }
                     }
                     for (var _i6 = 0; _i6 < aliases.length; _i6++) delete props[aliases[_i6]];
-                    for (var _i8 = 0, _Object$keys4 = Object.keys(props); _i8 < _Object$keys4.length; _i8++) {
+                    eachProp(props, propsDef, (function(key, propDef, value) {
+                        if (propDef && isDefined(value) && propDef.decorate) {
+                            var decoratedValue = propDef.decorate({
+                                value: value,
+                                props: props,
+                                state: state,
+                                close: close,
+                                focus: focus,
+                                event: event,
+                                onError: onError
+                            });
+                            props[key] = decoratedValue;
+                        }
+                    }));
+                    for (var _i8 = 0, _Object$keys4 = Object.keys(propsDef); _i8 < _Object$keys4.length; _i8++) {
                         var _key2 = _Object$keys4[_i8];
-                        var _propDef = propsDef[_key2];
-                        var _value = props[_key2];
-                        _propDef && isDefined(_value) && _propDef.decorate && (props[_key2] = _propDef.decorate({
-                            value: _value,
-                            props: props,
-                            state: state,
-                            close: close,
-                            focus: focus,
-                            event: event,
-                            onError: onError
-                        }));
-                    }
-                    for (var _i10 = 0, _Object$keys6 = Object.keys(propsDef); _i10 < _Object$keys6.length; _i10++) {
-                        var _key3 = _Object$keys6[_i10];
-                        if (!1 !== propsDef[_key3].required && !isDefined(props[_key3])) throw new Error('Expected prop "' + _key3 + '" to be defined');
+                        if (!1 !== propsDef[_key2].required && !isDefined(props[_key2])) throw new Error('Expected prop "' + _key2 + '" to be defined');
                     }
                 }(propsDef, props, newProps, helpers, isUpdate);
             };
@@ -3477,65 +3551,7 @@
                         }));
                         var windowProp = props.window;
                         var watchForUnloadPromise = watchForUnload();
-                        var buildUrlPromise = function(propsDef, props) {
-                            var params = {};
-                            var keys = Object.keys(props);
-                            return promise_ZalgoPromise.all(keys.map((function(key) {
-                                var prop = propsDef[key];
-                                if (prop) return promise_ZalgoPromise.resolve().then((function() {
-                                    var value = props[key];
-                                    if (null != value && prop.queryParam) return value;
-                                })).then((function(value) {
-                                    if (null != value) return promise_ZalgoPromise.all([ props_getQueryParam(prop, key, value), getQueryValue(prop, 0, value) ]).then((function(_ref) {
-                                        var queryParam = _ref[0], queryValue = _ref[1];
-                                        var result;
-                                        if ("boolean" == typeof queryValue) result = queryValue.toString(); else if ("string" == typeof queryValue) result = queryValue.toString(); else if ("object" == typeof queryValue && null !== queryValue) {
-                                            if (prop.serialization === PROP_SERIALIZATION.JSON) result = JSON.stringify(queryValue); else if (prop.serialization === PROP_SERIALIZATION.BASE64) result = base64encode(JSON.stringify(queryValue)); else if (prop.serialization === PROP_SERIALIZATION.DOTIFY || !prop.serialization) {
-                                                result = function dotify(obj, prefix, newobj) {
-                                                    void 0 === prefix && (prefix = "");
-                                                    void 0 === newobj && (newobj = {});
-                                                    prefix = prefix ? prefix + "." : prefix;
-                                                    for (var key in obj) obj.hasOwnProperty(key) && null != obj[key] && "function" != typeof obj[key] && (obj[key] && Array.isArray(obj[key]) && obj[key].length && obj[key].every((function(val) {
-                                                        return "object" != typeof val;
-                                                    })) ? newobj["" + prefix + key + "[]"] = obj[key].join(",") : obj[key] && "object" == typeof obj[key] ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
-                                                    return newobj;
-                                                }(queryValue, key);
-                                                for (var _i12 = 0, _Object$keys8 = Object.keys(result); _i12 < _Object$keys8.length; _i12++) {
-                                                    var dotkey = _Object$keys8[_i12];
-                                                    params[dotkey] = result[dotkey];
-                                                }
-                                                return;
-                                            }
-                                        } else "number" == typeof queryValue && (result = queryValue.toString());
-                                        params[queryParam] = result;
-                                    }));
-                                }));
-                            }))).then((function() {
-                                return params;
-                            }));
-                        }(propsDef, props).then((function(query) {
-                            return function(url, options) {
-                                var query = options.query || {};
-                                var hash = options.hash || {};
-                                var originalUrl;
-                                var originalHash;
-                                var _url$split = url.split("#");
-                                originalHash = _url$split[1];
-                                var _originalUrl$split = (originalUrl = _url$split[0]).split("?");
-                                originalUrl = _originalUrl$split[0];
-                                var queryString = extendQuery(_originalUrl$split[1], query);
-                                var hashString = extendQuery(originalHash, hash);
-                                queryString && (originalUrl = originalUrl + "?" + queryString);
-                                hashString && (originalUrl = originalUrl + "#" + hashString);
-                                return originalUrl;
-                            }(function(url) {
-                                if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf("mock:"))) return url;
-                                var domain;
-                                throw new Error("Mock urls not supported out of test mode");
-                            }(getUrl()), {
-                                query: query
-                            });
-                        }));
+                        var buildUrlPromise = buildUrl();
                         var onRenderPromise = event.trigger(EVENT.RENDER);
                         var getProxyContainerPromise = getProxyContainer(container);
                         var getProxyWindowPromise = getProxyWindow();
@@ -3568,7 +3584,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_69",
+                                        version: "9_0_70",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3946,17 +3962,11 @@
             style.appendChild(doc.createTextNode("\n            html, body {\n                width: 100%;\n                height: 100%;\n            }\n\n            .spinner {\n                position: fixed;\n                max-height: 60vmin;\n                max-width: 60vmin;\n                height: 40px;\n                width: 40px;\n                top: 50%;\n                left: 50%;\n                box-sizing: border-box;\n                border: 3px solid rgba(0, 0, 0, .2);\n                border-top-color: rgba(33, 128, 192, 0.8);\n                border-radius: 100%;\n                animation: rotation .7s infinite linear;\n            }\n\n            @keyframes rotation {\n                from {\n                    transform: translateX(-50%) translateY(-50%) rotate(0deg);\n                }\n                to {\n                    transform: translateX(-50%) translateY(-50%) rotate(359deg);\n                }\n            }\n        "));
             return html;
         }
-        var props_defaultNoop = function() {
-            return src_util_noop;
-        };
-        var props_decorateOnce = function(_ref) {
-            return once(_ref.value);
-        };
         var cleanInstances = cleanup();
         var cleanZoid = cleanup();
         function component_component(opts) {
             var options = function(options) {
-                var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, propsDef = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? defaultPrerenderTemplate : _options$prerenderTem, validate = options.validate, _options$eligible = options.eligible, eligible = void 0 === _options$eligible ? function() {
+                var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, props = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? defaultPrerenderTemplate : _options$prerenderTem, validate = options.validate, _options$eligible = options.eligible, eligible = void 0 === _options$eligible ? function() {
                     return {
                         eligible: !0
                     };
@@ -3965,7 +3975,7 @@
                 } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports;
                 var name = tag.replace(/-/g, "_");
                 var _dimensions$width = dimensions.width, width = void 0 === _dimensions$width ? "300px" : _dimensions$width, _dimensions$height = dimensions.height, height = void 0 === _dimensions$height ? "150px" : _dimensions$height;
-                propsDef = _extends({}, {
+                var propsDef = _extends({}, {
                     window: {
                         type: "object",
                         sendToChild: !1,
@@ -4133,7 +4143,7 @@
                             return _ref14.onProps;
                         }
                     }
-                }, propsDef);
+                }, props);
                 if (!containerTemplate) throw new Error("Container template required");
                 return {
                     name: name,
@@ -4178,7 +4188,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_69" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_69");
+                        if ("9_0_70" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_70");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4553,7 +4563,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_69__;
+            delete window.__zoid_9_0_70__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
@@ -4566,7 +4576,7 @@
                 }();
                 (listener = globalStore().get("postMessageListener")) && listener.cancel();
                 var listener;
-                delete window.__post_robot_10_0_42__;
+                delete window.__post_robot_10_0_43__;
             }();
             return cleanZoid.all(err);
         }
