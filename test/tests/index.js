@@ -17,3 +17,4 @@ import './bridge';
 import './clone';
 import './eligible';
 import './remove';
+import './rerender';

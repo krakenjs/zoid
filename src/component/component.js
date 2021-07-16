@@ -4,7 +4,7 @@
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop, isElement, cleanup, memoize, identity } from 'belter/src';
+import { noop, isElement, cleanup, memoize, identity, extend } from 'belter/src';
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
@@ -116,7 +116,7 @@ export type ZoidComponentInstance<P, X = void> = {|
     isEligible : () => boolean,
     clone : () => ZoidComponentInstance<P, X>,
     render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
-    renderTo : (target : CrossDomainWindowType, container? : string, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
+    renderTo : (target : CrossDomainWindowType, container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
 
 // eslint-disable-next-line flowtype/require-exact-type
@@ -256,7 +256,9 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
 
         const delegateListener = on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { overrides } }) => {
             return {
-                parent: parentComponent(options, overrides, source)
+                parent: parentComponent({
+                    options, overrides, parentWin: source
+                })
             };
         });
 
@@ -330,7 +332,10 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
             }
         };
 
-        const parent = parentComponent(options);
+        const parent = parentComponent({
+            options
+        });
+
         parent.init();
 
         if (eligibility) {
@@ -344,6 +349,10 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
         cleanInstances.register(err => {
             parent.destroy(err || new Error(`zoid destroyed all components`));
         });
+
+        const clone = ({ decorate = identity } = {}) => {
+            return init(decorate(props));
+        };
 
         const render = (target, container, context) => {
             return ZalgoPromise.try(() => {
@@ -359,21 +368,30 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
                     throw new Error(`Must pass window to renderTo`);
                 }
 
+                if (target !== window && typeof container !== 'string') {
+                    throw new Error(`Must pass string element when rendering to another window`);
+                }
+
                 return getDefaultContext(props, context);
 
             }).then(finalContext => {
                 container = getDefaultContainer(finalContext, container);
-                return parent.render(target, container, finalContext);
+                return parent.render({
+                    target,
+                    container,
+                    context:    finalContext,
+                    rerender: () => {
+                        const newInstance = clone();
+                        extend(instance, newInstance);
+                        return newInstance.renderTo(target, container, context);
+                    }
+                });
 
             }).catch(err => {
                 return parent.destroy(err).then(() => {
                     throw err;
                 });
             });
-        };
-
-        const clone = ({ decorate = identity } = {}) => {
-            return init(decorate(props));
         };
 
         instance = {

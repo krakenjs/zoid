@@ -325,9 +325,9 @@ describe('zoid renderto cases', () => {
                         tag:               'test-renderto-prerender-close-iframe-remote',
                         url:               '/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
-                        prerenderTemplate: ({ close }) => {
-                            const html = document.createElement('html');
-                            const body = document.createElement('body');
+                        prerenderTemplate: ({ close, doc }) => {
+                            const html = doc.createElement('html');
+                            const body = doc.createElement('body');
                             html.appendChild(body);
                             setTimeout(close, 300);
                             return html;
@@ -365,9 +365,9 @@ describe('zoid renderto cases', () => {
                         tag:               'test-renderto-prerender-close-popup-remote',
                         url:               '/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
-                        prerenderTemplate: ({ close }) => {
-                            const html = document.createElement('html');
-                            const body = document.createElement('body');
+                        prerenderTemplate: ({ close, doc }) => {
+                            const html = doc.createElement('html');
+                            const body = doc.createElement('body');
                             html.appendChild(body);
                             setTimeout(close, 300);
                             return html;

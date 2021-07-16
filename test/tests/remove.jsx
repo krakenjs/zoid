@@ -1,6 +1,7 @@
 /* @flow */
 /** @jsx node */
 
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise } from 'belter/src';
 import { getParent } from 'cross-domain-utils/src';
 
@@ -44,6 +45,10 @@ describe('zoid remove cases', () => {
                 }
 
                 destroy();
+
+                return ZalgoPromise.delay(5);
+
+            }).then(() => {
                 
                 if (!closed) {
                     throw new Error(`Expected element to be closed`);
@@ -87,6 +92,10 @@ describe('zoid remove cases', () => {
                 }
 
                 destroy();
+
+                return ZalgoPromise.delay(5);
+
+            }).then(() => {
                 
                 if (!closed) {
                     throw new Error(`Expected element to be closed`);
