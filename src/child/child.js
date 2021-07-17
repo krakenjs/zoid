@@ -124,7 +124,8 @@ export function childComponent<P, X>(options : NormalizedComponentOptionsType<P,
     }
 
     if (childPayload.version !== __ZOID__.__VERSION__) {
-        throw new Error(`Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
+        // eslint-disable-next-line no-console
+        console.warn(`Zoid version mismatch detected. Parent window has zoid version ${ childPayload.version }, child window has version ${ __ZOID__.__VERSION__ }`);
     }
 
     const { uid, parent: parentRef, parentDomain, exports: parentExports, context, props: propsRef } = childPayload;
