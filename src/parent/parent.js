@@ -11,7 +11,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEm
     once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, memoize, isElementClosed,
     awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
 
-import { ZOID, POST_MESSAGE, CONTEXT, EVENT,
+import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
     INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import { getGlobal, getProxyObject, type ProxyObject } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
@@ -19,7 +19,7 @@ import type { ChildExportsType } from '../child';
 import type { CssDimensionsType } from '../types';
 import type { NormalizedComponentOptionsType, AttributesType } from '../component';
 
-import { propsToQuery, extendProps } from './props';
+import { serializeProps, extendProps } from './props';
 
 export type RenderOptionsType<P> = {|
     uid : string,
@@ -410,8 +410,16 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
         return attributes;
     };
 
+    const buildQuery = () : ZalgoPromise<{| [string] : string | boolean |}> => {
+        return serializeProps(propsDef, props, METHOD.GET);
+    };
+
+    const buildBody = () : ZalgoPromise<{| [string] : string | boolean |}> => {
+        return serializeProps(propsDef, props, METHOD.POST);
+    };
+
     const buildUrl = () : ZalgoPromise<string> => {
-        return propsToQuery(propsDef, props).then(query => {
+        return buildQuery().then(query => {
             return extendUrl(normalizeMockUrl(getUrl()), { query });
         });
     };
@@ -632,7 +640,9 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
 
         }).then(win => {
             proxyWin.setWindow(win, { send });
-            return proxyWin;
+            return proxyWin.setName(windowName).then(() => {
+                return proxyWin;
+            });
         });
     };
 
@@ -1015,6 +1025,7 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
             const watchForUnloadPromise = watchForUnload();
             
             const buildUrlPromise = buildUrl();
+            const buildBodyPromise = buildBody();
             const onRenderPromise = event.trigger(EVENT.RENDER);
 
             const getProxyContainerPromise = getProxyContainer(container);
@@ -1058,8 +1069,21 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
                 }
             });
 
-            const loadUrlPromise = ZalgoPromise.hash({ proxyWin: openPromise, builtUrl: buildUrlPromise, windowName: setWindowNamePromise, prerender: prerenderPromise }).then(({ proxyWin, builtUrl }) => {
-                return proxyWin.setLocation(builtUrl);
+            const getMethodPromise = ZalgoPromise.hash({ body: buildBodyPromise }).then(({ body }) => {
+                if (options.method) {
+                    return options.method;
+                }
+
+                if (Object.keys(body).length) {
+                    return METHOD.POST;
+                }
+
+                return METHOD.GET;
+            });
+
+
+            const loadUrlPromise = ZalgoPromise.hash({ proxyWin: openPromise, windowUrl: buildUrlPromise, body: buildBodyPromise, method: getMethodPromise, windowName: setWindowNamePromise, prerender: prerenderPromise }).then(({ proxyWin, windowUrl, body, method }) => {
+                return proxyWin.setLocation(windowUrl, { method, body });
             });
 
             const watchForClosePromise = openPromise.then(proxyWin => {

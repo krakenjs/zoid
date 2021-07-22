@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { dotify, isDefined, extend, base64encode } from 'belter/src';
 
 import { eachProp, mapProps, type PropsInputType, type PropsType, type PropsDefinitionType } from '../component/props';
-import { PROP_SERIALIZATION } from '../constants';
+import { PROP_SERIALIZATION, METHOD } from '../constants';
 
 import type { ParentHelpers } from './index';
 
@@ -100,7 +100,7 @@ export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : 
     }
 }
 
-export function propsToQuery<P, X>(propsDef : PropsDefinitionType<P, X>, props : (PropsType<P>)) : ZalgoPromise<{ [string] : string | boolean }> {
+export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : (PropsType<P>), method : $Values<typeof METHOD>) : ZalgoPromise<{ [string] : string | boolean }> {
 
     const params = {};
 
@@ -111,50 +111,60 @@ export function propsToQuery<P, X>(propsDef : PropsDefinitionType<P, X>, props :
                 return;
             }
 
-            if (!propDef.queryParam) {
+            const getParam = {
+                [ METHOD.GET ]:  propDef.queryParam,
+                [ METHOD.POST ]: propDef.bodyParam
+            }[method];
+
+            const getValue = {
+                [ METHOD.GET ]:  propDef.queryValue,
+                [ METHOD.POST ]: propDef.bodyValue
+            }[method];
+            
+            if (!getParam) {
                 return;
             }
 
             return ZalgoPromise.hash({
 
-                queryParam: ZalgoPromise.try(() => {
-                    if (typeof propDef.queryParam === 'function') {
+                finalParam: ZalgoPromise.try(() => {
+                    if (typeof getParam === 'function') {
                         // $FlowFixMe[incompatible-call]
-                        return propDef.queryParam({ value });
-                    } else if (typeof propDef.queryParam === 'string') {
-                        return propDef.queryParam;
+                        return getParam({ value });
+                    } else if (typeof getParam === 'string') {
+                        return getParam;
                     } else {
                         return key;
                     }
                 }),
     
-                queryValue: ZalgoPromise.try(() => {
-                    if (typeof propDef.queryValue === 'function' && isDefined(value)) {
+                finalValue: ZalgoPromise.try(() => {
+                    if (typeof getValue === 'function' && isDefined(value)) {
                         // $FlowFixMe[incompatible-call]
                         // $FlowFixMe[incompatible-return]
-                        return propDef.queryValue({ value });
+                        return getValue({ value });
                     } else {
                         // $FlowFixMe[incompatible-return]
                         return value;
                     }
                 })
 
-            }).then(({ queryParam, queryValue }) => {
+            }).then(({ finalParam, finalValue }) => {
 
                 let result;
 
-                if (typeof queryValue === 'boolean') {
-                    result = queryValue.toString();
-                } else if (typeof queryValue === 'string') {
-                    result = queryValue.toString();
-                } else if (typeof queryValue === 'object' && queryValue !== null) {
+                if (typeof finalValue === 'boolean') {
+                    result = finalValue.toString();
+                } else if (typeof finalValue === 'string') {
+                    result = finalValue.toString();
+                } else if (typeof finalValue === 'object' && finalValue !== null) {
 
                     if (propDef.serialization === PROP_SERIALIZATION.JSON) {
-                        result = JSON.stringify(queryValue);
+                        result = JSON.stringify(finalValue);
                     } else if (propDef.serialization === PROP_SERIALIZATION.BASE64) {
-                        result = base64encode(JSON.stringify(queryValue));
+                        result = base64encode(JSON.stringify(finalValue));
                     } else if (propDef.serialization === PROP_SERIALIZATION.DOTIFY || !propDef.serialization) {
-                        result = dotify(queryValue, key);
+                        result = dotify(finalValue, key);
 
                         for (const dotkey of Object.keys(result)) {
                             params[dotkey] = result[dotkey];
@@ -163,11 +173,11 @@ export function propsToQuery<P, X>(propsDef : PropsDefinitionType<P, X>, props :
                         return;
                     }
 
-                } else if (typeof queryValue === 'number') {
-                    result = queryValue.toString();
+                } else if (typeof finalValue === 'number') {
+                    result = finalValue.toString();
                 }
 
-                params[queryParam] = result;
+                params[finalParam] = result;
             });
         });
 

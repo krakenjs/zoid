@@ -18,3 +18,4 @@ import './clone';
 import './eligible';
 import './remove';
 import './rerender';
+import './method';

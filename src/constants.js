@@ -55,3 +55,8 @@ export const EVENT = {
     RESIZE:   'zoid-resize',
     FOCUS:    'zoid-focus'
 };
+
+export const METHOD = {
+    GET:  ('get' : 'get'),
+    POST: ('post' : 'post')
+};

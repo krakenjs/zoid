@@ -5,7 +5,7 @@ import { once, noop, type EventEmitterType } from 'belter/src';
 import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from 'cross-domain-utils/src';
 import { ProxyWindow, toProxyWindow } from 'post-robot/src';
 
-import { PROP_SERIALIZATION } from '../constants';
+import { PROP_SERIALIZATION, PROP_TYPE } from '../constants';
 
 export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
 
@@ -72,7 +72,7 @@ export type PropsType<P> = {|
     ...P
 |};
 
-export type PropDefinitionType<T, P, S : string, X> = {|
+export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
     type : S,
     alias? : string,
     value? : ({|
@@ -116,8 +116,11 @@ export type PropDefinitionType<T, P, S : string, X> = {|
     |}) => ?T,
     required? : boolean,
     queryParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
+    bodyParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
     // eslint-disable-next-line no-undef
     queryValue? : <R>({| value : T |}) => (ZalgoPromise<R> | R | string),
+    // eslint-disable-next-line no-undef
+    bodyValue? : <R>({| value : T |}) => (ZalgoPromise<R> | R | string),
     sendToChild? : boolean,
     allowDelegate? : boolean,
     validate? : ({| value : T, props : PropsType<P> |}) => void,

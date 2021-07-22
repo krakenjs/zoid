@@ -8,7 +8,7 @@ import { noop, isElement, cleanup, memoize, identity, extend } from 'belter/src'
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
-import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS } from '../constants';
+import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS, METHOD } from '../constants';
 import { react, angular, vue, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
@@ -46,6 +46,7 @@ export type ComponentOptionsType<P, X> = {|
     url : string | ({| props : PropsType<P> |}) => string,
     domain? : string | RegExp,
     bridgeUrl? : string,
+    method? : $Values<typeof METHOD>,
 
     props? : UserPropsDefinitionType<P, X>,
 
@@ -88,6 +89,7 @@ export type NormalizedComponentOptionsType<P, X> = {|
     url : string | ({| props : PropsType<P> |}) => string,
     domain : ?(string | RegExp),
     bridgeUrl : ?string,
+    method : ?$Values<typeof METHOD>,
 
     propsDef : PropsDefinitionType<P, X>,
     dimensions : CssDimensionsType,
@@ -162,7 +164,8 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
         validate,
         eligible = () => ({ eligible: true }),
         logger = { info: noop },
-        exports: xports = getDefaultExports()
+        exports: xports = getDefaultExports(),
+        method
     } = options;
 
     const name = tag.replace(/-/g, '_');
@@ -185,6 +188,7 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
         url,
         domain,
         bridgeUrl,
+        method,
         propsDef,
         dimensions: { width, height },
         autoResize,
