@@ -28,7 +28,12 @@ type VueType = {|
 function propsToCamelCase(props : Object) : Object {
     return Object.keys(props).reduce((acc, key) => {
         const value = props[key];
-        if (key.includes('-')) {
+        // In vue `style` is a reserved prop name
+        if (key === 'style-object' || key === 'styleObject') {
+            acc.style = value;
+            // To keep zoid as generic as possible, passing in the original prop name as well
+            acc[key] = value;
+        } else if (key.includes('-')) {
             acc[dasherizeToCamel(key)] = value;
         } else {
             acc[key] = value;
