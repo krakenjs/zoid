@@ -32,7 +32,7 @@ function propsToCamelCase(props : Object) : Object {
         if (key === 'style-object' || key === 'styleObject') {
             acc.style = value;
             // To keep zoid as generic as possible, passing in the original prop name as well
-            acc[key] = value;
+            acc.styleObject = value;
         } else if (key.includes('-')) {
             acc[dasherizeToCamel(key)] = value;
         } else {
