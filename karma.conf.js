@@ -19,12 +19,21 @@ export default function configKarma(karma : Object) {
             'test/lib/react_v16.0.0.js',
             'test/lib/react-dom_v16.0.0.js',
             'test/lib/angular.min.js',
-            'test/lib/vue_v2.5.16.runtime.min.js',
             'test/lib/angular-4.js',
     
             {
                 pattern:  'test/zoid.js',
                 included: true,
+                served:   true
+            },
+            {
+                pattern:  'test/lib/vue_v2.5.16.runtime.min.js',
+                included: false,
+                served:   true
+            },
+            {
+                pattern:  'test/lib/vue_v3.2.1.js',
+                included: false,
                 served:   true
             },
     

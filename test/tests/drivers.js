@@ -3,7 +3,7 @@
 import { wrapPromise } from 'belter/src';
 
 import { zoid } from '../zoid';
-import { getBody } from '../common';
+import { getBody, loadScript } from '../common';
 
 describe('zoid drivers', () => {
 
@@ -188,8 +188,10 @@ describe('zoid drivers', () => {
     });
 
     it('should enter a component rendered with vue and call a prop', () => {
-        return wrapPromise(({ expect }) => {
-
+        
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/vue_v2.5.16.runtime.min.js');
+            
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-render-vue',
@@ -229,7 +231,9 @@ describe('zoid drivers', () => {
     });
 
     it('should enter a component rendered with vue and update/call props with camel-case and kebab-case', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/vue_v2.5.16.runtime.min.js');
+
 
             window.__component__ = () => {
                 return zoid.create({
@@ -301,6 +305,81 @@ describe('zoid drivers', () => {
                     };
                 }
             }).$mount(app);
+        });
+    });
+
+    it('should enter a component rendered with vue3 and call a prop', () => {
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/vue_v3.2.1.js');
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-vue3',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const zoidComponent = window.__component__().driver('vue3');
+
+            const container = document.createElement('div');
+            container.setAttribute('id', 'container');
+
+            getBody().appendChild(container);
+            
+            const vueAppp = window.Vue.createApp({
+                render: expect('render', () => {
+                    const createElement = window.Vue.h;
+                    return createElement(zoidComponent, {
+                        foo: expect('foo', bar => {
+                            if (bar !== 'bar') {
+                                throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                            }
+                        }),
+                        run: () => `window.xprops.foo('bar');`
+                    });
+                })
+            });
+
+            vueAppp.mount('#container');
+        });
+    });
+
+    it('should enter a component rendered with vue3 and update/call props with camel-case and kebab-case', () => {
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/vue_v3.2.1.js');
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-vue3-update-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const zoidComponent = window.__component__().driver('vue3');
+
+            const container = document.createElement('div');
+            container.setAttribute('id', 'container');
+
+            getBody().appendChild(container);
+
+            const vueAppp = window.Vue.createApp({
+                render: expect('render', () => {
+                    const createElement = window.Vue.h;
+                    return createElement(zoidComponent, {
+                        'bar-value': 'bar',
+                        'test-bar':  expect('foo', bar => {
+                            if (bar !== 'bar') {
+                                throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                            }
+                        }),
+                        'run': () => 'window.xprops.testBar(window.xprops.barValue);'
+
+                    });
+                })
+            });
+            vueAppp.mount('#container');
         });
     });
 

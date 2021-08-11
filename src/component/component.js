@@ -9,7 +9,7 @@ import { noop, isElement, cleanup, memoize, identity, extend } from 'belter/src'
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
 import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS, METHOD } from '../constants';
-import { react, angular, vue, angular2 } from '../drivers';
+import { react, angular, vue, vue3, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
@@ -416,7 +416,7 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
 
     const driver = (driverName : string, dep : mixed) : mixed => {
         if (__ZOID__.__FRAMEWORK_SUPPORT__) {
-            const drivers = { react, angular, vue, angular2 };
+            const drivers = { react, angular, vue, vue3, angular2 };
 
             if (!drivers[driverName]) {
                 throw new Error(`Could not find driver for framework: ${ driverName }`);
