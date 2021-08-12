@@ -2590,8 +2590,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_72__ || (win.__zoid_9_0_72__ = {});
-            return win.__zoid_9_0_72__;
+            win.__zoid_9_0_73__ || (win.__zoid_9_0_73__ = {});
+            return win.__zoid_9_0_73__;
         }
         function getProxyObject(obj) {
             return {
@@ -3583,7 +3583,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_72",
+                                        version: "9_0_73",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4044,7 +4044,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_72" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_72");
+                        if ("9_0_73" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_73");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4263,7 +4263,6 @@
                                 }));
                             }
                             if (!isWindow(target)) throw new Error("Must pass window to renderTo");
-                            if (target !== window && "string" != typeof container) throw new Error("Must pass string element when rendering to another window");
                             return function(props, context) {
                                 return promise_ZalgoPromise.try((function() {
                                     if (props.window) return setup_toProxyWindow(props.window).getType();
@@ -4283,6 +4282,7 @@
                                 if (context === CONTEXT.POPUP) return "body";
                                 throw new Error("Expected element to be passed to render iframe");
                             }(finalContext, container);
+                            if (target !== window && "string" != typeof container) throw new Error("Must pass string element when rendering to another window");
                             return parent.render({
                                 target: target,
                                 container: container,
@@ -4427,7 +4427,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_72__;
+            delete window.__zoid_9_0_73__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
