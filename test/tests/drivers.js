@@ -308,6 +308,69 @@ describe('zoid drivers', () => {
         });
     });
 
+    it('should enter a component rendered with vue and accept prop styleObject and convert it to a style prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-vue-style-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            if (!getBody()) {
+                throw new Error('Can not find getBody()');
+            }
+
+            const app = document.createElement('div');
+            const vueComponent = window.__component__().driver('vue', window.Vue);
+
+            if (!getBody()) {
+                throw new Error(`Expected getBody() to be present`);
+            }
+
+            getBody().appendChild(app);
+
+            new window.Vue({
+                render: expect('render', function render(createElement) : Object {
+                    return createElement(vueComponent, {
+                        attrs: {
+                            'styleObject': () => ({ color: 'red' }),
+                            'onLoad':       this.state.onLoad,
+                            'color':        this.state.color,
+                            'run':          this.state.run
+                        }
+                    });
+                }),
+                data() : Object {
+                    return {
+                        state: {
+                            onLoad: expect('onLoad', () => {
+                                // $FlowFixMe[object-this-reference]
+                                window.Vue.set(this.state, 'color', expect('color', color => {
+                                    if (color !== 'red') {
+                                        throw new Error(`Expected color to be 'red', got ${ color }`);
+                                    }
+                                }));
+                                
+                            }),
+                            run: expect('run', () => {
+                                return `
+                                    return window.xprops.onLoad().then(() => {
+                                        return window.xprops.style().then((style) => {
+                                            window.xprops.color(style.color);
+                                        });
+                                    });
+                                `;
+                            })
+                        }
+                    };
+                }
+            }).$mount(app);
+        });
+    });
+
     it('should enter a component rendered with vue3 and call a prop', () => {
         return wrapPromise(async ({ expect }) => {
             await loadScript('base/test/lib/vue_v3.2.1.js');

@@ -372,14 +372,15 @@ export function component<P, X>(opts : ComponentOptionsType<P, X>) : Component<P
                     throw new Error(`Must pass window to renderTo`);
                 }
 
-                if (target !== window && typeof container !== 'string') {
-                    throw new Error(`Must pass string element when rendering to another window`);
-                }
-
                 return getDefaultContext(props, context);
 
             }).then(finalContext => {
                 container = getDefaultContainer(finalContext, container);
+
+                if (target !== window && typeof container !== 'string') {
+                    throw new Error(`Must pass string element when rendering to another window`);
+                }
+
                 return parent.render({
                     target,
                     container,
