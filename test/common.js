@@ -268,13 +268,13 @@ export function getBody(win? : SameDomainWindowType = window) : HTMLBodyElement 
 
 // eslint-disable-next-line no-restricted-globals, promise/no-native
 export async function loadScript(url : string) : Promise<void> {
-    const scriptelement = document.createElement('script');
-    scriptelement.setAttribute('src', url);
-    getBody().prepend(scriptelement);
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('src', url);
+    getBody().prepend(scriptElement);
 
     // eslint-disable-next-line no-restricted-globals, promise/no-native
     const scriptPromise = new Promise((resolve) => {
-        scriptelement.addEventListener('load', () => resolve());
+        scriptElement.addEventListener('load', () => resolve());
     });
 
     await scriptPromise;
