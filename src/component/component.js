@@ -50,7 +50,7 @@ export type ComponentOptionsType<P, X> = {|
 
     props? : UserPropsDefinitionType<P, X>,
 
-    dimensions? : CssDimensionsType,
+    dimensions? : CssDimensionsType | () => CssDimensionsType,
     autoResize? : {| width? : boolean, height? : boolean, element? : string |},
 
     allowedParentDomains? : StringMatcherType,
@@ -92,7 +92,7 @@ export type NormalizedComponentOptionsType<P, X> = {|
     method : ?$Values<typeof METHOD>,
 
     propsDef : PropsDefinitionType<P, X>,
-    dimensions : CssDimensionsType,
+    dimensions : CssDimensionsType | () => CssDimensionsType,
     autoResize : AutoResizeType,
 
     allowedParentDomains : StringMatcherType,
@@ -147,6 +147,11 @@ const getDefaultExports = <X>() : () => X => {
     return noop;
 };
 
+const getDefaultDimensions = () : CssDimensionsType => {
+    // $FlowFixMe
+    return {};
+};
+
 function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : NormalizedComponentOptionsType<P, X> {
     const {
         tag,
@@ -154,7 +159,7 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
         domain,
         bridgeUrl,
         props = {},
-        dimensions = {},
+        dimensions = getDefaultDimensions(),
         autoResize = getDefaultAutoResize(),
         allowedParentDomains = WILDCARD,
         attributes = getDefaultAttributes(),
@@ -169,7 +174,15 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
     } = options;
 
     const name = tag.replace(/-/g, '_');
-    const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = dimensions;
+
+    const getDimensions = () : CssDimensionsType => {
+        if (typeof dimensions === 'function') {
+            return dimensions();
+        }
+    
+        return dimensions;
+    };
+    const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = getDimensions();
 
     // $FlowFixMe[incompatible-type]
     // $FlowFixMe[cannot-spread-inexact]

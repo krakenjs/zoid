@@ -3,6 +3,7 @@
 
 import { destroyElement, toCSS } from 'belter/src';
 
+import type { CssDimensionsType } from '../../types';
 import { type RenderOptionsType } from '../../parent/parent';
 import { EVENT } from '../../constants';
 
@@ -11,7 +12,17 @@ const CLASS = {
     INVISIBLE: 'zoid-invisible'
 };
 
-export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
+
+export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions } : RenderOptionsType<P>) : ?HTMLElement {
+    const getDimensions = () : CssDimensionsType => {
+        if (typeof dimensions === 'function') {
+            return dimensions();
+        }
+    
+        return dimensions;
+    };
+    const  { width, height } = getDimensions();
+
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {
             return;

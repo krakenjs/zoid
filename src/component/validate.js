@@ -3,8 +3,10 @@
 import { isPerc, isPx, values } from 'belter/src';
 
 import { CONTEXT, PROP_TYPE } from '../constants';
+import type { CssDimensionsType } from '../types';
 
 import type { ComponentOptionsType } from './index';
+
 
 function validatepropsDefinitions<P, X>(options : ComponentOptionsType<P, X>) {
 
@@ -43,7 +45,6 @@ function validatepropsDefinitions<P, X>(options : ComponentOptionsType<P, X>) {
 
 // eslint-disable-next-line complexity
 export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { // eslint-ignore-line
-
     if (!options) {
         throw new Error(`Expected options to be passed`);
     }
@@ -54,13 +55,18 @@ export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { /
     }
 
     validatepropsDefinitions(options);
-
+    const getDimensions = (dimensions) : CssDimensionsType => {
+        if (typeof dimensions === 'function') {
+            return dimensions();
+        }
+        return dimensions;
+    };
     if (options.dimensions) {
-        if (options.dimensions && !isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
+        if (options.dimensions && !isPx(getDimensions(options.dimensions).width) && !isPerc(getDimensions(options.dimensions).width)) {
             throw new Error(`Expected options.dimensions.width to be a px or % string value`);
         }
 
-        if (options.dimensions && !isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
+        if (options.dimensions && !isPx(getDimensions(options.dimensions).height) && !isPerc(getDimensions(options.dimensions).height)) {
             throw new Error(`Expected options.dimensions.height to be a px or % string value`);
         }
     }

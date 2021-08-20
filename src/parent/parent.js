@@ -30,7 +30,7 @@ export type RenderOptionsType<P> = {|
     focus : () => ZalgoPromise<void>,
     doc : Document,
     container? : HTMLElement,
-    dimensions : CssDimensionsType,
+    dimensions : CssDimensionsType | () => CssDimensionsType,
     state : Object,
     event : EventEmitterType,
     frame : ?HTMLIFrameElement,
@@ -615,7 +615,13 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
                     });
                 });
             } else if (context === CONTEXT.POPUP && __ZOID__.__POPUP_SUPPORT__) {
-                let { width, height } = dimensions;
+                const getDimensions = () : CssDimensionsType => {
+                    if (typeof dimensions === 'function') {
+                        return dimensions();
+                    }
+                    return dimensions;
+                };
+                let { width, height } = getDimensions();
     
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);
@@ -765,6 +771,7 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
     };
 
     const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : {| context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement |}) : ?HTMLElement => {
+        
         return renderer({
             container, context, uid, doc, frame, prerenderFrame,
             focus, close, state, props, tag, dimensions, event
