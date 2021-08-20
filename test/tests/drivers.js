@@ -488,7 +488,8 @@ describe('zoid drivers', () => {
 
 
     it('should enter a component rendered with angular 2 and call a prop', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/angular-4.js');
 
             window.__component__ = () => {
                 return zoid.create({
@@ -543,7 +544,9 @@ describe('zoid drivers', () => {
     });
 
     it('should enter a component rendered with angular 2 and update a prop', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(async ({ expect }) => {
+            await loadScript('base/test/lib/angular-4.js');
+
 
             window.__component__ = () => {
                 return zoid.create({
@@ -595,6 +598,84 @@ describe('zoid drivers', () => {
             window.ng.platformBrowserDynamic
                 .platformBrowserDynamic()
                 .bootstrapModule(appModule);
+        });
+    });
+
+    it('should enter a component rendered with angular2 driver (with Angular 12 lib) and call a prop', () => {
+        return wrapPromise(async ({ expect }) => {
+
+            // Dynamically load Angular 12 libs
+            await loadScript('base/test/lib/angular-12/zone_v0.8.12.js');
+            await loadScript('base/test/lib/angular-12/rxjs_v6.2.0.js');
+            await loadScript('base/test/lib/angular-12/angular-12-core.js');
+            await loadScript('base/test/lib/angular-12/angular-12-common.js');
+            await loadScript('base/test/lib/angular-12/angular-12-compiler.js');
+            await loadScript('base/test/lib/angular-12/angular-12-platform-browser.js');
+            await loadScript('base/test/lib/angular-12/angular-12-platform-browser-dynamic.js');
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-angular2-with-angular12-lib',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+
+            const props = {
+                foo: expect('foo', bar => {
+                    if (bar !== 'bar') {
+                        throw new Error(`Expected bar to be 'bar', got ${ bar }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo('bar');
+                `
+            };
+
+            const Angular2Component = component.driver('angular2', window.ng.core);
+
+            class AppComponent {
+                testProps : Object;
+                static annotations : $ReadOnlyArray<*>;
+
+                constructor() {
+                    // $FlowFixMe[object-this-reference]
+                    this.testProps = props;
+                }
+            }
+
+            AppComponent.annotations = [
+                new window.ng.core.Component({
+                    selector: 'body',
+                    template: `
+                        <test-render-angular2-with-angular12-lib [props]="testProps"></test-render-angular2-with-angular12-lib>
+                    `
+                })
+            ];
+
+            class AppModule {
+                static annotations : $ReadOnlyArray<*>;
+
+            }
+
+            AppModule.annotations = [
+                new window.ng.core.NgModule({
+                    imports: [
+                        window.ng.platformBrowser.BrowserModule,
+                        Angular2Component
+                    ],
+                    declarations: [ AppComponent ],
+                    bootstrap:    [ AppComponent ]
+                })
+            ];
+
+            window.ng.platformBrowserDynamic
+                .platformBrowserDynamic()
+                .bootstrapModule(AppModule);
+
         });
     });
 });
