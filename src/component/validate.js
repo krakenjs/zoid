@@ -3,7 +3,6 @@
 import { isPerc, isPx, values } from 'belter/src';
 
 import { CONTEXT, PROP_TYPE } from '../constants';
-import type { CssDimensionsType } from '../types';
 
 import type { ComponentOptionsType } from './index';
 
@@ -55,19 +54,20 @@ export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { /
     }
 
     validatepropsDefinitions(options);
-    const getDimensions = (dimensions) : CssDimensionsType => {
-        if (typeof dimensions === 'function') {
-            return dimensions();
-        }
-        return dimensions;
-    };
-    if (options.dimensions) {
-        if (options.dimensions && !isPx(getDimensions(options.dimensions).width) && !isPerc(getDimensions(options.dimensions).width)) {
-            throw new Error(`Expected options.dimensions.width to be a px or % string value`);
-        }
+    
+    if (options.dimensions && typeof options.dimensions === 'string') {
+        throw new Error(`Expected dimensions.width to be a px or % string value`);
+    }
 
-        if (options.dimensions && !isPx(getDimensions(options.dimensions).height) && !isPerc(getDimensions(options.dimensions).height)) {
-            throw new Error(`Expected options.dimensions.height to be a px or % string value`);
+    if (options.dimensions && typeof options.dimensions === 'object') {
+        if (!isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
+            throw new Error(`Expected dimensions.height to be a px or % string value`);
+        }
+    }
+
+    if (options.dimensions && typeof options.dimensions === 'object') {
+        if (!isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
+            throw new Error(`Expected dimensions.width to be a px or % string value`);
         }
     }
 

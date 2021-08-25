@@ -148,17 +148,17 @@ describe('zoid dimensions cases', () => {
         });
     });
 
-    it('should render a component to an iframe with specific px dimensions function', () => {
+    it('should render a component to an popup with specific px dimensions function', () => {
         return wrapPromise(({ expect }) => {
-            const width = 178;
-            const height = 253;
+            const width = 1282;
+            const height = 720;
 
             const expectedWidth = width;
             const expectedHeight = height;
 
             window.__component__ = () => {
                 return zoid.create({
-                    tag:        'test-render-iframe-dimensions',
+                    tag:        'test-render-popup-dimensions-func',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: ({ props }) => ({
@@ -178,10 +178,10 @@ describe('zoid dimensions cases', () => {
             const component = window.__component__();
             return component({
                 onRendered: expect('onRendered'),
-                dimensions: () => ({
+                dimensions: {
                     width:  '1282px',
                     height: '720px'
-                })
+                }
             }).render(getBody()).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {

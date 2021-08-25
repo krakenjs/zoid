@@ -3,7 +3,6 @@
 
 import { destroyElement, toCSS } from 'belter/src';
 
-import type { CssDimensionsType } from '../../types';
 import { type RenderOptionsType } from '../../parent/parent';
 import { EVENT } from '../../constants';
 
@@ -14,14 +13,13 @@ const CLASS = {
 
 
 export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions } : RenderOptionsType<P>) : ?HTMLElement {
-    const getDimensions = () : CssDimensionsType => {
+    const getDimenstion = () => {
         if (typeof dimensions === 'function') {
-            return dimensions();
+            return dimensions({ props });
         }
-    
         return dimensions;
     };
-    const  { width, height } = getDimensions();
+    const  { width, height } = getDimenstion();
 
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {

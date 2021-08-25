@@ -8,7 +8,7 @@ import { noop, isElement, cleanup, memoize, identity, extend } from 'belter/src'
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
-import { CONTEXT, POST_MESSAGE, WILDCARD, DEFAULT_DIMENSIONS, METHOD } from '../constants';
+import { CONTEXT, POST_MESSAGE, WILDCARD, METHOD } from '../constants';
 import { react, angular, vue, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
@@ -50,7 +50,7 @@ export type ComponentOptionsType<P, X> = {|
 
     props? : UserPropsDefinitionType<P, X>,
 
-    dimensions? : CssDimensionsType | () => CssDimensionsType,
+    dimensions? : CssDimensionsType | ({| props : PropsType<P> |}) => CssDimensionsType,
     autoResize? : {| width? : boolean, height? : boolean, element? : string |},
 
     allowedParentDomains? : StringMatcherType,
@@ -92,7 +92,7 @@ export type NormalizedComponentOptionsType<P, X> = {|
     method : ?$Values<typeof METHOD>,
 
     propsDef : PropsDefinitionType<P, X>,
-    dimensions : CssDimensionsType | () => CssDimensionsType,
+    dimensions : CssDimensionsType | ({| props : PropsType<P> |}) => CssDimensionsType,
     autoResize : AutoResizeType,
 
     allowedParentDomains : StringMatcherType,
@@ -175,15 +175,6 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
 
     const name = tag.replace(/-/g, '_');
 
-    const getDimensions = () : CssDimensionsType => {
-        if (typeof dimensions === 'function') {
-            return dimensions();
-        }
-    
-        return dimensions;
-    };
-    const { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = getDimensions();
-
     // $FlowFixMe[incompatible-type]
     // $FlowFixMe[cannot-spread-inexact]
     const propsDef : PropsDefinitionType<P, X> = {
@@ -203,7 +194,7 @@ function normalizeOptions<P, X>(options : ComponentOptionsType<P, X>) : Normaliz
         bridgeUrl,
         method,
         propsDef,
-        dimensions: { width, height },
+        dimensions,
         autoResize,
         allowedParentDomains,
         attributes,
