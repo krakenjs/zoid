@@ -9,7 +9,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup, base64encode, isRegex,
     once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, memoize, isElementClosed,
-    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot, isPx, isPerc } from 'belter/src';
+    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
     INITIAL_PROPS, WINDOW_REFERENCES, DEFAULT_DIMENSIONS } from '../constants';
@@ -622,21 +622,8 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
                     });
                 });
             } else if (context === CONTEXT.POPUP && __ZOID__.__POPUP_SUPPORT__) {
-                let { width, height } = getDimensions();
-                
-                if (width === undefined &&  height === undefined) {
-                    width = DEFAULT_DIMENSIONS.WIDTH;
-                    height = DEFAULT_DIMENSIONS.HEIGHT;
-                }
-                if (dimensions) {
-                    if (dimensions && !isPx(width) && !isPerc(width)) {
-                        throw new Error(`Expected dimensions.width to be a px or % string value`);
-                    }
+                let { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = getDimensions();
 
-                    if (dimensions && !isPx(height) && !isPerc(height)) {
-                        throw new Error(`Expected dimensions.height to be a px or % string value`);
-                    }
-                }
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);
 
