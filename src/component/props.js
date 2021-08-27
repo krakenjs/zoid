@@ -4,6 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, noop, type EventEmitterType } from 'belter/src';
 import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from 'cross-domain-utils/src';
 import { ProxyWindow, toProxyWindow } from 'post-robot/src';
+import type { CssDimensionsType } from '../types';
 
 import { PROP_SERIALIZATION, PROP_TYPE } from '../constants';
 
@@ -58,6 +59,7 @@ export type PropsType<P> = {|
     resize? : ?resizePropType,
     uid : uidPropType,
     cspNonce? : ?cspNoncePropType,
+    dimensions : CssDimensionsType,
 
     onDisplay : onDisplayPropType,
     onRendered : onRenderedPropType,
