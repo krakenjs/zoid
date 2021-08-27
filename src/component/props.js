@@ -4,8 +4,8 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, noop, type EventEmitterType } from 'belter/src';
 import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from 'cross-domain-utils/src';
 import { ProxyWindow, toProxyWindow } from 'post-robot/src';
-import type { CssDimensionsType } from '../types';
 
+import type { CssDimensionsType } from '../types';
 import { PROP_SERIALIZATION, PROP_TYPE } from '../constants';
 
 export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
