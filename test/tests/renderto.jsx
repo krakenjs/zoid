@@ -1246,4 +1246,54 @@ describe('zoid renderto cases', () => {
             return instance.render(getBody());
         });
     });
+
+    it('should render a component to the parent as a popup without a container element and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: zoid.create({
+                        tag:    'test-renderto-popup-no-container-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: zoid.create({
+                        tag:            'test-renderto-popup-no-container-remote',
+                        url:            'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain:         'mock://www.child.com',
+                        defaultContext: 'popup'
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                foo: expect('foo'),
+
+                runOnClick: true,
+
+                run() : string {
+                    // $FlowFixMe[object-this-reference]
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
+                        // $FlowFixMe[object-this-reference]
+                        if (getOpener(win) !== this.source) {
+                            throw new Error(`Expected window opener to be child frame`);
+                        }
+                    }));
+
+                    return `
+                        const instance = window.__component__().remote({
+                            foo: window.xprops.foo,
+
+                            run: () => \`
+                                window.xprops.foo();
+                            \`
+                        });
+                        
+                        return instance.renderTo(window.parent);
+                    `;
+                }
+            }).render(getBody());
+        });
+    });
 });
