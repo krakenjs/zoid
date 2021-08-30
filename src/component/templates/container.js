@@ -13,13 +13,7 @@ const CLASS = {
 
 
 export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions } : RenderOptionsType<P>) : ?HTMLElement {
-    const getDimenstion = () => {
-        if (typeof dimensions === 'function') {
-            return dimensions({ props });
-        }
-        return dimensions;
-    };
-    const  { width, height } = getDimenstion();
+    const  { width, height } = dimensions;
 
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {

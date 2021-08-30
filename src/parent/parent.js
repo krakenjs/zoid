@@ -30,7 +30,7 @@ export type RenderOptionsType<P> = {|
     focus : () => ZalgoPromise<void>,
     doc : Document,
     container? : HTMLElement,
-    dimensions : CssDimensionsType | ({| props : PropsType<P> |}) => CssDimensionsType,
+    dimensions : CssDimensionsType,
     state : Object,
     event : EventEmitterType,
     frame : ?HTMLIFrameElement,
@@ -775,7 +775,7 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
         
         return renderer({
             container, context, uid, doc, frame, prerenderFrame,
-            focus, close, state, props, tag, dimensions, event
+            focus, close, state, props, tag, dimensions: getDimensions(), event
         });
     };
 

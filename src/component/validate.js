@@ -55,15 +55,20 @@ export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { /
 
     validatepropsDefinitions(options);
 
-    if (options.dimensions && typeof options.dimensions !== 'function') {
-        if (!isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
-            throw new Error(`Expected dimensions.height to be a px or % string value`);
-        }
-    }
+    const { dimensions } = options;
+    if (dimensions) {
+        if (typeof dimensions === 'function') {
+            // pass
+        } else if (typeof dimensions === 'object' && dimensions !== null) {
+            if (!isPx(dimensions.height) && !isPerc(dimensions.height)) {
+                throw new Error(`Expected dimensions.height to be a px or % string value`);
+            }
 
-    if (options.dimensions && typeof options.dimensions !== 'function') {
-        if (!isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
-            throw new Error(`Expected dimensions.width to be a px or % string value`);
+            if (!isPx(dimensions.width) && !isPerc(dimensions.width)) {
+                throw new Error(`Expected dimensions.width to be a px or % string value`);
+            }
+        } else {
+            throw new Error(`Expected dimensions to be a function or object`);
         }
     }
 
