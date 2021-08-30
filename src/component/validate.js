@@ -6,7 +6,6 @@ import { CONTEXT, PROP_TYPE } from '../constants';
 
 import type { ComponentOptionsType } from './index';
 
-
 function validatepropsDefinitions<P, X>(options : ComponentOptionsType<P, X>) {
 
     if (options.props && !(typeof options.props === 'object')) {
@@ -44,6 +43,7 @@ function validatepropsDefinitions<P, X>(options : ComponentOptionsType<P, X>) {
 
 // eslint-disable-next-line complexity
 export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { // eslint-ignore-line
+
     if (!options) {
         throw new Error(`Expected options to be passed`);
     }
@@ -54,16 +54,22 @@ export function validateOptions<P, X>(options : ?ComponentOptionsType<P, X>) { /
     }
 
     validatepropsDefinitions(options);
+    
+    const { dimensions } = options;
 
-    if (options.dimensions && typeof options.dimensions !== 'function') {
-        if (!isPx(options.dimensions.height) && !isPerc(options.dimensions.height)) {
-            throw new Error(`Expected dimensions.height to be a px or % string value`);
-        }
-    }
+    if (dimensions) {
+        if (typeof dimensions === 'function') {
+            // pass
+        } else if (typeof dimensions === 'object' && dimensions !== null) {
+            if (!isPx(dimensions.height) && !isPerc(dimensions.height)) {
+                throw new Error(`Expected options.dimensions.height to be a px or % string value`);
+            }
 
-    if (options.dimensions && typeof options.dimensions !== 'function') {
-        if (!isPx(options.dimensions.width) && !isPerc(options.dimensions.width)) {
-            throw new Error(`Expected dimensions.width to be a px or % string value`);
+            if (!isPx(dimensions.width) && !isPerc(dimensions.width)) {
+                throw new Error(`Expected options.dimensions.width to be a px or % string value`);
+            }
+        } else {
+            throw new Error(`Expected dimensions to be a function or object`);
         }
     }
 
