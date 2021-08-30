@@ -11,7 +11,10 @@ const CLASS = {
     INVISIBLE: 'zoid-invisible'
 };
 
-export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
+
+export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions } : RenderOptionsType<P>) : ?HTMLElement {
+    const  { width, height } = dimensions;
+
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {
             return;
