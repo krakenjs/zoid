@@ -2969,8 +2969,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_73__ || (win.__zoid_9_0_73__ = {});
-            return win.__zoid_9_0_73__;
+            win.__zoid_9_0_74__ || (win.__zoid_9_0_74__ = {});
+            return win.__zoid_9_0_74__;
         }
         function getProxyObject(obj) {
             return {
@@ -3209,6 +3209,11 @@
             var watchForUnloadOverride = overrides.watchForUnload;
             var getInternalStateOverride = overrides.getInternalState;
             var setInternalStateOverride = overrides.setInternalState;
+            var getDimensions = function() {
+                return "function" == typeof dimensions ? dimensions({
+                    props: props
+                }) : dimensions;
+            };
             var resolveInitPromise = function() {
                 return promise_ZalgoPromise.try((function() {
                     return overrides.resolveInitPromise ? overrides.resolveInitPromise() : initPromise.resolve();
@@ -3444,7 +3449,7 @@
                         }));
                     }
                     if (context === CONTEXT.POPUP) {
-                        var width = dimensions.width, height = dimensions.height;
+                        var _getDimensions = getDimensions(), _getDimensions$width = _getDimensions.width, width = void 0 === _getDimensions$width ? "300px" : _getDimensions$width, _getDimensions$height = _getDimensions.height, height = void 0 === _getDimensions$height ? "150px" : _getDimensions$height;
                         width = normalizeDimension(width, window.outerWidth);
                         height = normalizeDimension(height, window.outerWidth);
                         var win = function(url, options) {
@@ -3565,7 +3570,7 @@
                     state: state,
                     props: props,
                     tag: tag,
-                    dimensions: dimensions,
+                    dimensions: getDimensions(),
                     event: event
                 });
             };
@@ -4015,7 +4020,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_73",
+                                        version: "9_0_74",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -4240,7 +4245,8 @@
             };
         }
         function defaultContainerTemplate(_ref) {
-            var uid = _ref.uid, frame = _ref.frame, prerenderFrame = _ref.prerenderFrame, doc = _ref.doc, props = _ref.props, event = _ref.event, _ref$dimensions = _ref.dimensions, width = _ref$dimensions.width, height = _ref$dimensions.height;
+            var uid = _ref.uid, frame = _ref.frame, prerenderFrame = _ref.prerenderFrame, doc = _ref.doc, props = _ref.props, event = _ref.event, dimensions = _ref.dimensions;
+            var width = dimensions.width, height = dimensions.height;
             if (frame && prerenderFrame) {
                 var div = doc.createElement("div");
                 div.setAttribute("id", uid);
@@ -4295,7 +4301,6 @@
                     info: src_util_noop
                 } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports, method = options.method;
                 var name = tag.replace(/-/g, "_");
-                var _dimensions$width = dimensions.width, width = void 0 === _dimensions$width ? "300px" : _dimensions$width, _dimensions$height = dimensions.height, height = void 0 === _dimensions$height ? "150px" : _dimensions$height;
                 var propsDef = _extends({}, {
                     window: {
                         type: "object",
@@ -4474,10 +4479,7 @@
                     bridgeUrl: bridgeUrl,
                     method: method,
                     propsDef: propsDef,
-                    dimensions: {
-                        width: width,
-                        height: height
-                    },
+                    dimensions: dimensions,
                     autoResize: autoResize,
                     allowedParentDomains: allowedParentDomains,
                     attributes: attributes,
@@ -4509,7 +4511,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_73" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_73");
+                        if ("9_0_74" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_74");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4898,7 +4900,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_73__;
+            delete window.__zoid_9_0_74__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");

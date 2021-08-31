@@ -148,6 +148,54 @@ describe('zoid dimensions cases', () => {
         });
     });
 
+    it('should render a component to an popup with specific px dimensions function', () => {
+        return wrapPromise(({ expect }) => {
+            const width = 1282;
+            const height = 720;
+
+            const expectedWidth = width;
+            const expectedHeight = height;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:        'test-render-popup-dimensions-func',
+                    url:        '/base/test/windows/child/index.htm',
+                    domain:     'mock://www.child.com',
+                    dimensions: ({ props }) => ({
+                        width:  props.dimensions.width,
+                        height: props.dimensions.height
+                    }),
+                    attributes: {
+                        iframe: {
+                            scrolling: 'no'
+                        }
+                    }
+                });
+            };
+
+            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
+
+            const component = window.__component__();
+            return component({
+                onRendered: expect('onRendered'),
+                dimensions: {
+                    width:  '1282px',
+                    height: '720px'
+                }
+            }).render(getBody()).then(() => {
+                return componentWindowPromise;
+            }).then(componentWindow => {
+                if (componentWindow.innerWidth !== expectedWidth) {
+                    throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
+                }
+
+                if (componentWindow.innerHeight !== expectedHeight) {
+                    throw new Error(`Expected height to be ${ expectedHeight }, got ${ componentWindow.innerHeight }`);
+                }
+            });
+        });
+    });
+
     it('should render a component to an iframe and resize from the child with specific px dimensions', () => {
         return wrapPromise(({ expect }) => {
             const width = 293;

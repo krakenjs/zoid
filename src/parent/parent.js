@@ -12,7 +12,7 @@ import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEm
     awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
-    INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
+    INITIAL_PROPS, WINDOW_REFERENCES, DEFAULT_DIMENSIONS } from '../constants';
 import { getGlobal, getProxyObject, type ProxyObject } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
@@ -219,6 +219,13 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
     let watchForUnloadOverride : ?WatchForUnload = overrides.watchForUnload;
     const getInternalStateOverride : ?GetInternalState = overrides.getInternalState;
     const setInternalStateOverride : ?SetInternalState = overrides.setInternalState;
+
+    const getDimensions = () : CssDimensionsType => {
+        if (typeof dimensions === 'function') {
+            return dimensions({ props });
+        }
+        return dimensions;
+    };
 
     const resolveInitPromise = () => {
         return ZalgoPromise.try(() => {
@@ -615,8 +622,8 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
                     });
                 });
             } else if (context === CONTEXT.POPUP && __ZOID__.__POPUP_SUPPORT__) {
-                let { width, height } = dimensions;
-    
+                let { width = DEFAULT_DIMENSIONS.WIDTH, height = DEFAULT_DIMENSIONS.HEIGHT } = getDimensions();
+
                 width = normalizeDimension(width, window.outerWidth);
                 height = normalizeDimension(height, window.outerWidth);
 
@@ -765,9 +772,10 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
     };
 
     const renderTemplate = (renderer : (RenderOptionsType<P>) => ?HTMLElement, { context, uid, container, doc, frame, prerenderFrame } : {| context : $Values<typeof CONTEXT>, uid : string, container? : HTMLElement, doc : Document, frame? : ?HTMLIFrameElement, prerenderFrame? : ?HTMLIFrameElement |}) : ?HTMLElement => {
+        
         return renderer({
             container, context, uid, doc, frame, prerenderFrame,
-            focus, close, state, props, tag, dimensions, event
+            focus, close, state, props, tag, dimensions: getDimensions(), event
         });
     };
 
