@@ -2657,8 +2657,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_74__ || (win.__zoid_9_0_74__ = {});
-            return win.__zoid_9_0_74__;
+            win.__zoid_9_0_75__ || (win.__zoid_9_0_75__ = {});
+            return win.__zoid_9_0_75__;
         }
         function getProxyObject(obj) {
             return {
@@ -3652,7 +3652,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_74",
+                                        version: "9_0_75",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3915,6 +3915,35 @@
                 });
             }
         };
+        var vue3 = {
+            register: function(tag, propsDef, init) {
+                return {
+                    template: "<div></div>",
+                    inheritAttrs: !1,
+                    mounted: function() {
+                        var el = this.$el;
+                        this.parent = init(_extends({}, (props = this.$attrs, Object.keys(props).reduce((function(acc, key) {
+                            var value = props[key];
+                            if ("style-object" === key || "styleObject" === key) {
+                                acc.style = value;
+                                acc.styleObject = value;
+                            } else key.includes("-") ? acc[dasherizeToCamel(key)] = value : acc[key] = value;
+                            return acc;
+                        }), {}))));
+                        var props;
+                        this.parent.render(el, CONTEXT.IFRAME);
+                    },
+                    watch: {
+                        $attrs: {
+                            handler: function() {
+                                this.parent && this.$attrs && this.parent.updateProps(_extends({}, this.$attrs)).catch(src_util_noop);
+                            },
+                            deep: !0
+                        }
+                    }
+                };
+            }
+        };
         var angular = {
             register: function(tag, propsDef, init, ng) {
                 return ng.module(tag, []).directive(dasherizeToCamel(tag), (function() {
@@ -3951,33 +3980,41 @@
         };
         var angular2 = {
             register: function(tag, propsDef, init, _ref) {
-                var NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone;
-                var getProps = function(component) {
-                    return replaceObject(_extends({}, component.internalProps, component.props), (function(item) {
-                        return "function" == typeof item ? function() {
-                            var _arguments = arguments, _this = this;
-                            return component.zone.run((function() {
-                                return item.apply(_this, _arguments);
-                            }));
-                        } : item;
-                    }));
-                };
-                var ComponentInstance = (0, _ref.Component)({
-                    selector: tag,
-                    template: "<div></div>",
-                    inputs: [ "props" ]
-                }).Class({
-                    constructor: [ ElementRef, NgZone, function(elementRef, zone) {
+                var AngularComponent = _ref.Component, NgModule = _ref.NgModule, ElementRef = _ref.ElementRef, NgZone = _ref.NgZone, Inject = _ref.Inject;
+                var ComponentInstance = function() {
+                    function ComponentInstance(elementRef, zone) {
+                        this.elementRef = void 0;
+                        this.internalProps = void 0;
+                        this.parent = void 0;
+                        this.props = void 0;
+                        this.zone = void 0;
+                        this._props = void 0;
                         this._props = {};
                         this.elementRef = elementRef;
                         this.zone = zone;
-                    } ],
-                    ngOnInit: function() {
+                    }
+                    var _proto = ComponentInstance.prototype;
+                    _proto.getProps = function() {
+                        var _this = this;
+                        return replaceObject(_extends({}, this.internalProps, this.props), (function(item) {
+                            if ("function" == typeof item) {
+                                var zone = _this.zone;
+                                return function() {
+                                    var _arguments = arguments, _this2 = this;
+                                    return zone.run((function() {
+                                        return item.apply(_this2, _arguments);
+                                    }));
+                                };
+                            }
+                            return item;
+                        }));
+                    };
+                    _proto.ngOnInit = function() {
                         var targetElement = this.elementRef.nativeElement;
-                        this.parent = init(getProps(this));
+                        this.parent = init(this.getProps());
                         this.parent.render(targetElement, CONTEXT.IFRAME);
-                    },
-                    ngDoCheck: function() {
+                    };
+                    _proto.ngDoCheck = function() {
                         if (this.parent && !function(obj1, obj2) {
                             var checked = {};
                             for (var key in obj1) if (obj1.hasOwnProperty(key)) {
@@ -3988,16 +4025,26 @@
                             return !0;
                         }(this._props, this.props)) {
                             this._props = _extends({}, this.props);
-                            this.parent.updateProps(getProps(this));
+                            this.parent.updateProps(this.getProps());
                         }
-                    }
-                });
-                return NgModule({
+                    };
+                    return ComponentInstance;
+                }();
+                ComponentInstance.annotations = void 0;
+                ComponentInstance.parameters = void 0;
+                ComponentInstance.parameters = [ [ new Inject(ElementRef) ], [ new Inject(NgZone) ] ];
+                ComponentInstance.annotations = [ new AngularComponent({
+                    selector: tag,
+                    template: "<div></div>",
+                    inputs: [ "props" ]
+                }) ];
+                var ModuleInstance = function() {};
+                ModuleInstance.annotations = void 0;
+                ModuleInstance.annotations = [ new NgModule({
                     declarations: [ ComponentInstance ],
                     exports: [ ComponentInstance ]
-                }).Class({
-                    constructor: function() {}
-                });
+                }) ];
+                return ModuleInstance;
             }
         };
         function defaultContainerTemplate(_ref) {
@@ -4047,7 +4094,7 @@
         }
         var cleanInstances = cleanup();
         var cleanZoid = cleanup();
-        function component_component(opts) {
+        function component(opts) {
             var options = function(options) {
                 var tag = options.tag, url = options.url, domain = options.domain, bridgeUrl = options.bridgeUrl, _options$props = options.props, props = void 0 === _options$props ? {} : _options$props, _options$dimensions = options.dimensions, dimensions = void 0 === _options$dimensions ? {} : _options$dimensions, _options$autoResize = options.autoResize, autoResize = void 0 === _options$autoResize ? {} : _options$autoResize, _options$allowedParen = options.allowedParentDomains, allowedParentDomains = void 0 === _options$allowedParen ? "*" : _options$allowedParen, _options$attributes = options.attributes, attributes = void 0 === _options$attributes ? {} : _options$attributes, _options$defaultConte = options.defaultContext, defaultContext = void 0 === _options$defaultConte ? CONTEXT.IFRAME : _options$defaultConte, _options$containerTem = options.containerTemplate, containerTemplate = void 0 === _options$containerTem ? defaultContainerTemplate : _options$containerTem, _options$prerenderTem = options.prerenderTemplate, prerenderTemplate = void 0 === _options$prerenderTem ? defaultPrerenderTemplate : _options$prerenderTem, validate = options.validate, _options$eligible = options.eligible, eligible = void 0 === _options$eligible ? function() {
                     return {
@@ -4268,7 +4315,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_74" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_74");
+                        if ("9_0_75" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_75");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4545,6 +4592,7 @@
                         react: react,
                         angular: angular,
                         vue: vue,
+                        vue3: vue3,
                         angular2: angular2
                     };
                     if (!drivers[driverName]) throw new Error("Could not find driver for framework: " + driverName);
@@ -4634,7 +4682,7 @@
                 }
                 var _ref3, on, send, global;
             }();
-            var comp = component_component(options);
+            var comp = component(options);
             var init = function(props) {
                 return comp.init(props);
             };
@@ -4660,7 +4708,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_74__;
+            delete window.__zoid_9_0_75__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
