@@ -611,3 +611,20 @@ Vue.component('app', {
 <my-zoid :foo="bar" />
 ```
 
+
+#### Vue 3
+
+```javascript
+// Create Vue application
+const app = Vue.createApp(...)
+
+// Define a new component called my-zoid 
+app.component('my-zoid', MyZoidComponent.driver('vue3'))
+
+// Mount Vue application
+app.mount(...)
+```
+
+```html
+<my-zoid :foo="bar" />
+```

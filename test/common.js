@@ -265,3 +265,17 @@ export function getBody(win? : SameDomainWindowType = window) : HTMLBodyElement 
 
     return win.document.body;
 }
+
+// eslint-disable-next-line no-restricted-globals, promise/no-native
+export function loadScript(url : string) : Promise<void> {
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('src', url);
+    getBody().prepend(scriptElement);
+
+    // eslint-disable-next-line no-restricted-globals, promise/no-native
+    const scriptPromise = new Promise((resolve) => {
+        scriptElement.addEventListener('load', () => resolve());
+    });
+
+    return scriptPromise;
+}
