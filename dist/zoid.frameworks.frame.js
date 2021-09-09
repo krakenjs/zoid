@@ -2657,8 +2657,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_75__ || (win.__zoid_9_0_75__ = {});
-            return win.__zoid_9_0_75__;
+            win.__zoid_9_0_76__ || (win.__zoid_9_0_76__ = {});
+            return win.__zoid_9_0_76__;
         }
         function getProxyObject(obj) {
             return {
@@ -3182,7 +3182,7 @@
                 }));
             };
             var exportsPromise = new promise_ZalgoPromise;
-            var resolveExports = function(actualExports) {
+            var xport = function(actualExports) {
                 return promise_ZalgoPromise.try((function() {
                     exportsPromise.resolve(actualExports);
                 }));
@@ -3652,7 +3652,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_75",
+                                        version: "9_0_76",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, uid, context),
@@ -3667,7 +3667,7 @@
                                             onError: onError,
                                             show: show,
                                             hide: hide,
-                                            export: resolveExports
+                                            export: xport
                                         }))
                                     };
                                     var win;
@@ -3828,7 +3828,11 @@
                     })).then(src_util_noop);
                 },
                 destroy: destroy,
+                getProps: function() {
+                    return props;
+                },
                 setProps: setProps,
+                export: xport,
                 getHelpers: getHelpers,
                 getDelegateOverrides: function() {
                     return promise_ZalgoPromise.try((function() {
@@ -4102,7 +4106,9 @@
                     };
                 } : _options$eligible, _options$logger = options.logger, logger = void 0 === _options$logger ? {
                     info: src_util_noop
-                } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports, method = options.method;
+                } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports, method = options.method, _options$children = options.children, children = void 0 === _options$children ? function() {
+                    return {};
+                } : _options$children;
                 var name = tag.replace(/-/g, "_");
                 var propsDef = _extends({}, {
                     window: {
@@ -4292,10 +4298,11 @@
                     validate: validate,
                     logger: logger,
                     eligible: eligible,
+                    children: children,
                     exports: xports
                 };
             }(opts);
-            var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef, eligible = options.eligible;
+            var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef, eligible = options.eligible, children = options.children;
             var global = lib_global_getGlobal();
             var driverCache = {};
             var instances = [];
@@ -4315,7 +4322,7 @@
                         var childPayload = getChildPayload();
                         var props;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_75" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_75");
+                        if ("9_0_76" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_76");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4549,7 +4556,24 @@
                         }));
                     }));
                 };
-                instance = _extends({}, parent.getExports(), parent.getHelpers(), {
+                instance = _extends({}, parent.getExports(), parent.getHelpers(), function() {
+                    var childComponents = children();
+                    var result = {};
+                    var _loop = function(_i2, _Object$keys2) {
+                        var childName = _Object$keys2[_i2];
+                        var Child = childComponents[childName];
+                        result[childName] = function(childInputProps) {
+                            return Child(_extends({}, childInputProps, {
+                                parent: {
+                                    props: parent.getProps(),
+                                    export: parent.export
+                                }
+                            }));
+                        };
+                    };
+                    for (var _i2 = 0, _Object$keys2 = Object.keys(childComponents); _i2 < _Object$keys2.length; _i2++) _loop(_i2, _Object$keys2);
+                    return result;
+                }(), {
                     isEligible: function() {
                         return eligibility;
                     },
@@ -4708,7 +4732,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_75__;
+            delete window.__zoid_9_0_76__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
