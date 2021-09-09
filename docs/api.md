@@ -454,7 +454,7 @@ url: 'https://foo.com/login',
 domain: 'https://subdomain.foo.com'
 ```
 
-### defaultContext `string`
+#### defaultContext `string`
 
 Determines which should be picked by default when `render()` is called. Defaults to `iframe`.
 
@@ -462,7 +462,7 @@ Determines which should be picked by default when `render()` is called. Defaults
 defaultContext: 'popup'
 ```
 
-### validate `({ props }) => void`
+#### validate `({ props }) => void`
 
 Function which is passed all of the props at once and may validate them. Useful for validating inter-dependant props.
 
@@ -471,6 +471,101 @@ validate: function({ props }) {
     if (props.name === 'Batman' && props.strength < 10) {
         throw new Error(`Batman must have at least 10 strength`);
     }
+}
+```
+
+#### eligible `({ props : { [string] : any } }) => boolean`
+
+Function which determines if the component is eligible to be rendered.
+
+```javascript
+const FirefoxOnlyButton = zoid.create({
+    tag: 'my-component',
+    url: 'https://my-site.com/my-component',
+    eligible: () => {
+        if (isFireFox()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+})
+```
+
+Now anyone can check eligibility prior to rendering the component:
+
+```javascript
+const myComponent = MyComponent();
+
+if (myComponent.isEligible()) {
+    myComponent.render('#my-container');
+}
+```
+
+If the component is not eligible, calling `.render(...)` will return a rejected promise:
+
+const myComponent = MyComponent();
+
+myComponent.render('#my-container').catch(err => {
+    console.error(err); // This will happen if we're not in firefox
+});
+
+#### exports `({ getExports : () => Promise<{ [string] : any }> }) => { [string] : Promise<any> }`
+
+Used to map exports from the child (passed with `xprops.export(...)`) to properties on the parent component instance.
+
+```javascript
+const CreatePostForm = zoid.create({
+    tag: 'create-post-form',
+    url: 'https://my-site.com/component/create-post-form',
+
+    exports: ({ getExports }) => {
+        return {
+            submit: () => getExports().then(exports => exports.submit())
+        };
+    };
+});
+```
+
+Once this mapper is defined, the child window may export values up to the parent:
+
+```javascript
+window.xprops.export({
+    submit: () => {
+        document.querySelector('form#createPost').submit();
+    }
+});
+```
+
+The parent window may call these exports at any time:
+
+```javascript
+const postForm = CreatePostForm();
+postForm.render('#create-post-form-container');
+
+document.querySelector('button#submitForm').addEventListener('click', () => {
+    postForm.submit();
+});
+```
+
+### `Component.driver(name, dependencies)`
+
+Register a component with your framework of choice, so it can be rendered natively in your app.
+
+#### React
+
+```javascript
+let MyReactZoidComponent = MyZoidComponent.driver('react', {
+    React:    React, 
+    ReactDOM: ReactDOM
+});
+```
+
+```javascript
+render() {
+    return (
+        <MyReactZoidComponent foo="bar" />
+    );
 }
 ```
 
@@ -500,7 +595,137 @@ Render the component to the given container element.
 
 #### props `Object`
 
-Object containing all of the props required by the given component
+Object containing all of the props required by the given component. These can be user-defined props, or pre-defined built-in props allowed by zoid.
+
+```javascript
+MyComponent({
+    foo: 'bar',
+    onBaz: () => {
+        console.log('Baz happened');
+    }
+}).render('#container');
+```
+
+##### window `Window | ProxyWindow`
+
+Pass in a custom window to render the zoid component to. Passing this option will suppress zoid from opening a new window.
+
+This value can also be a `ProxyWindow` type (a window serialized by `post-robot` which can be transferred via post message).
+
+```javascript
+document.querySelector('button#clickme').addEventListener('click', () => {
+    const customPopup = window.open();
+    MyComponent({
+        window: customPopup
+    }).render();
+});
+```
+
+##### timeout `number`
+
+A timeout after which a component render should fail/error out.
+
+```javascript
+MyComponent({
+    timeout: 1000
+}).render('#container').catch(err => {
+    console.warn('Component render errored', err); // This could be a timeout error
+});
+```
+
+##### cspNonce `string`
+
+A CSP nonce that will be passed to any inline `script` or `style` tags rendered by zoid in the default `containerTemplate` or `prerenderTemplate` fumctions.
+
+```javascript
+MyComponent({
+    cspNonce: 'xyz12345'
+}).render('#container');
+```
+
+##### onRender `() => void`
+
+Called immediately when a render is triggered 
+
+```javascript
+MyComponent({
+    onRender: () => {
+        console.log('The component started to render!');
+    }
+}).render('#container');
+```
+
+##### onDisplay `() => void`
+
+Called when the component has completed its initial prerender
+
+```javascript
+MyComponent({
+    onDisplay: () => {
+        console.log('The component was displayed!');
+    }
+}).render('#container');
+```
+
+##### onRendered `() => void`
+
+Called when the component has completed its full render
+
+```javascript
+MyComponent({
+    onRendered: () => {
+        console.log('The component was fully rendered!');
+    }
+}).render('#container');
+```
+
+##### onClose `() => void`
+
+Called when the component is first closed
+
+```javascript
+MyComponent({
+    onClose: () => {
+        console.log('The component was closed!');
+    }
+}).render('#container');
+```
+
+##### onDestroy `() => void`
+
+Called when the component is fully destroyed
+
+```javascript
+MyComponent({
+    onDestroy: () => {
+        console.log('The component was fully destroyed!');
+    }
+}).render('#container');
+```
+
+##### onResize `() => void`
+
+Called when the component is resized
+
+```javascript
+MyComponent({
+    onResize: () => {
+        console.log('The component was resized!');
+    }
+}).render('#container');
+```
+
+##### onFocus `() => void`
+
+Called when the component is focused
+
+```javascript
+MyComponent({
+    onFocus: () => {
+        console.log('The component was focused!');
+    }
+}).render('#container');
+```
 
 #### container `string | HTMLElement`
 
@@ -536,28 +761,7 @@ Defaults to `document.body`.
 
 #### context `iframe | popup`
 
-The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`.
-
-### `Component.driver(name, dependencies)`
-
-Register a component with your framework of choice, so it can be rendered natively in your app.
-
-#### React
-
-```javascript
-let MyReactZoidComponent = MyZoidComponent.driver('react', {
-    React:    React, 
-    ReactDOM: ReactDOM
-});
-```
-
-```javascript
-render() {
-    return (
-        <MyReactZoidComponent foo="bar" />
-    );
-}
-```
+The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`
 
 #### Angular 1
 
@@ -627,4 +831,434 @@ app.mount(...)
 
 ```html
 <my-zoid :foo="bar" />
+```
+
+# `instance`
+
+A component instance has a number of helpers.
+
+### render `(container : string | HTMLElement, context : 'iframe' | 'popup') => Promise<void>`
+
+Render the component to a given container.
+
+- container: can be a string selector like `'#my-container'` or a DOM element like `document.body`
+- context: defaults to `iframe` or `defaultContainer` if set. Can be overriden to explicitly specify `'iframe'` or `'popup'`.
+
+```javascript
+const component = MyComponent();
+
+component.render('#my-container').then(() => {
+    console.info('The component was successfully rendered')
+});
+```
+
+```javascript
+const component = MyComponent();
+
+component.render(document.body).then(() => {
+    console.info('The component was successfully rendered')
+});
+```
+
+```javascript
+const component = MyComponent();
+
+component.render('#my-container', 'popup').then(() => {
+    console.info('The component was successfully rendered')
+});
+```
+
+### renderTo `(window : Window, container : string | HTMLElement, context : 'iframe' | 'popup') => Promise<void>`
+
+Render the component to a given window and given container.
+
+- window: a reference to the window which the component should be rendered to. Zoid must be loaded in that window and the component must be registered.
+- container: must be a string selector like `'#my-container'` (DOM element is not transferable across different windows)
+- context: defaults to `iframe` or `defaultContainer` if set. Can be overriden to explicitly specify `'iframe'` or `'popup'`.
+
+```javascript
+const component = MyComponent();
+
+component.renderTo(window.parent, '#my-container').then(() => {
+    console.info('The component was successfully rendered')
+});
+```
+
+```javascript
+const component = MyComponent();
+
+component.renderTo(window.parent, '#my-container', 'popup').then(() => {
+    console.info('The component was successfully rendered')
+});
+```
+
+### clone `() => ZoidComponentInstance`
+
+Clones the current instance with the exact same set of props
+
+```javascript
+const button1 = ButtonComponent({
+    color: 'red'
+});
+
+const button2 = button1.clone();
+
+button1.render('#first-button-container'); // First red button
+button2.render('#first-button-container'); // Second red button
+```
+
+### isEligible `() => boolean`
+
+Informs if the component is eligible
+
+```javascript
+const myComponent = MyComponent();
+
+if (myComponent.isEligible()) {
+    myComponent.render('#my-container');
+}
+```
+
+To use `isEligible()` you must first define an `eligible` handler when setting up the component:
+
+```javascript
+const FirefoxOnlyButton = zoid.create({
+    tag: 'my-component',
+    url: 'https://my-site.com/my-component',
+    eligible: () => {
+        if (isFireFox()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+})
+```
+
+### close `() => Promise<void>`
+
+Gracefully close the component
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#close-component').addEventListener('click', () => {
+    myComponent.close().then(() => {
+        console.log('Component is now closed')
+    });
+});
+```
+
+### focus `() => Promise<void>`
+
+Focus the component. Only works for popup windows, on a user action like a click.
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#focus-component').addEventListener('click', () => {
+    myComponent.focus().then(() => {
+        console.log('Component is now focused')
+    });
+});
+```
+
+### resize `({ width : number, height : number }) => Promise<void>`
+
+Resize the component. Only works for iframe windows, popups can not be resized once opened.
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#resize-component').addEventListener('click', () => {
+    myComponent.resize({ width: 500, height: 800 }).then(() => {
+        console.log('Component is now resized')
+    });
+});
+```
+
+### show `() => Promise<void>`
+
+Show the component. Only works for iframe windows, popups can not be hidden/shown once opened.
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#show-component').addEventListener('click', () => {
+    myComponent.show().then(() => {
+        console.log('Component is now visible')
+    });
+});
+```
+
+### hide `() => Promise<void>`
+
+Hide the component. Only works for iframe windows, popups can not be hidden/shown once opened.
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#hide-component').addEventListener('click', () => {
+    myComponent.hide().then(() => {
+        console.log('Component is now hidden')
+    });
+});
+```
+
+### updateProps `({ [string ] : any }) => Promise<void>`
+
+Update props in the child window. The child can listen for new props using `window.xprops.onProps`
+
+In the parent window:
+
+```javascript
+const component = MyComponent({
+    color: 'red'
+});
+
+component.render('#container').then(() => {
+    component.setProps({
+        color: 'blue'
+    });
+});
+```
+
+In the child window:
+
+```javascript
+console.log('The current color is', window.xprops.color); // red
+
+window.xprops.onProps(() => {
+    console.log('The current color is', window.xprops.color); // lue
+});
+```
+
+### onError `(Error) => Promise<void>`
+
+Trigger an error in the component
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+document.querySelector('button#trigger-error').addEventListener('click', () => {
+    myComponent.onError(new Error(`Something went wrong`)).then(() => {
+        console.log('Error successfully triggered')
+    });
+});
+```
+
+### event
+
+Event emitter that can be used to listen for the following events: `RENDER`, `RENDERED`, `DISPLAY`, `ERROR`, `CLOSED`, `PROPS`, `RESIZE`.
+
+```javascript
+const myComponent = MyComponent();
+myComponent.render('#container');
+
+myComponent.event.on(zoid.EVENT.RENDERED, () => {
+    console.log('Component was rendered!');
+});
+```
+
+### exports
+
+Any values defined in `export` and passed to `window.xprops.export()` will be available as keys on the component instance:
+
+```javascript
+const CreatePostForm = zoid.create({
+    tag: 'create-post-form',
+    url: 'https://my-site.com/component/create-post-form',
+
+    exports: ({ getExports }) => {
+        return {
+            submit: () => getExports().then(exports => exports.submit())
+        };
+    };
+});
+```
+
+Once this mapper is defined, the child window may export values up to the parent:
+
+```javascript
+window.xprops.export({
+    submit: () => {
+        document.querySelector('form#createPost').submit();
+    }
+});
+```
+
+The parent window may call these exports at any time:
+
+```javascript
+const postForm = CreatePostForm();
+postForm.render('#create-post-form-container');
+
+document.querySelector('button#submitForm').addEventListener('click', () => {
+    postForm.submit();
+});
+```
+
+
+# `xprops`
+
+By default `window.xprops` is populated in the child window/frame with any props from the parent.
+
+Some built-in props are provided and automatically populated on `window.xprops`:
+
+### xprops.close `() => Promise<void>`
+
+Gracefully close the component.
+
+```javascript
+document.querySelector('button#close').addEventListener('click', () => {
+    window.xprops.close();
+});
+```
+
+### xprops.focus `() => Promise<void>`
+
+Refocus the component. Works on popup windows only, should be triggered on a user interaction like a click, in order to be allowed by the browser.
+
+```javascript
+document.querySelector('button#focus').addEventListener('click', () => {
+    window.xprops.focus();
+});
+```
+
+### xprops.resize `({ width : number, height : number }) => Promise<void>`
+
+Resize the component. Works on iframe windows only, popups can not be resized after opening.
+
+```javascript
+document.querySelector('button#resize').addEventListener('click', () => {
+    window.xprops.resize({ width: 500, height: 800 });
+});
+```
+
+### xprops.uid `string`
+
+Unique ID for the component instance
+
+```javascript
+console.log('The current component uid is:', window.xprops.uid);
+```
+
+### xprops.getParent `() => Window`
+
+Get a reference to the parent window
+
+```javascript
+const parentWindow = window.xprops.getParent();
+
+parentWindow.postMessage('hello!', '*');
+```
+
+### xprops.getParentDomain `() => string`
+
+Get the domain of the parent window
+
+```javascript
+console.log('The current parent window domain is:', window.xprops.getParentDomain());
+```
+
+### xprops.show `() => Promise<void>`
+
+Show the component. Works on iframe windows only, popups can not be shown/hidden after opening.
+
+```javascript
+document.querySelector('button#show').addEventListener('click', () => {
+    window.xprops.show();
+});
+```
+
+### xprops.hide `() => Promise<void>`
+
+Hide the component. Works on iframe windows only, popups can not be shown/hidden after opening.
+
+```javascript
+document.querySelector('button#hide').addEventListener('click', () => {
+    window.xprops.hide();
+});
+```
+
+### xprops.export `({ [string] : any }) => Promise<void>`
+
+Export data and/or functions from the child to the parent window.
+
+```javascript
+window.xprops.export({
+    submit: () => {
+        document.querySelector('form#createPost').submit();
+    }
+});
+```
+
+This export will be available on the parent window:
+
+```javascript
+const postForm = CreatePostForm();
+postForm.render('#create-post-form-container');
+
+document.querySelector('button#submitForm').addEventListener('click', () => {
+    postForm.submit();
+});
+```
+
+This assumes that when the component was first created, the author implemented the `exports` function to ensure the exports are mapped to the parent:
+
+```javascript
+const CreatePostForm = zoid.create({
+    tag: 'create-post-form',
+    url: 'https://my-site.com/component/create-post-form',
+
+    exports: ({ getExports }) => {
+        return {
+            submit: () => getExports().then(exports => exports.submit())
+        };
+    };
+});
+```
+
+This mapper is necessary so that the exports are immediately available on the parent component instance, even before the component is fully rendered and before `xprops.export(...)` has been called in the child window.
+
+### xprops.onError `(Error) => Promise<void>`
+
+Send an error to the parent
+
+```
+window.xprops.onError(new Error(`Something went wrong!`));
+```
+
+### xprops.onProps `(({ [string] : any }) => void) => void`
+
+Set up a listener to receive new props as they are set by the parent window using `componentInstance.setProps(...)`
+
+In the child window:
+
+```javascript
+console.log('The current color is', window.xprops.color); // red
+
+window.xprops.onProps(() => {
+    console.log('The current color is', window.xprops.color); // lue
+});
+```
+
+In the parent window:
+
+```javascript
+const component = MyComponent({
+    color: 'red'
+});
+
+component.render('#container').then(() => {
+    component.setProps({
+        color: 'blue'
+    });
+});
 ```
