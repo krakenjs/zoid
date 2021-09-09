@@ -1,14 +1,7 @@
 <body>
     <div id="container"></div>
 
-    <script src="/base/test/zoid.js"></script>
     <script>
-        window.zoid = __zoid__;
-    </script>
-
-    <script>
-        window.mockDomain = 'mock://www.child.com';
-
         function getAncestor(win) {
             if (win.opener) {
                 return win.opener;
@@ -34,10 +27,20 @@
             }
         }
 
+        window.__coverage__ = parentWindow.__coverage__;
+    </script>
+
+    <script src="/base/test/zoid.js"></script>
+    <script>
+        window.zoid = __zoid__;
+    </script>
+
+    <script>
+        window.mockDomain = 'mock://www.child.com';
+
         window.console.karma = parentWindow.console.karma;
         window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
 
-        window.__coverage__ = parentWindow.__coverage__;
         if (parentWindow.__component__) {
             const parentComponent = parentWindow.__component__.toString().replace(/zoid\.zoid/g, 'window.zoid');
             window.__component__ = eval(`(${parentComponent})`);
