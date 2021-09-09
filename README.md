@@ -23,7 +23,7 @@ It's 'data-down, actions up' style components, but 100% cross-domain using ifram
 
 -----
 
-### [API Docs](./docs/api.md)
+### [API Docs](./docs/api/index.md)
 
 Public options and methods supported by zoid
 
