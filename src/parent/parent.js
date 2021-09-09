@@ -168,7 +168,9 @@ type RenderOptions = {|
 type ParentComponent<P, X> = {|
     init : () => void,
     render : (RenderOptions) => ZalgoPromise<void>,
+    getProps : () => PropsType<P>,
     setProps : (newProps : PropsInputType<P>, isUpdate? : boolean) => void,
+    export : (X) => ZalgoPromise<void>,
     destroy : (err? : mixed) => ZalgoPromise<void>,
     getHelpers : () => ParentHelpers<P>,
     getDelegateOverrides : () => ZalgoPromise<DelegateOverrides>,
@@ -180,13 +182,13 @@ const getDefaultOverrides = <P>() : ParentDelegateOverrides<P> => {
     return {};
 };
 
-type ParentOptions<P, X> = {|
-    options : NormalizedComponentOptionsType<P, X>,
+type ParentOptions<P, X, C> = {|
+    options : NormalizedComponentOptionsType<P, X, C>,
     overrides? : ParentDelegateOverrides<P>,
     parentWin? : CrossDomainWindowType
 |};
 
-export function parentComponent<P, X>({ options, overrides = getDefaultOverrides(), parentWin = window } : ParentOptions<P, X>) : ParentComponent<P, X> {
+export function parentComponent<P, X, C>({ options, overrides = getDefaultOverrides(), parentWin = window } : ParentOptions<P, X, C>) : ParentComponent<P, X> {
     const { propsDef, containerTemplate, prerenderTemplate, tag, name, attributes, dimensions, autoResize, url, domain: domainMatch, validate, exports: xports } = options;
 
     const initPromise = new ZalgoPromise();
@@ -736,7 +738,7 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
         });
     };
 
-    const resolveExports = (actualExports : X) : ZalgoPromise<void> => {
+    const xport = (actualExports : X) : ZalgoPromise<void> => {
         return ZalgoPromise.try(() => {
             exportsPromise.resolve(actualExports);
         });
@@ -746,7 +748,7 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
 
     const buildParentExports = (win : ProxyWindow) : ParentExportsType<P, X> => {
         const checkClose = () => checkWindowClose(win);
-        return { init: initChild, close, checkClose, resize, onError, show, hide, export: resolveExports };
+        return { init: initChild, close, checkClose, resize, onError, show, hide, export: xport };
     };
 
     const buildChildPayload = ({ proxyWin, childDomain, domain, target = window, context, uid } : {| proxyWin : ProxyWindow, childDomain : string, domain : string | RegExp, target : CrossDomainWindowType, context : $Values<typeof CONTEXT>, uid : string |} = {}) : ZalgoPromise<ChildPayload> => {
@@ -903,6 +905,8 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
             onError, updateProps, show, hide
         };
     };
+
+    const getProps = () => props;
 
     const setProps = (newProps : PropsInputType<P>, isUpdate? : boolean = false) => {
         if (__DEBUG__ && validate) {
@@ -1136,7 +1140,9 @@ export function parentComponent<P, X>({ options, overrides = getDefaultOverrides
         init,
         render,
         destroy,
+        getProps,
         setProps,
+        export: xport,
         getHelpers,
         getDelegateOverrides,
         getExports

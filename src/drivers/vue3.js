@@ -21,7 +21,7 @@ function propsToCamelCase(props : Object) : Object {
     }, {});
 }
 
-export const vue3 : ComponentDriverType<*, *, *, *> = {
+export const vue3 : ComponentDriverType<*, *, *, *, *> = {
     register: (tag, propsDef, init) => {
         return {
             template: `<div></div>`,

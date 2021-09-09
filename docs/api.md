@@ -761,7 +761,128 @@ Defaults to `document.body`.
 
 #### context `iframe | popup`
 
-The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`
+The context to render to. Defaults to `defaultContext`, or if `defaultContext` is not set, `iframe`.
+
+#### exports `({ getExports : () => Promise<{ [string] : any }> }) => { [string] : Promise<any> }`
+
+Used to map exports from the child (passed with `xprops.export(...)`) to properties on the parent component instance.
+
+```javascript
+const CreatePostForm = zoid.create({
+    tag: 'create-post-form',
+    url: 'https://my-site.com/component/create-post-form',
+
+    exports: ({ getExports }) => {
+        return {
+            submit: () => getExports().then(exports => exports.submit())
+        };
+    };
+});
+```
+
+Once this mapper is defined, the child window may export values up to the parent:
+
+```javascript
+window.xprops.export({
+    submit: () => {
+        document.querySelector('form#createPost').submit();
+    }
+});
+```
+
+The parent window may call these exports at any time:
+
+```javascript
+const postForm = CreatePostForm();
+postForm.render('#create-post-form-container');
+
+document.querySelector('button#submitForm').addEventListener('click', () => {
+    postForm.submit();
+});
+```
+
+#### children `() => { [string] : ZoidComponent }`
+
+Set up components which will be renderable as children of the current component
+
+```javascript
+const CardNumberField = zoid.create({
+    tag: 'card-number-field',
+    url: 'https://my-site.com/component/card-fields/number'
+});
+
+const CardCVVField = zoid.create({
+    tag: 'card-cvv-field',
+    url: 'https://my-site.com/component/card-fields/cvv'
+});
+
+const CardExpiryField = zoid.create({
+    tag: 'card-expiry-field',
+    url: 'https://my-site.com/component/card-fields/expiry'
+});
+
+const CardFields = zoid.create({
+    tag: 'card-fields',
+    url: 'https://my-site.com/component/card-fields',
+
+    children: () => {
+        return {
+            NumberField: CardNumberField,
+            CVVField: CardCVVField,
+            ExpiryField: CardExpiryField
+        };
+    };
+});
+```
+
+These children will now be renderable as children of the parent:
+
+```javascript
+const cardFields = CardFields({
+    style: {
+        borderColor: 'red'
+    }
+});
+
+cardFields.NumberField().render('#card-number-field-container');
+cardFields.CVVField().render('#card-cvv-field-container');
+cardFields.ExpiryField().render('#card-expiry-field-container');
+```
+
+The children will inherit both `props` and `export` from the parent, in `window.xprops.parent`.
+
+```javascript
+console.log('Parent style:', window.xprops.parent.style);
+```
+
+```javascript
+window.xprops.parent.export({
+    submit: () => {
+        document.querySelector('form#cardFields').submit();
+    }
+});
+```
+
+### `Component.driver(name, dependencies)`
+
+Register a component with your framework of choice, so it can be rendered natively in your app.
+
+#### React
+
+```javascript
+let MyReactZoidComponent = MyZoidComponent.driver('react', {
+    React:    React, 
+    ReactDOM: ReactDOM
+});
+```
+
+```javascript
+render() {
+    return (
+        <MyReactZoidComponent foo="bar" />
+    );
+}
+```
 
 #### Angular 1
 
@@ -1260,5 +1381,102 @@ component.render('#container').then(() => {
     component.setProps({
         color: 'blue'
     });
+});
+```
+
+### xprops.parent.props `{ [string] : any }`
+
+Props from the parent component, if the component is rendered as a child.
+
+Define the components:
+
+```javascript
+const ChildComponent = zoid.create({
+    tag: 'child-component',
+    url: 'https://my-site.com/component/child'
+});
+
+const ParentComponent = zoid.create({
+    tag: 'child-component',
+    url: 'https://my-site.com/component/child',
+
+    children: () => {
+        return {
+            Child: ChildComponent
+        }
+    }
+});
+```
+
+In the parent window:
+
+```javascript
+const parent = ParentComponent({
+    color: 'blue'
+});
+
+const child = parent.Child();
+
+child.render('#child-container');
+```
+
+In the child window:
+
+```javascript
+console.log('The color of this component is:', window.xprops.parent.color); // Red
+```
+
+### xprops.parent.export `({ [string] : any }) => Promise<void>`
+
+Export values to the parent component.
+
+Define the components:
+
+```javascript
+const ChildComponent = zoid.create({
+    tag: 'child-component',
+    url: 'https://my-site.com/component/child'
+});
+
+const ParentComponent = zoid.create({
+    tag: 'child-component',
+    url: 'https://my-site.com/component/child',
+
+    children: () => {
+        return {
+            Child: ChildComponent
+        }
+    },
+
+    exports: ({ getExports }) => {
+        return {
+            sayHello: () => getExports().then(exports => exports.sayHello())
+        };
+    }
+});
+```
+
+In the parent window:
+
+```javascript
+const parent = ParentComponent({
+    color: 'blue'
+});
+
+const child = parent.Child();
+child.render('#child-container');
+
+document.querySelector('button#doSomething').addEventListener('click', () => {
+    parent.sayHello(); // Should log 'hello world!'
+});
+```
+
+In the child window:
+
+```javascript
+window.xprops.parent.export({
+    sayHello: () => {
+        console.log('hello world!')
+    }
 });
 ```

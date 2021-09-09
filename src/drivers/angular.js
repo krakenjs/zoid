@@ -17,7 +17,7 @@ type Angular = {|
     module : (string, $ReadOnlyArray<string>) => AngularModule
 |};
 
-export const angular : ComponentDriverType<*, Angular, AngularModule, *> = {
+export const angular : ComponentDriverType<*, Angular, AngularModule, *, *> = {
 
     register: (tag, propsDef, init, ng) => {
 

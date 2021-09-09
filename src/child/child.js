@@ -112,7 +112,7 @@ export type ChildComponent<P> = {|
     init : () => ZalgoPromise<void>
 |};
 
-export function childComponent<P, X>(options : NormalizedComponentOptionsType<P, X>) : ChildComponent<P> {
+export function childComponent<P, X, C>(options : NormalizedComponentOptionsType<P, X, C>) : ChildComponent<P> {
     const { propsDef, autoResize, allowedParentDomains } = options;
 
     const onPropHandlers = [];
