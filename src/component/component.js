@@ -494,7 +494,10 @@ export type ComponentDriverType<P, L, D, X, C> = {|
 
 export type ZoidProps<P> = PropsType<P>;
 
-export function create<P, X, C>(options : ComponentOptionsType<P, X, C>) : ZoidComponent<P, X, C> {
+// eslint-disable-next-line no-undef
+export type CreateZoidComponent = <P, X, C>(options : ComponentOptionsType<P, X, C>) => ZoidComponent<P, X, C>;
+
+export const create : CreateZoidComponent = <P, X, C>(options : ComponentOptionsType<P, X, C>) : ZoidComponent<P, X, C> => {
     setupPostRobot();
 
     const comp = component(options);
@@ -511,7 +514,7 @@ export function create<P, X, C>(options : ComponentOptionsType<P, X, C>) : ZoidC
     }
 
     return init;
-}
+};
 
 export function destroyComponents(err? : mixed) : ZalgoPromise<void> {
     if (bridge) {

@@ -30,12 +30,10 @@
         window.__coverage__ = parentWindow.__coverage__;
     </script>
 
-    <script src="/base/test/zoid.js"></script>
-    <script>
-        window.zoid = __zoid__;
-    </script>
+    <script src="/base/test/zoid.global.js"></script>
 
     <script>
+        window.zoid = __zoid__;
         window.mockDomain = 'mock://www.child.com';
 
         window.console.karma = parentWindow.console.karma;
