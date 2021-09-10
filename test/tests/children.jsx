@@ -270,4 +270,78 @@ describe('zoid children cases', () => {
             });
         });
     });
+
+    it('should render a child component which directly inherits a prop from the parent', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                const Button = zoid.create({
+                    tag:    'test-multiple-children-card-button-inherit-prop',
+                    url:    () => '/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        fundingSource: {
+                            type:     'string',
+                            required: false,
+                            default:  ({ props }) => props.parent.props.fundingSource
+                        }
+                    }
+                });
+
+                const CardFields = zoid.create({
+                    tag:      'test-multiple-children-card-fields-inherit-prop',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    props:  {
+                        fundingSource: {
+                            type:  'string',
+                            value: () => 'card'
+                        }
+                    },
+                    children: () => {
+                        return {
+                            Button
+                        };
+                    }
+                });
+
+                return CardFields;
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const CardFields = window.__component__();
+            const cardFields = CardFields({
+                onRendered: expect('onRenderedCardFields'),
+                callProp:   expect('callPropCardFields', ({ fundingSource }) => {
+                    if (fundingSource !== 'card') {
+                        throw new Error(`Expected fundingSource to be card, got ${ fundingSource }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.callProp({ fundingSource: window.xprops.fundingSource });
+                `
+            });
+
+            const cardButtonInstance = cardFields.Button({
+                onRendered: expect('onRenderedButton'),
+                callProp:   expect('callPropbutton', ({ fundingSource }) => {
+                    if (fundingSource !== 'card') {
+                        throw new Error(`Expected fundingSource to be card, got ${ fundingSource }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.callProp({ fundingSource: window.xprops.fundingSource });
+                `
+            });
+
+            return ZalgoPromise.all([
+                cardFields.render(getBody()),
+                cardButtonInstance.render(getBody())
+            ]);
+        });
+    });
 });
