@@ -56,6 +56,45 @@ describe('zoid window prop cases', () => {
         });
     });
 
+    it('should pass a custom iframe to a component, and close the zoid component', () => {
+        return wrapPromise(() => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-custom-iframe-close',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const body = getBody();
+            if (!body) {
+                throw new Error(`Can not find body`);
+            }
+
+            const frame = document.createElement('iframe');
+            body.appendChild(frame);
+            const win = frame.contentWindow;
+    
+            const component = window.__component__();
+            const instance = component({
+                window: win
+            });
+            
+            return instance.render(getBody()).then(() => {
+                return instance.close();
+            }).then(() => {
+                if (!win.closed) {
+                    throw new Error(`Expected iframe to be closed`);
+                }
+
+                if (body.contains(frame)) {
+                    throw new Error(`Expected iframe to be removed from dom`);
+                }
+            });
+        });
+    });
+
     it('should pass a custom popup to a component', () => {
         return wrapPromise(({ expect }) => {
 
@@ -97,6 +136,36 @@ describe('zoid window prop cases', () => {
         });
     });
 
+    it('should pass a custom popup to a component, and close the zoid component', () => {
+        return wrapPromise(() => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-custom-popup-close',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
+    
+            const component = window.__component__();
+            const instance = component({
+                window: win
+            });
+            
+            return instance.render(getBody()).then(() => {
+                return instance.close();
+            }).then(() => {
+                if (!win.closed) {
+                    throw new Error(`Expected popup to be closed`);
+                }
+            });
+        });
+    });
+
     it('should pass a custom popup to a component and close it', () => {
         return wrapPromise(({ expect }) => {
 
@@ -120,6 +189,43 @@ describe('zoid window prop cases', () => {
 
                 doClose: expect('doClose', () => {
                     win.close();
+                }),
+
+                run: () => `
+                    window.xprops.doClose();
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should pass a custom iframe to a component and close it', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-custom-close-iframe',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const body = getBody();
+            if (!body) {
+                throw new Error(`Can not find body`);
+            }
+
+            const frame = document.createElement('iframe');
+            body.appendChild(frame);
+            const win = frame.contentWindow;
+
+            const component = window.__component__();
+            return component({
+                window: win,
+
+                onClose: expect('onClose'),
+
+                doClose: expect('doClose', () => {
+                    body.removeChild(frame);
                 }),
 
                 run: () => `
