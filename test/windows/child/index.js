@@ -25,6 +25,8 @@ if (!window.xprops) {
 const xEval = (code) => {
     return ZalgoPromise.try(() => {
         return eval(`(function() { ${ code.replace(/zoid\.zoid/g, 'window.zoid') } })()`);
+    }).catch(err => {
+        window.xprops.onError(err);
     });
 };
 

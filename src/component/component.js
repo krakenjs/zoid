@@ -366,7 +366,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         }
 
         cleanInstances.register(err => {
-            parent.destroy(err || new Error(`zoid destroyed all components`));
+            return parent.destroy(err || new Error(`zoid destroyed all components`));
         });
 
         const clone = ({ decorate = identity } = {}) => {

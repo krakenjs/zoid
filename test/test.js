@@ -3,6 +3,8 @@
 import './tests';
 import { noop } from 'belter/src';
 
+import { zoid } from './zoid';
+
 window.mockDomain = 'mock://www.parent.com';
 
 window.console.karma = (...args) => {
@@ -34,5 +36,5 @@ afterEach((done) => {
     window.name = '';
     delete window.__component__;
     delete window.navigator.mockUserAgent;
-    return window.zoid.destroyAll().then(done);
+    return zoid.destroyAll().then(done);
 });
