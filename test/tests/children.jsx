@@ -483,10 +483,12 @@ describe('zoid children cases', () => {
                 }
             };
 
-            const passSiblings = () => `
+            const renderAll = new ZalgoPromise();
+
+            const passSiblings = () => renderAll.then(() => `
                 const siblings = window.xprops.getSiblings({ anyParent: true });
                 window.xprops.onSiblings(siblings, window.xprops);
-            `;
+            `);
 
             const onError = (err) => {
                 throw err;
@@ -529,7 +531,7 @@ describe('zoid children cases', () => {
                 cardCVVInstance.render(getBody()),
                 cardExpiryInstance.render(getBody()),
                 otherComponentInstance.render(getBody())
-            ]);
+            ]).then(() => renderAll.resolve());
         });
     });
 
@@ -670,10 +672,12 @@ describe('zoid children cases', () => {
                 }
             };
 
-            const passSiblings = () => `
+            const renderAll = new ZalgoPromise();
+
+            const passSiblings = () => renderAll.then(() => `
                 const siblings = window.xprops.getSiblings();
                 window.xprops.onSiblings(siblings, window.xprops);
-            `;
+            `);
 
             const onError = (err) => {
                 throw err;
@@ -713,7 +717,7 @@ describe('zoid children cases', () => {
                 cardCVVInstance.render(getBody()),
                 cardExpiryInstance.render(getBody()),
                 otherComponentInstance.render(getBody())
-            ]);
+            ]).then(() => renderAll.resolve());
         });
     });
 
@@ -865,10 +869,12 @@ describe('zoid children cases', () => {
                 }
             };
 
-            const passSiblings = () => `
+            const renderAll = new ZalgoPromise();
+
+            const passSiblings = () => renderAll.then(() => `
                 const siblings = window.xprops.getSiblings();
                 window.xprops.onSiblings(siblings, window.xprops);
-            `;
+            `);
 
             const onError = (err) => {
                 throw err;
@@ -908,7 +914,7 @@ describe('zoid children cases', () => {
                 cardCVVInstance.render(getBody()),
                 cardExpiryInstance.render(getBody()),
                 otherComponentInstance.render(getBody())
-            ]);
+            ]).then(() => renderAll.resolve());
         });
     });
 
@@ -1061,10 +1067,12 @@ describe('zoid children cases', () => {
                 }
             };
 
-            const passSiblings = () => `
+            const renderAll = new ZalgoPromise();
+
+            const passSiblings = () => renderAll.then(() => `
                 const siblings = window.xprops.getSiblings({ anyParent: true });
                 window.xprops.onSiblings(siblings, window.xprops);
-            `;
+            `);
 
             const onError = (err) => {
                 throw err;
@@ -1107,7 +1115,7 @@ describe('zoid children cases', () => {
                 cardCVVInstance.render(getBody()),
                 cardExpiryInstance.render(getBody()),
                 otherComponentInstance.render(getBody())
-            ]);
+            ]).then(() => renderAll.resolve());
         });
     });
 });
