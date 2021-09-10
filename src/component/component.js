@@ -4,18 +4,19 @@
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop, isElement, cleanup, memoize, identity, extend } from 'belter/src';
+import { noop, isElement, cleanup, memoize, identity, extend, uniqueID } from 'belter/src';
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
-import { CONTEXT, POST_MESSAGE, WILDCARD, METHOD } from '../constants';
+import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD } from '../constants';
 import { react, angular, vue, vue3, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
-import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType, type PropsType } from './props';
+import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType,
+    type PropsType, type ParentPropType, type exportPropType } from './props';
 
 type LoggerPayload = { [string] : ?string | ?boolean };
 
@@ -227,7 +228,7 @@ export type Component<P, X, C> = {|
     driver : (string, mixed) => mixed,
     isChild : () => boolean,
     canRenderTo : (CrossDomainWindowType) => ZalgoPromise<boolean>,
-    registerChild : () => ?ChildComponent<P>
+    registerChild : () => ?ChildComponent<P, X>
 |};
 
 export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Component<P, X, C> {
@@ -255,7 +256,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         return Boolean(payload && payload.tag === tag && payload.childDomain === getDomain());
     };
 
-    const registerChild = memoize(() : ?ChildComponent<P> => {
+    const registerChild = memoize(() : ?ChildComponent<P, X> => {
         if (isChild()) {
             if (window.xprops) {
                 delete global.components[tag];
@@ -273,10 +274,10 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
             return true;
         });
 
-        const delegateListener = on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { overrides } }) => {
+        const delegateListener = on(`${ POST_MESSAGE.DELEGATE }_${ name }`, ({ source, data: { uid, overrides } }) => {
             return {
                 parent: parentComponent({
-                    options, overrides, parentWin: source
+                    uid, options, overrides, parentWin: source
                 })
             };
         });
@@ -335,6 +336,8 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
     const init = (inputProps? : PropsInputType<P> | void) : ZoidComponentInstance<P, X, C> => {
         // eslint-disable-next-line prefer-const
         let instance;
+
+        const uid = `${ ZOID }-${ tag }-${ uniqueID() }`;
         const props = inputProps || getDefaultInputProps();
 
         const { eligible: eligibility, reason } = eligible({ props });
@@ -352,7 +355,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         };
 
         const parent = parentComponent({
-            options
+            uid, options
         });
 
         parent.init();
@@ -375,18 +378,29 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
 
         const getChildren = () : C => {
             // $FlowFixMe
-            const childComponents : {| [string] : ZoidComponent<*> |} = children();
+            const childComponents : {| [string] : ZoidComponent<mixed> |} = children();
             const result = {};
 
             for (const childName of Object.keys(childComponents)) {
-                const Child = childComponents[childName];
-                result[childName] = (childInputProps) => Child({
-                    ...childInputProps,
-                    parent: {
-                        props:  parent.getProps(),
-                        export: parent.export
-                    }
-                });
+                const Child : ZoidComponent<mixed> = childComponents[childName];
+
+                result[childName] = (childInputProps) => {
+                    const parentProps : PropsType<P> = parent.getProps();
+                    const parentExport : exportPropType<X> = parent.export;
+
+                    const childParent : ParentPropType<P, X> = {
+                        uid,
+                        props:  parentProps,
+                        export: parentExport
+                    };
+                    
+                    const childProps : PropsInputType<mixed> = {
+                        ...childInputProps,
+                        parent: childParent
+                    };
+
+                    return Child(childProps);
+                };
             }
 
             // $FlowFixMe

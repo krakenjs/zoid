@@ -9,15 +9,21 @@ import type { CssDimensionsType } from '../types';
 import { PROP_SERIALIZATION, PROP_TYPE } from '../constants';
 
 export type EventHandlerType<T> = (T) => void | ZalgoPromise<void>;
+export type Sibling = {|
+    props : mixed,
+    exports : mixed
+|};
 
 export type timeoutPropType = number;
 export type windowPropType = CrossDomainWindowType | ProxyWindow;
 export type cspNoncePropType = string;
 export type uidPropType = string;
+export type tagPropType = string;
 export type closePropType = () => ZalgoPromise<void>;
 export type focusPropType = () => ZalgoPromise<void>;
 export type showPropType = () => ZalgoPromise<void>;
 export type exportPropType<X> = (X) => ZalgoPromise<void>;
+export type getSiblingsPropType = (opts? : {| anyParent? : boolean |}) => $ReadOnlyArray<Sibling>;
 export type hidePropType = () => ZalgoPromise<void>;
 export type resizePropType = ({| width : ?number, height : ?number |}) => ZalgoPromise<void>;
 export type getParentPropType = () => CrossDomainWindowType;
@@ -33,7 +39,16 @@ export type onFocusPropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
 export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
 
+export type ParentPropType<P, X> = {|
+    uid : string,
+    // eslint-disable-next-line no-use-before-define
+    props : PropsType<P>,
+    export : exportPropType<X>
+|};
+
 export type PropsInputType<P> = {|
+    parent? : ParentPropType<mixed, mixed>,
+    
     timeout? : timeoutPropType,
     window? : windowPropType,
     cspNonce? : ?cspNoncePropType,
@@ -54,10 +69,6 @@ export type PropsInputType<P> = {|
 export type PropsType<P> = {|
     timeout? : timeoutPropType,
     window? : ?windowPropType,
-    close? : ?closePropType,
-    focus? : ?focusPropType,
-    resize? : ?resizePropType,
-    uid : uidPropType,
     cspNonce? : ?cspNoncePropType,
     dimensions : CssDimensionsType,
 
@@ -72,6 +83,27 @@ export type PropsType<P> = {|
     onProps : onPropsPropType<P>,
     
     ...P
+|};
+
+type onErrorChildPropType = (mixed) => ZalgoPromise<void>;
+
+export type ChildPropsType<P, X> = {|
+    ...PropsType<P>,
+
+    parent? : ParentPropType<mixed, mixed>,
+    uid : uidPropType,
+    tag : tagPropType,
+    close : closePropType,
+    focus : focusPropType,
+    show : showPropType,
+    hide : hidePropType,
+    export : exportPropType<X>,
+    getParent : getParentPropType,
+    getParentDomain : getParentDomainPropType,
+    resize : resizePropType,
+    onError : onErrorChildPropType,
+    onProps : onPropsPropType<P>,
+    getSiblings : getSiblingsPropType
 |};
 
 export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
@@ -104,17 +136,19 @@ export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
     |}) => T,
     childDecorate? : ({|
         value : ?T,
-        uid : string,
-        close : () => ZalgoPromise<void>,
-        focus : () => ZalgoPromise<void>,
-        onError : (mixed) => ZalgoPromise<void>,
-        onProps : ((PropsType<P>) => void) => void,
-        resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
-        getParentDomain : () => string,
-        getParent : () => CrossDomainWindowType,
-        show : () => ZalgoPromise<void>,
-        hide : () => ZalgoPromise<void>,
-        export : (X) => ZalgoPromise<void>
+        uid : uidPropType,
+        tag : tagPropType,
+        close : closePropType,
+        focus : focusPropType,
+        onError : onErrorPropType,
+        onProps : onPropsPropType<P>,
+        resize : resizePropType,
+        getParentDomain : getParentDomainPropType,
+        getParent : getParentPropType,
+        show : showPropType,
+        hide : hidePropType,
+        export : exportPropType<X>,
+        getSiblings : getSiblingsPropType
     |}) => ?T,
     required? : boolean,
     queryParam? : boolean | string | ({| value : T |}) => (string | ZalgoPromise<string>),
@@ -156,12 +190,14 @@ export type BuiltInPropsDefinitionType<P, X> = {|
     focus : FunctionPropDefinitionType<focusPropType, P, X>,
     resize : FunctionPropDefinitionType<resizePropType, P, X>,
     uid : StringPropDefinitionType<uidPropType, P, X>,
+    tag : StringPropDefinitionType<tagPropType, P, X>,
     cspNonce : StringPropDefinitionType<cspNoncePropType, P, X>,
     getParent : FunctionPropDefinitionType<getParentPropType, P, X>,
     getParentDomain : FunctionPropDefinitionType<getParentDomainPropType, P, X>,
     hide : FunctionPropDefinitionType<hidePropType, P, X>,
     show : FunctionPropDefinitionType<showPropType, P, X>,
     export : FunctionPropDefinitionType<exportPropType<X>, P, X>,
+    getSiblings : FunctionPropDefinitionType<getSiblingsPropType, P, X>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P, X>,
     onRendered : FunctionPropDefinitionType<onRenderedPropType, P, X>,
@@ -218,72 +254,9 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
             sendToChild: false
         },
 
-        close: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ close }) => close
-        },
-
-        focus: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ focus }) => focus
-        },
-
-        resize: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ resize }) => resize
-        },
-
-        uid: {
-            type:          'string',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ uid }) => uid
-        },
-
         cspNonce: {
             type:     'string',
             required: false
-        },
-
-        getParent: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ getParent }) => getParent
-        },
-
-        getParentDomain: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ getParentDomain }) => getParentDomain
-        },
-
-        show: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ show }) => show
-        },
-
-        hide: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ hide }) => hide
-        },
-
-        export: {
-            type:          'function',
-            required:      false,
-            sendToChild:   false,
-            childDecorate: ({ 'export': xport }) => xport
         },
 
         onDisplay: {
@@ -345,6 +318,76 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
             default:       defaultNoop
         },
 
+        close: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ close }) => close
+        },
+
+        focus: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ focus }) => focus
+        },
+
+        resize: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ resize }) => resize
+        },
+
+        uid: {
+            type:          'string',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ uid }) => uid
+        },
+
+        tag: {
+            type:          'string',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ tag }) => tag
+        },
+
+        getParent: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ getParent }) => getParent
+        },
+
+        getParentDomain: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ getParentDomain }) => getParentDomain
+        },
+
+        show: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ show }) => show
+        },
+
+        hide: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ hide }) => hide
+        },
+
+        export: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ 'export': xport }) => xport
+        },
+
         onError: {
             type:          'function',
             required:      false,
@@ -356,8 +399,14 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
             type:          'function',
             required:      false,
             sendToChild:   false,
-            default:       defaultNoop,
             childDecorate: ({ onProps }) => onProps
+        },
+
+        getSiblings: {
+            type:          'function',
+            required:      false,
+            sendToChild:   false,
+            childDecorate: ({ getSiblings }) => getSiblings
         }
     };
 }

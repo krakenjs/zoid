@@ -3,15 +3,15 @@
 
 import { isSameDomain, matchDomain, getDomain, getOpener,
     getNthParentFromTop, getAncestor, getAllFramesInWindow,
-    type CrossDomainWindowType, onCloseWindow } from 'cross-domain-utils/src';
+    type CrossDomainWindowType, onCloseWindow, assertSameDomain } from 'cross-domain-utils/src';
 import { markWindowKnown, deserializeMessage, type CrossDomainFunctionType } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onResize, elementReady, assertExists, noop } from 'belter/src';
 
 import { getGlobal } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
-import type { NormalizedComponentOptionsType } from '../component';
-import type { PropsType } from '../component/props';
+import type { NormalizedComponentOptionsType, getSiblingsPropType } from '../component';
+import type { PropsType, ChildPropsType } from '../component/props';
 import type { WindowRef, PropRef, ParentExportsType } from '../parent';
 import type { StringMatcherType } from '../types';
 
@@ -25,6 +25,7 @@ export type ChildExportsType<P> = {|
 
 export type ChildHelpers<P, X> = {|
     uid : string,
+    tag : string,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
     resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
@@ -34,7 +35,8 @@ export type ChildHelpers<P, X> = {|
     getParentDomain : () => string,
     show : () => ZalgoPromise<void>,
     hide : () => ZalgoPromise<void>,
-    export : (X) => ZalgoPromise<void>
+    export : (X) => ZalgoPromise<void>,
+    getSiblings : getSiblingsPropType
 |};
 
 function getParentComponentWindow(ref : WindowRef) : CrossDomainWindowType {
@@ -86,18 +88,18 @@ function destroy() : ZalgoPromise<void> {
     });
 }
 
-function getPropsByRef<P>(parentComponentWindow : CrossDomainWindowType, domain : string, { type, value, uid } : PropRef) : (PropsType<P>) {
+function getPropsByRef<P>(parentComponentWindow : CrossDomainWindowType, domain : string, propRef : PropRef) : (PropsType<P>) {
     let props;
 
-    if (type === INITIAL_PROPS.RAW) {
-        props = value;
-    } else if (type === INITIAL_PROPS.UID) {
+    if (propRef.type === INITIAL_PROPS.RAW) {
+        props = propRef.value;
+    } else if (propRef.type === INITIAL_PROPS.UID) {
         if (!isSameDomain(parentComponentWindow)) {
             throw new Error(`Parent component window is on a different domain - expected ${ getDomain() } - can not retrieve props`);
         }
 
         const global = getGlobal(parentComponentWindow);
-        props = assertExists('props', global && global.props[uid]);
+        props = assertExists('props', global && global.props[propRef.uid]);
     }
 
     if (!props) {
@@ -107,17 +109,18 @@ function getPropsByRef<P>(parentComponentWindow : CrossDomainWindowType, domain 
     return deserializeMessage(parentComponentWindow, domain, props);
 }
 
-export type ChildComponent<P> = {|
-    getProps : () => PropsType<P>,
+export type ChildComponent<P, X> = {|
+    getProps : () => ChildPropsType<P, X>,
     init : () => ZalgoPromise<void>
 |};
 
-export function childComponent<P, X, C>(options : NormalizedComponentOptionsType<P, X, C>) : ChildComponent<P> {
-    const { propsDef, autoResize, allowedParentDomains } = options;
+export function childComponent<P, X, C>(options : NormalizedComponentOptionsType<P, X, C>) : ChildComponent<P, X> {
+    const { tag, propsDef, autoResize, allowedParentDomains } = options;
 
     const onPropHandlers = [];
     const childPayload = getChildPayload();
-    let props : PropsType<P>;
+    let props : ChildPropsType<P, X>;
+    const exportsPromise = new ZalgoPromise();
 
     if (!childPayload) {
         throw new Error(`No child payload found`);
@@ -155,12 +158,53 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
     };
 
     const xport = (xports : X) : ZalgoPromise<void> => {
+        exportsPromise.resolve(xports);
         return parent.export(xports);
+    };
+
+    const getSiblings = ({ anyParent } = {}) => {
+        const result = [];
+        const currentParent = props.parent;
+
+        if (typeof anyParent === 'undefined') {
+            anyParent = !currentParent;
+        }
+
+        if (!anyParent && !currentParent) {
+            throw new Error(`No parent found for ${ tag } child`);
+        }
+
+        for (const win of getAllFramesInWindow(window)) {
+            if (!isSameDomain(win)) {
+                continue;
+            }
+
+            const xprops : ChildPropsType<mixed, mixed> = assertSameDomain(win).xprops;
+
+            if (!xprops || getParent() !== xprops.getParent()) {
+                continue;
+            }
+
+            const winParent = xprops.parent;
+
+            if (!anyParent && currentParent) {
+                if (!winParent || winParent.uid !== currentParent.uid) {
+                    continue;
+                }
+            }
+
+            result.push({
+                props:   xprops,
+                exports: getGlobal(win).exports
+            });
+        }
+
+        return result;
     };
 
     const getHelpers = () : ChildHelpers<P, X> => {
         return {
-            show, hide, close, focus, onError, resize,
+            tag, show, hide, close, focus, onError, resize, getSiblings,
             onProps, getParent, getParentDomain, uid, export: xport
         };
     };
@@ -222,6 +266,10 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
 
     const init = () => {
         return ZalgoPromise.try(() => {
+            getGlobal().exports = options.exports({
+                getExports: () => exportsPromise
+            });
+
             checkParentDomain(allowedParentDomains, parentDomain);
             markWindowKnown(parentComponentWindow);
             watchForClose();

@@ -44,6 +44,14 @@ Unique ID for the component instance
 console.log('The current component uid is:', window.xprops.uid);
 ```
 
+## xprops.tag `string`
+
+Tag for the component instance
+
+```javascript
+console.log('The current component is:', window.xprops.tag);
+```
+
 ## xprops.getParent `() => Window`
 
 Get a reference to the parent window
@@ -253,4 +261,20 @@ window.xprops.parent.export({
         console.log('hello world!')
     }
 });
+```
+
+## xprops.getSiblings `({ anyParent : boolean }) => Array<{ tag : string, xprops : XProps, exports : Exports }>`
+
+Get an array of sibling components on the same domain
+
+```javascript
+for (const sibling of window.xprops.getSiblings()) {
+    console.log ('Found sibling!', sibling.tag);
+}
+```
+
+```javascript
+for (const sibling of window.xprops.getSiblings({ anyParent: true })) {
+    console.log ('Found sibling from any parent!', sibling.tag);
+}
 ```

@@ -344,4 +344,770 @@ describe('zoid children cases', () => {
             ]);
         });
     });
+
+    it('should render a set of of child components and get all siblings', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                const CardNumberField = zoid.create({
+                    tag:     'test-multiple-children-card-field-number-getsiblings',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardCVVField = zoid.create({
+                    tag:     'test-multiple-children-card-field-cvv-getsiblings',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardExpiryField = zoid.create({
+                    tag:     'test-multiple-children-card-field-expiry-getsiblings',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardFields = zoid.create({
+                    tag:      'test-multiple-children-card-fields-getsiblings',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            NumberField: CardNumberField,
+                            CVVField:    CardCVVField,
+                            ExpiryField: CardExpiryField
+                        };
+                    }
+                });
+
+                const OtherComponent = zoid.create({
+                    tag:     'test-multiple-children-other-component-getsiblings',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                return {
+                    CardFields,
+                    OtherComponent
+                };
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const { CardFields, OtherComponent } = window.__component__();
+
+            const cardFields = CardFields({
+                onRendered: avoid('onRenderedCardFields')
+            });
+
+            const onSiblings = (siblings, xprops) => {
+                const EXPECTED_SIBLINGS = [
+                    'test-multiple-children-card-field-number-getsiblings',
+                    'test-multiple-children-card-field-cvv-getsiblings',
+                    'test-multiple-children-card-field-expiry-getsiblings',
+                    'test-multiple-children-other-component-getsiblings'
+                ];
+
+                for (const sibling of siblings) {
+                    if (!sibling.props) {
+                        throw new Error(`Sibling missing xprops`);
+                    }
+
+                    if (EXPECTED_SIBLINGS.indexOf(sibling.props.tag) === -1) {
+                        throw new Error(`Unexpected sibling: ${ sibling.props.tag }`);
+                    }
+
+                    if (!sibling.exports) {
+                        throw new Error(`Sibling ${ sibling.props.tag } missing exports`);
+                    }
+
+                    if (sibling.props.uid === xprops.uid) {
+                        xprops.export({
+                            submit: expect('submit')
+                        });
+                    } else {
+                        sibling.props.doXProp().then(() => {
+                            sibling.exports.submit();
+                        });
+                    }
+                }
+
+                for (const tag of EXPECTED_SIBLINGS) {
+                    if (!siblings.find(sibling => sibling.props.tag === tag)) {
+                        throw new Error(`Missing sibling: ${ tag }`);
+                    }
+                }
+
+                if (siblings.length !== EXPECTED_SIBLINGS.length) {
+                    throw new Error(`Expected ${ EXPECTED_SIBLINGS.length } siblings, found ${ siblings.length }`);
+                }
+            };
+
+            const passSiblings = () => `
+                const siblings = window.xprops.getSiblings({ anyParent: true });
+                window.xprops.onSiblings(siblings, window.xprops);
+            `;
+
+            const onError = (err) => {
+                throw err;
+            };
+
+            const cardNumberInstance = cardFields.NumberField({
+                onRendered: expect('onRenderedNumberField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardCVVInstance = cardFields.CVVField({
+                onRendered: expect('onRenderedCVVField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardExpiryInstance = cardFields.ExpiryField({
+                onRendered: expect('onRenderedExpiryField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const otherComponentInstance = OtherComponent({
+                onRendered: expect('onRenderedOtherComponent'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            return ZalgoPromise.all([
+                cardNumberInstance.render(getBody()),
+                cardCVVInstance.render(getBody()),
+                cardExpiryInstance.render(getBody()),
+                otherComponentInstance.render(getBody())
+            ]);
+        });
+    });
+
+    it('should render a set of of child components and get all siblings with the same parent', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                const CardNumberField = zoid.create({
+                    tag:     'test-multiple-children-card-field-number-getsiblings-sameparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardCVVField = zoid.create({
+                    tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardExpiryField = zoid.create({
+                    tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardFields = zoid.create({
+                    tag:      'test-multiple-children-card-fields-getsiblings-sameparent',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            NumberField: CardNumberField,
+                            CVVField:    CardCVVField,
+                            ExpiryField: CardExpiryField
+                        };
+                    }
+                });
+
+                const OtherComponent = zoid.create({
+                    tag:     'test-multiple-children-other-component-getsiblings-sameparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                return {
+                    CardFields,
+                    OtherComponent
+                };
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const { CardFields, OtherComponent } = window.__component__();
+
+            const cardFields = CardFields({
+                onRendered: avoid('onRenderedCardFields')
+            });
+
+            const onSiblings = (siblings, xprops) => {
+                const EXPECTED_SIBLINGS = [
+                    'test-multiple-children-card-field-number-getsiblings-sameparent',
+                    'test-multiple-children-card-field-cvv-getsiblings-sameparent',
+                    'test-multiple-children-card-field-expiry-getsiblings-sameparent'
+                ];
+
+                for (const sibling of siblings) {
+                    if (!sibling.props) {
+                        throw new Error(`Sibling missing xprops`);
+                    }
+
+                    if (EXPECTED_SIBLINGS.indexOf(sibling.props.tag) === -1) {
+                        throw new Error(`Unexpected sibling: ${ sibling.props.tag }`);
+                    }
+
+                    if (!sibling.exports) {
+                        throw new Error(`Sibling ${ sibling.props.tag } missing exports`);
+                    }
+
+                    if (sibling.props.uid === xprops.uid) {
+                        xprops.export({
+                            submit: expect('submit')
+                        });
+                    } else {
+                        sibling.props.doXProp().then(() => {
+                            sibling.exports.submit();
+                        });
+                    }
+                }
+
+                for (const tag of EXPECTED_SIBLINGS) {
+                    if (!siblings.find(sibling => sibling.props.tag === tag)) {
+                        throw new Error(`Missing sibling: ${ tag }`);
+                    }
+                }
+
+                if (siblings.length !== EXPECTED_SIBLINGS.length) {
+                    throw new Error(`Expected ${ EXPECTED_SIBLINGS.length } siblings, found ${ siblings.length }`);
+                }
+            };
+
+            const passSiblings = () => `
+                const siblings = window.xprops.getSiblings();
+                window.xprops.onSiblings(siblings, window.xprops);
+            `;
+
+            const onError = (err) => {
+                throw err;
+            };
+
+            const cardNumberInstance = cardFields.NumberField({
+                onRendered: expect('onRenderedNumberField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardCVVInstance = cardFields.CVVField({
+                onRendered: expect('onRenderedCVVField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardExpiryInstance = cardFields.ExpiryField({
+                onRendered: expect('onRenderedExpiryField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const otherComponentInstance = OtherComponent({
+                onRendered: expect('onRenderedOtherComponent'),
+                onError:    avoid('onError', onError)
+            });
+
+            return ZalgoPromise.all([
+                cardNumberInstance.render(getBody()),
+                cardCVVInstance.render(getBody()),
+                cardExpiryInstance.render(getBody()),
+                otherComponentInstance.render(getBody())
+            ]);
+        });
+    });
+
+    it('should render a set of of child components and get all siblings with the same parent, when a different parent exists', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                const CardNumberField = zoid.create({
+                    tag:     'test-multiple-children-card-field-number-getsiblings-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardCVVField = zoid.create({
+                    tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardExpiryField = zoid.create({
+                    tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardFields = zoid.create({
+                    tag:      'test-multiple-children-card-fields-getsiblings-sameparent-diffparent',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            NumberField: CardNumberField,
+                            CVVField:    CardCVVField,
+                            ExpiryField: CardExpiryField
+                        };
+                    }
+                });
+
+                const OtherComponent = zoid.create({
+                    tag:     'test-multiple-children-other-component-getsiblings-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const OtherComponentParent = zoid.create({
+                    tag:      'test-multiple-children-other-component-parent-getsiblings-sameparent-diffparent',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            OtherComponent
+                        };
+                    }
+                });
+
+                return {
+                    CardFields,
+                    OtherComponentParent
+                };
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const { CardFields, OtherComponentParent } = window.__component__();
+
+            const cardFields = CardFields({
+                onRendered: avoid('onRenderedCardFields')
+            });
+
+            const onSiblings = (siblings, xprops) => {
+                const EXPECTED_SIBLINGS = [
+                    'test-multiple-children-card-field-number-getsiblings-sameparent-diffparent',
+                    'test-multiple-children-card-field-cvv-getsiblings-sameparent-diffparent',
+                    'test-multiple-children-card-field-expiry-getsiblings-sameparent-diffparent'
+                ];
+
+                for (const sibling of siblings) {
+                    if (!sibling.props) {
+                        throw new Error(`Sibling missing xprops`);
+                    }
+
+                    if (EXPECTED_SIBLINGS.indexOf(sibling.props.tag) === -1) {
+                        throw new Error(`Unexpected sibling: ${ sibling.props.tag }`);
+                    }
+
+                    if (!sibling.exports) {
+                        throw new Error(`Sibling ${ sibling.props.tag } missing exports`);
+                    }
+
+                    if (sibling.props.uid === xprops.uid) {
+                        xprops.export({
+                            submit: expect('submit')
+                        });
+                    } else {
+                        sibling.props.doXProp().then(() => {
+                            sibling.exports.submit();
+                        });
+                    }
+                }
+
+                for (const tag of EXPECTED_SIBLINGS) {
+                    if (!siblings.find(sibling => sibling.props.tag === tag)) {
+                        throw new Error(`Missing sibling: ${ tag }`);
+                    }
+                }
+
+                if (siblings.length !== EXPECTED_SIBLINGS.length) {
+                    throw new Error(`Expected ${ EXPECTED_SIBLINGS.length } siblings, found ${ siblings.length }`);
+                }
+            };
+
+            const passSiblings = () => `
+                const siblings = window.xprops.getSiblings();
+                window.xprops.onSiblings(siblings, window.xprops);
+            `;
+
+            const onError = (err) => {
+                throw err;
+            };
+
+            const cardNumberInstance = cardFields.NumberField({
+                onRendered: expect('onRenderedNumberField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardCVVInstance = cardFields.CVVField({
+                onRendered: expect('onRenderedCVVField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardExpiryInstance = cardFields.ExpiryField({
+                onRendered: expect('onRenderedExpiryField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const otherComponentInstance = OtherComponentParent().OtherComponent({
+                onRendered: expect('onRenderedOtherComponent'),
+                onError:    avoid('onError', onError)
+            });
+
+            return ZalgoPromise.all([
+                cardNumberInstance.render(getBody()),
+                cardCVVInstance.render(getBody()),
+                cardExpiryInstance.render(getBody()),
+                otherComponentInstance.render(getBody())
+            ]);
+        });
+    });
+
+    it('should render a set of of child components and get all siblings, when a different parent exists', () => {
+        return wrapPromise(({ expect, avoid }) => {
+
+            window.__component__ = () => {
+                const CardNumberField = zoid.create({
+                    tag:     'test-multiple-children-card-field-number-getsiblings-anyparent-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardCVVField = zoid.create({
+                    tag:     'test-multiple-children-card-field-cvv-getsiblings-anyparent-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardExpiryField = zoid.create({
+                    tag:     'test-multiple-children-card-field-expiry-getsiblings-anyparent-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const CardFields = zoid.create({
+                    tag:      'test-multiple-children-card-fields-getsiblings-anyparent-sameparent-diffparent',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            NumberField: CardNumberField,
+                            CVVField:    CardCVVField,
+                            ExpiryField: CardExpiryField
+                        };
+                    }
+                });
+
+                const OtherComponent = zoid.create({
+                    tag:     'test-multiple-children-other-component-getsiblings-anyparent-sameparent-diffparent',
+                    url:     () => '/base/test/windows/child/index.htm',
+                    domain:  'mock://www.child.com',
+                    exports: ({ getExports }) => {
+                        return {
+                            submit: (...args) => {
+                                return getExports().then(exports => {
+                                    return exports.submit(...args);
+                                });
+                            }
+                        };
+                    }
+                });
+
+                const OtherComponentParent = zoid.create({
+                    tag:      'test-multiple-children-other-component-parent-getsiblings-anyparent-sameparent-diffparent',
+                    url:      () => '/base/test/windows/child/index.htm',
+                    domain:   'mock://www.child.com',
+                    children: () => {
+                        return {
+                            OtherComponent
+                        };
+                    }
+                });
+
+                return {
+                    CardFields,
+                    OtherComponentParent
+                };
+            };
+
+            onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                if (getParent(win) !== window) {
+                    throw new Error(`Expected window parent to be current window`);
+                }
+            }));
+
+            const { CardFields, OtherComponentParent } = window.__component__();
+
+            const cardFields = CardFields({
+                onRendered: avoid('onRenderedCardFields')
+            });
+
+            const onSiblings = (siblings, xprops) => {
+                const EXPECTED_SIBLINGS = [
+                    'test-multiple-children-card-field-number-getsiblings-anyparent-sameparent-diffparent',
+                    'test-multiple-children-card-field-cvv-getsiblings-anyparent-sameparent-diffparent',
+                    'test-multiple-children-card-field-expiry-getsiblings-anyparent-sameparent-diffparent',
+                    'test-multiple-children-other-component-getsiblings-anyparent-sameparent-diffparent'
+                ];
+
+                for (const sibling of siblings) {
+                    if (!sibling.props) {
+                        throw new Error(`Sibling missing xprops`);
+                    }
+
+                    if (EXPECTED_SIBLINGS.indexOf(sibling.props.tag) === -1) {
+                        throw new Error(`Unexpected sibling: ${ sibling.props.tag }`);
+                    }
+
+                    if (!sibling.exports) {
+                        throw new Error(`Sibling ${ sibling.props.tag } missing exports`);
+                    }
+
+                    if (sibling.props.uid === xprops.uid) {
+                        xprops.export({
+                            submit: expect('submit')
+                        });
+                    } else {
+                        sibling.props.doXProp().then(() => {
+                            sibling.exports.submit();
+                        });
+                    }
+                }
+
+                for (const tag of EXPECTED_SIBLINGS) {
+                    if (!siblings.find(sibling => sibling.props.tag === tag)) {
+                        throw new Error(`Missing sibling: ${ tag }`);
+                    }
+                }
+
+                if (siblings.length !== EXPECTED_SIBLINGS.length) {
+                    throw new Error(`Expected ${ EXPECTED_SIBLINGS.length } siblings, found ${ siblings.length }`);
+                }
+            };
+
+            const passSiblings = () => `
+                const siblings = window.xprops.getSiblings({ anyParent: true });
+                window.xprops.onSiblings(siblings, window.xprops);
+            `;
+
+            const onError = (err) => {
+                throw err;
+            };
+
+            const cardNumberInstance = cardFields.NumberField({
+                onRendered: expect('onRenderedNumberField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardCVVInstance = cardFields.CVVField({
+                onRendered: expect('onRenderedCVVField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const cardExpiryInstance = cardFields.ExpiryField({
+                onRendered: expect('onRenderedExpiryField'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            const otherComponentInstance = OtherComponentParent().OtherComponent({
+                onRendered: expect('onRenderedOtherComponent'),
+                onSiblings: expect('onSiblings', onSiblings),
+                doXProp:    expect('doXProp'),
+                onError:    avoid('onError', onError),
+                run:        passSiblings
+            });
+
+            return ZalgoPromise.all([
+                cardNumberInstance.render(getBody()),
+                cardCVVInstance.render(getBody()),
+                cardExpiryInstance.render(getBody()),
+                otherComponentInstance.render(getBody())
+            ]);
+        });
+    });
 });

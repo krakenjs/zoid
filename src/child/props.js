@@ -2,7 +2,7 @@
 
 import { getDomain, isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import type { PropsDefinitionType, PropsType } from '../component/props';
+import type { PropsDefinitionType, PropsType, ChildPropsType } from '../component/props';
 
 import type { ChildHelpers } from './index';
 
@@ -15,8 +15,8 @@ export function normalizeChildProp<P, T, X>(propsDef : PropsDefinitionType<P, X>
     const prop = propsDef[key];
 
     if (typeof prop.childDecorate === 'function') {
-        const { uid, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide, export: xport } = helpers;
-        const decoratedValue = prop.childDecorate({ value, uid, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide, export: xport });
+        const { uid, tag, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide, export: xport, getSiblings } = helpers;
+        const decoratedValue = prop.childDecorate({ value, uid, tag, close, focus, onError, onProps, resize, getParent, getParentDomain, show, hide, export: xport, getSiblings });
 
         // $FlowFixMe
         return decoratedValue;
@@ -26,7 +26,7 @@ export function normalizeChildProp<P, T, X>(propsDef : PropsDefinitionType<P, X>
 }
 
 // eslint-disable-next-line max-params
-export function normalizeChildProps<P, X>(parentComponentWindow : CrossDomainWindowType, propsDef : PropsDefinitionType<P, X>, props : PropsType<P>, origin : string, helpers : ChildHelpers<P, X>, isUpdate : boolean = false) : (PropsType<P>) {
+export function normalizeChildProps<P, X>(parentComponentWindow : CrossDomainWindowType, propsDef : PropsDefinitionType<P, X>, props : PropsType<P>, origin : string, helpers : ChildHelpers<P, X>, isUpdate : boolean = false) : ChildPropsType<P, X> {
 
     const result = {};
 
