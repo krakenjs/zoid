@@ -8,7 +8,7 @@ import { noop, isElement, cleanup, memoize, identity, extend, uniqueID } from 'b
 
 import { getChildPayload, childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
-import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD } from '../constants';
+import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD, PROP_TYPE } from '../constants';
 import { react, angular, vue, vue3, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
@@ -16,7 +16,7 @@ import type { CssDimensionsType, StringMatcherType } from '../types';
 import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
 import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType,
-    type PropsType, type ParentPropType, type exportPropType } from './props';
+    type PropsType, type ParentPropType, type exportPropType, type DEFINITION_TYPE } from './props';
 
 type LoggerPayload = { [string] : ?string | ?boolean };
 
@@ -39,6 +39,18 @@ type Attributes = {|
     iframe? : { [string] : string },
     popup? : { [string] : string }
 |};
+
+export type ExportsConfigDefinition = {|
+    [string] : {|
+        type : DEFINITION_TYPE
+    |}
+|};
+
+export type ExportsMapperDefinition<X> = ({|
+    getExports : () => ZalgoPromise<X>
+|}) => X;
+
+export type ExportsDefinition<X> = ExportsConfigDefinition | ExportsMapperDefinition<X>;
 
 export type ComponentOptionsType<P, X, C> = {|
 
@@ -71,7 +83,7 @@ export type ComponentOptionsType<P, X, C> = {|
 
     children? : () => C,
 
-    exports? : ({| getExports : () => ZalgoPromise<X> |}) => X
+    exports? : ExportsDefinition<X>
 |};
 
 export type AttributesType = {|
@@ -114,7 +126,7 @@ export type NormalizedComponentOptionsType<P, X, C> = {|
 
     children : () => C,
 
-    exports : ({| getExports : () => ZalgoPromise<X> |}) => X
+    exports : ExportsMapperDefinition<X>
 |};
 
 export type ZoidComponentInstance<P, X = void, C = void> = {|
@@ -175,7 +187,7 @@ function normalizeOptions<P, X, C>(options : ComponentOptionsType<P, X, C>) : No
         validate,
         eligible = () => ({ eligible: true }),
         logger = { info: noop },
-        exports: xports = getDefaultExports(),
+        exports: xportsDefinition = getDefaultExports(),
         method,
         children = () : C => {
             // $FlowFixMe
@@ -195,6 +207,29 @@ function normalizeOptions<P, X, C>(options : ComponentOptionsType<P, X, C>) : No
     if (!containerTemplate) {
         throw new Error(`Container template required`);
     }
+
+    const xports = typeof xportsDefinition === 'function'
+        ? xportsDefinition
+        : ({ getExports }) : X => {
+            const result = {};
+
+            for (const key of Object.keys(xportsDefinition)) {
+                const { type } = xportsDefinition[key];
+                const valuePromise = getExports().then(res => {
+                    // $FlowFixMe
+                    return res[key];
+                });
+
+                if (type === PROP_TYPE.FUNCTION) {
+                    result[key] = (...args) => valuePromise.then(value => value(...args));
+                } else {
+                    result[key] = valuePromise;
+                }
+            }
+
+            // $FlowFixMe
+            return result;
+        };
 
     return {
         name,

@@ -10,12 +10,12 @@ export const POST_MESSAGE = {
 };
 
 export const PROP_TYPE = {
-    STRING:   `string`,
-    OBJECT:   `object`,
-    FUNCTION: `function`,
-    BOOLEAN:  `boolean`,
-    NUMBER:   `number`,
-    ARRAY:    `array`
+    STRING:   ('string' : 'string'),
+    OBJECT:   ('object' : 'object'),
+    FUNCTION: ('function' : 'function'),
+    BOOLEAN:  ('boolean' : 'boolean'),
+    NUMBER:   ('number' : 'number'),
+    ARRAY:    ('array' : 'array')
 };
 
 export const INITIAL_PROPS = {

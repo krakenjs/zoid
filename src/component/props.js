@@ -164,12 +164,24 @@ export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
     serialization? : $Values<typeof PROP_SERIALIZATION>
 |};
 
-export type BooleanPropDefinitionType<T : boolean, P, X> = PropDefinitionType<T, P, 'boolean', X>;
-export type StringPropDefinitionType<T : string, P, X> = PropDefinitionType<T, P, 'string', X>;
-export type NumberPropDefinitionType<T : number, P, X> = PropDefinitionType<T, P, 'number', X>;
-export type FunctionPropDefinitionType<T : Function, P, X> = PropDefinitionType<T, P, 'function', X>;
-export type ArrayPropDefinitionType<T : Array<*> | $ReadOnlyArray<*>, P, X> = PropDefinitionType<T, P, 'array', X>; // eslint-disable-line flowtype/no-mutable-array
-export type ObjectPropDefinitionType<T : Object, P, X> = PropDefinitionType<T, P, 'object', X>;
+export type BOOLEAN_DEFINITION_TYPE = typeof PROP_TYPE.BOOLEAN;
+export type STRING_DEFINITION_TYPE = typeof PROP_TYPE.STRING;
+export type NUMBER_DEFINITION_TYPE = typeof PROP_TYPE.NUMBER;
+export type FUNCTION_DEFINITION_TYPE = typeof PROP_TYPE.FUNCTION;
+export type ARRAY_DEFINITION_TYPE = typeof PROP_TYPE.ARRAY;
+export type OBJECT_DEFINITION_TYPE = typeof PROP_TYPE.OBJECT;
+
+export type DEFINITION_TYPE =
+        BOOLEAN_DEFINITION_TYPE | STRING_DEFINITION_TYPE | NUMBER_DEFINITION_TYPE |
+        FUNCTION_DEFINITION_TYPE | ARRAY_DEFINITION_TYPE | OBJECT_DEFINITION_TYPE;
+
+
+export type BooleanPropDefinitionType<T : boolean, P, X> = PropDefinitionType<T, P, BOOLEAN_DEFINITION_TYPE, X>;
+export type StringPropDefinitionType<T : string, P, X> = PropDefinitionType<T, P, STRING_DEFINITION_TYPE, X>;
+export type NumberPropDefinitionType<T : number, P, X> = PropDefinitionType<T, P, NUMBER_DEFINITION_TYPE, X>;
+export type FunctionPropDefinitionType<T : Function, P, X> = PropDefinitionType<T, P, FUNCTION_DEFINITION_TYPE, X>;
+export type ArrayPropDefinitionType<T : Array<*> | $ReadOnlyArray<*>, P, X> = PropDefinitionType<T, P, ARRAY_DEFINITION_TYPE, X>; // eslint-disable-line flowtype/no-mutable-array
+export type ObjectPropDefinitionType<T : Object, P, X> = PropDefinitionType<T, P, OBJECT_DEFINITION_TYPE, X>;
 
 export type MixedPropDefinitionType<P, X> =
     BooleanPropDefinitionType<*, P, X> |
@@ -222,7 +234,7 @@ const decorateOnce = <F : Function>({ value } : { value : F }) : F => once(value
 export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
     return {
         window: {
-            type:          'object',
+            type:          PROP_TYPE.OBJECT,
             sendToChild:   false,
             required:      false,
             allowDelegate: true,
@@ -249,18 +261,18 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         timeout: {
-            type:        'number',
+            type:        PROP_TYPE.NUMBER,
             required:    false,
             sendToChild: false
         },
 
         cspNonce: {
-            type:     'string',
+            type:     PROP_TYPE.STRING,
             required: false
         },
 
         onDisplay: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
@@ -269,7 +281,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onRendered: {
-            type:        'function',
+            type:        PROP_TYPE.FUNCTION,
             required:    false,
             sendToChild: false,
             default:     defaultNoop,
@@ -277,7 +289,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onRender: {
-            type:        'function',
+            type:        PROP_TYPE.FUNCTION,
             required:    false,
             sendToChild: false,
             default:     defaultNoop,
@@ -285,7 +297,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onClose: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
@@ -294,7 +306,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onDestroy: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
@@ -303,7 +315,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onResize: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
@@ -311,7 +323,7 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onFocus: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             allowDelegate: true,
@@ -319,91 +331,91 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         close: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ close }) => close
         },
 
         focus: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ focus }) => focus
         },
 
         resize: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ resize }) => resize
         },
 
         uid: {
-            type:          'string',
+            type:          PROP_TYPE.STRING,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ uid }) => uid
         },
 
         tag: {
-            type:          'string',
+            type:          PROP_TYPE.STRING,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ tag }) => tag
         },
 
         getParent: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ getParent }) => getParent
         },
 
         getParentDomain: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ getParentDomain }) => getParentDomain
         },
 
         show: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ show }) => show
         },
 
         hide: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ hide }) => hide
         },
 
         export: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ 'export': xport }) => xport
         },
 
         onError: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ onError }) => onError
         },
 
         onProps: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ onProps }) => onProps
         },
 
         getSiblings: {
-            type:          'function',
+            type:          PROP_TYPE.FUNCTION,
             required:      false,
             sendToChild:   false,
             childDecorate: ({ getSiblings }) => getSiblings

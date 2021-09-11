@@ -195,14 +195,10 @@ describe('zoid children cases', () => {
                             ExpiryField: CardExpiryField
                         };
                     },
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -353,14 +349,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-number-getsiblings',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -368,14 +360,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-cvv-getsiblings',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -383,14 +371,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-expiry-getsiblings',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -411,14 +395,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-other-component-getsiblings',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -543,14 +523,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-number-getsiblings-sameparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -558,14 +534,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -573,14 +545,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -601,14 +569,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-other-component-getsiblings-sameparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -729,14 +693,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-number-getsiblings-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -744,14 +704,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -759,14 +715,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -787,14 +739,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-other-component-getsiblings-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -926,14 +874,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-number-getsiblings-anyparent-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -941,14 +885,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-anyparent-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -956,14 +896,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-anyparent-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 
@@ -984,14 +920,10 @@ describe('zoid children cases', () => {
                     tag:     'test-multiple-children-other-component-getsiblings-anyparent-sameparent-diffparent',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
-                        return {
-                            submit: (...args) => {
-                                return getExports().then(exports => {
-                                    return exports.submit(...args);
-                                });
-                            }
-                        };
+                    exports: {
+                        submit: {
+                            type: 'function'
+                        }
                     }
                 });
 

@@ -72,7 +72,7 @@ const MyComponent = zoid.create({
 });
 ```
 
-## props `Object<string, Object>`
+## props `{ [string] : PropDefinition }`
 
 A mapping of prop name to prop settings. Helpful for setting default values, decorating values, adding props to the query string of your component url, and more.
 
@@ -405,6 +405,7 @@ myComponent.render('#my-container').catch(err => {
     console.error(err); // This will happen if we're not in firefox
 });
 
+## exports `{ [string] : ExportDefinition }`
 ## exports `({ getExports : () => Promise<{ [string] : any }> }) => { [string] : Promise<any> }`
 
 Used to map exports from the child (passed with `xprops.export(...)`) to properties on the parent component instance.
@@ -414,11 +415,11 @@ const CreatePostForm = zoid.create({
     tag: 'create-post-form',
     url: 'https://my-site.com/component/create-post-form',
 
-    exports: ({ getExports }) => {
-        return {
-            submit: () => getExports().then(exports => exports.submit())
-        };
-    };
+    exports: {
+        submit: {
+            type: 'function'
+        }
+    }
 });
 ```
 
