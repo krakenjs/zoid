@@ -66,7 +66,7 @@
             return dom_PopupOpenError;
         }));
         __webpack_require__.d(__webpack_exports__, "create", (function() {
-            return create;
+            return component_create;
         }));
         __webpack_require__.d(__webpack_exports__, "destroy", (function() {
             return component_destroy;
@@ -760,7 +760,24 @@
             var domain;
             throw new Error("Mock urls not supported out of test mode");
         }
+        function getFrameForWindow(win) {
+            if (isSameDomain(win)) return assertSameDomain(win).frameElement;
+            for (var _i21 = 0, _document$querySelect2 = document.querySelectorAll("iframe"); _i21 < _document$querySelect2.length; _i21++) {
+                var frame = _document$querySelect2[_i21];
+                if (frame && frame.contentWindow && frame.contentWindow === win) return frame;
+            }
+        }
         function closeWindow(win) {
+            if (function(win) {
+                void 0 === win && (win = window);
+                return Boolean(utils_getParent(win));
+            }(win)) {
+                var frame = getFrameForWindow(win);
+                if (frame && frame.parentElement) {
+                    frame.parentElement.removeChild(frame);
+                    return;
+                }
+            }
             try {
                 win.close();
             } catch (err) {}
@@ -1220,9 +1237,16 @@
                     return item;
                 },
                 register: function(method) {
-                    cleaned ? method(cleanErr) : tasks.push(once((function() {
+                    var task = once((function() {
                         return method(cleanErr);
-                    })));
+                    }));
+                    cleaned ? method(cleanErr) : tasks.push(task);
+                    return {
+                        cancel: function() {
+                            var index = tasks.indexOf(task);
+                            -1 !== index && tasks.splice(index, 1);
+                        }
+                    };
                 },
                 all: function(err) {
                     cleanErr = err;
@@ -2135,13 +2159,7 @@
                             name: name
                         });
                         var sameDomain = isSameDomain(win);
-                        var frame = function(win) {
-                            if (isSameDomain(win)) return assertSameDomain(win).frameElement;
-                            for (var _i21 = 0, _document$querySelect2 = document.querySelectorAll("iframe"); _i21 < _document$querySelect2.length; _i21++) {
-                                var frame = _document$querySelect2[_i21];
-                                if (frame && frame.contentWindow && frame.contentWindow === win) return frame;
-                            }
-                        }(win);
+                        var frame = getFrameForWindow(win);
                         if (!sameDomain) throw new Error("Can not set name for cross-domain window: " + name);
                         assertSameDomain(win).name = name;
                         frame && frame.setAttribute("name", name);
@@ -3036,8 +3054,8 @@
         function lib_global_getGlobal(win) {
             void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_76__ || (win.__zoid_9_0_76__ = {});
-            return win.__zoid_9_0_76__;
+            win.__zoid_9_0_77__ || (win.__zoid_9_0_77__ = {});
+            return win.__zoid_9_0_77__;
         }
         function getProxyObject(obj) {
             return {
@@ -3081,6 +3099,7 @@
             return "function" == typeof prop.childDecorate ? prop.childDecorate({
                 value: value,
                 uid: helpers.uid,
+                tag: helpers.tag,
                 close: helpers.close,
                 focus: helpers.focus,
                 onError: helpers.onError,
@@ -3090,7 +3109,8 @@
                 getParentDomain: helpers.getParentDomain,
                 show: helpers.show,
                 hide: helpers.hide,
-                export: helpers.export
+                export: helpers.export,
+                getSiblings: helpers.getSiblings
             }) : value;
         }
         function parseChildWindowName(windowName) {
@@ -3199,7 +3219,7 @@
             }));
         }
         function parentComponent(_ref) {
-            var options = _ref.options, _ref$overrides = _ref.overrides, overrides = void 0 === _ref$overrides ? {} : _ref$overrides, _ref$parentWin = _ref.parentWin, parentWin = void 0 === _ref$parentWin ? window : _ref$parentWin;
+            var uid = _ref.uid, options = _ref.options, _ref$overrides = _ref.overrides, overrides = void 0 === _ref$overrides ? {} : _ref$overrides, _ref$parentWin = _ref.parentWin, parentWin = void 0 === _ref$parentWin ? window : _ref$parentWin;
             var propsDef = options.propsDef, containerTemplate = options.containerTemplate, prerenderTemplate = options.prerenderTemplate, tag = options.tag, name = options.name, attributes = options.attributes, dimensions = options.dimensions, autoResize = options.autoResize, url = options.url, domainMatch = options.domain, xports = options.exports;
             var initPromise = new promise_ZalgoPromise;
             var handledErrors = [];
@@ -3434,7 +3454,7 @@
                     if (currentProxyWin) return promise_ZalgoPromise.all([ event.trigger(EVENT.FOCUS), currentProxyWin.focus() ]).then(src_util_noop);
                 }));
             };
-            var getWindowRef = function(target, domain, uid, context) {
+            var getWindowRef = function(target, domain, context) {
                 if (domain === getDomain(window)) {
                     var global = lib_global_getGlobal(window);
                     global.windows = global.windows || {};
@@ -3626,9 +3646,9 @@
             initChild.onError = onError;
             var renderTemplate = function(renderer, _ref7) {
                 return renderer({
+                    uid: uid,
                     container: _ref7.container,
                     context: _ref7.context,
-                    uid: _ref7.uid,
                     doc: _ref7.doc,
                     frame: _ref7.frame,
                     prerenderFrame: _ref7.prerenderFrame,
@@ -3642,10 +3662,9 @@
                 });
             };
             var prerender = function(proxyPrerenderWin, _ref8) {
-                var context = _ref8.context, uid = _ref8.uid;
+                var context = _ref8.context;
                 return prerenderOverride ? prerenderOverride(proxyPrerenderWin, {
-                    context: context,
-                    uid: uid
+                    context: context
                 }) : promise_ZalgoPromise.try((function() {
                     if (prerenderTemplate) {
                         var prerenderWindow = proxyPrerenderWin.getWindow();
@@ -3659,7 +3678,6 @@
                             var doc = (prerenderWindow = assertSameDomain(prerenderWindow)).document;
                             var el = renderTemplate(prerenderTemplate, {
                                 context: context,
-                                uid: uid,
                                 doc: doc
                             });
                             if (el) {
@@ -3691,12 +3709,11 @@
                 }));
             };
             var renderContainer = function(proxyContainer, _ref10) {
-                var proxyFrame = _ref10.proxyFrame, proxyPrerenderFrame = _ref10.proxyPrerenderFrame, context = _ref10.context, uid = _ref10.uid, rerender = _ref10.rerender;
+                var proxyFrame = _ref10.proxyFrame, proxyPrerenderFrame = _ref10.proxyPrerenderFrame, context = _ref10.context, rerender = _ref10.rerender;
                 return renderContainerOverride ? renderContainerOverride(proxyContainer, {
                     proxyFrame: proxyFrame,
                     proxyPrerenderFrame: proxyPrerenderFrame,
                     context: context,
-                    uid: uid,
                     rerender: rerender
                 }) : promise_ZalgoPromise.hash({
                     container: proxyContainer.get(),
@@ -3707,7 +3724,6 @@
                     var container = _ref11.container, visible = _ref11.internalState.visible;
                     var innerContainer = renderTemplate(containerTemplate, {
                         context: context,
-                        uid: uid,
                         container: container,
                         frame: _ref11.frame,
                         prerenderFrame: _ref11.prerenderFrame,
@@ -3918,7 +3934,6 @@
                 render: function(_ref13) {
                     var target = _ref13.target, container = _ref13.container, context = _ref13.context, rerender = _ref13.rerender;
                     return promise_ZalgoPromise.try((function() {
-                        var uid = "zoid-" + tag + "-" + uniqueID();
                         var domain = getDomainMatcher();
                         var childDomain = getChildDomain();
                         !function(target, domain, container) {
@@ -3938,6 +3953,7 @@
                                     propDef && propDef.allowDelegate && (delegateProps[propName] = props[propName]);
                                 }
                                 var childOverridesPromise = send_send(target, "zoid_delegate_" + name, {
+                                    uid: uid,
                                     overrides: {
                                         props: delegateProps,
                                         event: event,
@@ -4061,8 +4077,8 @@
                         var buildWindowNamePromise = getProxyWindowPromise.then((function(proxyWin) {
                             return function(_temp) {
                                 var _ref5 = void 0 === _temp ? {} : _temp, proxyWin = _ref5.proxyWin, childDomain = _ref5.childDomain, domain = _ref5.domain, context = (void 0 === _ref5.target && window, 
-                                _ref5.context), uid = _ref5.uid;
-                                return function(proxyWin, childDomain, domain, uid) {
+                                _ref5.context);
+                                return function(proxyWin, childDomain, domain) {
                                     return getPropsForChild(domain).then((function(childProps) {
                                         var value = setup_serializeMessage(proxyWin, domain, childProps);
                                         var propRef = childDomain === getDomain() ? {
@@ -4082,15 +4098,15 @@
                                         }
                                         return propRef;
                                     }));
-                                }(proxyWin, childDomain, domain, uid).then((function(propsRef) {
+                                }(proxyWin, childDomain, domain).then((function(propsRef) {
                                     return {
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_76",
+                                        version: "9_0_77",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
-                                        parent: getWindowRef(0, childDomain, uid, context),
+                                        parent: getWindowRef(0, childDomain, context),
                                         props: propsRef,
                                         exports: setup_serializeMessage(proxyWin, domain, (win = proxyWin, {
                                             init: initChild,
@@ -4113,14 +4129,12 @@
                                     childDomain: childDomain,
                                     domain: domain,
                                     target: target,
-                                    context: context,
-                                    uid: uid
+                                    context: context
                                 }).proxyWin,
                                 childDomain: _ref6.childDomain,
                                 domain: _ref6.domain,
                                 target: _ref6.target,
-                                context: _ref6.context,
-                                uid: _ref6.uid
+                                context: _ref6.context
                             }).then((function(childPayload) {
                                 return "__zoid__" + name + "__" + base64encode(JSON.stringify(childPayload)) + "__";
                             }));
@@ -4139,7 +4153,6 @@
                         }).then((function(_ref14) {
                             return renderContainer(_ref14.proxyContainer, {
                                 context: context,
-                                uid: uid,
                                 proxyFrame: _ref14.proxyFrame,
                                 proxyPrerenderFrame: _ref14.proxyPrerenderFrame,
                                 rerender: rerender
@@ -4174,8 +4187,7 @@
                             state: setStatePromise
                         }).then((function(_ref17) {
                             return prerender(_ref17.proxyPrerenderWin, {
-                                context: context,
-                                uid: uid
+                                context: context
                             });
                         }));
                         var setWindowNamePromise = promise_ZalgoPromise.hash({
@@ -4560,13 +4572,13 @@
                     };
                 } : _options$eligible, _options$logger = options.logger, logger = void 0 === _options$logger ? {
                     info: src_util_noop
-                } : _options$logger, _options$exports = options.exports, xports = void 0 === _options$exports ? src_util_noop : _options$exports, method = options.method, _options$children = options.children, children = void 0 === _options$children ? function() {
+                } : _options$logger, _options$exports = options.exports, xportsDefinition = void 0 === _options$exports ? src_util_noop : _options$exports, method = options.method, _options$children = options.children, children = void 0 === _options$children ? function() {
                     return {};
                 } : _options$children;
                 var name = tag.replace(/-/g, "_");
                 var propsDef = _extends({}, {
                     window: {
-                        type: "object",
+                        type: PROP_TYPE.OBJECT,
                         sendToChild: !1,
                         required: !1,
                         allowDelegate: !0,
@@ -4583,88 +4595,16 @@
                         }
                     },
                     timeout: {
-                        type: "number",
+                        type: PROP_TYPE.NUMBER,
                         required: !1,
                         sendToChild: !1
                     },
-                    close: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref4) {
-                            return _ref4.close;
-                        }
-                    },
-                    focus: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref5) {
-                            return _ref5.focus;
-                        }
-                    },
-                    resize: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref6) {
-                            return _ref6.resize;
-                        }
-                    },
-                    uid: {
-                        type: "string",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref7) {
-                            return _ref7.uid;
-                        }
-                    },
                     cspNonce: {
-                        type: "string",
+                        type: PROP_TYPE.STRING,
                         required: !1
                     },
-                    getParent: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref8) {
-                            return _ref8.getParent;
-                        }
-                    },
-                    getParentDomain: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref9) {
-                            return _ref9.getParentDomain;
-                        }
-                    },
-                    show: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref10) {
-                            return _ref10.show;
-                        }
-                    },
-                    hide: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref11) {
-                            return _ref11.hide;
-                        }
-                    },
-                    export: {
-                        type: "function",
-                        required: !1,
-                        sendToChild: !1,
-                        childDecorate: function(_ref12) {
-                            return _ref12.export;
-                        }
-                    },
                     onDisplay: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         allowDelegate: !0,
@@ -4672,21 +4612,21 @@
                         decorate: props_decorateOnce
                     },
                     onRendered: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
                         decorate: props_decorateOnce
                     },
                     onRender: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         default: props_defaultNoop,
                         decorate: props_decorateOnce
                     },
                     onClose: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         allowDelegate: !0,
@@ -4694,7 +4634,7 @@
                         decorate: props_decorateOnce
                     },
                     onDestroy: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         allowDelegate: !0,
@@ -4702,34 +4642,121 @@
                         decorate: props_decorateOnce
                     },
                     onResize: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         allowDelegate: !0,
                         default: props_defaultNoop
                     },
                     onFocus: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         allowDelegate: !0,
                         default: props_defaultNoop
                     },
-                    onError: {
-                        type: "function",
+                    close: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref4) {
+                            return _ref4.close;
+                        }
+                    },
+                    focus: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref5) {
+                            return _ref5.focus;
+                        }
+                    },
+                    resize: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref6) {
+                            return _ref6.resize;
+                        }
+                    },
+                    uid: {
+                        type: PROP_TYPE.STRING,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref7) {
+                            return _ref7.uid;
+                        }
+                    },
+                    tag: {
+                        type: PROP_TYPE.STRING,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref8) {
+                            return _ref8.tag;
+                        }
+                    },
+                    getParent: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref9) {
+                            return _ref9.getParent;
+                        }
+                    },
+                    getParentDomain: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref10) {
+                            return _ref10.getParentDomain;
+                        }
+                    },
+                    show: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref11) {
+                            return _ref11.show;
+                        }
+                    },
+                    hide: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref12) {
+                            return _ref12.hide;
+                        }
+                    },
+                    export: {
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
                         childDecorate: function(_ref13) {
-                            return _ref13.onError;
+                            return _ref13.export;
+                        }
+                    },
+                    onError: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref14) {
+                            return _ref14.onError;
                         }
                     },
                     onProps: {
-                        type: "function",
+                        type: PROP_TYPE.FUNCTION,
                         required: !1,
                         sendToChild: !1,
-                        default: props_defaultNoop,
-                        childDecorate: function(_ref14) {
-                            return _ref14.onProps;
+                        childDecorate: function(_ref15) {
+                            return _ref15.onProps;
+                        }
+                    },
+                    getSiblings: {
+                        type: PROP_TYPE.FUNCTION,
+                        required: !1,
+                        sendToChild: !1,
+                        childDecorate: function(_ref16) {
+                            return _ref16.getSiblings;
                         }
                     }
                 }, props);
@@ -4753,7 +4780,25 @@
                     logger: logger,
                     eligible: eligible,
                     children: children,
-                    exports: xports
+                    exports: "function" == typeof xportsDefinition ? xportsDefinition : function(_ref) {
+                        var getExports = _ref.getExports;
+                        var result = {};
+                        var _loop = function(_i2, _Object$keys2) {
+                            var key = _Object$keys2[_i2];
+                            var type = xportsDefinition[key].type;
+                            var valuePromise = getExports().then((function(res) {
+                                return res[key];
+                            }));
+                            result[key] = type === PROP_TYPE.FUNCTION ? function() {
+                                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
+                                return valuePromise.then((function(value) {
+                                    return value.apply(void 0, args);
+                                }));
+                            } : valuePromise;
+                        };
+                        for (var _i2 = 0, _Object$keys2 = Object.keys(xportsDefinition); _i2 < _Object$keys2.length; _i2++) _loop(_i2, _Object$keys2);
+                        return result;
+                    }
                 };
             }(opts);
             var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef, eligible = options.eligible, children = options.children;
@@ -4771,12 +4816,13 @@
                         throw new Error("Can not register " + name + " as child - child already registered");
                     }
                     var child = function(options) {
-                        var propsDef = options.propsDef, autoResize = options.autoResize, allowedParentDomains = options.allowedParentDomains;
+                        var tag = options.tag, propsDef = options.propsDef, autoResize = options.autoResize, allowedParentDomains = options.allowedParentDomains;
                         var onPropHandlers = [];
                         var childPayload = getChildPayload();
                         var props;
+                        var exportsPromise = new promise_ZalgoPromise;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_76" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_76");
+                        if ("9_0_77" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_77");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4824,14 +4870,36 @@
                                 throw err;
                             }));
                         };
-                        var resize = function(_ref2) {
+                        var resize = function(_ref) {
                             return parent.resize.fireAndForget({
-                                width: _ref2.width,
-                                height: _ref2.height
+                                width: _ref.width,
+                                height: _ref.height
                             });
                         };
                         var xport = function(xports) {
+                            exportsPromise.resolve(xports);
                             return parent.export(xports);
+                        };
+                        var getSiblings = function(_temp) {
+                            var anyParent = (void 0 === _temp ? {} : _temp).anyParent;
+                            var result = [];
+                            var currentParent = props.parent;
+                            void 0 === anyParent && (anyParent = !currentParent);
+                            if (!anyParent && !currentParent) throw new Error("No parent found for " + tag + " child");
+                            for (var _i4 = 0, _getAllFramesInWindow4 = getAllFramesInWindow(window); _i4 < _getAllFramesInWindow4.length; _i4++) {
+                                var win = _getAllFramesInWindow4[_i4];
+                                if (isSameDomain(win)) {
+                                    var xprops = assertSameDomain(win).xprops;
+                                    if (xprops && getParent() === xprops.getParent()) {
+                                        var winParent = xprops.parent;
+                                        (anyParent || !currentParent || winParent && winParent.uid === currentParent.uid) && result.push({
+                                            props: xprops,
+                                            exports: lib_global_getGlobal(win).exports
+                                        });
+                                    }
+                                }
+                            }
+                            return result;
                         };
                         var setProps = function(newProps, origin, isUpdate) {
                             void 0 === isUpdate && (isUpdate = !1);
@@ -4853,12 +4921,14 @@
                                 }
                                 return result;
                             }(parentComponentWindow, propsDef, newProps, origin, {
+                                tag: tag,
                                 show: show,
                                 hide: hide,
                                 close: close,
                                 focus: child_focus,
                                 onError: onError,
                                 resize: resize,
+                                getSiblings: getSiblings,
                                 onProps: onProps,
                                 getParent: getParent,
                                 getParentDomain: getParentDomain,
@@ -4866,7 +4936,7 @@
                                 export: xport
                             }, isUpdate);
                             props ? extend(props, normalizedProps) : props = normalizedProps;
-                            for (var _i4 = 0; _i4 < onPropHandlers.length; _i4++) (0, onPropHandlers[_i4])(props);
+                            for (var _i6 = 0; _i6 < onPropHandlers.length; _i6++) (0, onPropHandlers[_i6])(props);
                         };
                         var updateProps = function(newProps) {
                             return promise_ZalgoPromise.try((function() {
@@ -4876,6 +4946,11 @@
                         return {
                             init: function() {
                                 return promise_ZalgoPromise.try((function() {
+                                    lib_global_getGlobal().exports = options.exports({
+                                        getExports: function() {
+                                            return exportsPromise;
+                                        }
+                                    });
                                     !function(allowedParentDomains, domain) {
                                         if (!matchDomain(allowedParentDomains, domain)) throw new Error("Can not be rendered by domain: " + domain);
                                     }(allowedParentDomains, parentDomain);
@@ -4923,13 +4998,12 @@
                             },
                             getProps: function() {
                                 if (props) return props;
-                                setProps(function(parentComponentWindow, domain, _ref) {
-                                    var type = _ref.type, uid = _ref.uid;
+                                setProps(function(parentComponentWindow, domain, propRef) {
                                     var props;
-                                    if ("raw" === type) props = _ref.value; else if ("uid" === type) {
+                                    if ("raw" === propRef.type) props = propRef.value; else if ("uid" === propRef.type) {
                                         if (!isSameDomain(parentComponentWindow)) throw new Error("Parent component window is on a different domain - expected " + getDomain() + " - can not retrieve props");
                                         var global = lib_global_getGlobal(parentComponentWindow);
-                                        props = assertExists("props", global && global.props[uid]);
+                                        props = assertExists("props", global && global.props[propRef.uid]);
                                     }
                                     if (!props) throw new Error("Could not find props");
                                     return setup_deserializeMessage(parentComponentWindow, domain, props);
@@ -4944,6 +5018,7 @@
             }));
             var init = function init(inputProps) {
                 var instance;
+                var uid = "zoid-" + tag + "-" + uniqueID();
                 var props = inputProps || {};
                 var _eligible = eligible({
                     props: props
@@ -4954,16 +5029,17 @@
                     if (onDestroy) return onDestroy.apply(void 0, arguments);
                 };
                 var parent = parentComponent({
+                    uid: uid,
                     options: options
                 });
                 parent.init();
                 eligibility ? parent.setProps(props) : props.onDestroy && props.onDestroy();
                 cleanInstances.register((function(err) {
-                    parent.destroy(err || new Error("zoid destroyed all components"));
+                    return parent.destroy(err || new Error("zoid destroyed all components"));
                 }));
                 var clone = function(_temp) {
-                    var _ref3$decorate = (void 0 === _temp ? {} : _temp).decorate;
-                    return init((void 0 === _ref3$decorate ? identity : _ref3$decorate)(props));
+                    var _ref4$decorate = (void 0 === _temp ? {} : _temp).decorate;
+                    return init((void 0 === _ref4$decorate ? identity : _ref4$decorate)(props));
                 };
                 var _render = function(target, container, context) {
                     return promise_ZalgoPromise.try((function() {
@@ -5013,19 +5089,22 @@
                 instance = _extends({}, parent.getExports(), parent.getHelpers(), function() {
                     var childComponents = children();
                     var result = {};
-                    var _loop = function(_i2, _Object$keys2) {
-                        var childName = _Object$keys2[_i2];
+                    var _loop2 = function(_i4, _Object$keys4) {
+                        var childName = _Object$keys4[_i4];
                         var Child = childComponents[childName];
                         result[childName] = function(childInputProps) {
-                            return Child(_extends({}, childInputProps, {
+                            var parentProps = parent.getProps();
+                            var childProps = _extends({}, childInputProps, {
                                 parent: {
-                                    props: parent.getProps(),
+                                    uid: uid,
+                                    props: parentProps,
                                     export: parent.export
                                 }
-                            }));
+                            });
+                            return Child(childProps);
                         };
                     };
-                    for (var _i2 = 0, _Object$keys2 = Object.keys(childComponents); _i2 < _Object$keys2.length; _i2++) _loop(_i2, _Object$keys2);
+                    for (var _i4 = 0, _Object$keys4 = Object.keys(childComponents); _i4 < _Object$keys4.length; _i4++) _loop2(_i4, _Object$keys4);
                     return result;
                 }(), {
                     isEligible: function() {
@@ -5047,12 +5126,14 @@
                 var allowDelegateListener = on_on("zoid_allow_delegate_" + name, (function() {
                     return !0;
                 }));
-                var delegateListener = on_on("zoid_delegate_" + name, (function(_ref) {
+                var delegateListener = on_on("zoid_delegate_" + name, (function(_ref2) {
+                    var _ref2$data = _ref2.data;
                     return {
                         parent: parentComponent({
+                            uid: _ref2$data.uid,
                             options: options,
-                            overrides: _ref.data.overrides,
-                            parentWin: _ref.source
+                            overrides: _ref2$data.overrides,
+                            parentWin: _ref2.source
                         })
                     };
                 }));
@@ -5079,8 +5160,8 @@
                 },
                 isChild: isChild,
                 canRenderTo: function(win) {
-                    return send_send(win, "zoid_allow_delegate_" + name).then((function(_ref2) {
-                        return _ref2.data;
+                    return send_send(win, "zoid_allow_delegate_" + name).then((function(_ref3) {
+                        return _ref3.data;
                     })).catch((function() {
                         return !1;
                     }));
@@ -5088,7 +5169,7 @@
                 registerChild: registerChild
             };
         }
-        function create(options) {
+        var component_create = function(options) {
             !function() {
                 if (!global_getGlobal().initialized) {
                     global_getGlobal().initialized = !0;
@@ -5182,7 +5263,7 @@
             var child = comp.registerChild();
             child && (window.xprops = init.xprops = child.getProps());
             return init;
-        }
+        };
         function destroyComponents(err) {
             src_bridge && src_bridge.destroyBridges();
             var destroyPromise = cleanInstances.all(err);
@@ -5192,7 +5273,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_76__;
+            delete window.__zoid_9_0_77__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
