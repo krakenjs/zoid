@@ -3052,10 +3052,14 @@
             }
         };
         function lib_global_getGlobal(win) {
-            void 0 === win && (win = window);
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_78__ || (win.__zoid_9_0_78__ = {});
-            return win.__zoid_9_0_78__;
+            win.__zoid_9_0_79__ || (win.__zoid_9_0_79__ = {});
+            return win.__zoid_9_0_79__;
+        }
+        function tryGlobal(win, handler) {
+            try {
+                return handler(lib_global_getGlobal(win));
+            } catch (err) {}
         }
         function getProxyObject(obj) {
             return {
@@ -4103,7 +4107,7 @@
                                         uid: uid,
                                         context: context,
                                         tag: tag,
-                                        version: "9_0_78",
+                                        version: "9_0_79",
                                         childDomain: childDomain,
                                         parentDomain: getDomain(window),
                                         parent: getWindowRef(0, childDomain, context),
@@ -4802,7 +4806,7 @@
                 };
             }(opts);
             var name = options.name, tag = options.tag, defaultContext = options.defaultContext, propsDef = options.propsDef, eligible = options.eligible, children = options.children;
-            var global = lib_global_getGlobal();
+            var global = lib_global_getGlobal(window);
             var driverCache = {};
             var instances = [];
             var isChild = function() {
@@ -4822,7 +4826,7 @@
                         var props;
                         var exportsPromise = new promise_ZalgoPromise;
                         if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_78" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_78");
+                        if ("9_0_79" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_79");
                         var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
                         var parentComponentWindow = function(ref) {
                             var type = ref.type;
@@ -4840,16 +4844,23 @@
                                 }(win, getDistanceFromTop(win) - n);
                             }(window, ref.distance));
                             if ("global" === type && ref.uid && "string" == typeof ref.uid) {
-                                var uid = ref.uid;
-                                var ancestor = getAncestor(window);
-                                if (!ancestor) throw new Error("Can not find ancestor window");
-                                for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
-                                    var frame = _getAllFramesInWindow2[_i2];
-                                    if (isSameDomain(frame)) {
-                                        var global = lib_global_getGlobal(frame);
-                                        if (global && global.windows && global.windows[uid]) return global.windows[uid];
+                                var _ret = function() {
+                                    var uid = ref.uid;
+                                    var ancestor = getAncestor(window);
+                                    if (!ancestor) throw new Error("Can not find ancestor window");
+                                    for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
+                                        var frame = _getAllFramesInWindow2[_i2];
+                                        if (isSameDomain(frame)) {
+                                            var win = tryGlobal(frame, (function(global) {
+                                                return global.windows && global.windows[uid];
+                                            }));
+                                            if (win) return {
+                                                v: win
+                                            };
+                                        }
                                     }
-                                }
+                                }();
+                                if ("object" == typeof _ret) return _ret.v;
                             }
                             throw new Error("Unable to find " + type + " parent component window");
                         }(childPayload.parent);
@@ -4892,10 +4903,15 @@
                                     var xprops = assertSameDomain(win).xprops;
                                     if (xprops && getParent() === xprops.getParent()) {
                                         var winParent = xprops.parent;
-                                        (anyParent || !currentParent || winParent && winParent.uid === currentParent.uid) && result.push({
-                                            props: xprops,
-                                            exports: lib_global_getGlobal(win).exports
-                                        });
+                                        if (anyParent || !currentParent || winParent && winParent.uid === currentParent.uid) {
+                                            var xports = tryGlobal(win, (function(global) {
+                                                return global.exports;
+                                            }));
+                                            result.push({
+                                                props: xprops,
+                                                exports: xports
+                                            });
+                                        }
                                     }
                                 }
                             }
@@ -4946,7 +4962,7 @@
                         return {
                             init: function() {
                                 return promise_ZalgoPromise.try((function() {
-                                    lib_global_getGlobal().exports = options.exports({
+                                    lib_global_getGlobal(window).exports = options.exports({
                                         getExports: function() {
                                             return exportsPromise;
                                         }
@@ -5273,7 +5289,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_78__;
+            delete window.__zoid_9_0_79__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
