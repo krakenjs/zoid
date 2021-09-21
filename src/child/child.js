@@ -8,7 +8,7 @@ import { markWindowKnown, deserializeMessage, type CrossDomainFunctionType } fro
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onResize, elementReady, assertExists, noop } from 'belter/src';
 
-import { getGlobal } from '../lib';
+import { getGlobal, tryGlobal } from '../lib';
 import { CONTEXT, INITIAL_PROPS, WINDOW_REFERENCES } from '../constants';
 import type { NormalizedComponentOptionsType, getSiblingsPropType } from '../component';
 import type { PropsType, ChildPropsType } from '../component/props';
@@ -58,10 +58,10 @@ function getParentComponentWindow(ref : WindowRef) : CrossDomainWindowType {
 
         for (const frame of getAllFramesInWindow(ancestor)) {
             if (isSameDomain(frame)) {
-                const global = getGlobal(frame);
+                const win = tryGlobal(frame, global => global.windows && global.windows[uid]);
 
-                if (global && global.windows && global.windows[uid]) {
-                    return global.windows[uid];
+                if (win) {
+                    return win;
                 }
             }
         }
@@ -193,9 +193,11 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
                 }
             }
 
+            const xports = tryGlobal(win, global => global.exports);
+
             result.push({
                 props:   xprops,
-                exports: getGlobal(win).exports
+                exports: xports
             });
         }
 
@@ -266,7 +268,7 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
 
     const init = () => {
         return ZalgoPromise.try(() => {
-            getGlobal().exports = options.exports({
+            getGlobal(window).exports = options.exports({
                 getExports: () => exportsPromise
             });
 

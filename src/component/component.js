@@ -282,7 +282,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         children
     } = options;
 
-    const global = getGlobal();
+    const global = getGlobal(window);
     const driverCache = {};
     const instances = [];
 

@@ -11,7 +11,7 @@ export function getGlobalKey() : string {
     }
 }
 
-export function getGlobal(win? : CrossDomainWindowType = window) : Object {
+export function getGlobal<T>(win : CrossDomainWindowType) : T {
     const globalKey = getGlobalKey();
 
     if (!isSameDomain(win)) {
@@ -23,6 +23,14 @@ export function getGlobal(win? : CrossDomainWindowType = window) : Object {
     }
 
     return win[globalKey];
+}
+
+export function tryGlobal<T, R>(win : CrossDomainWindowType, handler : (T) => R) : ?R {
+    try {
+        return handler(getGlobal(win));
+    } catch (err) {
+        // pass
+    }
 }
 
 export function destroyGlobal() {
