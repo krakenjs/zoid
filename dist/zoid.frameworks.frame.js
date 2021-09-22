@@ -628,6 +628,21 @@
             }
             return !1;
         }
+        function getFrameByName(win, name) {
+            var winFrames = getFrames(win);
+            for (var _i9 = 0; _i9 < winFrames.length; _i9++) {
+                var childFrame = winFrames[_i9];
+                try {
+                    if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
+                } catch (err) {}
+            }
+            try {
+                if (-1 !== winFrames.indexOf(win.frames[name])) return win.frames[name];
+            } catch (err) {}
+            try {
+                if (-1 !== winFrames.indexOf(win[name])) return win[name];
+            } catch (err) {}
+        }
         function getAncestor(win) {
             void 0 === win && (win = window);
             return getOpener(win = win || window) || utils_getParent(win) || void 0;
@@ -1048,12 +1063,6 @@
             };
             return setFunctionName(memoizedPromiseFunction, getFunctionName(method) + "::promiseMemoized");
         }
-        function inlineMemoize(method, logic, args) {
-            void 0 === args && (args = []);
-            var cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {};
-            var key = serializeArgs(args);
-            return cache.hasOwnProperty(key) ? cache[key] : cache[key] = logic.apply(void 0, args);
-        }
         function src_util_noop() {}
         function once(method) {
             var called = !1;
@@ -1278,16 +1287,21 @@
             }));
         }));
         function parseQuery(queryString) {
-            return inlineMemoize(parseQuery, (function() {
-                var params = {};
-                if (!queryString) return params;
-                if (-1 === queryString.indexOf("=")) return params;
-                for (var _i2 = 0, _queryString$split2 = queryString.split("&"); _i2 < _queryString$split2.length; _i2++) {
-                    var pair = _queryString$split2[_i2];
-                    (pair = pair.split("="))[0] && pair[1] && (params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]));
-                }
-                return params;
-            }), [ queryString ]);
+            return function(method, logic, args) {
+                void 0 === args && (args = []);
+                var cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {};
+                var key = serializeArgs(args);
+                return cache.hasOwnProperty(key) ? cache[key] : cache[key] = function() {
+                    var params = {};
+                    if (!queryString) return params;
+                    if (-1 === queryString.indexOf("=")) return params;
+                    for (var _i2 = 0, _queryString$split2 = queryString.split("&"); _i2 < _queryString$split2.length; _i2++) {
+                        var pair = _queryString$split2[_i2];
+                        (pair = pair.split("="))[0] && pair[1] && (params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]));
+                    }
+                    return params;
+                }.apply(void 0, args);
+            }(parseQuery, 0, [ queryString ]);
         }
         function extendQuery(originalQuery, props) {
             void 0 === props && (props = {});
@@ -2655,18 +2669,6 @@
                 }));
             }));
         };
-        function setup_serializeMessage(destination, domain, obj) {
-            return serializeMessage(destination, domain, obj, {
-                on: on_on,
-                send: send_send
-            });
-        }
-        function setup_deserializeMessage(source, origin, message) {
-            return deserializeMessage(source, origin, message, {
-                on: on_on,
-                send: send_send
-            });
-        }
         function setup_toProxyWindow(win) {
             return window_ProxyWindow.toProxyWindow(win, {
                 send: send_send
@@ -2674,8 +2676,8 @@
         }
         function lib_global_getGlobal(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_79__ || (win.__zoid_9_0_79__ = {});
-            return win.__zoid_9_0_79__;
+            win.__zoid_9_0_80__ || (win.__zoid_9_0_80__ = {});
+            return win.__zoid_9_0_80__;
         }
         function tryGlobal(win, handler) {
             try {
@@ -2691,6 +2693,86 @@
                         return obj;
                     }));
                 }
+            };
+        }
+        function basicSerialize(data) {
+            return base64encode(JSON.stringify(data));
+        }
+        function getUIDRefStore(win) {
+            var global = lib_global_getGlobal(win);
+            global.references = global.references || {};
+            return global.references;
+        }
+        function crossDomainSerialize(_ref) {
+            var data = _ref.data, metaData = _ref.metaData, sender = _ref.sender, receiver = _ref.receiver, _ref$passByReference = _ref.passByReference, passByReference = void 0 !== _ref$passByReference && _ref$passByReference, _ref$basic = _ref.basic, basic = void 0 !== _ref$basic && _ref$basic;
+            var proxyWin = setup_toProxyWindow(receiver.win);
+            var serializedMessage = basic ? JSON.stringify(data) : serializeMessage(proxyWin, receiver.domain, data, {
+                on: on_on,
+                send: send_send
+            });
+            var reference = passByReference ? function(val) {
+                var uid = uniqueID();
+                getUIDRefStore(window)[uid] = val;
+                return {
+                    type: "uid",
+                    uid: uid
+                };
+            }(serializedMessage) : {
+                type: "raw",
+                val: serializedMessage
+            };
+            return {
+                serializedData: basicSerialize({
+                    sender: {
+                        domain: sender.domain
+                    },
+                    metaData: metaData,
+                    reference: reference
+                }),
+                cleanReference: function() {
+                    win = window, "uid" === (ref = reference).type && delete getUIDRefStore(win)[ref.uid];
+                    var win, ref;
+                }
+            };
+        }
+        function crossDomainDeserialize(_ref2) {
+            var sender = _ref2.sender, _ref2$basic = _ref2.basic, basic = void 0 !== _ref2$basic && _ref2$basic;
+            var message = function(serializedData) {
+                return JSON.parse(function(str) {
+                    if ("function" == typeof atob) return decodeURIComponent([].map.call(atob(str), (function(c) {
+                        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                    })).join(""));
+                    if ("undefined" != typeof Buffer) return Buffer.from(str, "base64").toString("utf8");
+                    throw new Error("Can not find window.atob or Buffer");
+                }(serializedData));
+            }(_ref2.data);
+            var reference = message.reference, metaData = message.metaData;
+            var win;
+            win = "function" == typeof sender.win ? sender.win({
+                metaData: metaData
+            }) : sender.win;
+            var domain;
+            domain = "function" == typeof sender.domain ? sender.domain({
+                metaData: metaData
+            }) : "string" == typeof sender.domain ? sender.domain : message.sender.domain;
+            var serializedData = function(win, ref) {
+                if ("raw" === ref.type) return ref.val;
+                if ("uid" === ref.type) return getUIDRefStore(win)[ref.uid];
+                throw new Error("Unsupported ref type: " + ref.type);
+            }(win, reference);
+            return {
+                data: basic ? JSON.parse(serializedData) : function(source, origin, message) {
+                    return deserializeMessage(source, origin, message, {
+                        on: on_on,
+                        send: send_send
+                    });
+                }(win, domain, serializedData),
+                metaData: metaData,
+                sender: {
+                    win: win,
+                    domain: domain
+                },
+                reference: reference
             };
         }
         var PROP_TYPE = {
@@ -2718,6 +2800,81 @@
             RESIZE: "zoid-resize",
             FOCUS: "zoid-focus"
         };
+        function buildChildWindowName(_ref) {
+            return "__zoid__" + _ref.name + "__" + _ref.serializedPayload + "__";
+        }
+        function getSerializedInitialPayload(windowName) {
+            if (!windowName) throw new Error("No window name");
+            var _windowName$split = windowName.split("__"), zoidcomp = _windowName$split[1], name = _windowName$split[2], serializedInitialPayload = _windowName$split[3];
+            if ("zoid" !== zoidcomp) throw new Error("Window not rendered by zoid - got " + zoidcomp);
+            if (!name) throw new Error("Expected component name");
+            if (!serializedInitialPayload) throw new Error("Expected serialized payload ref");
+            return serializedInitialPayload;
+        }
+        var parseInitialParentPayload = memoize((function(windowName) {
+            var _crossDomainDeseriali = crossDomainDeserialize({
+                data: getSerializedInitialPayload(windowName),
+                sender: {
+                    win: function(_ref2) {
+                        return function(windowRef) {
+                            if ("opener" === windowRef.type) return assertExists("opener", getOpener(window));
+                            if ("parent" === windowRef.type && "number" == typeof windowRef.distance) return assertExists("parent", function(win, n) {
+                                void 0 === n && (n = 1);
+                                return function(win, n) {
+                                    void 0 === n && (n = 1);
+                                    var parent = win;
+                                    for (var i = 0; i < n; i++) {
+                                        if (!parent) return;
+                                        parent = utils_getParent(parent);
+                                    }
+                                    return parent;
+                                }(win, getDistanceFromTop(win) - n);
+                            }(window, windowRef.distance));
+                            if ("global" === windowRef.type && windowRef.uid && "string" == typeof windowRef.uid) {
+                                var _ret = function() {
+                                    var uid = windowRef.uid;
+                                    var ancestor = getAncestor(window);
+                                    if (!ancestor) throw new Error("Can not find ancestor window");
+                                    for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
+                                        var frame = _getAllFramesInWindow2[_i2];
+                                        if (isSameDomain(frame)) {
+                                            var win = tryGlobal(frame, (function(global) {
+                                                return global.windows && global.windows[uid];
+                                            }));
+                                            if (win) return {
+                                                v: win
+                                            };
+                                        }
+                                    }
+                                }();
+                                if ("object" == typeof _ret) return _ret.v;
+                            } else if ("name" === windowRef.type) {
+                                var name = windowRef.name;
+                                return assertExists("namedWindow", function(win, name) {
+                                    return getFrameByName(win, name) || function findChildFrameByName(win, name) {
+                                        var frame = getFrameByName(win, name);
+                                        if (frame) return frame;
+                                        for (var _i11 = 0, _getFrames4 = getFrames(win); _i11 < _getFrames4.length; _i11++) {
+                                            var namedFrame = findChildFrameByName(_getFrames4[_i11], name);
+                                            if (namedFrame) return namedFrame;
+                                        }
+                                    }(getTop(win) || win, name);
+                                }(assertExists("ancestor", getAncestor(window)), name));
+                            }
+                            throw new Error("Unable to find " + windowRef.type + " parent component window");
+                        }(_ref2.metaData.windowRef);
+                    }
+                }
+            });
+            return {
+                parent: _crossDomainDeseriali.sender,
+                payload: _crossDomainDeseriali.data,
+                reference: _crossDomainDeseriali.reference
+            };
+        }));
+        function getInitialParentPayload() {
+            return parseInitialParentPayload(window.name);
+        }
         function normalizeChildProp(propsDef, props, key, value, helpers) {
             if (!propsDef.hasOwnProperty(key)) return value;
             var prop = propsDef[key];
@@ -2737,31 +2894,6 @@
                 export: helpers.export,
                 getSiblings: helpers.getSiblings
             }) : value;
-        }
-        function parseChildWindowName(windowName) {
-            return inlineMemoize(parseChildWindowName, (function() {
-                if (!windowName) throw new Error("No window name");
-                var _windowName$split = windowName.split("__"), zoidcomp = _windowName$split[1], name = _windowName$split[2], encodedPayload = _windowName$split[3];
-                if ("zoid" !== zoidcomp) throw new Error("Window not rendered by zoid - got " + zoidcomp);
-                if (!name) throw new Error("Expected component name");
-                if (!encodedPayload) throw new Error("Expected encoded payload");
-                try {
-                    return JSON.parse(function(str) {
-                        if ("function" == typeof atob) return decodeURIComponent([].map.call(atob(str), (function(c) {
-                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-                        })).join(""));
-                        if ("undefined" != typeof Buffer) return Buffer.from(str, "base64").toString("utf8");
-                        throw new Error("Can not find window.atob or Buffer");
-                    }(encodedPayload));
-                } catch (err) {
-                    throw new Error("Can not decode window name payload: " + encodedPayload + ": " + stringifyError(err));
-                }
-            }), [ windowName ]);
-        }
-        function getChildPayload() {
-            try {
-                return parseChildWindowName(window.name);
-            } catch (err) {}
         }
         function child_focus() {
             return promise_ZalgoPromise.try((function() {
@@ -2905,6 +3037,7 @@
             var currentProxyWin;
             var currentProxyContainer;
             var childComponent;
+            var currentChildDomain;
             var onErrorOverride = overrides.onError;
             var getProxyContainerOverride = overrides.getProxyContainer;
             var showOverride = overrides.show;
@@ -2931,12 +3064,12 @@
                     return overrides.rejectInitPromise ? overrides.rejectInitPromise(err) : initPromise.reject(err);
                 }));
             };
-            var getPropsForChild = function(domain) {
+            var getPropsForChild = function(initialChildDomain) {
                 var result = {};
                 for (var _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
                     var key = _Object$keys2[_i2];
                     var prop = propsDef[key];
-                    prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(domain, getDomain(window)) || (result[key] = props[key]);
+                    prop && !1 === prop.sendToChild || prop && prop.sameDomain && !matchDomain(initialChildDomain, getDomain(window)) || (result[key] = props[key]);
                 }
                 return promise_ZalgoPromise.hash(result);
             };
@@ -3021,11 +3154,8 @@
                     props: props
                 }) : attributes;
             };
-            var getChildDomain = function() {
-                return domainMatch && "string" == typeof domainMatch ? domainMatch : getDomainFromUrl(getUrl());
-            };
-            var getDomainMatcher = function() {
-                return domainMatch && util_isRegex(domainMatch) ? domainMatch : getChildDomain();
+            var getInitialChildDomain = function() {
+                return getDomainFromUrl(getUrl());
             };
             var openFrame = function(context, _ref2) {
                 var windowName = _ref2.windowName;
@@ -3073,28 +3203,38 @@
                     if (currentProxyWin) return promise_ZalgoPromise.all([ event.trigger(EVENT.FOCUS), currentProxyWin.focus() ]).then(src_util_noop);
                 }));
             };
-            var getWindowRef = function(target, domain, context) {
-                if (domain === getDomain(window)) {
-                    var global = lib_global_getGlobal(window);
-                    global.windows = global.windows || {};
-                    global.windows[uid] = window;
-                    clean.register((function() {
-                        delete global.windows[uid];
-                    }));
-                    return {
-                        type: "global",
-                        uid: uid
-                    };
+            var getCurrentWindowReferenceUID = function() {
+                var global = lib_global_getGlobal(window);
+                global.windows = global.windows || {};
+                global.windows[uid] = window;
+                clean.register((function() {
+                    delete global.windows[uid];
+                }));
+                return uid;
+            };
+            var getWindowRef = function(target, initialChildDomain, context, proxyWin) {
+                if (initialChildDomain === getDomain(window)) return {
+                    type: "global",
+                    uid: getCurrentWindowReferenceUID()
+                };
+                if (target !== window) throw new Error("Can not construct cross-domain window reference for different target window");
+                if (props.window) {
+                    var actualComponentWindow = proxyWin.getWindow();
+                    if (!actualComponentWindow) throw new Error("Can not construct cross-domain window reference for lazy window prop");
+                    if (getAncestor(actualComponentWindow) !== window) throw new Error("Can not construct cross-domain window reference for window prop with different ancestor");
                 }
-                return context === CONTEXT.POPUP ? {
+                if (context === CONTEXT.POPUP) return {
                     type: "opener"
-                } : {
+                };
+                if (context === CONTEXT.IFRAME) return {
                     type: "parent",
                     distance: getDistanceFromTop(window)
                 };
+                throw new Error("Can not construct window reference for child");
             };
-            var initChild = function(childExports) {
+            var initChild = function(childDomain, childExports) {
                 return promise_ZalgoPromise.try((function() {
+                    currentChildDomain = childDomain;
                     childComponent = childExports;
                     resolveInitPromise();
                     clean.register((function() {
@@ -3212,14 +3352,14 @@
                 }));
             };
             initChild.onError = onError;
-            var renderTemplate = function(renderer, _ref7) {
+            var renderTemplate = function(renderer, _ref8) {
                 return renderer({
                     uid: uid,
-                    container: _ref7.container,
-                    context: _ref7.context,
-                    doc: _ref7.doc,
-                    frame: _ref7.frame,
-                    prerenderFrame: _ref7.prerenderFrame,
+                    container: _ref8.container,
+                    context: _ref8.context,
+                    doc: _ref8.doc,
+                    frame: _ref8.frame,
+                    prerenderFrame: _ref8.prerenderFrame,
                     focus: focus,
                     close: close,
                     state: state,
@@ -3231,8 +3371,8 @@
                     event: event
                 });
             };
-            var prerender = function(proxyPrerenderWin, _ref8) {
-                var context = _ref8.context;
+            var prerender = function(proxyPrerenderWin, _ref9) {
+                var context = _ref9.context;
                 return prerenderOverride ? prerenderOverride(proxyPrerenderWin, {
                     context: context
                 }) : promise_ZalgoPromise.try((function() {
@@ -3261,10 +3401,10 @@
                                 }(prerenderWindow, el);
                                 var _autoResize$width = autoResize.width, width = void 0 !== _autoResize$width && _autoResize$width, _autoResize$height = autoResize.height, height = void 0 !== _autoResize$height && _autoResize$height, _autoResize$element = autoResize.element, element = void 0 === _autoResize$element ? "body" : _autoResize$element;
                                 if ((element = getElementSafe(element, doc)) && (width || height)) {
-                                    var prerenderResizeListener = onResize(element, (function(_ref9) {
+                                    var prerenderResizeListener = onResize(element, (function(_ref10) {
                                         resize({
-                                            width: width ? _ref9.width : void 0,
-                                            height: height ? _ref9.height : void 0
+                                            width: width ? _ref10.width : void 0,
+                                            height: height ? _ref10.height : void 0
                                         });
                                     }), {
                                         width: width,
@@ -3278,8 +3418,8 @@
                     }
                 }));
             };
-            var renderContainer = function(proxyContainer, _ref10) {
-                var proxyFrame = _ref10.proxyFrame, proxyPrerenderFrame = _ref10.proxyPrerenderFrame, context = _ref10.context, rerender = _ref10.rerender;
+            var renderContainer = function(proxyContainer, _ref11) {
+                var proxyFrame = _ref11.proxyFrame, proxyPrerenderFrame = _ref11.proxyPrerenderFrame, context = _ref11.context, rerender = _ref11.rerender;
                 return renderContainerOverride ? renderContainerOverride(proxyContainer, {
                     proxyFrame: proxyFrame,
                     proxyPrerenderFrame: proxyPrerenderFrame,
@@ -3290,13 +3430,13 @@
                     frame: proxyFrame ? proxyFrame.get() : null,
                     prerenderFrame: proxyPrerenderFrame ? proxyPrerenderFrame.get() : null,
                     internalState: getInternalState()
-                }).then((function(_ref11) {
-                    var container = _ref11.container, visible = _ref11.internalState.visible;
+                }).then((function(_ref12) {
+                    var container = _ref12.container, visible = _ref12.internalState.visible;
                     var innerContainer = renderTemplate(containerTemplate, {
                         context: context,
                         container: container,
-                        frame: _ref11.frame,
-                        prerenderFrame: _ref11.prerenderFrame,
+                        frame: _ref12.frame,
+                        prerenderFrame: _ref12.prerenderFrame,
                         doc: document
                     });
                     if (innerContainer) {
@@ -3455,7 +3595,7 @@
                 return initPromise.then((function() {
                     var child = childComponent;
                     var proxyWin = currentProxyWin;
-                    if (child && proxyWin) return getPropsForChild(getDomainMatcher()).then((function(childProps) {
+                    if (child && proxyWin && currentChildDomain) return getPropsForChild(currentChildDomain).then((function(childProps) {
                         return child.updateProps(childProps).catch((function(err) {
                             return checkWindowClose(proxyWin).then((function(closed) {
                                 if (!closed) throw err;
@@ -3501,19 +3641,19 @@
                         clean.register(event.reset);
                     }();
                 },
-                render: function(_ref13) {
-                    var target = _ref13.target, container = _ref13.container, context = _ref13.context, rerender = _ref13.rerender;
+                render: function(_ref14) {
+                    var target = _ref14.target, container = _ref14.container, context = _ref14.context, rerender = _ref14.rerender;
                     return promise_ZalgoPromise.try((function() {
-                        var domain = getDomainMatcher();
-                        var childDomain = getChildDomain();
-                        !function(target, domain, container) {
+                        var initialChildDomain = getInitialChildDomain();
+                        var childDomainMatch = domainMatch || getInitialChildDomain();
+                        !function(target, childDomainMatch, container) {
                             if (target !== window) {
                                 if (!isSameTopWindow(window, target)) throw new Error("Can only renderTo an adjacent frame");
                                 var origin = getDomain();
-                                if (!matchDomain(domain, origin) && !isSameDomain(target)) throw new Error("Can not render remotely to " + domain.toString() + " - can only render to " + origin);
+                                if (!matchDomain(childDomainMatch, origin) && !isSameDomain(target)) throw new Error("Can not render remotely to " + childDomainMatch.toString() + " - can only render to " + origin);
                                 if (container && "string" != typeof container) throw new Error("Container passed to renderTo must be a string selector, got " + typeof container + " }");
                             }
-                        }(target, domain, container);
+                        }(target, childDomainMatch, container);
                         var delegatePromise = promise_ZalgoPromise.try((function() {
                             if (target !== window) return function(context, target) {
                                 var delegateProps = {};
@@ -3534,8 +3674,8 @@
                                         resolveInitPromise: resolveInitPromise,
                                         rejectInitPromise: rejectInitPromise
                                     }
-                                }).then((function(_ref12) {
-                                    var parentComp = _ref12.data.parent;
+                                }).then((function(_ref13) {
+                                    var parentComp = _ref13.data.parent;
                                     clean.register((function(err) {
                                         if (!isWindowClosed(target)) return parentComp.destroy(err);
                                     }));
@@ -3644,70 +3784,77 @@
                         var getProxyContainerPromise = getProxyContainer(container);
                         var getProxyWindowPromise = getProxyWindow();
                         var buildWindowNamePromise = getProxyWindowPromise.then((function(proxyWin) {
-                            return function(_temp) {
-                                var _ref5 = void 0 === _temp ? {} : _temp, proxyWin = _ref5.proxyWin, childDomain = _ref5.childDomain, domain = _ref5.domain, context = (void 0 === _ref5.target && window, 
-                                _ref5.context);
-                                return function(proxyWin, childDomain, domain) {
-                                    return getPropsForChild(domain).then((function(childProps) {
-                                        var value = setup_serializeMessage(proxyWin, domain, childProps);
-                                        var propRef = childDomain === getDomain() ? {
-                                            type: "uid",
-                                            uid: uid
-                                        } : {
-                                            type: "raw",
-                                            value: value
+                            return function(_temp2) {
+                                var _ref6 = void 0 === _temp2 ? {} : _temp2, proxyWin = _ref6.proxyWin, initialChildDomain = _ref6.initialChildDomain, childDomainMatch = _ref6.childDomainMatch, _ref6$target = _ref6.target, target = void 0 === _ref6$target ? window : _ref6$target, context = _ref6.context;
+                                return function(_temp) {
+                                    var _ref5 = void 0 === _temp ? {} : _temp, proxyWin = _ref5.proxyWin, childDomainMatch = _ref5.childDomainMatch, context = _ref5.context;
+                                    return getPropsForChild(_ref5.initialChildDomain).then((function(childProps) {
+                                        return {
+                                            uid: uid,
+                                            context: context,
+                                            tag: tag,
+                                            childDomainMatch: childDomainMatch,
+                                            version: "9_0_80",
+                                            props: childProps,
+                                            exports: (win = proxyWin, {
+                                                init: function(childExports) {
+                                                    return initChild(this.origin, childExports);
+                                                },
+                                                close: close,
+                                                checkClose: function() {
+                                                    return checkWindowClose(win);
+                                                },
+                                                resize: resize,
+                                                onError: onError,
+                                                show: show,
+                                                hide: hide,
+                                                export: xport
+                                            })
                                         };
-                                        if ("uid" === propRef.type) {
-                                            var global = lib_global_getGlobal(window);
-                                            global.props = global.props || {};
-                                            global.props[uid] = value;
-                                            clean.register((function() {
-                                                delete global.props[uid];
-                                            }));
-                                        }
-                                        return propRef;
+                                        var win;
                                     }));
-                                }(proxyWin, childDomain, domain).then((function(propsRef) {
-                                    return {
-                                        uid: uid,
-                                        context: context,
-                                        tag: tag,
-                                        version: "9_0_79",
-                                        childDomain: childDomain,
-                                        parentDomain: getDomain(window),
-                                        parent: getWindowRef(0, childDomain, context),
-                                        props: propsRef,
-                                        exports: setup_serializeMessage(proxyWin, domain, (win = proxyWin, {
-                                            init: initChild,
-                                            close: close,
-                                            checkClose: function() {
-                                                return checkWindowClose(win);
-                                            },
-                                            resize: resize,
-                                            onError: onError,
-                                            show: show,
-                                            hide: hide,
-                                            export: xport
-                                        }))
-                                    };
-                                    var win;
+                                }({
+                                    proxyWin: proxyWin,
+                                    initialChildDomain: initialChildDomain,
+                                    childDomainMatch: childDomainMatch,
+                                    context: context
+                                }).then((function(childPayload) {
+                                    var _crossDomainSerialize = crossDomainSerialize({
+                                        data: childPayload,
+                                        metaData: {
+                                            windowRef: getWindowRef(target, initialChildDomain, context, proxyWin)
+                                        },
+                                        sender: {
+                                            domain: getDomain(window)
+                                        },
+                                        receiver: {
+                                            win: proxyWin,
+                                            domain: childDomainMatch
+                                        },
+                                        passByReference: initialChildDomain === getDomain()
+                                    }), serializedData = _crossDomainSerialize.serializedData;
+                                    clean.register(_crossDomainSerialize.cleanReference);
+                                    return serializedData;
                                 }));
                             }({
-                                proxyWin: (_ref6 = {
+                                proxyWin: (_ref7 = {
                                     proxyWin: proxyWin,
-                                    childDomain: childDomain,
-                                    domain: domain,
+                                    initialChildDomain: initialChildDomain,
+                                    childDomainMatch: childDomainMatch,
                                     target: target,
                                     context: context
                                 }).proxyWin,
-                                childDomain: _ref6.childDomain,
-                                domain: _ref6.domain,
-                                target: _ref6.target,
-                                context: _ref6.context
-                            }).then((function(childPayload) {
-                                return "__zoid__" + name + "__" + base64encode(JSON.stringify(childPayload)) + "__";
+                                initialChildDomain: _ref7.initialChildDomain,
+                                childDomainMatch: _ref7.childDomainMatch,
+                                target: _ref7.target,
+                                context: _ref7.context
+                            }).then((function(serializedPayload) {
+                                return buildChildWindowName({
+                                    name: name,
+                                    serializedPayload: serializedPayload
+                                });
                             }));
-                            var _ref6;
+                            var _ref7;
                         }));
                         var openFramePromise = buildWindowNamePromise.then((function(windowName) {
                             return openFrame(context, {
@@ -3719,11 +3866,11 @@
                             proxyContainer: getProxyContainerPromise,
                             proxyFrame: openFramePromise,
                             proxyPrerenderFrame: openPrerenderFramePromise
-                        }).then((function(_ref14) {
-                            return renderContainer(_ref14.proxyContainer, {
+                        }).then((function(_ref15) {
+                            return renderContainer(_ref15.proxyContainer, {
                                 context: context,
-                                proxyFrame: _ref14.proxyFrame,
-                                proxyPrerenderFrame: _ref14.proxyPrerenderFrame,
+                                proxyFrame: _ref15.proxyFrame,
+                                proxyPrerenderFrame: _ref15.proxyPrerenderFrame,
                                 rerender: rerender
                             });
                         })).then((function(proxyContainer) {
@@ -3733,19 +3880,19 @@
                             windowName: buildWindowNamePromise,
                             proxyFrame: openFramePromise,
                             proxyWin: getProxyWindowPromise
-                        }).then((function(_ref15) {
-                            var proxyWin = _ref15.proxyWin;
+                        }).then((function(_ref16) {
+                            var proxyWin = _ref16.proxyWin;
                             return windowProp ? proxyWin : open(context, {
-                                windowName: _ref15.windowName,
+                                windowName: _ref16.windowName,
                                 proxyWin: proxyWin,
-                                proxyFrame: _ref15.proxyFrame
+                                proxyFrame: _ref16.proxyFrame
                             });
                         }));
                         var openPrerenderPromise = promise_ZalgoPromise.hash({
                             proxyWin: openPromise,
                             proxyPrerenderFrame: openPrerenderFramePromise
-                        }).then((function(_ref16) {
-                            return openPrerender(context, _ref16.proxyWin, _ref16.proxyPrerenderFrame);
+                        }).then((function(_ref17) {
+                            return openPrerender(context, _ref17.proxyWin, _ref17.proxyPrerenderFrame);
                         }));
                         var setStatePromise = openPromise.then((function(proxyWin) {
                             currentProxyWin = proxyWin;
@@ -3754,21 +3901,21 @@
                         var prerenderPromise = promise_ZalgoPromise.hash({
                             proxyPrerenderWin: openPrerenderPromise,
                             state: setStatePromise
-                        }).then((function(_ref17) {
-                            return prerender(_ref17.proxyPrerenderWin, {
+                        }).then((function(_ref18) {
+                            return prerender(_ref18.proxyPrerenderWin, {
                                 context: context
                             });
                         }));
                         var setWindowNamePromise = promise_ZalgoPromise.hash({
                             proxyWin: openPromise,
                             windowName: buildWindowNamePromise
-                        }).then((function(_ref18) {
-                            if (windowProp) return _ref18.proxyWin.setName(_ref18.windowName);
+                        }).then((function(_ref19) {
+                            if (windowProp) return _ref19.proxyWin.setName(_ref19.windowName);
                         }));
                         var getMethodPromise = promise_ZalgoPromise.hash({
                             body: buildBodyPromise
-                        }).then((function(_ref19) {
-                            return options.method ? options.method : Object.keys(_ref19.body).length ? "post" : "get";
+                        }).then((function(_ref20) {
+                            return options.method ? options.method : Object.keys(_ref20.body).length ? "post" : "get";
                         }));
                         var loadUrlPromise = promise_ZalgoPromise.hash({
                             proxyWin: openPromise,
@@ -3777,10 +3924,10 @@
                             method: getMethodPromise,
                             windowName: setWindowNamePromise,
                             prerender: prerenderPromise
-                        }).then((function(_ref20) {
-                            return _ref20.proxyWin.setLocation(_ref20.windowUrl, {
-                                method: _ref20.method,
-                                body: _ref20.body
+                        }).then((function(_ref21) {
+                            return _ref21.proxyWin.setLocation(_ref21.windowUrl, {
+                                method: _ref21.method,
+                                body: _ref21.body
                             });
                         }));
                         var watchForClosePromise = openPromise.then((function(proxyWin) {
@@ -4356,8 +4503,16 @@
             var driverCache = {};
             var instances = [];
             var isChild = function() {
-                var payload = getChildPayload();
-                return Boolean(payload && payload.tag === tag && payload.childDomain === getDomain());
+                if (function() {
+                    try {
+                        if (getInitialParentPayload()) return !0;
+                    } catch (err) {}
+                    return !1;
+                }()) {
+                    var _payload = getInitialParentPayload().payload;
+                    if (_payload.tag === tag && matchDomain(_payload.childDomainMatch, getDomain())) return !0;
+                }
+                return !1;
             };
             var registerChild = memoize((function() {
                 if (isChild()) {
@@ -4368,50 +4523,13 @@
                     var child = function(options) {
                         var tag = options.tag, propsDef = options.propsDef, autoResize = options.autoResize, allowedParentDomains = options.allowedParentDomains;
                         var onPropHandlers = [];
-                        var childPayload = getChildPayload();
+                        var _getInitialParentPayl = getInitialParentPayload(), parent = _getInitialParentPayl.parent, payload = _getInitialParentPayl.payload;
+                        var parentComponentWindow = parent.win, parentDomain = parent.domain;
                         var props;
                         var exportsPromise = new promise_ZalgoPromise;
-                        if (!childPayload) throw new Error("No child payload found");
-                        if ("9_0_79" !== childPayload.version) throw new Error("Parent window has zoid version " + childPayload.version + ", child window has version 9_0_79");
-                        var uid = childPayload.uid, parentDomain = childPayload.parentDomain, parentExports = childPayload.exports, context = childPayload.context, propsRef = childPayload.props;
-                        var parentComponentWindow = function(ref) {
-                            var type = ref.type;
-                            if ("opener" === type) return assertExists("opener", getOpener(window));
-                            if ("parent" === type && "number" == typeof ref.distance) return assertExists("parent", function(win, n) {
-                                void 0 === n && (n = 1);
-                                return function(win, n) {
-                                    void 0 === n && (n = 1);
-                                    var parent = win;
-                                    for (var i = 0; i < n; i++) {
-                                        if (!parent) return;
-                                        parent = utils_getParent(parent);
-                                    }
-                                    return parent;
-                                }(win, getDistanceFromTop(win) - n);
-                            }(window, ref.distance));
-                            if ("global" === type && ref.uid && "string" == typeof ref.uid) {
-                                var _ret = function() {
-                                    var uid = ref.uid;
-                                    var ancestor = getAncestor(window);
-                                    if (!ancestor) throw new Error("Can not find ancestor window");
-                                    for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(ancestor); _i2 < _getAllFramesInWindow2.length; _i2++) {
-                                        var frame = _getAllFramesInWindow2[_i2];
-                                        if (isSameDomain(frame)) {
-                                            var win = tryGlobal(frame, (function(global) {
-                                                return global.windows && global.windows[uid];
-                                            }));
-                                            if (win) return {
-                                                v: win
-                                            };
-                                        }
-                                    }
-                                }();
-                                if ("object" == typeof _ret) return _ret.v;
-                            }
-                            throw new Error("Unable to find " + type + " parent component window");
-                        }(childPayload.parent);
-                        var parent = setup_deserializeMessage(parentComponentWindow, parentDomain, parentExports);
-                        var show = parent.show, hide = parent.hide, close = parent.close;
+                        var version = payload.version, uid = payload.uid, parentExports = payload.exports, context = payload.context, initialProps = payload.props;
+                        if ("9_0_80" !== version) throw new Error("Parent window has zoid version " + version + ", child window has version 9_0_80");
+                        var show = parentExports.show, hide = parentExports.hide, close = parentExports.close, onError = parentExports.onError, checkClose = parentExports.checkClose, parentExport = parentExports.export, parentResize = parentExports.resize, parentInit = parentExports.init;
                         var getParent = function() {
                             return parentComponentWindow;
                         };
@@ -4421,21 +4539,15 @@
                         var onProps = function(handler) {
                             onPropHandlers.push(handler);
                         };
-                        var onError = function(err) {
-                            return promise_ZalgoPromise.try((function() {
-                                if (parent && parent.onError) return parent.onError(err);
-                                throw err;
-                            }));
-                        };
                         var resize = function(_ref) {
-                            return parent.resize.fireAndForget({
+                            return parentResize.fireAndForget({
                                 width: _ref.width,
                                 height: _ref.height
                             });
                         };
                         var xport = function(xports) {
                             exportsPromise.resolve(xports);
-                            return parent.export(xports);
+                            return parentExport(xports);
                         };
                         var getSiblings = function(_temp) {
                             var anyParent = (void 0 === _temp ? {} : _temp).anyParent;
@@ -4443,8 +4555,8 @@
                             var currentParent = props.parent;
                             void 0 === anyParent && (anyParent = !currentParent);
                             if (!anyParent && !currentParent) throw new Error("No parent found for " + tag + " child");
-                            for (var _i4 = 0, _getAllFramesInWindow4 = getAllFramesInWindow(window); _i4 < _getAllFramesInWindow4.length; _i4++) {
-                                var win = _getAllFramesInWindow4[_i4];
+                            for (var _i2 = 0, _getAllFramesInWindow2 = getAllFramesInWindow(window); _i2 < _getAllFramesInWindow2.length; _i2++) {
+                                var win = _getAllFramesInWindow2[_i2];
                                 if (isSameDomain(win)) {
                                     var xprops = assertSameDomain(win).xprops;
                                     if (xprops && getParent() === xprops.getParent()) {
@@ -4498,7 +4610,7 @@
                                 export: xport
                             }, isUpdate);
                             props ? extend(props, normalizedProps) : props = normalizedProps;
-                            for (var _i6 = 0; _i6 < onPropHandlers.length; _i6++) (0, onPropHandlers[_i6])(props);
+                            for (var _i4 = 0; _i4 < onPropHandlers.length; _i4++) (0, onPropHandlers[_i4])(props);
                         };
                         var updateProps = function(newProps) {
                             return promise_ZalgoPromise.try((function() {
@@ -4508,6 +4620,42 @@
                         return {
                             init: function() {
                                 return promise_ZalgoPromise.try((function() {
+                                    isSameDomain(parentComponentWindow) && function(_ref3) {
+                                        var componentName = _ref3.componentName, parentComponentWindow = _ref3.parentComponentWindow;
+                                        var _crossDomainDeseriali2 = crossDomainDeserialize({
+                                            data: getSerializedInitialPayload(window.name),
+                                            sender: {
+                                                win: parentComponentWindow
+                                            },
+                                            basic: !0
+                                        }), data = _crossDomainDeseriali2.data, sender = _crossDomainDeseriali2.sender;
+                                        if ("uid" === _crossDomainDeseriali2.reference.type && isSameDomain(parentComponentWindow)) {
+                                            var _crossDomainSerialize = crossDomainSerialize({
+                                                data: data,
+                                                metaData: {
+                                                    windowRef: {
+                                                        type: "name",
+                                                        name: assertSameDomain(parentComponentWindow).name
+                                                    }
+                                                },
+                                                sender: {
+                                                    domain: sender.domain
+                                                },
+                                                receiver: {
+                                                    win: window,
+                                                    domain: getDomain()
+                                                },
+                                                basic: !0
+                                            });
+                                            window.name = buildChildWindowName({
+                                                name: componentName,
+                                                serializedPayload: _crossDomainSerialize.serializedData
+                                            });
+                                        }
+                                    }({
+                                        componentName: options.name,
+                                        parentComponentWindow: parentComponentWindow
+                                    });
                                     lib_global_getGlobal(window).exports = options.exports({
                                         getExports: function() {
                                             return exportsPromise;
@@ -4519,16 +4667,16 @@
                                     markWindowKnown(parentComponentWindow);
                                     !function() {
                                         window.addEventListener("beforeunload", (function() {
-                                            parent.checkClose.fireAndForget();
+                                            checkClose.fireAndForget();
                                         }));
                                         window.addEventListener("unload", (function() {
-                                            parent.checkClose.fireAndForget();
+                                            checkClose.fireAndForget();
                                         }));
                                         onCloseWindow(parentComponentWindow, (function() {
                                             child_destroy();
                                         }));
                                     }();
-                                    return parent.init({
+                                    return parentInit({
                                         updateProps: updateProps,
                                         close: child_destroy
                                     });
@@ -4560,16 +4708,7 @@
                             },
                             getProps: function() {
                                 if (props) return props;
-                                setProps(function(parentComponentWindow, domain, propRef) {
-                                    var props;
-                                    if ("raw" === propRef.type) props = propRef.value; else if ("uid" === propRef.type) {
-                                        if (!isSameDomain(parentComponentWindow)) throw new Error("Parent component window is on a different domain - expected " + getDomain() + " - can not retrieve props");
-                                        var global = lib_global_getGlobal(parentComponentWindow);
-                                        props = assertExists("props", global && global.props[propRef.uid]);
-                                    }
-                                    if (!props) throw new Error("Could not find props");
-                                    return setup_deserializeMessage(parentComponentWindow, domain, props);
-                                }(parentComponentWindow, parentDomain, propsRef), parentDomain);
+                                setProps(initialProps, parentDomain);
                                 return props;
                             }
                         };
@@ -4829,7 +4968,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_79__;
+            delete window.__zoid_9_0_80__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
