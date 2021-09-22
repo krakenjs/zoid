@@ -1,0 +1,30 @@
+
+<head>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
+    <link rel="stylesheet" href="../../common/login.css" />
+
+    <!-- Pull in zoid and the login component we defined -->
+
+    <script src="../../../dist/zoid.js"></script>
+    <script src="./login.js"></script>
+</head>
+
+<body>
+
+    <h1>Welcome!</h1>
+
+    <button id="close">close</button>
+
+
+    <script>
+
+        console.log(window.xprops);
+
+        document.querySelector('#close').addEventListener('click', function(event) {
+            event.preventDefault();
+            window.xprops.close();
+        });
+    </script>
+
+</body>

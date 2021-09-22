@@ -6,6 +6,7 @@
   "scripts": {
     "setup": "npm install && npm run flow-typed",
     "demo": "serve . -l 1337",
+    "demo-redirect": "serve . -l 9337 & serve . -l 9338 & open http://localhost:9337/demo/redirect/popup/index.htm",
     "lint": "eslint --ext .js --ext .jsx src/ test/ *.js",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",
