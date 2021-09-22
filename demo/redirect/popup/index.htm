@@ -37,7 +37,7 @@
                     console.log('User logged in with email:', email);
                     document.querySelector('#result').innerText = email + ' logged in!';
                 }
-            }).render('body', zoid.CONTEXT.POPUP);
+            }).renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
         });
 
     </script>
