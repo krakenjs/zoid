@@ -7,7 +7,7 @@ import { markWindowKnown, type CrossDomainFunctionType } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onResize, elementReady, noop } from 'belter/src';
 
-import { getGlobal, tryGlobal, getInitialParentPayload } from '../lib';
+import { getGlobal, tryGlobal, getInitialParentPayload, updateChildWindowNameWithRef } from '../lib';
 import { CONTEXT } from '../constants';
 import type { NormalizedComponentOptionsType, getSiblingsPropType } from '../component';
 import type { PropsType, ChildPropsType } from '../component/props';
@@ -200,6 +200,13 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
 
     const init = () => {
         return ZalgoPromise.try(() => {
+            if (isSameDomain(parentComponentWindow)) {
+                updateChildWindowNameWithRef({
+                    componentName: options.name,
+                    parentComponentWindow
+                });
+            }
+
             getGlobal(window).exports = options.exports({
                 getExports: () => exportsPromise
             });

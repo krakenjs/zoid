@@ -2,12 +2,12 @@
 
 import { assertExists, memoize } from 'belter/src';
 import { isSameDomain, getOpener, getNthParentFromTop, getAncestor, getAllFramesInWindow,
-    type CrossDomainWindowType } from 'cross-domain-utils/src';
+    findFrameByName, getDomain, assertSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { ZOID, WINDOW_REFERENCE } from '../constants';
 import type { InitialChildPayload, WindowRef } from '../parent';
 
-import { crossDomainDeserialize } from './serialize';
+import { crossDomainDeserialize, crossDomainSerialize, REFERENCE_TYPE, type ReferenceType } from './serialize';
 import { tryGlobal } from './global';
 
 function getWindowByRef(windowRef : WindowRef) : CrossDomainWindowType {
@@ -34,6 +34,9 @@ function getWindowByRef(windowRef : WindowRef) : CrossDomainWindowType {
                 }
             }
         }
+    } else if (windowRef.type === WINDOW_REFERENCE.NAME) {
+        const { name } = windowRef;
+        return assertExists('namedWindow', findFrameByName(assertExists('ancestor', getAncestor(window)), name));
     }
 
     throw new Error(`Unable to find ${ windowRef.type } parent component window`);
@@ -43,15 +46,7 @@ export function buildChildWindowName({ name, serializedPayload } : {| name : str
     return `__${ ZOID }__${ name }__${ serializedPayload }__`;
 }
 
-export type InitialParentPayload<P, X> = {|
-    parent : {|
-        domain : string,
-        win : CrossDomainWindowType
-    |},
-    payload : InitialChildPayload<P, X>
-|};
-
-const parseInitialParentPayload = memoize(<P, X>(windowName : string) : InitialParentPayload<P, X> => {
+function getSerializedInitialPayload(windowName : string) : string {
     if (!windowName) {
         throw new Error(`No window name`);
     }
@@ -70,7 +65,22 @@ const parseInitialParentPayload = memoize(<P, X>(windowName : string) : InitialP
         throw new Error(`Expected serialized payload ref`);
     }
 
-    const { data: payload, sender: parent } = crossDomainDeserialize({
+    return serializedInitialPayload;
+}
+
+export type InitialParentPayload<P, X> = {|
+    parent : {|
+        domain : string,
+        win : CrossDomainWindowType
+    |},
+    payload : InitialChildPayload<P, X>,
+    reference : ReferenceType<string>
+|};
+
+const parseInitialParentPayload = memoize(<P, X>(windowName : string) : InitialParentPayload<P, X> => {
+    const serializedInitialPayload = getSerializedInitialPayload(windowName);
+
+    const { data: payload, sender: parent, reference } = crossDomainDeserialize({
         data:   serializedInitialPayload,
         sender: {
             win: ({ metaData: { windowRef } }) => getWindowByRef(windowRef)
@@ -79,7 +89,8 @@ const parseInitialParentPayload = memoize(<P, X>(windowName : string) : InitialP
 
     return {
         parent,
-        payload
+        payload,
+        reference
     };
 });
 
@@ -97,4 +108,45 @@ export function isChildComponentWindow() : boolean {
     }
 
     return false;
+}
+
+type UpdateChildWindowNameWithRefOptions = {|
+    componentName : string,
+    parentComponentWindow : CrossDomainWindowType
+|};
+
+export function updateChildWindowNameWithRef({ componentName, parentComponentWindow } : UpdateChildWindowNameWithRefOptions) {
+    const serializedInitialPayload = getSerializedInitialPayload(window.name);
+
+    const { data, sender, reference } = crossDomainDeserialize({
+        data:   serializedInitialPayload,
+        sender: {
+            win: parentComponentWindow
+        },
+        basic: true
+    });
+
+    if (reference.type === REFERENCE_TYPE.UID && isSameDomain(parentComponentWindow)) {
+        const windowName = assertSameDomain(parentComponentWindow).name;
+
+        const { serializedData: serializedPayload } = crossDomainSerialize({
+            data,
+            metaData: {
+                windowRef: { type: WINDOW_REFERENCE.NAME, name: windowName }
+            },
+            sender: {
+                domain: sender.domain
+            },
+            receiver: {
+                win:    window,
+                domain: getDomain()
+            },
+            basic: true
+        });
+
+        window.name = buildChildWindowName({
+            name:              componentName,
+            serializedPayload
+        });
+    }
 }

@@ -1296,4 +1296,115 @@ describe('zoid renderto cases', () => {
             }).render(getBody());
         });
     });
+
+    it('should render a component to the parent as an iframe, change domain, and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: zoid.create({
+                        tag:    'test-renderto-iframe-change-domain-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: zoid.create({
+                        tag:    'test-renderto-iframe-change-domain-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: [ 'mock://www.child.com', 'mock://www.child-redirect.com' ]
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => {
+                    onWindowOpen().then(expect('onWindowOpen', ({ win }) => {
+                        if (getParent(win) !== window) {
+                            throw new Error(`Expected window parent to be current window`);
+                        }
+                    }));
+
+                    return `
+                        window.__component__().remote({
+                            firstLoad: window.xprops.firstLoad,
+                            secondLoad: window.xprops.secondLoad,
+
+                            run: () => \`
+                                if (window.mockDomain === 'mock://www.child.com') {
+                                    window.xprops.firstLoad().then(() => {
+                                        window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com';
+                                    });
+                                }
+
+                                if (window.mockDomain === 'mock://www.child-redirect.com') {
+                                    window.xprops.secondLoad();
+                                }
+                            \`
+                        }).renderTo(window.parent, 'body');
+                    `;
+                }
+            }).render(getBody());
+        });
+    });
+
+    it('should render a component to the parent as a popup, change domain, and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: zoid.create({
+                        tag:    'test-renderto-popup-change-domain-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: zoid.create({
+                        tag:    'test-renderto-popup-change-domain-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: [ 'mock://www.child.com', 'mock://www.child-redirect.com' ]
+                    })
+                };
+            };
+
+            return window.__component__().simple({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                runOnClick: true,
+
+                run() : string {
+                    // $FlowFixMe[object-this-reference]
+                    onWindowOpen({ win: this.source }).then(expect('onWindowOpen', ({ win }) => {
+                        // $FlowFixMe[object-this-reference]
+                        if (getOpener(win) !== this.source) {
+                            throw new Error(`Expected window opener to be child frame`);
+                        }
+                    }));
+
+                    return `
+                        window.__component__().remote({
+                            firstLoad: window.xprops.firstLoad,
+                            secondLoad: window.xprops.secondLoad,
+
+                            run: () => \`
+                                if (window.mockDomain === 'mock://www.child.com') {
+                                    window.xprops.firstLoad().then(() => {
+                                        window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com';
+                                    });
+                                }
+
+                                if (window.mockDomain === 'mock://www.child-redirect.com') {
+                                    window.xprops.secondLoad();
+                                }
+                            \`
+                        }).renderTo(window.parent, 'body', zoid.CONTEXT.POPUP);
+                    `;
+                }
+            }).render(getBody());
+        });
+    });
+
 });
