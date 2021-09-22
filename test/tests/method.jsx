@@ -15,16 +15,16 @@ describe('zoid url method cases', () => {
                 return zoid.create({
                     tag:    'test-post-props',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
 
                     props: {
                         foo: {
                             type:       'string',
-                            queryParam: true
+                            queryParam:true
                         },
                         bar: {
                             type:      'string',
-                            bodyParam: true
+                            bodyParam:true
                         }
                     }
                 });
@@ -34,7 +34,7 @@ describe('zoid url method cases', () => {
             return component({
                 foo:        '123',
                 bar:        '456',
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 run:        () => `
                     window.xprops.checkUrl(window.location.href);
                 `,

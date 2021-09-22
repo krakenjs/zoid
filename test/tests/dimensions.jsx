@@ -23,9 +23,9 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    dimensions: {
+                    dimensions:{
                         width:  '178px',
-                        height: '253px'
+                        height:'253px'
                     },
                     attributes: {
                         iframe: {
@@ -67,9 +67,9 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-popup-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    dimensions: {
+                    dimensions:{
                         width:  '178px',
-                        height: '253px'
+                        height:'253px'
                     },
                     attributes: {
                         iframe: {
@@ -116,7 +116,7 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-resize',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    attributes: {
+                    attributes:{
                         iframe: {
                             scrolling: 'no'
                         }
@@ -161,7 +161,7 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-resize-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    attributes: {
+                    attributes:{
                         iframe: {
                             scrolling: 'no'
                         }
@@ -209,8 +209,8 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: true,
+                    autoResize:{
+                        height:true,
                         width:  true
                     },
                     attributes: {
@@ -226,7 +226,7 @@ describe('zoid dimensions cases', () => {
             const component = window.__component__();
             return component({
                 onResize:  expect('onResize'),
-                onResized: expect('onResized', () => {
+                onResized:expect('onResized', () => {
                     return componentWindowPromise.then(componentWindow => {
                         if (componentWindow.innerWidth !== expectedWidth) {
                             throw new Error(`Expected width to be ${ expectedWidth }, got ${ componentWindow.innerWidth }`);
@@ -263,13 +263,13 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-width-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: false,
+                    autoResize:{
+                        height:false,
                         width:  true
                     },
                     dimensions: {
                         width:  '100px',
-                        height: '100px'
+                        height:'100px'
                     },
                     attributes: {
                         iframe: {
@@ -320,12 +320,12 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-height-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: true,
+                    autoResize:{
+                        height:true,
                         width:  false
                     },
                     dimensions: {
-                        height: '100px',
+                        height:'100px',
                         width:  '100px'
                     },
                     attributes: {
@@ -377,10 +377,10 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-custom-from-child',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
+                    autoResize:{
                         height:  true,
                         width:   true,
-                        element: '#container'
+                        element:'#container'
                     },
                     attributes: {
                         iframe: {
@@ -432,8 +432,8 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: true,
+                    autoResize:{
+                        height:true,
                         width:  true
                     },
                     attributes: {
@@ -493,12 +493,12 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-width-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: false,
+                    autoResize:{
+                        height:false,
                         width:  true
                     },
                     dimensions: {
-                        height: '100px',
+                        height:'100px',
                         width:  '100px'
                     },
                     attributes: {
@@ -558,8 +558,8 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-height-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
-                        height: true,
+                    autoResize:{
+                        height:true,
                         width:  false
                     },
                     attributes: {
@@ -568,7 +568,7 @@ describe('zoid dimensions cases', () => {
                         }
                     },
                     dimensions: {
-                        height: '100px',
+                        height:'100px',
                         width:  '100px'
                     },
                     prerenderTemplate: ({ props, doc }) => {
@@ -623,10 +623,10 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-autoresize-custom-from-prerender',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    autoResize: {
+                    autoResize:{
                         height:  true,
                         width:   true,
-                        element: '#container'
+                        element:'#container'
                     },
                     attributes: {
                         iframe: {
@@ -697,9 +697,9 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-100-percent-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    dimensions: {
+                    dimensions:{
                         width:  '100%',
-                        height: '100%'
+                        height:'100%'
                     },
                     attributes: {
                         iframe: {
@@ -752,9 +752,9 @@ describe('zoid dimensions cases', () => {
                     tag:        'test-render-iframe-50-percent-dimensions',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    dimensions: {
+                    dimensions:{
                         width:  '50%',
-                        height: '50%'
+                        height:'50%'
                     },
                     attributes: {
                         iframe: {

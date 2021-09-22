@@ -18,7 +18,7 @@ describe('zoid export cases', () => {
                     tag:     'test-export-function-instance',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
+                    exports:({ getExports }) => {
                         return {
                             doSomething: (...args) => {
                                 return getExports().then(exports => {
@@ -62,7 +62,7 @@ describe('zoid export cases', () => {
                     tag:     'test-export-value-instance',
                     url:     () => '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
+                    exports:({ getExports }) => {
                         return {
                             get value() : ZalgoPromise<string> {
                                 return getExports().then(exports => {

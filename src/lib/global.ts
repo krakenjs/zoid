@@ -1,17 +1,17 @@
-/* @flow */
-
-import { isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import type { CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain } from 'cross-domain-utils/src';
 import { getCurrentScriptUID } from 'belter/src';
 
-export function getGlobalKey() : string {
+export function getGlobalKey(): string {
     if (__ZOID__.__SCRIPT_NAMESPACE__) {
         return `${ __ZOID__.__GLOBAL_KEY__ }_${ getCurrentScriptUID() }`;
     } else {
         return __ZOID__.__GLOBAL_KEY__;
     }
 }
-
-export function getGlobal(win? : CrossDomainWindowType = window) : Object {
+export function getGlobal(
+    win: CrossDomainWindowType = window
+): Record<string, any> {
     const globalKey = getGlobalKey();
 
     if (!isSameDomain(win)) {
@@ -24,7 +24,6 @@ export function getGlobal(win? : CrossDomainWindowType = window) : Object {
 
     return win[globalKey];
 }
-
 export function destroyGlobal() {
     const globalKey = getGlobalKey();
     delete window[globalKey];

@@ -17,7 +17,7 @@ describe('zoid clone cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-clone',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -41,7 +41,7 @@ describe('zoid clone cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-clone-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -71,7 +71,7 @@ describe('zoid clone cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-clone-instances',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -116,7 +116,7 @@ describe('zoid clone cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-clone-instances-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -168,7 +168,7 @@ describe('zoid clone cases', () => {
                     tag:      'test-render-iframe-clone-ineligible',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
-                    eligible: () => ({ eligible: false })
+                    eligible:() => ({ eligible: false })
                 });
             };
 

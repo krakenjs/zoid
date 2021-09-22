@@ -16,7 +16,7 @@ describe('parent domain check', () => {
                     tag:                  'test-parent-domain-wildcard',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
-                    allowedParentDomains: '*'
+                    allowedParentDomains:'*'
                 });
             };
 
@@ -31,7 +31,7 @@ describe('parent domain check', () => {
                         tag:                  'test-parent-domain-string',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
-                        allowedParentDomains: getDomain()
+                        allowedParentDomains:getDomain()
                     });
                 };
     
@@ -47,7 +47,7 @@ describe('parent domain check', () => {
                         tag:                  'test-parent-domain-array',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
-                        allowedParentDomains: [ getDomain(), 'https://www.foo.com' ]
+                        allowedParentDomains:[ getDomain(), 'https://www.foo.com' ]
                     });
                 };
     
@@ -62,7 +62,7 @@ describe('parent domain check', () => {
                     tag:                  'test-parent-domain-array-wildcard',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
-                    allowedParentDomains: [ '*', 'https://www.foo.com' ]
+                    allowedParentDomains:[ '*', 'https://www.foo.com' ]
                 });
             };
 
@@ -76,7 +76,7 @@ describe('parent domain check', () => {
                     tag:                  'test-parent-domain-regex',
                     url:                  '/base/test/windows/child/index.htm',
                     domain:               'mock://www.child.com',
-                    allowedParentDomains: /.+/
+                    allowedParentDomains:/.+/
                 });
             };
 
@@ -94,7 +94,7 @@ describe('parent domain check', () => {
                         tag:                  'test-parent-domain-string-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
-                        allowedParentDomains: 'https://www.foo.com'
+                        allowedParentDomains:'https://www.foo.com'
                     });
                 };
     
@@ -110,7 +110,7 @@ describe('parent domain check', () => {
                         tag:                  'test-parent-domain-array-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
-                        allowedParentDomains: [ 'https://www.foo.com', 'https://www.bar.com' ]
+                        allowedParentDomains:[ 'https://www.foo.com', 'https://www.bar.com' ]
                     });
                 };
     
@@ -126,7 +126,7 @@ describe('parent domain check', () => {
                         tag:                  'test-parent-domain-regex-nomatch',
                         url:                  '/base/test/windows/child/index.htm',
                         domain:               'mock://www.child.com',
-                        allowedParentDomains: /^https:\/\/www\.foo\.com$/
+                        allowedParentDomains:/^https:\/\/www\.foo\.com$/
                     });
                 };
     
@@ -141,7 +141,7 @@ describe('parent domain check', () => {
                     return zoid.create({
                         tag:    'test-get-parent-domain',
                         url:    '/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     });
                 };
     
@@ -167,7 +167,7 @@ describe('parent domain check', () => {
                     return zoid.create({
                         tag:    'test-get-parent',
                         url:    '/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     });
                 };
     

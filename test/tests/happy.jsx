@@ -18,7 +18,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-url-function',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -42,7 +42,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-default',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -66,7 +66,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -90,7 +90,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -119,7 +119,7 @@ describe('zoid happy cases', () => {
                     tag:            'test-render-popup-no-element',
                     url:            'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:         'mock://www.child.com',
-                    defaultContext: 'popup'
+                    defaultContext:'popup'
                 });
             };
 
@@ -147,7 +147,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-string-selector',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -172,7 +172,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-with-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -200,7 +200,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-popup-with-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -231,7 +231,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-domain-regex',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: /^mock:\/\/www\.child\.com$/
+                    domain:/^mock:\/\/www\.child\.com$/
                 });
             };
 
@@ -255,7 +255,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-ischild',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -282,7 +282,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-ischild-negative',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -317,7 +317,7 @@ describe('zoid happy cases', () => {
                     tag:               'test-render-iframe-in-iframe-with-prop',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    containerTemplate: ({ doc, frame, prerenderFrame }) => {
+                    containerTemplate:({ doc, frame, prerenderFrame }) => {
                         return (
                             <div>
                                 <iframe>
@@ -360,7 +360,7 @@ describe('zoid happy cases', () => {
                     tag:               'test-render-prerender-iframe',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    prerenderTemplate: ({ doc }) => {
+                    prerenderTemplate:({ doc }) => {
                         const html = doc.createElement('html');
                         const body = doc.createElement('body');
                         const script = doc.createElement('script');
@@ -388,7 +388,7 @@ describe('zoid happy cases', () => {
                     tag:               'test-render-prerender-popup',
                     url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
-                    prerenderTemplate: ({ doc }) => {
+                    prerenderTemplate:({ doc }) => {
                         const html = doc.createElement('html');
                         const body = doc.createElement('body');
                         const script = doc.createElement('script');
@@ -420,7 +420,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-shadow-dom',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -448,7 +448,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-nested-shadow-dom',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -475,7 +475,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-shadow-dom-slots',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -503,7 +503,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-window-name',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -538,7 +538,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-popup-window-name',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -578,7 +578,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-iframe-with-promise-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -606,7 +606,7 @@ describe('zoid happy cases', () => {
                 return zoid.create({
                     tag:    'test-render-popup-with-promise-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 

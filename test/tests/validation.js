@@ -54,8 +54,8 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is created with trailing dash in tag name', () => {
         return expectError('Malformed tag name', () => {
             zoid.create({
-                url: 'http://foo.com/bar',
-                tag: 'my-component-'
+                url:'http://foo.com/bar',
+                tag:'my-component-'
             });
         });
     });
@@ -63,24 +63,24 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is created with leading dash in tag name', () => {
         return expectError('Malformed tag name', () => {
             zoid.create({
-                url: 'http://foo.com/bar',
-                tag: '-my-component'
+                url:'http://foo.com/bar',
+                tag:'-my-component'
             });
         });
     });
 
     it('should NOT throw validation errors when a component is created NO dash in tag name', () => {
         return zoid.create({
-            url: 'http://foo.com/bar',
-            tag: 'component'
+            url:'http://foo.com/bar',
+            tag:'component'
         });
     });
 
     it('should throw validation errors when a component is created with Special chars in tag name', () => {
         return expectError('Special chars in tag name', () => {
             zoid.create({
-                url: 'http://foo.com/bar',
-                tag: 'special$%&-chars'
+                url:'http://foo.com/bar',
+                tag:'special$%&-chars'
             });
         });
     });
@@ -91,7 +91,7 @@ describe('zoid validation errors', () => {
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-dimensions',
                 // $FlowFixMe
-                dimensions: 'moo'
+                dimensions:'moo'
             });
         });
     });
@@ -102,7 +102,7 @@ describe('zoid validation errors', () => {
                 url:        'http://foo.com/bar',
                 tag:        'my-component-empty-dimensions',
                 // $FlowFixMe
-                dimensions: {}
+                dimensions:{}
             });
         });
     });
@@ -112,8 +112,8 @@ describe('zoid validation errors', () => {
             zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-dimensions-object',
-                dimensions: {
-                    height: 'foo',
+                dimensions:{
+                    height:'foo',
                     width:  'bar'
                 }
             });
@@ -125,8 +125,8 @@ describe('zoid validation errors', () => {
             zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-height',
-                dimensions: {
-                    height: 'foo',
+                dimensions:{
+                    height:'foo',
                     width:  '50px'
                 }
             });
@@ -138,8 +138,8 @@ describe('zoid validation errors', () => {
             zoid.create({
                 url:        'http://foo.com/bar',
                 tag:        'my-component-string-width',
-                dimensions: {
-                    height: '50px',
+                dimensions:{
+                    height:'50px',
                     width:  'foo'
                 }
             });
@@ -152,7 +152,7 @@ describe('zoid validation errors', () => {
                 url:   'http://foo.com/bar',
                 tag:   'my-component-props-string',
                 // $FlowFixMe
-                props: 'foo'
+                props:'foo'
             });
         });
     });
@@ -162,7 +162,7 @@ describe('zoid validation errors', () => {
             zoid.create({
                 tag:   'my-component-prop-string',
                 url:   'http://zombo.com',
-                props: {
+                props:{
                     // $FlowFixMe
                     moo: 'wat'
                 }
@@ -175,7 +175,7 @@ describe('zoid validation errors', () => {
             zoid.create({
                 tag:   'my-component-invalid-prop-type',
                 url:   'http://zombo.com',
-                props: {
+                props:{
                     // $FlowFixMe
                     moo: {
                         type: 'invalid'
@@ -190,7 +190,7 @@ describe('zoid validation errors', () => {
             zoid.create({
                 tag:   'my-component-no-prop-type',
                 url:   'http://zombo.com',
-                props: {
+                props:{
                     // $FlowFixMe
                     onSomething: {
 
@@ -205,10 +205,10 @@ describe('zoid validation errors', () => {
             zoid.create({
                 tag:   'my-component-required-and-default',
                 url:   'http://zombo.com',
-                props: {
+                props:{
                     onSomething: {
                         type:     'function',
-                        required: true,
+                        required:true,
                         default:  () => {
                             return () => {
                                 // pass
@@ -226,7 +226,7 @@ describe('zoid validation errors', () => {
                 url:               'http://foo.com/bar',
                 tag:               'my-component-prerender-non-function',
                 // $FlowFixMe
-                prerenderTemplate: 'foo'
+                prerenderTemplate:'foo'
             });
         });
     });
@@ -237,7 +237,7 @@ describe('zoid validation errors', () => {
                 url:               'http://foo.com/bar',
                 tag:               'my-component-container-non-function',
                 // $FlowFixMe
-                containerTemplate: 'foo'
+                containerTemplate:'foo'
             });
         });
     });
@@ -248,7 +248,7 @@ describe('zoid validation errors', () => {
                 tag:            'my-component-invalid-default-context',
                 url:            'http://zombo.com',
                 // $FlowFixMe
-                defaultContext: 'moo'
+                defaultContext:'moo'
             });
         });
     });
@@ -256,9 +256,9 @@ describe('zoid validation errors', () => {
     it('should throw validation errors when a component is created with Invalid url passed', () => {
         return expectError('Invalid url passed', () => {
             zoid.create({
-                tag: 'my-component-invalid-url',
+                tag:'my-component-invalid-url',
                 // $FlowFixMe
-                url: 12345
+                url:12345
             });
         });
     });
@@ -269,7 +269,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-string-passed-as-function-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         functionProp: {
                             type: 'function'
@@ -291,7 +291,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-object-passed-as-string-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         stringProp: {
                             type: 'string'
@@ -313,7 +313,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-object-passed-as-number-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         numberProp: {
                             type: 'number'
@@ -335,7 +335,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-unserializable-object',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         objectProp: {
                             type: 'object'
@@ -360,7 +360,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-object-passed-for-array',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         arrayProp: {
                             type: 'array'
@@ -382,7 +382,7 @@ describe('zoid validation errors', () => {
                 return zoid.create({
                     tag:    'test-render-no-props-passed-when-required',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         functionProp: {
                             type: 'function'
@@ -400,11 +400,11 @@ describe('zoid validation errors', () => {
             return zoid.create({
                 tag:    'test-render-function-queryparam-true',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                domain: 'mock://www.child.com',
+                domain:'mock://www.child.com',
                 props:  {
                     functionProp: {
                         type:       'function',
-                        queryParam: true
+                        queryParam:true
                     }
                 }
             });

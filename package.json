@@ -4,15 +4,14 @@
   "description": "Cross domain components.",
   "main": "index.js",
   "scripts": {
-    "setup": "npm install && npm run flow-typed",
+    "setup": "npm install",
     "demo": "serve . -l 1337",
-    "lint": "eslint --ext .js --ext .jsx src/ test/ *.js",
-    "flow-typed": "rm -rf ./flow-typed && flow-typed install",
-    "flow": "flow",
+    "lint": "eslint --ext ts,tsx,js,jsx src/ test/",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --progress",
-    "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
+    "test": "npm run lint && npm run tsc && npm run karma",
+    "tsc": "tsc",
     "clear-dist": "rm -rf dist/*;",
     "build": "npm run test && npm run babel && npm run clear-dist && npm run webpack -- $@",
     "release": "./publish.sh",
@@ -20,7 +19,7 @@
     "release:minor": "./publish.sh minor",
     "release:major": "./publish.sh major",
     "clean": "rimraf dist coverage",
-    "reinstall": "rimraf flow-typed && rimraf node_modules && npm install && flow-typed install",
+    "reinstall": "rimraf node_modules && npm install",
     "debug": "cross-env NODE_ENV=debug"
   },
   "repository": {
@@ -55,11 +54,16 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "flow-bin": "0.155.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "flowgen": "^1.14.1",
     "grumbler-scripts": "^3",
     "jsx-pragmatic": "^2",
     "mocha": "^4",
-    "serve": "^10.0.0"
+    "serve": "^10.0.0",
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
     "belter": "^1.0.123",

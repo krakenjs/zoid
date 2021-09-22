@@ -14,7 +14,7 @@ describe('zoid error cases', () => {
             const windowOpen = window.open;
             window.open = () => {
                 return {
-                    closed: true,
+                    closed:true,
                     close:  error('close')
                 };
             };
@@ -23,7 +23,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-popup-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -46,7 +46,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-from-child',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -77,7 +77,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-from-child-onerror',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -85,7 +85,7 @@ describe('zoid error cases', () => {
             return component({
                 timeout:   1,
                 onError:   expect('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render(getBody(), zoid.CONTEXT.IFRAME).catch(expect('catch'));
         });
     });
@@ -96,11 +96,11 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-prop-validate',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         validateProp: {
                             type:     'string',
-                            validate: expectError('validate', () => {
+                            validate:expectError('validate', () => {
                                 throw new Error(`Invalid prop`);
                             })
                         }
@@ -124,11 +124,11 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-prop-validate-onerror',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
                     props:  {
                         validateProp: {
                             type:     'string',
-                            validate: expectError('validate', () => {
+                            validate:expectError('validate', () => {
                                 throw new Error(`Invalid prop`);
                             })
                         }
@@ -140,7 +140,7 @@ describe('zoid error cases', () => {
 
             return ZalgoPromise.try(() => {
                 component({
-                    validateProp: 'foo',
+                    validateProp:'foo',
                     onError:      avoid('onError')
                 });
             }).catch(expect('catch'));
@@ -154,7 +154,7 @@ describe('zoid error cases', () => {
                     tag:      'test-error-validate',
                     url:      '/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
-                    validate: expectError('validate', () => {
+                    validate:expectError('validate', () => {
                         throw new Error(`Invalid component`);
                     })
                 });
@@ -175,7 +175,7 @@ describe('zoid error cases', () => {
                     tag:      'test-error-validate-onerror',
                     url:      '/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
-                    validate: expectError('validate', () => {
+                    validate:expectError('validate', () => {
                         throw new Error(`Invalid component`);
                     })
                 });
@@ -197,7 +197,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-popup-no-onclick',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -205,7 +205,7 @@ describe('zoid error cases', () => {
             const instance = component({
                 onClose:   avoid('onClose'),
                 onError:   expect('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
             
             return instance.render('body', zoid.CONTEXT.POPUP).catch(expect('catch'));
@@ -218,7 +218,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-popup-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -232,7 +232,7 @@ describe('zoid error cases', () => {
             const instance = component({
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -252,7 +252,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-popup-closed-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -264,7 +264,7 @@ describe('zoid error cases', () => {
             const instance = component({
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -279,7 +279,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-iframe-closed',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -293,7 +293,7 @@ describe('zoid error cases', () => {
             const instance = component({
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
             
             return runOnClick(() => {
@@ -308,7 +308,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-iframe-closed-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -322,7 +322,7 @@ describe('zoid error cases', () => {
             return component({
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render('body', zoid.CONTEXT.IFRAME).catch(expect('catch'));
         }, { timeout: 5000 });
     });
@@ -334,7 +334,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-prerender-incorrect-document',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com',
+                    domain:'mock://www.child.com',
     
                     prerenderTemplate: () => {
                         const body = document.createElement('body');
@@ -358,7 +358,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-iframe-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -381,7 +381,7 @@ describe('zoid error cases', () => {
                 }),
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render('body', zoid.CONTEXT.IFRAME);
         }, { timeout: 9000 });
     });
@@ -392,7 +392,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-iframe-immediately-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -417,7 +417,7 @@ describe('zoid error cases', () => {
                 }),
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render('body', zoid.CONTEXT.IFRAME);
         }, { timeout: 5000 });
     });
@@ -428,7 +428,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-popup-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -451,7 +451,7 @@ describe('zoid error cases', () => {
                 }),
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
 
             return runOnClick(() => {
@@ -466,7 +466,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-onclose-popup-immediately-redirected-during-render',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -491,7 +491,7 @@ describe('zoid error cases', () => {
                 }),
                 onClose:   expect('onClose'),
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             });
 
             return runOnClick(() => {
@@ -506,14 +506,14 @@ describe('zoid error cases', () => {
             zoid.create({
                 tag:    'test-error-duplicate-tag',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                domain: 'mock://www.child.com'
+                domain:'mock://www.child.com'
             });
 
             return ZalgoPromise.try(() => {
                 zoid.create({
                     tag:    'test-error-duplicate-tag',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             }).catch(expect('catch'));
         });
@@ -524,7 +524,7 @@ describe('zoid error cases', () => {
             const component = zoid.create({
                 tag:    'test-error-unknown-driver',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                domain: 'mock://www.child.com'
+                domain:'mock://www.child.com'
             });
 
             return ZalgoPromise.try(() => {
@@ -540,7 +540,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-render-domain-invalid-regex',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: /^mock:\/\/www\.meep\.com$/
+                    domain:/^mock:\/\/www\.meep\.com$/
                 });
             };
 
@@ -558,7 +558,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-render-invalid-element',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -575,7 +575,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-render-invalid-window',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -593,7 +593,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-render-no-element',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -611,7 +611,7 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-render-invalid-context',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -628,7 +628,7 @@ describe('zoid error cases', () => {
             const component = zoid.create({
                 tag:    'test-xprops-present',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                domain: 'mock://www.child.com'
+                domain:'mock://www.child.com'
             });
 
             window.__component__ = () => {
@@ -639,7 +639,7 @@ describe('zoid error cases', () => {
                     zoid.create({
                         tag:    'test-xprops-present',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     });
                 } catch (err) {
                     error = err;
@@ -649,7 +649,7 @@ describe('zoid error cases', () => {
                 zoid.create({
                     tag:    'test-xprops-present',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
 
                 window.xprops.onLoad(error);
@@ -671,7 +671,7 @@ describe('zoid error cases', () => {
         zoid.create({
             tag:    'test-create-window-name-no-zoid',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
+            domain:'mock://www.child.com'
         });
 
         if (window.xprops) {
@@ -685,7 +685,7 @@ describe('zoid error cases', () => {
         zoid.create({
             tag:    'test-create-window-name-no-component-name-passed',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
+            domain:'mock://www.child.com'
         });
 
         if (window.xprops) {
@@ -699,7 +699,7 @@ describe('zoid error cases', () => {
         zoid.create({
             tag:    'test-create-window-name-non-matching-component',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
+            domain:'mock://www.child.com'
         });
 
         if (window.xprops) {
@@ -713,7 +713,7 @@ describe('zoid error cases', () => {
         zoid.create({
             tag:    'test-create-window-name-no-payload',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
+            domain:'mock://www.child.com'
         });
 
         if (window.xprops) {
@@ -727,7 +727,7 @@ describe('zoid error cases', () => {
         zoid.create({
             tag:    'test-create-window-name-bad-payload',
             url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
+            domain:'mock://www.child.com'
         });
 
         if (window.xprops) {
@@ -741,14 +741,14 @@ describe('zoid error cases', () => {
                 return zoid.create({
                     tag:    'test-error-unload',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
             const component = window.__component__();
             return component({
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render(getBody(), zoid.CONTEXT.IFRAME).then(() => {
                 window.dispatchEvent(new Event('unload'));
             });
@@ -762,14 +762,14 @@ describe('zoid error cases', () => {
                     tag:      'test-error-ondestroy-ineligible',
                     url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
-                    eligible: () => ({ eligible: false })
+                    eligible:() => ({ eligible: false })
                 });
             };
 
             const component = window.__component__();
             return component({
                 onError:   avoid('onError'),
-                onDestroy: expect('onDestroy')
+                onDestroy:expect('onDestroy')
             }).render(getBody(), zoid.CONTEXT.IFRAME).catch(expect('error'));
         });
     });

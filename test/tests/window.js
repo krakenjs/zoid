@@ -17,7 +17,7 @@ describe('zoid window prop cases', () => {
                 return zoid.create({
                     tag:    'test-render-custom-iframe',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -63,7 +63,7 @@ describe('zoid window prop cases', () => {
                 return zoid.create({
                     tag:    'test-render-custom-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -104,7 +104,7 @@ describe('zoid window prop cases', () => {
                 return zoid.create({
                     tag:    'test-render-custom-close-popup',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -137,13 +137,13 @@ describe('zoid window prop cases', () => {
                     simple: zoid.create({
                         tag:    'test-renderto-custom-iframe-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     }),
 
                     remote: zoid.create({
                         tag:    'test-renderto-custom-iframe-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     })
                 };
             };
@@ -198,13 +198,13 @@ describe('zoid window prop cases', () => {
                     simple: zoid.create({
                         tag:    'test-renderto-custom-popup-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     }),
 
                     remote: zoid.create({
                         tag:    'test-renderto-custom-popup-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     })
                 };
             };
@@ -253,7 +253,7 @@ describe('zoid window prop cases', () => {
                 return zoid.create({
                     tag:    'test-render-custom-popup-loaded-url',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -298,13 +298,13 @@ describe('zoid window prop cases', () => {
                     simple: zoid.create({
                         tag:    'test-renderto-custom-popup-close-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     }),
 
                     remote: zoid.create({
                         tag:    'test-renderto-custom-popup-close-remote',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     })
                 };
             };
@@ -344,7 +344,7 @@ describe('zoid window prop cases', () => {
                 return zoid.create({
                     tag:    'test-render-bogus-window',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 

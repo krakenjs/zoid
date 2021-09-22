@@ -1,9 +1,11 @@
-/* @flow */
 /* eslint react/react-in-jsx-scope: off */
+import type { RenderOptionsType } from '../../parent/parent';
+import '../../parent/parent';
 
-import { type RenderOptionsType } from '../../parent/parent';
-
-export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P>) : ?HTMLElement {
+export function defaultPrerenderTemplate<P>({
+    doc,
+    props
+}: RenderOptionsType<P>): HTMLElement | null | undefined {
     if (__ZOID__.__DEFAULT_PRERENDER__) {
         const html = doc.createElement('html');
         const body = doc.createElement('body');
@@ -18,7 +20,8 @@ export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P
         html.appendChild(body);
         body.appendChild(spinner);
         body.appendChild(style);
-        style.appendChild(doc.createTextNode(`
+        style.appendChild(
+            doc.createTextNode(`
             html, body {
                 width: 100%;
                 height: 100%;
@@ -47,8 +50,8 @@ export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P
                     transform: translateX(-50%) translateY(-50%) rotate(359deg);
                 }
             }
-        `));
-
+        `)
+        );
         return html;
     }
 }

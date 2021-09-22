@@ -1,17 +1,23 @@
-/* @flow */
 /* eslint react/react-in-jsx-scope: off */
-
 import { destroyElement, toCSS } from 'belter/src';
 
-import { type RenderOptionsType } from '../../parent/parent';
+import type { RenderOptionsType } from '../../parent/parent';
+import '../../parent/parent';
 import { EVENT } from '../../constants';
 
 const CLASS = {
-    VISIBLE:   'zoid-visible',
-    INVISIBLE: 'zoid-invisible'
+    VISIBLE:  'zoid-visible',
+    INVISIBLE:'zoid-invisible'
 };
-
-export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, props, event, dimensions : { width, height } } : RenderOptionsType<P>) : ?HTMLElement {
+export function defaultContainerTemplate<P>({
+    uid,
+    frame,
+    prerenderFrame,
+    doc,
+    props,
+    event,
+    dimensions: { width, height }
+}: RenderOptionsType<P>): HTMLElement | null | undefined {
     if (__ZOID__.__DEFAULT_CONTAINER__) {
         if (!frame || !prerenderFrame) {
             return;
@@ -20,11 +26,13 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, p
         const div = doc.createElement('div');
         div.setAttribute('id', uid);
         const style = doc.createElement('style');
+
         if (props.cspNonce) {
             style.setAttribute('nonce', props.cspNonce);
         }
 
-        style.appendChild(doc.createTextNode(`
+        style.appendChild(
+            doc.createTextNode(`
             #${ uid } {
                 display: inline-block;
                 position: relative;
@@ -49,37 +57,31 @@ export function defaultContainerTemplate<P>({ uid, frame, prerenderFrame, doc, p
             #${ uid } > iframe.${ CLASS.VISIBLE } {
                 opacity: 1;
         }
-        `));
-
+        `)
+        );
         div.appendChild(frame);
         div.appendChild(prerenderFrame);
         div.appendChild(style);
-
         prerenderFrame.classList.add(CLASS.VISIBLE);
         frame.classList.add(CLASS.INVISIBLE);
-    
         event.on(EVENT.RENDERED, () => {
             prerenderFrame.classList.remove(CLASS.VISIBLE);
             prerenderFrame.classList.add(CLASS.INVISIBLE);
-    
             frame.classList.remove(CLASS.INVISIBLE);
             frame.classList.add(CLASS.VISIBLE);
-    
             setTimeout(() => {
                 destroyElement(prerenderFrame);
             }, 1);
         });
-
         event.on(EVENT.RESIZE, ({ width: newWidth, height: newHeight }) => {
             if (typeof newWidth === 'number') {
                 div.style.width = toCSS(newWidth);
             }
-    
+
             if (typeof newHeight === 'number') {
                 div.style.height = toCSS(newHeight);
             }
         });
-
         return div;
     }
 }

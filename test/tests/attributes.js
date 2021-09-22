@@ -15,7 +15,7 @@ describe('zoid attributes cases', () => {
                     tag:        'test-render-iframe-static-attributes',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    attributes: {
+                    attributes:{
                         iframe: {
                             scrolling: 'no'
                         }
@@ -49,7 +49,7 @@ describe('zoid attributes cases', () => {
                     tag:        'test-render-iframe-dynamic-attributes',
                     url:        '/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
-                    attributes: ({ props }) => ({
+                    attributes:({ props }) => ({
                         iframe: {
                             scrolling: props.scrolling
                         }
@@ -67,7 +67,7 @@ describe('zoid attributes cases', () => {
             const component = window.__component__();
             return component({
                 scrolling:  'no',
-                onRendered: expect('onRendered')
+                onRendered:expect('onRendered')
             }).render(getBody()).then(() => {
                 return componentWindowPromise;
             }).then(componentWindow => {

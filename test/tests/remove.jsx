@@ -20,7 +20,7 @@ describe('zoid remove cases', () => {
                 return zoid.create({
                     tag:    'test-remove-destroy',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -33,7 +33,7 @@ describe('zoid remove cases', () => {
             const component = window.__component__();
             return component({
 
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    expect('onClose', () => {
                     closed = true;
                 })
@@ -67,7 +67,7 @@ describe('zoid remove cases', () => {
                 return zoid.create({
                     tag:    'test-remove-destroy-shadow',
                     url:    () => '/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -80,7 +80,7 @@ describe('zoid remove cases', () => {
             const component = window.__component__();
             return component({
 
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    expect('onClose', () => {
                     closed = true;
                 })

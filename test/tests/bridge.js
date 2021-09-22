@@ -14,7 +14,7 @@ describe('zoid bridge cases', () => {
                 return zoid.create({
                     tag:       'test-render-popup-post-bridge',
                     url:       'mock://www.child.com/base/test/windows/child/index.htm',
-                    bridgeUrl: 'mock://www.child.com/base/test/windows/bridge/index.htm'
+                    bridgeUrl:'mock://www.child.com/base/test/windows/bridge/index.htm'
                 });
             };
 
@@ -42,8 +42,8 @@ describe('zoid bridge cases', () => {
 
             window.__component__ = () => {
                 return zoid.create({
-                    tag:       'test-render-popup-post-bridge-no-url',
-                    url:       'mock://www.child.com/base/test/windows/child/index.htm'
+                    tag:'test-render-popup-post-bridge-no-url',
+                    url:'mock://www.child.com/base/test/windows/child/index.htm'
                 });
             };
 

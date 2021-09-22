@@ -1,0 +1,7 @@
+{
+    "extends": "grumbler-scripts/config/tsconfig.json",
+    "exclude": ["test/**/*"],
+    "compilerOptions": {
+      "resolveJsonModule": true
+    }
+}

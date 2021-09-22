@@ -12,7 +12,7 @@ describe('zoid drivers', () => {
             return zoid.create({
                 tag:    'test-render-angular',
                 url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                domain: 'mock://www.child.com'
+                domain:'mock://www.child.com'
             });
         };
         
@@ -27,7 +27,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-react-props',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -72,7 +72,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-react-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -97,7 +97,7 @@ describe('zoid drivers', () => {
                 render() : Object {
                     return window.React.createElement('div', null, window.React.createElement(ReactZoidComponent, {
                         foo:    this.state.foo,
-                        onLoad: this.state.onLoad,
+                        onLoad:this.state.onLoad,
 
                         run: () => `
                                 window.xprops.onLoad().then(() => {
@@ -194,7 +194,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-vue',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -235,7 +235,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-vue-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -259,7 +259,7 @@ describe('zoid drivers', () => {
                             'foo':       this.state.foo,
                             'onLoad':    this.state.onLoad,
                             'baz':       this.state.baz,
-                            'on-test':   this.state.onTest,
+                            'on-test':this.state.onTest,
                             'run':       this.state.run
                         }
                     });
@@ -311,7 +311,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-angular2',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -332,8 +332,8 @@ describe('zoid drivers', () => {
             const Angular2Component = component.driver('angular2', window.ng.core);
 
             const appComponent = window.ng.core.Component({
-                selector: 'body',
-                template: `
+                selector:'body',
+                template:`
                     <test-render-angular2 [props]="testProps"></test-render-angular2>
                 `
             }).Class({
@@ -345,7 +345,7 @@ describe('zoid drivers', () => {
 
             const appModule = window.ng.core.NgModule({
                 imports:      [ window.ng.platformBrowser.BrowserModule, Angular2Component ],
-                declarations: [ appComponent ],
+                declarations:[ appComponent ],
                 bootstrap:    [ appComponent ]
             }).Class({
                 constructor() {
@@ -366,7 +366,7 @@ describe('zoid drivers', () => {
                 return zoid.create({
                     tag:    'test-render-angular2-update-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain: 'mock://www.child.com'
+                    domain:'mock://www.child.com'
                 });
             };
 
@@ -375,8 +375,8 @@ describe('zoid drivers', () => {
             const Angular2Component = component.driver('angular2', window.ng.core);
 
             const appComponent = window.ng.core.Component({
-                selector: 'body',
-                template: `
+                selector:'body',
+                template:`
                     <test-render-angular2-update-prop [props]="testProps"></test-render-angular2-update-prop>
                 `
             }).Class({
@@ -401,7 +401,7 @@ describe('zoid drivers', () => {
 
             const appModule = window.ng.core.NgModule({
                 imports:      [ window.ng.platformBrowser.BrowserModule, Angular2Component ],
-                declarations: [ appComponent ],
+                declarations:[ appComponent ],
                 bootstrap:    [ appComponent ]
             }).Class({
                 constructor() {

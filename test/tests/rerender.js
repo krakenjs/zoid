@@ -17,7 +17,7 @@ describe('zoid rerender cases', () => {
                     tag:     'test-rerender',
                     url:     '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
+                    exports:({ getExports }) => {
                         return {
                             exec: (...args) => {
                                 return getExports().then(exports => {
@@ -34,7 +34,7 @@ describe('zoid rerender cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    avoid('onClose'),
                 onDestroy:  avoid('onDestroy'),
                 onError:    avoid('onError'),
@@ -69,7 +69,7 @@ describe('zoid rerender cases', () => {
                     tag:     'test-rerender-during-render',
                     url:     '/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
-                    exports: ({ getExports }) => {
+                    exports:({ getExports }) => {
                         return {
                             exec: (...args) => {
                                 return getExports().then(exports => {
@@ -86,7 +86,7 @@ describe('zoid rerender cases', () => {
 
             const component = window.__component__();
             const instance = component({
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    avoid('onClose'),
                 onDestroy:  avoid('onDestroy'),
                 onError:    avoid('onError'),
@@ -120,14 +120,14 @@ describe('zoid rerender cases', () => {
                     simple: zoid.create({
                         tag:    'test-rerender-renderto-iframe-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     }),
 
                     remote: zoid.create({
                         tag:     'test-rerender-renderto-iframe-remote',
                         url:     'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:  'mock://www.child.com',
-                        exports: ({ getExports }) => {
+                        exports:({ getExports }) => {
                             return {
                                 exec: (...args) => {
                                     return getExports().then(exports => {
@@ -145,7 +145,7 @@ describe('zoid rerender cases', () => {
             getBody().appendChild(container);
 
             return window.__component__().simple({
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    avoid('onClose'),
                 onDestroy:  avoid('onDestroy'),
                 onError:    avoid('onError'),
@@ -192,14 +192,14 @@ describe('zoid rerender cases', () => {
                     simple: zoid.create({
                         tag:    'test-rerender-during-render-renderto-iframe-simple',
                         url:    'mock://www.child.com/base/test/windows/child/index.htm',
-                        domain: 'mock://www.child.com'
+                        domain:'mock://www.child.com'
                     }),
 
                     remote: zoid.create({
                         tag:     'test-rerender-during-render-renderto-iframe-remote',
                         url:     'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:  'mock://www.child.com',
-                        exports: ({ getExports }) => {
+                        exports:({ getExports }) => {
                             return {
                                 exec: (...args) => {
                                     return getExports().then(exports => {
@@ -217,7 +217,7 @@ describe('zoid rerender cases', () => {
             getBody().appendChild(container);
 
             return window.__component__().simple({
-                onRendered: expect('onRendered'),
+                onRendered:expect('onRendered'),
                 onClose:    avoid('onClose'),
                 onDestroy:  avoid('onDestroy'),
                 onError:    avoid('onError'),
