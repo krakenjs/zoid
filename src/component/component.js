@@ -3,14 +3,14 @@
 
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindow, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isWindow, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { noop, isElement, cleanup, memoize, identity, extend, uniqueID } from 'belter/src';
 
-import { getChildPayload, childComponent, type ChildComponent } from '../child';
+import { childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
 import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD, PROP_TYPE } from '../constants';
 import { react, angular, vue, vue3, angular2 } from '../drivers';
-import { getGlobal, destroyGlobal } from '../lib';
+import { getGlobal, destroyGlobal, getInitialParentPayload, isChildComponentWindow } from '../lib';
 import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validateOptions } from './validate';
@@ -57,7 +57,7 @@ export type ComponentOptionsType<P, X, C> = {|
     tag : string,
 
     url : string | ({| props : PropsType<P> |}) => string,
-    domain? : string | RegExp,
+    domain? : DomainMatcher,
     bridgeUrl? : string,
     method? : $Values<typeof METHOD>,
 
@@ -102,7 +102,7 @@ export type NormalizedComponentOptionsType<P, X, C> = {|
     name : string,
 
     url : string | ({| props : PropsType<P> |}) => string,
-    domain : ?(string | RegExp),
+    domain : ?DomainMatcher,
     bridgeUrl : ?string,
     method : ?$Values<typeof METHOD>,
 
@@ -287,8 +287,14 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
     const instances = [];
 
     const isChild = () : boolean => {
-        const payload = getChildPayload();
-        return Boolean(payload && payload.tag === tag && payload.childDomain === getDomain());
+        if (isChildComponentWindow()) {
+            const { payload } = getInitialParentPayload();
+            if (payload.tag === tag && matchDomain(payload.childDomainMatch, getDomain())) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     const registerChild = memoize(() : ?ChildComponent<P, X> => {

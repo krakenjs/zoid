@@ -33,8 +33,10 @@
     <script src="/base/test/zoid.global.js"></script>
 
     <script>
+        const query = Object.fromEntries(location.search.replace(/^\?/, '').split('&').filter(Boolean).map(entry => entry.split('=')));
+
         window.zoid = __zoid__;
-        window.mockDomain = 'mock://www.child.com';
+        window.mockDomain = query.mockDomain || 'mock://www.child.com';
 
         window.console.karma = parentWindow.console.karma;
         window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;

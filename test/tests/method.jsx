@@ -14,7 +14,7 @@ describe('zoid url method cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-post-props',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
 
                     props: {

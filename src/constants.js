@@ -18,15 +18,11 @@ export const PROP_TYPE = {
     ARRAY:    ('array' : 'array')
 };
 
-export const INITIAL_PROPS = {
-    RAW: 'raw',
-    UID: 'uid'
-};
-
-export const WINDOW_REFERENCES = {
+export const WINDOW_REFERENCE = {
     OPENER: ('opener' : 'opener'),
     PARENT: ('parent' : 'parent'),
-    GLOBAL: ('global' : 'global')
+    GLOBAL: ('global' : 'global'),
+    NAME:   ('name' : 'name')
 };
 
 export const PROP_SERIALIZATION = {

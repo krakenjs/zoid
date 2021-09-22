@@ -17,7 +17,7 @@ describe('zoid happy cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-render-url-function',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
@@ -254,7 +254,7 @@ describe('zoid happy cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-render-ischild',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
@@ -281,7 +281,7 @@ describe('zoid happy cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-render-ischild-negative',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
@@ -297,7 +297,7 @@ describe('zoid happy cases', () => {
                     return `
                         const component = zoid.create({
                             tag:    'test-render-ischild-negative-second',
-                            url:    () => '/base/test/windows/child/index.htm',
+                            url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                             domain: 'mock://www.child.com'
                         });
 

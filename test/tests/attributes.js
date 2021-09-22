@@ -13,7 +13,7 @@ describe('zoid attributes cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-static-attributes',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     attributes: {
                         iframe: {
@@ -47,7 +47,7 @@ describe('zoid attributes cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-dynamic-attributes',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     attributes: ({ props }) => ({
                         iframe: {

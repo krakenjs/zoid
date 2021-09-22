@@ -15,7 +15,7 @@ describe('zoid rerender cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:     'test-rerender',
-                    url:     '/base/test/windows/child/index.htm',
+                    url:     'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: ({ getExports }) => {
                         return {
@@ -67,7 +67,7 @@ describe('zoid rerender cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:     'test-rerender-during-render',
-                    url:     '/base/test/windows/child/index.htm',
+                    url:     'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: ({ getExports }) => {
                         return {

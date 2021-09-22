@@ -19,7 +19,7 @@ describe('zoid remove cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-remove-destroy',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };
@@ -66,7 +66,7 @@ describe('zoid remove cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:    'test-remove-destroy-shadow',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
             };

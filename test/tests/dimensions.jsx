@@ -21,7 +21,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-dimensions',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: {
                         width:  '178px',
@@ -65,7 +65,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-popup-dimensions',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: {
                         width:  '178px',
@@ -114,7 +114,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-resize',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     attributes: {
                         iframe: {
@@ -159,7 +159,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-popup-dimensions-func',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: ({ props }) => ({
                         width:  props.dimensions.width,
@@ -207,7 +207,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-resize-from-child',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     attributes: {
                         iframe: {
@@ -255,7 +255,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-from-child',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: true,
@@ -309,7 +309,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-width-from-child',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: false,
@@ -366,7 +366,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-height-from-child',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: true,
@@ -423,7 +423,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-custom-from-child',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height:  true,
@@ -478,7 +478,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-from-prerender',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: true,
@@ -539,7 +539,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-width-from-prerender',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: false,
@@ -604,7 +604,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-height-from-prerender',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height: true,
@@ -669,7 +669,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-autoresize-custom-from-prerender',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     autoResize: {
                         height:  true,
@@ -743,7 +743,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-100-percent-dimensions',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: {
                         width:  '100%',
@@ -798,7 +798,7 @@ describe('zoid dimensions cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:        'test-render-iframe-50-percent-dimensions',
-                    url:        '/base/test/windows/child/index.htm',
+                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:     'mock://www.child.com',
                     dimensions: {
                         width:  '50%',

@@ -16,25 +16,25 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:    'test-multiple-children-card-field-number',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardCVVField = zoid.create({
                     tag:    'test-multiple-children-card-field-cvv',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardExpiryField = zoid.create({
                     tag:    'test-multiple-children-card-field-expiry',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -116,7 +116,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-isolation',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -168,25 +168,25 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:    'test-multiple-children-card-field-number-export',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardCVVField = zoid.create({
                     tag:    'test-multiple-children-card-field-cvv-export',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardExpiryField = zoid.create({
                     tag:    'test-multiple-children-card-field-expiry-export',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com'
                 });
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-export',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -272,7 +272,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const Button = zoid.create({
                     tag:    'test-multiple-children-card-button-inherit-prop',
-                    url:    () => '/base/test/windows/child/index.htm',
+                    url:    () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
                     props:  {
                         fundingSource: {
@@ -285,7 +285,7 @@ describe('zoid children cases', () => {
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-inherit-prop',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     props:  {
                         fundingSource: {
@@ -347,7 +347,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:     'test-multiple-children-card-field-number-getsiblings',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -358,7 +358,7 @@ describe('zoid children cases', () => {
 
                 const CardCVVField = zoid.create({
                     tag:     'test-multiple-children-card-field-cvv-getsiblings',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -369,7 +369,7 @@ describe('zoid children cases', () => {
 
                 const CardExpiryField = zoid.create({
                     tag:     'test-multiple-children-card-field-expiry-getsiblings',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -380,7 +380,7 @@ describe('zoid children cases', () => {
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-getsiblings',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -393,7 +393,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponent = zoid.create({
                     tag:     'test-multiple-children-other-component-getsiblings',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -521,7 +521,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:     'test-multiple-children-card-field-number-getsiblings-sameparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -532,7 +532,7 @@ describe('zoid children cases', () => {
 
                 const CardCVVField = zoid.create({
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -543,7 +543,7 @@ describe('zoid children cases', () => {
 
                 const CardExpiryField = zoid.create({
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -554,7 +554,7 @@ describe('zoid children cases', () => {
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-getsiblings-sameparent',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -567,7 +567,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponent = zoid.create({
                     tag:     'test-multiple-children-other-component-getsiblings-sameparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -691,7 +691,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:     'test-multiple-children-card-field-number-getsiblings-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -702,7 +702,7 @@ describe('zoid children cases', () => {
 
                 const CardCVVField = zoid.create({
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -713,7 +713,7 @@ describe('zoid children cases', () => {
 
                 const CardExpiryField = zoid.create({
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -724,7 +724,7 @@ describe('zoid children cases', () => {
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-getsiblings-sameparent-diffparent',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -737,7 +737,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponent = zoid.create({
                     tag:     'test-multiple-children-other-component-getsiblings-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -748,7 +748,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponentParent = zoid.create({
                     tag:      'test-multiple-children-other-component-parent-getsiblings-sameparent-diffparent',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -872,7 +872,7 @@ describe('zoid children cases', () => {
             window.__component__ = () => {
                 const CardNumberField = zoid.create({
                     tag:     'test-multiple-children-card-field-number-getsiblings-anyparent-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -883,7 +883,7 @@ describe('zoid children cases', () => {
 
                 const CardCVVField = zoid.create({
                     tag:     'test-multiple-children-card-field-cvv-getsiblings-anyparent-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -894,7 +894,7 @@ describe('zoid children cases', () => {
 
                 const CardExpiryField = zoid.create({
                     tag:     'test-multiple-children-card-field-expiry-getsiblings-anyparent-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -905,7 +905,7 @@ describe('zoid children cases', () => {
 
                 const CardFields = zoid.create({
                     tag:      'test-multiple-children-card-fields-getsiblings-anyparent-sameparent-diffparent',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {
@@ -918,7 +918,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponent = zoid.create({
                     tag:     'test-multiple-children-other-component-getsiblings-anyparent-sameparent-diffparent',
-                    url:     () => '/base/test/windows/child/index.htm',
+                    url:     () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:  'mock://www.child.com',
                     exports: {
                         submit: {
@@ -929,7 +929,7 @@ describe('zoid children cases', () => {
 
                 const OtherComponentParent = zoid.create({
                     tag:      'test-multiple-children-other-component-parent-getsiblings-anyparent-sameparent-diffparent',
-                    url:      () => '/base/test/windows/child/index.htm',
+                    url:      () => 'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     children: () => {
                         return {

@@ -18,7 +18,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-close-iframe',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
                     containerTemplate: ({ doc, close, frame, prerenderFrame }) => {
                         closeComponent = close;
@@ -53,7 +53,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-close-popup',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
                     containerTemplate: ({ doc, close }) => {
                         closeComponent = close;
@@ -89,7 +89,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-close-popup-from-child',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
                     containerTemplate: ({ doc, close }) => {
                         closeComponent = close;
@@ -129,7 +129,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-focus-popup',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com',
                     containerTemplate: ({ doc, focus }) => {
                         focusComponent = focus;
@@ -164,7 +164,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-helper-close-iframe',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com'
                 });
             };
@@ -189,7 +189,7 @@ describe('zoid actions', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:               'test-container-helper-focus-popup',
-                    url:               '/base/test/windows/child/index.htm',
+                    url:               'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:            'mock://www.child.com'
                 });
             };

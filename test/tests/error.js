@@ -152,7 +152,7 @@ describe('zoid error cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:      'test-error-validate',
-                    url:      '/base/test/windows/child/index.htm',
+                    url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     validate: expectError('validate', () => {
                         throw new Error(`Invalid component`);
@@ -173,7 +173,7 @@ describe('zoid error cases', () => {
             window.__component__ = () => {
                 return zoid.create({
                     tag:      'test-error-validate-onerror',
-                    url:      '/base/test/windows/child/index.htm',
+                    url:      'mock://www.child.com/base/test/windows/child/index.htm',
                     domain:   'mock://www.child.com',
                     validate: expectError('validate', () => {
                         throw new Error(`Invalid component`);

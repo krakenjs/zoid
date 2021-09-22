@@ -115,7 +115,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-prerender-popup-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         prerenderTemplate: ({ doc }) => {
                             const html = doc.createElement('html');
@@ -166,7 +166,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-prerender-iframe-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         prerenderTemplate: ({ doc }) => {
                             const html = doc.createElement('html');
@@ -323,7 +323,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-prerender-close-iframe-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         prerenderTemplate: ({ close, doc }) => {
                             const html = doc.createElement('html');
@@ -363,7 +363,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-prerender-close-popup-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         prerenderTemplate: ({ close, doc }) => {
                             const html = doc.createElement('html');
@@ -406,7 +406,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-container-focus-popup-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         containerTemplate: ({ doc, focus }) => {
                             doFocus = focus;
@@ -457,7 +457,7 @@ describe('zoid renderto cases', () => {
 
                     remote: zoid.create({
                         tag:               'test-renderto-prerender-focus-popup-remote',
-                        url:               '/base/test/windows/child/index.htm',
+                        url:               'mock://www.child.com/base/test/windows/child/index.htm',
                         domain:            'mock://www.child.com',
                         prerenderTemplate: ({ doc, focus }) => {
                             const html = doc.createElement('html');
