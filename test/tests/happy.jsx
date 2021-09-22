@@ -629,4 +629,324 @@ describe('zoid happy cases', () => {
             });
         });
     });
+
+    it('should render an iframe component on the same domain and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-iframe-samedomain',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: 'mock://www.parent.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                callProp:  expect('callProp', mockDomain => {
+                    if (mockDomain !== 'mock://www.parent.com') {
+                        throw new Error(`Expected domain to be 'mock://www.parent.com', got '${ mockDomain }'`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.callProp(window.mockDomain);
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should render a popup component on the same domain and call a prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-popup-samedomain',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: 'mock://www.parent.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                callProp:  expect('callProp', mockDomain => {
+                    if (mockDomain !== 'mock://www.parent.com') {
+                        throw new Error(`Expected domain to be 'mock://www.parent.com', got '${ mockDomain }'`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.callProp(window.mockDomain);
+                `
+            });
+
+            return runOnClick(() => {
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
+            });
+        });
+    });
+
+    it('should render an iframe component, change url, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-iframe-url-change',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm?firstLoad',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should render a popup component, change url, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-popup-url-change',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm?firstLoad',
+                    domain: 'mock://www.child.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            });
+            
+            return runOnClick(() => {
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
+            });
+        });
+    });
+
+    it('should render an iframe component on the same domain, change url, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-iframe-samedomain-url-change',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: 'mock://www.parent.com'
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should render a popup component on the same domain, change url, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-popup-samedomain-url-change',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: 'mock://www.parent.com'
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            });
+            
+            return runOnClick(() => {
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
+            });
+        });
+    });
+
+    it('should render an iframe component, change url to a different domain, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-iframe-url-change-diffdomain',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm?firstLoad',
+                    domain: [ 'mock://www.child.com', 'mock://www.child-redirect.com' ]
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should render a popup component, change url to a different domain, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-popup-url-change-diffdomain',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm?firstLoad',
+                    domain: [ 'mock://www.child.com', 'mock://www.child-redirect.com' ]
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            });
+            
+            return runOnClick(() => {
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
+            });
+        });
+    });
+
+    it('should render an iframe component on the same domain, change url to a different domain, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-iframe-samedomain-url-change-diffdomain',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: [ 'mock://www.parent.com', 'mock://www.child-redirect.com' ]
+                });
+            };
+
+            const component = window.__component__();
+            return component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            }).render(getBody());
+        });
+    });
+
+    it('should render a popup component on the same domain, change url to a different domain, and complete', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-render-popup-samedomain-url-change-diffdomain',
+                    url:    'mock://www.parent.com/base/test/windows/child/index.htm?mockDomain=mock://www.parent.com&firstLoad',
+                    domain: [ 'mock://www.parent.com', 'mock://www.child-redirect.com' ]
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                firstLoad:  expect('firstLoad'),
+                secondLoad: expect('secondLoad'),
+
+                run: () => `
+                    if (location.href.indexOf('firstLoad') !== -1) {
+                        window.xprops.firstLoad().then(() => {
+                            window.location = '/base/test/windows/child/index.htm?mockDomain=mock://www.child-redirect.com&secondLoad';
+                        });
+                    }
+
+                    if (location.href.indexOf('secondLoad') !== -1) {
+                        window.xprops.secondLoad();
+                    }
+                `
+            });
+            
+            return runOnClick(() => {
+                return instance.render(getBody(), zoid.CONTEXT.POPUP);
+            });
+        });
+    });
 });

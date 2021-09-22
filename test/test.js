@@ -19,6 +19,10 @@ window.console.karma = (...args) => {
 beforeEach(() => {
     // eslint-disable-next-line unicorn/prefer-add-event-listener
     window.onerror = noop;
+
+    if (window !== window.top) {
+        throw new Error(`Expected to be top window`);
+    }
 });
 
 window.name = '__zoid_test_parent_window__';

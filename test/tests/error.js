@@ -724,14 +724,20 @@ describe('zoid error cases', () => {
     it('should not set xprops when payload is not correctly formatted', () => {
         window.name = `__zoid__test_create_window_name_bad_payload__abc123__`;
 
-        zoid.create({
-            tag:    'test-create-window-name-bad-payload',
-            url:    'mock://www.child.com/base/test/windows/child/index.htm',
-            domain: 'mock://www.child.com'
-        });
+        let error;
 
-        if (window.xprops) {
-            throw new Error(`Expected xprops to not be set`);
+        try {
+            zoid.create({
+                tag:    'test-create-window-name-bad-payload',
+                url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                domain: 'mock://www.child.com'
+            });
+        } catch (err) {
+            error = err;
+        }
+
+        if (!error) {
+            throw new Error(`Expected error to be thrown`);
         }
     });
 
