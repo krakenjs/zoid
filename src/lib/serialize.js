@@ -39,9 +39,12 @@ export const REFERENCE_TYPE = {
     RAW: ('raw' : 'raw')
 };
 
+export type UIDReferenceType = {| type : typeof REFERENCE_TYPE.UID, uid : string |};
+export type RawReferenceType<T> = {| type : typeof REFERENCE_TYPE.RAW, val : T |};
+
 export type ReferenceType<T> =
-    {| type : typeof REFERENCE_TYPE.UID, uid : string |} |
-    {| type : typeof REFERENCE_TYPE.RAW, val : T |};
+    UIDReferenceType |
+    RawReferenceType<T>;
 
 export function getUIDRefStore<T>(win : CrossDomainWindowType) : { [string] : T } {
     const global = getGlobal(win);
@@ -98,7 +101,8 @@ type CrossDomainSerializeOptions<T, M> = {|
         win : ProxyWindow | CrossDomainWindowType,
         domain : DomainMatcher
     |},
-    passByReference? : boolean
+    passByReference? : boolean,
+    basic? : boolean
 |};
 
 type CrossDomainSerializedMessage = {|
@@ -106,9 +110,11 @@ type CrossDomainSerializedMessage = {|
     cleanReference : () => void
 |};
 
-export function crossDomainSerialize<T, M>({ data, metaData, sender, receiver, passByReference = false } : CrossDomainSerializeOptions<T, M>) : CrossDomainSerializedMessage {
+export function crossDomainSerialize<T, M>({ data, metaData, sender, receiver, passByReference = false, basic = false } : CrossDomainSerializeOptions<T, M>) : CrossDomainSerializedMessage {
     const proxyWin = toProxyWindow(receiver.win);
-    const serializedMessage = serializeMessage(proxyWin, receiver.domain, data);
+    const serializedMessage = basic
+        ? JSON.stringify(data)
+        : serializeMessage(proxyWin, receiver.domain, data);
 
     const reference = passByReference
         ? getUIDRef(serializedMessage)
@@ -137,7 +143,8 @@ type CrossDomainDeserializeOptions<M> = {|
     sender : {|
         win : CrossDomainWindowType | ({| metaData : M |}) => CrossDomainWindowType,
         domain? : string | ({| metaData : M |}) => string
-    |}
+    |},
+    basic? : boolean
 |};
 
 type CrossDomainDeserializedMessage<T, M> = {|
@@ -146,10 +153,11 @@ type CrossDomainDeserializedMessage<T, M> = {|
     sender : {|
         domain : string,
         win : CrossDomainWindowType
-    |}
+    |},
+    reference : ReferenceType<string>
 |};
 
-export function crossDomainDeserialize<T, M>({ data, sender } : CrossDomainDeserializeOptions<M>) : CrossDomainDeserializedMessage<T, M> {
+export function crossDomainDeserialize<T, M>({ data, sender, basic = false } : CrossDomainDeserializeOptions<M>) : CrossDomainDeserializedMessage<T, M> {
     const message : Message<string, M> = basicDeserialize(data);
 
     const { reference, metaData } = message;
@@ -171,10 +179,14 @@ export function crossDomainDeserialize<T, M>({ data, sender } : CrossDomainDeser
     }
 
     const serializedData = getRefValue(win, reference);
+    const deserializedData = basic
+        ? JSON.parse(serializedData)
+        : deserializeMessage(win, domain, serializedData);
     
     return {
-        data:   deserializeMessage(win, domain, serializedData),
+        data:   deserializedData,
         metaData,
-        sender: { win, domain }
+        sender: { win, domain },
+        reference
     };
 }

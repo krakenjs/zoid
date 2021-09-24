@@ -287,7 +287,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
     const instances = [];
 
     const isChild = () : boolean => {
-        if (isChildComponentWindow()) {
+        if (isChildComponentWindow(name)) {
             const { payload } = getInitialParentPayload();
             if (payload.tag === tag && matchDomain(payload.childDomainMatch, getDomain())) {
                 return true;

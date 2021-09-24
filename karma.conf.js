@@ -33,6 +33,8 @@ export default function configKarma(karma : Object) {
         webpack:  WEBPACK_CONFIG_TEST
     });
 
+    karmaConfig.client.useIframe = false;
+
     karma.set({
         ...karmaConfig,
 

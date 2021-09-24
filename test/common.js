@@ -44,12 +44,35 @@ export function monkeyPatchFunction<T, A>(obj : Object, name : string, handler :
     };
 }
 
-export function onWindowOpen({ win = window, doc = win.document, time = 500 } : {| win? : SameDomainWindowType, doc? : HTMLElement, time? : number |} = {}) : ZalgoPromise<{| win : SameDomainWindowType, iframe : ?{| element : HTMLIFrameElement |}, popup : ?{| args : [ string, string, string ] |} |}> {
+type OnWindowOpenOptions = {|
+    win? : SameDomainWindowType,
+    doc? : HTMLElement,
+    time? : number,
+    namePattern? : RegExp
+|};
+
+type OnWindowOpenResult = {|
+    win : SameDomainWindowType,
+    url : ?string,
+    name : ?string,
+    iframe : ?{|
+        element : HTMLIFrameElement
+    |},
+    popup : ?{|
+        args : [ string, ?string, ?string ]
+    |}
+|};
+
+export function onWindowOpen({ win = window, doc = win.document, time = 500, namePattern = /.*/ } : OnWindowOpenOptions = {}) : ZalgoPromise<OnWindowOpenResult> {
     return new ZalgoPromise((resolve, reject) => {
         const winOpenMonkeyPatch = monkeyPatchFunction(win, 'open', ({ call, args }) => {
             const popup = call();
-            resolve({ win: popup, popup: { args }, iframe: null });
-            winOpenMonkeyPatch.cancel();
+            const [ url, name ] = args;
+            
+            if (name.match(namePattern)) {
+                resolve({ win: popup, url, name, popup: { args }, iframe: null });
+                winOpenMonkeyPatch.cancel();
+            }
         });
 
         const createElementMonkeyPatch = monkeyPatchFunction(doc, 'createElement', ({ call, args: [ tagName ] }) => {
@@ -67,9 +90,9 @@ export function onWindowOpen({ win = window, doc = win.document, time = 500 } : 
                 };
 
                 const check = () => {
-                    if (el.contentWindow && el.name.match(/^__zoid_/)) {
+                    if (el.contentWindow && el.name.match(/^__zoid_/) && el.name.match(namePattern)) {
                         cleanup();
-                        resolve({ win: el.contentWindow, iframe: { element: el }, popup: null });
+                        resolve({ win: el.contentWindow, url: el.src, name: el.name, iframe: { element: el }, popup: null });
                     }
                 };
 
@@ -85,13 +108,13 @@ export function onWindowOpen({ win = window, doc = win.document, time = 500 } : 
             }
         });
 
-    }).then(({ win: openedWindow, iframe, popup }) => {
+    }).then(({ win: openedWindow, iframe, popup, name, url }) => {
 
         if (!openedWindow || isWindowClosed(openedWindow)) {
             throw new Error(`Expected win to be open`);
         }
 
-        return { win: openedWindow, iframe, popup };
+        return { win: openedWindow, name, url, iframe, popup };
     });
 }
 
