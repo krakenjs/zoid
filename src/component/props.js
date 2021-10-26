@@ -115,6 +115,7 @@ export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
         close : () => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
+        container : HTMLElement | void,
         event : EventEmitterType
     |}) => ?T,
     default? : ({|
@@ -123,6 +124,7 @@ export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
         close : () => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
+        container : HTMLElement | void,
         event : EventEmitterType
     |}) => ?T,
     decorate? : ({|
@@ -132,6 +134,7 @@ export type PropDefinitionType<T, P, S : $Values<typeof PROP_TYPE>, X> = {|
         close : () => ZalgoPromise<void>,
         focus : () => ZalgoPromise<void>,
         onError : (mixed) => ZalgoPromise<void>,
+        container : HTMLElement | void,
         event : EventEmitterType
     |}) => T,
     childDecorate? : ({|
@@ -424,21 +427,18 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
 }
 
 type PropCallback<P, X, R> =
-    ((string, BooleanPropDefinitionType<boolean, P, X>, boolean) => R) &
-    ((string, StringPropDefinitionType<string, P, X>, string) => R) &
-    ((string, NumberPropDefinitionType<number, P, X>, number) => R) &
-    ((string, FunctionPropDefinitionType<Function, P, X>, Function) => R) &
-    ((string, ArrayPropDefinitionType<$ReadOnlyArray<*> | $ReadOnlyArray<*>, P, X>, $ReadOnlyArray<*> | $ReadOnlyArray<*>) => R) &
-    ((string, ObjectPropDefinitionType<Object, P, X>, Object) => R);
+    ((string, BooleanPropDefinitionType<boolean, P, X> | void, boolean) => R) &
+    ((string, StringPropDefinitionType<string, P, X> | void, string) => R) &
+    ((string, NumberPropDefinitionType<number, P, X> | void, number) => R) &
+    ((string, FunctionPropDefinitionType<Function, P, X> | void, Function) => R) &
+    ((string, ArrayPropDefinitionType<$ReadOnlyArray<*> | $ReadOnlyArray<*>, P, X>  | void, $ReadOnlyArray<*> | $ReadOnlyArray<*>) => R) &
+    ((string, ObjectPropDefinitionType<Object, P, X>  | void, Object) => R);
 
 export function eachProp<P, X>(props : PropsType<P>, propsDef : PropsDefinitionType<P, X>, handler : PropCallback<P, X, void>) {
-    for (const key of Object.keys(props)) {
+    // $FlowFixMe[cannot-spread-indexer]
+    for (const key of Object.keys({ ...props, ...propsDef })) {
         const propDef = propsDef[key];
         const value = props[key];
-
-        if (!propDef) {
-            continue;
-        }
 
         // $FlowFixMe[incompatible-call]
         handler(key, propDef, value);
