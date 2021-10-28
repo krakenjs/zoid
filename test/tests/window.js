@@ -443,6 +443,57 @@ describe('zoid window prop cases', () => {
         });
     });
 
+    it.only('should renderTo with a custom popup passed through an iframe, wait for a message from the popup, and close the popup', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return {
+                    simple: zoid.create({
+                        tag:    'test-renderto-custom-popup-message-close-simple',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    }),
+
+                    remote: zoid.create({
+                        tag:    'test-renderto-custom-popup-message-close-remote',
+                        url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                        domain: 'mock://www.child.com'
+                    })
+                };
+            };
+
+            const win = runOnClick(() => {
+                return window.open('', '');
+            });
+
+            return window.__component__().simple({
+                myCustomWindow: win,
+
+                customWindowClosed: expect('customWindowClosed'),
+
+                closeCustomWindow: expect('closeCustomWindow', () => {
+                    win.close();
+                }),
+
+                run: () => `
+                    postRobot.on('initBasicChild', { window: window.xprops.myCustomWindow }, () => {
+                        window.__component__().remote({
+                            window: window.xprops.myCustomWindow,
+                            onClose: window.xprops.customWindowClosed,
+                            closeCustomWindow: window.xprops.closeCustomWindow,
+                            
+                            run: () => \`
+                                window.xprops.closeCustomWindow();
+                            \`
+                        }).renderTo(window.parent, 'body');
+                    });
+                `
+            }).render(getBody()).then(() => {
+                win.location = '/base/test/windows/basicchild/index.htm';
+            });
+        });
+    });
+
     it('should error when a non-window is passed', () => {
         return wrapPromise(({ expect }) => {
 

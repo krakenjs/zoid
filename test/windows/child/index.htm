@@ -36,6 +36,7 @@
         const query = Object.fromEntries(location.search.replace(/^\?/, '').split('&').filter(Boolean).map(entry => entry.split('=')));
 
         window.zoid = __zoid__;
+        window.postRobot = __post_robot__;
         window.mockDomain = query.mockDomain || 'mock://www.child.com';
 
         window.console.karma = parentWindow.console.karma;

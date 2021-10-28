@@ -18,6 +18,12 @@ import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates'
 import { getBuiltInProps, type UserPropsDefinitionType, type PropsDefinitionType, type PropsInputType,
     type PropsType, type ParentPropType, type exportPropType, type DEFINITION_TYPE } from './props';
 
+export const postRobot = {
+    setup:   setupPostRobot,
+    destroy: destroyPostRobot,
+    on, send, bridge, toProxyWindow
+};
+
 type LoggerPayload = { [string] : ?string | ?boolean };
 
 // eslint-disable-next-line flowtype/require-exact-type
