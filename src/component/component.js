@@ -4,14 +4,14 @@
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindow, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
-import { noop, isElement, cleanup, memoize, identity, extend, uniqueID } from 'belter/src';
+import { noop, isElement, cleanup, memoize, identity, extend, uniqueID, values } from 'belter/src';
 
 import { childComponent, type ChildComponent } from '../child';
 import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../parent/parent';
 import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD, PROP_TYPE } from '../constants';
 import { react, angular, vue, vue3, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal, getInitialParentPayload, isChildComponentWindow } from '../lib';
-import type { CssDimensionsType, StringMatcherType } from '../types';
+import type { CssDimensionsType, StringMatcherType, ContainerReferenceType } from '../types';
 
 import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
@@ -135,8 +135,8 @@ export type ZoidComponentInstance<P, X = void, C = void> = {|
     ...C,
     isEligible : () => boolean,
     clone : () => ZoidComponentInstance<P, X, C>,
-    render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
-    renderTo : (target : CrossDomainWindowType, container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
+    render : (container? : ContainerReferenceType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
+    renderTo : (target : CrossDomainWindowType, container? : ContainerReferenceType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
 
 // eslint-disable-next-line flowtype/require-exact-type
@@ -270,7 +270,6 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
     if (__DEBUG__) {
         validateOptions(opts);
     }
-
     const options = normalizeOptions(opts);
 
     const {
@@ -335,7 +334,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         });
     };
 
-    const getDefaultContainer = (context : $Values<typeof CONTEXT>, container? : string | HTMLElement) : string | HTMLElement => {
+    const getDefaultContainer = (context : $Values<typeof CONTEXT>, container? : ContainerReferenceType) : ContainerReferenceType => {
         if (container) {
             if (typeof container !== 'string' && !isElement(container)) {
                 throw new TypeError(`Expected string or element selector to be passed`);
@@ -414,6 +413,13 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         });
 
         const clone = ({ decorate = identity } = {}) => {
+            // Delete any existence of the decorate function before clone the instance
+            // The _originalDefinition was added in the parent/props.js in the decorate logic
+            // $FlowFixMe
+            values(propsDef).forEach(prop => {
+                // $FlowFixMe
+                delete prop._originalDefinition;
+            });
             return init(decorate(props));
         };
 

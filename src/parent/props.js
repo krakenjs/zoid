@@ -1,103 +1,90 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { dotify, isDefined, extend, base64encode } from 'belter/src';
+import { dotify, isDefined, base64encode, extend, getOrSet } from 'belter/src';
 
 import { eachProp, mapProps, type PropsInputType, type PropsType, type PropsDefinitionType } from '../component/props';
-import { PROP_SERIALIZATION, METHOD } from '../constants';
+import { PROP_SERIALIZATION, METHOD, PROP_TYPE } from '../constants';
 
 import type { ParentHelpers } from './index';
 
-function getDefaultInputProps<P>() : P {
-    // $FlowFixMe[incompatible-type]
-    const defaultInputProps : P = {};
-    return defaultInputProps;
-}
-
-export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) {
-
-    inputProps = inputProps || getDefaultInputProps();
-    extend(props, inputProps);
-
-    const propNames = isUpdate ? [] : [ ...Object.keys(propsDef) ];
-
-    for (const key of Object.keys(inputProps)) {
-        if (propNames.indexOf(key) === -1) {
-            propNames.push(key);
-        }
-    }
-
-    const aliases = [];
-
+export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existingProps : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, container : HTMLElement | void) {
     const { state, close, focus, event, onError } = helpers;
+    
+    /* NOTE: The inputProps (PropsInputType) type is not compatible with
+        the existingProps (PropsType) type,
+        that is the reason to removed the parent key from that object and
+        merge with the existingProps object
+    */
+    // eslint-disable-next-line no-unused-vars
+    const { parent, ...inputPropsRest } = inputProps;
+    const newProps = { ...existingProps, ...inputPropsRest };
 
-    for (const key of propNames) {
-        const propDef = propsDef[key];
-
-        // $FlowFixMe
-        let value = inputProps[key];
+    // $FlowFixMe
+    eachProp(inputProps, propsDef, (key, propDef, value) => {
 
         if (!propDef) {
-            continue;
+            // $FlowFixMe
+            newProps[key] = value;
+            return;
         }
 
         const alias = propDef.alias;
-        if (alias) {
-            if (!isDefined(value) && isDefined(inputProps[alias])) {
-                value = inputProps[alias];
-            }
-            aliases.push(alias);
+        if (alias && !isDefined(value) && isDefined(inputProps[alias])) {
+            value = inputProps[alias];
         }
 
         if (propDef.value) {
-            value = propDef.value({ props, state, close, focus, event, onError });
+            value = propDef.value({ props: newProps, state, close, focus, event, onError, container });
         }
 
-        if (!isDefined(value) && propDef.default) {
-            value = propDef.default({ props, state, close, focus, event, onError });
+        if (propDef.default && !isDefined(value) && !isDefined(newProps[key])) {
+            value = propDef.default({ props: newProps, state, close, focus, event, onError, container });
         }
 
         if (isDefined(value)) {
-            if (propDef.type === 'array' ? !Array.isArray(value) : (typeof value !== propDef.type)) {
-                throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
-            }
+            // $FlowFixMe
+            newProps[key] = value;
         }
-        
-        // $FlowFixMe
-        props[key] = value;
-    }
+    });
 
-    for (const alias of aliases) {
-        delete props[alias];
-    }
-
-    eachProp(props, propsDef, (key, propDef, value) => {
+    eachProp(newProps, propsDef, (key, propDef, value) => {
         if (!propDef) {
             return;
+        }
+
+        if (isDefined(value)) {
+            if (propDef.type === PROP_TYPE.ARRAY ? !Array.isArray(value) : (typeof value !== propDef.type)) {
+                throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
+            }
+        } else {
+            if (propDef.required !== false) {
+                throw new Error(`Expected prop "${ key }" to be defined`);
+            }
         }
 
         if (__DEBUG__ && isDefined(value) && propDef.validate) {
             // $FlowFixMe[incompatible-call]
             // $FlowFixMe[incompatible-exact]
-            propDef.validate({ value, props });
+            propDef.validate({ value, props: newProps });
         }
 
         if (isDefined(value) && propDef.decorate) {
-            // $FlowFixMe[incompatible-call]
-            const decoratedValue = propDef.decorate({ value, props, state, close, focus, event, onError });
-            // $FlowFixMe[incompatible-type]
-            props[key] = decoratedValue;
+            // Store the value the first time the decorate props is executed and use it in further executions
+            // This will be delete if the component instance is cloned
+            // $FlowFixMe
+            const originalValue = getOrSet(propDef, '_originalDefinition', () => value);
+            // $FlowFixMe
+            const decoratedValue = propDef.decorate({ value: originalValue, props: newProps, state, close, focus, event, onError, container });
+
+            if (isDefined(decoratedValue)) {
+                // $FlowFixMe[incompatible-type]
+                newProps[key] = decoratedValue;
+            }
         }
     });
 
-    for (const key of Object.keys(propsDef)) {
-        const propDef = propsDef[key];
-        // $FlowFixMe
-        const propVal = props[key];
-        if (propDef.required !== false && !isDefined(propVal)) {
-            throw new Error(`Expected prop "${ key }" to be defined`);
-        }
-    }
+    extend(existingProps, newProps);
 }
 
 export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : (PropsType<P>), method : $Values<typeof METHOD>) : ZalgoPromise<{ [string] : string | boolean }> {
@@ -107,7 +94,7 @@ export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props
     return ZalgoPromise.all(mapProps(props, propsDef, (key, propDef, value) => {
         return ZalgoPromise.resolve().then(() => {
 
-            if (value === null || typeof value === 'undefined') {
+            if (value === null || typeof value === 'undefined' || !propDef) {
                 return;
             }
 
