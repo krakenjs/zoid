@@ -203,7 +203,11 @@ describe('zoid props cases', () => {
                 run: () => `
                     window.xprops.onSuccess(null, {success: true});
                 `,
-                onSuccess:   expect('onSuccess'),
+                onSuccess:   expect('onSuccess', (result) => {
+                    if (result !== true) {
+                        throw new Error(`Expected onSuccess to have been called with true, but was called with ${ result }`);
+                    }
+                }),
                 onError:     avoid('onError')
             });
 
