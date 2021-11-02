@@ -11,7 +11,7 @@ import type { ParentHelpers } from './index';
 export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existingProps : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, container : HTMLElement | void) {
     const { state, close, focus, event, onError } = helpers;
 
-    const newProps = { ...existingProps };
+    const newProps = { ...existingProps, ...inputProps };
 
     // $FlowFixMe
     eachProp(inputProps, propsDef, (key, propDef, value) => {

@@ -87,6 +87,53 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should merge props definition with input props before passing to decorator', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-container-url-param-bug',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        account: {
+                            type:       'string',
+                            queryParam: false,
+                            required:   true,
+                            value:      () => undefined
+                        },
+                        testAccountParam: {
+                            type:       'string',
+                            queryParam: 'account',
+                            decorate:   ({ props }) => props.account,
+                            default:    () => '',
+                            required:   false
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ query: location.search });
+                `,
+                account: '123',
+                passFoo: expect('passFoo', ({ query }) => {
+                    if (query.indexOf(`account=123`) === -1) {
+                        throw new Error(`Expected account=123 in the url, but got ${query}`);
+                    }
+
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
     it('should render a component with a prop with a pre-defined value using container, and pass the value in the url', () => {
         return wrapPromise(({ expect }) => {
             const bodyWidth = getBody().offsetWidth;
