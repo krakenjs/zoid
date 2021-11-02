@@ -38,7 +38,7 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -74,7 +74,7 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -126,7 +126,87 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should pass the inputProp as a parameter in the value function', () => {
+        const expectedAccount = '123';
+
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-input-value-passing',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        account: {
+                            type:       'string',
+                            required:   true,
+                            value:      ({ props }) => {
+                                return props.account;
+                            }
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ account: window.xprops.account });
+                `,
+                account: expectedAccount,
+                passFoo: expect('passFoo', ({ account }) => {
+                    if (account !== expectedAccount) {
+                        throw new Error(`Expected account=${ expectedAccount } in the url, but got account=${ account }`);
+                    }
+
+                })
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should allow decorated functions to change their signature from the original value callback prop', () => {
+        return wrapPromise(({ expect, avoid }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'changing-decorated-function-signature',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        onSuccess: {
+                            type:     'function',
+                            decorate: ({ value, onError }) => {
+                                return (err, result) => {
+                                    if (err || !result) {
+                                        return onError(err);
+                                    }
+
+                                    return value(true);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.onSuccess(null, {success: true});
+                `,
+                onSuccess:   expect('onSuccess'),
+                onError:     avoid('onError')
+            });
+
             return instance.render(getBody());
         });
     });
@@ -197,13 +277,13 @@ describe('zoid props cases', () => {
 
                 postRun: () => {
                     doExpect = true;
-    
+
                     return instance.updateProps({
                         meep: error('meepv2')
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -224,13 +304,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -254,13 +334,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -284,13 +364,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -339,7 +419,7 @@ describe('zoid props cases', () => {
                     if (typeof result[3] !== 'function') {
                         throw new TypeError(`Object ${ JSON.stringify(result) } does not match expected ${ JSON.stringify(expectedResult) }`);
                     }
-                    
+
                     result[3]();
                 }),
 
@@ -391,7 +471,7 @@ describe('zoid props cases', () => {
                     if (typeof result.fn !== 'function') {
                         throw new TypeError(`Object ${ JSON.stringify(result) } does not match expected ${ JSON.stringify(expectedResult) }`);
                     }
-                    
+
                     result.fn();
                 }),
 
@@ -485,7 +565,7 @@ describe('zoid props cases', () => {
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -519,7 +599,7 @@ describe('zoid props cases', () => {
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -548,7 +628,7 @@ describe('zoid props cases', () => {
                     window.xprops.bar();
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -577,7 +657,7 @@ describe('zoid props cases', () => {
                     window.xprops.foo();
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -678,7 +758,7 @@ describe('zoid props cases', () => {
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -771,7 +851,7 @@ describe('zoid props cases', () => {
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -863,7 +943,7 @@ describe('zoid props cases', () => {
                     `;
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
