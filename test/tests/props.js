@@ -41,7 +41,7 @@ describe('zoid props cases', () => {
                     }
                 })
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -82,7 +82,7 @@ describe('zoid props cases', () => {
                     }
                 })
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -99,7 +99,9 @@ describe('zoid props cases', () => {
                             type:       'string',
                             queryParam: false,
                             required:   true,
-                            value:      () => undefined
+                            value:      ({ props }) => {
+                                return props.account;
+                            }
                         },
                         testAccountParam: {
                             type:       'string',
@@ -124,12 +126,12 @@ describe('zoid props cases', () => {
                 account: '123',
                 passFoo: expect('passFoo', ({ query }) => {
                     if (query.indexOf(`account=123`) === -1) {
-                        throw new Error(`Expected account=123 in the url, but got ${query}`);
+                        throw new Error(`Expected account=123 in the url, but got ${ query }`);
                     }
 
                 })
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -171,7 +173,7 @@ describe('zoid props cases', () => {
                     }
                 })
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -215,7 +217,7 @@ describe('zoid props cases', () => {
             });
 
             Object.defineProperty(document, 'readyState', { value: 'loading', configurable: true });
-            
+
             const renderPromise = instance.render('#container-element');
 
             const container = document.createElement('div');
@@ -257,7 +259,7 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -293,7 +295,7 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -345,7 +347,7 @@ describe('zoid props cases', () => {
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -416,13 +418,13 @@ describe('zoid props cases', () => {
 
                 postRun: () => {
                     doExpect = true;
-    
+
                     return instance.updateProps({
                         meep: error('meepv2')
                     });
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -443,13 +445,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -473,13 +475,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -503,13 +505,13 @@ describe('zoid props cases', () => {
             return component({
 
                 customProp: expectedResult,
-    
+
                 foo: expect('foo', bar => {
                     if (bar !== expectedResult) {
                         throw new Error(`Expected bar to be 'bar', got ${ bar }`);
                     }
                 }),
-    
+
                 run: () => `
                     window.xprops.foo(window.xprops.customProp);
                 `
@@ -558,7 +560,7 @@ describe('zoid props cases', () => {
                     if (typeof result[3] !== 'function') {
                         throw new TypeError(`Object ${ JSON.stringify(result) } does not match expected ${ JSON.stringify(expectedResult) }`);
                     }
-                    
+
                     result[3]();
                 }),
 
@@ -610,7 +612,7 @@ describe('zoid props cases', () => {
                     if (typeof result.fn !== 'function') {
                         throw new TypeError(`Object ${ JSON.stringify(result) } does not match expected ${ JSON.stringify(expectedResult) }`);
                     }
-                    
+
                     result.fn();
                 }),
 
@@ -704,7 +706,7 @@ describe('zoid props cases', () => {
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -738,7 +740,7 @@ describe('zoid props cases', () => {
                     window.xprops.passProp(window.xprops.foo);
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -767,7 +769,7 @@ describe('zoid props cases', () => {
                     window.xprops.bar();
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -796,7 +798,7 @@ describe('zoid props cases', () => {
                     window.xprops.foo();
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -897,7 +899,7 @@ describe('zoid props cases', () => {
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -990,7 +992,7 @@ describe('zoid props cases', () => {
                     window.xprops.getQuery(window.location.search.slice(1));
                 `
             });
-            
+
             return instance.render(getBody());
         });
     });
@@ -1082,7 +1084,7 @@ describe('zoid props cases', () => {
                     `;
                 }
             });
-            
+
             return instance.render(getBody());
         });
     });
