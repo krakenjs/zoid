@@ -1,205 +1,156 @@
 # Prop Definitions
 
-## type
+## type `string`
 
-`string`
+  The data-type expected for the prop
 
-The data-type expected for the prop
+  - `'string'`
+  - `'number'`
+  - `'boolean'`
+  - `'object'`
+  - `'function'`
+  - `'array'`
 
-- `'string'`
-- `'number'`
-- `'boolean'`
-- `'object'`
-- `'function'`
-- `'array'`
+## required `boolean`
 
-## required
+  Whether or not the prop is mandatory. Defaults to `true`.
 
-`boolean`
+  ```javascript
+  onLogin: {
+      type: 'function',
+      required: false
+  }
+  ```
 
-Whether or not the prop is mandatory. Defaults to `true`.
+## default `({ props }) => value`
 
-```javascript
-onLogin: {
-    type: 'function',
-    required: false
-}
-```
+  A function returning the default value for the prop, if none is passed
 
-## default
+  ```javascript
+  email: {
+      type: 'string',
+      required: false,
+      default: function() {
+          return 'a@b.com';
+      }
+  }
+  ```
 
-```javascript
-({
-    props : Props,
-    state : Object,
-    close : () => Promise<undefined>,
-    focus : () => Promise<undefined>,
-    onError : (mixed) => Promise<undefined>,
-    container : HTMLElement | undefined,
-    event : Event
-}) => value
-```
+## validate `({ value, props }) => void`
 
-A function returning the default value for the prop, if none is passed
+  A function to validate the passed value. Should throw an appropriate error if invalid.
 
-```javascript
-email: {
-    type: 'string',
-    required: false,
-    default: function() {
-        return 'a@b.com';
-    }
-}
-```
+  ```javascript
+  email: {
+      type: 'string',
+      validate: function({ value, props }) {
+          if (!value.match(/^.+@.+\..+$/)) {
+              throw new TypeError(`Expected email to be valid format`);
+          }
+      }
+  }
+  ```
 
-## validate
+## queryParam `boolean | string | (value) => string`
 
-`({ value, props }) => void`
+  Should a prop be passed in the url.
 
-A function to validate the passed value. Should throw an appropriate error if invalid.
+  ```javascript
+  email: {
+      type: 'string',
+      queryParam: true // ?email=foo@bar.com
+  }
+  ```
 
-```javascript
-email: {
-    type: 'string',
-    validate: function({ value, props }) {
-        if (!value.match(/^.+@.+\..+$/)) {
-            throw new TypeError(`Expected email to be valid format`);
-        }
-    }
-}
-```
+  If a string is set, this specifies the url param name which will be used. 
 
-## queryParam
+  ```javascript
+  email: {
+      type: 'string',
+      queryParam: 'user-email' // ?user-email=foo@bar.com
+  }
+  ```
 
-`boolean | string | (value) => string`
+  If a function is set, this is called to determine the url param which should be used.
 
-Should a prop be passed in the url.
+  ```javascript
+  email: {
+      type: 'string',
+      queryParam: function({ value }) {
+          if (value.indexOf('@foo.com') !== -1) {
+              return 'foo-email'; // ?foo-email=person@foo.com
+          } else {
+              return 'generic-email'; // ?generic-email=person@whatever.com
+          }
+      }
+  }
+  ```
 
-```javascript
-email: {
-    type: 'string',
-    queryParam: true // ?email=foo@bar.com
-}
-```
+## value `({ props }) => value`
 
-If a string is set, this specifies the url param name which will be used. 
+  The value for the prop, if it should be statically defined at component creation time
 
-```javascript
-email: {
-    type: 'string',
-    queryParam: 'user-email' // ?user-email=foo@bar.com
-}
-```
+  ```javascript
+  userAgent: {
+      type: 'string',
+      value() {
+          return window.navigator.userAgent;
+      }
+  }
+  ```
 
-If a function is set, this is called to determine the url param which should be used.
+## decorate `({ value, props }) => value`
 
-```javascript
-email: {
-    type: 'string',
-    queryParam: function({ value }) {
-        if (value.indexOf('@foo.com') !== -1) {
-            return 'foo-email'; // ?foo-email=person@foo.com
-        } else {
-            return 'generic-email'; // ?generic-email=person@whatever.com
-        }
-    }
-}
-```
+  A function used to decorate the prop at render-time. Called with the value of the prop, should return the new value.
 
-## value
+  ```javascript
+  onLogin: {
+      type: 'function',
+      decorate(original) {
+          return function() {
+              console.log('User logged in!');
+              return original.apply(this, arguments);
+          };
+      }
+  }
+  ```
 
-```javascript
-({
-    props : Props,
-    state : Object,
-    close : () => Promise<undefined>,
-    focus : () => Promise<undefined>,
-    onError : (mixed) => Promise<undefined>,
-    container : HTMLElement | undefined,
-    event : Event
-}) => value
-```
+## serialization `string`
 
-The value for the prop, if it should be statically defined at component creation time
+  If `json`, the prop will be JSON stringified before being inserted into the url
 
-```javascript
-userAgent: {
-    type: 'string',
-    value() {
-        return window.navigator.userAgent;
-    }
-}
-```
+  ```javascript
+  user: {
+      type: 'object',
+      serialization: 'json' // ?user={"name":"Zippy","age":34}
+  }
+  ```
 
-## decorate
+  If `dotify` the prop will be converted to dot-notation.
 
-```javascript
-({
-    props : Props,
-    state : Object,
-    close : () => Promise<undefined>,
-    focus : () => Promise<undefined>,
-    onError : (mixed) => Promise<undefined>,
-    container : HTMLElement | undefined,
-    event : Event,
-    value : Value
-}) => value
-```
+  ```javascript
+  user: {
+      type: 'object',
+      serialization: 'dotify' // ?user.name=Zippy&user.age=34
+  }
+  ```
 
-A function used to decorate the prop at render-time. Called with the value of the prop, should return the new value.
+  If `base64`, the prop will be JSON stringified then base64 encoded before being inserted into the url
 
-```javascript
-onLogin: {
-    type: 'function',
-    decorate(original) {
-        return function() {
-            console.log('User logged in!');
-            return original.apply(this, arguments);
-        };
-    }
-}
-```
+  ```javascript
+  user: {
+      type: 'object',
+      serialization: 'base64' // ?user=eyJuYW1lIjoiWmlwcHkiLCJhZ2UiOjM0fQ==
+  }
+  ```
 
-## serialization
+## alias `string`
 
-`string`
+  An aliased name for the prop
 
-If `json`, the prop will be JSON stringified before being inserted into the url
-
-```javascript
-user: {
-    type: 'object',
-    serialization: 'json' // ?user={"name":"Zippy","age":34}
-}
-```
-
-If `dotify` the prop will be converted to dot-notation.
-
-```javascript
-user: {
-    type: 'object',
-    serialization: 'dotify' // ?user.name=Zippy&user.age=34
-}
-```
-
-If `base64`, the prop will be JSON stringified then base64 encoded before being inserted into the url
-
-```javascript
-user: {
-    type: 'object',
-    serialization: 'base64' // ?user=eyJuYW1lIjoiWmlwcHkiLCJhZ2UiOjM0fQ==
-}
-```
-
-## alias
-
-`string`
-
-An aliased name for the prop
-
-```javascript
-onLogin: {
-    type: 'function',
-    alias: 'onUserLogin'
-}
-```
+  ```javascript
+  onLogin: {
+      type: 'function',
+      alias: 'onUserLogin'
+  }
+  ```

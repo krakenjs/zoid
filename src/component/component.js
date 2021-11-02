@@ -11,7 +11,7 @@ import { type RenderOptionsType, type ParentHelpers, parentComponent } from '../
 import { ZOID, CONTEXT, POST_MESSAGE, WILDCARD, METHOD, PROP_TYPE } from '../constants';
 import { react, angular, vue, vue3, angular2 } from '../drivers';
 import { getGlobal, destroyGlobal, getInitialParentPayload, isChildComponentWindow } from '../lib';
-import type { CssDimensionsType, StringMatcherType, ContainerReferenceType } from '../types';
+import type { CssDimensionsType, StringMatcherType } from '../types';
 
 import { validateOptions } from './validate';
 import { defaultContainerTemplate, defaultPrerenderTemplate } from './templates';
@@ -135,8 +135,8 @@ export type ZoidComponentInstance<P, X = void, C = void> = {|
     ...C,
     isEligible : () => boolean,
     clone : () => ZoidComponentInstance<P, X, C>,
-    render : (container? : ContainerReferenceType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
-    renderTo : (target : CrossDomainWindowType, container? : ContainerReferenceType, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
+    render : (container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>,
+    renderTo : (target : CrossDomainWindowType, container? : string | HTMLElement, context? : $Values<typeof CONTEXT>) => ZalgoPromise<void>
 |};
 
 // eslint-disable-next-line flowtype/require-exact-type
@@ -335,7 +335,7 @@ export function component<P, X, C>(opts : ComponentOptionsType<P, X, C>) : Compo
         });
     };
 
-    const getDefaultContainer = (context : $Values<typeof CONTEXT>, container? : ContainerReferenceType) : ContainerReferenceType => {
+    const getDefaultContainer = (context : $Values<typeof CONTEXT>, container? : string | HTMLElement) : string | HTMLElement => {
         if (container) {
             if (typeof container !== 'string' && !isElement(container)) {
                 throw new TypeError(`Expected string or element selector to be passed`);
