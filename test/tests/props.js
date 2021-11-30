@@ -1090,4 +1090,261 @@ describe('zoid props cases', () => {
             }
         });
     });
+
+    it('should instantiate a component, decorate a prop, update the prop, and get the latest decorated value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-update-decorated-multiple-times',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ value }) => {
+                                return value * 2;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                baz: 2,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== 4) {
+                        throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                    }
+
+                    return instance.updateProps({
+                        baz: 3
+                    });
+                }),
+
+                passBazAgain: expect('passBazAgain', (baz) => {
+                    if (baz !== 6) {
+                        throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                    const propListener = window.xprops.onProps(function() {
+                        window.xprops.passBazAgain(window.xprops.baz);
+                    });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, update the prop multiple times, and get the latest decorated value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-update-decorated-multiple-times-updated-multiple-times',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ value }) => {
+                                return value * 2;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                baz: 2,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== 4) {
+                        throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                    }
+
+                    return instance.updateProps({
+                        baz: 3
+                    });
+                }),
+
+                passBazAgain: expect('passBazAgain', (baz) => {
+                    if (baz !== 6) {
+                        throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                    }
+
+                    return instance.updateProps({
+                        baz: 8
+                    });
+                }),
+
+                passBazAgainAgain: expect('passBazAgainAgain', (baz) => {
+                    if (baz !== 16) {
+                        throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                    const propListener = window.xprops.onProps(function() {
+                        window.xprops.passBazAgain(window.xprops.baz);
+
+                        propListener.cancel();
+                        const propListener2 = window.xprops.onProps(function() {
+                            window.xprops.passBazAgainAgain(window.xprops.baz);
+                            propListener2.cancel();
+                        });
+                    });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, update the prop, and get the latest decorated value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-update-decorated-multiple-times-multiple-instances',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ value }) => {
+                                return value * 2;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+
+            return ZalgoPromise.all(new Array(3).fill(0).map(() => {
+                const startingNumber = Math.floor(Math.random() * 10);
+                const startingNumber2 = Math.floor(Math.random() * 10);
+
+                const instance = component({
+                    baz: startingNumber,
+    
+                    passBaz: expect('passBaz', (baz) => {
+                        if (baz !== startingNumber * 2) {
+                            throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                        }
+    
+                        return instance.updateProps({
+                            baz: startingNumber2
+                        });
+                    }),
+    
+                    passBazAgain: expect('passBazAgain', (baz) => {
+                        if (baz !== startingNumber2 * 2) {
+                            throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                        }
+                    }),
+    
+                    run: () => `
+                        window.xprops.passBaz(window.xprops.baz);
+                        const propListener = window.xprops.onProps(function() {
+                            window.xprops.passBazAgain(window.xprops.baz);
+                        });
+                    `
+                });
+    
+                return instance.render(getBody());
+            }));
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, update the prop, and get the latest decorated value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-update-decorated-multiple-times-multiple-instances-updated-multiple-times',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ value }) => {
+                                return value * 2;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+
+            return ZalgoPromise.all(new Array(3).fill(0).map(() => {
+                const startingNumber = Math.floor(Math.random() * 10);
+                const startingNumber2 = Math.floor(Math.random() * 10);
+                const startingNumber3 = Math.floor(Math.random() * 10);
+
+                const instance = component({
+                    baz: startingNumber,
+    
+                    passBaz: expect('passBaz', (baz) => {
+                        if (baz !== startingNumber * 2) {
+                            throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                        }
+    
+                        return instance.updateProps({
+                            baz: startingNumber2
+                        });
+                    }),
+    
+                    passBazAgain: expect('passBazAgain', (baz) => {
+                        if (baz !== startingNumber2 * 2) {
+                            throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                        }
+
+                        return instance.updateProps({
+                            baz: startingNumber3
+                        });
+                    }),
+
+                    passBazAgainAgain: expect('passBazAgainAgain', (baz) => {
+                        if (baz !== startingNumber3 * 2) {
+                            throw new Error(`Expected prop to have the correct value; got ${ baz }`);
+                        }
+                    }),
+    
+                    run: () => `
+                        window.xprops.passBaz(window.xprops.baz);
+                        const propListener = window.xprops.onProps(function() {
+                            window.xprops.passBazAgain(window.xprops.baz);
+
+                            propListener.cancel();
+                            const propListener2 = window.xprops.onProps(function() {
+                                window.xprops.passBazAgainAgain(window.xprops.baz);
+                                propListener2.cancel();
+                            });
+                        });
+                    `
+                });
+    
+                return instance.render(getBody());
+            }));
+        });
+    });
 });

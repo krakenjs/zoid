@@ -27,7 +27,7 @@ export type ChildHelpers<P, X> = {|
     focus : () => ZalgoPromise<void>,
     resize : ({| width : ?number, height : ?number |}) => ZalgoPromise<void>,
     onError : (mixed) => ZalgoPromise<void>,
-    onProps : ((PropsType<P>) => void) => void,
+    onProps : ((PropsType<P>) => void) => {| cancel : () => void |},
     getParent : () => CrossDomainWindowType,
     getParentDomain : () => string,
     show : () => ZalgoPromise<void>,
@@ -83,6 +83,11 @@ export function childComponent<P, X, C>(options : NormalizedComponentOptionsType
     
     const onProps = (handler : Function) => {
         onPropHandlers.push(handler);
+        return {
+            cancel: () => {
+                onPropHandlers.splice(onPropHandlers.indexOf(handler), 1);
+            }
+        };
     };
 
     const resize = ({ width, height } : {| width : ?number, height : ?number |}) : ZalgoPromise<void> => {

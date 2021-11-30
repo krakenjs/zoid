@@ -37,7 +37,7 @@ export type onDestroyPropType = EventHandlerType<void>;
 export type onResizePropType = EventHandlerType<void>;
 export type onFocusPropType = EventHandlerType<void>;
 export type onErrorPropType = EventHandlerType<mixed>;
-export type onPropsPropType<P> = ((PropsType<P>) => void) => void; // eslint-disable-line no-use-before-define
+export type onPropsPropType<P> = ((PropsType<P>) => void) => {| cancel : () => void |}; // eslint-disable-line no-use-before-define
 
 export type ParentPropType<P, X> = {|
     uid : string,
