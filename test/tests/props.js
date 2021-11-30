@@ -952,4 +952,142 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should pass all input props through to value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-derived-from-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:  'string'
+                        },
+                        bar: {
+                            type:  'string',
+                            value: ({ props }) => props.foo
+                        },
+                        passBar: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passBar({ bar: xprops.bar });
+                `,
+                foo:     'foo',
+                passBar: expect('passBar', ({ bar }) => {
+                    if (bar !== 'foo') {
+                        throw new Error(`Expected prop to have the correct value; got ${ bar }`);
+                    }
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
+    it('should pass all input props through to value, even for the same prop', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-derived-from-props-with-same-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        bar: {
+                            type:  'string',
+                            value: ({ props }) => props.bar
+                        },
+                        passBar: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passBar({ bar: xprops.bar });
+                `,
+                bar:     'foo',
+                passBar: expect('passBar', ({ bar }) => {
+                    if (bar !== 'foo') {
+                        throw new Error(`Expected prop to have the correct value; got ${ bar }`);
+                    }
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
+    it('should error out if a required prop has an value function which returns undefined', () => {
+        return wrapPromise(() => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-undefined-error',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:  'string',
+                            value: () => undefined
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            
+            let error;
+
+            try {
+                component();
+            } catch (err) {
+                error = err;
+            }
+
+            if (!error) {
+                throw new Error(`Expected error to be thrown`);
+            }
+        });
+    });
+
+    it('should error out if a required prop has both required:true and a default value', () => {
+        return wrapPromise(() => {
+            let error;
+
+            try {
+                zoid.create({
+                    tag:    'test-prop-value-required-default',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:     'string',
+                            required: true,
+                            default:  () => 'foo'
+                        }
+                    }
+                });
+            } catch (err) {
+                error = err;
+            }
+
+            if (!error) {
+                throw new Error(`Expected error to be thrown`);
+            }
+        });
+    });
 });
