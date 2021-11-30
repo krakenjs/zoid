@@ -11,7 +11,7 @@ import type { ParentHelpers } from './index';
 export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existingProps : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, container : HTMLElement | void) {
     const { state, close, focus, event, onError } = helpers;
 
-    const newProps = { ...existingProps };
+    const newProps = { ...existingProps, ...inputProps };
 
     // $FlowFixMe
     eachProp(inputProps, propsDef, (key, propDef, value) => {
@@ -36,38 +36,38 @@ export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existing
         }
 
         if (isDefined(value)) {
-            // $FlowFixMe
-            newProps[key] = value;
-        }
-    });
-
-    eachProp(newProps, propsDef, (key, propDef, value) => {
-        if (!propDef) {
-            return;
-        }
-
-        if (isDefined(value)) {
             if (propDef.type === PROP_TYPE.ARRAY ? !Array.isArray(value) : (typeof value !== propDef.type)) {
                 throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
             }
         } else {
-            if (propDef.required !== false) {
+            if (propDef.required !== false && !isDefined(newProps[key])) {
                 throw new Error(`Expected prop "${ key }" to be defined`);
             }
         }
 
         if (__DEBUG__ && isDefined(value) && propDef.validate) {
-            // $FlowFixMe[incompatible-call]
-            // $FlowFixMe[incompatible-exact]
+            // $FlowFixMe
             propDef.validate({ value, props: newProps });
         }
 
+        if (isDefined(value)) {
+            // $FlowFixMe
+            newProps[key] = value;
+        }
+    });
+
+    // $FlowFixMe
+    eachProp(inputProps, propsDef, (key, propDef, value) => {
+        if (!propDef) {
+            return;
+        }
+
         if (isDefined(value) && propDef.decorate) {
-            // $FlowFixMe[incompatible-call]
+            // $FlowFixMe
             const decoratedValue = propDef.decorate({ value, props: newProps, state, close, focus, event, onError, container });
 
             if (isDefined(decoratedValue)) {
-                // $FlowFixMe[incompatible-type]
+                // $FlowFixMe
                 newProps[key] = decoratedValue;
             }
         }
