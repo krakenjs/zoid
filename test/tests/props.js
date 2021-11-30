@@ -1348,6 +1348,110 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should instantiate a component, decorate a prop, and get a passed value in the value function', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-value-passed-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type: 'number'
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            // $FlowFixMe
+                            value:    ({ props, value }) => {
+                                if (typeof value !== 'undefined') {
+                                    throw new TypeError(`Expected value to be undefined in value function`);
+                                }
+
+                                return props.foo;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const expectedValue = fooValue;
+
+            const component = window.__component__();
+            const instance = component({
+                foo: fooValue,
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, and get a passed value in the default function', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = Math.floor(Math.random() * 100);
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-default-passed-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type: 'number'
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            // $FlowFixMe
+                            default:  ({ props, value }) => {
+                                if (typeof value !== 'undefined') {
+                                    throw new TypeError(`Expected value to be undefined in default function`);
+                                }
+
+                                return props.foo;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const expectedValue = fooValue;
+
+            const component = window.__component__();
+            const instance = component({
+                foo: fooValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
     it('should instantiate a component, decorate a prop, and get a passed value in the decorator', () => {
         return wrapPromise(({ expect }) => {
             const fooValue = Math.floor(Math.random() * 100);
