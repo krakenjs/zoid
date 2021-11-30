@@ -1347,4 +1347,248 @@ describe('zoid props cases', () => {
             }));
         });
     });
+
+    it('should instantiate a component, decorate a prop, and get a passed value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-passed-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type: 'number'
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ props, value }) => {
+                                return props.foo * value;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const expectedValue = fooValue * bazValue;
+
+            const component = window.__component__();
+            const instance = component({
+                foo: fooValue,
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, and get an aliased value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-alias-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:  'number',
+                            alias: 'bar'
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ props, value }) => {
+                                return props.foo * value;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            const expectedValue = fooValue * bazValue;
+
+            const component = window.__component__();
+            const instance = component({
+                bar: fooValue,
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it.skip('should instantiate a component, decorate a prop, and get a reverse-aliased value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-reverse-alias-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:  'number',
+                            alias: 'bar'
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ props, value }) => {
+                                return props.bar * value;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            const expectedValue = fooValue * bazValue;
+
+            const component = window.__component__();
+            const instance = component({
+                foo: fooValue,
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, and get a calculated value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-value-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:  'number',
+                            value: () => fooValue
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ props, value }) => {
+                                return props.foo * value;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const expectedValue = fooValue * bazValue;
+
+            const component = window.__component__();
+            const instance = component({
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, and get a default value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = Math.floor(Math.random() * 100);
+            const bazValue = Math.floor(Math.random() * 100);
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-default-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:    'number',
+                            default: () => fooValue
+                        },
+                        baz: {
+                            type:     'number',
+                            required: false,
+                            decorate: ({ props, value }) => {
+                                return props.foo * value;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const expectedValue = fooValue * bazValue;
+
+            const component = window.__component__();
+            const instance = component({
+                baz: bazValue,
+
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
 });
