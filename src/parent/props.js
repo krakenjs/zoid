@@ -1,103 +1,80 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { dotify, isDefined, extend, base64encode } from 'belter/src';
+import { dotify, isDefined, base64encode, noop } from 'belter/src';
 
 import { eachProp, mapProps, type PropsInputType, type PropsType, type PropsDefinitionType } from '../component/props';
-import { PROP_SERIALIZATION, METHOD } from '../constants';
+import { PROP_SERIALIZATION, METHOD, PROP_TYPE } from '../constants';
 
 import type { ParentHelpers } from './index';
 
-function getDefaultInputProps<P>() : P {
-    // $FlowFixMe[incompatible-type]
-    const defaultInputProps : P = {};
-    return defaultInputProps;
-}
-
-export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, isUpdate : boolean = false) {
-
-    inputProps = inputProps || getDefaultInputProps();
-    extend(props, inputProps);
-
-    const propNames = isUpdate ? [] : [ ...Object.keys(propsDef) ];
-
-    for (const key of Object.keys(inputProps)) {
-        if (propNames.indexOf(key) === -1) {
-            propNames.push(key);
-        }
-    }
-
-    const aliases = [];
-
+export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existingProps : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, container : HTMLElement | void) {
     const { state, close, focus, event, onError } = helpers;
 
-    for (const key of propNames) {
-        const propDef = propsDef[key];
+    // $FlowFixMe
+    eachProp(inputProps, propsDef, (key, propDef, val) => {
+        let valueDetermined = false;
+        let value = val;
 
-        // $FlowFixMe
-        let value = inputProps[key];
+        const getDerivedValue = () => {
+            if (!propDef) {
+                return value;
+            }
 
-        if (!propDef) {
-            continue;
-        }
-
-        const alias = propDef.alias;
-        if (alias) {
-            if (!isDefined(value) && isDefined(inputProps[alias])) {
+            const alias = propDef.alias;
+            if (alias && !isDefined(val) && isDefined(inputProps[alias])) {
                 value = inputProps[alias];
             }
-            aliases.push(alias);
-        }
-
-        if (propDef.value) {
-            value = propDef.value({ props, state, close, focus, event, onError });
-        }
-
-        if (!isDefined(value) && propDef.default) {
-            value = propDef.default({ props, state, close, focus, event, onError });
-        }
-
-        if (isDefined(value)) {
-            if (propDef.type === 'array' ? !Array.isArray(value) : (typeof value !== propDef.type)) {
-                throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
+    
+            if (propDef.value) {
+                value = propDef.value({ props: existingProps, state, close, focus, event, onError, container });
             }
-        }
-        
-        // $FlowFixMe
-        props[key] = value;
-    }
+    
+            if (propDef.default && !isDefined(value) && !isDefined(inputProps[key])) {
+                value = propDef.default({ props: existingProps, state, close, focus, event, onError, container });
+            }
 
-    for (const alias of aliases) {
-        delete props[alias];
-    }
+            if (isDefined(value)) {
+                if (propDef.type === PROP_TYPE.ARRAY ? !Array.isArray(value) : (typeof value !== propDef.type)) {
+                    throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
+                }
+            } else {
+                if (propDef.required !== false && !isDefined(inputProps[key])) {
+                    throw new Error(`Expected prop "${ key }" to be defined`);
+                }
+            }
+    
+            if (__DEBUG__ && isDefined(value) && propDef.validate) {
+                // $FlowFixMe
+                propDef.validate({ value, props: inputProps });
+            }
 
-    eachProp(props, propsDef, (key, propDef, value) => {
-        if (!propDef) {
-            return;
-        }
+            if (isDefined(value) && propDef.decorate) {
+                // $FlowFixMe
+                value = propDef.decorate({ value, props: existingProps, state, close, focus, event, onError, container });
+            }
 
-        if (__DEBUG__ && isDefined(value) && propDef.validate) {
-            // $FlowFixMe[incompatible-call]
-            // $FlowFixMe[incompatible-exact]
-            propDef.validate({ value, props });
-        }
+            return value;
+        };
 
-        if (isDefined(value) && propDef.decorate) {
-            // $FlowFixMe[incompatible-call]
-            const decoratedValue = propDef.decorate({ value, props, state, close, focus, event, onError });
-            // $FlowFixMe[incompatible-type]
-            props[key] = decoratedValue;
-        }
+        const getter = () => {
+            if (valueDetermined) {
+                return value;
+            }
+
+            valueDetermined = true;
+            return getDerivedValue();
+        };
+
+        Object.defineProperty(existingProps, key, {
+            configurable: true,
+            enumerable:   true,
+            get:          getter
+        });
     });
 
-    for (const key of Object.keys(propsDef)) {
-        const propDef = propsDef[key];
-        // $FlowFixMe
-        const propVal = props[key];
-        if (propDef.required !== false && !isDefined(propVal)) {
-            throw new Error(`Expected prop "${ key }" to be defined`);
-        }
-    }
+    // $FlowFixMe
+    eachProp(existingProps, propsDef, noop);
 }
 
 export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props : (PropsType<P>), method : $Values<typeof METHOD>) : ZalgoPromise<{ [string] : string | boolean }> {
@@ -107,7 +84,7 @@ export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props
     return ZalgoPromise.all(mapProps(props, propsDef, (key, propDef, value) => {
         return ZalgoPromise.resolve().then(() => {
 
-            if (value === null || typeof value === 'undefined') {
+            if (value === null || typeof value === 'undefined' || !propDef) {
                 return;
             }
 

@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: off */
 
-import { wrapPromise, noop, parseQuery, destroyElement } from 'belter/src';
+import { wrapPromise, noop, parseQuery, destroyElement, getElement } from 'belter/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { onWindowOpen, getBody } from '../common';
@@ -43,6 +43,141 @@ describe('zoid props cases', () => {
             });
             
             return instance.render(getBody());
+        });
+    });
+
+    it('should render a component with a prop with a pre-defined value using container', () => {
+        return wrapPromise(({ expect }) => {
+            const bodyWidth = getBody().offsetWidth;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-container',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:     'number',
+                            required: false,
+                            value:    ({ container }) => {
+                                return container?.offsetWidth;
+                            }
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ foo: xprops.foo });
+                `,
+                passFoo: expect('passFoo', ({ foo }) => {
+                    if (foo !== bodyWidth) {
+                        throw new Error(`Expected prop to have the correct value; got ${ foo }`);
+                    }
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
+    it('should render a component with a prop with a pre-defined value using container, and pass the value in the url', () => {
+        return wrapPromise(({ expect }) => {
+            const bodyWidth = getBody().offsetWidth;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-container-url-param',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:     'number',
+                            required: false,
+                            value:    ({ container }) => {
+                                return container ? getElement(container)?.offsetWidth : null;
+                            },
+                            queryParam: true
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ query: location.search });
+                `,
+                passFoo: expect('passFoo', ({ query }) => {
+                    if (query.indexOf(`foo=${ bodyWidth }`) === -1) {
+                        throw new Error(`Expected foo=${ bodyWidth } in the url`);
+                    }
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
+    it('should render a component with a prop with a pre-defined value using container, and pass the value in the url, with a lazy element', () => {
+        return wrapPromise(({ expect }) => {
+            const bodyWidth = getBody().offsetWidth;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-container-url-param-element-not-ready',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:     'number',
+                            required: false,
+                            value:    ({ container }) => {
+                                return container ? getElement(container)?.offsetWidth : null;
+                            },
+                            queryParam: true
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ query: location.search });
+                `,
+                passFoo: expect('passFoo', ({ query }) => {
+                    if (query.indexOf(`foo=${ bodyWidth }`) === -1) {
+                        throw new Error(`Expected foo=${ bodyWidth } in the url`);
+                    }
+                })
+            });
+
+            Object.defineProperty(document, 'readyState', { value: 'loading', configurable: true });
+            
+            const renderPromise = instance.render('#container-element');
+
+            const container = document.createElement('div');
+            container.setAttribute('id', 'container-element');
+            getBody().appendChild(container);
+
+            Object.defineProperty(document, 'readyState', { value: 'ready', configurable: true });
+
+            return renderPromise;
         });
     });
 
@@ -2075,7 +2210,6 @@ describe('zoid props cases', () => {
                     }
                 });
             };
-        
 
             const component = window.__component__();
             const instance = component({
@@ -2087,8 +2221,6 @@ describe('zoid props cases', () => {
                     if (props.bar !== barValue) {
                         throw new Error(`Expected props.bar to have the correct value of ${ barValue }; got ${ props.bar }`);
                     }
-
-                    /*
                     
                     if (props.superprop.foo !== fooValue) {
                         throw new Error(`Expected props.superprop.foo to have the correct value of ${ fooValue }; got ${ props.superprop.foo }`);
@@ -2097,8 +2229,6 @@ describe('zoid props cases', () => {
                     if (props.superprop.bar !== barValue) {
                         throw new Error(`Expected props.superprop.bar to have the correct value of ${ barValue }; got ${ props.superprop.bar }`);
                     }
-
-                    */
 
                     if (typeof props.superpropfunc !== 'function') {
                         throw new TypeError(`Expected props.superpropfunc to have the correct type of 'function'; got ${ typeof props.superpropfunc }`);
