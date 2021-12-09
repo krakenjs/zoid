@@ -1820,14 +1820,14 @@ describe('zoid props cases', () => {
         });
     });
 
-    it.only('should instantiate a component, decorate a prop, and get a self-calculated value in the decorator', () => {
+    it('should instantiate a component, decorate a prop, and get a self-calculated value in the decorator', () => {
         return wrapPromise(({ expect }) => {
             const bazValue = 'baz';
             const expectedValue = 'baz_baz_decorated';
 
             window.__component__ = () => {
                 return zoid.create({
-                    tag:    'test-decorated-value-prop',
+                    tag:    'test-decorated-self-value-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
 
@@ -1908,14 +1908,14 @@ describe('zoid props cases', () => {
         });
     });
 
-    it.only('should instantiate a component, decorate a prop, and get a self-default value in the decorator', () => {
+    it('should instantiate a component, decorate a prop, and get a self-default value in the decorator', () => {
         return wrapPromise(({ expect }) => {
             const bazValue = 'baz';
             const expectedValue = 'baz_baz_decorated';
 
             window.__component__ = () => {
                 return zoid.create({
-                    tag:    'test-decorated-default-prop',
+                    tag:    'test-decorated-self-default-prop',
                     url:    'mock://www.child.com/base/test/windows/child/index.htm',
                     domain: 'mock://www.child.com',
 

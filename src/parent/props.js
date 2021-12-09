@@ -11,13 +11,12 @@ import type { ParentHelpers } from './index';
 export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existingProps : PropsType<P>, inputProps : PropsInputType<P>, helpers : ParentHelpers<P>, container : HTMLElement | void) {
     const { state, close, focus, event, onError } = helpers;
 
-    const newProps = { ...existingProps, ...inputProps };
+    const allProps = { ...existingProps, ...inputProps };
+    const newProps = {};
 
     // $FlowFixMe
     eachProp(inputProps, propsDef, (key, propDef, value) => {
-
         if (!propDef) {
-            // $FlowFixMe
             newProps[key] = value;
             return;
         }
@@ -28,11 +27,11 @@ export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existing
         }
 
         if (propDef.value) {
-            value = propDef.value({ props: newProps, state, close, focus, event, onError, container });
+            value = propDef.value({ props: allProps, state, close, focus, event, onError, container });
         }
 
-        if (propDef.default && !isDefined(value) && !isDefined(newProps[key])) {
-            value = propDef.default({ props: newProps, state, close, focus, event, onError, container });
+        if (propDef.default && !isDefined(value) && !isDefined(allProps[key])) {
+            value = propDef.default({ props: allProps, state, close, focus, event, onError, container });
         }
 
         if (isDefined(value)) {
@@ -40,35 +39,33 @@ export function extendProps<P, X>(propsDef : PropsDefinitionType<P, X>, existing
                 throw new TypeError(`Prop is not of type ${ propDef.type }: ${ key }`);
             }
         } else {
-            if (propDef.required !== false && !isDefined(newProps[key])) {
+            if (propDef.required !== false && !isDefined(allProps[key])) {
                 throw new Error(`Expected prop "${ key }" to be defined`);
             }
         }
 
         if (__DEBUG__ && isDefined(value) && propDef.validate) {
             // $FlowFixMe
-            propDef.validate({ value, props: newProps });
+            propDef.validate({ value, props: allProps });
         }
 
         if (isDefined(value)) {
-            // $FlowFixMe
-            newProps[key] = value;
+            allProps[key] = newProps[key] = value;
         }
     });
 
     // $FlowFixMe
-    eachProp(inputProps, propsDef, (key, propDef, value) => {
+    eachProp(newProps, propsDef, (key, propDef, value) => {
         if (!propDef) {
             return;
         }
 
         if (isDefined(value) && propDef.decorate) {
             // $FlowFixMe
-            const decoratedValue = propDef.decorate({ value, props: newProps, state, close, focus, event, onError, container });
+            const decoratedValue = propDef.decorate({ value, props: allProps, state, close, focus, event, onError, container });
 
             if (isDefined(decoratedValue)) {
-                // $FlowFixMe
-                newProps[key] = decoratedValue;
+                allProps[key] = newProps[key] = decoratedValue;
             }
         }
     });
