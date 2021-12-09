@@ -16,7 +16,7 @@ import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
 import { getGlobal, getProxyObject, crossDomainSerialize, buildChildWindowName, type ProxyObject } from '../lib';
 import type { PropsInputType, PropsType } from '../component/props';
 import type { ChildExportsType } from '../child';
-import type { CssDimensionsType, ContainerReferenceType } from '../types';
+import type { CssDimensionsType } from '../types';
 import type { NormalizedComponentOptionsType, AttributesType } from '../component';
 
 import { serializeProps, extendProps } from './props';
@@ -102,7 +102,7 @@ type RenderContainerOptions = {|
 
 type ResolveInitPromise = () => ZalgoPromise<void>;
 type RejectInitPromise = (mixed) => ZalgoPromise<void>;
-type GetProxyContainer = (container : ContainerReferenceType) => ZalgoPromise<ProxyObject<HTMLElement>>;
+type GetProxyContainer = (container : string | HTMLElement) => ZalgoPromise<ProxyObject<HTMLElement>>;
 type Show = () => ZalgoPromise<void>;
 type Hide = () => ZalgoPromise<void>;
 type Close = () => ZalgoPromise<void>;
@@ -159,7 +159,7 @@ type DelegateOverrides = {|
 
 type RenderOptions = {|
     target : CrossDomainWindowType,
-    container : ContainerReferenceType,
+    container : string | HTMLElement,
     context : $Values<typeof CONTEXT>,
     rerender : Rerender
 |};
@@ -205,7 +205,6 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
     let currentProxyContainer : ?ProxyObject<HTMLElement>;
     let childComponent : ?ChildExportsType<P>;
     let currentChildDomain : ?string;
-    let currentContainer : HTMLElement | void;
 
     const onErrorOverride : ?OnError = overrides.onError;
     let getProxyContainerOverride : ?GetProxyContainer = overrides.getProxyContainer;
@@ -332,6 +331,22 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
             }
 
             return new ProxyWindow({ send });
+        });
+    };
+
+    const getProxyContainer : GetProxyContainer = (container : string | HTMLElement) : ZalgoPromise<ProxyObject<HTMLElement>> => {
+        if (getProxyContainerOverride) {
+            return getProxyContainerOverride(container);
+        }
+
+        return ZalgoPromise.try(() => {
+            return elementReady(container);
+        }).then(containerElement => {
+            if (isShadowElement(containerElement)) {
+                containerElement = insertShadowSlot(containerElement);
+            }
+
+            return getProxyObject(containerElement);
         });
     };
 
@@ -911,23 +926,17 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
 
     const getProps = () => props;
 
-    const getDefaultPropsInput = () : PropsInputType<P> => {
-        // $FlowFixMe
-        return {};
-    };
-
-    const setProps = (newProps : PropsInputType<P> = getDefaultPropsInput()) => {
+    const setProps = (newProps : PropsInputType<P>, isUpdate? : boolean = false) => {
         if (__DEBUG__ && validate) {
             validate({ props: newProps });
         }
 
-        const container = currentContainer;
         const helpers = getHelpers();
-        extendProps(propsDef, props, newProps, helpers, container);
+        extendProps(propsDef, props, newProps, helpers, isUpdate);
     };
 
     const updateProps = (newProps : PropsInputType<P>) : ZalgoPromise<void> => {
-        setProps(newProps);
+        setProps(newProps, true);
 
         return initPromise.then(() => {
             const child = childComponent;
@@ -947,23 +956,6 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
                     });
                 });
             });
-        });
-    };
-
-    const getProxyContainer : GetProxyContainer = (container : ContainerReferenceType) : ZalgoPromise<ProxyObject<HTMLElement>> => {
-        if (getProxyContainerOverride) {
-            return getProxyContainerOverride(container);
-        }
-
-        return ZalgoPromise.try(() => {
-            return elementReady(container);
-        }).then(containerElement => {
-            if (isShadowElement(containerElement)) {
-                containerElement = insertShadowSlot(containerElement);
-            }
-
-            currentContainer = containerElement;
-            return getProxyObject(containerElement);
         });
     };
 
@@ -1025,7 +1017,7 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
         });
     };
 
-    const checkAllowRender = (target : CrossDomainWindowType, childDomainMatch : DomainMatcher, container : ContainerReferenceType) => {
+    const checkAllowRender = (target : CrossDomainWindowType, childDomainMatch : DomainMatcher, container : string | HTMLElement) => {
         if (target === window) {
             return;
         }
@@ -1066,19 +1058,12 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
 
             const watchForUnloadPromise = watchForUnload();
             
+            const buildUrlPromise = buildUrl();
             const buildBodyPromise = buildBody();
             const onRenderPromise = event.trigger(EVENT.RENDER);
 
             const getProxyContainerPromise = getProxyContainer(container);
             const getProxyWindowPromise = getProxyWindow();
-
-            const finalSetPropsPromise = getProxyContainerPromise.then(() => {
-                return setProps();
-            });
-
-            const buildUrlPromise = finalSetPropsPromise.then(() => {
-                return buildUrl();
-            });
 
             const buildWindowNamePromise = getProxyWindowPromise.then(proxyWin => {
                 return buildWindowName({ proxyWin, initialChildDomain, childDomainMatch, target, context });
@@ -1158,7 +1143,7 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
             return ZalgoPromise.hash({
                 initPromise, buildUrlPromise, onRenderPromise, getProxyContainerPromise, openFramePromise, openPrerenderFramePromise, renderContainerPromise, openPromise,
                 openPrerenderPromise, setStatePromise, prerenderPromise, loadUrlPromise, buildWindowNamePromise, setWindowNamePromise, watchForClosePromise, onDisplayPromise,
-                openBridgePromise, runTimeoutPromise, onRenderedPromise, delegatePromise, watchForUnloadPromise, finalSetPropsPromise
+                openBridgePromise, runTimeoutPromise, onRenderedPromise, delegatePromise, watchForUnloadPromise
             });
             
         }).catch(err => {
