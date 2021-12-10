@@ -436,8 +436,11 @@ type PropCallback<P, X, R> =
 
 export function eachProp<P, X>(props : PropsType<P>, propsDef : PropsDefinitionType<P, X>, handler : PropCallback<P, X, void>) {
     // $FlowFixMe[cannot-spread-indexer]
-    for (const key of Object.keys({ ...props, ...propsDef })) {
+    for (const key of Object.keys({ ...propsDef, ...props })) {
+        // $FlowFixMe
         const propDef = propsDef[key];
+
+        // $FlowFixMe
         const value = props[key];
 
         // $FlowFixMe[incompatible-call]

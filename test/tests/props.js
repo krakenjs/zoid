@@ -1984,4 +1984,142 @@ describe('zoid props cases', () => {
             return instance.render(getBody());
         });
     });
+
+    it('should instantiate a component, decorate a value for a function prop, and call the function with a different signature using the props.propName', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorate-diff-signature-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:     'function',
+                            decorate: ({ props }) => {
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return props.foo(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a value for a function prop, and call the function with a different signature using the value', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorate-diff-signature-value',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:     'function',
+                            decorate: ({ value }) => {
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return value(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, derive a value for a function prop, and call the function with a different signature using the props.propName', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-value-diff-signature-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:  'function',
+                            value: ({ props }) => {
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return props.foo(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
 });

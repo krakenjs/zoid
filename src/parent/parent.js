@@ -9,7 +9,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup,
     once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, memoize, isElementClosed,
-    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot } from 'belter/src';
+    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot, extend } from 'belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
     WINDOW_REFERENCE, DEFAULT_DIMENSIONS } from '../constants';
@@ -195,6 +195,7 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
     const handledErrors = [];
     const clean = cleanup();
     const state = {};
+    const inputProps = {};
     let internalState = {
         visible: true
     };
@@ -916,14 +917,17 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
         return {};
     };
 
-    const setProps = (newProps : PropsInputType<P> = getDefaultPropsInput()) => {
+    const setProps = (newInputProps : PropsInputType<P> = getDefaultPropsInput()) => {
         if (__DEBUG__ && validate) {
-            validate({ props: newProps });
+            validate({ props: newInputProps });
         }
 
         const container = currentContainer;
         const helpers = getHelpers();
-        extendProps(propsDef, props, newProps, helpers, container);
+        extend(inputProps, newInputProps);
+
+        // $FlowFixMe
+        extendProps(propsDef, props, inputProps, helpers, container);
     };
 
     const updateProps = (newProps : PropsInputType<P>) : ZalgoPromise<void> => {
