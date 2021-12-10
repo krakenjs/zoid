@@ -1032,6 +1032,42 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should not pass an empty string as a query param', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-promise-props-query-param-empty-string',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        fooBar: {
+                            type:       'string',
+                            required:   false,
+                            queryParam: 'foo_bar'
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                fooBar:   '',
+                getQuery: expect('getQuery', rawQuery => {
+                    const query = parseQuery(rawQuery);
+
+                    if ('foo_bar' in query || rawQuery.indexOf('foo_bar') !== -1) {
+                        throw new Error(`Expected foo_bar to not be in query string, got ${ rawQuery }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.getQuery(window.location.search.slice(1));
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
     it('should enter a component, update a prop, destroy the component, and not error out', () => {
         return wrapPromise(({ expect }) => {
 

@@ -80,7 +80,7 @@ export function serializeProps<P, X>(propsDef : PropsDefinitionType<P, X>, props
     return ZalgoPromise.all(mapProps(props, propsDef, (key, propDef, value) => {
         return ZalgoPromise.resolve().then(() => {
 
-            if (value === null || typeof value === 'undefined' || !propDef) {
+            if (value === null || typeof value === 'undefined' || value === '' || !propDef) {
                 return;
             }
 
