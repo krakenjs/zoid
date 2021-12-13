@@ -9,6 +9,43 @@ import { zoid } from '../zoid';
 
 describe('zoid props cases', () => {
 
+    it('should render a component with a prop with a pre-defined value', () => {
+        return wrapPromise(({ expect }) => {
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        foo: {
+                            type:  'string',
+                            value: () => 'bar'
+                        },
+                        passFoo: {
+                            type:     'function',
+                            required: true
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                run: () => `
+                    window.xprops.passFoo({ foo: xprops.foo });
+                `,
+                passFoo: expect('passFoo', ({ foo }) => {
+                    if (foo !== 'bar') {
+                        throw new Error(`Expected prop to have the correct value; got ${ foo }`);
+                    }
+                })
+            });
+            
+            return instance.render(getBody());
+        });
+    });
+
     it('should enter a component, update a prop, and call a prop', () => {
         return wrapPromise(({ expect }) => {
 
@@ -164,7 +201,7 @@ describe('zoid props cases', () => {
                 account: expectedAccount,
                 passFoo: expect('passFoo', ({ account }) => {
                     if (account !== expectedAccount) {
-                        throw new Error(`Expected account=${ expectedAccount } in the url, but got account=${ account }`);
+                        throw new Error(`Expected account=${ expectedAccount }, but got account=${ account }`);
                     }
 
                 })
@@ -849,6 +886,81 @@ describe('zoid props cases', () => {
 
                     if (query !== expected) {
                         throw new Error(`Expected query string to be:\n\n${ expected }\n\nbut got:\n\n${ query }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.getQuery(window.location.search.slice(1));
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should pass an empty string as a query param', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-promise-props-query-param-empty-string',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        fooBar: {
+                            type:       'string',
+                            required:   false,
+                            queryParam: 'foo_bar'
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                fooBar:   '',
+                getQuery: expect('getQuery', rawQuery => {
+                    if (rawQuery.indexOf('foo_bar=') === -1) {
+                        throw new Error(`Expected foo_bar to be in query string, got ${ rawQuery }`);
+                    }
+                }),
+                run: () => `
+                    window.xprops.getQuery(window.location.search.slice(1));
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should not pass an empty default string as a query param when decorated to null', () => {
+        return wrapPromise(({ expect }) => {
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-promise-props-query-param-empty-string-null-decorator',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+                    props:  {
+                        fooBar: {
+                            type:       'string',
+                            required:   false,
+                            queryParam: 'foo_bar',
+                            default:    () => '',
+                            decorate:   ({ props }) => {
+                                // $FlowFixMe
+                                return props.fooBar ? props.fooBar : null;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                fooBar:   '',
+                getQuery: expect('getQuery', rawQuery => {
+                    const query = parseQuery(rawQuery);
+
+                    if ('foo_bar' in query || rawQuery.indexOf('foo_bar=') !== -1) {
+                        throw new Error(`Expected foo_bar to not be in query string, got ${ rawQuery }`);
                     }
                 }),
                 run: () => `
@@ -1648,6 +1760,46 @@ describe('zoid props cases', () => {
         });
     });
 
+    it('should instantiate a component, decorate a prop, and get a self-calculated value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+            const bazValue = 'baz';
+            const expectedValue = 'baz_baz_decorated';
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-self-value-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'string',
+                            value:    () => bazValue,
+                            decorate: ({ props, value }) => {
+                                return `${ props.baz }_${ value }_decorated`;
+                            }
+                        }
+                    }
+                });
+            };
+
+            const component = window.__component__();
+            const instance = component({
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
     it('should instantiate a component, decorate a prop, and get a default value in the decorator', () => {
         return wrapPromise(({ expect }) => {
             const fooValue = Math.floor(Math.random() * 100);
@@ -1689,6 +1841,272 @@ describe('zoid props cases', () => {
 
                 run: () => `
                     window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a prop, and get a self-default value in the decorator', () => {
+        return wrapPromise(({ expect }) => {
+            const bazValue = 'baz';
+            const expectedValue = 'baz_baz_decorated';
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorated-self-default-prop',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        baz: {
+                            type:     'string',
+                            default:  () => bazValue,
+                            decorate: ({ props, value }) => {
+                                return `${ props.baz }_${ value }_decorated`;
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                passBaz: expect('passBaz', (baz) => {
+                    if (baz !== expectedValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ expectedValue }; got ${ baz }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.passBaz(window.xprops.baz);
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a value for a function prop, and call the function with a different signature using the props.propName', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorate-diff-signature-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:     'function',
+                            decorate: ({ props }) => {
+                                const { foo } = props;
+
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return foo(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, decorate a value for a function prop, and call the function with a different signature using the value', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-decorate-diff-signature-value',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:     'function',
+                            decorate: ({ value }) => {
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return value(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should instantiate a component, derive a value for a function prop, and call the function with a different signature using the props.propName', () => {
+        return wrapPromise(({ expect }) => {
+            const originalValue = 'hello';
+            const newValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-value-diff-signature-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        foo: {
+                            type:  'function',
+                            value: ({ props }) => {
+                                const { foo } = props;
+
+                                return (originalPropValue) => {
+                                    if (originalPropValue !== originalValue) {
+                                        throw new Error(`Expected prop to have the correct value of ${ originalValue }; got ${ originalPropValue }`);
+                                    }
+
+                                    return foo(newValue);
+                                };
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                foo: expect('foo', (newPropValue) => {
+                    if (newPropValue !== newValue) {
+                        throw new Error(`Expected prop to have the correct value of ${ newValue }; got ${ newPropValue }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.foo(${ JSON.stringify(originalValue) });
+                `
+            });
+
+            return instance.render(getBody());
+        });
+    });
+
+    it('should get the correct value for all other props in value function', () => {
+        return wrapPromise(({ expect }) => {
+            const fooValue = 'abc123';
+            const barValue = 12345;
+
+            window.__component__ = () => {
+                return zoid.create({
+                    tag:    'test-prop-value-get-other-props',
+                    url:    'mock://www.child.com/base/test/windows/child/index.htm',
+                    domain: 'mock://www.child.com',
+
+                    props: {
+                        superpropfunc: {
+                            type:  'function',
+                            value: ({ props }) => {
+                                return () => {
+                                    props.passProps(props);
+                                };
+                            }
+                        },
+                        superprop: {
+                            type:  'object',
+                            value: ({ props }) => {
+                                return {
+                                    foo: props.foo,
+                                    bar: props.bar
+                                };
+                            }
+                        },
+                        foo: {
+                            type:  'string',
+                            value: () => {
+                                return fooValue;
+                            }
+                        },
+                        bar: {
+                            type:  'number',
+                            value: () => {
+                                return barValue;
+                            }
+                        }
+                    }
+                });
+            };
+        
+
+            const component = window.__component__();
+            const instance = component({
+                passProps: expect('passProps', (props) => {
+                    if (props.foo !== fooValue) {
+                        throw new Error(`Expected props.foo to have the correct value of ${ fooValue }; got ${ props.foo }`);
+                    }
+
+                    if (props.bar !== barValue) {
+                        throw new Error(`Expected props.bar to have the correct value of ${ barValue }; got ${ props.bar }`);
+                    }
+
+                    /*
+                    
+                    if (props.superprop.foo !== fooValue) {
+                        throw new Error(`Expected props.superprop.foo to have the correct value of ${ fooValue }; got ${ props.superprop.foo }`);
+                    }
+
+                    if (props.superprop.bar !== barValue) {
+                        throw new Error(`Expected props.superprop.bar to have the correct value of ${ barValue }; got ${ props.superprop.bar }`);
+                    }
+
+                    */
+
+                    if (typeof props.superpropfunc !== 'function') {
+                        throw new TypeError(`Expected props.superpropfunc to have the correct type of 'function'; got ${ typeof props.superpropfunc }`);
+                    }
+                }),
+
+                run: () => `
+                    window.xprops.superpropfunc();
                 `
             });
 
