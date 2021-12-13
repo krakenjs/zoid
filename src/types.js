@@ -18,5 +18,3 @@ export type CancelableType = {|
 |};
 
 export type StringMatcherType = string | $ReadOnlyArray<string> | RegExp;
-
-export type ContainerReferenceType = string | HTMLElement;
