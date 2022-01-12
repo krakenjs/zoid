@@ -3,6 +3,7 @@
 .*/node_modules/flow-runtime
 .*/node_modules/npm
 .*/node_modules/jsonlint
+.*/node_modules/resolve
 .*/dist/module
 [include]
 [libs]
