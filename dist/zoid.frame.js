@@ -2631,8 +2631,8 @@
         }
         function lib_global_getGlobal(win) {
             if (!isSameDomain(win)) throw new Error("Can not get global for window on different domain");
-            win.__zoid_9_0_85__ || (win.__zoid_9_0_85__ = {});
-            return win.__zoid_9_0_85__;
+            win.__zoid_9_0_86__ || (win.__zoid_9_0_86__ = {});
+            return win.__zoid_9_0_86__;
         }
         function tryGlobal(win, handler) {
             try {
@@ -2888,10 +2888,9 @@
             return once(_ref.value);
         };
         function eachProp(props, propsDef, handler) {
-            for (var _i2 = 0, _Object$keys2 = Object.keys(props); _i2 < _Object$keys2.length; _i2++) {
+            for (var _i2 = 0, _Object$keys2 = Object.keys(_extends({}, props, propsDef)); _i2 < _Object$keys2.length; _i2++) {
                 var key = _Object$keys2[_i2];
-                var propDef = propsDef[key];
-                propDef && handler(key, propDef, props[key]);
+                handler(key, propsDef[key], props[key]);
             }
         }
         function serializeProps(propsDef, props, method) {
@@ -2902,7 +2901,7 @@
                     var result = function(key, propDef, value) {
                         return promise_ZalgoPromise.resolve().then((function() {
                             var _METHOD$GET$METHOD$PO, _METHOD$GET$METHOD$PO2;
-                            if (null != value) {
+                            if (null != value && propDef) {
                                 var getParam = (_METHOD$GET$METHOD$PO = {}, _METHOD$GET$METHOD$PO.get = propDef.queryParam, 
                                 _METHOD$GET$METHOD$PO.post = propDef.bodyParam, _METHOD$GET$METHOD$PO)[method];
                                 var getValue = (_METHOD$GET$METHOD$PO2 = {}, _METHOD$GET$METHOD$PO2.get = propDef.queryValue, 
@@ -2932,8 +2931,8 @@
                                                 })) ? newobj["" + prefix + key + "[]"] = obj[key].join(",") : obj[key] && "object" == typeof obj[key] ? newobj = dotify(obj[key], "" + prefix + key, newobj) : newobj["" + prefix + key] = obj[key].toString());
                                                 return newobj;
                                             }(finalValue, key);
-                                            for (var _i10 = 0, _Object$keys6 = Object.keys(result); _i10 < _Object$keys6.length; _i10++) {
-                                                var dotkey = _Object$keys6[_i10];
+                                            for (var _i2 = 0, _Object$keys2 = Object.keys(result); _i2 < _Object$keys2.length; _i2++) {
+                                                var dotkey = _Object$keys2[_i2];
                                                 params[dotkey] = result[dotkey];
                                             }
                                             return;
@@ -2958,6 +2957,7 @@
             var handledErrors = [];
             var clean = cleanup();
             var state = {};
+            var inputProps = {};
             var internalState = {
                 visible: !0
             };
@@ -3014,6 +3014,7 @@
             var currentProxyContainer;
             var childComponent;
             var currentChildDomain;
+            var currentContainer;
             var onErrorOverride = overrides.onError;
             var getProxyContainerOverride = overrides.getProxyContainer;
             var showOverride = overrides.show;
@@ -3072,31 +3073,6 @@
                     return new window_ProxyWindow({
                         send: send_send
                     });
-                }));
-            };
-            var getProxyContainer = function(container) {
-                return getProxyContainerOverride ? getProxyContainerOverride(container) : promise_ZalgoPromise.try((function() {
-                    return elementReady(container);
-                })).then((function(containerElement) {
-                    isShadowElement(containerElement) && (containerElement = function insertShadowSlot(element) {
-                        var shadowHost = function(element) {
-                            var shadowRoot = function(element) {
-                                for (;element.parentNode; ) element = element.parentNode;
-                                if (isShadowElement(element)) return element;
-                            }(element);
-                            if (shadowRoot && shadowRoot.host) return shadowRoot.host;
-                        }(element);
-                        if (!shadowHost) throw new Error("Element is not in shadow dom");
-                        var slotName = "shadow-slot-" + uniqueID();
-                        var slot = document.createElement("slot");
-                        slot.setAttribute("name", slotName);
-                        element.appendChild(slot);
-                        var slotProvider = document.createElement("div");
-                        slotProvider.setAttribute("slot", slotName);
-                        shadowHost.appendChild(slotProvider);
-                        return isShadowElement(shadowHost) ? insertShadowSlot(slotProvider) : slotProvider;
-                    }(containerElement));
-                    return getProxyObject(containerElement);
                 }));
             };
             var setProxyWin = function(proxyWin) {
@@ -3502,72 +3478,67 @@
                     hide: hide
                 };
             };
-            var setProps = function(newProps, isUpdate) {
-                void 0 === isUpdate && (isUpdate = !1);
+            var setProps = function(newInputProps) {
+                void 0 === newInputProps && (newInputProps = {});
+                var container = currentContainer;
                 var helpers = getHelpers();
-                !function(propsDef, props, inputProps, helpers, isUpdate) {
-                    void 0 === isUpdate && (isUpdate = !1);
-                    extend(props, inputProps = inputProps || {});
-                    var propNames = isUpdate ? [] : [].concat(Object.keys(propsDef));
-                    for (var _i2 = 0, _Object$keys2 = Object.keys(inputProps); _i2 < _Object$keys2.length; _i2++) {
-                        var key = _Object$keys2[_i2];
-                        -1 === propNames.indexOf(key) && propNames.push(key);
-                    }
-                    var aliases = [];
+                extend(inputProps, newInputProps);
+                !function(propsDef, existingProps, inputProps, helpers, container) {
                     var state = helpers.state, close = helpers.close, focus = helpers.focus, event = helpers.event, onError = helpers.onError;
-                    for (var _i4 = 0; _i4 < propNames.length; _i4++) {
-                        var _key = propNames[_i4];
-                        var propDef = propsDef[_key];
-                        var value = inputProps[_key];
-                        if (propDef) {
-                            var alias = propDef.alias;
-                            if (alias) {
-                                !isDefined(value) && isDefined(inputProps[alias]) && (value = inputProps[alias]);
-                                aliases.push(alias);
+                    eachProp(inputProps, propsDef, (function(key, propDef, val) {
+                        var valueDetermined = !1;
+                        var value = val;
+                        Object.defineProperty(existingProps, key, {
+                            configurable: !0,
+                            enumerable: !0,
+                            get: function() {
+                                if (valueDetermined) return value;
+                                valueDetermined = !0;
+                                return function() {
+                                    if (!propDef) return value;
+                                    var alias = propDef.alias;
+                                    alias && !isDefined(val) && isDefined(inputProps[alias]) && (value = inputProps[alias]);
+                                    propDef.value && (value = propDef.value({
+                                        props: existingProps,
+                                        state: state,
+                                        close: close,
+                                        focus: focus,
+                                        event: event,
+                                        onError: onError,
+                                        container: container
+                                    }));
+                                    !propDef.default || isDefined(value) || isDefined(inputProps[key]) || (value = propDef.default({
+                                        props: existingProps,
+                                        state: state,
+                                        close: close,
+                                        focus: focus,
+                                        event: event,
+                                        onError: onError,
+                                        container: container
+                                    }));
+                                    if (isDefined(value)) {
+                                        if (propDef.type === PROP_TYPE.ARRAY ? !Array.isArray(value) : typeof value !== propDef.type) throw new TypeError("Prop is not of type " + propDef.type + ": " + key);
+                                    } else if (!1 !== propDef.required && !isDefined(inputProps[key])) throw new Error('Expected prop "' + key + '" to be defined');
+                                    isDefined(value) && propDef.decorate && (value = propDef.decorate({
+                                        value: value,
+                                        props: existingProps,
+                                        state: state,
+                                        close: close,
+                                        focus: focus,
+                                        event: event,
+                                        onError: onError,
+                                        container: container
+                                    }));
+                                    return value;
+                                }();
                             }
-                            propDef.value && (value = propDef.value({
-                                props: props,
-                                state: state,
-                                close: close,
-                                focus: focus,
-                                event: event,
-                                onError: onError
-                            }));
-                            !isDefined(value) && propDef.default && (value = propDef.default({
-                                props: props,
-                                state: state,
-                                close: close,
-                                focus: focus,
-                                event: event,
-                                onError: onError
-                            }));
-                            if (isDefined(value) && ("array" === propDef.type ? !Array.isArray(value) : typeof value !== propDef.type)) throw new TypeError("Prop is not of type " + propDef.type + ": " + _key);
-                            props[_key] = value;
-                        }
-                    }
-                    for (var _i6 = 0; _i6 < aliases.length; _i6++) delete props[aliases[_i6]];
-                    eachProp(props, propsDef, (function(key, propDef, value) {
-                        if (propDef && isDefined(value) && propDef.decorate) {
-                            var decoratedValue = propDef.decorate({
-                                value: value,
-                                props: props,
-                                state: state,
-                                close: close,
-                                focus: focus,
-                                event: event,
-                                onError: onError
-                            });
-                            props[key] = decoratedValue;
-                        }
+                        });
                     }));
-                    for (var _i8 = 0, _Object$keys4 = Object.keys(propsDef); _i8 < _Object$keys4.length; _i8++) {
-                        var _key2 = _Object$keys4[_i8];
-                        if (!1 !== propsDef[_key2].required && !isDefined(props[_key2])) throw new Error('Expected prop "' + _key2 + '" to be defined');
-                    }
-                }(propsDef, props, newProps, helpers, isUpdate);
+                    eachProp(existingProps, propsDef, src_util_noop);
+                }(propsDef, props, inputProps, helpers, container);
             };
             var updateProps = function(newProps) {
-                setProps(newProps, !0);
+                setProps(newProps);
                 return initPromise.then((function() {
                     var child = childComponent;
                     var proxyWin = currentProxyWin;
@@ -3578,6 +3549,32 @@
                             }));
                         }));
                     }));
+                }));
+            };
+            var getProxyContainer = function(container) {
+                return getProxyContainerOverride ? getProxyContainerOverride(container) : promise_ZalgoPromise.try((function() {
+                    return elementReady(container);
+                })).then((function(containerElement) {
+                    isShadowElement(containerElement) && (containerElement = function insertShadowSlot(element) {
+                        var shadowHost = function(element) {
+                            var shadowRoot = function(element) {
+                                for (;element.parentNode; ) element = element.parentNode;
+                                if (isShadowElement(element)) return element;
+                            }(element);
+                            if (shadowRoot && shadowRoot.host) return shadowRoot.host;
+                        }(element);
+                        if (!shadowHost) throw new Error("Element is not in shadow dom");
+                        var slotName = "shadow-slot-" + uniqueID();
+                        var slot = document.createElement("slot");
+                        slot.setAttribute("name", slotName);
+                        element.appendChild(slot);
+                        var slotProvider = document.createElement("div");
+                        slotProvider.setAttribute("slot", slotName);
+                        shadowHost.appendChild(slotProvider);
+                        return isShadowElement(shadowHost) ? insertShadowSlot(slotProvider) : slotProvider;
+                    }(containerElement));
+                    currentContainer = containerElement;
+                    return getProxyObject(containerElement);
                 }));
             };
             return {
@@ -3732,33 +3729,38 @@
                         }));
                         var windowProp = props.window;
                         var watchForUnloadPromise = watchForUnload();
-                        var buildUrlPromise = serializeProps(propsDef, props, "get").then((function(query) {
-                            return function(url, options) {
-                                var query = options.query || {};
-                                var hash = options.hash || {};
-                                var originalUrl;
-                                var originalHash;
-                                var _url$split = url.split("#");
-                                originalHash = _url$split[1];
-                                var _originalUrl$split = (originalUrl = _url$split[0]).split("?");
-                                originalUrl = _originalUrl$split[0];
-                                var queryString = extendQuery(_originalUrl$split[1], query);
-                                var hashString = extendQuery(originalHash, hash);
-                                queryString && (originalUrl = originalUrl + "?" + queryString);
-                                hashString && (originalUrl = originalUrl + "#" + hashString);
-                                return originalUrl;
-                            }(function(url) {
-                                if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf("mock:"))) return url;
-                                var domain;
-                                throw new Error("Mock urls not supported out of test mode");
-                            }(getUrl()), {
-                                query: query
-                            });
-                        }));
                         var buildBodyPromise = serializeProps(propsDef, props, "post");
                         var onRenderPromise = event.trigger(EVENT.RENDER);
                         var getProxyContainerPromise = getProxyContainer(container);
                         var getProxyWindowPromise = getProxyWindow();
+                        var finalSetPropsPromise = getProxyContainerPromise.then((function() {
+                            return setProps();
+                        }));
+                        var buildUrlPromise = finalSetPropsPromise.then((function() {
+                            return serializeProps(propsDef, props, "get").then((function(query) {
+                                return function(url, options) {
+                                    var query = options.query || {};
+                                    var hash = options.hash || {};
+                                    var originalUrl;
+                                    var originalHash;
+                                    var _url$split = url.split("#");
+                                    originalHash = _url$split[1];
+                                    var _originalUrl$split = (originalUrl = _url$split[0]).split("?");
+                                    originalUrl = _originalUrl$split[0];
+                                    var queryString = extendQuery(_originalUrl$split[1], query);
+                                    var hashString = extendQuery(originalHash, hash);
+                                    queryString && (originalUrl = originalUrl + "?" + queryString);
+                                    hashString && (originalUrl = originalUrl + "#" + hashString);
+                                    return originalUrl;
+                                }(function(url) {
+                                    if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf("mock:"))) return url;
+                                    var domain;
+                                    throw new Error("Mock urls not supported out of test mode");
+                                }(getUrl()), {
+                                    query: query
+                                });
+                            }));
+                        }));
                         var buildWindowNamePromise = getProxyWindowPromise.then((function(proxyWin) {
                             return function(_temp2) {
                                 var _ref6 = void 0 === _temp2 ? {} : _temp2, proxyWin = _ref6.proxyWin, initialChildDomain = _ref6.initialChildDomain, childDomainMatch = _ref6.childDomainMatch, _ref6$target = _ref6.target, target = void 0 === _ref6$target ? window : _ref6$target, context = _ref6.context;
@@ -3770,7 +3772,7 @@
                                             context: context,
                                             tag: tag,
                                             childDomainMatch: childDomainMatch,
-                                            version: "9_0_85",
+                                            version: "9_0_86",
                                             props: childProps,
                                             exports: (win = proxyWin, {
                                                 init: function(childExports) {
@@ -3956,7 +3958,8 @@
                             runTimeoutPromise: runTimeoutPromise,
                             onRenderedPromise: onRenderedPromise,
                             delegatePromise: delegatePromise,
-                            watchForUnloadPromise: watchForUnloadPromise
+                            watchForUnloadPromise: watchForUnloadPromise,
+                            finalSetPropsPromise: finalSetPropsPromise
                         });
                     })).catch((function(err) {
                         return promise_ZalgoPromise.all([ onError(err), destroy(err) ]).then((function() {
@@ -4299,7 +4302,7 @@
                         var props;
                         var exportsPromise = new promise_ZalgoPromise;
                         var version = payload.version, uid = payload.uid, parentExports = payload.exports, context = payload.context, initialProps = payload.props;
-                        if ("9_0_85" !== version) throw new Error("Parent window has zoid version " + version + ", child window has version 9_0_85");
+                        if ("9_0_86" !== version) throw new Error("Parent window has zoid version " + version + ", child window has version 9_0_86");
                         var show = parentExports.show, hide = parentExports.hide, close = parentExports.close, onError = parentExports.onError, checkClose = parentExports.checkClose, parentExport = parentExports.export, parentResize = parentExports.resize, parentInit = parentExports.init;
                         var getParent = function() {
                             return parentComponentWindow;
@@ -4731,7 +4734,7 @@
         var destroyAll = destroyComponents;
         function component_destroy(err) {
             destroyAll();
-            delete window.__zoid_9_0_85__;
+            delete window.__zoid_9_0_86__;
             !function() {
                 !function() {
                     var responseListeners = globalStore("responseListeners");
