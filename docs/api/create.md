@@ -178,7 +178,7 @@ var MyLoginZoidComponent = zoid.create({
 });
 ```
 
-If no `containerTemplate` function is defined, then a default is used. The default template can be found [here](https://github.com/krakenjs/zoid/blob/master/src/component/templates/container.js).
+If no `containerTemplate` function is defined, then a default is used. The default template can be found [here](https://github.com/krakenjs/zoid/blob/main/src/component/templates/container.js).
 
 ## prerenderTemplate `(opts) => HTMLElement`
 
@@ -313,12 +313,12 @@ Recommended to only use autoResize for height. Width has some strange effects, e
 ## allowedParentDomains `string | Array<string | RegEx>`
 
 A string, array of strings or reqular expresions to be used to validate parent domain. If parent domain doesn't match any item, communication from child to parent will be prevented. The default value is '*' which match any domain.
-  
+
 ```javascript
 const MyComponent = zoid.create({
     tag: 'my-component',
     url: 'https://my-site.com/my-component',
-    allowedParentDomains: [ 
+    allowedParentDomains: [
         "http://localhost",
         /^http:\/\/www\.mydomain\.com$/
     ]

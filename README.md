@@ -1,4 +1,4 @@
-<p align="center"><img width="45%" alt="zoid" src="https://cdn.rawgit.com/krakenjs/zoid/master/zoid.png"></p>
+<p align="center"><img width="45%" alt="zoid" src="https://cdn.rawgit.com/krakenjs/zoid/main/zoid.png"></p>
 
 ----
 [![build status][build-badge]][build]

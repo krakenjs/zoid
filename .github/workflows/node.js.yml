@@ -7,7 +7,7 @@ on:
   # run on push but only for the master branch
   push:
     branches:
-      - master
+      - main
   # run for every pull request
   pull_request: {}
 jobs:
