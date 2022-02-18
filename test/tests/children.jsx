@@ -2,7 +2,7 @@
 /** @jsx node */
 
 import { wrapPromise } from 'belter/src';
-import { getParent } from 'cross-domain-utils/src';
+import { getParent } from '@krakenjs/cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { onWindowOpen, getBody } from '../common';

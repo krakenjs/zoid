@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getDomain, isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 
 import type { PropsDefinitionType, PropsType, ChildPropsType } from '../component/props';
 
