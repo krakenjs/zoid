@@ -4,7 +4,7 @@
 import { send, bridge, ProxyWindow, toProxyWindow, type CrossDomainFunctionType, cleanUpWindow } from 'post-robot/src';
 import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain, getAncestor, getDomain, type CrossDomainWindowType,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain, closeWindow, onCloseWindow, isWindowClosed, isSameTopWindow,
-    type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+    type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup,

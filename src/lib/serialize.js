@@ -3,7 +3,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { serializeMessage, deserializeMessage, toProxyWindow, type ProxyWindow } from 'post-robot/src';
 import { uniqueID, base64encode, base64decode } from 'belter/src';
-import type { CrossDomainWindowType, DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
 
 import { getGlobal } from './global';
 

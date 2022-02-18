@@ -3,7 +3,7 @@
 
 import { setup as setupPostRobot, on, send, bridge, toProxyWindow, destroy as destroyPostRobot } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindow, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { isWindow, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { noop, isElement, cleanup, memoize, identity, extend, uniqueID } from 'belter/src';
 
 import { childComponent, type ChildComponent } from '../child';

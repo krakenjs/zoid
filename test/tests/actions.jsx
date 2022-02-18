@@ -1,7 +1,7 @@
 /* @flow */
 /** @jsx node */
 
-import { onCloseWindow } from '@krakenjs/cross-domain-utils/src';
+import { onCloseWindow } from 'cross-domain-utils/src';
 import { wrapPromise } from 'belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 

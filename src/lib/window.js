@@ -2,7 +2,7 @@
 
 import { assertExists, memoize } from 'belter/src';
 import { isSameDomain, getOpener, getNthParentFromTop, getAncestor, getAllFramesInWindow, getParent, isTop,
-    findFrameByName, getDomain, assertSameDomain, type CrossDomainWindowType, getDistanceFromTop } from '@krakenjs/cross-domain-utils/src';
+    findFrameByName, getDomain, assertSameDomain, type CrossDomainWindowType, getDistanceFromTop } from 'cross-domain-utils/src';
 
 import { ZOID, WINDOW_REFERENCE } from '../constants';
 import type { InitialChildPayload, WindowRef } from '../parent';

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { WINDOW_TYPE } from '@krakenjs/cross-domain-utils/src';
+import { WINDOW_TYPE } from 'cross-domain-utils/src';
 
 export const ZOID = `zoid`;
 

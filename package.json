@@ -62,8 +62,8 @@
     "serve": "^10.0.0"
   },
   "dependencies": {
-    "@krakenjs/cross-domain-utils": "^3.0.2",
     "belter": "^1.0.123",
+    "cross-domain-utils": "^2.0.33",
     "post-robot": "^10",
     "zalgo-promise": "^1.0.45"
   }

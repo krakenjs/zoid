@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { isSameDomain, matchDomain, getAllFramesInWindow, type CrossDomainWindowType,
-    onCloseWindow, assertSameDomain } from '@krakenjs/cross-domain-utils/src';
+    onCloseWindow, assertSameDomain } from 'cross-domain-utils/src';
 import { markWindowKnown, type CrossDomainFunctionType } from 'post-robot/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { extend, onResize, elementReady, noop } from 'belter/src';

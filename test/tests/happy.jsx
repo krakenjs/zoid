@@ -3,7 +3,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise } from 'belter/src';
-import { getParent, getOpener } from '@krakenjs/cross-domain-utils/src';
+import { getParent, getOpener } from 'cross-domain-utils/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen, runOnClick, getContainer, getBody } from '../common';

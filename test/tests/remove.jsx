@@ -3,7 +3,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { wrapPromise } from 'belter/src';
-import { getParent } from '@krakenjs/cross-domain-utils/src';
+import { getParent } from 'cross-domain-utils/src';
 
 import { onWindowOpen, getContainer } from '../common';
 import { zoid } from '../zoid';
