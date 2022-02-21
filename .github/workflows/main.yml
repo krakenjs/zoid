@@ -25,6 +25,9 @@ jobs:
         with:
           useLockFile: false
 
+      - name: 👕 Lint commit messages
+        uses: wagoid/commitlint-github-action@v4
+
       - name: ▶️ Run flow-typed script
         run: npm run flow-typed
 
