@@ -6,10 +6,7 @@ import { extend, noop } from 'belter/src';
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';
 
-// eslint-disable-next-line flowtype/require-exact-type
 declare class ReactClassType {}
-
-// eslint-disable-next-line flowtype/require-exact-type
 declare class __ReactComponent {}
 
 type ReactElementType = {|
