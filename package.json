@@ -15,13 +15,49 @@
     "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
     "clear-dist": "rm -rf dist/*;",
     "build": "npm run test && npm run babel && npm run clear-dist && npm run webpack -- $@",
-    "release": "./publish.sh",
-    "release:patch": "./publish.sh patch",
-    "release:minor": "./publish.sh minor",
-    "release:major": "./publish.sh major",
     "clean": "rimraf dist coverage",
     "reinstall": "rimraf flow-typed && rimraf node_modules && npm install && flow-typed install",
-    "debug": "cross-env NODE_ENV=debug"
+    "debug": "cross-env NODE_ENV=debug",
+    "prepare": "husky install",
+    "prerelease": "npm run clean && npm run test && npm run build",
+    "release": "standard-version",
+    "postrelease": "git push && git push --follow-tags && npm publish"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": false
+      },
+      {
+        "type": "docs",
+        "hidden": false
+      },
+      {
+        "type": "style",
+        "hidden": false
+      },
+      {
+        "type": "refactor",
+        "hidden": false
+      },
+      {
+        "type": "perf",
+        "hidden": false
+      },
+      {
+        "type": "test",
+        "hidden": false
+      }
+    ]
   },
   "repository": {
     "type": "git",
@@ -55,11 +91,15 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
+    "@commitlint/cli": "^16.2.1",
+    "@commitlint/config-conventional": "^16.2.1",
     "flow-bin": "0.155.0",
     "grumbler-scripts": "^3",
+    "husky": "^7.0.4",
     "jsx-pragmatic": "^2",
     "mocha": "^4",
-    "serve": "^10.0.0"
+    "serve": "^10.0.0",
+    "standard-version": "^9.3.2"
   },
   "dependencies": {
     "belter": "^1.0.123",
