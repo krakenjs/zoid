@@ -6,7 +6,7 @@
 [![npm version][version-badge]][package]
 
 [build-badge]: https://img.shields.io/github/workflow/status/krakenjs/zoid/build?logo=github&style=flat-square
-[build]: https://github.com/krakenjs/zoid/actions?query=workflow%3Abuild
+[build]: https://github.com/krakenjs/zoid/actions/workflows/main.yml?query=workflow:build
 [coverage-badge]: https://img.shields.io/codecov/c/github/krakenjs/zoid.svg?style=flat-square
 [coverage]: https://codecov.io/github/krakenjs/zoid/
 [version-badge]: https://img.shields.io/npm/v/zoid.svg?style=flat-square
