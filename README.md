@@ -9,8 +9,8 @@
 [build]: https://github.com/krakenjs/zoid/actions?query=workflow%3Abuild
 [coverage-badge]: https://img.shields.io/codecov/c/github/krakenjs/zoid.svg?style=flat-square
 [coverage]: https://codecov.io/github/krakenjs/zoid/
-[version-badge]: https://img.shields.io/npm/v/zoid.svg?style=flat-square
-[package]: https://www.npmjs.com/package/zoid
+[version-badge]: https://img.shields.io/npm/v/@krakenjs/zoid.svg?style=flat-square
+[package]: https://www.npmjs.com/package/@krakenjs/zoid
 
 A cross-domain component toolkit, supporting:
 

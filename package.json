@@ -1,5 +1,5 @@
 {
-  "name": "zoid",
+  "name": "@krakenjs/zoid",
   "version": "9.0.87",
   "description": "Cross domain components.",
   "main": "index.js",
