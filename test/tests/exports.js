@@ -1,8 +1,8 @@
 /* @flow */
 /** @jsx node */
 
-import type { ZalgoPromise } from 'zalgo-promise/src';
-import { wrapPromise } from 'belter/src';
+import type { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 
 import { zoid } from '../zoid';
 import { getBody } from '../common';

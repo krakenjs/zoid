@@ -1,7 +1,7 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { dotify, isDefined, base64encode, noop } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { dotify, isDefined, base64encode, noop } from '@krakenjs/belter/src';
 
 import { eachProp, mapProps, type PropsInputType, type PropsType, type PropsDefinitionType } from '../component/props';
 import { PROP_SERIALIZATION, METHOD, PROP_TYPE } from '../constants';

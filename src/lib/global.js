@@ -1,7 +1,7 @@
 /* @flow */
 
-import { isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { getCurrentScriptUID } from 'belter/src';
+import { isSameDomain, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { getCurrentScriptUID } from '@krakenjs/belter/src';
 
 export function getGlobalKey() : string {
     if (__ZOID__.__SCRIPT_NAMESPACE__) {

@@ -1,7 +1,7 @@
 /* @flow */
 
-import { wrapPromise } from 'belter/src';
-import { onCloseWindow } from 'cross-domain-utils/src';
+import { wrapPromise } from '@krakenjs/belter/src';
+import { onCloseWindow } from '@krakenjs/cross-domain-utils/src';
 
 import { zoid } from '../zoid';
 import { onWindowOpen, runOnClick, getBody } from '../common';

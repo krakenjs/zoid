@@ -1,6 +1,6 @@
 /* @flow */
 
-import { dasherizeToCamel, replaceObject, noop } from 'belter/src';
+import { dasherizeToCamel, replaceObject, noop } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';

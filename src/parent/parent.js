@@ -1,15 +1,15 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { send, bridge, ProxyWindow, toProxyWindow, type CrossDomainFunctionType, cleanUpWindow } from 'post-robot/src';
+import { send, bridge, ProxyWindow, toProxyWindow, type CrossDomainFunctionType, cleanUpWindow } from '@krakenjs/post-robot/src';
 import { isSameDomain, matchDomain, getDomainFromUrl, isBlankDomain, getAncestor, getDomain, type CrossDomainWindowType,
     getDistanceFromTop, normalizeMockUrl, assertSameDomain, closeWindow, onCloseWindow, isWindowClosed, isSameTopWindow,
-    type DomainMatcher } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
+    type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 import { addEventListener, uniqueID, elementReady, writeElementToWindow, eventEmitter, type EventEmitterType,
     noop, onResize, extendUrl, appendChild, cleanup,
     once, stringifyError, destroyElement, getElementSafe, showElement, hideElement, iframe, memoize, isElementClosed,
-    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot, extend } from 'belter/src';
+    awaitFrameWindow, popup, normalizeDimension, watchElementForClose, isShadowElement, insertShadowSlot, extend } from '@krakenjs/belter/src';
 
 import { ZOID, POST_MESSAGE, CONTEXT, EVENT, METHOD,
     WINDOW_REFERENCE, DEFAULT_DIMENSIONS } from '../constants';

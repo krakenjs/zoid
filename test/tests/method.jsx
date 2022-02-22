@@ -1,7 +1,7 @@
 /* @flow */
 /** @jsx node */
 
-import { wrapPromise } from 'belter/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 
 import { getBody } from '../common';
 import { zoid } from '../zoid';

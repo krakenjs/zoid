@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint react/react-in-jsx-scope: off */
 
-import { destroyElement, toCSS } from 'belter/src';
+import { destroyElement, toCSS } from '@krakenjs/belter/src';
 
 import { type RenderOptionsType } from '../../parent/parent';
 import { EVENT } from '../../constants';

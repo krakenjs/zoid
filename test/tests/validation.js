@@ -1,6 +1,6 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 
 import { zoid } from '../zoid';
 import { getBody } from '../common';
