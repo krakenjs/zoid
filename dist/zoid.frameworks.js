@@ -4886,7 +4886,7 @@
                     _proto.componentDidMount = function() {
                         var el = ReactDOM.findDOMNode(this);
                         var parent = init(extend({}, this.props));
-                        parent.render(el, CONTEXT.IFRAME);
+                        parent.render(el);
                         this.setState({
                             parent: parent
                         });
@@ -4916,7 +4916,7 @@
                             return acc;
                         }), {}))));
                         var props;
-                        this.parent.render(el, CONTEXT.IFRAME);
+                        this.parent.render(el);
                     },
                     watch: {
                         $attrs: {
@@ -4945,7 +4945,7 @@
                             return acc;
                         }), {}))));
                         var props;
-                        this.parent.render(el, CONTEXT.IFRAME);
+                        this.parent.render(el);
                     },
                     watch: {
                         $attrs: {
@@ -4983,7 +4983,7 @@
                                 }));
                             };
                             var instance = init(getProps());
-                            instance.render($element[0], CONTEXT.IFRAME);
+                            instance.render($element[0]);
                             $scope.$watch((function() {
                                 instance.updateProps(getProps()).catch(src_util_noop);
                             }));
@@ -5026,7 +5026,7 @@
                     _proto.ngOnInit = function() {
                         var targetElement = this.elementRef.nativeElement;
                         this.parent = init(this.getProps());
-                        this.parent.render(targetElement, CONTEXT.IFRAME);
+                        this.parent.render(targetElement);
                     };
                     _proto.ngDoCheck = function() {
                         if (this.parent && !function(obj1, obj2) {
