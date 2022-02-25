@@ -3,7 +3,6 @@
 import { noop, dasherizeToCamel } from 'belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 type VueComponent = {|
     render : (Function) => Element,
@@ -59,7 +58,7 @@ export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent, *, *>
                 // $FlowFixMe[object-this-reference]
                 this.parent = init({ ...propsToCamelCase(this.$attrs) });
                 // $FlowFixMe[object-this-reference]
-                this.parent.render(el, CONTEXT.IFRAME);
+                this.parent.render(el);
             },
 
             watch: {
