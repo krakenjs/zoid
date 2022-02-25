@@ -3,7 +3,6 @@
 import { dasherizeToCamel, replaceObject, noop } from 'belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 type AngularModule = {|
     directive : (string, () => {|
@@ -62,7 +61,7 @@ export const angular : ComponentDriverType<*, Angular, AngularModule, *, *> = {
                     };
 
                     const instance = init(getProps());
-                    instance.render($element[0], CONTEXT.IFRAME);
+                    instance.render($element[0]);
 
                     $scope.$watch(() => {
                         instance.updateProps(getProps()).catch(noop);
