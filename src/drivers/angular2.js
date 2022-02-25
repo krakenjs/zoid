@@ -4,7 +4,6 @@
 import { replaceObject } from 'belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 type Angular2Injection = {||};
 
@@ -82,7 +81,7 @@ export const angular2 : ComponentDriverType<*, Angular2, Angular2Module, *, *> =
             ngOnInit() {
                 const targetElement = this.elementRef.nativeElement;
                 this.parent = init(this.getProps());
-                this.parent.render(targetElement, CONTEXT.IFRAME);
+                this.parent.render(targetElement);
             }
 
             ngDoCheck() {
