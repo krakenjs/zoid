@@ -1,6 +1,6 @@
 {
   "name": "@krakenjs/zoid",
-  "version": "9.0.87",
+  "version": "10.0.0",
   "description": "Cross domain components.",
   "main": "index.js",
   "scripts": {
