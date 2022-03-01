@@ -1,5 +1,5 @@
 /* @flow */
-/* eslint import/no-commonjs: 0 */
+/* eslint import/no-commonjs: 0, import/extensions: 0 */
 
 // eslint-disable-next-line no-process-env
 if (process && process.env && process.env.ZOID_FRAME_ONLY) {
