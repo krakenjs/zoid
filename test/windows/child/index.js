@@ -1,9 +1,9 @@
 /* @flow */
 /* eslint no-eval: off, security/detect-eval-with-expression: off */
 
-import { on } from 'post-robot/src';
-import { memoize, destroyElement } from 'belter/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
+import { on } from '@krakenjs/post-robot/src';
+import { memoize, destroyElement } from '@krakenjs/belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 
 import { runOnClick } from '../../common';
 

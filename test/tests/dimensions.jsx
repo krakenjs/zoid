@@ -2,7 +2,7 @@
 /** @jsx node */
 /* eslint max-lines: off */
 
-import { wrapPromise } from 'belter/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { zoid } from '../zoid';

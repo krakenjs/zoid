@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isPerc, isPx, values } from 'belter/src';
+import { isPerc, isPx, values } from '@krakenjs/belter/src';
 
 import { CONTEXT, PROP_TYPE } from '../constants';
 

@@ -9,7 +9,7 @@
 [libs]
 flow-typed
 src/declarations.js
-node_modules/post-robot/src/declarations.js
+node_modules/@krakenjs/post-robot/src/declarations.js
 node_modules/grumbler-scripts/declarations.js
 [options]
 module.name_mapper='^src\(.*\)$' -> '<PROJECT_ROOT>/src/\1'

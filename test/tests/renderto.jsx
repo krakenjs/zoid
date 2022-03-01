@@ -2,8 +2,8 @@
 /* eslint max-lines: off */
 /** @jsx node */
 
-import { onCloseWindow, getParent, getOpener, isWindowClosed } from 'cross-domain-utils/src';
-import { wrapPromise, destroyElement, base64decode } from 'belter/src';
+import { onCloseWindow, getParent, getOpener, isWindowClosed } from '@krakenjs/cross-domain-utils/src';
+import { wrapPromise, destroyElement, base64decode } from '@krakenjs/belter/src';
 import { node, dom } from 'jsx-pragmatic/src';
 
 import { onWindowOpen, getContainer, getBody } from '../common';

@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint import/no-commonjs: off */
 
-const postRobotGlobals = require('post-robot/globals');
+const postRobotGlobals = require('@krakenjs/post-robot/globals');
 
 const pkg = require('./package.json');
 

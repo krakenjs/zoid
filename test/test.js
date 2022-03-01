@@ -1,7 +1,7 @@
 /* @flow */
 
 import './tests';
-import { noop } from 'belter/src';
+import { noop } from '@krakenjs/belter/src';
 
 import { zoid } from './zoid';
 

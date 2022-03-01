@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint react/no-deprecated: off, react/no-find-dom-node: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
 
-import { extend, noop } from 'belter/src';
+import { extend, noop } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';

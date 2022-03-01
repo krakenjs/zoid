@@ -1,8 +1,8 @@
 /* @flow */
 /* eslint max-lines: off */
 
-import { wrapPromise, noop, parseQuery, destroyElement, getElement } from 'belter/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
+import { wrapPromise, noop, parseQuery, destroyElement, getElement } from '@krakenjs/belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 
 import { onWindowOpen, getBody } from '../common';
 import { zoid } from '../zoid';

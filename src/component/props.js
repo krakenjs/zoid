@@ -1,9 +1,9 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, noop, type EventEmitterType } from 'belter/src';
-import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from 'cross-domain-utils/src';
-import { ProxyWindow, toProxyWindow } from 'post-robot/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { once, noop, type EventEmitterType } from '@krakenjs/belter/src';
+import { isWindow, type CrossDomainWindowType, isWindowClosed, isSameDomain } from '@krakenjs/cross-domain-utils/src';
+import { ProxyWindow, toProxyWindow } from '@krakenjs/post-robot/src';
 
 import type { CssDimensionsType } from '../types';
 import { PROP_SERIALIZATION, PROP_TYPE } from '../constants';

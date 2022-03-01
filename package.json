@@ -1,5 +1,5 @@
 {
-  "name": "zoid",
+  "name": "@krakenjs/zoid",
   "version": "9.0.87",
   "description": "Cross domain components.",
   "main": "index.js",
@@ -102,9 +102,9 @@
     "standard-version": "^9.3.2"
   },
   "dependencies": {
-    "belter": "^1.0.123",
-    "cross-domain-utils": "^2.0.33",
-    "post-robot": "^10",
-    "zalgo-promise": "^1.0.45"
+    "@krakenjs/belter": "^2.0.0",
+    "@krakenjs/cross-domain-utils": "^3.0.0",
+    "@krakenjs/post-robot": "^11.0.0",
+    "@krakenjs/zalgo-promise": "^2.0.0"
   }
 }

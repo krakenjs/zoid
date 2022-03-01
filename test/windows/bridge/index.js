@@ -1,5 +1,5 @@
 /* @flow */
 
-import { setup } from 'post-robot/src';
+import { setup } from '@krakenjs/post-robot/src';
 
 setup();

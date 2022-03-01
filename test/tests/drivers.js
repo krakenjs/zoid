@@ -1,6 +1,6 @@
 /* @flow */
 
-import { wrapPromise } from 'belter/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 
 import { zoid } from '../zoid';
 import { getBody, loadScript } from '../common';

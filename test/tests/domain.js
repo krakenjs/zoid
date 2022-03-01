@@ -1,7 +1,7 @@
 /* @flow */
 
-import { wrapPromise } from 'belter/src';
-import { getDomain } from 'cross-domain-utils/src';
+import { wrapPromise } from '@krakenjs/belter/src';
+import { getDomain } from '@krakenjs/cross-domain-utils/src';
 
 import { zoid } from '../zoid';
 import { getBody } from '../common';

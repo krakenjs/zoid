@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint no-eval: off, security/detect-eval-with-expression: off */
 
-import { setup, send, on, once } from 'post-robot/src';
+import { setup, send, on, once } from '@krakenjs/post-robot/src';
 
 setup();
 

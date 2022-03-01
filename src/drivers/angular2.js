@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint new-cap: 0 */
 
-import { replaceObject } from 'belter/src';
+import { replaceObject } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
 import { CONTEXT } from '../constants';

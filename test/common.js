@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
-import { createElement, destroyElement, uniqueID } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { isWindowClosed, type CrossDomainWindowType, type SameDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { createElement, destroyElement, uniqueID } from '@krakenjs/belter/src';
 
 export function monkeyPatchFunction<T, A>(obj : Object, name : string, handler : ({| call : () => T, args : A |}) => void) : {| cancel : () => void |} {
     const original = obj[name];

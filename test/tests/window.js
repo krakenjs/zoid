@@ -1,9 +1,9 @@
 /* @flow */
 /* eslint max-nested-callbacks: off */
 
-import { send, once } from 'post-robot/src';
-import { uniqueID, wrapPromise } from 'belter/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
+import { send, once } from '@krakenjs/post-robot/src';
+import { uniqueID, wrapPromise } from '@krakenjs/belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 
 import { runOnClick, getBody } from '../common';
 import { zoid } from '../zoid';
