@@ -58,7 +58,7 @@ export const vue : ComponentDriverType<*, VueType, RegisteredVueComponent, *, *>
                 // $FlowFixMe[object-this-reference]
                 this.parent = init({ ...propsToCamelCase(this.$attrs) });
                 // $FlowFixMe[object-this-reference]
-                this.parent.render(el);
+                this.parent.render(el, this.$attrs.context);
             },
 
             watch: {
