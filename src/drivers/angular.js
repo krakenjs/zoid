@@ -60,8 +60,9 @@ export const angular : ComponentDriverType<*, Angular, AngularModule, *, *> = {
                         });
                     };
 
-                    const instance = init(getProps());
-                    instance.render($element[0]);
+                    const props = getProps();
+                    const instance = init(props);
+                    instance.render($element[0], props.context);
 
                     $scope.$watch(() => {
                         instance.updateProps(getProps()).catch(noop);
