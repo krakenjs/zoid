@@ -33,7 +33,7 @@ export const vue3 : ComponentDriverType<*, *, *, *, *> = {
                 // $FlowFixMe[object-this-reference]
                 this.parent = init({ ...propsToCamelCase(this.$attrs) });
                 // $FlowFixMe[object-this-reference]
-                this.parent.render(el);
+                this.parent.render(el, this.$attrs.context);
             },
 
             watch: {

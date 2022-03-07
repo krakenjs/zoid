@@ -352,6 +352,7 @@ const MyComponent = zoid.create({
     defaultContext: 'popup'
 });
 ```
+**Note: Use [parentProps.context](https://github.com/krakenjs/zoid/blob/main/docs/api/parent-props.md#context-string) to set context when framework's driver `render`s the component
 
 ## validate `({ props }) => void`
 

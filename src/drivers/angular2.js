@@ -80,8 +80,9 @@ export const angular2 : ComponentDriverType<*, Angular2, Angular2Module, *, *> =
 
             ngOnInit() {
                 const targetElement = this.elementRef.nativeElement;
-                this.parent = init(this.getProps());
-                this.parent.render(targetElement);
+                const props = this.getProps();
+                this.parent = init(props);
+                this.parent.render(targetElement, props.context);
             }
 
             ngDoCheck() {
