@@ -18,6 +18,7 @@
     "clean": "rimraf dist coverage",
     "reinstall": "rimraf flow-typed && rimraf node_modules && npm install && flow-typed install",
     "debug": "cross-env NODE_ENV=debug",
+    "prepare": "husky install",
     "prerelease": "npm run clean && npm run test && npm run build",
     "release": "standard-version",
     "postrelease": "git push && git push --follow-tags && npm publish"
