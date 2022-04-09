@@ -93,10 +93,10 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.1",
     "@commitlint/config-conventional": "^16.2.1",
+    "@krakenjs/grumbler-scripts": "^6.0.2",
+    "@krakenjs/jsx-pragmatic": "^3.0.0",
     "flow-bin": "0.155.0",
-    "grumbler-scripts": "^5.0.3",
     "husky": "^7.0.4",
-    "jsx-pragmatic": "^2",
     "mocha": "^4",
     "serve": "^10.0.0",
     "standard-version": "^9.3.2"
