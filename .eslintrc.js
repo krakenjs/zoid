@@ -1,7 +1,7 @@
 /* @flow */
 
 module.exports = {
-    'extends': './node_modules/grumbler-scripts/config/.eslintrc-browser.js',
+    'extends': './node_modules/@krakenjs/grumbler-scripts/config/.eslintrc-browser.js',
 
     'globals': {
         __ZOID__: true,

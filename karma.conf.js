@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint import/no-default-export: off */
 
-import { getKarmaConfig } from 'grumbler-scripts/config/karma.conf';
+import { getKarmaConfig } from '@krakenjs/grumbler-scripts/config/karma.conf';
 
 import { WEBPACK_CONFIG_TEST } from './webpack.config';
 

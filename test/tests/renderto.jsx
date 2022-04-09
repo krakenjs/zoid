@@ -4,7 +4,7 @@
 
 import { onCloseWindow, getParent, getOpener, isWindowClosed } from '@krakenjs/cross-domain-utils/src';
 import { wrapPromise, destroyElement, base64decode } from '@krakenjs/belter/src';
-import { node, dom } from 'jsx-pragmatic/src';
+import { node, dom } from '@krakenjs/jsx-pragmatic/src';
 
 import { onWindowOpen, getContainer, getBody } from '../common';
 import { zoid } from '../zoid';

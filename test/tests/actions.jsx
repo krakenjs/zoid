@@ -3,7 +3,7 @@
 
 import { onCloseWindow } from '@krakenjs/cross-domain-utils/src';
 import { wrapPromise } from '@krakenjs/belter/src';
-import { node, dom } from 'jsx-pragmatic/src';
+import { node, dom } from '@krakenjs/jsx-pragmatic/src';
 
 import { zoid } from '../zoid';
 import { onWindowOpen, runOnClick, getBody } from '../common';

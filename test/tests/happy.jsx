@@ -4,7 +4,7 @@
 import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 import { wrapPromise } from '@krakenjs/belter/src';
 import { getParent, getOpener } from '@krakenjs/cross-domain-utils/src';
-import { node, dom } from 'jsx-pragmatic/src';
+import { node, dom } from '@krakenjs/jsx-pragmatic/src';
 
 import { onWindowOpen, runOnClick, getContainer, getBody } from '../common';
 import { zoid } from '../zoid';
