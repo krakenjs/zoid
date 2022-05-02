@@ -328,7 +328,7 @@ describe('zoid error cases', () => {
     });
 
     it('should error out when a prerender template is created with the incorrect document', () => {
-        return wrapPromise(({ expect }) => {
+        return wrapPromise(({ expect, avoid }) => {
 
             window.__component__ = () => {
                 return zoid.create({
@@ -347,7 +347,9 @@ describe('zoid error cases', () => {
 
             const component = window.__component__();
             return component({
-                onDestroy: expect('onDestroy')
+                onDestroy:     expect('onDestroy'),
+                onPrerender:   expect('onPrerender'),
+                onPrerendered: avoid('onPrerendered')
             }).render(getBody()).catch(expect('catch'));
         });
     });

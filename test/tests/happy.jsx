@@ -377,7 +377,10 @@ describe('zoid happy cases', () => {
             window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
 
             const component = window.__component__();
-            return component().render(getBody());
+            return component({
+                onPrerender:   expect('onPrerender'),
+                onPrerendered: expect('onPrerendered')
+            }).render(getBody());
         });
     });
 
@@ -405,7 +408,10 @@ describe('zoid happy cases', () => {
             window.prerenderScriptLoaded = expect('prerenderScriptLoaded');
 
             const component = window.__component__();
-            const instance = component();
+            const instance = component({
+                onPrerender:   expect('onPrerender'),
+                onPrerendered: expect('onPrerendered')
+            });
 
             return runOnClick(() => {
                 return instance.render(getBody(), zoid.CONTEXT.POPUP);
