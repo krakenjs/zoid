@@ -41,15 +41,17 @@ export const DEFAULT_DIMENSIONS = {
 };
 
 export const EVENT = {
-    RENDER:   'zoid-render',
-    RENDERED: 'zoid-rendered',
-    DISPLAY:  'zoid-display',
-    ERROR:    'zoid-error',
-    CLOSE:    'zoid-close',
-    DESTROY:  'zoid-destroy',
-    PROPS:    'zoid-props',
-    RESIZE:   'zoid-resize',
-    FOCUS:    'zoid-focus'
+    RENDER:      'zoid-render',
+    RENDERED:    'zoid-rendered',
+    PRERENDER:   'zoid-prerender',
+    PRERENDERED: 'zoid-prerendered',
+    DISPLAY:     'zoid-display',
+    ERROR:       'zoid-error',
+    CLOSE:       'zoid-close',
+    DESTROY:     'zoid-destroy',
+    PROPS:       'zoid-props',
+    RESIZE:      'zoid-resize',
+    FOCUS:       'zoid-focus'
 };
 
 export const METHOD = {
