@@ -32,6 +32,8 @@ export type getParentDomainPropType = () => string;
 export type onDisplayPropType = EventHandlerType<void>;
 export type onRenderedPropType = EventHandlerType<void>;
 export type onRenderPropType = EventHandlerType<void>;
+export type onPrerenderedPropType = EventHandlerType<void>;
+export type onPrerenderPropType = EventHandlerType<void>;
 export type onClosePropType = EventHandlerType<void>;
 export type onDestroyPropType = EventHandlerType<void>;
 export type onResizePropType = EventHandlerType<void>;
@@ -56,6 +58,8 @@ export type PropsInputType<P> = {|
     onDisplay? : onDisplayPropType,
     onRendered? : onRenderedPropType,
     onRender? : onRenderPropType,
+    onPrerendered? : onPrerenderedPropType,
+    onPrerender? : onPrerenderPropType,
     onClose? : onClosePropType,
     onDestroy? : onDestroyPropType,
     onResize? : onResizePropType,
@@ -75,6 +79,8 @@ export type PropsType<P> = {|
     onDisplay : onDisplayPropType,
     onRendered : onRenderedPropType,
     onRender : onRenderPropType,
+    onPrerendered : onPrerenderedPropType,
+    onPrerender : onPrerenderPropType,
     onClose : onClosePropType,
     onDestroy : onDestroyPropType,
     onResize : onResizePropType,
@@ -217,6 +223,8 @@ export type BuiltInPropsDefinitionType<P, X> = {|
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P, X>,
     onRendered : FunctionPropDefinitionType<onRenderedPropType, P, X>,
     onRender : FunctionPropDefinitionType<onRenderPropType, P, X>,
+    onPrerendered : FunctionPropDefinitionType<onPrerenderedPropType, P, X>,
+    onPrerender : FunctionPropDefinitionType<onPrerenderPropType, P, X>,
     onClose : FunctionPropDefinitionType<onClosePropType, P, X>,
     onDestroy : FunctionPropDefinitionType<onDestroyPropType, P, X>,
     onResize : FunctionPropDefinitionType<onClosePropType, P, X>,
@@ -292,6 +300,22 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         onRender: {
+            type:        PROP_TYPE.FUNCTION,
+            required:    false,
+            sendToChild: false,
+            default:     defaultNoop,
+            decorate:    decorateOnce
+        },
+
+        onPrerendered: {
+            type:        PROP_TYPE.FUNCTION,
+            required:    false,
+            sendToChild: false,
+            default:     defaultNoop,
+            decorate:    decorateOnce
+        },
+
+        onPrerender: {
             type:        PROP_TYPE.FUNCTION,
             required:    false,
             sendToChild: false,

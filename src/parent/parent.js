@@ -275,8 +275,10 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
 
     const setupEvents = () => {
         event.on(EVENT.RENDER,   () => props.onRender());
+        event.on(EVENT.PRERENDER,   () => props.onPrerender());
         event.on(EVENT.DISPLAY,  () => props.onDisplay());
         event.on(EVENT.RENDERED, () => props.onRendered());
+        event.on(EVENT.PRERENDERED, () => props.onPrerendered());
         event.on(EVENT.CLOSE,    () => props.onClose());
         event.on(EVENT.DESTROY,  () => props.onDestroy());
         event.on(EVENT.RESIZE,   () => props.onResize());
@@ -795,6 +797,8 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
                 return;
             }
 
+            event.trigger(EVENT.PRERENDER);
+
             let prerenderWindow = proxyPrerenderWin.getWindow();
 
             if (!prerenderWindow || !isSameDomain(prerenderWindow) || !isBlankDomain(prerenderWindow)) {
@@ -829,6 +833,7 @@ export function parentComponent<P, X, C>({ uid, options, overrides = getDefaultO
 
                 event.on(EVENT.RENDERED, prerenderResizeListener.cancel);
             }
+            event.trigger(EVENT.PRERENDERED);
         });
     };
     const renderContainer : RenderContainer = (proxyContainer : ProxyObject<HTMLElement>, { proxyFrame, proxyPrerenderFrame, context, rerender } : RenderContainerOptions) : ZalgoPromise<?ProxyObject<HTMLElement>> => {

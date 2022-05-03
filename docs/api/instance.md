@@ -234,7 +234,7 @@ document.querySelector('button#trigger-error').addEventListener('click', () => {
 
 ## event
 
-Event emitter that can be used to listen for the following events: `RENDER`, `RENDERED`, `DISPLAY`, `ERROR`, `CLOSED`, `PROPS`, `RESIZE`.
+Event emitter that can be used to listen for the following events: `RENDER`, `RENDERED`, `PRERENDER`, `PRERENDERED`, `DISPLAY`, `ERROR`, `CLOSED`, `PROPS`, `RESIZE`.
 
 ```javascript
 const myComponent = MyComponent();
