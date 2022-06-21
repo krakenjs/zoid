@@ -29,7 +29,7 @@ MyComponent({
 
 ## cspNonce `string`
 
-A CSP nonce that will be passed to any inline `script` or `style` tags rendered by zoid in the default `containerTemplate` or `prerenderTemplate` fumctions.
+A CSP nonce that will be passed to any inline `script` or `style` tags rendered by zoid in the default `containerTemplate` or `prerenderTemplate` functions.
 
 ```javascript
 MyComponent({
