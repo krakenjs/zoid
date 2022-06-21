@@ -148,7 +148,7 @@ In the child window:
 console.log('The current color is', window.xprops.color); // red
 
 window.xprops.onProps(() => {
-    console.log('The current color is', window.xprops.color); // lue
+    console.log('The current color is', window.xprops.color); // blue
 });
 ```
 
