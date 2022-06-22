@@ -27,6 +27,17 @@ MyComponent({
 });
 ```
 
+## context `string`
+
+The type of window to host remote url in. Valid values are `iframe` and `popup`. Used with framework drivers for setting `context` at render time.
+
+```javascript
+const MyFooFrameworkComponent = MyComponent.driver('foo', { FooFramework })
+
+<MyFooFrameworkComponent context="popup">
+// Now the foo framework's driver will call `render` method with `popup` context
+```
+
 ## cspNonce `string`
 
 A CSP nonce that will be passed to any inline `script` or `style` tags rendered by zoid in the default `containerTemplate` or `prerenderTemplate` functions.

@@ -28,6 +28,7 @@ export type hidePropType = () => ZalgoPromise<void>;
 export type resizePropType = ({| width : ?number, height : ?number |}) => ZalgoPromise<void>;
 export type getParentPropType = () => CrossDomainWindowType;
 export type getParentDomainPropType = () => string;
+export type contextPropType = string;
 
 export type onDisplayPropType = EventHandlerType<void>;
 export type onRenderedPropType = EventHandlerType<void>;
@@ -54,6 +55,7 @@ export type PropsInputType<P> = {|
     timeout? : timeoutPropType,
     window? : windowPropType,
     cspNonce? : ?cspNoncePropType,
+    context? : ?contextPropType,
 
     onDisplay? : onDisplayPropType,
     onRendered? : onRenderedPropType,
@@ -74,6 +76,7 @@ export type PropsType<P> = {|
     timeout? : timeoutPropType,
     window? : ?windowPropType,
     cspNonce? : ?cspNoncePropType,
+    context? : ?contextPropType,
     dimensions : CssDimensionsType,
 
     onDisplay : onDisplayPropType,
@@ -219,6 +222,7 @@ export type BuiltInPropsDefinitionType<P, X> = {|
     show : FunctionPropDefinitionType<showPropType, P, X>,
     export : FunctionPropDefinitionType<exportPropType<X>, P, X>,
     getSiblings : FunctionPropDefinitionType<getSiblingsPropType, P, X>,
+    context : StringPropDefinitionType<contextPropType, P, X>,
 
     onDisplay : FunctionPropDefinitionType<onDisplayPropType, P, X>,
     onRendered : FunctionPropDefinitionType<onRenderedPropType, P, X>,
@@ -278,6 +282,11 @@ export function getBuiltInProps<P, X>() : BuiltInPropsDefinitionType<P, X> {
         },
 
         cspNonce: {
+            type:     PROP_TYPE.STRING,
+            required: false
+        },
+
+        context: {
             type:     PROP_TYPE.STRING,
             required: false
         },

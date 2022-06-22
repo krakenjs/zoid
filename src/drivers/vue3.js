@@ -2,7 +2,6 @@
 import { dasherizeToCamel, noop } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 function propsToCamelCase(props : Object) : Object {
     return Object.keys(props).reduce((acc, key) => {
@@ -34,7 +33,7 @@ export const vue3 : ComponentDriverType<*, *, *, *, *> = {
                 // $FlowFixMe[object-this-reference]
                 this.parent = init({ ...propsToCamelCase(this.$attrs) });
                 // $FlowFixMe[object-this-reference]
-                this.parent.render(el, CONTEXT.IFRAME);
+                this.parent.render(el, this.$attrs.context);
             },
 
             watch: {

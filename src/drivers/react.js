@@ -4,7 +4,6 @@
 import { extend, noop } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 declare class ReactClassType {}
 declare class __ReactComponent {}
@@ -42,7 +41,7 @@ export const react : ComponentDriverType<*, ReactLibraryType, typeof ReactClassT
                 // $FlowFixMe
                 const el = ReactDOM.findDOMNode(this);
                 const parent = init(extend({}, this.props));
-                parent.render(el, CONTEXT.IFRAME);
+                parent.render(el, this.props.context);
                 this.setState({ parent });
             }
 

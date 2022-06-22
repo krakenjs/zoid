@@ -3,7 +3,6 @@
 import { dasherizeToCamel, replaceObject, noop } from '@krakenjs/belter/src';
 
 import type { ComponentDriverType } from '../component';
-import { CONTEXT } from '../constants';
 
 type AngularModule = {|
     directive : (string, () => {|
@@ -61,8 +60,9 @@ export const angular : ComponentDriverType<*, Angular, AngularModule, *, *> = {
                         });
                     };
 
-                    const instance = init(getProps());
-                    instance.render($element[0], CONTEXT.IFRAME);
+                    const props = getProps();
+                    const instance = init(props);
+                    instance.render($element[0], props.context);
 
                     $scope.$watch(() => {
                         instance.updateProps(getProps()).catch(noop);
