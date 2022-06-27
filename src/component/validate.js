@@ -1,97 +1,122 @@
 /* @flow */
 
-import { isPerc, isPx, values } from '@krakenjs/belter/src';
+import { isPerc, isPx, values } from "@krakenjs/belter/src";
 
-import { CONTEXT, PROP_TYPE } from '../constants';
+import { CONTEXT, PROP_TYPE } from "../constants";
 
-import type { ComponentOptionsType } from './index';
+import type { ComponentOptionsType } from "./index";
 
-function validatepropsDefinitions<P, X, C>(options : ComponentOptionsType<P, X, C>) {
+function validatepropsDefinitions<P, X, C>(
+  options: ComponentOptionsType<P, X, C>
+) {
+  if (options.props && !(typeof options.props === "object")) {
+    throw new Error(`Expected options.props to be an object`);
+  }
 
-    if (options.props && !(typeof options.props === 'object')) {
-        throw new Error(`Expected options.props to be an object`);
+  const PROP_TYPE_LIST = values(PROP_TYPE);
+
+  if (options.props) {
+    for (const key of Object.keys(options.props)) {
+      const prop = options.props[key];
+
+      if (!prop || !(typeof prop === "object")) {
+        throw new Error(`Expected options.props.${key} to be an object`);
+      }
+
+      if (!prop.type) {
+        throw new Error(`Expected prop.type`);
+      }
+
+      if (PROP_TYPE_LIST.indexOf(prop.type) === -1) {
+        throw new Error(
+          `Expected prop.type to be one of ${PROP_TYPE_LIST.join(", ")}`
+        );
+      }
+
+      if (prop.required && prop.default) {
+        throw new Error(`Required prop can not have a default value`);
+      }
+
+      if (
+        prop.type === PROP_TYPE.FUNCTION &&
+        prop.queryParam &&
+        !prop.queryValue
+      ) {
+        throw new Error(`Do not pass queryParam for function prop`);
+      }
     }
-
-    const PROP_TYPE_LIST = values(PROP_TYPE);
-
-    if (options.props) {
-        for (const key of Object.keys(options.props)) {
-            const prop = options.props[key];
-
-            if (!prop || !(typeof prop === 'object')) {
-                throw new Error(`Expected options.props.${ key } to be an object`);
-            }
-
-            if (!prop.type) {
-                throw new Error(`Expected prop.type`);
-            }
-
-            if (PROP_TYPE_LIST.indexOf(prop.type) === -1) {
-                throw new Error(`Expected prop.type to be one of ${ PROP_TYPE_LIST.join(', ') }`);
-            }
-
-            if (prop.required && prop.default) {
-                throw new Error(`Required prop can not have a default value`);
-            }
-
-            if (prop.type === PROP_TYPE.FUNCTION && prop.queryParam && !prop.queryValue) {
-                throw new Error(`Do not pass queryParam for function prop`);
-            }
-        }
-    }
+  }
 }
 
 // eslint-disable-next-line complexity
-export function validateOptions<P, X, C>(options : ?ComponentOptionsType<P, X, C>) { // eslint-ignore-line
+export function validateOptions<P, X, C>(
+  options: ?ComponentOptionsType<P, X, C>
+) {
+  // eslint-ignore-line
 
-    if (!options) {
-        throw new Error(`Expected options to be passed`);
+  if (!options) {
+    throw new Error(`Expected options to be passed`);
+  }
+
+  // eslint-disable-next-line security/detect-unsafe-regex
+  if (!options.tag || !options.tag.match(/^([a-z0-9][a-z0-9-]*)+[a-z0-9]+$/)) {
+    throw new Error(`Invalid options.tag: ${options.tag}`);
+  }
+
+  validatepropsDefinitions(options);
+
+  const { dimensions } = options;
+
+  if (dimensions) {
+    if (typeof dimensions === "function") {
+      // pass
+    } else if (typeof dimensions === "object" && dimensions !== null) {
+      if (!isPx(dimensions.height) && !isPerc(dimensions.height)) {
+        throw new Error(
+          `Expected options.dimensions.height to be a px or % string value`
+        );
+      }
+
+      if (!isPx(dimensions.width) && !isPerc(dimensions.width)) {
+        throw new Error(
+          `Expected options.dimensions.width to be a px or % string value`
+        );
+      }
+    } else {
+      throw new Error(`Expected dimensions to be a function or object`);
     }
+  }
 
-    // eslint-disable-next-line security/detect-unsafe-regex
-    if (!options.tag || !options.tag.match(/^([a-z0-9][a-z0-9-]*)+[a-z0-9]+$/)) {
-        throw new Error(`Invalid options.tag: ${ options.tag }`);
+  if (options.defaultContext) {
+    if (
+      options.defaultContext !== CONTEXT.IFRAME &&
+      options.defaultContext !== CONTEXT.POPUP
+    ) {
+      throw new Error(
+        `Unsupported context type: ${options.defaultContext || "unknown"}`
+      );
     }
+  }
 
-    validatepropsDefinitions(options);
-    
-    const { dimensions } = options;
+  if (!options.url) {
+    throw new Error(`Must pass url`);
+  }
 
-    if (dimensions) {
-        if (typeof dimensions === 'function') {
-            // pass
-        } else if (typeof dimensions === 'object' && dimensions !== null) {
-            if (!isPx(dimensions.height) && !isPerc(dimensions.height)) {
-                throw new Error(`Expected options.dimensions.height to be a px or % string value`);
-            }
+  if (typeof options.url !== "string" && typeof options.url !== "function") {
+    throw new TypeError(`Expected url to be string or function`);
+  }
 
-            if (!isPx(dimensions.width) && !isPerc(dimensions.width)) {
-                throw new Error(`Expected options.dimensions.width to be a px or % string value`);
-            }
-        } else {
-            throw new Error(`Expected dimensions to be a function or object`);
-        }
-    }
+  if (
+    options.prerenderTemplate &&
+    typeof options.prerenderTemplate !== "function"
+  ) {
+    throw new Error(`Expected options.prerenderTemplate to be a function`);
+  }
 
-    if (options.defaultContext) {
-        if (options.defaultContext !== CONTEXT.IFRAME && options.defaultContext !== CONTEXT.POPUP) {
-            throw new Error(`Unsupported context type: ${ options.defaultContext || 'unknown' }`);
-        }
-    }
-
-    if (!options.url) {
-        throw new Error(`Must pass url`);
-    }
-
-    if (typeof options.url !== 'string' && typeof options.url !== 'function') {
-        throw new TypeError(`Expected url to be string or function`);
-    }
-
-    if (options.prerenderTemplate && typeof options.prerenderTemplate !== 'function') {
-        throw new Error(`Expected options.prerenderTemplate to be a function`);
-    }
-
-    if ((options.containerTemplate || !__ZOID__.__DEFAULT_CONTAINER__) && typeof options.containerTemplate !== 'function') {
-        throw new Error(`Expected options.containerTemplate to be a function`);
-    }
+  if (
+    (options.containerTemplate || !__ZOID__.__DEFAULT_CONTAINER__) &&
+    typeof options.containerTemplate !== "function"
+  ) {
+    throw new Error(`Expected options.containerTemplate to be a function`);
+  }
 }

@@ -4,15 +4,15 @@ After instantiating a component, that component instance has a number of helpers
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component'
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
 });
 
 const component = MyComponent({
-    foo: 'bar',
-    onSomething: () => {
-        console.log('Something happened!');
-    }
+  foo: "bar",
+  onSomething: () => {
+    console.log("Something happened!");
+  },
 });
 ```
 
@@ -26,8 +26,8 @@ Render the component to a given container.
 ```javascript
 const component = MyComponent();
 
-component.render('#my-container').then(() => {
-    console.info('The component was successfully rendered')
+component.render("#my-container").then(() => {
+  console.info("The component was successfully rendered");
 });
 ```
 
@@ -35,15 +35,15 @@ component.render('#my-container').then(() => {
 const component = MyComponent();
 
 component.render(document.body).then(() => {
-    console.info('The component was successfully rendered')
+  console.info("The component was successfully rendered");
 });
 ```
 
 ```javascript
 const component = MyComponent();
 
-component.render('#my-container', 'popup').then(() => {
-    console.info('The component was successfully rendered')
+component.render("#my-container", "popup").then(() => {
+  console.info("The component was successfully rendered");
 });
 ```
 
@@ -58,16 +58,16 @@ Render the component to a given window and given container.
 ```javascript
 const component = MyComponent();
 
-component.renderTo(window.parent, '#my-container').then(() => {
-    console.info('The component was successfully rendered')
+component.renderTo(window.parent, "#my-container").then(() => {
+  console.info("The component was successfully rendered");
 });
 ```
 
 ```javascript
 const component = MyComponent();
 
-component.renderTo(window.parent, '#my-container', 'popup').then(() => {
-    console.info('The component was successfully rendered')
+component.renderTo(window.parent, "#my-container", "popup").then(() => {
+  console.info("The component was successfully rendered");
 });
 ```
 
@@ -77,13 +77,13 @@ Clones the current instance with the exact same set of props
 
 ```javascript
 const button1 = ButtonComponent({
-    color: 'red'
+  color: "red",
 });
 
 const button2 = button1.clone();
 
-button1.render('#first-button-container'); // First red button
-button2.render('#first-button-container'); // Second red button
+button1.render("#first-button-container"); // First red button
+button2.render("#first-button-container"); // Second red button
 ```
 
 ## isEligible `() => boolean`
@@ -94,7 +94,7 @@ Informs if the component is eligible
 const myComponent = MyComponent();
 
 if (myComponent.isEligible()) {
-    myComponent.render('#my-container');
+  myComponent.render("#my-container");
 }
 ```
 
@@ -102,16 +102,16 @@ To use `isEligible()` you must first define an `eligible` handler when setting u
 
 ```javascript
 const FirefoxOnlyButton = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    eligible: () => {
-        if (isFireFox()) {
-            return true;
-        } else {
-            return false;
-        }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  eligible: () => {
+    if (isFireFox()) {
+      return true;
+    } else {
+      return false;
     }
-})
+  },
+});
 ```
 
 ## close `() => Promise<void>`
@@ -120,13 +120,15 @@ Gracefully close the component
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#close-component').addEventListener('click', () => {
+document
+  .querySelector("button#close-component")
+  .addEventListener("click", () => {
     myComponent.close().then(() => {
-        console.log('Component is now closed')
+      console.log("Component is now closed");
     });
-});
+  });
 ```
 
 ## focus `() => Promise<void>`
@@ -135,13 +137,15 @@ Focus the component. Only works for popup windows, on a user action like a click
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#focus-component').addEventListener('click', () => {
+document
+  .querySelector("button#focus-component")
+  .addEventListener("click", () => {
     myComponent.focus().then(() => {
-        console.log('Component is now focused')
+      console.log("Component is now focused");
     });
-});
+  });
 ```
 
 ## resize `({ width : number, height : number }) => Promise<void>`
@@ -150,13 +154,15 @@ Resize the component. Only works for iframe windows, popups can not be resized o
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#resize-component').addEventListener('click', () => {
+document
+  .querySelector("button#resize-component")
+  .addEventListener("click", () => {
     myComponent.resize({ width: 500, height: 800 }).then(() => {
-        console.log('Component is now resized')
+      console.log("Component is now resized");
     });
-});
+  });
 ```
 
 ## show `() => Promise<void>`
@@ -165,13 +171,15 @@ Show the component. Only works for iframe windows, popups can not be hidden/show
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#show-component').addEventListener('click', () => {
+document
+  .querySelector("button#show-component")
+  .addEventListener("click", () => {
     myComponent.show().then(() => {
-        console.log('Component is now visible')
+      console.log("Component is now visible");
     });
-});
+  });
 ```
 
 ## hide `() => Promise<void>`
@@ -180,13 +188,15 @@ Hide the component. Only works for iframe windows, popups can not be hidden/show
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#hide-component').addEventListener('click', () => {
+document
+  .querySelector("button#hide-component")
+  .addEventListener("click", () => {
     myComponent.hide().then(() => {
-        console.log('Component is now hidden')
+      console.log("Component is now hidden");
     });
-});
+  });
 ```
 
 ## updateProps `({ [string ] : any }) => Promise<void>`
@@ -197,23 +207,23 @@ In the parent window:
 
 ```javascript
 const component = MyComponent({
-    color: 'red'
+  color: "red",
 });
 
-component.render('#container').then(() => {
-    component.setProps({
-        color: 'blue'
-    });
+component.render("#container").then(() => {
+  component.setProps({
+    color: "blue",
+  });
 });
 ```
 
 In the child window:
 
 ```javascript
-console.log('The current color is', window.xprops.color); // red
+console.log("The current color is", window.xprops.color); // red
 
 window.xprops.onProps(() => {
-    console.log('The current color is', window.xprops.color); // lue
+  console.log("The current color is", window.xprops.color); // lue
 });
 ```
 
@@ -223,12 +233,12 @@ Trigger an error in the component
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
-document.querySelector('button#trigger-error').addEventListener('click', () => {
-    myComponent.onError(new Error(`Something went wrong`)).then(() => {
-        console.log('Error successfully triggered')
-    });
+document.querySelector("button#trigger-error").addEventListener("click", () => {
+  myComponent.onError(new Error(`Something went wrong`)).then(() => {
+    console.log("Error successfully triggered");
+  });
 });
 ```
 
@@ -238,10 +248,10 @@ Event emitter that can be used to listen for the following events: `RENDER`, `RE
 
 ```javascript
 const myComponent = MyComponent();
-myComponent.render('#container');
+myComponent.render("#container");
 
 myComponent.event.on(zoid.EVENT.RENDERED, () => {
-    console.log('Component was rendered!');
+  console.log("Component was rendered!");
 });
 ```
 
@@ -266,9 +276,9 @@ Once this mapper is defined, the child window may export values up to the parent
 
 ```javascript
 window.xprops.export({
-    submit: () => {
-        document.querySelector('form#createPost').submit();
-    }
+  submit: () => {
+    document.querySelector("form#createPost").submit();
+  },
 });
 ```
 
@@ -276,9 +286,9 @@ The parent window may call these exports at any time:
 
 ```javascript
 const postForm = CreatePostForm();
-postForm.render('#create-post-form-container');
+postForm.render("#create-post-form-container");
 
-document.querySelector('button#submitForm').addEventListener('click', () => {
-    postForm.submit();
+document.querySelector("button#submitForm").addEventListener("click", () => {
+  postForm.submit();
 });
 ```

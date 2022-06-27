@@ -1,52 +1,51 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.13.1/umd/react.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.13.1/umd/react-dom.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.13.1/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.13.1/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
-    <div id="container"></div>
+  <div id="container"></div>
 
-    <script type="text/babel">
+  <script type="text/babel">
+    let LoginZoidReactComponent = LoginZoidComponent.driver("react", {
+      React: window.React,
+      ReactDOM: window.ReactDOM,
+    });
 
-        let LoginZoidReactComponent = LoginZoidComponent.driver('react', {
-            React: window.React,
-            ReactDOM: window.ReactDOM
-        });
+    function App() {
+      const [loggedIn, setLoggedIn] = React.useState(false);
+      const [email, setEmail] = React.useState("foo@bar.com");
 
-        function App() {
-            const [ loggedIn, setLoggedIn ] = React.useState(false);
-            const [ email, setEmail ] = React.useState('foo@bar.com');
+      let onLogin = (email) => {
+        setEmail(email);
+        setLoggedIn(true);
+      };
 
-            let onLogin = (email) => {
-                setEmail(email);
-                setLoggedIn(true);
-            }
+      return (
+        <div>
+          <h3>Log in on xyz.com</h3>
 
-            return (
-                <div>
-                    <h3>Log in on xyz.com</h3>
+          {loggedIn ? (
+            <p>User logged in with email: {email}</p>
+          ) : (
+            <LoginZoidReactComponent prefilledEmail={email} onLogin={onLogin} />
+          )}
+        </div>
+      );
+    }
 
-                    { loggedIn
-                        ? <p>User logged in with email: { email }</p>
-                        : <LoginZoidReactComponent
-                            prefilledEmail={ email }
-                            onLogin={ onLogin } />
-                    }
-                </div>
-            );
-        }
-
-        ReactDOM.render(<App />, document.querySelector('#container'));
-
-    </script>
-
+    ReactDOM.render(<App />, document.querySelector("#container"));
+  </script>
 </body>

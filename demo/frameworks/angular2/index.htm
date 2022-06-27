@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
-    <script src="https://npmcdn.com/zone.js@0.8.12?main=browser"></script>
-    <script src="https://npmcdn.com/reflect-metadata@0.1.10"></script>
-    <script src="https://unpkg.com/rxjs@6.2.0/bundles/rxjs.umd.min.js"></script>
-    <script src="https://npmcdn.com/@angular/core@12.2.1/bundles/core.umd.js"></script>
-    <script src="https://npmcdn.com/@angular/common@12.2.1/bundles/common.umd.js"></script>
-    <script src="https://npmcdn.com/@angular/compiler@12.2.1/bundles/compiler.umd.js"></script>
-    <script src="https://npmcdn.com/@angular/platform-browser@12.2.1/bundles/platform-browser.umd.js"></script>
-    <script src="https://npmcdn.com/@angular/platform-browser-dynamic@12.2.1/bundles/platform-browser-dynamic.umd.js"></script>
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
+  <script src="https://npmcdn.com/zone.js@0.8.12?main=browser"></script>
+  <script src="https://npmcdn.com/reflect-metadata@0.1.10"></script>
+  <script src="https://unpkg.com/rxjs@6.2.0/bundles/rxjs.umd.min.js"></script>
+  <script src="https://npmcdn.com/@angular/core@12.2.1/bundles/core.umd.js"></script>
+  <script src="https://npmcdn.com/@angular/common@12.2.1/bundles/common.umd.js"></script>
+  <script src="https://npmcdn.com/@angular/compiler@12.2.1/bundles/compiler.umd.js"></script>
+  <script src="https://npmcdn.com/@angular/platform-browser@12.2.1/bundles/platform-browser.umd.js"></script>
+  <script src="https://npmcdn.com/@angular/platform-browser-dynamic@12.2.1/bundles/platform-browser-dynamic.umd.js"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
-    <my-app>Loading...</my-app>
-    <script>
+  <my-app>Loading...</my-app>
+  <script>
+    (function () {
+      const MyLoginZoidComponentModule = MyLoginZoidComponent.driver(
+        "angular2",
+        ng.core
+      );
 
-        (function() {
+      class AppComponent {
+        constructor() {
+          this.prefilledEmail = "foo@bar.com";
+          this.onLogin = function (email) {
+            this.email = email;
+          }.bind(this);
+        }
+      }
 
-            const MyLoginZoidComponentModule = MyLoginZoidComponent.driver('angular2', ng.core);
-
-            class AppComponent {
-                constructor() {
-                    this.prefilledEmail = 'foo@bar.com';
-                    this.onLogin = (function (email) {
-                        this.email = email;
-                    }).bind(this);
-                }
-            }
-
-            AppComponent.annotations = [
-                new ng.core.Component({
-                    selector: 'my-app',
-                    template: `
+      AppComponent.annotations = [
+        new ng.core.Component({
+          selector: "my-app",
+          template: `
                         <div>
                             <h3>Log in on xyz.com</h3>
                             <div id="container">
@@ -44,30 +48,27 @@
                             <div id="result" *ngIf="email">User logged in with email: {{email}}</div>
                         </div>
                     `,
-                }),
-            ]
+        }),
+      ];
 
-            class AppModule {}
+      class AppModule {}
 
-            AppModule.annotations = [
-                new ng.core.NgModule({
-                    imports: [
-                        ng.platformBrowser.BrowserModule,
-                        MyLoginZoidComponentModule
-                    ],
-                    declarations: [ AppComponent ],
-                    bootstrap: [ AppComponent ],
-                })
-            ]
+      AppModule.annotations = [
+        new ng.core.NgModule({
+          imports: [
+            ng.platformBrowser.BrowserModule,
+            MyLoginZoidComponentModule,
+          ],
+          declarations: [AppComponent],
+          bootstrap: [AppComponent],
+        }),
+      ];
 
-            document.addEventListener('DOMContentLoaded', function() {
-                ng.platformBrowserDynamic
-                    .platformBrowserDynamic()
-                    .bootstrapModule(AppModule);
-            });
-
-        })();
-
-    </script>
-
+      document.addEventListener("DOMContentLoaded", function () {
+        ng.platformBrowserDynamic
+          .platformBrowserDynamic()
+          .bootstrapModule(AppModule);
+      });
+    })();
+  </script>
 </body>

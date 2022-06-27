@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="../../../dist/zoid.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <h3>Log in on xyz.com</h3>
 
-    <h3>Log in on xyz.com</h3>
+  <input id="email" placeholder="Custom Email" />
+  <br /><br />
 
-    <input id="email" placeholder="Custom Email" />
-    <br /><br />
+  <div id="container"></div>
 
-    <div id="container"></div>
+  <div id="result"></div>
 
-    <div id="result"></div>
+  <script>
+    // Render the component
 
-    <script>
+    var instance = MyLoginZoidComponent({
+      prefilledEmail: "foo@bar.com",
 
-        // Render the component
+      onLogin: function (email) {
+        console.log("User logged in with email:", email);
+        document.querySelector("#result").innerText = email + " logged in!";
+      },
+    });
 
-        var instance = MyLoginZoidComponent({
+    instance.render("#container");
 
-            prefilledEmail: 'foo@bar.com',
-
-            onLogin: function(email) {
-                console.log('User logged in with email:', email);
-                document.querySelector('#result').innerText = email + ' logged in!';
-            }
-
+    document
+      .querySelector("#email")
+      .addEventListener("keyup", function (event) {
+        instance.updateProps({
+          prefilledEmail: event.target.value,
         });
-        
-        instance.render('#container');
-
-        document.querySelector('#email').addEventListener('keyup', function(event) {
-            instance.updateProps({
-                prefilledEmail: event.target.value
-            });
-        });
-    </script>
-
+      });
+  </script>
 </body>

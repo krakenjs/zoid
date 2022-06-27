@@ -1,24 +1,28 @@
 /* @flow */
 /* eslint react/react-in-jsx-scope: off */
 
-import { type RenderOptionsType } from '../../parent/parent';
+import { type RenderOptionsType } from "../../parent/parent";
 
-export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P>) : ?HTMLElement {
-    if (__ZOID__.__DEFAULT_PRERENDER__) {
-        const html = doc.createElement('html');
-        const body = doc.createElement('body');
-        const style = doc.createElement('style');
-        const spinner = doc.createElement('div');
-        spinner.classList.add('spinner');
+export function defaultPrerenderTemplate<P>({
+  doc,
+  props,
+}: RenderOptionsType<P>): ?HTMLElement {
+  if (__ZOID__.__DEFAULT_PRERENDER__) {
+    const html = doc.createElement("html");
+    const body = doc.createElement("body");
+    const style = doc.createElement("style");
+    const spinner = doc.createElement("div");
+    spinner.classList.add("spinner");
 
-        if (props.cspNonce) {
-            style.setAttribute('nonce', props.cspNonce);
-        }
+    if (props.cspNonce) {
+      style.setAttribute("nonce", props.cspNonce);
+    }
 
-        html.appendChild(body);
-        body.appendChild(spinner);
-        body.appendChild(style);
-        style.appendChild(doc.createTextNode(`
+    html.appendChild(body);
+    body.appendChild(spinner);
+    body.appendChild(style);
+    style.appendChild(
+      doc.createTextNode(`
             html, body {
                 width: 100%;
                 height: 100%;
@@ -47,8 +51,9 @@ export function defaultPrerenderTemplate<P>({ doc, props } : RenderOptionsType<P
                     transform: translateX(-50%) translateY(-50%) rotate(359deg);
                 }
             }
-        `));
+        `)
+    );
 
-        return html;
-    }
+    return html;
+  }
 }

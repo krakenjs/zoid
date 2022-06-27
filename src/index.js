@@ -1,28 +1,37 @@
 /* @flow */
 
-import typeof { PopupOpenError } from '@krakenjs/belter/src';
+import typeof { PopupOpenError } from "@krakenjs/belter/src";
 
-import type { CreateZoidComponent } from './component';
+import type { CreateZoidComponent } from "./component";
 // eslint-disable-next-line no-duplicate-imports
-import typeof { destroy, destroyComponents, destroyAll } from './component';
-import typeof { PROP_TYPE, PROP_SERIALIZATION, CONTEXT, EVENT } from './constants';
+import typeof { destroy, destroyComponents, destroyAll } from "./component";
+import typeof {
+  PROP_TYPE,
+  PROP_SERIALIZATION,
+  CONTEXT,
+  EVENT,
+} from "./constants";
 
-export { PopupOpenError } from '@krakenjs/belter/src';
+export { PopupOpenError } from "@krakenjs/belter/src";
 
-export type { ZoidComponent, ZoidComponentInstance, ZoidProps } from './component';
-export type { RenderOptionsType } from './parent';
+export type {
+  ZoidComponent,
+  ZoidComponentInstance,
+  ZoidProps,
+} from "./component";
+export type { RenderOptionsType } from "./parent";
 
-export { create, destroy, destroyComponents, destroyAll } from './component';
-export { PROP_TYPE, PROP_SERIALIZATION, CONTEXT, EVENT } from './constants';
+export { create, destroy, destroyComponents, destroyAll } from "./component";
+export { PROP_TYPE, PROP_SERIALIZATION, CONTEXT, EVENT } from "./constants";
 
 export type Zoid = {|
-    create : CreateZoidComponent,
-    destroy : destroy,
-    destroyComponents : destroyComponents,
-    destroyAll : destroyAll,
-    PROP_TYPE : PROP_TYPE,
-    PROP_SERIALIZATION : PROP_SERIALIZATION,
-    CONTEXT : CONTEXT,
-    EVENT : EVENT,
-    PopupOpenError : PopupOpenError
+  create: CreateZoidComponent,
+  destroy: destroy,
+  destroyComponents: destroyComponents,
+  destroyAll: destroyAll,
+  PROP_TYPE: PROP_TYPE,
+  PROP_SERIALIZATION: PROP_SERIALIZATION,
+  CONTEXT: CONTEXT,
+  EVENT: EVENT,
+  PopupOpenError: PopupOpenError,
 |};

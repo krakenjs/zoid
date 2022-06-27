@@ -1,41 +1,52 @@
-
 window.MyLoginZoidComponent = zoid.create({
+  // The html tag used to render my component
 
-    // The html tag used to render my component
+  tag: "my-login-component",
 
-    tag: 'my-login-component',
+  // The url that will be loaded in the iframe or popup, when someone includes my component on their page
 
-    // The url that will be loaded in the iframe or popup, when someone includes my component on their page
+  url: new URL("login.htm", window.location.href).href,
 
-    url: new URL('login.htm', window.location.href).href,
-    
-    dimensions: {
-        width:  '300px',
-        height: '150px'
-    },
+  dimensions: {
+    width: "300px",
+    height: "150px",
+  },
 
-    // The background overlay
+  // The background overlay
 
-    containerTemplate: ({ uid, tag, context, focus, close, doc }) => {
+  containerTemplate: ({ uid, tag, context, focus, close, doc }) => {
+    function closeComponent(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      return close();
+    }
 
-        function closeComponent(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            return close();
-        }
+    function focusComponent(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      return focus();
+    }
 
-        function focusComponent(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            return focus();
-        }
+    return pragmatic
+      .node(
+        "div",
+        {
+          id: uid,
+          onClick: focusComponent,
+          class: `${tag} ${tag}-context-${context} ${tag}-focus`,
+        },
 
-        return pragmatic.node('div', { id: uid, 'onClick': focusComponent, 'class': `${ tag } ${ tag }-context-${ context } ${ tag }-focus` },
+        pragmatic.node("a", {
+          href: "#",
+          onClick: closeComponent,
+          class: `${tag}-close`,
+        }),
 
-            pragmatic.node('a', { 'href': '#', 'onClick': closeComponent, 'class': `${ tag }-close` }),
-
-            pragmatic.node('style', null, `
-                #${ uid } {
+        pragmatic.node(
+          "style",
+          null,
+          `
+                #${uid} {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -44,11 +55,11 @@ window.MyLoginZoidComponent = zoid.create({
                     background-color: rgba(0, 0, 0, 0.8);
                 }
 
-                #${ uid }.${ tag }-context-${ zoid.CONTEXT.POPUP } {
+                #${uid}.${tag}-context-${zoid.CONTEXT.POPUP} {
                     cursor: pointer;
                 }
 
-                #${ uid } .${ tag }-close {
+                #${uid} .${tag}-close {
                     position: absolute;
                     right: 16px;
                     top: 16px;
@@ -57,12 +68,12 @@ window.MyLoginZoidComponent = zoid.create({
                     opacity: 0.6;
                 }
 
-                #${ uid } .${ tag }-close:hover {
+                #${uid} .${tag}-close:hover {
                     opacity: 1;
                 }
 
-                #${ uid } .${ tag }-close:before,
-                #${ uid } .${ tag }-close:after {
+                #${uid} .${tag}-close:before,
+                #${uid} .${tag}-close:after {
                     position: absolute;
                     left: 8px;
                     content: ' ';
@@ -71,14 +82,16 @@ window.MyLoginZoidComponent = zoid.create({
                     background-color: white;
                 }
 
-                #${ uid } .${ tag }-close:before {
+                #${uid} .${tag}-close:before {
                     transform: rotate(45deg);
                 }
 
-                #${ uid } .${ tag }-close:after {
+                #${uid} .${tag}-close:after {
                     transform: rotate(-45deg);
                 }
-            `)
-        ).render(pragmatic.dom({ doc }));
-    }
+            `
+        )
+      )
+      .render(pragmatic.dom({ doc }));
+  },
 });

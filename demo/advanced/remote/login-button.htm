@@ -1,42 +1,37 @@
-
 <head>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/login.css" />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/login.css" />
+  <!-- Pull in zoid and the component we defined -->
 
-    <!-- Pull in zoid and the component we defined -->
+  <script src="../../../dist/zoid.js"></script>
 
-    <script src="../../../dist/zoid.js"></script>
-
-    <script src="./login-button.js"></script>
-    <script src="./login.js"></script>
+  <script src="./login-button.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <button id="openLoginButton" class="btn btn-primary">Open Log In</button>
 
-    <button id="openLoginButton" class="btn btn-primary">Open Log In</button>
+  <div id="result"></div>
 
-    <div id="result"></div>
+  <script>
+    document
+      .querySelector("#openLoginButton")
+      .addEventListener("click", function () {
+        // document.querySelector('#openLoginButton').style.display = 'none';
 
-    <script>
+        MyLoginZoidComponent({
+          prefilledEmail: "foo@bar.com",
 
-        document.querySelector('#openLoginButton').addEventListener('click', function() {
-
-            // document.querySelector('#openLoginButton').style.display = 'none';
-
-            MyLoginZoidComponent({
-
-                prefilledEmail: 'foo@bar.com',
-
-                onLogin: function(email) {
-                    console.log('User logged in with email:', email);
-                    document.querySelector('#result').innerText = email + ' logged in!';
-                }
-
-            }).renderTo(window.parent, window.xprops.loginContainer);
-            
-        });
-
-    </script>
-
+          onLogin: function (email) {
+            console.log("User logged in with email:", email);
+            document.querySelector("#result").innerText = email + " logged in!";
+          },
+        }).renderTo(window.parent, window.xprops.loginContainer);
+      });
+  </script>
 </body>
