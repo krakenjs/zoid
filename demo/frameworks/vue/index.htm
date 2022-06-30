@@ -1,65 +1,59 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="https://unpkg.com/vue"></script>
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <div id="container">
+    <app></app>
+  </div>
 
-<div id="container">
-<app></app>
-</div>
+  <script type="text/babel">
+    var MyLoginVueZoidComponent = MyLoginZoidComponent.driver("vue", Vue);
 
-<script type="text/babel">
+    Vue.component("app", {
+      data: function () {
+        return {
+          userLoggedIn: false,
+          email: "foo@bar.com",
+        };
+      },
 
-    var MyLoginVueZoidComponent = MyLoginZoidComponent.driver('vue', Vue);
-
-    Vue.component('app', {
-
-
-        data: function () {
-            return {
-                userLoggedIn: false,
-                email: 'foo@bar.com'
-            }
-        },
-
-        template: `<div>
+      template: `<div>
                         <h3>Log in on xyz.com</h3>
 
 
                         <my-component :prefilledEmail = "this.email" :onLogin = "onLogin"  />
                         <div id="result">{{ this.userLoggedIn ? 'User logged in with email: ' + email : '' }}</div>
 
-                    </div>` ,
-        components: {
-            'my-component': MyLoginVueZoidComponent
+                    </div>`,
+      components: {
+        "my-component": MyLoginVueZoidComponent,
+      },
+
+      computed: {
+        onLogin: function (email) {
+          return (email) => {
+            this.userLoggedIn = true;
+            this.email = email;
+          };
         },
-
-        computed: {
-            onLogin: function(email) {
-                return (email) => {
-
-                    this.userLoggedIn = true;
-                    this.email = email;
-                }
-
-
-            }
-        }
+      },
     });
 
     var vm = new Vue({
-        el: '#container'
+      el: "#container",
     });
-
-</script>
-
+  </script>
 </body>

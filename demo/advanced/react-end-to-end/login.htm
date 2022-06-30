@@ -1,107 +1,102 @@
-
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/login.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/login.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.13.1/umd/react.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.13.1/umd/react-dom.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.13.1/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.13.1/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
-    <div id="container"></div>
+  <div id="container"></div>
 
-    <script type="text/babel">
+  <script type="text/babel">
+    function Login({ onLogin, prefilledEmail }) {
+      let [email, setEmail] = React.useState(prefilledEmail);
+      let [password, setPassword] = React.useState("");
+      let [displaySpinner, setDisplaySpinner] = React.useState(false);
 
-        function Login({ onLogin, prefilledEmail }) {
-            let [ email, setEmail ] = React.useState(prefilledEmail);
-            let [ password, setPassword ] = React.useState('');
-            let [ displaySpinner, setDisplaySpinner ] = React.useState(false);
+      let login = () => {
+        setDisplaySpinner(true);
 
-            let login = () => {
-                setDisplaySpinner(true)
+        setTimeout(() => {
+          onLogin(email);
+        }, 2000);
+      };
 
-                setTimeout(() => {
-                    onLogin(email);
-                }, 2000);
-            };
+      return (
+        <form>
+          {displaySpinner ? (
+            <div>
+              <svg
+                id="spinner"
+                className="spinner"
+                width="65px"
+                height="65px"
+                viewBox="0 0 66 66"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  className="path"
+                  fill="none"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  cx="33"
+                  cy="33"
+                  r="30"
+                ></circle>
+              </svg>
+            </div>
+          ) : (
+            <div>
+              <input
+                placeholder="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              ></input>
 
-            return (
-                <form>
-                    {
-                        displaySpinner
-                            ? (
-                                <div>
-                                    <svg id='spinner' className='spinner' width='65px' height='65px' viewBox='0 0 66 66' xmlns='http://www.w3.org/2000/svg'>
-                                        <circle className='path' fill='none' strokeWidth='6' strokeLinecap='round' cx='33' cy='33' r='30'></circle>
-                                    </svg>
-                                </div>
-                            )
-                            : (
-                                <div>
+              <br />
 
-                                    <input
-                                        placeholder='email'
-                                        value={ email }
-                                        onChange={
-                                            event => setEmail(event.target.value)
-                                        }>
-                                    </input>
+              <input
+                placeholder="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              ></input>
 
-                                    <br/>
+              <br />
 
-                                    <input
-                                        placeholder='password' type='password'
-                                        value={ password }
-                                        onChange={
-                                            event => setPassword(event.target.value)
-                                        }>
-                                    </input>
+              <button className="btn btn-primary" onClick={login}>
+                Log In
+              </button>
+            </div>
+          )}
+        </form>
+      );
+    }
 
-                                    <br/>
+    function useXProps() {
+      const [xprops, setXProps] = React.useState(window.xprops);
+      React.useEffect(() => {
+        window.xprops.onProps((props) => {
+          setXProps({ ...props });
+        });
+      }, []);
+      return xprops;
+    }
 
-                                    <button
-                                        className='btn btn-primary'
-                                        onClick={ login }>
-                                            Log In
-                                    </button>
+    function App() {
+      const { prefilledEmail, onLogin } = useXProps();
 
-                                 </div>
-                            )
-                    }
-                </form>
-            );
-        }
+      return <Login prefilledEmail={prefilledEmail} onLogin={onLogin} />;
+    }
 
-        function useXProps() {
-            const [ xprops, setXProps ] = React.useState(window.xprops);
-            React.useEffect(() => {
-                window.xprops.onProps(props => {
-                    setXProps({ ...props })
-                });
-            }, []);
-            return xprops;
-        }
-
-        function App() {
-            const { prefilledEmail, onLogin } = useXProps();
-
-            return (
-                <Login
-                    prefilledEmail={ prefilledEmail }
-                    onLogin={ onLogin }
-                />
-            );
-        }
-
-        ReactDOM.render(
-            <App />,
-            document.querySelector('#container')
-        );
-
-    </script>
-
+    ReactDOM.render(<App />, document.querySelector("#container"));
+  </script>
 </body>

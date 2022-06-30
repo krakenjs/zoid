@@ -1,69 +1,82 @@
-
 <head>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/login.css" />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/login.css" />
+  <!-- Pull in zoid and the login component we defined -->
 
-    <!-- Pull in zoid and the login component we defined -->
-
-    <script src="../../../dist/zoid.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <!-- Set up a login form -->
 
-    <!-- Set up a login form -->
+  <form id="loginForm">
+    <input id="email" type="text" placeholder="email" /><br />
+    <input id="password" type="password" placeholder="password" /><br />
+    <button id="loginButton" class="btn btn-primary">Log In</button>
+  </form>
 
-    <form id="loginForm">
-        <input id="email" type="text" placeholder="email" /><br>
-        <input id="password" type="password" placeholder="password" /><br>
-        <button id="loginButton" class="btn btn-primary">Log In</button>
-    </form>
+  <svg
+    id="spinner"
+    class="spinner"
+    width="65px"
+    height="65px"
+    viewBox="0 0 66 66"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      class="path"
+      fill="none"
+      stroke-width="6"
+      stroke-linecap="round"
+      cx="33"
+      cy="33"
+      r="30"
+    ></circle>
+  </svg>
 
-    <svg id="spinner" class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-        <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
-    </svg>
+  <script>
+    // Hide the loading spinner by default
 
-    <script>
+    document.querySelector("#spinner").style.display = "none";
 
-        // Hide the loading spinner by default
+    // Pre-polulate the email field, if we're passed an email
 
-        document.querySelector('#spinner').style.display = 'none';
+    if (window.xprops.prefilledEmail) {
+      document.querySelector("#email").value = window.xprops.prefilledEmail;
+    }
 
-        // Pre-polulate the email field, if we're passed an email
+    // Handle the button click to log the user in
 
-        if (window.xprops.prefilledEmail) {
-            document.querySelector('#email').value = window.xprops.prefilledEmail;
+    document
+      .querySelector("#loginButton")
+      .addEventListener("click", function (event) {
+        event.preventDefault();
+
+        var email = document.querySelector("#email").value;
+        var password = document.querySelector("#password").value;
+
+        if (!email || !password) {
+          return alert("Please enter both an email and a password");
         }
 
-        // Handle the button click to log the user in
+        // Hide the login form and replace it with a spinner
 
-        document.querySelector('#loginButton').addEventListener('click', function(event) {
-            event.preventDefault();
+        document.querySelector("#loginForm").style.display = "none";
+        document.querySelector("#spinner").style.display = "inline-block";
 
-            var email    = document.querySelector('#email').value;
-            var password = document.querySelector('#password').value;
+        // Pretend to make an ajax call to log the user in
 
-            if (!email || !password) {
-                return alert('Please enter both an email and a password');
-            }
+        setTimeout(function () {
+          // Since we had a successful login, call-back the parent page to let them know which user logged in:
 
-            // Hide the login form and replace it with a spinner
-
-            document.querySelector('#loginForm').style.display = 'none';
-            document.querySelector('#spinner').style.display = 'inline-block';
-
-            // Pretend to make an ajax call to log the user in
-
-            setTimeout(function() {
-
-                // Since we had a successful login, call-back the parent page to let them know which user logged in:
-
-                window.xprops.onLogin(email);
-                window.xprops.close();
-
-            }, 2000);
-        });
-    </script>
-
+          window.xprops.onLogin(email);
+          window.xprops.close();
+        }, 2000);
+      });
+  </script>
 </body>

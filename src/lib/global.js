@@ -1,39 +1,45 @@
 /* @flow */
 
-import { isSameDomain, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
-import { getCurrentScriptUID } from '@krakenjs/belter/src';
+import {
+  isSameDomain,
+  type CrossDomainWindowType,
+} from "@krakenjs/cross-domain-utils/src";
+import { getCurrentScriptUID } from "@krakenjs/belter/src";
 
-export function getGlobalKey() : string {
-    if (__ZOID__.__SCRIPT_NAMESPACE__) {
-        return `${ __ZOID__.__GLOBAL_KEY__ }_${ getCurrentScriptUID() }`;
-    } else {
-        return __ZOID__.__GLOBAL_KEY__;
-    }
+export function getGlobalKey(): string {
+  if (__ZOID__.__SCRIPT_NAMESPACE__) {
+    return `${__ZOID__.__GLOBAL_KEY__}_${getCurrentScriptUID()}`;
+  } else {
+    return __ZOID__.__GLOBAL_KEY__;
+  }
 }
 
-export function getGlobal<T>(win : CrossDomainWindowType) : T {
-    const globalKey = getGlobalKey();
+export function getGlobal<T>(win: CrossDomainWindowType): T {
+  const globalKey = getGlobalKey();
 
-    if (!isSameDomain(win)) {
-        throw new Error(`Can not get global for window on different domain`);
-    }
+  if (!isSameDomain(win)) {
+    throw new Error(`Can not get global for window on different domain`);
+  }
 
-    if (!win[globalKey]) {
-        win[globalKey] = {};
-    }
+  if (!win[globalKey]) {
+    win[globalKey] = {};
+  }
 
-    return win[globalKey];
+  return win[globalKey];
 }
 
-export function tryGlobal<T, R>(win : CrossDomainWindowType, handler : (T) => R) : ?R {
-    try {
-        return handler(getGlobal(win));
-    } catch (err) {
-        // pass
-    }
+export function tryGlobal<T, R>(
+  win: CrossDomainWindowType,
+  handler: (T) => R
+): ?R {
+  try {
+    return handler(getGlobal(win));
+  } catch (err) {
+    // pass
+  }
 }
 
 export function destroyGlobal() {
-    const globalKey = getGlobalKey();
-    delete window[globalKey];
+  const globalKey = getGlobalKey();
+  delete window[globalKey];
 }

@@ -1,36 +1,36 @@
 <body>
-    <script>
-        function getAncestor(win) {
-            if (win.opener) {
-                return win.opener;
-            }
+  <script>
+    function getAncestor(win) {
+      if (win.opener) {
+        return win.opener;
+      }
 
-            if (win.parent !== win) {
-                return win.parent;
-            }
-        }
+      if (win.parent !== win) {
+        return win.parent;
+      }
+    }
 
-        var parentWindow = window;
-        while (true) {
-            const ancestor = getAncestor(parentWindow);
+    var parentWindow = window;
+    while (true) {
+      const ancestor = getAncestor(parentWindow);
 
-            if (!ancestor) {
-                break;
-            }
+      if (!ancestor) {
+        break;
+      }
 
-            if (ancestor.zoid || getAncestor(ancestor)) {
-                parentWindow = ancestor;
-            } else {
-                break;
-            }
-        }
+      if (ancestor.zoid || getAncestor(ancestor)) {
+        parentWindow = ancestor;
+      } else {
+        break;
+      }
+    }
 
-        window.__coverage__ = parentWindow.__coverage__;
+    window.__coverage__ = parentWindow.__coverage__;
 
-        window.mockDomain = 'mock://www.child.com';
-        window.console.karma = parentWindow.console.karma;
-        window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
-    </script>
+    window.mockDomain = "mock://www.child.com";
+    window.console.karma = parentWindow.console.karma;
+    window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
+  </script>
 
-    <script src="/base/test/windows/bridge/index.js"></script>
+  <script src="/base/test/windows/bridge/index.js"></script>
 </body>

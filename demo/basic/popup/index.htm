@@ -1,45 +1,44 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://unpkg.com/jsx-pragmatic@2.0.20/dist/jsx-pragmatic.js"></script>
-    <script src="../../../dist/zoid.js"></script>
-    <script src="./login.js"></script>
+  <script src="https://unpkg.com/jsx-pragmatic@2.0.20/dist/jsx-pragmatic.js"></script>
+  <script src="../../../dist/zoid.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <h3>Log in on xyz.com</h3>
 
-    <h3>Log in on xyz.com</h3>
+  <button id="popupLogin" class="btn btn-primary">Popup Log In</button>
 
-    <button id="popupLogin" class="btn btn-primary">Popup Log In</button>
+  <div id="result"></div>
 
-    <div id="result"></div>
+  <script>
+    // To render a popup we need to wait for a click event
 
-    <script>
+    document
+      .querySelector("#popupLogin")
+      .addEventListener("click", function () {
+        // Hide the button
 
-        // To render a popup we need to wait for a click event
+        document.querySelector("#popupLogin").style.display = "none";
 
-        document.querySelector('#popupLogin').addEventListener('click', function() {
+        // Render the component
 
-            // Hide the button
+        MyLoginZoidComponent({
+          prefilledEmail: "foo@bar.com",
 
-            document.querySelector('#popupLogin').style.display = 'none';
-
-            // Render the component
-
-            MyLoginZoidComponent({
-
-                prefilledEmail: 'foo@bar.com',
-
-                onLogin: function(email) {
-                    console.log('User logged in with email:', email);
-                    document.querySelector('#result').innerText = email + ' logged in!';
-                }
-            }).render('body', zoid.CONTEXT.POPUP);
-        });
-
-    </script>
-
+          onLogin: function (email) {
+            console.log("User logged in with email:", email);
+            document.querySelector("#result").innerText = email + " logged in!";
+          },
+        }).render("body", zoid.CONTEXT.POPUP);
+      });
+  </script>
 </body>

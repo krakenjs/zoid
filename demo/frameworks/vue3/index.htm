@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="https://unpkg.com/vue@next"></script>
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <div id="container"></div>
 
-    <div id="container">
-
-    </div>
-
-    <script type="text/babel">
-
-
-        const RootComponent = {
-            template: `
+  <script type="text/babel">
+    const RootComponent = {
+      template: `
             <div>
                 <h3>Log in on xyz.com</h3>
                 <app :prefilled-email="this.email" :on-login="onLogin"></app>
@@ -30,31 +27,28 @@
             </div>
             `,
 
-            data() {
-                return {
-                    userLoggedIn: false,
-                    email: 'foo@bar.com'
-                }
-            },
-            computed: {
-                onLogin: function (email) {
-                    return (email) => {
-                        this.userLoggedIn = true;
-                        this.email = email;
-                    }
-                }
-            }
-        }
+      data() {
+        return {
+          userLoggedIn: false,
+          email: "foo@bar.com",
+        };
+      },
+      computed: {
+        onLogin: function (email) {
+          return (email) => {
+            this.userLoggedIn = true;
+            this.email = email;
+          };
+        },
+      },
+    };
 
+    const vueAppp = Vue.createApp(RootComponent);
 
-        const vueAppp = Vue.createApp(RootComponent);
+    const MyVueLoginZoidComponent = MyLoginZoidComponent.driver("vue3");
 
-        const MyVueLoginZoidComponent = MyLoginZoidComponent.driver('vue3');
+    vueAppp.component("app", MyVueLoginZoidComponent);
 
-        vueAppp.component('app', MyVueLoginZoidComponent);
-
-        vueAppp.mount('#container');
-
-    </script>
-
+    vueAppp.mount("#container");
+  </script>
 </body>

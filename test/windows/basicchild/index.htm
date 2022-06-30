@@ -1,44 +1,44 @@
 <body>
-    <div id="container"></div>
+  <div id="container"></div>
 
-    <script>
-        function getAncestor(win) {
-            if (win.opener) {
-                return win.opener;
-            }
+  <script>
+    function getAncestor(win) {
+      if (win.opener) {
+        return win.opener;
+      }
 
-            if (win.parent !== win) {
-                return win.parent;
-            }
-        }
+      if (win.parent !== win) {
+        return win.parent;
+      }
+    }
 
-        window.mockDomain = getAncestor(window).mockDomain;
+    window.mockDomain = getAncestor(window).mockDomain;
 
-        var parentWindow = window;
-        while (true) {
-            const ancestor = getAncestor(parentWindow);
+    var parentWindow = window;
+    while (true) {
+      const ancestor = getAncestor(parentWindow);
 
-            if (!ancestor) {
-                break;
-            }
+      if (!ancestor) {
+        break;
+      }
 
-            if (ancestor.zoid || getAncestor(ancestor)) {
-                parentWindow = ancestor;
-            } else {
-                break;
-            }
-        }
+      if (ancestor.zoid || getAncestor(ancestor)) {
+        parentWindow = ancestor;
+      } else {
+        break;
+      }
+    }
 
-        window.console.karma = parentWindow.console.karma;
-        window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
+    window.console.karma = parentWindow.console.karma;
+    window.navigator.mockUserAgent = parentWindow.navigator.mockUserAgent;
 
-        window.__coverage__ = parentWindow.__coverage__;
-    </script>
+    window.__coverage__ = parentWindow.__coverage__;
+  </script>
 
-    <script src="/base/test/zoid.global.js"></script>
-    <script>
-        window.zoid = __zoid__;
-    </script>
+  <script src="/base/test/zoid.global.js"></script>
+  <script>
+    window.zoid = __zoid__;
+  </script>
 
-    <script src="/base/test/windows/basicchild/index.js"></script>
+  <script src="/base/test/windows/basicchild/index.js"></script>
 </body>

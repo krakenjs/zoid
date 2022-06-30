@@ -6,15 +6,15 @@ Instantiate a component and pass in props.
 
 ```javascript
 const Component = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component'
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
 });
 
 const componentInstance = Component({
-    foo: 'bar',
-    onSomething: () => {
-        console.log('Something happened!');
-    }
+  foo: "bar",
+  onSomething: () => {
+    console.log("Something happened!");
+  },
 });
 ```
 
@@ -83,9 +83,9 @@ const FooComponent = Component.driver('foo', { FooFramework });
 ### React
 
 ```javascript
-let MyReactZoidComponent = MyZoidComponent.driver('react', {
-    React:    React, 
-    ReactDOM: ReactDOM
+let MyReactZoidComponent = MyZoidComponent.driver("react", {
+  React: React,
+  ReactDOM: ReactDOM,
 });
 ```
 
@@ -104,7 +104,7 @@ MyZoidComponent.driver('angular', angular);`
 ```
 
 ```html
-<my-zoid foo="bar">
+<my-zoid foo="bar"></my-zoid>
 ```
 
 ### Angular 2
@@ -125,13 +125,13 @@ MyZoidComponent.driver('angular', angular);`
 ### Glimmer
 
 ```javascript
-import Component from '@glimmer/component';
+import Component from "@glimmer/component";
 
-export default MyZoidComponent.driver('glimmer', Component);
+export default MyZoidComponent.driver("glimmer", Component);
 ```
 
 ```html
-<my-zoid @foo={{bar}}></my-zoid>
+<my-zoid @foo="{{bar}}"></my-zoid>
 ```
 
 ### Vue
@@ -149,14 +149,13 @@ Vue.component('app', {
 <my-zoid :foo="bar" />
 ```
 
-
 ### Vue 3
 
 ```javascript
 // Create Vue application
 const app = Vue.createApp(...)
 
-// Define a new component called my-zoid 
+// Define a new component called my-zoid
 app.component('my-zoid', MyZoidComponent.driver('vue3'))
 
 // Mount Vue application

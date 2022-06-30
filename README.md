@@ -1,6 +1,7 @@
 <p align="center"><img width="45%" alt="zoid" src="https://cdn.rawgit.com/krakenjs/zoid/main/zoid.png"></p>
 
-----
+---
+
 [![build status][build-badge]][build]
 [![code coverage][coverage-badge]][coverage]
 [![npm version][version-badge]][package]
@@ -21,7 +22,7 @@ A cross-domain component toolkit, supporting:
 
 It's 'data-down, actions up' style components, but 100% cross-domain using iframes and popups!
 
------
+---
 
 ### [API Docs](./docs/api/index.md)
 
@@ -39,7 +40,7 @@ Forkable demo app with build, test, publishing and demos pre-configured.
 
 A full example of a cross-domain component using zoid
 
------
+---
 
 ### Quick example
 
@@ -47,9 +48,8 @@ Define a component to be put on both the parent and child pages:
 
 ```javascript
 var MyLoginComponent = zoid.create({
-
-    tag: 'my-login-component',
-    url: 'http://www.my-site.com/my-login-component'
+  tag: "my-login-component",
+  url: "http://www.my-site.com/my-login-component",
 });
 ```
 
@@ -116,7 +116,6 @@ Implement the component in the iframe:
 
 ## Rationale
 
-
 **Writing cross domain components is tricky.**
 
 Consider this: I own `foo.com`, you own `bar.com`, and I have some functionality I want to share on your page.
@@ -125,7 +124,6 @@ I could just give you some javascript to load in your page. But then:
 - What if I've written a component in React, but you're using some other framework?
 - What if I have secure form fields, or secure data I don't want your site to spy on?
 - What if I need to make secure calls to my back-end, without resorting to CORS?
-
 
 **What about an iframe?**
 
@@ -136,7 +134,6 @@ You could just use a vanilla iframe for all of this. But:
 - You need to deal with error cases, like if your iframe fails to load or doesn't respond to a post-message.
 - You need to think carefully about how to expose all this functionality behind a simple, clear interface.
 
-
 **zoid solves all of these problems.**
 
 - You pass data and callbacks down as a javascript object
@@ -145,7 +142,6 @@ You could just use a vanilla iframe for all of this. But:
 
 It will even automatically generate React and Angular bindings, so people can drop-in your component anywhere and not
 worry about iframes or post-messages.
-
 
 ## FAQ
 

@@ -82,7 +82,7 @@ email: {
 }
 ```
 
-If a string is set, this specifies the url param name which will be used. 
+If a string is set, this specifies the url param name which will be used.
 
 ```javascript
 email: {

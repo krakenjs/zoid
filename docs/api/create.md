@@ -1,7 +1,7 @@
 # Create new component
 
 ```javascript
-zoid.create({ ...options })
+zoid.create({ ...options });
 ```
 
 Create a component definition, which will be loaded in both the parent and child windows.
@@ -29,11 +29,11 @@ This must include a protocol (http:, https:, or about:); it cannot be scheme-rel
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component'
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
 });
 
-url: 'https://www.my-site.com/mycomponent'
+url: "https://www.my-site.com/mycomponent";
 ```
 
 ```javascript
@@ -52,23 +52,23 @@ The dimensions for your component, in css-style units, with support for `px` or 
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    dimensions: {
-        width: '300px',
-        height: '200px'
-    }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  dimensions: {
+    width: "300px",
+    height: "200px",
+  },
 });
 ```
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    dimensions: {
-        width: '80%',
-        height: '90%'
-    }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  dimensions: {
+    width: "80%",
+    height: "90%",
+  },
 });
 ```
 
@@ -80,19 +80,19 @@ Note: you are not required to create a prop definition for each new prop. By def
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
 
-    props: {
-        onLogin: {
-            type: 'function'
-        },
+  props: {
+    onLogin: {
+      type: "function",
+    },
 
-        prefilledEmail: {
-            type: 'string',
-            required: false
-        }
-    }
+    prefilledEmail: {
+      type: "string",
+      required: false,
+    },
+  },
 });
 ```
 
@@ -111,70 +111,86 @@ Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You c
 ```javascript
 /* @jsx node */
 
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    containerTemplate: function({ uid, doc, frame, prerenderFrame }) {
-        return (
-            <div id={ uid } class="container">
-                <style>
-                    {`
-                        #${ uid }.container {
+  containerTemplate: function ({ uid, doc, frame, prerenderFrame }) {
+    return (
+      <div id={uid} class="container">
+        <style>
+          {`
+                        #${uid}.container {
                             border: 5px solid red;
                         }
                     `}
-                </style>
+        </style>
 
-                <node el={ frame } />
-                <node el={ prerenderFrame } />
-            </div>
-        ).render(dom({ doc }));
-    }
+        <node el={frame} />
+        <node el={prerenderFrame} />
+      </div>
+    ).render(dom({ doc }));
+  },
 });
 ```
 
 As with React, you are also free to skip using JSX and just use `node` from `jsx-pragmatic` directly:
 
 ```javascript
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    containerTemplate: function containerTemplate({ uid, doc, frame, prerenderFrame }) {
-        return node('div', { id: uid, class: 'container' },
-            node('style', null, `
-                #${ uid }.container {
+  containerTemplate: function containerTemplate({
+    uid,
+    doc,
+    frame,
+    prerenderFrame,
+  }) {
+    return node(
+      "div",
+      { id: uid, class: "container" },
+      node(
+        "style",
+        null,
+        `
+                #${uid}.container {
                     border: 5px solid red;
                 }
-            `),
-            node('node', { el: frame }),
-            node('node', { el: prerenderFrame })
-        ).render(dom({ doc }));
-    }
+            `
+      ),
+      node("node", { el: frame }),
+      node("node", { el: prerenderFrame })
+    ).render(dom({ doc }));
+  },
 });
 ```
 
 Since `containerTemplate` requires a DOM element to be returned, you're also free to manually create the element hierarchy using built-in browser methods like `doc.createElement`:
 
 ```javascript
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    containerTemplate: function containerTemplate({ doc, uid, frame, prerenderFrame }) {
-        let container = doc.createElement('div');
-        container.id = uid;
-        container.appendChild(frame);
-        container.appendChild(prerenderFrame);
-        return container;
-    }
+  containerTemplate: function containerTemplate({
+    doc,
+    uid,
+    frame,
+    prerenderFrame,
+  }) {
+    let container = doc.createElement("div");
+    container.id = uid;
+    container.appendChild(frame);
+    container.appendChild(prerenderFrame);
+    return container;
+  },
 });
 ```
 
@@ -191,36 +207,38 @@ Best used with [jsx-pragmatic](https://github.com/krakenjs/jsx-pragmatic). You c
 ```javascript
 /* @jsx node */
 
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    prerenderTemplate: function({ doc }) {
-        return (
-            <p>
-                Please wait while the component loads...
-            </p>
-        ).render(dom({ doc }));
-    }
+  prerenderTemplate: function ({ doc }) {
+    return (<p>Please wait while the component loads...</p>).render(
+      dom({ doc })
+    );
+  },
 });
 ```
 
 As with React, you are also free to skip using JSX and just use `node` directly:
 
 ```javascript
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    prerenderTemplate: function containerTemplate({ doc }) {
-        return node('p', null, `
+  prerenderTemplate: function containerTemplate({ doc }) {
+    return node(
+      "p",
+      null,
+      `
             Please wait while the component loads...
-        `).render(dom({ doc }));
-    }
+        `
+    ).render(dom({ doc }));
+  },
 });
 ```
 
@@ -229,17 +247,17 @@ Since `prerenderTemplate` only requires a DOM element, you're also free to manua
 **Note:** if you're using `document` method, you must use the `doc` passed to `prerenderTemplate`, so the element is created using the target document of the new iframe or popup window, **not** the document of the parent page. This is essential for browser compatibility.
 
 ```javascript
-import { node, dom } from 'jsx-pragmatic';
+import { node, dom } from "jsx-pragmatic";
 
 var MyLoginZoidComponent = zoid.create({
-    tag: 'my-login',
-    url: 'https://www.mysite.com/login',
+  tag: "my-login",
+  url: "https://www.mysite.com/login",
 
-    prerenderTemplate: function containerTemplate({ doc }) {
-        const p = doc.createElement('p');
-        p.innerText = 'Please wait while the component loads...';
-        return p;
-    }
+  prerenderTemplate: function containerTemplate({ doc }) {
+    const p = doc.createElement("p");
+    p.innerText = "Please wait while the component loads...";
+    return p;
+  },
 });
 ```
 
@@ -284,12 +302,12 @@ Makes the iframe resize automatically when the child window size changes.
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    autoResize: {
-        width: false,
-        height: true,
-    }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  autoResize: {
+    width: false,
+    height: true,
+  },
 });
 ```
 
@@ -298,13 +316,13 @@ You can override this setting by specifying a custom selector as an `element` pr
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    autoResize: {
-        width: false,
-        height: true,
-        element: '.my-selector',
-    }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  autoResize: {
+    width: false,
+    height: true,
+    element: ".my-selector",
+  },
 });
 ```
 
@@ -312,16 +330,13 @@ Recommended to only use autoResize for height. Width has some strange effects, e
 
 ## allowedParentDomains `string | Array<string | RegEx>`
 
-A string, array of strings or reqular expresions to be used to validate parent domain. If parent domain doesn't match any item, communication from child to parent will be prevented. The default value is '*' which match any domain.
+A string, array of strings or reqular expresions to be used to validate parent domain. If parent domain doesn't match any item, communication from child to parent will be prevented. The default value is '\*' which match any domain.
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    allowedParentDomains: [
-        "http://localhost",
-        /^http:\/\/www\.mydomain\.com$/
-    ]
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  allowedParentDomains: ["http://localhost", /^http:\/\/www\.mydomain\.com$/],
 });
 ```
 
@@ -333,12 +348,10 @@ Only required if the domain which will be rendered is different to the domain sp
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://foo.com/login',
-    domain: 'https://subdomain.foo.com'
+  tag: "my-component",
+  url: "https://foo.com/login",
+  domain: "https://subdomain.foo.com",
 });
-
-
 ```
 
 ## defaultContext `string`
@@ -347,9 +360,9 @@ Determines which should be picked by default when `render()` is called. Defaults
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    defaultContext: 'popup'
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  defaultContext: "popup",
 });
 ```
 
@@ -359,13 +372,13 @@ Function which is passed all of the props at once and may validate them. Useful 
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    validate: function({ props }) {
-        if (props.name === 'Batman' && props.strength < 10) {
-            throw new Error(`Batman must have at least 10 strength`);
-        }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  validate: function ({ props }) {
+    if (props.name === "Batman" && props.strength < 10) {
+      throw new Error(`Batman must have at least 10 strength`);
     }
+  },
 });
 ```
 
@@ -375,16 +388,16 @@ Function which determines if the component is eligible to be rendered.
 
 ```javascript
 const FirefoxOnlyButton = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    eligible: () => {
-        if (isFireFox()) {
-            return true;
-        } else {
-            return false;
-        }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  eligible: () => {
+    if (isFireFox()) {
+      return true;
+    } else {
+      return false;
     }
-})
+  },
+});
 ```
 
 Now anyone can check eligibility prior to rendering the component:
@@ -393,7 +406,7 @@ Now anyone can check eligibility prior to rendering the component:
 const myComponent = MyComponent();
 
 if (myComponent.isEligible()) {
-    myComponent.render('#my-container');
+  myComponent.render("#my-container");
 }
 ```
 
@@ -402,24 +415,25 @@ If the component is not eligible, calling `.render(...)` will return a rejected 
 const myComponent = MyComponent();
 
 myComponent.render('#my-container').catch(err => {
-    console.error(err); // This will happen if we're not in firefox
+console.error(err); // This will happen if we're not in firefox
 });
 
 ## exports `{ [string] : ExportDefinition }`
+
 ## exports `({ getExports : () => Promise<{ [string] : any }> }) => { [string] : Promise<any> }`
 
 Used to map exports from the child (passed with `xprops.export(...)`) to properties on the parent component instance.
 
 ```javascript
 const CreatePostForm = zoid.create({
-    tag: 'create-post-form',
-    url: 'https://my-site.com/component/create-post-form',
+  tag: "create-post-form",
+  url: "https://my-site.com/component/create-post-form",
 
-    exports: {
-        submit: {
-            type: 'function'
-        }
-    }
+  exports: {
+    submit: {
+      type: "function",
+    },
+  },
 });
 ```
 
@@ -427,9 +441,9 @@ Once this mapper is defined, the child window may export values up to the parent
 
 ```javascript
 window.xprops.export({
-    submit: () => {
-        document.querySelector('form#createPost').submit();
-    }
+  submit: () => {
+    document.querySelector("form#createPost").submit();
+  },
 });
 ```
 
@@ -437,10 +451,10 @@ The parent window may call these exports at any time:
 
 ```javascript
 const postForm = CreatePostForm();
-postForm.render('#create-post-form-container');
+postForm.render("#create-post-form-container");
 
-document.querySelector('button#submitForm').addEventListener('click', () => {
-    postForm.submit();
+document.querySelector("button#submitForm").addEventListener("click", () => {
+  postForm.submit();
 });
 ```
 
@@ -452,21 +466,21 @@ This is only necessary if you are creating a popup component which needs to run 
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    bridgeUrl: 'https://foo.com/bridge'
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  bridgeUrl: "https://foo.com/bridge",
 });
 ```
 
 ```javascript
 const MyComponent = zoid.create({
-    tag: 'my-component',
-    url: 'https://my-site.com/my-component',
-    bridgeUrl: ({ props }) => {
-        return (props.env === 'development')
-            ? 'http://foo.dev/bridge'
-            : 'https://foo.com/bridge';
-    }
+  tag: "my-component",
+  url: "https://my-site.com/my-component",
+  bridgeUrl: ({ props }) => {
+    return props.env === "development"
+      ? "http://foo.dev/bridge"
+      : "https://foo.com/bridge";
+  },
 });
 ```
 
@@ -491,9 +505,9 @@ Once this mapper is defined, the child window may export values up to the parent
 
 ```javascript
 window.xprops.export({
-    submit: () => {
-        document.querySelector('form#createPost').submit();
-    }
+  submit: () => {
+    document.querySelector("form#createPost").submit();
+  },
 });
 ```
 
@@ -501,10 +515,10 @@ The parent window may call these exports at any time:
 
 ```javascript
 const postForm = CreatePostForm();
-postForm.render('#create-post-form-container');
+postForm.render("#create-post-form-container");
 
-document.querySelector('button#submitForm').addEventListener('click', () => {
-    postForm.submit();
+document.querySelector("button#submitForm").addEventListener("click", () => {
+  postForm.submit();
 });
 ```
 
@@ -546,26 +560,26 @@ These children will now be renderable as children of the parent:
 
 ```javascript
 const cardFields = CardFields({
-    style: {
-        borderColor: 'red'
-    }
+  style: {
+    borderColor: "red",
+  },
 });
 
-cardFields.NumberField().render('#card-number-field-container');
-cardFields.CVVField().render('#card-cvv-field-container');
-cardFields.ExpiryField().render('#card-expiry-field-container');
+cardFields.NumberField().render("#card-number-field-container");
+cardFields.CVVField().render("#card-cvv-field-container");
+cardFields.ExpiryField().render("#card-expiry-field-container");
 ```
 
 The children will inherit both `props` and `export` from the parent, in `window.xprops.parent`.
 
 ```javascript
-console.log('Parent style:', window.xprops.parent.style);
+console.log("Parent style:", window.xprops.parent.style);
 ```
 
 ```javascript
 window.xprops.parent.export({
-    submit: () => {
-        document.querySelector('form#cardFields').submit();
-    }
+  submit: () => {
+    document.querySelector("form#cardFields").submit();
+  },
 });
 ```

@@ -1,63 +1,68 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.0.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.0.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.js"></script>
 
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 </head>
 
 <body>
+  <div id="container"></div>
 
-    <div id="container"></div>
+  <script type="text/babel">
+    let MyLoginReactZoidComponent = MyLoginZoidComponent.driver("react", {
+      React: window.React,
+      ReactDOM: window.ReactDOM,
+    });
 
-    <script type="text/babel">
+    class Main extends React.Component {
+      constructor(props) {
+        super(props);
 
-        let MyLoginReactZoidComponent = MyLoginZoidComponent.driver('react', {
-            React: window.React,
-            ReactDOM: window.ReactDOM
+        this.state = {
+          userLoggedIn: false,
+          email: "foo@bar.com",
+        };
+      }
+
+      onLogin(email) {
+        console.log("User logged in with email:", email);
+
+        this.setState({
+          userLoggedIn: true,
+          email: email,
         });
+      }
 
-        class Main extends React.Component {
+      render() {
+        return (
+          <div>
+            <h3>Log in on xyz.com</h3>
 
-            constructor(props) {
-                super(props);
+            <MyLoginReactZoidComponent
+              prefilledEmail={this.state.email}
+              onLogin={(email) => this.onLogin(email)}
+            />
 
-                this.state = {
-                    userLoggedIn: false,
-                    email:        'foo@bar.com'
-                };
-            }
+            <div id="result">
+              {this.state.userLoggedIn
+                ? "User logged in with email: " + this.state.email
+                : ""}
+            </div>
+          </div>
+        );
+      }
+    }
 
-            onLogin(email) {
-                console.log('User logged in with email:', email);
-
-                this.setState({
-                    userLoggedIn: true,
-                    email:        email
-                });
-            }
-
-            render() {
-                return (
-                    <div>
-                        <h3>Log in on xyz.com</h3>
-
-                        <MyLoginReactZoidComponent prefilledEmail={ this.state.email } onLogin={ email => this.onLogin(email) } />
-
-                        <div id="result">{this.state.userLoggedIn ? 'User logged in with email: ' + this.state.email : ''}</div>
-                    </div>
-                );
-            }
-        }
-
-        ReactDOM.render(<Main />, document.querySelector('#container'));
-
-    </script>
-
+    ReactDOM.render(<Main />, document.querySelector("#container"));
+  </script>
 </body>

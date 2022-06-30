@@ -14,11 +14,11 @@ Object containing all of the props required by the given component. These can be
 
 ```javascript
 MyComponent({
-    foo: 'bar',
-    onBaz: () => {
-        console.log('Baz happened');
-    }
-}).render('#container');
+  foo: "bar",
+  onBaz: () => {
+    console.log("Baz happened");
+  },
+}).render("#container");
 ```
 
 See [Parent Props](./parent-props.md) for built-in props that can be passed to any zoid component.

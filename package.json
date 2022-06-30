@@ -9,10 +9,12 @@
     "lint": "eslint --ext .js --ext .jsx src/ test/ *.js",
     "flow-typed": "rm -rf ./flow-typed && flow-typed install",
     "flow": "flow",
+    "format": "prettier --write --ignore-unknown .",
+    "format:check": "prettier --check .",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --progress",
-    "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
+    "test": "npm run format:check && npm run lint && npm run flow-typed && npm run flow && npm run karma",
     "clear-dist": "rm -rf dist/*;",
     "build": "npm run test && npm run babel && npm run clear-dist && npm run webpack -- $@",
     "clean": "rimraf dist coverage",
@@ -93,11 +95,13 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.1",
     "@commitlint/config-conventional": "^16.2.1",
-    "@krakenjs/grumbler-scripts": "^6.0.2",
+    "@krakenjs/grumbler-scripts": "^7.0.0",
     "@krakenjs/jsx-pragmatic": "^3.0.0",
     "flow-bin": "0.155.0",
     "husky": "^7.0.4",
+    "lint-staged": "^12.4.0",
     "mocha": "^4",
+    "prettier": "^2.6.2",
     "serve": "^10.0.0",
     "standard-version": "^9.3.2"
   },
@@ -106,5 +110,8 @@
     "@krakenjs/cross-domain-utils": "^3.0.0",
     "@krakenjs/post-robot": "^11.0.0",
     "@krakenjs/zalgo-promise": "^2.0.0"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown"
   }
 }

@@ -1,5 +1,5 @@
 /* @flow */
 
-import type { Zoid } from '../src/index';
+import type { Zoid } from "../src/index";
 
-export const zoid : Zoid = window.__zoid__;
+export const zoid: Zoid = window.__zoid__;

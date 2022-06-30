@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css" />
-    <link rel="stylesheet" href="../../common/index.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css"
+  />
+  <link rel="stylesheet" href="../../common/index.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
 
-    <script src="../../../dist/zoid.frameworks.js"></script>
-    <script src="./login.js"></script>
+  <script src="../../../dist/zoid.frameworks.js"></script>
+  <script src="./login.js"></script>
 
-    <script>
-        var MyLoginAngularZoidComponent = MyLoginZoidComponent.driver('angular', window.angular);
+  <script>
+    var MyLoginAngularZoidComponent = MyLoginZoidComponent.driver(
+      "angular",
+      window.angular
+    );
 
-        angular.module('app', [ MyLoginAngularZoidComponent.name ]).controller('appController', function ($scope) {
+    angular
+      .module("app", [MyLoginAngularZoidComponent.name])
+      .controller("appController", function ($scope) {
+        $scope.userLoggedIn = false;
+        $scope.email = "foo@bar.com";
 
-            $scope.userLoggedIn = false;
-            $scope.email = 'foo@bar.com';
+        $scope.onLogin = function onLogin(email) {
+          console.log("User logged in with email:", email);
 
-            $scope.onLogin = function onLogin(email) {
-                console.log('User logged in with email:', email);
-
-                $scope.userLoggedIn = true;
-                $scope.email = email;
-            }
-        });
-    </script>
+          $scope.userLoggedIn = true;
+          $scope.email = email;
+        };
+      });
+  </script>
 </head>
 
 <body ng-app="app" ng-controller="appController">
-    <h3>Log in on xyz.com</h3>
+  <h3>Log in on xyz.com</h3>
 
-    <div id="container">
-        <my-login-component props="{ prefilledEmail: email, onLogin: onLogin }"></my-login-component>
-    </div>
+  <div id="container">
+    <my-login-component
+      props="{ prefilledEmail: email, onLogin: onLogin }"
+    ></my-login-component>
+  </div>
 
-    <div id="result" ng-if="userLoggedIn">User logged in with email: {{email}}</div>
+  <div id="result" ng-if="userLoggedIn">
+    User logged in with email: {{email}}
+  </div>
 </body>

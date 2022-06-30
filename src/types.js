@@ -4,17 +4,17 @@
 export const TYPES = true;
 
 export type DimensionsType = {|
-    width : number,
-    height : number
+  width: number,
+  height: number,
 |};
 
 export type CssDimensionsType = {|
-    width : string,
-    height : string
+  width: string,
+  height: string,
 |};
 
 export type CancelableType = {|
-    cancel : () => void
+  cancel: () => void,
 |};
 
 export type StringMatcherType = string | $ReadOnlyArray<string> | RegExp;

@@ -1,11 +1,11 @@
 body {
-    text-align: center;
+  text-align: center;
 }
 
 h3 {
-    margin: 50px;
+  margin: 50px;
 }
 
 #container {
-    display: inline-block;
+  display: inline-block;
 }

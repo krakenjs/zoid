@@ -1,82 +1,98 @@
 /* @flow */
 
-import { wrapPromise } from '@krakenjs/belter/src';
+import { wrapPromise } from "@krakenjs/belter/src";
 
-import { zoid } from '../zoid';
-import { onWindowOpen, getBody } from '../common';
+import { zoid } from "../zoid";
+import { onWindowOpen, getBody } from "../common";
 
-describe('zoid attributes cases', () => {
-    it('should render a component to an iframe with specified static attributes', () => {
-        return wrapPromise(({ expect }) => {
-            const expectedScrolling = 'no';
+describe("zoid attributes cases", () => {
+  it("should render a component to an iframe with specified static attributes", () => {
+    return wrapPromise(({ expect }) => {
+      const expectedScrolling = "no";
 
-            window.__component__ = () => {
-                return zoid.create({
-                    tag:        'test-render-iframe-static-attributes',
-                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain:     'mock://www.child.com',
-                    attributes: {
-                        iframe: {
-                            scrolling: 'no'
-                        }
-                    }
-                });
-            };
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-render-iframe-static-attributes",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          attributes: {
+            iframe: {
+              scrolling: "no",
+            },
+          },
+        });
+      };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
+      const componentWindowPromise = onWindowOpen().then(
+        expect("onWindowOpen", ({ win }) => win)
+      );
 
-            const component = window.__component__();
-            return component({
-                onRendered: expect('onRendered')
-            }).render(getBody()).then(() => {
-                return componentWindowPromise;
-            }).then(componentWindow => {
-                const scrolling = componentWindow.frameElement.getAttribute('scrolling');
+      const component = window.__component__();
+      return component({
+        onRendered: expect("onRendered"),
+      })
+        .render(getBody())
+        .then(() => {
+          return componentWindowPromise;
+        })
+        .then((componentWindow) => {
+          const scrolling =
+            componentWindow.frameElement.getAttribute("scrolling");
 
-                if (scrolling !== expectedScrolling) {
-                    throw new Error(`Expected scrolling attribute to be ${ expectedScrolling }, got ${ scrolling }`);
-                }
-            });
+          if (scrolling !== expectedScrolling) {
+            throw new Error(
+              `Expected scrolling attribute to be ${expectedScrolling}, got ${scrolling}`
+            );
+          }
         });
     });
+  });
 
-    it('should render a component to an iframe with specified dynamic attributes', () => {
-        return wrapPromise(({ expect }) => {
-            const expectedScrolling = 'no';
+  it("should render a component to an iframe with specified dynamic attributes", () => {
+    return wrapPromise(({ expect }) => {
+      const expectedScrolling = "no";
 
-            window.__component__ = () => {
-                return zoid.create({
-                    tag:        'test-render-iframe-dynamic-attributes',
-                    url:        'mock://www.child.com/base/test/windows/child/index.htm',
-                    domain:     'mock://www.child.com',
-                    attributes: ({ props }) => ({
-                        iframe: {
-                            scrolling: props.scrolling
-                        }
-                    }),
-                    props: {
-                        scrolling: {
-                            type: 'string'
-                        }
-                    }
-                });
-            };
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-render-iframe-dynamic-attributes",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          attributes: ({ props }) => ({
+            iframe: {
+              scrolling: props.scrolling,
+            },
+          }),
+          props: {
+            scrolling: {
+              type: "string",
+            },
+          },
+        });
+      };
 
-            const componentWindowPromise = onWindowOpen().then(expect('onWindowOpen', ({ win }) => win));
+      const componentWindowPromise = onWindowOpen().then(
+        expect("onWindowOpen", ({ win }) => win)
+      );
 
-            const component = window.__component__();
-            return component({
-                scrolling:  'no',
-                onRendered: expect('onRendered')
-            }).render(getBody()).then(() => {
-                return componentWindowPromise;
-            }).then(componentWindow => {
-                const scrolling = componentWindow.frameElement.getAttribute('scrolling');
+      const component = window.__component__();
+      return component({
+        scrolling: "no",
+        onRendered: expect("onRendered"),
+      })
+        .render(getBody())
+        .then(() => {
+          return componentWindowPromise;
+        })
+        .then((componentWindow) => {
+          const scrolling =
+            componentWindow.frameElement.getAttribute("scrolling");
 
-                if (scrolling !== expectedScrolling) {
-                    throw new Error(`Expected scrolling attribute to be ${ expectedScrolling }, got ${ scrolling }`);
-                }
-            });
+          if (scrolling !== expectedScrolling) {
+            throw new Error(
+              `Expected scrolling attribute to be ${expectedScrolling}, got ${scrolling}`
+            );
+          }
         });
     });
+  });
 });
