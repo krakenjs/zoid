@@ -10,3 +10,5 @@ declare var __ZOID__: {|
   __DEFAULT_PRERENDER__: boolean,
   __SCRIPT_NAMESPACE__: boolean,
 |};
+
+declare var __DEBUG__: boolean;
