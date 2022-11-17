@@ -1,11 +1,11 @@
 /* @flow */
 /* eslint import/no-nodejs-modules: off, import/no-default-export: off */
 
-import type { WebpackConfig } from "@krakenjs/grumbler-scripts/config/types";
+import type { WebpackConfig } from "@krakenjs/webpack-config-grumbler/index.flow";
 import {
   getWebpackConfig,
   getNextVersion,
-} from "@krakenjs/grumbler-scripts/config/webpack.config";
+} from "@krakenjs/webpack-config-grumbler";
 import { argv } from "yargs";
 
 import pkg from "./package.json";

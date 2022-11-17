@@ -1,8 +1,7 @@
 /* @flow */
 
 module.exports = {
-  extends:
-    "./node_modules/@krakenjs/grumbler-scripts/config/.eslintrc-browser.js",
+  extends: "@krakenjs/eslint-config-grumbler/eslintrc-browser",
 
   globals: {
     __ZOID__: true,
@@ -13,4 +12,14 @@ module.exports = {
     "react/display-name": "off",
     "react/prop-types": "off",
   },
+
+  overrides: [
+    {
+      files: ["test/**/*"],
+      rules: {
+        "max-lines": "off",
+        "compat/compat": "off",
+      },
+    },
+  ],
 };
