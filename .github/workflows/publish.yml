@@ -1,4 +1,4 @@
-name: "publish to npm"
+name: publish to npm
 on: workflow_dispatch
 jobs:
   main:
@@ -7,7 +7,6 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
           fetch-depth: 0
 
       - name: ⎔ Setup node
@@ -26,7 +25,7 @@ jobs:
         run: |
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
-      - name: ▶️ Run release
+      - name: Publish to npm
         run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
