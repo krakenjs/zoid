@@ -729,7 +729,16 @@ export function parentComponent<P, X, C>({
         return clean.all(err);
       })
       .then(() => {
-        initPromise.asyncReject(err || new Error("Component destroyed"));
+        const error = err || new Error("Component destroyed");
+        if (
+          isElementClosed(currentContainer) ||
+          error.message === "Window navigated away"
+        ) {
+          console.warn(error);
+          initPromise.resolve();
+        } else {
+          initPromise.asyncReject(error);
+        }
       });
   };
 
