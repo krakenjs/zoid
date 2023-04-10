@@ -316,7 +316,7 @@ export function parentComponent<P, X, C>({
   let currentProxyContainer: ?ProxyObject<HTMLElement>;
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
-  let currentContainer: HTMLElement | void;
+  let currentContainer: HTMLElement;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
