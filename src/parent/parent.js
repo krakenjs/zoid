@@ -65,6 +65,7 @@ import {
   METHOD,
   WINDOW_REFERENCE,
   DEFAULT_DIMENSIONS,
+  RENDER_ERRORS,
 } from "../constants";
 import {
   getGlobal,
@@ -729,12 +730,11 @@ export function parentComponent<P, X, C>({
         return clean.all(err);
       })
       .then(() => {
-        const error = err || new Error("Component destroyed");
+        const error = err || new Error(RENDER_ERRORS.COMPONENT_DESTROYED);
         if (
           isElementClosed(currentContainer) ||
-          error.message === "Window navigated away"
+          error.message === RENDER_ERRORS.NAVIGATED_AWAY
         ) {
-          console.warn(error);
           initPromise.resolve();
         } else {
           initPromise.asyncReject(error);
@@ -758,7 +758,7 @@ export function parentComponent<P, X, C>({
       return ZalgoPromise.try(() => {
         return event.trigger(EVENT.CLOSE);
       }).then(() => {
-        return destroy(err || new Error(`Component closed`));
+        return destroy(err || new Error(RENDER_ERRORS.COMPONENT_CLOSED));
       });
     });
   });
@@ -832,7 +832,7 @@ export function parentComponent<P, X, C>({
         window,
         "unload",
         once(() => {
-          destroy(new Error(`Window navigated away`));
+          destroy(new Error(RENDER_ERRORS.NAVIGATED_AWAY));
         })
       );
 
@@ -879,7 +879,7 @@ export function parentComponent<P, X, C>({
       .then((isClosed) => {
         if (isClosed) {
           closed = true;
-          return close(new Error(`Detected component window close`));
+          return close(new Error(RENDER_ERRORS.WINDOW_CLOSED));
         }
 
         return ZalgoPromise.delay(200)
@@ -887,7 +887,7 @@ export function parentComponent<P, X, C>({
           .then((secondIsClosed) => {
             if (secondIsClosed) {
               closed = true;
-              return close(new Error(`Detected component window close`));
+              return close(new Error(RENDER_ERRORS.WINDOW_CLOSED));
             }
           });
       })
