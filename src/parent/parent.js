@@ -65,7 +65,7 @@ import {
   METHOD,
   WINDOW_REFERENCE,
   DEFAULT_DIMENSIONS,
-  RENDER_ERRORS,
+  COMPONENT_ERROR,
 } from "../constants";
 import {
   getGlobal,
@@ -316,7 +316,7 @@ export function parentComponent<P, X, C>({
   let currentProxyContainer: ?ProxyObject<HTMLElement>;
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
-  let currentContainer: HTMLElement;
+  let currentContainer: HTMLElement | void;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
@@ -730,10 +730,10 @@ export function parentComponent<P, X, C>({
         return clean.all(err);
       })
       .then(() => {
-        const error = err || new Error(RENDER_ERRORS.COMPONENT_DESTROYED);
+        const error = err || new Error(COMPONENT_ERROR.COMPONENT_DESTROYED);
         if (
-          isElementClosed(currentContainer) ||
-          error.message === RENDER_ERRORS.NAVIGATED_AWAY
+          (currentContainer && isElementClosed(currentContainer)) ||
+          error.message === COMPONENT_ERROR.NAVIGATED_AWAY
         ) {
           initPromise.resolve();
         } else {
@@ -758,7 +758,7 @@ export function parentComponent<P, X, C>({
       return ZalgoPromise.try(() => {
         return event.trigger(EVENT.CLOSE);
       }).then(() => {
-        return destroy(err || new Error(RENDER_ERRORS.COMPONENT_CLOSED));
+        return destroy(err || new Error(COMPONENT_ERROR.COMPONENT_CLOSED));
       });
     });
   });
@@ -832,7 +832,7 @@ export function parentComponent<P, X, C>({
         window,
         "unload",
         once(() => {
-          destroy(new Error(RENDER_ERRORS.NAVIGATED_AWAY));
+          destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
         })
       );
 
@@ -856,7 +856,7 @@ export function parentComponent<P, X, C>({
       cancelled = true;
     });
 
-    return ZalgoPromise.delay(2000)
+    return ZalgoPromise.delay(2400)
       .then(() => {
         return proxyWin.isClosed();
       })
@@ -879,7 +879,7 @@ export function parentComponent<P, X, C>({
       .then((isClosed) => {
         if (isClosed) {
           closed = true;
-          return close(new Error(RENDER_ERRORS.WINDOW_CLOSED));
+          return close(new Error(COMPONENT_ERROR.WINDOW_CLOSED));
         }
 
         return ZalgoPromise.delay(200)
@@ -887,7 +887,7 @@ export function parentComponent<P, X, C>({
           .then((secondIsClosed) => {
             if (secondIsClosed) {
               closed = true;
-              return close(new Error(RENDER_ERRORS.WINDOW_CLOSED));
+              return close(new Error(COMPONENT_ERROR.WINDOW_CLOSED));
             }
           });
       })

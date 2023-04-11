@@ -9,7 +9,7 @@ export const POST_MESSAGE = {
   ALLOW_DELEGATE: `${ZOID}_allow_delegate`,
 };
 
-export const RENDER_ERRORS = {
+export const COMPONENT_ERROR = {
   NAVIGATED_AWAY: "Window navigated away",
   COMPONENT_DESTROYED: "Component destroyed",
   COMPONENT_CLOSED: "Component closed",
