@@ -317,6 +317,7 @@ export function parentComponent<P, X, C>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
+  let isSecondRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
@@ -856,14 +857,21 @@ export function parentComponent<P, X, C>({
       cancelled = true;
     });
 
-    return ZalgoPromise.delay(2400)
+    return ZalgoPromise.delay(2000)
       .then(() => {
         return proxyWin.isClosed();
       })
       .then((isClosed) => {
         if (!cancelled) {
-          if (isClosed) {
-            return close(new Error(`Detected ${context} close`));
+          if (context === CONTEXT.POPUP && isClosed) {
+            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+          } else if (
+            context === CONTEXT.IFRAME &&
+            isClosed &&
+            ((currentContainer && isElementClosed(currentContainer)) ||
+              isSecondRenderFinished)
+          ) {
+            return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
           } else {
             return watchForClose(proxyWin, context);
           }
@@ -1618,6 +1626,7 @@ export function parentComponent<P, X, C>({
       });
 
       const onRenderedPromise = initPromise.then(() => {
+        isSecondRenderFinished = true;
         return event.trigger(EVENT.RENDERED);
       });
 

@@ -14,6 +14,8 @@ export const COMPONENT_ERROR = {
   COMPONENT_DESTROYED: "Component destroyed",
   COMPONENT_CLOSED: "Component closed",
   WINDOW_CLOSED: "Detected component window close",
+  POPUP_CLOSE: "Detected popup close",
+  IFRAME_CLOSE: "Detected iframe close",
 };
 
 export const PROP_TYPE = {
