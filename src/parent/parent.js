@@ -317,7 +317,7 @@ export function parentComponent<P, X, C>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
-  let isSecondRenderFinished: boolean = false;
+  let isRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
@@ -736,7 +736,6 @@ export function parentComponent<P, X, C>({
           (currentContainer && isElementClosed(currentContainer)) ||
           error.message === COMPONENT_ERROR.NAVIGATED_AWAY
         ) {
-          console.warn(error);
           initPromise.resolve();
         } else {
           initPromise.asyncReject(error);
@@ -1620,7 +1619,7 @@ export function parentComponent<P, X, C>({
       });
 
       const onRenderedPromise = initPromise.then(() => {
-        isSecondRenderFinished = true;
+        isRenderFinished = true;
         return event.trigger(EVENT.RENDERED);
       });
 
