@@ -736,6 +736,7 @@ export function parentComponent<P, X, C>({
           (currentContainer && isElementClosed(currentContainer)) ||
           error.message === COMPONENT_ERROR.NAVIGATED_AWAY
         ) {
+          console.warn(error);
           initPromise.resolve();
         } else {
           initPromise.asyncReject(error);
@@ -863,15 +864,8 @@ export function parentComponent<P, X, C>({
       })
       .then((isClosed) => {
         if (!cancelled) {
-          if (context === CONTEXT.POPUP && isClosed) {
-            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
-          } else if (
-            context === CONTEXT.IFRAME &&
-            isClosed &&
-            ((currentContainer && isElementClosed(currentContainer)) ||
-              isSecondRenderFinished)
-          ) {
-            return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
+          if (isClosed) {
+            return close(new Error(`Detected ${context} close`));
           } else {
             return watchForClose(proxyWin, context);
           }
