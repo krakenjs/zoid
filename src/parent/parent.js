@@ -863,8 +863,17 @@ export function parentComponent<P, X, C>({
       })
       .then((isClosed) => {
         if (!cancelled) {
-          if (isClosed) {
-            return close(new Error(`Detected ${context} close`));
+          const isCurrentContainerClosed: boolean =
+            currentContainer && isElementClosed(currentContainer);
+
+          if (context === CONTEXT.POPUP && isClosed) {
+            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+          } else if (
+            context === CONTEXT.IFRAME &&
+            isClosed &&
+            (isCurrentContainerClosed || isRenderFinished)
+          ) {
+            return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
           } else {
             return watchForClose(proxyWin, context);
           }
