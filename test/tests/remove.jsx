@@ -102,4 +102,63 @@ describe("zoid remove cases", () => {
         });
     });
   });
+
+  it("should not throw an error when parent container is removed before render completes", () => {
+    return wrapPromise(() => {
+      const { container } = getContainer();
+
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-remove-before-render-complete",
+          url: () => "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+        });
+      };
+
+      const component = window.__component__();
+      const onRenderedPromise = new ZalgoPromise();
+      const onClosePromise = new ZalgoPromise();
+
+      const renderPromise = component({
+        onRendered: () => onRenderedPromise.resolve(),
+        onClose: () => onClosePromise.resolve(),
+      }).render(container);
+
+      // manually remove before render completes
+      container.remove();
+
+      return renderPromise.then(() => {
+        ZalgoPromise.delay(5);
+      });
+    });
+  });
+
+  it("should not throw an error when window navigates away before render completes", () => {
+    return wrapPromise(() => {
+      const { container } = getContainer();
+
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-navigation-before-render-complete",
+          url: () => "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+        });
+      };
+
+      const component = window.__component__();
+      const onRenderedPromise = new ZalgoPromise();
+      const onClosePromise = new ZalgoPromise();
+
+      const renderPromise = component({
+        onRendered: () => onRenderedPromise.resolve(),
+        onClose: () => onClosePromise.resolve(),
+      }).render(container);
+
+      // manually reload window before render completes
+      window.dispatchEvent(new Event("unload"));
+      return renderPromise.then(() => {
+        ZalgoPromise.delay(5);
+      });
+    });
+  });
 });

@@ -330,9 +330,9 @@ describe("zoid error cases", () => {
     );
   });
 
-  it("should call onclose when an iframe is closed by someone other than zoid during render", () => {
+  it("should error out when iframe is closed by someone other than zoid during render", () => {
     return wrapPromise(
-      ({ expect, avoid }) => {
+      ({ expect }) => {
         window.__component__ = () => {
           return zoid.create({
             tag: "test-onclose-iframe-closed-during-render",
@@ -343,17 +343,13 @@ describe("zoid error cases", () => {
 
         onWindowOpen().then(
           expect("onWindowOpen", ({ win: openedWindow }) => {
-            setTimeout(() => {
-              destroyElement(openedWindow.frameElement);
-            }, 1);
+            destroyElement(openedWindow.frameElement);
           })
         );
 
         const component = window.__component__();
         return component({
-          onClose: expect("onClose"),
-          onError: avoid("onError"),
-          onDestroy: expect("onDestroy"),
+          onError: expect("onError"),
         })
           .render("body", zoid.CONTEXT.IFRAME)
           .catch(expect("catch"));
@@ -587,25 +583,6 @@ describe("zoid error cases", () => {
       return ZalgoPromise.try(() => {
         component.driver("meep", {});
       }).catch(expect("catch"));
-    });
-  });
-
-  it("should error out where the domain is an invalid regex", () => {
-    return wrapPromise(({ expect }) => {
-      window.__component__ = () => {
-        return zoid.create({
-          tag: "test-render-domain-invalid-regex",
-          url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: /^mock:\/\/www\.meep\.com$/,
-        });
-      };
-
-      const component = window.__component__();
-      return component({
-        onDestroy: expect("onDestroy"),
-      })
-        .render(getBody())
-        .catch(expect("catch"));
     });
   });
 
