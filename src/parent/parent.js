@@ -317,7 +317,6 @@ export function parentComponent<P, X, C>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
-  let isRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
@@ -1619,7 +1618,6 @@ export function parentComponent<P, X, C>({
       });
 
       const onRenderedPromise = initPromise.then(() => {
-        isRenderFinished = true;
         return event.trigger(EVENT.RENDERED);
       });
 
