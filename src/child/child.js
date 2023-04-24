@@ -74,6 +74,10 @@ function destroy(): ZalgoPromise<void> {
   });
 }
 
+function hasMajorVersionChanged(version1: string, version2: string): boolean {
+  return version1.split("_")[0] !== version2.split("_")[0];
+}
+
 export type ChildComponent<P, X> = {|
   getProps: () => ChildPropsType<P, X>,
   init: () => ZalgoPromise<void>,
@@ -100,7 +104,7 @@ export function childComponent<P, X, C>(
     props: initialProps,
   } = payload;
 
-  if (version !== __ZOID__.__VERSION__) {
+  if (hasMajorVersionChanged(version, __ZOID__.__VERSION__)) {
     throw new Error(
       `Parent window has zoid version ${version}, child window has version ${__ZOID__.__VERSION__}`
     );
