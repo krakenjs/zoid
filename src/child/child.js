@@ -74,8 +74,13 @@ function destroy(): ZalgoPromise<void> {
   });
 }
 
+// zoid version strings should be in snake_case format (10_1_0, 10_2_0, 11_0_0, etc.)
+// since it is saved on the window object as a key. This function will compare the first numerical value
+// that should only change during major changes.
 function hasMajorVersionChanged(version1: string, version2: string): boolean {
-  return version1.split("_")[0] !== version2.split("_")[0];
+  if (/_/.test(version1) && /_/.test(version2)) {
+    return version1.split("_")[0] !== version2.split("_")[0];
+  }
 }
 
 export type ChildComponent<P, X> = {|
@@ -108,6 +113,8 @@ export function childComponent<P, X, C>(
     throw new Error(
       `Parent window has zoid version ${version}, child window has version ${__ZOID__.__VERSION__}`
     );
+  } else {
+    console.log("passed regex tests");
   }
 
   const {
