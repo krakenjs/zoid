@@ -113,8 +113,6 @@ export function childComponent<P, X, C>(
     throw new Error(
       `Parent window has zoid version ${version}, child window has version ${__ZOID__.__VERSION__}`
     );
-  } else {
-    console.log("passed regex tests");
   }
 
   const {
