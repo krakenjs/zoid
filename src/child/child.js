@@ -74,7 +74,7 @@ function destroy(): ZalgoPromise<void> {
   });
 }
 
-// This function will only compare the first numerical value,
+// Compares the first numerical value of the parent and child versions of zoid,
 // ensuring that an error is only thrown when major versions of Zoid are released.
 // Additionally, zoid version strings should be in snake_case format (10_1_0, 10_2_0, 11_0_0, etc.)
 function versionCompatabilityCheck(
