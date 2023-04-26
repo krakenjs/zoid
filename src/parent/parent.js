@@ -864,6 +864,7 @@ export function parentComponent<P, X, C>({
       .then((isClosed) => {
         if (!cancelled) {
           const isCurrentContainerClosed: boolean =
+            // $FlowIssue
             currentContainer && isElementClosed(currentContainer);
 
           if (context === CONTEXT.POPUP && isClosed) {
