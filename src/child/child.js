@@ -74,6 +74,22 @@ function destroy(): ZalgoPromise<void> {
   });
 }
 
+// Compares the first numerical value of the parent and child versions of zoid,
+// ensuring that an error is only thrown when major versions of Zoid do not match.
+// Additionally, zoid version strings should be in snake_case format (10_1_0, 10_2_0, 11_0_0, etc.)
+function versionCompatabilityCheck(
+  version1: string,
+  version2: string
+): boolean {
+  if (!/_/.test(version1) || !/_/.test(version2)) {
+    throw new Error(
+      `Versions are in an invalid format (${version1}, ${version2})`
+    );
+  }
+
+  return version1.split("_")[0] === version2.split("_")[0];
+}
+
 export type ChildComponent<P, X> = {|
   getProps: () => ChildPropsType<P, X>,
   init: () => ZalgoPromise<void>,
@@ -100,7 +116,7 @@ export function childComponent<P, X, C>(
     props: initialProps,
   } = payload;
 
-  if (version !== __ZOID__.__VERSION__) {
+  if (!versionCompatabilityCheck(version, __ZOID__.__VERSION__)) {
     throw new Error(
       `Parent window has zoid version ${version}, child window has version ${__ZOID__.__VERSION__}`
     );
