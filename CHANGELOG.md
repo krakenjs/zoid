@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.2.2](https://github.com/krakenjs/zoid/compare/v10.2.1...v10.2.2) (2023-05-01)
+
+
+### Bug Fixes
+
+* reduce frequency of "Detected iframe close" error ([#426](https://github.com/krakenjs/zoid/issues/426)) ([5343277](https://github.com/krakenjs/zoid/commit/53432775742a56aad8377c84258ec8d7a17d0450))
+
 ### [10.2.1](https://github.com/krakenjs/zoid/compare/v10.2.0...v10.2.1) (2023-04-25)
 
 
