@@ -869,15 +869,17 @@ export function parentComponent<P, X, C>({
 
           if (context === CONTEXT.POPUP && isClosed) {
             return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
-          } else if (
+          }
+
+          if (
             context === CONTEXT.IFRAME &&
             isClosed &&
             (isCurrentContainerClosed || isRenderFinished)
           ) {
             return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
-          } else {
-            return watchForClose(proxyWin, context);
           }
+
+          return watchForClose(proxyWin, context);
         }
       });
   };
