@@ -734,7 +734,8 @@ export function parentComponent<P, X, C>({
         const error = err || new Error(COMPONENT_ERROR.COMPONENT_DESTROYED);
         if (
           (currentContainer && isElementClosed(currentContainer)) ||
-          error.message === COMPONENT_ERROR.NAVIGATED_AWAY
+          error.message === COMPONENT_ERROR.NAVIGATED_AWAY ||
+          error.message === COMPONENT_ERROR.POPUP_CLOSE
         ) {
           initPromise.resolve();
         } else {
@@ -863,23 +864,26 @@ export function parentComponent<P, X, C>({
       })
       .then((isClosed) => {
         if (!cancelled) {
-          const isCurrentContainerClosed: boolean = Boolean(
-            currentContainer && isElementClosed(currentContainer)
-          );
+          if (isClosed) {
+            if (context === CONTEXT.POPUP) {
+              return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+            }
 
-          if (context === CONTEXT.POPUP && isClosed) {
-            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+            const isCurrentContainerClosed: boolean = Boolean(
+              currentContainer && isElementClosed(currentContainer)
+            );
+
+            if (
+              context === CONTEXT.IFRAME &&
+              (isCurrentContainerClosed || isRenderFinished)
+            ) {
+              return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
+            } else {
+              return watchForClose(proxyWin, context);
+            }
+          } else {
+            return watchForClose(proxyWin, context);
           }
-
-          if (
-            context === CONTEXT.IFRAME &&
-            isClosed &&
-            (isCurrentContainerClosed || isRenderFinished)
-          ) {
-            return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
-          }
-
-          return watchForClose(proxyWin, context);
         }
       });
   };

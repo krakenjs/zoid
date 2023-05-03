@@ -290,7 +290,7 @@ describe("zoid error cases", () => {
 
         return runOnClick(() => {
           return instance.render("body", zoid.CONTEXT.POPUP);
-        }).catch(expect("catch"));
+        }).catch(avoid("catch"));
       },
       { timeout: 5000 }
     );
