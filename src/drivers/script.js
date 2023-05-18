@@ -27,22 +27,13 @@ export let script : ComponentDriverType<*, Document> = {
                 return;
             }
 
-            component.log(`instantiate_script_component`);
+            component.log(`instantiate_script_component_error`);
 
-            let props : { [string] : mixed } = element.innerText
-                ? eval(`(${ element.innerText })`) // eslint-disable-line no-eval, security/detect-eval-with-expression
-                : {};
-
-            let container = document.createElement('div');
-
-            if (!element.parentNode) {
-                throw new Error(`Element has no parent`);
-            }
-
-            element.parentNode.replaceChild(container, element);
-
-            // $FlowFixMe
-            component.render(props, container);
+            throw new Error(`
+               'x-component' script type is no longer supported.  
+               Please migrate to another integration pattern.
+            `);
+      
         }
 
         function scan() {
