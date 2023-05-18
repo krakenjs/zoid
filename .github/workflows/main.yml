@@ -1,0 +1,38 @@
+name: build
+
+on:
+  push:
+    branches:
+      - zoid-v6
+  pull_request: {}
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+        with:
+          useLockFile: false
+
+      - name: 👕 Lint commit messages
+        uses: wagoid/commitlint-github-action@v4
+
+      - name: ▶️ Run flow-typed script
+        run: npm run flow-typed
+
+      - name: ▶️ Run build and test script
+        run: npm run build
+
+      - name: ⬆️ Upload karma coverage report
+        uses: codecov/codecov-action@v2
