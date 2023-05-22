@@ -23,21 +23,9 @@ export var script = {
                 return;
             }
 
-            component.log('instantiate_script_component');
+            component.log('instantiate_script_component_error');
 
-            var props = element.innerText ? eval('(' + element.innerText + ')') // eslint-disable-line no-eval, security/detect-eval-with-expression
-            : {};
-
-            var container = document.createElement('div');
-
-            if (!element.parentNode) {
-                throw new Error('Element has no parent');
-            }
-
-            element.parentNode.replaceChild(container, element);
-
-            // $FlowFixMe
-            component.render(props, container);
+            throw new Error('\n               \'x-component\' script type is no longer supported.  \n               Please migrate to another integration pattern.\n            ');
         }
 
         function scan() {

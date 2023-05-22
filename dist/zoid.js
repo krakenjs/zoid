@@ -747,11 +747,25 @@
                 IFRAME: "iframe",
                 POPUP: "popup"
             }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
+            function getActualProtocol() {
+                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol;
+            }
+            function getProtocol() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                if (win.mockDomain) {
+                    var protocol = win.mockDomain.split("//")[0];
+                    if (protocol) return protocol;
+                }
+                return getActualProtocol(win);
+            }
             function isFileProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === PROTOCOL.FILE;
+                return getProtocol(arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window) === PROTOCOL.FILE;
             }
             function isAboutProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === PROTOCOL.ABOUT;
+                return getProtocol(arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window) === PROTOCOL.ABOUT;
+            }
+            function isMockProtocol() {
+                return getProtocol(arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window) === PROTOCOL.MOCK;
             }
             function getParent() {
                 var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
@@ -775,7 +789,7 @@
             function getActualDomain() {
                 var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, location = win.location;
                 if (!location) throw new Error("Can not read window location");
-                var protocol = location.protocol;
+                var protocol = getActualProtocol(win);
                 if (!protocol) throw new Error("Can not read window protocol");
                 if (protocol === PROTOCOL.FILE) return PROTOCOL.FILE + "//";
                 if (protocol === PROTOCOL.ABOUT) {
@@ -807,6 +821,9 @@
                 } catch (err) {}
                 try {
                     if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+                } catch (err) {}
+                try {
+                    if (isMockProtocol(win) && canReadFromWindow(win)) return !0;
                 } catch (err) {}
                 try {
                     if (getActualDomain(win) === getActualDomain(window)) return !0;
@@ -1020,8 +1037,7 @@
                 }
             }
             function findFrameByName(win, name) {
-                var frame;
-                return (frame = getFrameByName(win, name)) ? frame : findChildFrameByName(getTop(win) || win, name);
+                return getFrameByName(win, name) || findChildFrameByName(getTop(win) || win, name);
             }
             function isParent(win, frame) {
                 var frameParent = getParent(frame);
@@ -1101,7 +1117,7 @@
                 }));
             }
             function stringifyDomainPattern(pattern) {
-                return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
+                return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() + ")" : pattern.toString();
             }
             function getDomainFromUrl(url) {
                 return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
@@ -1178,11 +1194,6 @@
                 if (!isMockDomain(getDomainFromUrl(url))) return url;
                 throw new Error("Mock urls not supported out of test mode");
             }
-            function closeWindow(win) {
-                try {
-                    win.close();
-                } catch (err) {}
-            }
             function getFrameForWindow(win) {
                 if (isSameDomain(win)) return assertSameDomain(win).frameElement;
                 for (var _i21 = 0, _document$querySelect2 = document.querySelectorAll("iframe"), _length20 = null == _document$querySelect2 ? 0 : _document$querySelect2.length; _i21 < _length20; _i21++) {
@@ -1190,11 +1201,32 @@
                     if (frame && frame.contentWindow && frame.contentWindow === win) return frame;
                 }
             }
+            function closeWindow(win) {
+                if (isIframe(win)) {
+                    var frame = getFrameForWindow(win);
+                    if (frame && frame.parentElement) {
+                        frame.parentElement.removeChild(frame);
+                        return;
+                    }
+                }
+                try {
+                    win.close();
+                } catch (err) {}
+            }
+            __webpack_require__.d(__webpack_exports__, !1, function() {
+                return getActualProtocol;
+            });
+            __webpack_require__.d(__webpack_exports__, !1, function() {
+                return getProtocol;
+            });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return isFileProtocol;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return isAboutProtocol;
+            });
+            __webpack_require__.d(__webpack_exports__, !1, function() {
+                return isMockProtocol;
             });
             __webpack_require__.d(__webpack_exports__, "m", function() {
                 return getParent;
@@ -1338,10 +1370,10 @@
                 return normalizeMockUrl;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
-                return closeWindow;
+                return getFrameForWindow;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
-                return getFrameForWindow;
+                return closeWindow;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return !0;
@@ -1406,6 +1438,7 @@
                         err.position = position;
                         throw err;
                     }, decodeAsBytes = function(base32Str) {
+                        if ("" === base32Str) return [];
                         if (!/^[A-Z2-7=]+$/.test(base32Str)) throw new Error("Invalid base32 characters");
                         for (var v1, v2, v3, v4, v5, v6, v7, v8, bytes = [], index = 0, length = (base32Str = base32Str.replace(/=/g, "")).length, i = 0, count = length >> 3 << 3; i < count; ) {
                             v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -1485,6 +1518,7 @@
                             }
                             return str;
                         }(decodeAsBytes(base32Str));
+                        if ("" === base32Str) return "";
                         if (!/^[A-Z2-7=]+$/.test(base32Str)) throw new Error("Invalid base32 characters");
                         var v1, v2, v3, v4, v5, v6, v7, v8, str = "", length = base32Str.indexOf("=");
                         -1 === length && (length = base32Str.length);
@@ -1594,6 +1628,7 @@
                                 return base32Str;
                             }(input) : function(str) {
                                 var v1, v2, v3, v4, v5, code, i, end = !1, base32Str = "", index = 0, start = 0, length = str.length;
+                                if ("" === str) return base32Str;
                                 do {
                                     blocks[0] = blocks[5];
                                     blocks[1] = blocks[6];
@@ -3356,8 +3391,9 @@
                                 }
                             }
                             if (_result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected)) {
-                                _result2.resolved ? _promise.resolve(_result2.value) : _promise.reject(_result2.error);
-                                _result2.errorHandled = !0;
+                                var promiseResult = _result2;
+                                promiseResult.resolved ? _promise.resolve(promiseResult.value) : _promise.reject(promiseResult.error);
+                                promiseResult.errorHandled = !0;
                             } else utils_isPromise(_result2) ? _result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected) ? _result2.resolved ? _promise.resolve(_result2.value) : _promise.reject(_result2.error) : chain(_result2, _promise) : _promise.resolve(_result2);
                         }
                         handlers.length = 0;
@@ -3408,6 +3444,10 @@
                     if ("undefined" == typeof Promise) throw new TypeError("Could not find Promise");
                     return Promise.resolve(this);
                 };
+                ZalgoPromise.prototype.lazy = function() {
+                    this.errorHandled = !0;
+                    return this;
+                };
                 ZalgoPromise.resolve = function(value) {
                     return value instanceof ZalgoPromise ? value : utils_isPromise(value) ? new ZalgoPromise(function(resolve, reject) {
                         return value.then(resolve, reject);
@@ -3420,7 +3460,7 @@
                     return new ZalgoPromise().asyncReject(error);
                 };
                 ZalgoPromise.all = function(promises) {
-                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    var promise = new ZalgoPromise(), count = promises.length, results = [].slice();
                     if (!count) {
                         promise.resolve(results);
                         return promise;
@@ -3911,16 +3951,13 @@
                 global: function() {
                     return window.document;
                 },
-                register: function register(component, document) {
+                register: function(component, document) {
                     function render(element) {
                         if (element && element.tagName && "script" === element.tagName.toLowerCase() && element.attributes.type && "application/x-component" === element.attributes.type.value && element.parentNode) {
                             var tag = element.getAttribute("data-component");
                             if (tag && tag === component.tag) {
-                                component.log("instantiate_script_component");
-                                var props = element.innerText ? eval("(" + element.innerText + ")") : {}, container = document.createElement("div");
-                                if (!element.parentNode) throw new Error("Element has no parent");
-                                element.parentNode.replaceChild(container, element);
-                                component.render(props, container);
+                                component.log("instantiate_script_component_error");
+                                throw new Error("\n               'x-component' script type is no longer supported.  \n               Please migrate to another integration pattern.\n            ");
                             }
                         }
                     }
@@ -5859,7 +5896,7 @@
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
                     }(this, _BaseComponent.call(this));
                     !function(options) {
-                        if (!options) throw new Error("Expecred options to be passed");
+                        if (!options) throw new Error("Expected options to be passed");
                         if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) throw new Error("Invalid options.tag: " + options.tag);
                         !function(options) {
                             if (options.props && "object" !== component_validate__typeof(options.props)) throw new Error("Expected options.props to be an object");
