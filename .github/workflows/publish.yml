@@ -13,7 +13,7 @@ jobs:
         # sets up the .npmrc file to publish to npm
         uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: "12.13"
           registry-url: "https://registry.npmjs.org"
 
       - name: 📥 Download deps
