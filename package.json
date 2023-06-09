@@ -49,16 +49,16 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "flow-bin": "^0.76",
-    "grumbler-scripts": "^2.0.19",
+    "grumbler-scripts": "^2.0.26",
     "mocha": "^4",
-    "serve": "^6.5.6"
+    "serve": "6.5.6"
   },
   "dependencies": {
     "beaver-logger": "^3.0.11",
-    "cross-domain-safe-weakmap": "^1.0.19",
-    "cross-domain-utils": "^2.0.3",
-    "hi-base32": "^0.5.0",
-    "post-robot": "^8.0.14",
-    "zalgo-promise": "^1.0.22"
+    "cross-domain-safe-weakmap": "1.0.23",
+    "cross-domain-utils": "2.0.23",
+    "hi-base32": "0.5.0",
+    "post-robot": "8.0.30",
+    "zalgo-promise": "1.0.36"
   }
 }
