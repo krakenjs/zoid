@@ -133,6 +133,10 @@
                 for (var i in src) src.hasOwnProperty(i) && (!over && dest.hasOwnProperty(i) || (dest[i] = src[i]));
                 return dest;
             }
+            var windowReady = new src.a(function(resolve) {
+                "undefined" != typeof document && "complete" === document.readyState && resolve();
+                window.addEventListener && window.addEventListener("load", resolve);
+            });
             function uniqueID() {
                 var chars = "0123456789abcdef";
                 return "xxxxxxxxxx".replace(/./g, function() {
@@ -169,7 +173,15 @@
                 autoLog: [ "warn", "error" ],
                 logUnload: !0,
                 logPerformance: !0
-            }, logLevels = [ "error", "warn", "info", "debug" ], buffer = [], tracking = [], logger_transport = function(headers, data, options) {
+            }, logLevels = [ "error", "warn", "info", "debug" ], _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+                return typeof obj;
+            } : function(obj) {
+                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+            }, buffer = [], tracking = [];
+            Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
+                console[method] = this.bind(console[method], console);
+            }, Function.prototype.call);
+            var logger_transport = function(headers, data, options) {
                 return function(method, url) {
                     var headers = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, data = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : {}, _ref$fireAndForget = (arguments.length > 4 && void 0 !== arguments[4] ? arguments[4] : {}).fireAndForget, fireAndForget = void 0 !== _ref$fireAndForget && _ref$fireAndForget;
                     return new src.a(function(resolve) {
@@ -208,12 +220,11 @@
                 loaded = !0;
             }, 1);
             function print(level, event, payload) {
-                if ("undefined" != typeof window && window.console && window.console.log) {
-                    if (!loaded) return setTimeout(function() {
-                        return print(level, event, payload);
-                    }, 1);
-                    var logLevel = config.logLevel;
-                    window.LOG_LEVEL && (logLevel = window.LOG_LEVEL);
+                if (!loaded) return setTimeout(function() {
+                    return print(level, event, payload);
+                }, 1);
+                if (window.console && window.console.log) {
+                    var logLevel = window.LOG_LEVEL || config.logLevel;
                     if (!(logLevels.indexOf(level) > logLevels.indexOf(logLevel))) {
                         payload = payload || {};
                         var args = [ event ];
@@ -228,7 +239,7 @@
             }
             function immediateFlush() {
                 var _ref$fireAndForget = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).fireAndForget, fireAndForget = void 0 !== _ref$fireAndForget && _ref$fireAndForget;
-                if ("undefined" != typeof window && config.uri) {
+                if (config.uri) {
                     var hasBuffer = buffer.length, hasTracking = tracking.length;
                     if (hasBuffer || hasTracking) {
                         for (var meta = {}, _i2 = 0, _length2 = null == metaBuilders ? 0 : metaBuilders.length; _i2 < _length2; _i2++) {
@@ -292,30 +303,28 @@
                 config.autoLog.indexOf(level) > -1 && _flush();
             }
             function log(level, event, payload) {
-                if ("undefined" != typeof window) {
-                    config.prefix && (event = config.prefix + "_" + event);
-                    "string" == typeof (payload = payload || {}) ? payload = {
-                        message: payload
-                    } : payload instanceof Error && (payload = {
-                        error: payload.stack || payload.toString()
-                    });
-                    try {
-                        JSON.stringify(payload);
-                    } catch (err) {
-                        return;
-                    }
-                    payload.timestamp = Date.now();
-                    for (var _i6 = 0, _length6 = null == payloadBuilders ? 0 : payloadBuilders.length; _i6 < _length6; _i6++) {
-                        var builder = payloadBuilders[_i6];
-                        try {
-                            extend(payload, builder(payload), !1);
-                        } catch (err) {
-                            console.error("Error in custom payload builder:", err.stack || err.toString());
-                        }
-                    }
-                    config.silent || print(level, event, payload);
-                    buffer.length === config.sizeLimit ? enqueue("info", "logger_max_buffer_length") : buffer.length < config.sizeLimit && enqueue(level, event, payload);
+                config.prefix && (event = config.prefix + "_" + event);
+                "string" == typeof (payload = payload || {}) ? payload = {
+                    message: payload
+                } : payload instanceof Error && (payload = {
+                    error: payload.stack || payload.toString()
+                });
+                try {
+                    JSON.stringify(payload);
+                } catch (err) {
+                    return;
                 }
+                payload.timestamp = Date.now();
+                for (var _i6 = 0, _length6 = null == payloadBuilders ? 0 : payloadBuilders.length; _i6 < _length6; _i6++) {
+                    var builder = payloadBuilders[_i6];
+                    try {
+                        extend(payload, builder(payload), !1);
+                    } catch (err) {
+                        console.error("Error in custom payload builder:", err.stack || err.toString());
+                    }
+                }
+                config.silent || print(level, event, payload);
+                buffer.length === config.sizeLimit ? enqueue("info", "logger_max_buffer_length") : buffer.length < config.sizeLimit && enqueue(level, event, payload);
             }
             function prefix(name) {
                 return {
@@ -352,7 +361,7 @@
                 return log("error", event, payload);
             }
             function _track(payload) {
-                if ("undefined" != typeof window && payload) {
+                if (payload) {
                     try {
                         JSON.stringify(payload);
                     } catch (err) {
@@ -405,10 +414,7 @@
                             enablePerformance && (payload.req_elapsed = reqTimer.elapsed());
                             return payload;
                         });
-                        new src.a(function(resolve) {
-                            "undefined" != typeof document && "complete" === document.readyState && resolve();
-                            window.addEventListener("load", resolve);
-                        }).then(function() {
+                        windowReady.then(function() {
                             var timing = {};
                             [ "connectEnd", "connectStart", "domComplete", "domContentLoadedEventEnd", "domContentLoadedEventStart", "domInteractive", "domLoading", "domainLookupEnd", "domainLookupStart", "fetchStart", "loadEventEnd", "loadEventStart", "navigationStart", "redirectEnd", "redirectStart", "requestStart", "responseEnd", "responseStart", "secureConnectionStart", "unloadEventEnd", "unloadEventStart" ].forEach(function(key) {
                                 timing[key] = parseInt(window.performance.timing[key], 10) || 0;
@@ -717,7 +723,7 @@
                     if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
-                        return weakmap.has(key);
+                        if (weakmap.has(key)) return !0;
                     } catch (err) {
                         delete this.weakmap;
                     }
@@ -739,6 +745,20 @@
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return weakmap_CrossDomainSafeWeakMap;
             });
+        },
+        "./node_modules/cross-domain-utils/src/constants.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            __webpack_require__.d(__webpack_exports__, "a", function() {
+                return PROTOCOL;
+            });
+            __webpack_require__.d(__webpack_exports__, "b", function() {
+                return WILDCARD;
+            });
+            var PROTOCOL = {
+                MOCK: "mock:",
+                FILE: "file:",
+                ABOUT: "about:"
+            }, WILDCARD = "*";
         },
         "./node_modules/cross-domain-utils/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -828,7 +848,7 @@
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.B;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
         },
         "./node_modules/cross-domain-utils/src/types.js": function(module, exports) {},
         "./node_modules/cross-domain-utils/src/utils.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -836,6 +856,7 @@
             function isRegex(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             }
+            var constants = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
             __webpack_exports__.l = getParent;
             __webpack_exports__.k = getOpener;
             __webpack_exports__.b = getActualDomain;
@@ -851,13 +872,15 @@
             __webpack_exports__.x = isWindowClosed;
             __webpack_exports__.y = function(frame) {
                 !function() {
-                    for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
-                        iframeFrames.splice(i, 1);
-                        iframeWindows.splice(i, 1);
-                    }
-                    for (var _i8 = 0; _i8 < iframeWindows.length; _i8++) if (isWindowClosed(iframeWindows[_i8])) {
-                        iframeFrames.splice(_i8, 1);
-                        iframeWindows.splice(_i8, 1);
+                    for (var i = 0; i < iframeWindows.length; i++) {
+                        var closed = !1;
+                        try {
+                            closed = iframeWindows[i].closed;
+                        } catch (err) {}
+                        if (closed) {
+                            iframeFrames.splice(i, 1);
+                            iframeWindows.splice(i, 1);
+                        }
                     }
                 }();
                 if (frame && frame.contentWindow) try {
@@ -874,8 +897,8 @@
                 return (frame = getFrameByName(win, name)) ? frame : function findChildFrameByName(win, name) {
                     var frame = getFrameByName(win, name);
                     if (frame) return frame;
-                    for (var _i12 = 0, _getFrames4 = getFrames(win), _length10 = null == _getFrames4 ? 0 : _getFrames4.length; _i12 < _length10; _i12++) {
-                        var namedFrame = findChildFrameByName(_getFrames4[_i12], name);
+                    for (var _i11 = 0, _getFrames4 = getFrames(win), _length10 = null == _getFrames4 ? 0 : _getFrames4.length; _i11 < _length10; _i11++) {
+                        var namedFrame = findChildFrameByName(_getFrames4[_i11], name);
                         if (namedFrame) return namedFrame;
                     }
                 }(getTop(win) || win, name);
@@ -889,7 +912,7 @@
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
                 if (getTop(child) === child) return !1;
-                for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
+                for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
                 return !1;
             };
             __webpack_exports__.s = function() {
@@ -922,7 +945,7 @@
             };
             __webpack_exports__.z = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
-                    if ("string" == typeof origin) return pattern === CONSTANTS.WILDCARD || origin === pattern;
+                    if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
                     if (Array.isArray(origin)) return !1;
                 }
@@ -992,14 +1015,9 @@
                 }
                 return !1;
             };
-            var CONSTANTS = {
-                MOCK_PROTOCOL: "mock:",
-                FILE_PROTOCOL: "file:",
-                ABOUT_PROTOCOL: "about:",
-                WILDCARD: "*"
-            }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
+            var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.ABOUT_PROTOCOL;
+                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === constants.a.ABOUT;
             }
             function getParent(win) {
                 if (win) try {
@@ -1023,10 +1041,10 @@
                 if (!location) throw new Error("Can not read window location");
                 var protocol = location.protocol;
                 if (!protocol) throw new Error("Can not read window protocol");
-                if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
-                if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
+                if (protocol === constants.a.FILE) return constants.a.FILE + "//";
+                if (protocol === constants.a.ABOUT) {
                     var parent = getParent(win);
-                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : constants.a.ABOUT + "//";
                 }
                 var host = location.host;
                 if (!host) throw new Error("Can not read window host");
@@ -1034,7 +1052,7 @@
             }
             function getDomain(win) {
                 var domain = getActualDomain(win = win || window);
-                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
+                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(constants.a.MOCK) ? win.mockDomain : domain;
             }
             function isActuallySameDomain(win) {
                 try {
@@ -1148,12 +1166,6 @@
                 if (!top) throw new Error("Can not determine top window");
                 return [].concat(getAllChildFrames(top), [ top ]);
             }
-            function isFrameWindowClosed(frame) {
-                if (!frame.contentWindow) return !0;
-                if (!frame.parentNode) return !0;
-                var doc = frame.ownerDocument;
-                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
-            }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
                 var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
@@ -1186,13 +1198,18 @@
                 }(iframeWindows, win);
                 if (-1 !== iframeIndex) {
                     var frame = iframeFrames[iframeIndex];
-                    if (frame && isFrameWindowClosed(frame)) return !0;
+                    if (frame && function(frame) {
+                        if (!frame.contentWindow) return !0;
+                        if (!frame.parentNode) return !0;
+                        var doc = frame.ownerDocument;
+                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                    }(frame)) return !0;
                 }
                 return !1;
             }
             function getFrameByName(win, name) {
-                for (var winFrames = getFrames(win), _i10 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i10 < _length8; _i10++) {
-                    var childFrame = winFrames[_i10];
+                for (var winFrames = getFrames(win), _i9 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i9 < _length8; _i9++) {
+                    var childFrame = winFrames[_i9];
                     try {
                         if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                     } catch (err) {}
@@ -1208,7 +1225,7 @@
                 return getOpener(win = win || window) || getParent(win) || void 0;
             }
             function anyMatch(collection1, collection2) {
-                for (var _i18 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i18 < _length16; _i18++) for (var item1 = collection1[_i18], _i20 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i20 < _length18; _i20++) if (item1 === collection2[_i20]) return !0;
+                for (var _i17 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i17 < _length16; _i17++) for (var item1 = collection1[_i17], _i19 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i19 < _length18; _i19++) if (item1 === collection2[_i19]) return !0;
                 return !1;
             }
             function getDistanceFromTop() {
@@ -1991,7 +2008,7 @@
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
-                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
+                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 1e4 : 2e3,
                 RES_TIMEOUT: -1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
                 _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
@@ -3177,6 +3194,7 @@
                 ZalgoPromise.prototype.asyncReject = function(error) {
                     this.errorHandled = !0;
                     this.reject(error);
+                    return this;
                 };
                 ZalgoPromise.prototype.dispatch = function() {
                     var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
@@ -3267,6 +3285,9 @@
                 };
                 ZalgoPromise.reject = function(error) {
                     return new ZalgoPromise().reject(error);
+                };
+                ZalgoPromise.asyncReject = function(error) {
+                    return new ZalgoPromise().asyncReject(error);
                 };
                 ZalgoPromise.all = function(promises) {
                     var promise = new ZalgoPromise(), count = promises.length, results = [];
@@ -3756,16 +3777,13 @@
                 global: function() {
                     return window.document;
                 },
-                register: function register(component, document) {
+                register: function(component, document) {
                     function render(element) {
                         if (element && element.tagName && "script" === element.tagName.toLowerCase() && element.attributes.type && "application/x-component" === element.attributes.type.value && element.parentNode) {
                             var tag = element.getAttribute("data-component");
                             if (tag && tag === component.tag) {
-                                component.log("instantiate_script_component");
-                                var props = element.innerText ? eval("(" + element.innerText + ")") : {}, container = document.createElement("div");
-                                if (!element.parentNode) throw new Error("Element has no parent");
-                                element.parentNode.replaceChild(container, element);
-                                component.render(props, container);
+                                component.log("instantiate_script_component_error");
+                                throw new Error("\n               'x-component' script type is no longer supported.  \n               Please migrate to another integration pattern.\n            ");
                             }
                         }
                     }
@@ -5644,7 +5662,7 @@
                         return !call || "object" != typeof call && "function" != typeof call ? self : call;
                     }(this, _BaseComponent.call(this));
                     !function(options) {
-                        if (!options) throw new Error("Expecred options to be passed");
+                        if (!options) throw new Error("Expected options to be passed");
                         if (!options.tag || !options.tag.match(/^[a-z0-9-]+$/)) throw new Error("Invalid options.tag: " + options.tag);
                         !function(options) {
                             if (options.props && "object" !== component_validate__typeof(options.props)) throw new Error("Expected options.props to be an object");
@@ -7339,5 +7357,4 @@
         "./src/types.js": function(module, exports) {}
     });
 });
-//# sourceMappingURL=zoid.js.map
 //# sourceMappingURL=zoid.js.map
