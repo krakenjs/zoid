@@ -813,6 +813,73 @@ describe("zoid props cases", () => {
     });
   });
 
+  it("should pass a trustedDomain prop and have it populate on the child", () => {
+    return wrapPromise(({ expect }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-trusteddomain-prop-passed",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: ["mock://www.child.com"],
+          props: {
+            foo: {
+              type: "string",
+              trustedDomains: ["mock://www.child.com"],
+            },
+          },
+        });
+      };
+
+      const component = window.__component__();
+      const instance = component({
+        foo: "bar",
+        passProp: expect("passProp", (val) => {
+          if (!val) {
+            throw new Error(`Expected val to be passed`);
+          }
+        }),
+        run: () => `
+                    window.xprops.passProp(window.xprops.foo);
+                `,
+      });
+
+      return instance.render(getBody());
+    });
+  });
+
+  it("should pass a trustedDomain and sameDomain=true prop and have it populate on the child", () => {
+    return wrapPromise(({ expect }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-samedomain-trusteddomain-prop-passed",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: ["mock://www.child.com"],
+          props: {
+            foo: {
+              type: "string",
+              sameDomain: true,
+              trustedDomains: ["mock://www.child.com"],
+            },
+          },
+        });
+      };
+
+      const component = window.__component__();
+      const instance = component({
+        foo: "bar",
+        passProp: expect("passProp", (val) => {
+          if (!val) {
+            throw new Error(`Expected val to be passed`);
+          }
+        }),
+        run: () => `
+                    window.xprops.passProp(window.xprops.foo);
+                `,
+      });
+
+      return instance.render(getBody());
+    });
+  });
+
   it("should alias a prop and have it copy correctly", () => {
     return wrapPromise(({ expect }) => {
       window.__component__ = () => {

@@ -378,11 +378,12 @@ export function parentComponent<P, X, C>({
         continue;
       }
 
-      if (
-        prop &&
-        prop.sameDomain &&
-        !matchDomain(initialChildDomain, getDomain(window))
-      ) {
+      const trustedChild: boolean =
+        prop && prop.trustedDomains && prop.trustedDomains.length > 0
+          ? prop.trustedDomains.indexOf(initialChildDomain) !== -1
+          : matchDomain(initialChildDomain, getDomain(window));
+
+      if (prop && prop.sameDomain && !trustedChild) {
         continue;
       }
 
