@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.3.0](https://github.com/krakenjs/zoid/compare/v10.2.4...v10.3.0) (2023-06-12)
+
+
+### Features
+
+* **venmo:** allow trusted domains ([#439](https://github.com/krakenjs/zoid/issues/439)) ([5f3bf00](https://github.com/krakenjs/zoid/commit/5f3bf00a08715154ff110023f0a1b862d560670e))
+
+
+* **docs:** update npm badge ([#437](https://github.com/krakenjs/zoid/issues/437)) ([2ef6fdb](https://github.com/krakenjs/zoid/commit/2ef6fdb4efeeecdbbe446623cf45650499d598fa))
+
 ### [10.2.4](https://github.com/krakenjs/zoid/compare/v10.2.3...v10.2.4) (2023-05-22)
 
 ### [10.2.3](https://github.com/krakenjs/zoid/compare/v10.2.2...v10.2.3) (2023-05-03)
