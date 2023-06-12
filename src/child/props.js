@@ -82,11 +82,18 @@ export function normalizeChildProps<P, X>(
   for (const key of Object.keys(props)) {
     const prop = propsDef[key];
 
-    if (
-      prop &&
-      prop.sameDomain &&
-      (origin !== getDomain(window) || !isSameDomain(parentComponentWindow))
-    ) {
+    const trustedChild: boolean =
+      prop && prop.trustedDomains && prop.trustedDomains.length > 0
+        ? prop.trustedDomains.includes(getDomain(window))
+        : origin === getDomain(window) || isSameDomain(parentComponentWindow);
+
+    // let trustedDomains override sameDomain prop
+    if (prop && prop.sameDomain && !trustedChild) {
+      continue;
+    }
+
+    // sameDomain was not set and trusted domains must match
+    if (prop && prop.trustedDomains && !trustedChild) {
       continue;
     }
 

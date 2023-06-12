@@ -68,7 +68,7 @@ describe("parent domain check", () => {
       return component().render(getBody());
     });
 
-    it("allowedParentDomains is specified as a regex and parent domian match", () => {
+    it("allowedParentDomains is specified as a regex and parent domain match", () => {
       window.__component__ = () => {
         return zoid.create({
           tag: "test-parent-domain-regex",
@@ -163,7 +163,7 @@ describe("parent domain check", () => {
       });
     });
 
-    it("xprops.getParentDomain should pass the correct domain", () => {
+    it("xprops.getParent should pass the correct domain", () => {
       return wrapPromise(({ expect }) => {
         window.__component__ = () => {
           return zoid.create({

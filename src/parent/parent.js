@@ -378,11 +378,18 @@ export function parentComponent<P, X, C>({
         continue;
       }
 
-      if (
-        prop &&
-        prop.sameDomain &&
-        !matchDomain(initialChildDomain, getDomain(window))
-      ) {
+      const trustedChild: boolean =
+        prop && prop.trustedDomains && prop.trustedDomains.length > 0
+          ? prop.trustedDomains.includes(initialChildDomain)
+          : matchDomain(initialChildDomain, getDomain(window));
+
+      // let trustedDomains override sameDomain prop
+      if (prop && prop.sameDomain && !trustedChild) {
+        continue;
+      }
+
+      // sameDomain was not set and trusted domains must match
+      if (prop && prop.trustedDomains && !trustedChild) {
         continue;
       }
 
