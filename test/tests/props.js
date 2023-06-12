@@ -802,7 +802,7 @@ describe("zoid props cases", () => {
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://venmo.com"],
+              trustedDomains: ["mock://www.child.com"],
             },
           },
         });
@@ -817,7 +817,6 @@ describe("zoid props cases", () => {
           }
         }),
         run: () => `
-                    window.location = "mock://venmo.com";
                     window.xprops.passProp(window.xprops.foo);
                 `,
       });
@@ -850,7 +849,6 @@ describe("zoid props cases", () => {
           }
         }),
         run: () => `
-                    window.location = "mock://venmo.com";
                     window.xprops.passProp(window.xprops.foo);
                 `,
       });
