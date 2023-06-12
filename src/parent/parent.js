@@ -380,7 +380,7 @@ export function parentComponent<P, X, C>({
 
       const trustedChild: boolean =
         prop && prop.trustedDomains && prop.trustedDomains.length > 0
-          ? prop.trustedDomains.indexOf(initialChildDomain) !== -1
+          ? prop.trustedDomains.includes(initialChildDomain)
           : matchDomain(initialChildDomain, getDomain(window));
 
       if (prop && prop.sameDomain && !trustedChild) {
