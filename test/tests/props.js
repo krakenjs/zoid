@@ -20,7 +20,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -60,7 +59,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-container",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "number",
@@ -103,7 +101,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-container-url-param",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "number",
@@ -145,7 +142,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-container-url-param-element-not-ready",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "number",
@@ -201,7 +197,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -234,7 +229,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-different-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -269,7 +263,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-decorated-different-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -322,7 +315,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-input-value-passing",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             account: {
               type: "string",
@@ -364,7 +356,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "changing-decorated-function-signature",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             onSuccess: {
               type: "function",
@@ -407,7 +398,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-default-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             meep: {
               type: "function",
@@ -444,7 +434,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-value-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             meep: {
               type: "function",
@@ -485,7 +474,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-string-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -514,7 +502,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-number-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -543,7 +530,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-boolean-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -579,7 +565,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-array-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -645,7 +630,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-object-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -702,7 +686,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-function-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -730,7 +713,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-required-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -753,7 +735,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-samedomain-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -786,7 +767,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-samedomain-prop-passed",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -819,11 +799,10 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-trusteddomain-prop-passed",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: ["mock://www.child.com"],
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://www.child.com"],
+              trustedDomains: ["mock://venmo.com"],
             },
           },
         });
@@ -838,6 +817,40 @@ describe("zoid props cases", () => {
           }
         }),
         run: () => `
+                    window.location = "mock://venmo.com";
+                    window.xprops.passProp(window.xprops.foo);
+                `,
+      });
+
+      return instance.render(getBody());
+    });
+  });
+
+  it("should pass a trustedDomain prop and have it not populate on the child if no match", () => {
+    return wrapPromise(({ expect }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-trusteddomain-prop-not-passed",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          props: {
+            foo: {
+              type: "string",
+              trustedDomains: ["mock://www.other.com"],
+            },
+          },
+        });
+      };
+
+      const component = window.__component__();
+      const instance = component({
+        foo: "bar",
+        passProp: expect("passProp", (val) => {
+          if (val) {
+            throw new Error(`Expected val to not be passed`);
+          }
+        }),
+        run: () => `
+                    window.location = "mock://venmo.com";
                     window.xprops.passProp(window.xprops.foo);
                 `,
       });
@@ -852,7 +865,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-samedomain-trusteddomain-prop-passed",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: ["mock://www.child.com"],
           props: {
             foo: {
               type: "string",
@@ -886,7 +898,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-alias-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "function",
@@ -914,7 +925,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-alias-reverse-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "function",
@@ -942,7 +952,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-props-query-param",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             fooProp: {
               type: "string",
@@ -1044,7 +1053,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-props-boolean-query-param",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             trueProp: {
               type: "boolean",
@@ -1099,7 +1107,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-promise-props-query-param",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             promiseProp: {
               type: "function",
@@ -1151,7 +1158,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-promise-props-query-param-empty-string",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             fooBar: {
               type: "string",
@@ -1187,7 +1193,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-promise-props-query-param-empty-string-null-decorator",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             fooBar: {
               type: "string",
@@ -1230,7 +1235,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-prop-destroy-component",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -1292,7 +1296,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-prop-delay",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
         });
       };
 
@@ -1325,7 +1328,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-derived-from-props",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -1367,7 +1369,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-derived-from-props-with-same-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             bar: {
               type: "string",
@@ -1406,7 +1407,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-undefined-error",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -1440,7 +1440,6 @@ describe("zoid props cases", () => {
         zoid.create({
           tag: "test-prop-value-required-default",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
           props: {
             foo: {
               type: "string",
@@ -1465,7 +1464,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-decorated-multiple-times",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -1521,7 +1519,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-decorated-multiple-times-updated-multiple-times",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -1595,7 +1592,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-decorated-multiple-times-multiple-instances",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -1659,7 +1655,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-update-decorated-multiple-times-multiple-instances-updated-multiple-times",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -1745,7 +1740,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-value-passed-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -1801,7 +1795,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-default-passed-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -1857,7 +1850,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-passed-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -1904,7 +1896,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-alias-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -1955,7 +1946,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-reverse-alias-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2009,7 +1999,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-value-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2059,7 +2048,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-self-value-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -2101,7 +2089,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-default-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2151,7 +2138,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorated-self-default-prop",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             baz: {
@@ -2193,7 +2179,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorate-diff-signature-props",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2244,7 +2229,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-decorate-diff-signature-value",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2293,7 +2277,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-value-diff-signature-props",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             foo: {
@@ -2344,7 +2327,6 @@ describe("zoid props cases", () => {
         return zoid.create({
           tag: "test-prop-value-get-other-props",
           url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
 
           props: {
             superpropfunc: {
