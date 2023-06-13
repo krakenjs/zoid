@@ -380,7 +380,9 @@ export function parentComponent<P, X, C>({
 
       const trustedChild: boolean =
         prop && prop.trustedDomains && prop.trustedDomains.length > 0
-          ? prop.trustedDomains.includes(initialChildDomain)
+          ? prop.trustedDomains.reduce((acc, val) => {
+              return acc || matchDomain(val, initialChildDomain);
+            }, false)
           : matchDomain(initialChildDomain, getDomain(window));
 
       // let trustedDomains override sameDomain prop

@@ -191,7 +191,7 @@ export type PropDefinitionType<T, P, S: $Values<typeof PROP_TYPE>, X> = {|
   validate?: ({| value: T, props: PropsType<P> |}) => void,
   sameDomain?: boolean,
   serialization?: $Values<typeof PROP_SERIALIZATION>,
-  trustedDomains?: $ReadOnlyArray<string>,
+  trustedDomains?: $ReadOnlyArray<RegExp>,
 |};
 
 export type BOOLEAN_DEFINITION_TYPE = typeof PROP_TYPE.BOOLEAN;

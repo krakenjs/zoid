@@ -802,7 +802,8 @@ describe("zoid props cases", () => {
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://www.child.com"],
+              // eslint-disable-next-line security/detect-unsafe-regex
+              trustedDomains: [/\.child\.(com|cn)(:\d+)?$/],
             },
           },
         });
@@ -834,7 +835,8 @@ describe("zoid props cases", () => {
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://www.other.com"],
+              // eslint-disable-next-line security/detect-unsafe-regex
+              trustedDomains: [/\.other\.(com|cn)(:\d+)?$/],
             },
           },
         });
@@ -867,7 +869,8 @@ describe("zoid props cases", () => {
             foo: {
               type: "string",
               sameDomain: true,
-              trustedDomains: ["mock://www.child.com"],
+              // eslint-disable-next-line security/detect-unsafe-regex
+              trustedDomains: [/\.child\.(com|cn)(:\d+)?$/],
             },
           },
         });

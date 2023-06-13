@@ -3,6 +3,7 @@
 import {
   getDomain,
   isSameDomain,
+  matchDomain,
   type CrossDomainWindowType,
 } from "@krakenjs/cross-domain-utils/src";
 
@@ -84,7 +85,9 @@ export function normalizeChildProps<P, X>(
 
     const trustedChild: boolean =
       prop && prop.trustedDomains && prop.trustedDomains.length > 0
-        ? prop.trustedDomains.includes(getDomain(window))
+        ? prop.trustedDomains.reduce((acc, val) => {
+            return acc || matchDomain(val, getDomain(window));
+          }, false)
         : origin === getDomain(window) || isSameDomain(parentComponentWindow);
 
     // let trustedDomains override sameDomain prop
