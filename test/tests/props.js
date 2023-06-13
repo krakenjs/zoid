@@ -793,7 +793,7 @@ describe("zoid props cases", () => {
     });
   });
 
-  it("should pass a trustedDomain prop and have it populate on the child", () => {
+  it("should pass a trustedDomain prop and have it populate on the child with string and regex", () => {
     return wrapPromise(({ expect }) => {
       window.__component__ = () => {
         return zoid.create({
@@ -802,7 +802,11 @@ describe("zoid props cases", () => {
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://www.child.com"],
+              trustedDomains: [
+                // eslint-disable-next-line security/detect-unsafe-regex
+                /\.other\.(com|cn)(:\d+)?$/,
+                "mock://www.child.com",
+              ],
             },
           },
         });
@@ -834,7 +838,8 @@ describe("zoid props cases", () => {
           props: {
             foo: {
               type: "string",
-              trustedDomains: ["mock://www.other.com"],
+              // eslint-disable-next-line security/detect-unsafe-regex
+              trustedDomains: [/\.other\.(com|cn)(:\d+)?$/],
             },
           },
         });
@@ -867,7 +872,8 @@ describe("zoid props cases", () => {
             foo: {
               type: "string",
               sameDomain: true,
-              trustedDomains: ["mock://www.child.com"],
+              // eslint-disable-next-line security/detect-unsafe-regex
+              trustedDomains: [/\.child\.(com|cn)(:\d+)?$/],
             },
           },
         });
