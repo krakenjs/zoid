@@ -55,10 +55,10 @@
   },
   "dependencies": {
     "beaver-logger": "^3.0.17",
-    "cross-domain-safe-weakmap": "^1.0.22",
-    "cross-domain-utils": "^2.0.16",
+    "cross-domain-safe-weakmap": "1.0.23",
+    "cross-domain-utils": "2.0.23",
     "hi-base32": "^0.5.0",
-    "post-robot": "^8.0.29",
-    "zalgo-promise": "^1.0.34"
+    "post-robot": "8.0.29",
+    "zalgo-promise": "1.0.36"
   }
 }
