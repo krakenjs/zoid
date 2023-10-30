@@ -317,6 +317,7 @@ export function parentComponent<P, X, C>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
+  let isRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
   let getProxyContainerOverride: ?GetProxyContainer =
@@ -872,11 +873,23 @@ export function parentComponent<P, X, C>({
       })
       .then((isClosed) => {
         if (!cancelled) {
-          if (isClosed) {
-            return close(new Error(`Detected ${context} close`));
-          } else {
-            return watchForClose(proxyWin, context);
+          if (context === CONTEXT.POPUP && isClosed) {
+            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
           }
+
+          const isCurrentContainerClosed: boolean = Boolean(
+            currentContainer && isElementClosed(currentContainer)
+          );
+
+          if (
+            context === CONTEXT.IFRAME &&
+            isClosed &&
+            (isCurrentContainerClosed || isRenderFinished)
+          ) {
+            return close(new Error(COMPONENT_ERROR.IFRAME_CLOSE));
+          }
+
+          return watchForClose(proxyWin, context);
         }
       });
   };
@@ -1628,6 +1641,7 @@ export function parentComponent<P, X, C>({
       });
 
       const onRenderedPromise = initPromise.then(() => {
+        isRenderFinished = true;
         return event.trigger(EVENT.RENDERED);
       });
 
