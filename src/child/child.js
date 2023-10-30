@@ -35,6 +35,7 @@ import { normalizeChildProps } from "./props";
 export type ChildExportsType<P> = {|
   updateProps: CrossDomainFunctionType<[PropsType<P>], void>,
   close: CrossDomainFunctionType<[], void>,
+  name: string,
 |};
 
 export type ChildHelpers<P, X> = {|
@@ -302,8 +303,9 @@ export function childComponent<P, X, C>(
 
   const init = () => {
     return ZalgoPromise.try(() => {
+      let updatedChildName;
       if (isSameDomain(parentComponentWindow)) {
-        updateChildWindowNameWithRef({
+        updatedChildName = updateChildWindowNameWithRef({
           componentName: options.name,
           parentComponentWindow,
         });
@@ -317,7 +319,11 @@ export function childComponent<P, X, C>(
       markWindowKnown(parentComponentWindow);
       watchForClose();
 
-      return parentInit({ updateProps, close: destroy });
+      return parentInit({
+        name: updatedChildName,
+        updateProps,
+        close: destroy,
+      });
     })
       .then(() => {
         return watchForResize();

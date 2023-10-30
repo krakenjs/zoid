@@ -626,8 +626,20 @@ export function parentComponent<P, X, C>({
   };
 
   const focus = (): ZalgoPromise<void> => {
-    return ZalgoPromise.try(() => {
+    return ZalgoPromise.try(async () => {
       if (currentProxyWin) {
+        const winType = await currentProxyWin.getType();
+        const winName = await currentProxyWin.getName();
+
+        if (winType === "popup") {
+          if (winName) {
+            return ZalgoPromise.all([
+              event.trigger(EVENT.FOCUS),
+              window.open("", winName),
+            ]).then(noop);
+          }
+        }
+
         return ZalgoPromise.all([
           event.trigger(EVENT.FOCUS),
           currentProxyWin.focus(),
@@ -712,6 +724,7 @@ export function parentComponent<P, X, C>({
     return ZalgoPromise.try(() => {
       currentChildDomain = childDomain;
       childComponent = childExports;
+      currentProxyWin.setName(childExports?.name);
       resolveInitPromise();
       clean.register(() => childExports.close.fireAndForget().catch(noop));
     });
