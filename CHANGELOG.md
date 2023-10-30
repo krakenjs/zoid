@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.3.2](https://github.com/krakenjs/zoid/compare/v10.3.1...v10.3.2) (2023-10-30)
+
+
+### Bug Fixes
+
+* reduce frequency of iframe removed error ([#429](https://github.com/krakenjs/zoid/issues/429)) ([fd2ec05](https://github.com/krakenjs/zoid/commit/fd2ec05cab35143abc287649f6868ace4eb5626e))
+* **venmo:** window name ([#443](https://github.com/krakenjs/zoid/issues/443)) ([02bcaab](https://github.com/krakenjs/zoid/commit/02bcaab83512d5339c921fe240f5929b4580e97d))
+
 ### [10.3.1](https://github.com/krakenjs/zoid/compare/v10.3.0...v10.3.1) (2023-06-13)
 
 
