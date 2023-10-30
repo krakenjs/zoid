@@ -303,12 +303,13 @@ export function childComponent<P, X, C>(
 
   const init = () => {
     return ZalgoPromise.try(() => {
-      let updatedChildName;
+      let updatedChildName = "";
       if (isSameDomain(parentComponentWindow)) {
-        updatedChildName = updateChildWindowNameWithRef({
-          componentName: options.name,
-          parentComponentWindow,
-        });
+        updatedChildName =
+          updateChildWindowNameWithRef({
+            componentName: options.name,
+            parentComponentWindow,
+          }) || "";
       }
 
       getGlobal(window).exports = options.exports({

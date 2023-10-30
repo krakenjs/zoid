@@ -185,7 +185,7 @@ type UpdateChildWindowNameWithRefOptions = {|
 export function updateChildWindowNameWithRef({
   componentName,
   parentComponentWindow,
-}: UpdateChildWindowNameWithRefOptions): string {
+}: UpdateChildWindowNameWithRefOptions): ?string {
   const { serializedInitialPayload } = parseWindowName(window.name);
 
   const { data, sender, reference, metaData } = crossDomainDeserialize({
@@ -217,11 +217,12 @@ export function updateChildWindowNameWithRef({
       basic: true,
     });
 
-    window.name = buildChildWindowName({
+    const childWindowName = buildChildWindowName({
       name: componentName,
       serializedPayload,
     });
 
-    return window.name;
+    window.name = childWindowName;
+    return childWindowName;
   }
 }
