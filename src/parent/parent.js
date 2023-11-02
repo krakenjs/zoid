@@ -710,17 +710,18 @@ export function parentComponent<P, X, C>({
     childDomain: string,
     childExports: ChildExportsType<P>
   ): ZalgoPromise<void> => {
-    return ZalgoPromise.try(async () => {
+    return ZalgoPromise.try(() => {
       currentChildDomain = childDomain;
       childComponent = childExports;
 
-      const context = await currentProxyWin.getType();
-      if (childExports?.name !== "" && context === "popup") {
-        currentProxyWin?.setName(childExports?.name);
-      }
+      currentProxyWin?.isPopup().then((isPopup) => {
+        if (childExports?.name !== "" && isPopup) {
+          currentProxyWin?.setName(childExports?.name);
+        }
 
-      resolveInitPromise();
-      clean.register(() => childExports.close.fireAndForget().catch(noop));
+        resolveInitPromise();
+        clean.register(() => childExports.close.fireAndForget().catch(noop));
+      });
     });
   };
 
