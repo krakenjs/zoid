@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.3.3](https://github.com/krakenjs/zoid/compare/v10.3.2...v10.3.3) (2023-11-02)
+
+
+### Bug Fixes
+
+* **initChild:** setName is applied in popup context ([#444](https://github.com/krakenjs/zoid/issues/444)) ([b26b8cb](https://github.com/krakenjs/zoid/commit/b26b8cba89324710beecbc09b99551ccf6630e32))
+
 ### [10.3.2](https://github.com/krakenjs/zoid/compare/v10.3.1...v10.3.2) (2023-10-30)
 
 
