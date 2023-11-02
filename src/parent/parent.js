@@ -714,14 +714,17 @@ export function parentComponent<P, X, C>({
       currentChildDomain = childDomain;
       childComponent = childExports;
 
-      currentProxyWin?.isPopup().then((isPopup) => {
-        if (childExports?.name !== "" && isPopup) {
-          currentProxyWin?.setName(childExports?.name);
-        }
-
-        resolveInitPromise();
-        clean.register(() => childExports.close.fireAndForget().catch(noop));
-      });
+      currentProxyWin
+        ?.isPopup()
+        .then((isPopup) => {
+          if (childExports?.name !== "" && isPopup) {
+            currentProxyWin?.setName(childExports?.name);
+          }
+        })
+        .finally(() => {
+          resolveInitPromise();
+          clean.register(() => childExports.close.fireAndForget().catch(noop));
+        });
     });
   };
 
