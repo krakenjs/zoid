@@ -713,7 +713,11 @@ export function parentComponent<P, X, C>({
     return ZalgoPromise.try(() => {
       currentChildDomain = childDomain;
       childComponent = childExports;
-      currentProxyWin?.setName(childExports?.name);
+
+      if (childExports?.name !== "") {
+        currentProxyWin?.setName(childExports?.name);
+      }
+
       resolveInitPromise();
       clean.register(() => childExports.close.fireAndForget().catch(noop));
     });
