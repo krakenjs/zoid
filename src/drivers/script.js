@@ -45,12 +45,6 @@ export let script : ComponentDriverType<*, Document> = {
         }
 
         scan();
-        document.addEventListener('DOMContentLoaded', scan);
         window.addEventListener('load', scan);
-
-        document.addEventListener('DOMNodeInserted', event => {
-            // $FlowFixMe
-            render(event.target);
-        });
     }
 };
