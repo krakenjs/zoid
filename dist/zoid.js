@@ -3965,11 +3965,7 @@
                         for (var scriptTags = Array.prototype.slice.call(document.getElementsByTagName("script")), _i2 = 0, _length2 = null == scriptTags ? 0 : scriptTags.length; _i2 < _length2; _i2++) render(scriptTags[_i2]);
                     }
                     scan();
-                    document.addEventListener("DOMContentLoaded", scan);
                     window.addEventListener("load", scan);
-                    document.addEventListener("DOMNodeInserted", function(event) {
-                        render(event.target);
-                    });
                 }
             };
         },

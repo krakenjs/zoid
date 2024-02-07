@@ -38,12 +38,6 @@ export var script = {
         }
 
         scan();
-        document.addEventListener('DOMContentLoaded', scan);
         window.addEventListener('load', scan);
-
-        document.addEventListener('DOMNodeInserted', function (event) {
-            // $FlowFixMe
-            render(event.target);
-        });
     }
 };
