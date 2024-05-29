@@ -14,7 +14,7 @@
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --progress",
-    "test": "npm run format:check && npm run lint && npm run flow-typed && npm run flow && npm run karma",
+    "test": "npm run format:check && npm run lint && npm run flow && npm run karma",
     "clear-dist": "rm -rf dist/*;",
     "build": "npm run test && npm run babel && npm run clear-dist && npm run webpack -- $@",
     "clean": "rimraf dist coverage",
