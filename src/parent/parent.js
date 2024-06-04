@@ -884,7 +884,7 @@ export function parentComponent<P, X, C>({
       .then((isClosed) => {
         if (!cancelled) {
           if (context === CONTEXT.POPUP && isClosed) {
-            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+            return close(new Error("Detected popup close"));
           }
 
           const isCurrentContainerClosed: boolean = Boolean(
