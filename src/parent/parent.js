@@ -753,7 +753,8 @@ export function parentComponent<P, X, C>({
         const error = err || new Error(COMPONENT_ERROR.COMPONENT_DESTROYED);
         if (
           (currentContainer && isElementClosed(currentContainer)) ||
-          error.message === COMPONENT_ERROR.NAVIGATED_AWAY
+          // $FlowFixMe
+          Object.values(COMPONENT_ERROR).includes(error.message)
         ) {
           initPromise.resolve();
         } else {
@@ -883,7 +884,7 @@ export function parentComponent<P, X, C>({
       .then((isClosed) => {
         if (!cancelled) {
           if (context === CONTEXT.POPUP && isClosed) {
-            return close(new Error(COMPONENT_ERROR.POPUP_CLOSE));
+            return close(new Error("Detected popup close"));
           }
 
           const isCurrentContainerClosed: boolean = Boolean(
