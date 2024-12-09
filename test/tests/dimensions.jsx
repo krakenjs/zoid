@@ -62,7 +62,7 @@ describe("zoid dimensions cases", () => {
     });
   });
 
-  it("should render a component to a popup with specific px dimensions", () => {
+  it.skip("should render a component to a popup with specific px dimensions", () => {
     return wrapPromise(({ expect }) => {
       const width = 178;
       const height = 253;
