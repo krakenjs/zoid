@@ -109,7 +109,7 @@ export type ExportsDefinition<X> =
 export type ComponentOptionsType<P, X, C, ExtType> = {|
   tag: string,
 
-  getExtensions?: (parentProps: X) => ExtType,
+  getExtensions?: (parentProps: PropsType<P>) => ExtType,
   url: string | (({| props: PropsType<P> |}) => string),
   domain?: DomainMatcher,
   bridgeUrl?: string,
@@ -160,7 +160,7 @@ export type NormalizedComponentOptionsType<P, X, C, ExtType> = {|
   tag: string,
   name: string,
 
-  getExtensions: (parentProps: X) => ExtType,
+  getExtensions: (parentProps: PropsType<P>) => ExtType,
   url: string | (({| props: PropsType<P> |}) => string),
   domain: ?DomainMatcher,
   bridgeUrl: ?string,
@@ -195,10 +195,10 @@ export type NormalizedComponentOptionsType<P, X, C, ExtType> = {|
 |};
 
 export type ZoidComponentInstance<P, X = void, C = void, ExtType = void> = {|
+  ...ExtType,
   ...ParentHelpers<P>,
   ...X,
   ...C,
-  ...ExtType,
   isEligible: () => boolean,
   clone: () => ZoidComponentInstance<P, X, C, ExtType>,
   render: (
@@ -243,7 +243,9 @@ const getDefaultDimensions = (): CssDimensionsType => {
   return {};
 };
 
-function getDefaultGetExtensions<X, ExtType>(): (parentProps: X) => ExtType {
+function getDefaultGetExtensions<P, ExtType>(): (
+  parentProps: PropsType<P>
+) => ExtType {
   return function getExtensions(): ExtType {
     // $FlowFixMe
     const ext: ExtType = {};
@@ -260,7 +262,7 @@ function normalizeOptions<P, X, C, ExtType>(
     domain,
     bridgeUrl,
     props = {},
-    getExtensions = getDefaultGetExtensions<X, ExtType>(),
+    getExtensions = getDefaultGetExtensions<P, ExtType>(),
     dimensions = getDefaultDimensions(),
     autoResize = getDefaultAutoResize(),
     allowedParentDomains = WILDCARD,
@@ -613,10 +615,10 @@ export function component<P, X, C, ExtType>(
     };
 
     instance = {
+      ...getExtensions(parent.getProps()),
       ...parent.getExports(),
       ...parent.getHelpers(),
       ...getChildren(),
-      ...getExtensions(parent.getExports()),
       isEligible,
       clone,
       render: (container, context) => render(window, container, context),
