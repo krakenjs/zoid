@@ -79,6 +79,7 @@ type Logger = {
 
 /*  Component
     ---------
+    Dummy Message to test PR
 
     This is the spec for the component. The idea is, when I call zoid.create(), it will create a new instance
     of Component with the blueprint needed to set up ParentComponents and ChildComponents.
