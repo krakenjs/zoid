@@ -119,7 +119,53 @@ describe("zoid getExtensions cases", () => {
 
       if (instance.invokeCalculatePrice() !== 1034.56) {
         throw new Error(
-          `Expected test attribute to be "result_of_test_method", but got ${instance.testMethod()}`
+          `Expected test attribute to be "1034.56", but got ${instance.invokeCalculatePrice()}`
+        );
+      }
+
+      return instance.render(getBody());
+    });
+  });
+
+  it("should be able to interact with updated methods supplied to the component during instantiation", () => {
+    return wrapPromise(({ expect }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-render-with-updated-extended-method-invokes-callbacks",
+          url: () => "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          getExtensions: (parent) => {
+            return {
+              invokeCalculatePrice: () => {
+                return parent.getProps().calculatePrice();
+              },
+            };
+          },
+        });
+      };
+
+      onWindowOpen().then(
+        expect("onWindowOpen", ({ win }) => {
+          if (getParent(win) !== window) {
+            throw new Error(`Expected window parent to be current window`);
+          }
+        })
+      );
+
+      const component = window.__component__();
+
+      const instance = component({
+        onRendered: expect("onRendered"),
+        calculatePrice: () => 1034.56,
+      });
+
+      instance.updateProps({
+        calculatePrice: () => 50.56,
+      });
+
+      if (instance.invokeCalculatePrice() !== 50.56) {
+        throw new Error(
+          `Expected test attribute to be "50.56", but got ${instance.invokeCalculatePrice()}`
         );
       }
 
