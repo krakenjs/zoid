@@ -96,8 +96,8 @@ export type ChildComponent<P, X> = {|
   init: () => ZalgoPromise<void>,
 |};
 
-export function childComponent<P, X, C, ExtType>(
-  options: NormalizedComponentOptionsType<P, X, C, ExtType>
+export function childComponent<P, X, C>(
+  options: NormalizedComponentOptionsType<P, X, C>
 ): ChildComponent<P, X> {
   const { tag, propsDef, autoResize, allowedParentDomains } = options;
 

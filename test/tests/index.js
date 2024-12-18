@@ -20,4 +20,3 @@ import "./remove";
 import "./rerender";
 import "./method";
 import "./children";
-import "./extensions";
