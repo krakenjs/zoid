@@ -93,10 +93,10 @@ describe("zoid getExtensions cases", () => {
           tag: "test-render-with-extended-method-invokes-callbacks",
           url: () => "mock://www.child.com/base/test/windows/child/index.htm",
           domain: "mock://www.child.com",
-          getExtensions: (props) => {
+          getExtensions: (parent) => {
             return {
               invokeCalculatePrice: () => {
-                return props.calculatePrice();
+                return parent.getProps().calculatePrice();
               },
             };
           },

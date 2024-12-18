@@ -254,7 +254,7 @@ type RenderOptions = {|
   rerender: Rerender,
 |};
 
-type ParentComponent<P, X> = {|
+export type ParentComponent<P, X> = {|
   init: () => void,
   render: (RenderOptions) => ZalgoPromise<void>,
   getProps: () => PropsType<P>,

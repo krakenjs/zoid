@@ -29,6 +29,7 @@ import {
 
 import { childComponent, type ChildComponent } from "../child";
 import {
+  type ParentComponent,
   type RenderOptionsType,
   type ParentHelpers,
   parentComponent,
@@ -109,7 +110,7 @@ export type ExportsDefinition<X> =
 export type ComponentOptionsType<P, X, C, ExtType> = {|
   tag: string,
 
-  getExtensions?: (parentProps: PropsType<P>) => ExtType,
+  getExtensions?: (parent: ParentComponent<P, X>) => ExtType,
   url: string | (({| props: PropsType<P> |}) => string),
   domain?: DomainMatcher,
   bridgeUrl?: string,
@@ -160,7 +161,7 @@ export type NormalizedComponentOptionsType<P, X, C, ExtType> = {|
   tag: string,
   name: string,
 
-  getExtensions: (parentProps: PropsType<P>) => ExtType,
+  getExtensions: (parent: ParentComponent<P, X>) => ExtType,
   url: string | (({| props: PropsType<P> |}) => string),
   domain: ?DomainMatcher,
   bridgeUrl: ?string,
@@ -243,8 +244,8 @@ const getDefaultDimensions = (): CssDimensionsType => {
   return {};
 };
 
-function getDefaultGetExtensions<P, ExtType>(): (
-  parentProps: PropsType<P>
+function getDefaultGetExtensions<P, X, ExtType>(): (
+  parent: ParentComponent<P, X>
 ) => ExtType {
   return function getExtensions(): ExtType {
     // $FlowFixMe
@@ -262,7 +263,7 @@ function normalizeOptions<P, X, C, ExtType>(
     domain,
     bridgeUrl,
     props = {},
-    getExtensions = getDefaultGetExtensions<P, ExtType>(),
+    getExtensions = getDefaultGetExtensions<P, X, ExtType>(),
     dimensions = getDefaultDimensions(),
     autoResize = getDefaultAutoResize(),
     allowedParentDomains = WILDCARD,
@@ -615,7 +616,7 @@ export function component<P, X, C, ExtType>(
     };
 
     instance = {
-      ...getExtensions(parent.getProps()),
+      ...getExtensions(parent),
       ...parent.getExports(),
       ...parent.getHelpers(),
       ...getChildren(),
