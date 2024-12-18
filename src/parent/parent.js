@@ -254,7 +254,7 @@ type RenderOptions = {|
   rerender: Rerender,
 |};
 
-export type ParentComponent<P, X> = {|
+type ParentComponent<P, X> = {|
   init: () => void,
   render: (RenderOptions) => ZalgoPromise<void>,
   getProps: () => PropsType<P>,
@@ -271,19 +271,19 @@ const getDefaultOverrides = <P>(): ParentDelegateOverrides<P> => {
   return {};
 };
 
-type ParentOptions<P, X, C, ExtType> = {|
+type ParentOptions<P, X, C> = {|
   uid: string,
-  options: NormalizedComponentOptionsType<P, X, C, ExtType>,
+  options: NormalizedComponentOptionsType<P, X, C>,
   overrides?: ParentDelegateOverrides<P>,
   parentWin?: CrossDomainWindowType,
 |};
 
-export function parentComponent<P, X, C, ExtType>({
+export function parentComponent<P, X, C>({
   uid,
   options,
   overrides = getDefaultOverrides(),
   parentWin = window,
-}: ParentOptions<P, X, C, ExtType>): ParentComponent<P, X> {
+}: ParentOptions<P, X, C>): ParentComponent<P, X> {
   const {
     propsDef,
     containerTemplate,
