@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.4.0](https://github.com/krakenjs/zoid/compare/v10.3.3...v10.4.0) (2024-12-19)
+
+
+### Features
+
+* add getExtensions method to extend zoid component instance ([#468](https://github.com/krakenjs/zoid/issues/468)) ([44d2d24](https://github.com/krakenjs/zoid/commit/44d2d242dc60765a015821b7b3153fdfa18d7c00))
+* support additional properties to be added to zoid component from the client ([#464](https://github.com/krakenjs/zoid/issues/464)) ([d2f3f09](https://github.com/krakenjs/zoid/commit/d2f3f0992ae9947e709d20875a666aedce645e3c))
+
+
+### Bug Fixes
+
+* commit flow-typed to fix ci ([#457](https://github.com/krakenjs/zoid/issues/457)) ([e4da223](https://github.com/krakenjs/zoid/commit/e4da22308b286fb2212af543574a1e66de7c70d1))
+* resolve the promise when component is closed/destroyed ([#455](https://github.com/krakenjs/zoid/issues/455)) ([b42cc03](https://github.com/krakenjs/zoid/commit/b42cc038ec0019165848aa95ebffa652960e61d7))
+* skip failing test ([#466](https://github.com/krakenjs/zoid/issues/466)) ([a70f250](https://github.com/krakenjs/zoid/commit/a70f250501cdfeba253a36afcdc8937afc2c42ee))
+
 ### [10.3.3](https://github.com/krakenjs/zoid/compare/v10.3.2...v10.3.3) (2023-11-02)
 
 
