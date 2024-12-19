@@ -6,8 +6,8 @@ import { CONTEXT, PROP_TYPE } from "../constants";
 
 import type { ComponentOptionsType } from "./index";
 
-function validatepropsDefinitions<P, X, C>(
-  options: ComponentOptionsType<P, X, C>
+function validatepropsDefinitions<P, X, C, ExtType>(
+  options: ComponentOptionsType<P, X, C, ExtType>
 ) {
   if (options.props && !(typeof options.props === "object")) {
     throw new Error(`Expected options.props to be an object`);
@@ -49,8 +49,8 @@ function validatepropsDefinitions<P, X, C>(
 }
 
 // eslint-disable-next-line complexity
-export function validateOptions<P, X, C>(
-  options: ?ComponentOptionsType<P, X, C>
+export function validateOptions<P, X, C, ExtType>(
+  options: ?ComponentOptionsType<P, X, C, ExtType>
 ) {
   // eslint-ignore-line
 
