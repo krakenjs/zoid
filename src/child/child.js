@@ -226,9 +226,10 @@ export function childComponent<P, X, C, ExtType>(
       checkClose.fireAndForget();
     });
 
-    window.addEventListener("unload", () => {
-      checkClose.fireAndForget();
-    });
+    // unload event is deprecated
+    // window.addEventListener("unload", () => {
+    //   checkClose.fireAndForget();
+    // });
 
     onCloseWindow(parentComponentWindow, () => {
       destroy();
