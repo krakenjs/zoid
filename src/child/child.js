@@ -222,14 +222,9 @@ export function childComponent<P, X, C, ExtType>(
   };
 
   const watchForClose = () => {
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener("pagehide", () => {
       checkClose.fireAndForget();
     });
-
-    // unload event is deprecated
-    // window.addEventListener("unload", () => {
-    //   checkClose.fireAndForget();
-    // });
 
     onCloseWindow(parentComponentWindow, () => {
       destroy();
