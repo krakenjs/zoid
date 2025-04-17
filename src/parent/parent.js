@@ -851,7 +851,7 @@ export function parentComponent<P, X, C, ExtType>({
     return ZalgoPromise.try(() => {
       const unloadWindowListener = addEventListener(
         window,
-        "unload",
+        "pagehide",
         once(() => {
           destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
         })

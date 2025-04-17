@@ -222,11 +222,7 @@ export function childComponent<P, X, C, ExtType>(
   };
 
   const watchForClose = () => {
-    window.addEventListener("beforeunload", () => {
-      checkClose.fireAndForget();
-    });
-
-    window.addEventListener("unload", () => {
+    window.addEventListener("pagehide", () => {
       checkClose.fireAndForget();
     });
 
