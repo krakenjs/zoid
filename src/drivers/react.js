@@ -1,5 +1,5 @@
 /* @flow */
-/* eslint react/no-deprecated: off, react/no-find-dom-node: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
+/* eslint react/no-deprecated: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
 
 import { extend, noop } from "@krakenjs/belter/src";
 
@@ -23,6 +23,7 @@ type ReactType = {|
     ?{ [string]: mixed },
     ...children: $ReadOnlyArray<ReactElementType>
   ) => ReactElementType,
+  createRef: () => {| current: HTMLElement |},
 |};
 
 type ReactDomType = {|
@@ -41,16 +42,20 @@ export const react: ComponentDriverType<
   *,
   *
 > = {
-  register: (tag, propsDef, init, { React, ReactDOM }) => {
+  register: (tag, propsDef, init, { React }) => {
     // $FlowFixMe
     return class extends React.Component {
+      constructor(props) {
+        super(props);
+        this.containerRef = React.createRef();
+      }
+
       render(): ReactElementType {
-        return React.createElement("div", null);
+        return React.createElement("div", { ref: this.containerRef });
       }
 
       componentDidMount() {
-        // $FlowFixMe
-        const el = ReactDOM.findDOMNode(this);
+        const el = this.containerRef.current;
         const parent = init(extend({}, this.props));
         parent.render(el, CONTEXT.IFRAME);
         this.setState({ parent });
