@@ -23,7 +23,7 @@ type ReactType = {|
     ?{ [string]: mixed },
     ...children: $ReadOnlyArray<ReactElementType>
   ) => ReactElementType,
-  createRef?: () => {| current: HTMLElement |},
+  createRef: () => {| current: HTMLElement |},
 |};
 
 type ReactDomType = {|
@@ -42,46 +42,27 @@ export const react: ComponentDriverType<
   *,
   *
 > = {
-  register: (tag, propsDef, init, { React, ReactDOM }) => {
+  register: (tag, propsDef, init, { React }) => {
+    if (typeof React.createRef !== "function") {
+      throw new TypeError(
+        "React version 16.3 or higher is required. createRef API is not available in this version of React."
+      );
+    }
+
     // $FlowFixMe
     return class extends React.Component {
       constructor(props) {
         super(props);
         this.state = {};
-
-        // Support React 16.3+ with createRef API
-        if (typeof React.createRef === "function") {
-          this.containerRef = React.createRef();
-        }
+        this.containerRef = React.createRef();
       }
 
       render(): ReactElementType {
-        // For React 16.3+, use the ref created in constructor
-        if (this.containerRef) {
-          return React.createElement("div", { ref: this.containerRef });
-        }
-
-        // For older React versions, use callback ref pattern
-        return React.createElement("div", {
-          ref: (element) => {
-            this.containerElement = element;
-          },
-        });
+        return React.createElement("div", { ref: this.containerRef });
       }
 
       componentDidMount() {
-        // Use the appropriate ref depending on React version
-        let el = null;
-
-        if (this.containerRef) {
-          el = this.containerRef.current;
-        } else if (this.containerElement) {
-          el = this.containerElement;
-        } else if (ReactDOM && ReactDOM.findDOMNode) {
-          // Fallback to findDOMNode only if needed (for older React in tests)
-          // eslint-disable-next-line react/no-find-dom-node
-          el = ReactDOM.findDOMNode(this);
-        }
+        const el = this.containerRef.current;
 
         if (!el) {
           throw new Error("Could not find DOM element for React component");
