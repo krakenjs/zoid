@@ -26,13 +26,8 @@ type ReactType = {|
   createRef: () => {| current: HTMLElement |},
 |};
 
-type ReactDomType = {|
-  findDOMNode: (Object) => HTMLElement,
-|};
-
 type ReactLibraryType = {|
   React: ReactType,
-  ReactDOM: ReactDomType,
 |};
 
 export const react: ComponentDriverType<
