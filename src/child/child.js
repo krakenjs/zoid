@@ -230,6 +230,10 @@ export function childComponent<P, X, C, ExtType>(
       checkClose.fireAndForget();
     });
 
+    window.addEventListener("pagehide", () => {
+      checkClose.fireAndForget();
+    });
+
     onCloseWindow(parentComponentWindow, () => {
       destroy();
     });
