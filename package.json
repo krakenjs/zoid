@@ -97,6 +97,7 @@
     "@commitlint/config-conventional": "^16.2.1",
     "@krakenjs/grumbler-scripts": "^8.0.4",
     "@krakenjs/jsx-pragmatic": "^3.0.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "cross-env": "^7.0.3",
     "flow-bin": "0.155.0",
     "flow-typed": "^3.8.0",
