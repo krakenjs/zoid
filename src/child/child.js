@@ -226,9 +226,15 @@ export function childComponent<P, X, C, ExtType>(
       checkClose.fireAndForget();
     });
 
-    window.addEventListener("unload", () => {
+   if ('onpagehide' in window) {
+      window.addEventListener("pagehide", () => {
       checkClose.fireAndForget();
-    });
+      });
+    } else {
+      window.addEventListener("unload", () => {
+      checkClose.fireAndForget();
+      });
+    }
 
     onCloseWindow(parentComponentWindow, () => {
       destroy();
