@@ -25,7 +25,15 @@ jobs:
         run: |
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
-      - name: Publish to npm
+
+      - name: Publish to npm (main branch)
+        if: github.ref_name == 'main'
         run: npm run release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish alpha to npm (non-main branch)
+        if: github.ref_name != 'main'
+        run: npm run release:alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
