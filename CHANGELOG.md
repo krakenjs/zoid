@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.5.0-alpha.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0-alpha.0) (2026-01-06)
+
+
+### Features
+
+* add support for publishing alpha branches to npm ([#474](https://github.com/krakenjs/zoid/issues/474)) ([90c0b73](https://github.com/krakenjs/zoid/commit/90c0b73b2e658b5931f644cf8ae1f2871bc8f829))
+* conditionally add unload event listener ([d35fb7e](https://github.com/krakenjs/zoid/commit/d35fb7ec1189520fea5581548c235b6f341be82f))
+* update npm token ([cbd8709](https://github.com/krakenjs/zoid/commit/cbd87090dce9a8e9b40883f55efd878f48f566d2))
+* update test event name ([f9205b2](https://github.com/krakenjs/zoid/commit/f9205b2ed8cd768f84abec7ef0df4779d13d7fd4))
+
 ## [10.4.0](https://github.com/krakenjs/zoid/compare/v10.3.3...v10.4.0) (2024-12-19)
 
 
