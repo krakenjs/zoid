@@ -30,10 +30,10 @@ jobs:
         if: github.ref_name == 'main'
         run: npm run release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.KRAKENJS_PAYPAL_SDK_NPM_AUTH_TOKEN }}
 
       - name: Publish alpha to npm (non-main branch)
         if: github.ref_name != 'main'
         run: npm run release:alpha
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.KRAKENJS_PAYPAL_SDK_NPM_AUTH_TOKEN }}
