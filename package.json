@@ -21,9 +21,13 @@
     "reinstall": "rimraf flow-typed && rimraf node_modules && npm install && flow-typed install",
     "debug": "cross-env NODE_ENV=debug",
     "prepare": "husky install",
-    "prerelease": "npm run clean && npm run test && npm run build",
+    "prebuild:release": "npm run clean && npm run test && npm run build",
+    "prerelease": "npm run prebuild:release",
     "release": "standard-version",
-    "postrelease": "git push && git push --follow-tags && npm publish"
+    "postrelease": "git push && git push --follow-tags && npm publish",
+    "prerelease:alpha": "npm run prebuild:release",
+    "release:alpha": "standard-version --prerelease alpha",
+    "postrelease:alpha": "git push && git push --follow-tags && npm publish --tag alpha"
   },
   "standard-version": {
     "types": [

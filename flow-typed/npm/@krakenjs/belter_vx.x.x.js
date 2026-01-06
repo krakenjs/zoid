@@ -1,4 +1,4 @@
-// flow-typed signature: 1d9a51a538917baa9335b2b04ae1946b
+// flow-typed signature: 78dfcbdab7b7573cb3d17170eaade9ab
 // flow-typed version: <<STUB>>/@krakenjs/belter_v^2.0.0/flow_v0.155.0
 
 /**
@@ -78,10 +78,6 @@ declare module '@krakenjs/belter/dist/module/storage' {
   declare module.exports: any;
 }
 
-declare module '@krakenjs/belter/dist/module/storage.test' {
-  declare module.exports: any;
-}
-
 declare module '@krakenjs/belter/dist/module/test' {
   declare module.exports: any;
 }
@@ -139,10 +135,6 @@ declare module '@krakenjs/belter/src/screenHeights' {
 }
 
 declare module '@krakenjs/belter/src/storage' {
-  declare module.exports: any;
-}
-
-declare module '@krakenjs/belter/src/storage.test' {
   declare module.exports: any;
 }
 
@@ -204,9 +196,6 @@ declare module '@krakenjs/belter/dist/module/screenHeights.js' {
 declare module '@krakenjs/belter/dist/module/storage.js' {
   declare module.exports: $Exports<'@krakenjs/belter/dist/module/storage'>;
 }
-declare module '@krakenjs/belter/dist/module/storage.test.js' {
-  declare module.exports: $Exports<'@krakenjs/belter/dist/module/storage.test'>;
-}
 declare module '@krakenjs/belter/dist/module/test.js' {
   declare module.exports: $Exports<'@krakenjs/belter/dist/module/test'>;
 }
@@ -260,9 +249,6 @@ declare module '@krakenjs/belter/src/screenHeights.js' {
 }
 declare module '@krakenjs/belter/src/storage.js' {
   declare module.exports: $Exports<'@krakenjs/belter/src/storage'>;
-}
-declare module '@krakenjs/belter/src/storage.test.js' {
-  declare module.exports: $Exports<'@krakenjs/belter/src/storage.test'>;
 }
 declare module '@krakenjs/belter/src/test.js' {
   declare module.exports: $Exports<'@krakenjs/belter/src/test'>;
