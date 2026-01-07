@@ -797,7 +797,7 @@ describe("zoid error cases", () => {
       })
         .render(getBody(), zoid.CONTEXT.IFRAME)
         .then(() => {
-          window.dispatchEvent(new Event("unload"));
+          window.dispatchEvent(new Event("pagehide"));
         });
     });
   });
