@@ -850,7 +850,7 @@ export function parentComponent<P, X, C, ExtType>({
   const watchForUnload = () => {
     return ZalgoPromise.try(() => {
       const eventname = "onpagehide" in window ? "pagehide" : "unload";
-
+      console.log(`[bfcache] - termination event ${eventname} added`);
       const unloadWindowListener = addEventListener(
         window,
         eventname,

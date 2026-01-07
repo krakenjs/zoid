@@ -227,10 +227,12 @@ export function childComponent<P, X, C, ExtType>(
     });
 
     if ("onpagehide" in window) {
+      console.log(`[bfcache] - termination event pagehide added`);
       window.addEventListener("pagehide", () => {
         checkClose.fireAndForget();
       });
     } else {
+      console.log(`[bfcache] - termination event unload added`);
       window.addEventListener("unload", () => {
         checkClose.fireAndForget();
       });
