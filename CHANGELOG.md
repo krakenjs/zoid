@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.5.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0) (2026-01-07)
+
+
+### Features
+
+* add support for publishing alpha branches to npm ([#474](https://github.com/krakenjs/zoid/issues/474)) ([90c0b73](https://github.com/krakenjs/zoid/commit/90c0b73b2e658b5931f644cf8ae1f2871bc8f829))
+
 ## [10.4.0](https://github.com/krakenjs/zoid/compare/v10.3.3...v10.4.0) (2024-12-19)
 
 
