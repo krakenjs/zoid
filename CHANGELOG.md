@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.5.0-alpha.1](https://github.com/krakenjs/zoid/compare/v10.5.0-alpha.0...v10.5.0-alpha.1) (2026-01-07)
+
+
+### Features
+
+* add logs ([845b9a9](https://github.com/krakenjs/zoid/commit/845b9a932d16da7d94df2962df7946626a11c46f))
+* remove test ([eefba51](https://github.com/krakenjs/zoid/commit/eefba516e99f29b2fabd2fd224b0abaec9134865))
+* remove test ([e22381c](https://github.com/krakenjs/zoid/commit/e22381c4609f6a7922025dbf646560afc7b29e1a))
+* use alpha of belter ([22b0fa7](https://github.com/krakenjs/zoid/commit/22b0fa72a67b435d8bf012b0fd73b3ad13140793))
+
 ## [10.5.0-alpha.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0-alpha.0) (2026-01-06)
 
 
