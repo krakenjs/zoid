@@ -223,15 +223,29 @@ export function childComponent<P, X, C, ExtType>(
 
   const watchForClose = () => {
     window.addEventListener("beforeunload", () => {
+      console.log("[zoid-bfcache] child: beforeunload fired");
       checkClose.fireAndForget();
     });
 
     if ("onpagehide" in window) {
-      window.addEventListener("pagehide", () => {
+      window.addEventListener("pagehide", (event) => {
+        console.log(
+          `[zoid-bfcache] child: pagehide fired, persisted=${event.persisted}`
+        );
+        if (event.persisted) {
+          console.log(
+            "[zoid-bfcache] child: skipping checkClose (page entering bfcache)"
+          );
+          return;
+        }
+        console.log(
+          "[zoid-bfcache] child: sending checkClose (real navigation)"
+        );
         checkClose.fireAndForget();
       });
     } else {
       window.addEventListener("unload", () => {
+        console.log("[zoid-bfcache] child: unload fired (legacy browser)");
         checkClose.fireAndForget();
       });
     }
