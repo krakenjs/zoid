@@ -39,7 +39,6 @@ import {
   extendUrl,
   appendChild,
   cleanup,
-  once,
   stringifyError,
   destroyElement,
   getElementSafe,
@@ -854,9 +853,27 @@ export function parentComponent<P, X, C, ExtType>({
       const unloadWindowListener = addEventListener(
         window,
         eventname,
-        once(() => {
+        (evt) => {
+          const persisted = evt instanceof PageTransitionEvent && evt.persisted;
+          // eslint-disable-next-line no-console
+          console.log(
+            `[zoid-bfcache] parent ${eventname} fired, persisted=${String(
+              persisted
+            )}`
+          );
+          if (persisted) {
+            // eslint-disable-next-line no-console
+            console.log(
+              "[zoid-bfcache] parent: skipping destroy (page entering bfcache)"
+            );
+            return;
+          }
+          // eslint-disable-next-line no-console
+          console.log(
+            "[zoid-bfcache] parent: destroying component (real navigation)"
+          );
           destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
-        })
+        }
       );
 
       const closeParentWindowListener = onCloseWindow(parentWin, destroy, 3000);
@@ -1208,13 +1225,25 @@ export function parentComponent<P, X, C, ExtType>({
           }
           appendChild(container, innerContainer);
           const containerWatcher = watchElementForClose(innerContainer, () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              "[zoid-bfcache] parent: watchElementForClose triggered (container element removed from DOM)"
+            );
             const removeError = new Error(
               `Detected container element removed from DOM`
             );
             return ZalgoPromise.delay(1).then(() => {
               if (isElementClosed(innerContainer)) {
+                // eslint-disable-next-line no-console
+                console.log(
+                  "[zoid-bfcache] parent: container is closed, calling close()"
+                );
                 close(removeError);
               } else {
+                // eslint-disable-next-line no-console
+                console.log(
+                  "[zoid-bfcache] parent: container still exists, triggering rerender()"
+                );
                 clean.all(removeError);
                 return rerender().then(resolveInitPromise, rejectInitPromise);
               }

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.6.0-alpha.0](https://github.com/krakenjs/zoid/compare/v10.5.0...v10.6.0-alpha.0) (2026-02-20)
+
+
+### Features
+
+* fix eslint errors ([04d876e](https://github.com/krakenjs/zoid/commit/04d876e0450caf56bdf21c60125ec4659a7d0f66))
+* update unload behvaior to support bfcache ([3aab5f7](https://github.com/krakenjs/zoid/commit/3aab5f7fefa25399e2643b77f803f5fa0cb2d848))
+
 ## [10.5.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0) (2026-01-07)
 
 

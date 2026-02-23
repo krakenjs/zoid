@@ -223,15 +223,34 @@ export function childComponent<P, X, C, ExtType>(
 
   const watchForClose = () => {
     window.addEventListener("beforeunload", () => {
+      // eslint-disable-next-line no-console
+      console.log("[zoid-bfcache] child: beforeunload fired");
       checkClose.fireAndForget();
     });
 
     if ("onpagehide" in window) {
-      window.addEventListener("pagehide", () => {
+      window.addEventListener("pagehide", (event) => {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[zoid-bfcache] child: pagehide fired, persisted=${event.persisted}`
+        );
+        if (event.persisted) {
+          // eslint-disable-next-line no-console
+          console.log(
+            "[zoid-bfcache] child: skipping checkClose (page entering bfcache)"
+          );
+          return;
+        }
+        // eslint-disable-next-line no-console
+        console.log(
+          "[zoid-bfcache] child: sending checkClose (real navigation)"
+        );
         checkClose.fireAndForget();
       });
     } else {
       window.addEventListener("unload", () => {
+        // eslint-disable-next-line no-console
+        console.log("[zoid-bfcache] child: unload fired (legacy browser)");
         checkClose.fireAndForget();
       });
     }

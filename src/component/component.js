@@ -602,6 +602,10 @@ export function component<P, X, C, ExtType>(
             container,
             context: finalContext,
             rerender: () => {
+              // eslint-disable-next-line no-console
+              console.log(
+                "[zoid-bfcache] component: rerender() called, cloning and re-rendering"
+              );
               const newInstance = clone();
               extend(instance, newInstance);
               return newInstance.renderTo(target, container, context);
