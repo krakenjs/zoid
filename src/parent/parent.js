@@ -209,6 +209,7 @@ type OpenPrerender = (
 type WatchForUnload = () => ZalgoPromise<void>;
 type GetInternalState = () => ZalgoPromise<InternalState>;
 type SetInternalState = (InternalState) => ZalgoPromise<InternalState>;
+type GetFallbackRerender = () => ?Rerender;
 
 type ParentDelegateOverrides<P> = {|
   props: PropsType<P>,
@@ -277,6 +278,7 @@ type ParentOptions<P, X, C, ExtType> = {|
   options: NormalizedComponentOptionsType<P, X, C, ExtType>,
   overrides?: ParentDelegateOverrides<P>,
   parentWin?: CrossDomainWindowType,
+  getFallbackRerender?: GetFallbackRerender,
 |};
 
 export function parentComponent<P, X, C, ExtType>({
@@ -284,6 +286,7 @@ export function parentComponent<P, X, C, ExtType>({
   options,
   overrides = getDefaultOverrides(),
   parentWin = window,
+  getFallbackRerender = () => null,
 }: ParentOptions<P, X, C, ExtType>): ParentComponent<P, X> {
   const {
     propsDef,
@@ -1285,7 +1288,9 @@ export function parentComponent<P, X, C, ExtType>({
       show,
       hide,
       rerender: () => {
-        const rerenderFn = currentRerender || lastRerender;
+        const fallbackRerender = getFallbackRerender();
+        const rerenderFn = currentRerender || lastRerender || fallbackRerender;
+
         if (!rerenderFn) {
           if (!hasBeenRendered) {
             throw new Error(
