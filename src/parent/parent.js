@@ -861,7 +861,6 @@ export function parentComponent<P, X, C, ExtType>({
           if (persisted) {
             bfcacheEnterTime = Date.now();
             event.trigger(EVENT.BFCACHE_CACHE);
-            return;
           }
           destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
         }
