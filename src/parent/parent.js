@@ -871,13 +871,10 @@ export function parentComponent<P, X, C, ExtType>({
         const pageshowListener = addEventListener(window, "pageshow", (evt) => {
           const persisted = evt instanceof PageTransitionEvent && evt.persisted;
           if (persisted) {
-            let cachedDurationMs = null;
-            if (bfcacheEnterTime !== null && bfcacheEnterTime !== undefined) {
-              // $FlowFixMe Flow doesn't properly narrow type in closures
-              const enterTime: number = bfcacheEnterTime;
-              cachedDurationMs = Date.now() - enterTime;
-            }
-            bfcacheEnterTime = null;
+            const cachedDurationMs =
+              bfcacheEnterTime !== null && bfcacheEnterTime !== undefined
+                ? Date.now() - bfcacheEnterTime
+                : null;
             event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
           }
         });

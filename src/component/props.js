@@ -422,6 +422,9 @@ export function getBuiltInProps<P, X>(): BuiltInPropsDefinitionType<P, X> {
       default: defaultNoop,
     },
 
+    // Note: decorateOnce is intentionally omitted for bfcache events.
+    // Unlike other lifecycle props, these can fire multiple times as the page
+    // transitions in and out of bfcache (cache -> restore -> cache -> restore).
     onBfcacheCache: {
       type: PROP_TYPE.FUNCTION,
       required: false,
