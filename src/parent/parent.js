@@ -871,9 +871,7 @@ export function parentComponent<P, X, C, ExtType>({
           const persisted = evt instanceof PageTransitionEvent && evt.persisted;
           if (persisted) {
             const cachedDurationMs =
-              bfcacheEnterTime !== null && bfcacheEnterTime !== undefined
-                ? Date.now() - bfcacheEnterTime
-                : null;
+              bfcacheEnterTime !== null ? Date.now() - bfcacheEnterTime : null;
             event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
           }
         });
