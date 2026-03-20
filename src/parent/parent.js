@@ -870,8 +870,13 @@ export function parentComponent<P, X, C, ExtType>({
         const pageshowListener = addEventListener(window, "pageshow", (evt) => {
           const persisted = evt instanceof PageTransitionEvent && evt.persisted;
           if (persisted) {
+            // Flow can't narrow ?number through closures in ternaries, so capture locally first
+            const enterTime = bfcacheEnterTime;
             const cachedDurationMs =
-              bfcacheEnterTime !== null ? Date.now() - bfcacheEnterTime : null;
+              enterTime !== null && enterTime !== undefined
+                ? Date.now() - enterTime
+                : null;
+            bfcacheEnterTime = null;
             event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
           }
         });
