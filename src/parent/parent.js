@@ -39,7 +39,6 @@ import {
   extendUrl,
   appendChild,
   cleanup,
-  once,
   stringifyError,
   destroyElement,
   getElementSafe,
@@ -413,6 +412,8 @@ export function parentComponent<P, X, C, ExtType>({
     event.on(EVENT.DESTROY, () => props.onDestroy());
     event.on(EVENT.RESIZE, () => props.onResize());
     event.on(EVENT.FOCUS, () => props.onFocus());
+    event.on(EVENT.BFCACHE_CACHE, () => props.onBfcacheCache());
+    event.on(EVENT.BFCACHE_RESTORE, (data) => props.onBfcacheRestore(data));
     event.on(EVENT.PROPS, (newProps) => props.onProps(newProps));
     event.on(EVENT.ERROR, (err) => {
       if (props && props.onError) {
@@ -850,14 +851,37 @@ export function parentComponent<P, X, C, ExtType>({
   const watchForUnload = () => {
     return ZalgoPromise.try(() => {
       const eventname = "onpagehide" in window ? "pagehide" : "unload";
+      let bfcacheEnterTime: ?number = null;
 
       const unloadWindowListener = addEventListener(
         window,
         eventname,
-        once(() => {
+        (evt) => {
+          const persisted = evt instanceof PageTransitionEvent && evt.persisted;
+          if (persisted) {
+            bfcacheEnterTime = Date.now();
+            event.trigger(EVENT.BFCACHE_CACHE);
+          }
           destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
-        })
+        }
       );
+
+      if ("onpageshow" in window) {
+        const pageshowListener = addEventListener(window, "pageshow", (evt) => {
+          const persisted = evt instanceof PageTransitionEvent && evt.persisted;
+          if (persisted) {
+            // Flow can't narrow ?number through closures in ternaries, so capture locally first
+            const enterTime = bfcacheEnterTime;
+            const cachedDurationMs =
+              enterTime !== null && enterTime !== undefined
+                ? Date.now() - enterTime
+                : null;
+            bfcacheEnterTime = null;
+            event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
+          }
+        });
+        clean.register(pageshowListener.cancel);
+      }
 
       const closeParentWindowListener = onCloseWindow(parentWin, destroy, 3000);
       clean.register(closeParentWindowListener.cancel);
