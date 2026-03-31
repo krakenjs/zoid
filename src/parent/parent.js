@@ -296,6 +296,7 @@ export function parentComponent<P, X, C, ExtType>({
     domain: domainMatch,
     validate,
     exports: xports,
+    bfcacheEnabled,
   } = options;
 
   const initPromise = new ZalgoPromise();
@@ -851,31 +852,28 @@ export function parentComponent<P, X, C, ExtType>({
   const watchForUnload = () => {
     return ZalgoPromise.try(() => {
       const eventname = "onpagehide" in window ? "pagehide" : "unload";
-      let bfcacheEnterTime: ?number = null;
+      let bfcacheEnterTime = null;
 
       const unloadWindowListener = addEventListener(
         window,
         eventname,
         (evt) => {
           const persisted = evt instanceof PageTransitionEvent && evt.persisted;
-          if (persisted) {
+          if (persisted && bfcacheEnabled) {
             bfcacheEnterTime = Date.now();
             event.trigger(EVENT.BFCACHE_CACHE);
+            return;
           }
           destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
         }
       );
 
-      if ("onpageshow" in window) {
+      if (bfcacheEnabled && "onpageshow" in window) {
         const pageshowListener = addEventListener(window, "pageshow", (evt) => {
-          const persisted = evt instanceof PageTransitionEvent && evt.persisted;
-          if (persisted) {
-            // Flow can't narrow ?number through closures in ternaries, so capture locally first
-            const enterTime = bfcacheEnterTime;
-            const cachedDurationMs =
-              enterTime !== null && enterTime !== undefined
-                ? Date.now() - enterTime
-                : null;
+          if (evt.persisted) {
+            const cachedDurationMs = bfcacheEnterTime
+              ? Date.now() - bfcacheEnterTime
+              : null;
             bfcacheEnterTime = null;
             event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
           }
@@ -1231,19 +1229,23 @@ export function parentComponent<P, X, C, ExtType>({
             hideElement(innerContainer);
           }
           appendChild(container, innerContainer);
-          const containerWatcher = watchElementForClose(innerContainer, () => {
-            const removeError = new Error(
-              `Detected container element removed from DOM`
-            );
-            return ZalgoPromise.delay(1).then(() => {
-              if (isElementClosed(innerContainer)) {
-                close(removeError);
-              } else {
-                clean.all(removeError);
-                return rerender().then(resolveInitPromise, rejectInitPromise);
-              }
-            });
-          });
+          const containerWatcher = watchElementForClose(
+            innerContainer,
+            () => {
+              const removeError = new Error(
+                `Detected container element removed from DOM`
+              );
+              return ZalgoPromise.delay(1).then(() => {
+                if (isElementClosed(innerContainer)) {
+                  close(removeError);
+                } else {
+                  clean.all(removeError);
+                  return rerender().then(resolveInitPromise, rejectInitPromise);
+                }
+              });
+            },
+            { bfcacheAware: bfcacheEnabled }
+          );
 
           clean.register(() => containerWatcher.cancel());
           clean.register(() => destroyElement(innerContainer));

@@ -227,7 +227,10 @@ export function childComponent<P, X, C, ExtType>(
     });
 
     if ("onpagehide" in window) {
-      window.addEventListener("pagehide", () => {
+      window.addEventListener("pagehide", (event) => {
+        if (event.persisted) {
+          return;
+        }
         checkClose.fireAndForget();
       });
     } else {
