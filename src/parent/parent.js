@@ -127,6 +127,7 @@ export type InitialChildPayload<P, X> = {|
   childDomainMatch: DomainMatcher,
   props: PropsType<P>,
   exports: ParentExportsType<P, X>,
+  enableBfcache: boolean,
 |};
 
 export type InitialChildPayloadMetadata = {|
@@ -296,7 +297,7 @@ export function parentComponent<P, X, C, ExtType>({
     domain: domainMatch,
     validate,
     exports: xports,
-    bfcacheEnabled,
+    enableBfcache,
   } = options;
 
   const initPromise = new ZalgoPromise();
@@ -859,7 +860,7 @@ export function parentComponent<P, X, C, ExtType>({
         eventname,
         (evt) => {
           const persisted = evt instanceof PageTransitionEvent && evt.persisted;
-          if (persisted && bfcacheEnabled) {
+          if (persisted && enableBfcache) {
             bfcacheEnterTime = Date.now();
             event.trigger(EVENT.BFCACHE_CACHE);
             return;
@@ -868,12 +869,16 @@ export function parentComponent<P, X, C, ExtType>({
         }
       );
 
-      if (bfcacheEnabled && "onpageshow" in window) {
+      if (enableBfcache && "onpageshow" in window) {
         const pageshowListener = addEventListener(window, "pageshow", (evt) => {
-          if (evt.persisted) {
-            const cachedDurationMs = bfcacheEnterTime
-              ? Date.now() - bfcacheEnterTime
-              : null;
+          const persisted =
+            typeof PageTransitionEvent !== "undefined" &&
+            evt instanceof PageTransitionEvent &&
+            evt.persisted;
+          if (persisted) {
+            const enterTime = bfcacheEnterTime;
+            const cachedDurationMs =
+              typeof enterTime === "number" ? Date.now() - enterTime : null;
             bfcacheEnterTime = null;
             event.trigger(EVENT.BFCACHE_RESTORE, { cachedDurationMs });
           }
@@ -1023,6 +1028,7 @@ export function parentComponent<P, X, C, ExtType>({
         version: __ZOID__.__VERSION__,
         props: childProps,
         exports: buildParentExports(proxyWin),
+        enableBfcache,
       };
     });
   };
@@ -1244,7 +1250,7 @@ export function parentComponent<P, X, C, ExtType>({
                 }
               });
             },
-            { bfcacheAware: bfcacheEnabled }
+            { isBfcacheEnabled: enableBfcache }
           );
 
           clean.register(() => containerWatcher.cancel());

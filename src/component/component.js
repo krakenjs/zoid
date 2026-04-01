@@ -145,7 +145,7 @@ export type ComponentOptionsType<P, X, C, ExtType> = {|
 
   exports?: ExportsDefinition<X>,
 
-  bfcacheEnabled?: boolean,
+  enableBfcache?: boolean,
 |};
 
 export type AttributesType = {|
@@ -196,7 +196,7 @@ export type NormalizedComponentOptionsType<P, X, C, ExtType> = {|
 
   exports: ExportsMapperDefinition<X>,
 
-  bfcacheEnabled: boolean,
+  enableBfcache: boolean,
 |};
 
 export type ZoidComponentInstance<P, X = void, C = void, ExtType = void> = {|
@@ -284,7 +284,7 @@ function normalizeOptions<P, X, C, ExtType>(
     logger = { info: noop },
     exports: xportsDefinition = getDefaultExports(),
     method,
-    bfcacheEnabled = false,
+    enableBfcache = false,
     children = (): C => {
       // $FlowFixMe
       return {};
@@ -350,7 +350,7 @@ function normalizeOptions<P, X, C, ExtType>(
     children,
     exports: xports,
     getExtensions,
-    bfcacheEnabled,
+    enableBfcache,
   };
 }
 
