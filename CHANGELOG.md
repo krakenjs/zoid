@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.6.0-alpha.1](https://github.com/krakenjs/zoid/compare/v10.5.1...v10.6.0-alpha.1) (2026-04-01)
+
+
+### Features
+
+* add bfcacheEnabled component option and gate parent guards in zoid ([846fcba](https://github.com/krakenjs/zoid/commit/846fcba81ce57aaf05c96a75753c194c12890344))
+* alpha version ([a79de90](https://github.com/krakenjs/zoid/commit/a79de90df4b4532cb12e161075570813cab190ec))
+* changes ([70a5c78](https://github.com/krakenjs/zoid/commit/70a5c7818e49dae80b031fcbc810f008307ca2d3))
+
 ### [10.5.1](https://github.com/krakenjs/zoid/compare/v10.5.0...v10.5.1) (2026-03-23)
 
 ## [10.5.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0) (2026-01-07)
