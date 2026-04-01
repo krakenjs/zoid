@@ -115,6 +115,7 @@ export function childComponent<P, X, C, ExtType>(
     exports: parentExports,
     context,
     props: initialProps,
+    enableBfcache,
   } = payload;
 
   if (!versionCompatabilityCheck(version, __ZOID__.__VERSION__)) {
@@ -227,7 +228,10 @@ export function childComponent<P, X, C, ExtType>(
     });
 
     if ("onpagehide" in window) {
-      window.addEventListener("pagehide", () => {
+      window.addEventListener("pagehide", (event) => {
+        if (event.persisted && enableBfcache) {
+          return;
+        }
         checkClose.fireAndForget();
       });
     } else {
