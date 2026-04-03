@@ -60,8 +60,6 @@ export const EVENT = {
   PROPS: "zoid-props",
   RESIZE: "zoid-resize",
   FOCUS: "zoid-focus",
-  BFCACHE_CACHE: "zoid-bfcache-cache",
-  BFCACHE_RESTORE: "zoid-bfcache-restore",
 };
 
 export const METHOD = {

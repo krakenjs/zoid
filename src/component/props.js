@@ -50,10 +50,6 @@ export type onClosePropType = EventHandlerType<void>;
 export type onDestroyPropType = EventHandlerType<void>;
 export type onResizePropType = EventHandlerType<void>;
 export type onFocusPropType = EventHandlerType<void>;
-export type onBfcacheCachePropType = EventHandlerType<void>;
-export type onBfcacheRestorePropType = EventHandlerType<{|
-  cachedDurationMs: ?number,
-|}>;
 export type onErrorPropType = EventHandlerType<mixed>;
 // eslint-disable-next-line no-use-before-define
 export type onPropsPropType<P> = ((PropsType<P>) => void) => {|
@@ -83,8 +79,6 @@ export type PropsInputType<P> = {|
   onDestroy?: onDestroyPropType,
   onResize?: onResizePropType,
   onFocus?: onFocusPropType,
-  onBfcacheCache?: onBfcacheCachePropType,
-  onBfcacheRestore?: onBfcacheRestorePropType,
   onError?: onErrorPropType,
   onProps?: onPropsPropType<P>,
 
@@ -107,8 +101,6 @@ export type PropsType<P> = {|
   onResize: onResizePropType,
   onFocus: onFocusPropType,
   onError: onErrorPropType,
-  onBfcacheCache: EventHandlerType<void>,
-  onBfcacheRestore: EventHandlerType<{| cachedDurationMs: ?number |}>,
   onProps: onPropsPropType<P>,
 
   ...P,
@@ -292,8 +284,6 @@ export type BuiltInPropsDefinitionType<P, X> = {|
   onDestroy: FunctionPropDefinitionType<onDestroyPropType, P, X>,
   onResize: FunctionPropDefinitionType<onClosePropType, P, X>,
   onFocus: FunctionPropDefinitionType<onFocusPropType, P, X>,
-  onBfcacheCache: FunctionPropDefinitionType<onBfcacheCachePropType, P, X>,
-  onBfcacheRestore: FunctionPropDefinitionType<onBfcacheRestorePropType, P, X>,
   onError: FunctionPropDefinitionType<onErrorPropType, P, X>,
   onProps: FunctionPropDefinitionType<onPropsPropType<P>, P, X>,
 |};
@@ -415,25 +405,6 @@ export function getBuiltInProps<P, X>(): BuiltInPropsDefinitionType<P, X> {
     },
 
     onFocus: {
-      type: PROP_TYPE.FUNCTION,
-      required: false,
-      sendToChild: false,
-      allowDelegate: true,
-      default: defaultNoop,
-    },
-
-    // Note: decorateOnce is intentionally omitted for bfcache events.
-    // Unlike other lifecycle props, these can fire multiple times as the page
-    // transitions in and out of bfcache (cache -> restore -> cache -> restore).
-    onBfcacheCache: {
-      type: PROP_TYPE.FUNCTION,
-      required: false,
-      sendToChild: false,
-      allowDelegate: true,
-      default: defaultNoop,
-    },
-
-    onBfcacheRestore: {
       type: PROP_TYPE.FUNCTION,
       required: false,
       sendToChild: false,
