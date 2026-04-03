@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.5.2](https://github.com/krakenjs/zoid/compare/v10.5.1...v10.5.2) (2026-04-03)
+
 ### [10.5.1](https://github.com/krakenjs/zoid/compare/v10.5.0...v10.5.1) (2026-03-23)
 
 ## [10.5.0](https://github.com/krakenjs/zoid/compare/v10.4.0...v10.5.0) (2026-01-07)
