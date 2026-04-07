@@ -146,6 +146,7 @@ export type ParentHelpers<P> = {|
   event: EventEmitterType,
   show: () => ZalgoPromise<void>,
   hide: () => ZalgoPromise<void>,
+  rerender: () => ZalgoPromise<void>,
 |};
 
 function getDefaultProps<P>(): PropsType<P> {
@@ -208,6 +209,7 @@ type OpenPrerender = (
 type WatchForUnload = () => ZalgoPromise<void>;
 type GetInternalState = () => ZalgoPromise<InternalState>;
 type SetInternalState = (InternalState) => ZalgoPromise<InternalState>;
+type GetFallbackRerender = () => ?Rerender;
 
 type ParentDelegateOverrides<P> = {|
   props: PropsType<P>,
@@ -276,6 +278,7 @@ type ParentOptions<P, X, C, ExtType> = {|
   options: NormalizedComponentOptionsType<P, X, C, ExtType>,
   overrides?: ParentDelegateOverrides<P>,
   parentWin?: CrossDomainWindowType,
+  getFallbackRerender?: GetFallbackRerender,
 |};
 
 export function parentComponent<P, X, C, ExtType>({
@@ -283,6 +286,7 @@ export function parentComponent<P, X, C, ExtType>({
   options,
   overrides = getDefaultOverrides(),
   parentWin = window,
+  getFallbackRerender = () => null,
 }: ParentOptions<P, X, C, ExtType>): ParentComponent<P, X> {
   const {
     propsDef,
@@ -317,6 +321,9 @@ export function parentComponent<P, X, C, ExtType>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
+  let currentRerender: ?Rerender = null;
+  let lastRerender: ?Rerender = null;
+  let hasBeenRendered: boolean = false;
   let isRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
@@ -1280,6 +1287,22 @@ export function parentComponent<P, X, C, ExtType>({
       updateProps,
       show,
       hide,
+      rerender: () => {
+        const fallbackRerender = getFallbackRerender();
+        const rerenderFn = currentRerender || lastRerender || fallbackRerender;
+
+        if (!rerenderFn) {
+          if (!hasBeenRendered) {
+            throw new Error(
+              "Rerender not available - component must be rendered first."
+            );
+          }
+          throw new Error(
+            "Rerender callback lost after render - component may be destroyed or re-initialized."
+          );
+        }
+        return rerenderFn();
+      },
     };
   };
 
@@ -1509,6 +1532,9 @@ export function parentComponent<P, X, C, ExtType>({
     rerender,
   }: RenderOptions): ZalgoPromise<void> => {
     return ZalgoPromise.try(() => {
+      currentRerender = rerender;
+      lastRerender = rerender;
+      hasBeenRendered = true;
       const initialChildDomain = getInitialChildDomain();
       const childDomainMatch = getDomainMatcher();
 
