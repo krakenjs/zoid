@@ -267,7 +267,7 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     watchForClose() {
-        const eventname = "onpagehide" in window ? "pagehide" : "unload";
+        const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
         window.addEventListener(eventname, () => this.checkClose());
     }
 
