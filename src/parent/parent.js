@@ -859,9 +859,18 @@ export function parentComponent<P, X, C, ExtType>({
         })
       );
 
+      const pagehideWindowListener = addEventListener(
+        window,
+        "pagehide",
+        once(() => {
+          destroy(new Error(COMPONENT_ERROR.NAVIGATED_AWAY));
+        })
+      );
+
       const closeParentWindowListener = onCloseWindow(parentWin, destroy, 3000);
       clean.register(closeParentWindowListener.cancel);
       clean.register(unloadWindowListener.cancel);
+      clean.register(pagehideWindowListener.cancel);
 
       if (watchForUnloadOverride) {
         return watchForUnloadOverride();
