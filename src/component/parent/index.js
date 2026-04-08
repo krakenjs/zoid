@@ -600,11 +600,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`, { windowName: this.childWindowName });
             const win = this.props.win;
+            const eventname = "onpagehide" in window ? "pagehide" : "unload";
 
             if (win) {
                 this.clean.set('window', win);
                 window.addEventListener('beforeunload', () => win.close());
-                window.addEventListener('unload', () => win.close());
+                window.addEventListener(eventname, () => win.close());
                 assertSameDomain(this.window).name = this.childWindowName;
                 return;
             }
@@ -761,7 +762,8 @@ export class ParentComponent<P> extends BaseComponent<P> {
             this.destroyComponent();
         });
 
-        let unloadWindowListener = addEventListener(window, 'unload', onunload);
+        const eventname = "onpagehide" in window ? "pagehide" : "unload";
+        let unloadWindowListener = addEventListener(window, eventname, onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }
