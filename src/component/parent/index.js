@@ -755,14 +755,14 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
+        const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
 
         let onunload = once(() => {
-            this.component.log(`navigate_away`);
+            this.component.log(`navigate_away`, { trigger: eventname });
             flush();
             this.destroyComponent();
         });
 
-        const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
         let unloadWindowListener = addEventListener(window, eventname, onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
