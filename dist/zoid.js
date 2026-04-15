@@ -1912,7 +1912,16 @@
                         var iframe = document.createElement("iframe");
                         iframe.setAttribute("name", name);
                         iframe.setAttribute("id", name);
-                        iframe.setAttribute("style", "display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;");
+                        !function(element) {
+                            var styles = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                            if (element) for (var _key in styles) Object.prototype.hasOwnProperty.call(styles, _key) && (element.style[_key] = styles[_key]);
+                        }(iframe, {
+                            display: "none",
+                            margin: 0,
+                            padding: 0,
+                            border: "0px none",
+                            overflow: "hidden"
+                        });
                         iframe.setAttribute("frameborder", "0");
                         iframe.setAttribute("border", "0");
                         iframe.setAttribute("scrolling", "no");
@@ -4408,8 +4417,8 @@
                     this.watchForClose();
                 };
                 ChildComponent.prototype.watchForClose = function() {
-                    var _this3 = this;
-                    window.addEventListener("unload", function() {
+                    var _this3 = this, eventname = "onpagehide" in window ? "pagehide" : "unload";
+                    window.addEventListener(eventname, function() {
                         return _this3.checkClose();
                     });
                 };
@@ -5245,13 +5254,13 @@
                         _this11.component.log("open_" + _this11.context, {
                             windowName: _this11.childWindowName
                         });
-                        var win = _this11.props.win;
+                        var win = _this11.props.win, eventname = "onpagehide" in window ? "pagehide" : "unload";
                         if (!win) return _this11.driver.open.call(_this11);
                         _this11.clean.set("window", win);
                         window.addEventListener("beforeunload", function() {
                             return win.close();
                         });
-                        window.addEventListener("unload", function() {
+                        window.addEventListener(eventname, function() {
                             return win.close();
                         });
                         Object(cross_domain_utils_src.a)(_this11.window).name = _this11.childWindowName;
@@ -5345,11 +5354,13 @@
                     this.clean.register("destroyCloseWindowListener", closeWindowListener.cancel);
                 };
                 ParentComponent.prototype.watchForUnload = function() {
-                    var _this17 = this, onunload = Object(lib.G)(function() {
-                        _this17.component.log("navigate_away");
+                    var _this17 = this, eventname = "onpagehide" in window ? "pagehide" : "unload", onunload = Object(lib.G)(function() {
+                        _this17.component.log("navigate_away", {
+                            trigger: eventname
+                        });
                         Object(client.c)();
                         _this17.destroyComponent();
-                    }), unloadWindowListener = Object(lib.b)(window, "unload", onunload);
+                    }), unloadWindowListener = Object(lib.b)(window, eventname, onunload);
                     this.clean.register("destroyUnloadWindowListener", unloadWindowListener.cancel);
                 };
                 ParentComponent.prototype.loadUrl = function(url) {

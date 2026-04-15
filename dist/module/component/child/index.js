@@ -292,7 +292,8 @@ export var ChildComponent = function (_BaseComponent) {
     ChildComponent.prototype.watchForClose = function watchForClose() {
         var _this3 = this;
 
-        window.addEventListener('unload', function () {
+        var eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
+        window.addEventListener(eventname, function () {
             return _this3.checkClose();
         });
     };
