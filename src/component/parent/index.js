@@ -600,11 +600,12 @@ export class ParentComponent<P> extends BaseComponent<P> {
         return ZalgoPromise.try(() => {
             this.component.log(`open_${ this.context }`, { windowName: this.childWindowName });
             const win = this.props.win;
+            const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
 
             if (win) {
                 this.clean.set('window', win);
                 window.addEventListener('beforeunload', () => win.close());
-                window.addEventListener('unload', () => win.close());
+                window.addEventListener(eventname, () => win.close());
                 assertSameDomain(this.window).name = this.childWindowName;
                 return;
             }
@@ -754,14 +755,15 @@ export class ParentComponent<P> extends BaseComponent<P> {
 
         // Our child has no way of knowing if we navigated off the page. So we have to listen for unload
         // and close the child manually if that happens.
+        const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
 
         let onunload = once(() => {
-            this.component.log(`navigate_away`);
+            this.component.log(`navigate_away`, { trigger: eventname });
             flush();
             this.destroyComponent();
         });
 
-        let unloadWindowListener = addEventListener(window, 'unload', onunload);
+        let unloadWindowListener = addEventListener(window, eventname, onunload);
 
         this.clean.register('destroyUnloadWindowListener', unloadWindowListener.cancel);
     }

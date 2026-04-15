@@ -267,7 +267,8 @@ export class ChildComponent<P> extends BaseComponent<P> {
     }
 
     watchForClose() {
-        window.addEventListener('unload', () => this.checkClose());
+        const eventname = 'onpagehide' in window ? 'pagehide' : 'unload';
+        window.addEventListener(eventname, () => this.checkClose());
     }
 
     enableAutoResize({ width = true, height = true } : { width : boolean, height : boolean } = {}) {
