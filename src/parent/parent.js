@@ -136,6 +136,10 @@ export type InitialChildPayloadMetadata = {|
 
 export type StateType = Object;
 
+export type RerenderOptions<P> = {|
+  decorate?: (PropsInputType<P>) => PropsInputType<P>,
+|};
+
 export type ParentHelpers<P> = {|
   state: StateType,
   close: () => ZalgoPromise<void>,
@@ -146,6 +150,7 @@ export type ParentHelpers<P> = {|
   event: EventEmitterType,
   show: () => ZalgoPromise<void>,
   hide: () => ZalgoPromise<void>,
+  rerender: (options?: RerenderOptions<P>) => ZalgoPromise<void>,
 |};
 
 function getDefaultProps<P>(): PropsType<P> {
@@ -157,13 +162,13 @@ type InternalState = {|
   visible: boolean,
 |};
 
-type Rerender = () => ZalgoPromise<void>;
+type Rerender<P> = (options?: RerenderOptions<P>) => ZalgoPromise<void>;
 
-type RenderContainerOptions = {|
+type RenderContainerOptions<P> = {|
   context: $Values<typeof CONTEXT>,
   proxyFrame: ?ProxyObject<HTMLIFrameElement>,
   proxyPrerenderFrame: ?ProxyObject<HTMLIFrameElement>,
-  rerender: Rerender,
+  rerender: Rerender<P>,
 |};
 
 type ResolveInitPromise = () => ZalgoPromise<void>;
@@ -175,9 +180,9 @@ type Show = () => ZalgoPromise<void>;
 type Hide = () => ZalgoPromise<void>;
 type Close = () => ZalgoPromise<void>;
 type OnError = (mixed) => ZalgoPromise<void>;
-type RenderContainer = (
+type RenderContainer<P> = (
   proxyContainer: ProxyObject<HTMLElement>,
-  RenderContainerOptions
+  RenderContainerOptions<P>
 ) => ZalgoPromise<?ProxyObject<HTMLElement>>;
 type SetProxyWin = (ProxyWindow) => ZalgoPromise<void>;
 type GetProxyWindow = () => ZalgoPromise<ProxyWindow>;
@@ -208,6 +213,7 @@ type OpenPrerender = (
 type WatchForUnload = () => ZalgoPromise<void>;
 type GetInternalState = () => ZalgoPromise<InternalState>;
 type SetInternalState = (InternalState) => ZalgoPromise<InternalState>;
+type GetFallbackRerender<P> = () => ?Rerender<P>;
 
 type ParentDelegateOverrides<P> = {|
   props: PropsType<P>,
@@ -217,7 +223,7 @@ type ParentDelegateOverrides<P> = {|
   getProxyContainer: GetProxyContainer,
   show: Show,
   hide: Hide,
-  renderContainer: RenderContainer,
+  renderContainer: RenderContainer<P>,
   getProxyWindow: GetProxyWindow,
   setProxyWin: SetProxyWin,
   openFrame: OpenFrame,
@@ -232,11 +238,11 @@ type ParentDelegateOverrides<P> = {|
   rejectInitPromise: RejectInitPromise,
 |};
 
-type DelegateOverrides = {|
+type DelegateOverrides<P> = {|
   getProxyContainer: GetProxyContainer,
   show: Show,
   hide: Hide,
-  renderContainer: RenderContainer,
+  renderContainer: RenderContainer<P>,
   getProxyWindow: GetProxyWindow,
   setProxyWin: SetProxyWin,
   openFrame: OpenFrame,
@@ -247,22 +253,22 @@ type DelegateOverrides = {|
   watchForUnload: WatchForUnload,
 |};
 
-type RenderOptions = {|
+type RenderOptions<P> = {|
   target: CrossDomainWindowType,
   container: ContainerReferenceType,
   context: $Values<typeof CONTEXT>,
-  rerender: Rerender,
+  rerender: Rerender<P>,
 |};
 
 export type ParentComponent<P, X> = {|
   init: () => void,
-  render: (RenderOptions) => ZalgoPromise<void>,
+  render: (RenderOptions<P>) => ZalgoPromise<void>,
   getProps: () => PropsType<P>,
   setProps: (newProps: PropsInputType<P>, isUpdate?: boolean) => void,
   export: (X) => ZalgoPromise<void>,
   destroy: (err?: mixed) => ZalgoPromise<void>,
   getHelpers: () => ParentHelpers<P>,
-  getDelegateOverrides: () => ZalgoPromise<DelegateOverrides>,
+  getDelegateOverrides: () => ZalgoPromise<DelegateOverrides<P>>,
   getExports: () => X,
 |};
 
@@ -276,6 +282,7 @@ type ParentOptions<P, X, C, ExtType> = {|
   options: NormalizedComponentOptionsType<P, X, C, ExtType>,
   overrides?: ParentDelegateOverrides<P>,
   parentWin?: CrossDomainWindowType,
+  getFallbackRerender?: GetFallbackRerender<P>,
 |};
 
 export function parentComponent<P, X, C, ExtType>({
@@ -283,6 +290,7 @@ export function parentComponent<P, X, C, ExtType>({
   options,
   overrides = getDefaultOverrides(),
   parentWin = window,
+  getFallbackRerender = () => null,
 }: ParentOptions<P, X, C, ExtType>): ParentComponent<P, X> {
   const {
     propsDef,
@@ -317,6 +325,9 @@ export function parentComponent<P, X, C, ExtType>({
   let childComponent: ?ChildExportsType<P>;
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
+  let currentRerender: ?Rerender<P> = null;
+  let lastRerender: ?Rerender<P> = null;
+  let hasBeenRendered: boolean = false;
   let isRenderFinished: boolean = false;
 
   const onErrorOverride: ?OnError = overrides.onError;
@@ -325,7 +336,7 @@ export function parentComponent<P, X, C, ExtType>({
   let showOverride: ?Show = overrides.show;
   let hideOverride: ?Hide = overrides.hide;
   const closeOverride: ?Close = overrides.close;
-  let renderContainerOverride: ?RenderContainer = overrides.renderContainer;
+  let renderContainerOverride: ?RenderContainer<P> = overrides.renderContainer;
   let getProxyWindowOverride: ?GetProxyWindow = overrides.getProxyWindow;
   let setProxyWinOverride: ?SetProxyWin = overrides.setProxyWin;
   let openFrameOverride: ?OpenFrame = overrides.openFrame;
@@ -1168,14 +1179,14 @@ export function parentComponent<P, X, C, ExtType>({
       event.trigger(EVENT.PRERENDERED);
     });
   };
-  const renderContainer: RenderContainer = (
+  const renderContainer: RenderContainer<P> = (
     proxyContainer: ProxyObject<HTMLElement>,
     {
       proxyFrame,
       proxyPrerenderFrame,
       context,
       rerender,
-    }: RenderContainerOptions
+    }: RenderContainerOptions<P>
   ): ZalgoPromise<?ProxyObject<HTMLElement>> => {
     if (renderContainerOverride) {
       return renderContainerOverride(proxyContainer, {
@@ -1280,6 +1291,22 @@ export function parentComponent<P, X, C, ExtType>({
       updateProps,
       show,
       hide,
+      rerender: (rerenderOptions) => {
+        const fallbackRerender = getFallbackRerender();
+        const rerenderFn = currentRerender || lastRerender || fallbackRerender;
+
+        if (!rerenderFn) {
+          if (!hasBeenRendered) {
+            throw new Error(
+              "Rerender not available - component must be rendered first."
+            );
+          }
+          throw new Error(
+            "Rerender callback lost after render - component may be destroyed or re-initialized."
+          );
+        }
+        return rerenderFn(rerenderOptions);
+      },
     };
   };
 
@@ -1351,7 +1378,7 @@ export function parentComponent<P, X, C, ExtType>({
   const delegate = (
     context: $Values<typeof CONTEXT>,
     target: CrossDomainWindowType
-  ): ZalgoPromise<DelegateOverrides> => {
+  ): ZalgoPromise<DelegateOverrides<P>> => {
     const delegateProps = {};
     for (const propName of Object.keys(props)) {
       const propDef = propsDef[propName];
@@ -1451,7 +1478,7 @@ export function parentComponent<P, X, C, ExtType>({
     return childOverridesPromise;
   };
 
-  const getDelegateOverrides = (): ZalgoPromise<DelegateOverrides> => {
+  const getDelegateOverrides = (): ZalgoPromise<DelegateOverrides<P>> => {
     return ZalgoPromise.try(() => {
       return {
         getProxyContainer,
@@ -1507,8 +1534,11 @@ export function parentComponent<P, X, C, ExtType>({
     container,
     context,
     rerender,
-  }: RenderOptions): ZalgoPromise<void> => {
+  }: RenderOptions<P>): ZalgoPromise<void> => {
     return ZalgoPromise.try(() => {
+      currentRerender = rerender;
+      lastRerender = rerender;
+      hasBeenRendered = true;
       const initialChildDomain = getInitialChildDomain();
       const childDomainMatch = getDomainMatcher();
 

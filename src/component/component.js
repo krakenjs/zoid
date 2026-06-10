@@ -32,6 +32,7 @@ import {
   type ParentComponent,
   type RenderOptionsType,
   type ParentHelpers,
+  type RerenderOptions,
   parentComponent,
 } from "../parent/parent";
 import {
@@ -201,7 +202,9 @@ export type ZoidComponentInstance<P, X = void, C = void, ExtType = void> = {|
   ...X,
   ...C,
   isEligible: () => boolean,
-  clone: () => ZoidComponentInstance<P, X, C, ExtType>,
+  clone: (
+    options?: RerenderOptions<P>
+  ) => ZoidComponentInstance<P, X, C, ExtType>,
   render: (
     container?: ContainerReferenceType,
     context?: $Values<typeof CONTEXT>
@@ -384,6 +387,175 @@ export function component<P, X, C, ExtType>(
   const global = getGlobal(window);
   const driverCache = {};
   const instances = [];
+  let latestRenderedRerender: ?(
+    options?: RerenderOptions<P>
+  ) => ZalgoPromise<void>;
+  const latestRenderStorageKey = `__zoid_latest_render__${tag}`;
+  const latestRenderContainerAttr = `data-zoid-latest-container-${tag}`;
+  const escapeAttr = (value: string): string => {
+    return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  };
+  const waitForSelector = (
+    selector: string,
+    timeout: number = 3000,
+    interval: number = 100
+  ): ZalgoPromise<string> => {
+    return new ZalgoPromise((resolve, reject) => {
+      const start = Date.now();
+
+      const check = () => {
+        try {
+          if (document.querySelector(selector)) {
+            resolve(selector);
+            return;
+          }
+        } catch (err) {
+          reject(err);
+          return;
+        }
+
+        if (Date.now() - start >= timeout) {
+          reject(
+            new Error(
+              `Timed out waiting for container selector to appear: ${selector}`
+            )
+          );
+          return;
+        }
+
+        setTimeout(check, interval);
+      };
+
+      check();
+    });
+  };
+
+  const readLatestRender = (): ?{|
+    container: string,
+    context: $Values<typeof CONTEXT>,
+  |} => {
+    try {
+      if (!window.sessionStorage) {
+        return;
+      }
+
+      const latestRender = window.sessionStorage.getItem(
+        latestRenderStorageKey
+      );
+      if (!latestRender) {
+        return;
+      }
+
+      const parsed = JSON.parse(latestRender);
+      const persistedContainers =
+        parsed && Array.isArray(parsed.containers)
+          ? parsed.containers.filter(
+              (candidate) => typeof candidate === "string"
+            )
+          : [];
+
+      let candidates = persistedContainers;
+
+      if (candidates.length === 0) {
+        if (parsed && typeof parsed.container === "string") {
+          candidates = [parsed.container];
+        } else {
+          candidates = [];
+        }
+      }
+
+      if (!parsed || candidates.length === 0) {
+        return;
+      }
+
+      if (
+        parsed.context !== CONTEXT.IFRAME &&
+        parsed.context !== CONTEXT.POPUP
+      ) {
+        return;
+      }
+
+      const container =
+        candidates.find((candidate) => {
+          try {
+            return Boolean(document.querySelector(candidate));
+          } catch (err) {
+            return false;
+          }
+        }) || candidates[0];
+
+      return {
+        container,
+        context: parsed.context,
+      };
+    } catch (err) {
+      // ignored
+    }
+  };
+
+  const writeLatestRender = (
+    container: ContainerReferenceType,
+    context: $Values<typeof CONTEXT>
+  ) => {
+    let persistedContainer: ?string;
+    const persistedContainers = [];
+
+    if (typeof container === "string") {
+      persistedContainer = container;
+      persistedContainers.push(container);
+    } else if (isElement(container)) {
+      const elementID = container.getAttribute("id");
+      if (elementID) {
+        persistedContainers.push(`[id="${escapeAttr(elementID)}"]`);
+      }
+
+      const elementName = container.getAttribute("name");
+      if (elementName) {
+        persistedContainers.push(`[name="${escapeAttr(elementName)}"]`);
+      }
+
+      const className = container.className;
+      if (typeof className === "string" && className.trim()) {
+        const firstClass = className.trim().split(/\s+/)[0];
+        if (firstClass) {
+          persistedContainers.push(`.${firstClass}`);
+        }
+      }
+
+      let marker = container.getAttribute(latestRenderContainerAttr);
+
+      if (!marker) {
+        marker = uniqueID();
+        container.setAttribute(latestRenderContainerAttr, marker);
+      }
+
+      persistedContainers.push(
+        `[${latestRenderContainerAttr}="${escapeAttr(marker)}"]`
+      );
+      persistedContainer = persistedContainers[0];
+    }
+
+    if (!persistedContainer) {
+      return;
+    }
+
+    try {
+      if (!window.sessionStorage) {
+        return;
+      }
+
+      window.sessionStorage.setItem(
+        latestRenderStorageKey,
+        JSON.stringify({
+          container: persistedContainer,
+          containers: persistedContainers,
+          context,
+        })
+      );
+    } catch (err) {
+      // ignored
+    }
+  };
 
   const isChild = (): boolean => {
     if (isChildComponentWindow(name)) {
@@ -518,9 +690,31 @@ export function component<P, X, C, ExtType>(
       }
     };
 
+    const clone = ({ decorate = identity }: RerenderOptions<P> = {}) => {
+      return init(decorate(props));
+    };
+
     const parent = parentComponent({
       uid,
       options,
+      getFallbackRerender: () => {
+        if (latestRenderedRerender) {
+          return latestRenderedRerender;
+        }
+
+        const latestRender = readLatestRender();
+        if (!latestRender) {
+          return;
+        }
+
+        return (rerenderOptions) => {
+          return waitForSelector(latestRender.container).then((selector) => {
+            const newInstance = clone(rerenderOptions);
+            extend(instance, newInstance);
+            return newInstance.render(selector, latestRender.context);
+          });
+        };
+      },
     });
 
     parent.init();
@@ -536,10 +730,6 @@ export function component<P, X, C, ExtType>(
     cleanInstances.register((err) => {
       return parent.destroy(err || new Error(`zoid destroyed all components`));
     });
-
-    const clone = ({ decorate = identity } = {}) => {
-      return init(decorate(props));
-    };
 
     const getChildren = (): C => {
       // $FlowFixMe
@@ -597,15 +787,20 @@ export function component<P, X, C, ExtType>(
             );
           }
 
+          const rerender = (rerenderOptions) => {
+            const newInstance = clone(rerenderOptions);
+            extend(instance, newInstance);
+            return newInstance.renderTo(target, container, context);
+          };
+
+          latestRenderedRerender = rerender;
+          writeLatestRender(container, finalContext);
+
           return parent.render({
             target,
             container,
             context: finalContext,
-            rerender: () => {
-              const newInstance = clone();
-              extend(instance, newInstance);
-              return newInstance.renderTo(target, container, context);
-            },
+            rerender,
           });
         })
         .catch((err) => {
