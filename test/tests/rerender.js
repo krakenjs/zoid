@@ -116,6 +116,64 @@ describe("zoid rerender cases", () => {
     });
   });
 
+  it("should re-render a component with decorated props", () => {
+    return wrapPromise(({ expect, avoid }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-rerender-decorated-props",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          exports: ({ getExports }) => {
+            return {
+              exec: (...args) => {
+                return getExports().then((exports) => {
+                  return exports.exec(...args);
+                });
+              },
+            };
+          },
+        });
+      };
+
+      const container = document.createElement("div");
+      getBody().appendChild(container);
+
+      const component = window.__component__();
+      const instance = component({
+        onRendered: expect("onRendered"),
+        onClose: avoid("onClose"),
+        onDestroy: avoid("onDestroy"),
+        onError: avoid("onError"),
+        getValue: avoid("getValue"),
+        run: () => `
+                    window.xprops.export({
+                        exec: (code) => eval(code)
+                    });
+                `,
+      });
+
+      return instance
+        .render(container)
+        .then(() => {
+          return instance.rerender({
+            decorate: (props) => ({
+              ...props,
+              getValue: expect("getValue", () => "decorated-value"),
+            }),
+          });
+        })
+        .then(() => {
+          return instance.exec(`
+                    window.xprops.getValue().then((value) => {
+                        if (value !== "decorated-value") {
+                            throw new Error("Expected decorated prop value");
+                        }
+                    });
+                `);
+        });
+    });
+  });
+
   it("should render a component to the parent as an iframe and re-render when the container is removed and immediately re-added to the dom", () => {
     return wrapPromise(({ expect, avoid }) => {
       window.__component__ = () => {
