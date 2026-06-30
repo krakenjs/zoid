@@ -47,7 +47,7 @@ export function getGlobal<T>(win: CrossDomainWindowType): T {
 
 export function tryGlobal<T, R>(
   win: CrossDomainWindowType,
-  handler: (T) => R,
+  handler: (T) => R
 ): ?R {
   try {
     return handler(getGlobal(win));
