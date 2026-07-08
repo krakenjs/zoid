@@ -16,7 +16,8 @@ module.exports = {
   },
   __ZOID__: {
     __VERSION__: `${formatVersion(pkg.version)}`,
-    __GLOBAL_KEY__: `__zoid_${formatVersion(pkg.version)}__`,
+    __LEGACY_GLOBAL_KEY__: "__zoid_10_5_0__",
+    __MAJOR_VERSION_GLOBAL_KEY__: `__zoid_${pkg.version.split(".")[0]}__`,
     __IFRAME_SUPPORT__: true,
     __POPUP_SUPPORT__: true,
     __FRAMEWORK_SUPPORT__: false,
