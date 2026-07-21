@@ -859,7 +859,8 @@ export function parentComponent<P, X, C, ExtType>({
         window,
         eventname,
         (evt) => {
-          const persisted = evt instanceof PageTransitionEvent && evt.persisted;
+          // $FlowFixMe
+          const persisted = Boolean(evt.persisted);
           if (persisted && enableBfcache) {
             bfcacheEnterTime = Date.now();
             event.trigger(EVENT.BFCACHE_CACHE);
@@ -871,10 +872,8 @@ export function parentComponent<P, X, C, ExtType>({
 
       if (enableBfcache && "onpageshow" in window) {
         const pageshowListener = addEventListener(window, "pageshow", (evt) => {
-          const persisted =
-            typeof PageTransitionEvent !== "undefined" &&
-            evt instanceof PageTransitionEvent &&
-            evt.persisted;
+          // $FlowFixMe
+          const persisted = Boolean(evt.persisted);
           if (persisted) {
             const enterTime = bfcacheEnterTime;
             const cachedDurationMs =
