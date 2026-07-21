@@ -802,6 +802,85 @@ describe("zoid error cases", () => {
     });
   });
 
+  it("should not call onDestroy when the page enters bfcache and enableBfcache is true", () => {
+    return wrapPromise(({ expect, avoid }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-bfcache-enter-enabled",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          enableBfcache: true,
+        });
+      };
+
+      const testComplete = expect("testComplete");
+      const component = window.__component__();
+      return component({
+        onError: avoid("onError"),
+        onDestroy: avoid("onDestroy"),
+      })
+        .render(getBody(), zoid.CONTEXT.IFRAME)
+        .then(() => {
+          window.dispatchEvent(
+            new PageTransitionEvent("pagehide", { persisted: true })
+          );
+          return ZalgoPromise.delay(50);
+        })
+        .then(() => {
+          testComplete();
+        });
+    });
+  });
+
+  it("should call onDestroy when the page enters bfcache but enableBfcache is false (default)", () => {
+    return wrapPromise(({ expect, avoid }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-bfcache-enter-disabled",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+        });
+      };
+
+      const component = window.__component__();
+      return component({
+        onError: avoid("onError"),
+        onDestroy: expect("onDestroy"),
+      })
+        .render(getBody(), zoid.CONTEXT.IFRAME)
+        .then(() => {
+          window.dispatchEvent(
+            new PageTransitionEvent("pagehide", { persisted: true })
+          );
+        });
+    });
+  });
+
+  it("should call onDestroy on a real unload even when enableBfcache is true", () => {
+    return wrapPromise(({ expect, avoid }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-bfcache-real-unload",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          domain: "mock://www.child.com",
+          enableBfcache: true,
+        });
+      };
+
+      const component = window.__component__();
+      return component({
+        onError: avoid("onError"),
+        onDestroy: expect("onDestroy"),
+      })
+        .render(getBody(), zoid.CONTEXT.IFRAME)
+        .then(() => {
+          window.dispatchEvent(
+            new PageTransitionEvent("pagehide", { persisted: false })
+          );
+        });
+    });
+  });
+
   it("should call onDestroy even if component is not eligible", () => {
     return wrapPromise(({ expect, avoid }) => {
       window.__component__ = () => {
