@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.6.0-alpha.2](https://github.com/krakenjs/zoid/compare/v10.5.4...v10.6.0-alpha.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* point belter dep at published 2.10.1, drop stray alpha version/changelog cruft ([ac4e75f](https://github.com/krakenjs/zoid/commit/ac4e75f82dfff5a0b438c94706b4999c7193a38f))
+* use consistent, safe persisted check in watchForUnload ([f796d89](https://github.com/krakenjs/zoid/commit/f796d890dd06f73c08eed3617be969958c68cb68))
+
+
+* bump to 10.6.0-alpha.1 to skip past orphaned tags from feature/bfcache ([fa8ea8f](https://github.com/krakenjs/zoid/commit/fa8ea8fc43a1ddd19915eb1f12da12a2a34f9040))
+* cover enableBfcache gating in watchForUnload ([6f40ed5](https://github.com/krakenjs/zoid/commit/6f40ed5e771bd707b23ee538807de092b9f0fd05))
+
+## [10.6.0-alpha.1](https://github.com/krakenjs/zoid/compare/v10.5.1...v10.6.0-alpha.1) (2026-04-01)
+
+
+### Features
+
+* add bfcacheEnabled component option and gate parent guards in zoid ([846fcba](https://github.com/krakenjs/zoid/commit/846fcba81ce57aaf05c96a75753c194c12890344))
+* alpha version ([a79de90](https://github.com/krakenjs/zoid/commit/a79de90df4b4532cb12e161075570813cab190ec))
+* changes ([70a5c78](https://github.com/krakenjs/zoid/commit/70a5c7818e49dae80b031fcbc810f008307ca2d3))
+
+
+* **release:** 10.6.0-alpha.1 ([5d77092](https://github.com/krakenjs/zoid/commit/5d77092f415280c34dc67f05a98d1f4ecfeb8fce))
+
 ### [10.5.4](https://github.com/krakenjs/zoid/compare/v10.5.3...v10.5.4) (2026-07-22)
 
 ### [10.5.3](https://github.com/krakenjs/zoid/compare/v10.5.2...v10.5.3) (2026-07-06)
