@@ -7,6 +7,7 @@ import "./exports";
 import "./drivers";
 import "./error";
 import "./renderto";
+import "./delegate";
 import "./validation";
 import "./domain";
 import "./window";
