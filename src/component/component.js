@@ -13,6 +13,7 @@ import { ZalgoPromise } from "@krakenjs/zalgo-promise/src";
 import {
   isWindow,
   getDomain,
+  getDomainFromUrl,
   matchDomain,
   type CrossDomainWindowType,
   type DomainMatcher,
@@ -374,6 +375,8 @@ export function component<P, X, C, ExtType>(
   const {
     name,
     tag,
+    url,
+    domain,
     defaultContext,
     propsDef,
     eligible,
@@ -414,9 +417,50 @@ export function component<P, X, C, ExtType>(
     }
   });
 
+  // Attempt to derive a domain from a function-type url by calling it with empty
+  // props at registration time. This works for components like card-fields where
+  // the url function ignores its argument (e.g. `url: () => \`${getPayPalDomain()}/v2/card-fields\``).
+  // Returns null if the function throws or returns a non-string.
+  const tryGetDomainFromUrlFunction = (): ?string => {
+    try {
+      // $FlowFixMe
+      const resolvedUrl = url({ props: {} });
+      if (typeof resolvedUrl === "string" && resolvedUrl) {
+        return getDomainFromUrl(resolvedUrl);
+      }
+    } catch {
+      return null;
+    }
+  };
+
+  const getDelegateDomainMatcher = (): DomainMatcher => {
+    if (domain) {
+      return domain;
+    }
+    if (typeof url === "string") {
+      return getDomainFromUrl(url);
+    }
+    const resolvedDomain = tryGetDomainFromUrlFunction();
+    if (resolvedDomain) {
+      return resolvedDomain;
+    }
+    throw new Error(
+      `${name}: a \`domain\` option is required when \`url\` cannot be resolved without instance props`
+    );
+  };
+
   const listenForDelegate = () => {
+    const domainMatcher = getDelegateDomainMatcher();
+
+    if (domainMatcher === WILDCARD) {
+      throw new Error(
+        `${name}: delegate listeners must not register with a wildcard domain matcher`
+      );
+    }
+
     const allowDelegateListener = on(
       `${POST_MESSAGE.ALLOW_DELEGATE}_${name}`,
+      { domain: domainMatcher },
       () => {
         return true;
       }
@@ -424,6 +468,7 @@ export function component<P, X, C, ExtType>(
 
     const delegateListener = on(
       `${POST_MESSAGE.DELEGATE}_${name}`,
+      { domain: domainMatcher },
       ({ source, data: { uid, overrides } }) => {
         return {
           parent: parentComponent({
