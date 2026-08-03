@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.5.5](https://github.com/krakenjs/zoid/compare/v10.5.4...v10.5.5) (2026-08-03)
+
+
+### Bug Fixes
+
+* rendering delegation ([#486](https://github.com/krakenjs/zoid/issues/486)) ([aa50086](https://github.com/krakenjs/zoid/commit/aa5008654f6933819b0315fc1bda8fe52e2eda23))
+
 ### [10.5.4](https://github.com/krakenjs/zoid/compare/v10.5.3...v10.5.4) (2026-07-22)
 
 ### [10.5.3](https://github.com/krakenjs/zoid/compare/v10.5.2...v10.5.3) (2026-07-06)
