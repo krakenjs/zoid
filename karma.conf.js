@@ -36,8 +36,8 @@ export default function configKarma(karma: Object) {
     ...karmaConfig,
 
     files: [
-      "test/lib/react_v16.0.0.js",
-      "test/lib/react-dom_v16.0.0.js",
+      "test/lib/react_v16.3.0.js",
+      "test/lib/react-dom_v16.3.0.js",
       "test/lib/angular.min.js",
       {
         pattern: "test/zoid.global.js",
