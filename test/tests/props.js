@@ -2408,4 +2408,64 @@ describe("zoid props cases", () => {
       return instance.render(getBody());
     });
   });
+
+  it("should reject an object smuggled into a string-typed prop", () => {
+    return wrapPromise(({ expect }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-string-prop-object-rejected",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          props: {
+            term: {
+              type: "string",
+            },
+          },
+        });
+      };
+
+      const component = window.__component__();
+
+      // A forged vnode-shaped object where a string is declared must not be
+      // accepted - this is the window.name XSS injection vector. The type
+      // guard must reject it rather than passing the object through.
+      return ZalgoPromise.try(() => {
+        component({
+          // $FlowFixMe
+          term: { __html: "<img src=x onerror=alert(1)>" },
+        });
+      }).catch(expect("catch"));
+    });
+  });
+
+  it("should accept a normal string for a string-typed prop", () => {
+    return wrapPromise(({ expect, avoid }) => {
+      window.__component__ = () => {
+        return zoid.create({
+          tag: "test-string-prop-accepted",
+          url: "mock://www.child.com/base/test/windows/child/index.htm",
+          props: {
+            term: {
+              type: "string",
+            },
+          },
+        });
+      };
+
+      const component = window.__component__();
+      const instance = component({
+        term: "12 months",
+        passProp: expect("passProp", (val) => {
+          if (val !== "12 months") {
+            throw new Error(`Expected term to be passed through unchanged`);
+          }
+        }),
+        onError: avoid("onError"),
+        run: () => `
+                    window.xprops.passProp(window.xprops.term);
+                `,
+      });
+
+      return instance.render(getBody());
+    });
+  });
 });

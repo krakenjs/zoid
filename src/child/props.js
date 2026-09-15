@@ -7,6 +7,7 @@ import {
   type CrossDomainWindowType,
 } from "@krakenjs/cross-domain-utils/src";
 
+import { PROP_TYPE } from "../constants";
 import type {
   PropsDefinitionType,
   PropsType,
@@ -14,6 +15,28 @@ import type {
 } from "../component/props";
 
 import type { ChildHelpers } from "./index";
+
+const PRIMITIVE_PROP_TYPES = [
+  PROP_TYPE.STRING,
+  PROP_TYPE.NUMBER,
+  PROP_TYPE.BOOLEAN,
+];
+
+// Bootstrap props come from window.name, which a framing/opening page can
+// forge; reject an object/function smuggled into a primitive-typed prop so it
+// cannot reach a render sink (e.g. dangerouslySetInnerHTML).
+function assertPrimitivePropType(type: string, key: string, value: mixed) {
+  if (
+    PRIMITIVE_PROP_TYPES.indexOf(type) !== -1 &&
+    value !== null &&
+    value !== undefined &&
+    (typeof value === "object" || typeof value === "function")
+  ) {
+    throw new Error(
+      `Prop "${key}" is declared as ${type} but received ${typeof value}`
+    );
+  }
+}
 
 export function normalizeChildProp<P, T, X>(
   // $FlowFixMe
@@ -98,6 +121,10 @@ export function normalizeChildProps<P, X>(
     // sameDomain was not set and trusted domains must match
     if (prop && prop.trustedDomains && !trustedChild) {
       continue;
+    }
+
+    if (prop) {
+      assertPrimitivePropType(prop.type, key, props[key]);
     }
 
     // $FlowFixMe
