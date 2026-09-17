@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.7.0-alpha.0](https://github.com/krakenjs/zoid/compare/v10.6.0...v10.7.0-alpha.0) (2026-09-17)
+
+
+### Features
+
+* added changes needed to test ([1755564](https://github.com/krakenjs/zoid/commit/1755564ec5e49053900d07c79be4797fef4ed7a3))
+
+
+* simplify logging ([3937783](https://github.com/krakenjs/zoid/commit/3937783d72be5360758f2f8e1d549b660e244c77))
+
 ## [10.6.0](https://github.com/krakenjs/zoid/compare/v10.5.5...v10.6.0) (2026-08-03)
 
 
