@@ -714,7 +714,7 @@ export function parentComponent<P, X, C, ExtType>({
     childExports: ChildExportsType<P>
   ): ZalgoPromise<void> => {
     // eslint-disable-next-line no-console
-    console.log("[setName] initChild called");
+    console.log("[sn] ic");
     return ZalgoPromise.try(() => {
       currentChildDomain = childDomain;
       childComponent = childExports;
@@ -724,7 +724,7 @@ export function parentComponent<P, X, C, ExtType>({
         .then((isPopup) => {
           if (childExports?.name !== "" && isPopup) {
             // eslint-disable-next-line no-console
-            console.log("[setName] zoid setName initChild");
+            console.log("[sn] ic sn");
             currentProxyWin?.setName(childExports?.name);
           }
         })
@@ -804,7 +804,7 @@ export function parentComponent<P, X, C, ExtType>({
     |}
   ): ZalgoPromise<ProxyWindow> => {
     // eslint-disable-next-line no-console
-    console.log("[setName] zoid open 2");
+    console.log("[sn] o");
     if (openOverride) {
       return openOverride(context, { proxyWin, proxyFrame, windowName });
     }
@@ -812,7 +812,7 @@ export function parentComponent<P, X, C, ExtType>({
     return ZalgoPromise.try(() => {
       if (context === CONTEXT.IFRAME && __ZOID__.__IFRAME_SUPPORT__) {
         // eslint-disable-next-line no-console
-        console.log("[setName] zoid open iframe context");
+        console.log("[sn] o ic");
         if (!proxyFrame) {
           throw new Error(`Expected proxy frame to be passed`);
         }
@@ -826,7 +826,7 @@ export function parentComponent<P, X, C, ExtType>({
         });
       } else if (context === CONTEXT.POPUP && __ZOID__.__POPUP_SUPPORT__) {
         // eslint-disable-next-line no-console
-        console.log("[setName] zoid open popup context");
+        console.log("[sn] o pc");
         let {
           width = DEFAULT_DIMENSIONS.WIDTH,
           height = DEFAULT_DIMENSIONS.HEIGHT,
@@ -855,7 +855,7 @@ export function parentComponent<P, X, C, ExtType>({
     }).then((win) => {
       proxyWin.setWindow(win, { send });
       // eslint-disable-next-line no-console
-      console.log("[setName] zoid setName open");
+      console.log("[sn] o t sn");
       return proxyWin.setName(windowName).then(() => {
         return proxyWin;
       });
@@ -1006,7 +1006,7 @@ export function parentComponent<P, X, C, ExtType>({
     const checkClose = () => checkWindowClose(win);
     function init(childExports: ChildExportsType<P>): ZalgoPromise<void> {
       // eslint-disable-next-line no-console
-      console.log("[setName] zoid setName init() invoked", Date.now());
+      console.log("[sn] i ic");
       return initChild(this.origin, childExports);
     }
     return {
@@ -1650,7 +1650,7 @@ export function parentComponent<P, X, C, ExtType>({
       }).then(({ proxyWin, windowName }) => {
         if (windowProp) {
           // eslint-disable-next-line no-console
-          console.log("[setName] zoid setName render");
+          console.log("[sn] s sn r");
           throw new Error("Can not set name for cross-domain window (TEST)");
           // return proxyWin.setName(windowName);
         }
