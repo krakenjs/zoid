@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [10.6.1](https://github.com/krakenjs/zoid/compare/v10.6.0...v10.6.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **child:** enforce prop types on untrusted props to prevent XSS ([#487](https://github.com/krakenjs/zoid/issues/487)) ([b7e9653](https://github.com/krakenjs/zoid/commit/b7e9653cbe425f449e39e2d7c640fccefcb27e27))
+
 ## [10.6.0](https://github.com/krakenjs/zoid/compare/v10.5.5...v10.6.0) (2026-08-03)
 
 
