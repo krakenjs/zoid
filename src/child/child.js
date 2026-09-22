@@ -348,6 +348,8 @@ export function childComponent<P, X, C, ExtType>(
     if (props) {
       return props;
     } else {
+      // Reject a disallowed parent before any props are exposed to the page.
+      checkParentDomain(allowedParentDomains, parentDomain);
       setProps(initialProps, parentDomain);
       return props;
     }
