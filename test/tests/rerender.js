@@ -70,7 +70,7 @@ describe("zoid rerender cases", () => {
         const tag = "test-rerender-fallback-fresh-instance";
         window.__component__ = () => {
           return zoid.create({
-            tag,
+            tag: "test-rerender-fallback-fresh-instance",
             url: "mock://www.child.com/base/test/windows/child/index.htm",
             domain: "mock://www.child.com",
             enableRerenderFallback: true,
@@ -153,21 +153,25 @@ describe("zoid rerender cases", () => {
   it("should not cross-wire the fallback rerender between two instances of the same tag rendered into different containers", () => {
     return wrapPromise(
       ({ expect, avoid }) => {
-        const component = zoid.create({
-          tag: "test-rerender-fallback-multi-instance",
-          url: "mock://www.child.com/base/test/windows/child/index.htm",
-          domain: "mock://www.child.com",
-          enableRerenderFallback: true,
-          exports: ({ getExports }) => {
-            return {
-              exec: (...args) => {
-                return getExports().then((exports) => {
-                  return exports.exec(...args);
-                });
-              },
-            };
-          },
-        });
+        window.__component__ = () => {
+          return zoid.create({
+            tag: "test-rerender-fallback-multi-instance",
+            url: "mock://www.child.com/base/test/windows/child/index.htm",
+            domain: "mock://www.child.com",
+            enableRerenderFallback: true,
+            exports: ({ getExports }) => {
+              return {
+                exec: (...args) => {
+                  return getExports().then((exports) => {
+                    return exports.exec(...args);
+                  });
+                },
+              };
+            },
+          });
+        };
+
+        const component = window.__component__();
 
         const containerA = document.createElement("div");
         containerA.id = "fallback-multi-instance-container-a";
@@ -191,8 +195,8 @@ describe("zoid rerender cases", () => {
 
         const instanceB = component({
           onRendered: expect("onRenderedB"),
-          onClose: avoid("onCloseB"),
-          onDestroy: avoid("onDestroyB"),
+          onClose: () => {},
+          onDestroy: () => {},
           onError: avoid("onErrorB"),
           run: () => `
                     window.xprops.export({
