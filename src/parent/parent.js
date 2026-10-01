@@ -764,6 +764,8 @@ export function parentComponent<P, X, C, ExtType>({
         return clean.all(err);
       })
       .then(() => {
+        currentRerender = null;
+        lastRerender = null;
         const error = err || new Error(COMPONENT_ERROR.COMPONENT_DESTROYED);
         if (
           (currentContainer && isElementClosed(currentContainer)) ||
@@ -1567,9 +1569,6 @@ export function parentComponent<P, X, C, ExtType>({
     rerender,
   }: RenderOptions<P>): ZalgoPromise<void> => {
     return ZalgoPromise.try(() => {
-      currentRerender = rerender;
-      lastRerender = rerender;
-      hasBeenRendered = true;
       const initialChildDomain = getInitialChildDomain();
       const childDomainMatch = getDomainMatcher();
 
@@ -1743,6 +1742,12 @@ export function parentComponent<P, X, C, ExtType>({
         finalSetPropsPromise,
       });
     })
+      .then((result) => {
+        currentRerender = rerender;
+        lastRerender = rerender;
+        hasBeenRendered = true;
+        return result;
+      })
       .catch((err) => {
         return ZalgoPromise.all([onError(err), destroy(err)]).then(
           () => {

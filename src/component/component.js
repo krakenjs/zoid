@@ -148,6 +148,11 @@ export type ComponentOptionsType<P, X, C, ExtType> = {|
   exports?: ExportsDefinition<X>,
 
   enableBfcache?: boolean,
+
+  // when enabled, zoid persists the most recent render target to
+  // sessionStorage so `.rerender()` can still find it after a full page
+  // navigation, even if the calling instance never called `.render()`
+  enableRerenderFallback?: boolean,
 |};
 
 export type AttributesType = {|
@@ -199,6 +204,7 @@ export type NormalizedComponentOptionsType<P, X, C, ExtType> = {|
   exports: ExportsMapperDefinition<X>,
 
   enableBfcache: boolean,
+  enableRerenderFallback: boolean,
 |};
 
 export type ZoidComponentInstance<P, X = void, C = void, ExtType = void> = {|
@@ -289,6 +295,7 @@ function normalizeOptions<P, X, C, ExtType>(
     exports: xportsDefinition = getDefaultExports(),
     method,
     enableBfcache = false,
+    enableRerenderFallback = false,
     children = (): C => {
       // $FlowFixMe
       return {};
@@ -355,6 +362,7 @@ function normalizeOptions<P, X, C, ExtType>(
     exports: xports,
     getExtensions,
     enableBfcache,
+    enableRerenderFallback,
   };
 }
 
@@ -391,14 +399,17 @@ export function component<P, X, C, ExtType>(
     eligible,
     children,
     getExtensions,
+    enableRerenderFallback,
   } = options;
 
   const global = getGlobal(window);
   const driverCache = {};
   const instances = [];
-  let latestRenderedRerender: ?(
-    options?: RerenderOptions<P>
-  ) => ZalgoPromise<void>;
+  const MAX_PERSISTED_RENDERS = 10;
+  const latestRenders: Array<{|
+    containers: $ReadOnlyArray<string>,
+    context: $Values<typeof CONTEXT>,
+  |}> = [];
   const latestRenderStorageKey = `__zoid_latest_render__${tag}`;
   const latestRenderContainerAttr = `data-zoid-latest-container-${tag}`;
   const escapeAttr = (value: string): string => {
@@ -448,69 +459,74 @@ export function component<P, X, C, ExtType>(
         return;
       }
 
-      const latestRender = window.sessionStorage.getItem(
-        latestRenderStorageKey
-      );
-      if (!latestRender) {
+      const stored = window.sessionStorage.getItem(latestRenderStorageKey);
+      if (!stored) {
         return;
       }
 
-      const parsed = JSON.parse(latestRender);
-      const persistedContainers =
-        parsed && Array.isArray(parsed.containers)
-          ? parsed.containers.filter(
+      const parsed = JSON.parse(stored);
+      const records = Array.isArray(parsed) ? parsed : [parsed];
+
+      let fallback: ?{| container: string, context: $Values<typeof CONTEXT> |};
+
+      for (const record of records) {
+        if (!record || typeof record !== "object") {
+          continue;
+        }
+
+        let persistedContainers = Array.isArray(record.containers)
+          ? record.containers.filter(
               (candidate) => typeof candidate === "string"
             )
           : [];
 
-      let candidates = persistedContainers;
-
-      if (candidates.length === 0) {
-        if (parsed && typeof parsed.container === "string") {
-          candidates = [parsed.container];
-        } else {
-          candidates = [];
+        if (
+          persistedContainers.length === 0 &&
+          typeof record.container === "string"
+        ) {
+          persistedContainers = [record.container];
         }
-      }
 
-      if (!parsed || candidates.length === 0) {
-        return;
-      }
+        if (
+          persistedContainers.length === 0 ||
+          (record.context !== CONTEXT.IFRAME &&
+            record.context !== CONTEXT.POPUP)
+        ) {
+          continue;
+        }
 
-      if (
-        parsed.context !== CONTEXT.IFRAME &&
-        parsed.context !== CONTEXT.POPUP
-      ) {
-        return;
-      }
-
-      const container =
-        candidates.find((candidate) => {
+        const matchedContainer = persistedContainers.find((candidate) => {
           try {
             return Boolean(document.querySelector(candidate));
           } catch (err) {
             return false;
           }
-        }) || candidates[0];
+        });
 
-      return {
-        container,
-        context: parsed.context,
-      };
+        if (matchedContainer) {
+          return { container: matchedContainer, context: record.context };
+        }
+
+        if (!fallback) {
+          fallback = {
+            container: persistedContainers[0],
+            context: record.context,
+          };
+        }
+      }
+
+      return fallback;
     } catch (err) {
       // ignored
     }
   };
 
-  const writeLatestRender = (
-    container: ContainerReferenceType,
-    context: $Values<typeof CONTEXT>
-  ) => {
-    let persistedContainer: ?string;
+  const buildPersistedContainers = (
+    container: ContainerReferenceType
+  ): $ReadOnlyArray<string> => {
     const persistedContainers = [];
 
     if (typeof container === "string") {
-      persistedContainer = container;
       persistedContainers.push(container);
     } else if (isElement(container)) {
       const elementID = container.getAttribute("id");
@@ -541,10 +557,16 @@ export function component<P, X, C, ExtType>(
       persistedContainers.push(
         `[${latestRenderContainerAttr}="${escapeAttr(marker)}"]`
       );
-      persistedContainer = persistedContainers[0];
     }
 
-    if (!persistedContainer) {
+    return persistedContainers;
+  };
+
+  const writeLatestRender = (
+    persistedContainers: $ReadOnlyArray<string>,
+    context: $Values<typeof CONTEXT>
+  ) => {
+    if (persistedContainers.length === 0) {
       return;
     }
 
@@ -553,13 +575,30 @@ export function component<P, X, C, ExtType>(
         return;
       }
 
+      const stored = window.sessionStorage.getItem(latestRenderStorageKey);
+      let records = [];
+
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        records = Array.isArray(parsed) ? parsed : [parsed];
+      }
+
+      // drop any existing record that refers to the same container so
+      // repeated renders of the same instance don't grow the list forever
+      records = records.filter((record) => {
+        const existingContainers =
+          record && Array.isArray(record.containers) ? record.containers : [];
+        return !existingContainers.some((candidate) =>
+          persistedContainers.includes(candidate)
+        );
+      });
+
+      records.unshift({ containers: persistedContainers, context });
+      records = records.slice(0, MAX_PERSISTED_RENDERS);
+
       window.sessionStorage.setItem(
         latestRenderStorageKey,
-        JSON.stringify({
-          container: persistedContainer,
-          containers: persistedContainers,
-          context,
-        })
+        JSON.stringify(records)
       );
     } catch (err) {
       // ignored
@@ -749,8 +788,49 @@ export function component<P, X, C, ExtType>(
       uid,
       options,
       getFallbackRerender: () => {
-        if (latestRenderedRerender) {
-          return latestRenderedRerender;
+        if (!enableRerenderFallback) {
+          return;
+        }
+
+        const buildFallbackRerender = (
+          containers: $ReadOnlyArray<string>,
+          context: $Values<typeof CONTEXT>
+        ) => {
+          return (rerenderOptions) => {
+            const matchedContainer =
+              containers.find((candidate) => {
+                try {
+                  return Boolean(document.querySelector(candidate));
+                } catch (err) {
+                  return false;
+                }
+              }) || containers[0];
+
+            return waitForSelector(matchedContainer).then((selector) => {
+              const newInstance = clone(rerenderOptions);
+              extend(instance, newInstance);
+              return newInstance.render(selector, context);
+            });
+          };
+        };
+
+        const matchedInMemory = latestRenders.find((record) =>
+          record.containers.some((candidate) => {
+            try {
+              return Boolean(document.querySelector(candidate));
+            } catch (err) {
+              return false;
+            }
+          })
+        );
+
+        const fallbackRecord = matchedInMemory || latestRenders[0];
+
+        if (fallbackRecord) {
+          return buildFallbackRerender(
+            fallbackRecord.containers,
+            fallbackRecord.context
+          );
         }
 
         const latestRender = readLatestRender();
@@ -758,13 +838,10 @@ export function component<P, X, C, ExtType>(
           return;
         }
 
-        return (rerenderOptions) => {
-          return waitForSelector(latestRender.container).then((selector) => {
-            const newInstance = clone(rerenderOptions);
-            extend(instance, newInstance);
-            return newInstance.render(selector, latestRender.context);
-          });
-        };
+        return buildFallbackRerender(
+          [latestRender.container],
+          latestRender.context
+        );
       },
     });
 
@@ -844,8 +921,22 @@ export function component<P, X, C, ExtType>(
             return newInstance.renderTo(target, container, context);
           };
 
-          latestRenderedRerender = rerender;
-          writeLatestRender(container, finalContext);
+          if (enableRerenderFallback) {
+            const persistedContainers = buildPersistedContainers(container);
+
+            if (persistedContainers.length) {
+              latestRenders.unshift({
+                containers: persistedContainers,
+                context: finalContext,
+              });
+              latestRenders.length = Math.min(
+                latestRenders.length,
+                MAX_PERSISTED_RENDERS
+              );
+
+              writeLatestRender(persistedContainers, finalContext);
+            }
+          }
 
           return parent.render({
             target,
