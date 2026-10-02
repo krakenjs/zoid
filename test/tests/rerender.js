@@ -195,8 +195,8 @@ describe("zoid rerender cases", () => {
 
         const instanceB = component({
           onRendered: expect("onRenderedB"),
-          onClose: () => {},
-          onDestroy: () => {},
+          onClose: () => undefined,
+          onDestroy: () => undefined,
           onError: avoid("onErrorB"),
           run: () => `
                     window.xprops.export({

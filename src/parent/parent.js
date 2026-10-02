@@ -1247,23 +1247,19 @@ export function parentComponent<P, X, C, ExtType>({
             hideElement(innerContainer);
           }
           appendChild(container, innerContainer);
-          const containerWatcher = watchElementForClose(
-            innerContainer,
-            () => {
-              const removeError = new Error(
-                `Detected container element removed from DOM`
-              );
-              return ZalgoPromise.delay(1).then(() => {
-                if (isElementClosed(innerContainer)) {
-                  close(removeError);
-                } else {
-                  clean.all(removeError);
-                  return rerender().then(resolveInitPromise, rejectInitPromise);
-                }
-              });
-            },
-            { isBfcacheEnabled: enableBfcache }
-          );
+          const containerWatcher = watchElementForClose(innerContainer, () => {
+            const removeError = new Error(
+              `Detected container element removed from DOM`
+            );
+            return ZalgoPromise.delay(1).then(() => {
+              if (isElementClosed(innerContainer)) {
+                close(removeError);
+              } else {
+                clean.all(removeError);
+                return rerender().then(resolveInitPromise, rejectInitPromise);
+              }
+            });
+          });
 
           clean.register(() => containerWatcher.cancel());
           clean.register(() => destroyElement(innerContainer));
