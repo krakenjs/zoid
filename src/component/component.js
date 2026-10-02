@@ -925,6 +925,16 @@ export function component<P, X, C, ExtType>(
             const persistedContainers = buildPersistedContainers(container);
 
             if (persistedContainers.length) {
+              latestRenders.splice(
+                0,
+                latestRenders.length,
+                ...latestRenders.filter(
+                  (record) =>
+                    !record.containers.some((candidate) =>
+                      persistedContainers.includes(candidate)
+                    )
+                )
+              );
               latestRenders.unshift({
                 containers: persistedContainers,
                 context: finalContext,

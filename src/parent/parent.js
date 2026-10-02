@@ -327,7 +327,6 @@ export function parentComponent<P, X, C, ExtType>({
   let currentChildDomain: ?string;
   let currentContainer: HTMLElement | void;
   let currentRerender: ?Rerender<P> = null;
-  let lastRerender: ?Rerender<P> = null;
   let hasBeenRendered: boolean = false;
   let isRenderFinished: boolean = false;
 
@@ -765,7 +764,6 @@ export function parentComponent<P, X, C, ExtType>({
       })
       .then(() => {
         currentRerender = null;
-        lastRerender = null;
         const error = err || new Error(COMPONENT_ERROR.COMPONENT_DESTROYED);
         if (
           (currentContainer && isElementClosed(currentContainer)) ||
@@ -1321,20 +1319,22 @@ export function parentComponent<P, X, C, ExtType>({
       show,
       hide,
       rerender: (rerenderOptions) => {
-        const fallbackRerender = getFallbackRerender();
-        const rerenderFn = currentRerender || lastRerender || fallbackRerender;
+        return ZalgoPromise.try(() => {
+          const fallbackRerender = getFallbackRerender();
+          const rerenderFn = currentRerender || fallbackRerender;
 
-        if (!rerenderFn) {
-          if (!hasBeenRendered) {
+          if (!rerenderFn) {
+            if (!hasBeenRendered) {
+              throw new Error(
+                "Rerender not available - component must be rendered first."
+              );
+            }
             throw new Error(
-              "Rerender not available - component must be rendered first."
+              "Rerender callback lost after render - component may be destroyed or re-initialized."
             );
           }
-          throw new Error(
-            "Rerender callback lost after render - component may be destroyed or re-initialized."
-          );
-        }
-        return rerenderFn(rerenderOptions);
+          return rerenderFn(rerenderOptions);
+        });
       },
     };
   };
@@ -1740,7 +1740,6 @@ export function parentComponent<P, X, C, ExtType>({
     })
       .then((result) => {
         currentRerender = rerender;
-        lastRerender = rerender;
         hasBeenRendered = true;
         return result;
       })
