@@ -1,5 +1,5 @@
 /* @flow */
-/* eslint react/no-deprecated: off, react/no-find-dom-node: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
+/* eslint react/no-deprecated: off, react/display-name: off, react/no-did-mount-set-state: off, react/destructuring-assignment: off, react/prop-types: off */
 
 import { extend, noop } from "@krakenjs/belter/src";
 
@@ -23,15 +23,11 @@ type ReactType = {|
     ?{ [string]: mixed },
     ...children: $ReadOnlyArray<ReactElementType>
   ) => ReactElementType,
-|};
-
-type ReactDomType = {|
-  findDOMNode: (typeof ReactClassType) => HTMLElement,
+  createRef: () => {| current: HTMLElement |},
 |};
 
 type ReactLibraryType = {|
   React: ReactType,
-  ReactDOM: ReactDomType,
 |};
 
 export const react: ComponentDriverType<
@@ -41,16 +37,32 @@ export const react: ComponentDriverType<
   *,
   *
 > = {
-  register: (tag, propsDef, init, { React, ReactDOM }) => {
+  register: (tag, propsDef, init, { React }) => {
+    if (typeof React.createRef !== "function") {
+      throw new TypeError(
+        "React version 16.3 or higher is required. createRef API is not available in this version of React."
+      );
+    }
+
     // $FlowFixMe
     return class extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {};
+        this.containerRef = React.createRef();
+      }
+
       render(): ReactElementType {
-        return React.createElement("div", null);
+        return React.createElement("div", { ref: this.containerRef });
       }
 
       componentDidMount() {
-        // $FlowFixMe
-        const el = ReactDOM.findDOMNode(this);
+        const el = this.containerRef.current;
+
+        if (!el) {
+          throw new Error("Could not find DOM element for React component");
+        }
+
         const parent = init(extend({}, this.props));
         parent.render(el, CONTEXT.IFRAME);
         this.setState({ parent });
